@@ -1,0 +1,22 @@
+{
+    "name": "mapbender/digitizer",
+    "description": "Mapbender About element",
+    "keywords": ["mapbender", "digitizer","digitizing"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {"name": "Andriy Oblivantsev"},
+        {"name": "Stefan Winkelmann"}
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "config": {
+        "bin-dir": "bin"
+    },
+    "autoload": {
+        "psr-0": {
+            "Mapbender\\DigitizerBundle": "src/"
+        }
+    }
+}
