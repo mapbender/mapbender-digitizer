@@ -2,6 +2,7 @@
 
 namespace Mapbender\DigitizerBundle\Element;
 
+use Doctrine\DBAL\DBALException;
 use Mapbender\CoreBundle\Element\HTMLElement;
 use Mapbender\DigitizerBundle\Entity\FeatureType;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -77,7 +78,9 @@ class Digitizer extends HTMLElement
      */
     public function getConfiguration()
     {
-        $configuration = parent::getConfiguration();
+        $configuration          = parent::getConfiguration();
+        $configuration['debug'] = isset($configuration['debug']) ? $configuration['debug'] : false;
+
         if ($configuration["schemes"] && is_array($configuration["schemes"])) {
             foreach ($configuration["schemes"] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
@@ -152,13 +155,25 @@ class Digitizer extends HTMLElement
                 if (isset($request['feature'])) {
                     $request['features'] = array($request['feature']);
                 }
-                // save collection
-                if (isset($request['features']) && is_array($request['features'])) {
-                    foreach ($request['features'] as $feature) {
-                        $results[] = $featureType->save($feature);
+
+                try {
+                    // save collection
+                    if (isset($request['features']) && is_array($request['features'])) {
+                        foreach ($request['features'] as $feature) {
+                            $results[] = $featureType->save($feature);
+                        }
                     }
+                    $results = $featureType->toFeatureCollection($results);
+                } catch (DBALException $e) {
+                    $message = $configuration['debug'] ? $e->getMessage() : "Feature saving isn't possible. Maybe something is wrong konfigured or databate isn't avaible?  \n" .
+                        "For more information please look at web-server log file.\n" .
+                        "Another option is to turn debug mode on by adding 'debug=true' to the digitizer element,\n " .
+                        "so you can see full SQL query and error message here directly. \n Error code: " .$e->getCode();
+                    $results = array('errors' => array(
+                        array('message' => $message, 'code' => $e->getCode())
+                    ));
                 }
-                $results = $featureType->toFeatureCollection($results);
+
                 break;
 
             case 'delete':

@@ -483,9 +483,22 @@
                                 self.query('save',{
                                     schema: self.schemaName,
                                     feature: jsonFeature
-                                }).done(function(featureCollection){
+                                }).done(function(response){
 
-                                    var dbFeature = featureCollection.features[0];
+                                    if(response.hasOwnProperty('errors')) {
+                                        form.enableForm();
+                                        $.each(response.errors, function(i, error) {
+                                            $.notify( error.message, {
+                                                title:'API Error',
+                                                autoHide: false,
+                                                className: 'error'
+                                            });
+                                            console.error(error.message);
+                                        })
+                                        return;
+                                    }
+
+                                    var dbFeature = response.features[0];
                                     var table = self.currentSettings.table;
                                     var tableApi = table.resultTable('getApi');
                                     var isNew = !feature.hasOwnProperty('fid');
