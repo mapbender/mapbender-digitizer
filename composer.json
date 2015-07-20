@@ -16,8 +16,7 @@
         "bin-dir": "bin"
     },
     "autoload": {
-			"psr-0": {"Mapbender\\DigitizerBundle": "."}
-        },
-		"target-dir": "Mapbender/DigitizerBundle"
+		"psr-0": {"Mapbender\\DigitizerBundle": "."}
     }
+    "target-dir": "Mapbender/DigitizerBundle"
 }
