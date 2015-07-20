@@ -12,16 +12,9 @@
 * Modify ```application/composer.json``` 
  * Add dependency to "require" section:
  ```javascript
-"require": {
-    "mapbender/digitizer": "1.x"
-},
+"require": {"mapbender/digitizer": "1.x"}
 ```
- * Add custom repository
- ```javascript
-"repositories": [
-    { "type": "git", "url": "https://github.com/mapbender/mapbender-digitizer.git"}
-]
-```
+
 
 * Update composer
 
