@@ -127,6 +127,33 @@ class Digitizer extends HTMLElement
     }
 
     /**
+     * Prepare request feautre data by the form definition
+     *
+     * @param $feature
+     * @param $formItems
+     * @return array
+     */
+    protected function prepareQueredFeatureData($feature, $formItems)
+    {
+        foreach ($formItems as $key => $formItem) {
+            if (isset($formItem['children'])) {
+                $feature = array_merge($feature, $this->prepareQueredFeatureData($feature, $formItem['children']));
+            } elseif (isset($formItem['type']) && isset($formItem['name'])) {
+                switch ($formItem['type']) {
+                    case 'select':
+                        if (isset($formItem['multiple'])) {
+                            $fieldType                  = isset($formItem['fieldType']) ? $formItem['fieldType'] : 'text';
+                            $separator                  = isset($formItem['separator']) ? $formItem['separator'] : ',';
+                            $feature["properties"][$formItem['name']] = implode($separator, $feature["properties"][$formItem['name']]);
+                        }
+                        break;
+                }
+            }
+        }
+        return $feature;
+    }
+
+    /**
      * @inheritdoc
      */
     public function httpAction($action)
@@ -161,6 +188,7 @@ class Digitizer extends HTMLElement
                     // save collection
                     if (isset($request['features']) && is_array($request['features'])) {
                         foreach ($request['features'] as $feature) {
+                            $feature   = $this->prepareQueredFeatureData($feature, $schema['formItems']);
                             $results[] = $featureType->save($feature);
                         }
                     }
@@ -180,7 +208,7 @@ class Digitizer extends HTMLElement
             case 'delete':
                 // remove once
                 $results = $featureType->remove($request['feature'])->getId();
-
+                break;
         }
 
         return new JsonResponse($results);
