@@ -259,11 +259,25 @@
                         case 'removeFeature':
                             widget.removeFeature(feature);
                             break;
+
+                        case 'zoom':
+                            widget.zoomToJsonFeature(feature);
+                            break;
+
+                        case 'edit':
+                            widget.openFeatureEditDialog(feature);
+                            break;
+
+                        case 'exportGeoJson':
+                            widget.exportGeoJson(feature);
+                            break;
                     }
                 },
                 items:    {
                     zoom:          {name: "Zoom to"},
                     edit:          {name: "Edit"},
+                    sep1:          "---------",
+                    testEdit:          {name: "TestEd"},
                     removeFeature: {name: "Remove"},
                     sep1:          "---------",
                     exportGeoJson: {name: "Export GeoJSON"},
@@ -291,13 +305,7 @@
                     title: translate('feature.edit'),
                     className: 'edit',
                     onClick: function(feature, ui) {
-                        var olFeature;
-                        if(feature.hasOwnProperty('isNew') ){
-                            olFeature =  layer.getFeatureById(feature.id);
-                        }else{
-                            olFeature = widget.activeLayer.getFeatureByFid(feature.id);
-                        }
-                        widget._openFeatureEditDialog(olFeature);
+                       widget.openFeatureEditDialog(feature);
                     }
                 };
                 var buttons = [editButton];
@@ -359,17 +367,17 @@
                         // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
                         controlEvents: {
                             featureadded: function(event, feature) {
-                                var feature = event.feature;
+                                var olFeature = event.feature;
                                 var geoJSON = new OpenLayers.Format.GeoJSON();
-                                var srid = feature.layer.map.getProjectionObject().proj.srsProjNumber;
+                                var srid = olFeature.layer.map.getProjectionObject().proj.srsProjNumber;
                                 var digitizerToolSetElement = $(".digitizing-tool-set", frame);
                                 var properties = jQuery.extend(true, {}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
                                 var jsonGeometry;
 
-                                eval("jsonGeometry=" + geoJSON.write(feature.geometry));
+                                eval("jsonGeometry=" + geoJSON.write(olFeature.geometry));
 
                                 var jsonFeature = {
-                                    id:         feature.id,
+                                    id:         olFeature.id,
                                     isNew:      true,
                                     properties: properties,
                                     geometry:   jsonGeometry,
@@ -384,7 +392,7 @@
                                 digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
 
                                 if(settings.openFormAfterEdit) {
-                                    widget._openFeatureEditDialog(feature);
+                                    widget._openFeatureEditDialog(olFeature);
                                 }
                             }
                         }
@@ -542,7 +550,14 @@
             });
             onSelectorChange();
         },
-        _openFeatureEditDialog: function (feature) {
+
+        /**
+         * Open edit feature dialog
+         *
+         * @param olFeature open layer feature
+         * @private
+         */
+        _openFeatureEditDialog: function (olFeature) {
             var self = this;
 
             if(self.currentPopup){
@@ -556,7 +571,7 @@
                         click: function() {
                             var form = $(this).closest(".ui-dialog-content");
                             var formData = form.formData();
-                            var wkt = new OpenLayers.Format.WKT().write(feature);
+                            var wkt = new OpenLayers.Format.WKT().write(olFeature);
                             var srid = self.map.getProjectionObject().proj.srsProjNumber;
                             var jsonFeature = {
                                     properties: formData,
@@ -564,8 +579,8 @@
                                     srid: srid
                                 };
 
-                            if(feature.fid){
-                                jsonFeature.id = feature.fid;
+                            if(olFeature.fid){
+                                jsonFeature.id = olFeature.fid;
                             }
 
                             var errorInputs = $(".has-error", dialog);
@@ -594,19 +609,19 @@
                                     var dbFeature = response.features[0];
                                     var table = self.currentSettings.table;
                                     var tableApi = table.resultTable('getApi');
-                                    var isNew = !feature.hasOwnProperty('fid');
+                                    var isNew = !olFeature.hasOwnProperty('fid');
                                     var tableJson = null;
 
                                     // search jsonData from table
                                     $.each(tableApi.data(),function(i,jsonData){
                                         if(isNew){
-                                           if(jsonData.id == feature.id){
+                                           if(jsonData.id == olFeature.id){
                                                delete jsonData.isNew;
                                                tableJson = jsonData;
                                                return false
                                            }
                                         }else{
-                                            if(jsonData.id == feature.fid){
+                                            if(jsonData.id == olFeature.fid){
                                                tableJson = jsonData;
                                                return false
                                             }
@@ -629,9 +644,9 @@
                                     tableApi.draw();
 
                                     // Update open layer feature to...
-                                    feature.fid = tableJson.id;
-                                    feature.data = tableJson.properties;
-                                    feature.attributes = tableJson.properties;
+                                    olFeature.fid = tableJson.id;
+                                    olFeature.data = tableJson.properties;
+                                    olFeature.attributes = tableJson.properties;
 
                                     form.enableForm();
                                     self.currentPopup.popupDialog('close');
@@ -652,7 +667,7 @@
             dialog.generateElements({children: self.currentSettings.formItems});
             dialog.popupDialog(popupConfiguration);
             self.currentPopup = dialog;
-            dialog.formData(feature.data);
+            dialog.formData(olFeature.data);
         },
 
         _mapClick: function(evt) {
@@ -923,6 +938,38 @@
             var feature = jsonFeature.hasOwnProperty('isNew') ? layer.getFeatureById(jsonFeature.id): layer.getFeatureByFid(jsonFeature.id);
             var bounds = feature.geometry.getBounds();
             this.map.zoomToExtent(bounds);
+        },
+
+        /**
+         * Open feature edit dialog
+         *
+         * @param feature
+         */
+        openFeatureEditDialog: function(feature) {
+            var widget = this;
+            var olFeature;
+            if(feature.hasOwnProperty('isNew') ){
+                olFeature =  layer.getFeatureById(feature.id);
+            }else{
+                olFeature = widget.activeLayer.getFeatureByFid(feature.id);
+            }
+            widget._openFeatureEditDialog(olFeature);
+        },
+
+        /**
+         * Open feature edit dialog
+         *
+         * @param feature
+         */
+        exportGeoJson: function(feature) {
+            var widget = this;
+            widget.query('export', {
+                schema:  widget.schemaName,
+                feature: feature,
+                format:  'GeoJSON'
+            }).done(function(response) {
+                debugger;
+            })
         }
     });
 
