@@ -144,7 +144,9 @@ class Digitizer extends HTMLElement
                         if (isset($formItem['multiple'])) {
                             $fieldType                  = isset($formItem['fieldType']) ? $formItem['fieldType'] : 'text';
                             $separator                  = isset($formItem['separator']) ? $formItem['separator'] : ',';
-                            $feature["properties"][$formItem['name']] = implode($separator, $feature["properties"][$formItem['name']]);
+                            if(is_array($feature["properties"][$formItem['name']])){
+                                $feature["properties"][$formItem['name']] = implode($separator, $feature["properties"][$formItem['name']]);
+                            }
                         }
                         break;
                 }
