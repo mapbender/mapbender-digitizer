@@ -51,6 +51,7 @@ class Digitizer extends HTMLElement
     static public function listAssets()
     {
         return array('js'    => array(
+                        "/components/jquery-context-menu/jquery-context-menu-built.js",
                         'mapbender.element.digitizer.js',
                         '@FOMCoreBundle/Resources/public/js/widgets/popup.js',
                         '@FOMCoreBundle/Resources/public/js/widgets/dropdown.js'),

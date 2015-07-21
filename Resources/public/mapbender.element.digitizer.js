@@ -111,14 +111,28 @@
               {type: 'moveFeature'},
               {type: 'selectFeature'},
               {type: 'removeSelected'}
-              //{type: 'removeAll'}
+                //{type: 'removeAll'}
             ]
         },
-        map: null,
-        currentSettings:null,
+        map:      null,
+        currentSettings: null,
         featureEditDialogWidth: "423px",
+        styles: {
+            'default': {
+                strokeWidth: 1,
+                strokeColor: '#6fb536',
+                fillColor:   "#6fb536",
+                fillOpacity: 0.3
+            },
+            'select':  {
+                strokeWidth: 3,
+                fillColor:   "#F7F79A",
+                strokeColor: '#6fb536',
+                fillOpacity: 0.5
+            }
 
-        _create: function(){
+        },
+        _create:                function() {
             if(!Mapbender.checkTarget("mbDigitizer", this.options.target)){
                 return;
             }
@@ -126,13 +140,92 @@
             var me = this.element;
             this.elementUrl = Mapbender.configuration.application.urls.element + '/' + me.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(this.options.target, $.proxy(self._setup, self));
-        },
 
-        styles: {
-            'default': {strokeWidth: 2},
-            'select': {strokeWidth: 2}
 
         },
+
+        /**
+         * Find feature schema by feature data
+         *
+         * @param feature
+         * @returns {*}
+         */
+        findFeatureSchema: function(feature){
+            var widget = this;
+            var schema = null;
+            var options = widget.options;
+            var schemas = options.schemes;
+
+            // find schema by feature
+            $.each(schemas, function(k, _schema) {
+                $.each(_schema.features, function(i, featureCollection) {
+                    $.each(featureCollection, function(i, _feature) {
+                        if(_feature == feature) {
+                            schema = _schema;
+                            return false;
+                        }
+                    })
+                    if(schema){
+                        return false;
+                    }
+                })
+                if(schema){
+                    return false;
+                }
+            });
+            return schema;
+        },
+
+        /**
+         * Remove feature
+         *
+         * @param feature
+         * @returns {*}
+         */
+        removeFeature: function(feature) {
+            var widget = this;
+            var olFeature = null;
+            var schema = widget.findFeatureSchema(feature);
+            var layer = schema.layer;
+            var tableApi = schema.table.resultTable('getApi');
+            var row = tableApi.row(schema.table.resultTable("getDomRowByData", feature));
+
+            if(!schema) {
+                $.notify("Feature remove failed.", "error");
+                return;
+            }
+
+            if(feature.hasOwnProperty('isNew')) {
+                olFeature = layer.getFeatureById(feature.id);
+            } else {
+                olFeature = layer.getFeatureByFid(feature.id);
+                if(!Mapbender.confirm(translate("feature.remove.from.database"))) {
+                    return;
+                }
+
+                widget.query('delete', {
+                    schema:  schema.schemaName,
+                    feature: feature
+                }).done(function(fid) {
+                    $.notify(translate('feature.remove.successfully'), 'info');
+                });
+            }
+
+            // remove from map
+            olFeature.layer.removeFeatures(olFeature);
+
+            // remove from table
+            row.remove().draw();
+
+            widget._trigger('featureRemoved', null, {
+                feautre:   feature,
+                schema:    schema,
+                olFeature: olFeature
+            });
+
+            return olFeature;
+        },
+
         _setup: function() {
             var frames = [];
             var widget = this;
@@ -154,6 +247,31 @@
                 titleElement.css('display', 'none');
             }
 
+            $.contextMenu({
+                selector: '.mapbender-element-result-table > div > table > tbody > tr',
+                callback: function(key, options) {
+                    var tr = $(options.$trigger);
+                    var resultTable = tr.closest('.mapbender-element-result-table');
+                    var api = resultTable.resultTable('getApi');
+                    var feature = api.row(tr).data();
+
+                    switch (key) {
+                        case 'removeFeature':
+                            widget.removeFeature(feature);
+                            break;
+                    }
+                },
+                items:    {
+                    zoom:          {name: "Zoom to"},
+                    edit:          {name: "Edit"},
+                    removeFeature: {name: "Remove"},
+                    sep1:          "---------",
+                    exportGeoJson: {name: "Export GeoJSON"},
+                    exportCSV:     {name: "Export CSV"},
+                    exportKML:     {name: "Export KML"}
+                }
+            });
+
             // build select options
             $.each(options.schemes, function(schemaName){
                 var settings = this;
@@ -166,32 +284,7 @@
                     className: 'remove',
                     cssClass:  'critical',
                     onClick:   function(feature, ui) {
-                        var tr = ui.closest('tr');
-                        var tableApi = table.resultTable('getApi');
-                        var row = tableApi.row(tr);
-                        var olFeature;
-
-                        if(feature.hasOwnProperty('isNew')) {
-                            olFeature = layer.getFeatureById(feature.id);
-                        } else {
-                            olFeature = layer.getFeatureByFid(feature.id);
-                            if(!Mapbender.confirm(translate("feature.remove.from.database"))) {
-                                return;
-                            }
-
-                            widget.query('delete', {
-                                schema:  schemaName,
-                                feature: feature
-                            }).done(function(fid) {
-                                $.notify(translate('feature.remove.successfully'), 'info');
-                            });
-                        }
-
-                        // remove from map
-                        olFeature.layer.removeFeatures(olFeature);
-
-                        // remove from table
-                        row.remove().draw();
+                        widget.removeFeature(feature);
                     }
                 };
                 var editButton = {
