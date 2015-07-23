@@ -5,6 +5,7 @@ namespace Mapbender\DigitizerBundle\Element;
 use Doctrine\DBAL\DBALException;
 use Mapbender\CoreBundle\Element\HTMLElement;
 use Mapbender\DigitizerBundle\Entity\FeatureType;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
@@ -163,6 +164,11 @@ class Digitizer extends HTMLElement
         $configuration = $this->getConfiguration();
         $request       = json_decode($this->container->get('request')->getContent(), true);
         $schemas       = $configuration["schemes"];
+
+        if(!isset($request["schema"])){
+            throw new Exception('For initialization there is no name of the declared scheme');
+        }
+
         $schema        = $schemas[$request["schema"]];
 
         if (is_array($schema['featureType'])) {
