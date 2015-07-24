@@ -26,6 +26,10 @@ $selectColor: #F7F79A;
   .mapbender-element-result-table {
     margin-top: 10px;
 
+    > .dataTables_wrapper.no-footer{
+      overflow: hidden;
+    }
+
     // Row higlight by feature select
     table.dataTable > tbody > tr {
 
