@@ -11,7 +11,7 @@
     "require": {
         "php": ">=5.3.3",
         "phayes/geophp": "1.2",
-        "medialize/jquery-context-menu": "dev-master"
+        "medialize/jquery-context-menu": "*"
     },
     "config": {
         "bin-dir": "bin"
