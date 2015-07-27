@@ -11,7 +11,7 @@
 * First you need installed mapbender3-starter https://github.com/mapbender/mapbender-starter#installation project
 * Add required module to mapbender
 ```sh
-$ cp application/
+$ cd application/
 $ ../composer.phar require "mapbender/digitizer"
 ```
 
@@ -19,7 +19,7 @@ $ ../composer.phar require "mapbender/digitizer"
 
 
  ```sh
-$ cp application/
+$ cd application/
 $ ../composer.phar self-update
 $ ../composer.phar update
 ```
