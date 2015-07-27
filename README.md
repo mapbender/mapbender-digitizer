@@ -12,7 +12,7 @@
 * Modify ```application/composer.json``` 
  * Add dependency to "require" section:
  ```javascript
-"require": {"mapbender/digitizer": "1.x"}
+"require": {"mapbender/digitizer": "1.0.*"}
 ```
 
 
