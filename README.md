@@ -9,16 +9,17 @@
 
 ## Installation 
 * First you need installed mapbender3-starter https://github.com/mapbender/mapbender-starter#installation project
-* Modify ```application/composer.json``` 
- * Add dependency to "require" section:
- ```javascript
-"require": {"mapbender/digitizer": "1.0.*"}
+* Add required module to mapbender
+```sh
+$ cp application/
+$ ../composer.phar require "mapbender/digitizer"
 ```
 
+## Update 
 
-* Update composer
 
  ```sh
 $ cp application/
-$ composer update
+$ ../composer.phar self-update
+$ ../composer.phar update
 ```
