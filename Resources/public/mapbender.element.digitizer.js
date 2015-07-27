@@ -83,7 +83,17 @@
      * @copyright 20.04.2015 by WhereGroup GmbH & Co. KG
      */
     $.widget("mapbender.mbDigitizer", {
-        options: {},
+        options: {
+            // Default option values
+
+            allowDigitize: true,
+            allowDelete: true,
+            openFormAfterEdit: true,
+            maxResults: 1000,
+            oneInstanceEdit: true,
+            searchType: "currentExtent"
+        },
+        // Default tool-sets
         toolsets: {
             point: [
               {type: 'drawPoint'},
@@ -290,9 +300,22 @@
             $.each(options.schemes, function(schemaName){
                 var settings = this;
                 var option = $("<option/>");
-                var layer =  settings.layer = new OpenLayers.Layer.Vector(settings.label, {styleMap: styleMap});
-                var searchType = settings.searchType = settings.hasOwnProperty("searchType") ? settings.searchType : "currentExtent";
-                var allowDelete =  settings.allowDelete = settings.hasOwnProperty("allowDelete") ? settings.allowDelete :  true;
+                var styleMap = new OpenLayers.StyleMap({
+                    'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], widget.styles.default)),
+                    'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], widget.styles.select))
+                }, {extendDefault: true});
+
+                var layer = settings.layer = new OpenLayers.Layer.Vector(settings.label, {styleMap: styleMap});
+
+
+                // Merge settings with default values from options
+                for (var k in options) {
+                    if(k == "schemes" || k == "target" || k == "create" || k == 'jsSrc' || k == 'disabled') {
+                        continue;
+                    }
+                    settings[k] = settings.hasOwnProperty(k) ? settings[k] : options[k];
+                }
+
                 var deleteButton = {
                     title:     translate("feature.remove"),
                     className: 'remove',
@@ -309,7 +332,7 @@
                     }
                 };
                 var buttons = [editButton];
-                if(allowDelete) {
+                if(settings.allowDelete) {
                     buttons.push(deleteButton);
                 }
 
@@ -350,7 +373,7 @@
                 if(settings.hasOwnProperty("toolset")){
                     toolset = settings.toolset;
                 }
-                if(!allowDelete){
+                if(!settings.allowDelete){
                     $.each(toolset,function(k,tool){
                         if(tool.type == "removeSelected"){
                             toolset.splice(k,1);
@@ -408,6 +431,10 @@
                     }]
                 });
 
+                if(!settings.allowDigitize){
+                    $(".digitizing-tool-set",frame).css('display','none');
+                }
+
                 frame.append(table);
 
                 frames.push(settings);
@@ -432,6 +459,12 @@
 
                 frame.css('display', 'none');
                 layer.setVisibility(false);
+
+                // https://trac.wheregroup.com/cp/issues/4548
+                if(widget.currentPopup){
+                    widget.currentPopup.popupDialog('close');
+                }
+
                 //layer.redraw();
                 //layer.removeAllFeatures();
                 //tableApi.clear();
@@ -557,12 +590,14 @@
          * @param olFeature open layer feature
          * @private
          */
+
         _openFeatureEditDialog: function (olFeature) {
             var self = this;
 
             if(self.currentPopup){
                 self.currentPopup.popupDialog('close');
             }
+
             var popupConfiguration = {
                 title: translate("feature.attributes"),
                 width: self.featureEditDialogWidth,
@@ -668,6 +703,8 @@
             dialog.popupDialog(popupConfiguration);
             self.currentPopup = dialog;
             dialog.formData(olFeature.data);
+
+            return dialog;
         },
 
         _mapClick: function(evt) {
@@ -786,7 +823,7 @@
             var extent = map.getExtent();
             var request = {
                 srid:       projection.proj.srsProjNumber,
-                maxResults: settings.hasOwnProperty('maxResults') ? settings.maxResults : 1000,
+                maxResults: settings.maxResults,
                 schema:     settings.schemaName
             };
 
