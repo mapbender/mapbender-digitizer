@@ -202,10 +202,8 @@ class Digitizer extends HTMLElement
                     }
                     $results = $featureType->toFeatureCollection($results);
                 } catch (DBALException $e) {
-                    $message = $configuration['debug'] ? $e->getMessage() : "Feature saving isn't possible. Maybe something is wrong konfigured or databate isn't avaible?  \n" .
-                        "For more information please look at web-server log file.\n" .
-                        "Another option is to turn debug mode on by adding 'debug=true' to the digitizer element,\n " .
-                        "so you can see full SQL query and error message here directly. \n Error code: " .$e->getCode();
+                    $message = $configuration['debug'] ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
+                        "For more information have a look at the webserver log file. \n Error code: " .$e->getCode();
                     $results = array('errors' => array(
                         array('message' => $message, 'code' => $e->getCode())
                     ));
