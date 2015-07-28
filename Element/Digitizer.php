@@ -164,6 +164,7 @@ class Digitizer extends HTMLElement
         $configuration = $this->getConfiguration();
         $request       = json_decode($this->container->get('request')->getContent(), true);
         $schemas       = $configuration["schemes"];
+        $debugMode     = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
 
         if(!isset($request["schema"])){
             throw new Exception('For initialization there is no name of the declared scheme');
@@ -202,7 +203,7 @@ class Digitizer extends HTMLElement
                     }
                     $results = $featureType->toFeatureCollection($results);
                 } catch (DBALException $e) {
-                    $message = $configuration['debug'] ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
+                    $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
                         "For more information have a look at the webserver log file. \n Error code: " .$e->getCode();
                     $results = array('errors' => array(
                         array('message' => $message, 'code' => $e->getCode())
