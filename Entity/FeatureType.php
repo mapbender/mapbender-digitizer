@@ -269,11 +269,14 @@ class FeatureType extends ContainerAware
         try {
             // Insert if no ID given
             if (!$autoUpdate || !$feature->hasId()) {
-                $result = $this->insert($feature);
+                $feature = $this->insert($feature);
             } // Replace if has ID
             else {
-                $result = $this->update($feature);
+                $feature = $this->update($feature);
             }
+
+            // Get complete feature data
+            $result = $this->getById($feature->getId());
 
         } catch (Exception $e) {
             $result = array(
