@@ -85,9 +85,9 @@
     $.widget("mapbender.mbDigitizer", {
         options: {
             // Default option values
-
             allowDigitize: true,
             allowDelete: true,
+            allowEditData:true,
             openFormAfterEdit: true,
             maxResults: 1000,
             oneInstanceEdit: true,
@@ -146,12 +146,79 @@
             if(!Mapbender.checkTarget("mbDigitizer", this.options.target)){
                 return;
             }
-            var self = this;
+            var widget = this;
             var me = this.element;
             this.elementUrl = Mapbender.configuration.application.urls.element + '/' + me.attr('id') + '/';
-            Mapbender.elementRegistry.onElementReady(this.options.target, $.proxy(self._setup, self));
+            Mapbender.elementRegistry.onElementReady(this.options.target, $.proxy(widget._setup, widget));
 
 
+
+
+
+        },
+
+        _containerInfo:   null,
+        getContainerInfo: function() {
+            var widget = this.element;
+
+            if(!widget._containerInfo) {
+                widget._containerInfo = new function() {
+                    var self = this;
+                    var toolBar = $(widget).closest(".toolBar");
+                    var contentPane = $(widget).closest(".contentPane");
+                    var sidePane = $(widget).closest(".contentPane");
+                    var container = null;
+
+                    if(contentPane.size()) {
+                        container = contentPane;
+                    }
+
+                    if(toolBar.size()) {
+                        container = toolBar;
+                    }
+
+                    if(sidePane.size()) {
+                        container = sidePane;
+                    }
+
+                    self.isSidePane = function() {
+                        return sidePane.size() > 0;
+                    }
+
+                    self.isContentPane = function() {
+                        return contentPane.size() > 0;
+                    }
+
+                    self.isToolBar = function() {
+                        return toolBar.size() > 0;
+                    }
+
+                    self.isOnTop = function() {
+                        return toolBar.hasClass('top');
+                    }
+
+                    self.isOnBottom = function() {
+                        return toolBar.hasClass('bottom');
+                    }
+
+                    self.isOnTop = function() {
+                        return toolBar.hasClass('top');
+                    }
+
+                    self.isOnLeft = function() {
+                        return sidePane.hasClass('left');
+                    }
+
+                    self.isOnRight = function() {
+                        return sidePane.hasClass('right');
+                    }
+
+                    self.getContainer = function() {
+                        return container;
+                    }
+                }
+            }
+            return widget._containerInfo;
         },
 
         /**
@@ -256,43 +323,50 @@
             } else {
                 titleElement.css('display', 'none');
             }
+            //debugger;
 
             $.contextMenu({
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
-                callback: function(key, options) {
-                    var tr = $(options.$trigger);
+                build:    function($trigger, e) {
+                    var tr = $($trigger);
                     var resultTable = tr.closest('.mapbender-element-result-table');
                     var api = resultTable.resultTable('getApi');
                     var feature = api.row(tr).data();
-
-                    switch (key) {
-                        case 'removeFeature':
-                            widget.removeFeature(feature);
-                            break;
-
-                        case 'zoom':
-                            widget.zoomToJsonFeature(feature);
-                            break;
-
-                        case 'edit':
-                            widget.openFeatureEditDialog(feature);
-                            break;
-
-                        case 'exportGeoJson':
-                            widget.exportGeoJson(feature);
-                            break;
+                    var schema = widget.findFeatureSchema(feature);
+                    var items =  {
+                        zoom: {name: "Zoom to"}
                     }
-                },
-                items:    {
-                    zoom:          {name: "Zoom to"},
-                    edit:          {name: "Edit"},
-                    sep1:          "---------",
-                    testEdit:          {name: "TestEd"},
-                    removeFeature: {name: "Remove"},
-                    sep1:          "---------",
-                    exportGeoJson: {name: "Export GeoJSON"},
-                    exportCSV:     {name: "Export CSV"},
-                    exportKML:     {name: "Export KML"}
+
+                    if(schema.allowDelete) {
+                        items['removeFeature'] = {name: "Remove"};
+                    }
+
+                    if(schema.allowEditData) {
+                        items['edit'] = {name: "Edit"};
+                    }
+
+                    return {
+                        callback: function(key, options) {
+                            switch (key) {
+                                case 'removeFeature':
+                                    widget.removeFeature(feature);
+                                    break;
+
+                                case 'zoom':
+                                    widget.zoomToJsonFeature(feature);
+                                    break;
+
+                                case 'edit':
+                                    widget.openFeatureEditDialog(feature);
+                                    break;
+
+                                case 'exportGeoJson':
+                                    widget.exportGeoJson(feature);
+                                    break;
+                            }
+                        },
+                        items:    items
+                    };
                 }
             });
 
@@ -591,117 +665,127 @@
          * @private
          */
 
-        _openFeatureEditDialog: function (olFeature) {
-            var self = this;
+        _openFeatureEditDialog: function(olFeature) {
+            var widget = this;
 
-            if(self.currentPopup){
-                self.currentPopup.popupDialog('close');
+            if(widget.currentPopup) {
+                widget.currentPopup.popupDialog('close');
             }
+            var schema = widget.findSchemaByLayer(olFeature.layer);
+            var buttons = [];
+
+
+            if(schema.allowEditData){
+                var saveButton = {
+                    text: translate("feature.save"),
+                    click: function() {
+                        var form = $(this).closest(".ui-dialog-content");
+                        var formData = form.formData();
+                        var wkt = new OpenLayers.Format.WKT().write(olFeature);
+                        var srid = widget.map.getProjectionObject().proj.srsProjNumber;
+                        var jsonFeature = {
+                            properties: formData,
+                            geometry:   wkt,
+                            srid: srid
+                        };
+
+                        if(olFeature.fid){
+                            jsonFeature.id = olFeature.fid;
+                        }
+
+                        var errorInputs = $(".has-error", dialog);
+                        var hasErrors = errorInputs.size() > 0;
+
+
+                        if( !hasErrors ){
+                            form.disableForm();
+                            widget.query('save',{
+                                schema: widget.schemaName,
+                                feature: jsonFeature
+                            }).done(function(response){
+
+                                if(response.hasOwnProperty('errors')) {
+                                    form.enableForm();
+                                    $.each(response.errors, function(i, error) {
+                                        $.notify( error.message, {
+                                            title:'API Error',
+                                            autoHide: false,
+                                            className: 'error'
+                                        });
+                                        console.error(error.message);
+                                    })
+                                    return;
+                                }
+
+                                var dbFeature = response.features[0];
+                                var table = widget.currentSettings.table;
+                                var tableApi = table.resultTable('getApi');
+                                var isNew = !olFeature.hasOwnProperty('fid');
+                                var tableJson = null;
+
+                                // search jsonData from table
+                                $.each(tableApi.data(),function(i,jsonData){
+                                    if(isNew){
+                                        if(jsonData.id == olFeature.id){
+                                            delete jsonData.isNew;
+                                            tableJson = jsonData;
+                                            return false
+                                        }
+                                    }else{
+                                        if(jsonData.id == olFeature.fid){
+                                            tableJson = jsonData;
+                                            return false
+                                        }
+                                    }
+                                });
+
+
+                                // Merge object2 into object1
+                                $.extend( tableJson, dbFeature );
+
+                                // Redraw table fix
+                                // TODO: find how to drop table cache...
+                                $.each(tableApi.$("tbody > tr"), function (i, tr) {
+                                    var row = tableApi.row(tr);
+                                    if(row.data() == tableJson){
+                                        row.data(tableJson);
+                                        return false;
+                                    }
+                                })
+                                tableApi.draw();
+
+                                // Update open layer feature to...
+                                olFeature.fid = tableJson.id;
+                                olFeature.data = tableJson.properties;
+                                olFeature.attributes = tableJson.properties;
+
+                                form.enableForm();
+                                widget.currentPopup.popupDialog('close');
+                                $.notify(translate("feature.save.successfully"),'info');
+                            });
+                        }
+                    }
+                };
+                buttons.push(saveButton);
+            }
+
 
             var popupConfiguration = {
                 title: translate("feature.attributes"),
-                width: self.featureEditDialogWidth,
-                buttons: [{
-                        text: translate("feature.save"),
-                        click: function() {
-                            var form = $(this).closest(".ui-dialog-content");
-                            var formData = form.formData();
-                            var wkt = new OpenLayers.Format.WKT().write(olFeature);
-                            var srid = self.map.getProjectionObject().proj.srsProjNumber;
-                            var jsonFeature = {
-                                    properties: formData,
-                                    geometry:   wkt,
-                                    srid: srid
-                                };
-
-                            if(olFeature.fid){
-                                jsonFeature.id = olFeature.fid;
-                            }
-
-                            var errorInputs = $(".has-error", dialog);
-                            var hasErrors = errorInputs.size() > 0;
-
-                            if( !hasErrors ){
-                                form.disableForm();
-                                self.query('save',{
-                                    schema: self.schemaName,
-                                    feature: jsonFeature
-                                }).done(function(response){
-
-                                    if(response.hasOwnProperty('errors')) {
-                                        form.enableForm();
-                                        $.each(response.errors, function(i, error) {
-                                            $.notify( error.message, {
-                                                title:'API Error',
-                                                autoHide: false,
-                                                className: 'error'
-                                            });
-                                            console.error(error.message);
-                                        })
-                                        return;
-                                    }
-
-                                    var dbFeature = response.features[0];
-                                    var table = self.currentSettings.table;
-                                    var tableApi = table.resultTable('getApi');
-                                    var isNew = !olFeature.hasOwnProperty('fid');
-                                    var tableJson = null;
-
-                                    // search jsonData from table
-                                    $.each(tableApi.data(),function(i,jsonData){
-                                        if(isNew){
-                                           if(jsonData.id == olFeature.id){
-                                               delete jsonData.isNew;
-                                               tableJson = jsonData;
-                                               return false
-                                           }
-                                        }else{
-                                            if(jsonData.id == olFeature.fid){
-                                               tableJson = jsonData;
-                                               return false
-                                            }
-                                        }
-                                    });
-
-
-                                    // Merge object2 into object1
-                                    $.extend( tableJson, dbFeature );
-
-                                    // Redraw table fix
-                                    // TODO: find how to drop table cache...
-                                    $.each(tableApi.$("tbody > tr"), function (i, tr) {
-                                        var row = tableApi.row(tr);
-                                        if(row.data() == tableJson){
-                                            row.data(tableJson);
-                                            return false;
-                                        }
-                                    })
-                                    tableApi.draw();
-
-                                    // Update open layer feature to...
-                                    olFeature.fid = tableJson.id;
-                                    olFeature.data = tableJson.properties;
-                                    olFeature.attributes = tableJson.properties;
-
-                                    form.enableForm();
-                                    self.currentPopup.popupDialog('close');
-                                    $.notify(translate("feature.save.successfully"),'info');
-                                });
-                            }
-                        }
-                    }]
+                width: widget.featureEditDialogWidth,
+                buttons: buttons
             };
 
-            if(self.currentSettings.hasOwnProperty('popup')){
-                $.extend(popupConfiguration,self.currentSettings.popup);
+            if(widget.currentSettings.hasOwnProperty('popup')){
+                $.extend(popupConfiguration,widget.currentSettings.popup);
             }
 
             var dialog = $("<div/>");
-            translateStructure(self.currentSettings.formItems);
+            translateStructure(widget.currentSettings.formItems);
 
-            dialog.generateElements({children: self.currentSettings.formItems});
+            dialog.generateElements({children: widget.currentSettings.formItems});
             dialog.popupDialog(popupConfiguration);
-            self.currentPopup = dialog;
+            widget.currentPopup = dialog;
             dialog.formData(olFeature.data);
 
             return dialog;
@@ -1007,7 +1091,57 @@
             }).done(function(response) {
                 debugger;
             })
-        }
+        },
+
+        /**
+         * Find schema definition by open layer object
+         *
+         * @param layer
+         */
+        findSchemaByLayer: function(layer) {
+            var widget = this;
+            var schema = null;
+
+            $.each(widget.options.schemes, function(i, _schema) {
+                if(_schema.layer == layer) {
+                    schema = _schema;
+                    return false;
+                }
+            });
+
+            return schema;
+        },
+
+        /**
+         * Find feature data by open layer feature object
+         * @returns {*}
+         */
+        findFeatureByOpenLayerFeature: function(olFeature) {
+            var widget = this;
+            var feature = null;
+            var data = olFeature.data;
+            var isNew = !olFeature.fid;
+            var schema = widget.findSchemaByLayer(olFeature.layer);
+
+
+            $.each(schema.features, function(i, featureCollection) {
+                if(!isNew) {
+                    if(featureCollection.hasOwnProperty(olFeature.fid)) {
+                        feature = featureCollection[olFeature.fid];
+                        return false;
+                    }
+                } else {
+                    $.each(featureCollection, function(k, _feature) {
+                        if(_feature == data) {
+                            feature = data;
+                            return false;
+                        }
+                    });
+                }
+            });
+
+            return feature;
+        },
     });
 
 })(jQuery);
