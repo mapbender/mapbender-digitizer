@@ -323,7 +323,6 @@
             } else {
                 titleElement.css('display', 'none');
             }
-            //debugger;
 
             $.contextMenu({
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
@@ -674,6 +673,17 @@
             var schema = widget.findSchemaByLayer(olFeature.layer);
             var buttons = [];
 
+            if(schema.allowDelete) {
+                buttons.push({
+                    text:  translate("feature.remove"),
+                    'class': 'critical',
+                    click: function() {
+                        var feature = widget.findFeatureByOpenLayerFeature(olFeature);
+                        widget.removeFeature(feature);
+                        widget.currentPopup.popupDialog('close');
+                    }
+                });
+            }
 
             if(schema.allowEditData){
                 var saveButton = {
@@ -786,7 +796,9 @@
             dialog.generateElements({children: widget.currentSettings.formItems});
             dialog.popupDialog(popupConfiguration);
             widget.currentPopup = dialog;
-            dialog.formData(olFeature.data);
+            setTimeout(function() {
+                dialog.formData(olFeature.data);
+            }, 21);
 
             return dialog;
         },
