@@ -51,15 +51,10 @@ class Digitizer extends HTMLElement
      */
     static public function listAssets()
     {
-        return array('js'    => array(
-                        "/components/jquery-context-menu/jquery-context-menu-built.js",
-                        'mapbender.element.digitizer.js',
-                        '@FOMCoreBundle/Resources/public/js/widgets/popup.js',
-                        '@FOMCoreBundle/Resources/public/js/widgets/dropdown.js'),
+        return array('js'    => array("/components/jquery-context-menu/jquery-context-menu-built.js",
+                                      'mapbender.element.digitizer.js'),
                      'css'   => array('sass/element/digitizer.scss'),
-                     'trans' => array(
-                         '@MapbenderDigitizerBundle/Resources/views/Element/digitizer.json.twig'
-                     ));
+                     'trans' => array('@MapbenderDigitizerBundle/Resources/views/Element/digitizer.json.twig'));
     }
 
     /**
@@ -219,5 +214,25 @@ class Digitizer extends HTMLElement
         }
 
         return new JsonResponse($results);
+    }
+
+    /**
+     * Get assets. This method is overloaded,
+     * course of needing to aggregate CSS from configuration.
+     *
+     * @inheritdoc
+     */
+    public function getAssets()
+    {
+        $configuration = $this->getConfiguration();
+        $assets        = parent::getAssets();
+        if (isset($configuration['css'])) {
+            if (is_array($configuration['css'])) {
+                $assets['css'] = array_merge($assets['css'], $configuration['css']);
+            } else {
+                $assets['css'][] = $configuration['css'];
+            }
+        }
+        return $assets;
     }
 }
