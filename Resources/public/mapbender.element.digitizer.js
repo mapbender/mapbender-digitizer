@@ -152,9 +152,6 @@
             Mapbender.elementRegistry.onElementReady(this.options.target, $.proxy(widget._setup, widget));
 
 
-
-
-
         },
 
         _containerInfo:   null,
@@ -323,6 +320,29 @@
             } else {
                 titleElement.css('display', 'none');
             }
+
+            // Cancel context menu on right click
+            //map.div.oncontextmenu = function() {
+            //    return false;
+            //};
+            //
+            //$(map.div).on("mousedown", function(e) {
+            //    console.log(e.button)
+            //    return true;
+            //});
+
+            //myMap.div.oncontextmenu = function noContextMenu(e) {
+            //    if(!e){ //dear IE...
+            //        var e = window.event;
+            //        e.returnValue = false;
+            //    }
+            //
+            //    var f = myVectorLayer.getFeatureFromEvent(e);
+            //    alert(f);
+            //    //f is the pointed vector.feature :)
+            //
+            //    return false; //Prevent display of browser context menu
+            //}
 
             $.contextMenu({
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
@@ -779,7 +799,6 @@
                 buttons.push(saveButton);
             }
 
-
             var popupConfiguration = {
                 title: translate("feature.attributes"),
                 width: widget.featureEditDialogWidth,
@@ -1064,13 +1083,20 @@
         /**
          * Zoom to JSON feature
          *
-         * @param jsonFeature
+         * @param feature
          */
-        zoomToJsonFeature: function(jsonFeature){
+        zoomToJsonFeature: function(feature) {
             var layer = this.activeLayer;
-            var feature = jsonFeature.hasOwnProperty('isNew') ? layer.getFeatureById(jsonFeature.id): layer.getFeatureByFid(jsonFeature.id);
-            var bounds = feature.geometry.getBounds();
-            this.map.zoomToExtent(bounds);
+            var olMap = this.map;
+            var olFeature = feature.hasOwnProperty('isNew') ? layer.getFeatureById(feature.id) : layer.getFeatureByFid(feature.id);
+            var bounds = olFeature.geometry.getBounds();
+            var schema = this.findFeatureSchema(feature);
+
+            olMap.zoomToExtent(bounds);
+
+            if(schema.hasOwnProperty('zoomScaleDenominator')){
+                olMap.zoomToScale(schema.zoomScaleDenominator);
+            }
         },
 
         /**

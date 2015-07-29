@@ -1,6 +1,6 @@
 {
     "name": "mapbender/digitizer",
-    "description": "Mapbender About element",
+    "description": "Mapbender digitizer element",
     "keywords": ["mapbender", "digitizer","digitizing"],
     "type": "library",
     "license": "MIT",
