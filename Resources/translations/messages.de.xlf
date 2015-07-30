@@ -46,6 +46,10 @@
         <source>mb.digitizer.feature.remove.from.database</source>
         <target>Feature aus der Datenbank löschen?</target>
       </trans-unit>
+      <trans-unit id="276bc6948506ddc20491642c43d85ec7" resname="mb.digitizer.cancel">
+        <source>mb.digitizer.cancel</source>
+        <target>Abbrechen</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
