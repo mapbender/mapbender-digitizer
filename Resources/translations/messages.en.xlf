@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="c3c97b778347f54067b9b8e07d22f16a" resname="mb.digitizer.feature.remove.from.database">
         <source>mb.digitizer.feature.remove.from.database</source>
-        <target>Remove feature from server.</target>
+        <target>Delete feature.</target>
       </trans-unit>
     </body>
   </file>
