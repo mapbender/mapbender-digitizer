@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="9728e3887eb78b1169723e59697f00b9" resname="mb.digitizer.feature.remove">
         <source>mb.digitizer.feature.remove</source>
-        <target>Удалить геометрию</target>
+        <target>Удалить</target>
       </trans-unit>
       <trans-unit id="7dbb76095005015c35538c7b7489899a" resname="mb.digitizer.feature.edit">
         <source>mb.digitizer.feature.edit</source>
