@@ -693,18 +693,6 @@
             var schema = widget.findSchemaByLayer(olFeature.layer);
             var buttons = [];
 
-            if(schema.allowDelete) {
-                buttons.push({
-                    text:  translate("feature.remove"),
-                    'class': 'critical',
-                    click: function() {
-                        var feature = widget.findFeatureByOpenLayerFeature(olFeature);
-                        widget.removeFeature(feature);
-                        widget.currentPopup.popupDialog('close');
-                    }
-                });
-            }
-
             if(schema.allowEditData){
                 var saveButton = {
                     text: translate("feature.save"),
@@ -798,7 +786,23 @@
                 };
                 buttons.push(saveButton);
             }
-
+            if(schema.allowDelete) {
+                buttons.push({
+                    text:  translate("feature.remove"),
+                    'class': 'critical',
+                    click: function() {
+                        var feature = widget.findFeatureByOpenLayerFeature(olFeature);
+                        widget.removeFeature(feature);
+                        widget.currentPopup.popupDialog('close');
+                    }
+                });
+            }
+            buttons.push({
+                text:  translate("mb.digitizer.cancel",true),
+                click: function() {
+                    widget.currentPopup.popupDialog('close');
+                }
+            });
             var popupConfiguration = {
                 title: translate("feature.attributes"),
                 width: widget.featureEditDialogWidth,
