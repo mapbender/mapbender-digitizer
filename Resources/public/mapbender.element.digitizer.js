@@ -516,7 +516,7 @@
                         type:     'checkbox',
                         cssClass: 'onlyExtent',
                         title:    translate('toolset.current-extent'),
-                        checked:  true,
+                        checked:  settings.searchType == "currentExtent",
                         change:   function() {
                             settings.searchType = $('.onlyExtent', settings.frame).prop('checked') ? "currentExtent" : "all";
                             widget._getData();
