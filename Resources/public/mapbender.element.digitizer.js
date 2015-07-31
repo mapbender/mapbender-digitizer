@@ -91,7 +91,8 @@
             openFormAfterEdit: true,
             maxResults: 1000,
             oneInstanceEdit: true,
-            searchType: "currentExtent"
+            searchType: "currentExtent",
+            inlineSearch: false
         },
         // Default tool-sets
         toolsets: {
@@ -449,7 +450,7 @@
                 var table = settings.table = $("<div/>").resultTable({
                     lengthChange: false,
                     pageLength: 10,
-                    searching: false,
+                    searching: settings.inlineSearch,
                     info: true,
                     processing: false,
                     ordering: true,
