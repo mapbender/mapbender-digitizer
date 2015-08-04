@@ -855,7 +855,7 @@
                     }
 
                     if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name)) {
-                        item.dbSrc = olFeature.data[item.name];
+                        item.dbSrc = item.path ? item.path + olFeature.data[item.name] : olFeature.data[item.name];
                     }
 
                     var src = item.dbSrc ? item.dbSrc : item.origSrc;
