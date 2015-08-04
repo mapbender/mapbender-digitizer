@@ -70,6 +70,60 @@ $selectColor: #F7F79A;
     width: auto;
     white-space: pre;
   }
+  .image-container {
+    position: relative;
+    overflow: hidden;
+//    > img {
+//      width: 100%;
+//      height: auto;
+//      display: inline-block;
+//    }
+  }
+  .file-container{
+
+    .progress-bar{
+      width: 0;
+      height: 2px;
+      background-color: #00ccaa;
+      float: none;
+    }
+
+    .fileinput-button {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      > input {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 0;
+        opacity: 0;
+        -ms-filter: 'alpha(opacity=0)';
+        font-size: 200px;
+        direction: ltr;
+        cursor: pointer;
+
+        &:focus, &hover {
+          box-shadow: inset 0 1px 1px transparent, 0 0 4px #000 !important;
+        }
+
+      }
+    }
+  }
+
+
+
+
+  /* Fixes for IE < 8 */
+  @media screen\9 {
+    .fileinput-button > input {
+      filter: alpha(opacity=0);
+      font-size: 100%;
+      height: 100%;
+    }
+  }
+
+
 }
 
 
