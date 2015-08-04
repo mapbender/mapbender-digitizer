@@ -351,10 +351,10 @@
             var selector = widget.selector = $("select.selector", element);
             var options = widget.options;
             var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
-            var styleMap = new OpenLayers.StyleMap({
-                'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], widget.styles.default)),
-                'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], widget.styles.select))
-            }, {extendDefault: true});
+            //var styleMap = new OpenLayers.StyleMap({
+            //    'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], widget.styles.default)),
+            //    'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], widget.styles.select))
+            //}, {extendDefault: true});
             var hasOnlyOneScheme = _.size(options.schemes) === 1;
 
             if(hasOnlyOneScheme) {
@@ -439,14 +439,15 @@
 
             // build select options
             $.each(options.schemes, function(schemaName){
-                var settings = this;
+                var schema = this;
                 var option = $("<option/>");
+                var styles = schema.styles ? schema.styles : {};
                 var styleMap = new OpenLayers.StyleMap({
-                    'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], widget.styles.default)),
-                    'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], widget.styles.select))
+                    'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? styles['default'] : widget.styles.default)),
+                    'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
                 }, {extendDefault: true});
 
-                var layer = settings.layer = new OpenLayers.Layer.Vector(settings.label, {styleMap: styleMap});
+                var layer = schema.layer = new OpenLayers.Layer.Vector(schema.label, {styleMap: styleMap});
 
 
                 // Merge settings with default values from options
@@ -454,7 +455,7 @@
                     if(k == "schemes" || k == "target" || k == "create" || k == 'jsSrc' || k == 'disabled') {
                         continue;
                     }
-                    settings[k] = settings.hasOwnProperty(k) ? settings[k] : options[k];
+                    schema[k] = schema.hasOwnProperty(k) ? schema[k] : options[k];
                 }
 
                 var deleteButton = {
@@ -473,21 +474,21 @@
                     }
                 };
                 var buttons = [editButton];
-                if(settings.allowDelete) {
+                if(schema.allowDelete) {
                     buttons.push(deleteButton);
                 }
 
-                option.val(schemaName).html(settings.label);
+                option.val(schemaName).html(schema.label);
                 widget.map.addLayer(layer);
 
-                var frame = settings.frame = $("<div/>").addClass('frame').data("schemaSettings", settings);
+                var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
                 var columns = [];
                 var newFeatureDefaultProperties = {};
-                if( !settings.hasOwnProperty("tableFields")){
-                    console.error(translate("table.fields.not.defined"),settings );
+                if( !schema.hasOwnProperty("tableFields")){
+                    console.error(translate("table.fields.not.defined"),schema );
                 }
 
-                $.each(settings.tableFields, function(fieldName, fieldSettings) {
+                $.each(schema.tableFields, function(fieldName, fieldSettings) {
                     newFeatureDefaultProperties[fieldName] = "";
                     fieldSettings.title = fieldSettings.label;
                     fieldSettings.data = "properties." + fieldName;
@@ -498,7 +499,7 @@
                 var resultTableSettings = {
                     lengthChange: false,
                     pageLength: 10,
-                    searching: settings.inlineSearch,
+                    searching: schema.inlineSearch,
                     info: true,
                     processing: false,
                     ordering: true,
@@ -513,15 +514,15 @@
                     resultTableSettings.oLanguage = options.tableTranslation;
                 }
 
-                var table = settings.table = $("<div/>").resultTable(resultTableSettings);
+                var table = schema.table = $("<div/>").resultTable(resultTableSettings);
 
-                settings.schemaName = schemaName;
+                schema.schemaName = schemaName;
 
-                var toolset = widget.toolsets[settings.featureType.geomType];
-                if(settings.hasOwnProperty("toolset")){
-                    toolset = settings.toolset;
+                var toolset = widget.toolsets[schema.featureType.geomType];
+                if(schema.hasOwnProperty("toolset")){
+                    toolset = schema.toolset;
                 }
-                if(!settings.allowDelete){
+                if(!schema.allowDelete){
                     $.each(toolset,function(k,tool){
                         if(tool.type == "removeSelected"){
                             toolset.splice(k,1);
@@ -562,7 +563,7 @@
 
                                 digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
 
-                                if(settings.openFormAfterEdit) {
+                                if(schema.openFormAfterEdit) {
                                     widget._openFeatureEditDialog(olFeature);
                                 }
                             }
@@ -571,29 +572,29 @@
                         type:     'checkbox',
                         cssClass: 'onlyExtent',
                         title:    translate('toolset.current-extent'),
-                        checked:  settings.searchType == "currentExtent",
+                        checked:  schema.searchType == "currentExtent",
                         change:   function() {
-                            settings.searchType = $('.onlyExtent', settings.frame).prop('checked') ? "currentExtent" : "all";
+                            schema.searchType = $('.onlyExtent', schema.frame).prop('checked') ? "currentExtent" : "all";
                             widget._getData();
                         }
                     }]
                 });
 
-                if(!settings.allowDigitize){
+                if(!schema.allowDigitize){
                     $(".digitizing-tool-set",frame).css('display','none');
                 }
 
                 frame.append(table);
 
-                frames.push(settings);
+                frames.push(schema);
                 frame.css('display','none');
 
-                frame.data("schemaSettings", settings);
+                frame.data("schemaSettings", schema);
 
                 element.append(frame);
-                option.data("schemaSettings",settings);
+                option.data("schemaSettings",schema);
                 selector.append(option);
-                settings.features = {
+                schema.features = {
                     loaded:   [],
                     modified: [],
                     created:  []
