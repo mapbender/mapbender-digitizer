@@ -10,6 +10,25 @@
     }
 
     /**
+     * Translate object
+     *
+     * @param items
+     * @returns object
+     */
+    function translateObject(items) {
+        for (var k in items) {
+            var item = items[k];
+            if(typeof item === "string" && item.match(translationReg)) {
+                items[k] = translate(item.split(':')[1], true);
+            } else if(typeof item === "object") {
+                translateObject(item);
+            }
+        }
+        return item;
+    }
+
+
+    /**
      * Regular Expression to get checked if string should be translated
      *
      * @type {RegExp}
@@ -413,6 +432,11 @@
                 }
             });
 
+
+            if(options.tableTranslation) {
+                translateObject(options.tableTranslation);
+            }
+
             // build select options
             $.each(options.schemes, function(schemaName){
                 var settings = this;
@@ -470,7 +494,8 @@
                     columns.push(fieldSettings);
                 });
 
-                var table = settings.table = $("<div/>").resultTable({
+
+                var resultTableSettings = {
                     lengthChange: false,
                     pageLength: 10,
                     searching: settings.inlineSearch,
@@ -482,7 +507,13 @@
                     autoWidth: false,
                     columns:  columns,
                     buttons: buttons
-                });
+                }
+
+                if(options.tableTranslation) {
+                    resultTableSettings.oLanguage = options.tableTranslation;
+                }
+
+                var table = settings.table = $("<div/>").resultTable(resultTableSettings);
 
                 settings.schemaName = schemaName;
 
