@@ -4,9 +4,13 @@ namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\DBALException;
 use Mapbender\CoreBundle\Element\HTMLElement;
+use Mapbender\CoreBundle\Entity\Application;
+use Mapbender\CoreBundle\Component\Application as AppComponent;
+use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DigitizerBundle\Entity\FeatureType;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  *
@@ -51,8 +55,11 @@ class Digitizer extends HTMLElement
      */
     static public function listAssets()
     {
-        return array('js'    => array("/components/jquery-context-menu/jquery-context-menu-built.js",
-                                      'mapbender.element.digitizer.js'),
+        return array('js'    => array(
+                        '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
+                        '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
+                        "/components/jquery-context-menu/jquery-context-menu-built.js",
+                        'mapbender.element.digitizer.js'),
                      'css'   => array('sass/element/digitizer.scss'),
                      'trans' => array('@MapbenderDigitizerBundle/Resources/views/Element/digitizer.json.twig'));
     }
@@ -156,16 +163,21 @@ class Digitizer extends HTMLElement
      */
     public function httpAction($action)
     {
-        $configuration = $this->getConfiguration();
-        $request       = json_decode($this->container->get('request')->getContent(), true);
-        $schemas       = $configuration["schemes"];
-        $debugMode     = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
+        /**
+         * @var $requestService Request
+         */
+        $configuration  = $this->getConfiguration();
+        $requestService = $this->container->get('request');
+        $request        = json_decode($requestService->getContent(), true);
+        $schemas        = $configuration["schemes"];
+        $debugMode      = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
+        $schemaName     = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
 
-        if(!isset($request["schema"])){
+        if (empty($schemaName)) {
             throw new Exception('For initialization there is no name of the declared scheme');
         }
 
-        $schema        = $schemas[$request["schema"]];
+        $schema     = $schemas[$schemaName];
 
         if (is_array($schema['featureType'])) {
             $featureType = new FeatureType($this->container, $schema['featureType']);
@@ -208,9 +220,56 @@ class Digitizer extends HTMLElement
                 break;
 
             case 'delete':
-                // remove once
                 $results = $featureType->remove($request['feature'])->getId();
                 break;
+
+            case 'file-upload':
+                /**
+                 * Application entity.
+                 * Holds element configuration
+                 * @var $elementEntity Mapbender\CoreBundle\Entity\Element
+                 */
+
+                /**
+                 * @var $application Application
+                 */
+                /**
+                 * Application short name used as ID
+                 *
+                 * @var $slug string
+                 */
+//                $applications         = $this->container->get('mapbender')->getApplicationEntities();
+//                $uploads_web_url      = AppComponent::getUploadsUrl($this->container);
+
+                $fid                = $requestService->get('fid');
+                $feature            = $featureType->getById($fid);
+                $results["feature"] = $feature->toGeoJson();
+                $results["fid"]     = $fid;
+                $results["schema"]  = $schemaName;
+                $results["webUrl"]  = AppComponent::getUploadsUrl($this->container);
+                $elementEntity      = $this->getEntity();
+                $elemntId           = $elementEntity->getId();
+                $application        = $elementEntity->getApplication();
+                $slug               = $application->getSlug();
+
+                // Cre
+                AppComponent::createAppWebDir($this->container, $slug);
+
+
+                $results["webUrl"]  = AppComponent::getAppWebUrl($this->container, $slug);
+                $results["slug"]    = $slug;
+
+
+                //                $results["list"]   = $featureType->search(array("returnType" => 'FeatureCollection'));
+
+                break;
+
+            default:
+                $results = array(
+                    array('errors' => array(
+                        array('message' => $action . " not defined!")
+                    ))
+                );
         }
 
         return new JsonResponse($results);
