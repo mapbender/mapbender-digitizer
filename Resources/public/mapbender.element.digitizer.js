@@ -37,6 +37,29 @@
     }
 
     /**
+     * Check and replace values recursive if they should be translated.
+     * For checking used "translationReg" variable
+     *
+     *
+     * @param items
+     */
+    function eachItem(items, callback) {
+        var isArray = items instanceof Array;
+        if(isArray) {
+            for (var k in items) {
+                eachItem(items[k], callback);
+            }
+        } else {
+            if(typeof items["type"] !== 'undefined'){
+                callback(items);
+            }
+            if(typeof items["children"] !== 'undefined') {
+                eachItem(items["children"], callback);
+            }
+        }
+    }
+
+    /**
      * Example:
      *     confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
                   return false;
@@ -144,13 +167,13 @@
 
         },
         _create:                function() {
-            if(!Mapbender.checkTarget("mbDigitizer", this.options.target)){
+            var widget = this;
+            if(!Mapbender.checkTarget("mbDigitizer", widget.options.target)){
                 return;
             }
-            var widget = this;
-            var me = this.element;
-            this.elementUrl = Mapbender.configuration.application.urls.element + '/' + me.attr('id') + '/';
-            Mapbender.elementRegistry.onElementReady(this.options.target, $.proxy(widget._setup, widget));
+            var element = widget.element;
+            widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
+            Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
 
 
         },
@@ -693,7 +716,6 @@
             }
             var schema = widget.findSchemaByLayer(olFeature.layer);
             var buttons = [];
-
             if(schema.allowEditData){
                 var saveButton = {
                     text: translate("feature.save"),
@@ -815,7 +837,35 @@
             }
 
             var dialog = $("<div/>");
-            translateStructure(widget.currentSettings.formItems);
+
+            if(!schema.elementsTranslated){
+                translateStructure(widget.currentSettings.formItems);
+                schema.elementsTranslated = true;
+            }
+
+            eachItem(widget.currentSettings.formItems, function(item) {
+                if(item.type == "file") {
+                    item.uploadHanderUrl = widget.elementUrl + "file-upload?schema="+schema.schemaName+"&fid="+olFeature.fid;
+                }
+
+                if(item.type == 'image') {
+
+                    if(!item.origSrc){
+                        item.origSrc = item.src;
+                    }
+
+                    if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name)) {
+                        item.dbSrc = olFeature.data[item.name];
+                    }
+
+                    var src = item.dbSrc ? item.dbSrc : item.origSrc;
+                    if(item.relative) {
+                        item.src = src.match(/^(http[s]?\:|\/{2})/) ? src : Mapbender.configuration.application.urls.asset + src;
+                    } else {
+                        item.src = src;
+                    }
+                }
+            });
 
             dialog.generateElements({children: widget.currentSettings.formItems});
             dialog.popupDialog(popupConfiguration);
