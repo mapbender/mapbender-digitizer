@@ -697,7 +697,6 @@
             });
             this.map.events.register("zoomend", this.map, function(){
                 widget._getData();
-                console.log("zoomend");
             });
             this.map.events.register('click', this, this._mapClick);
 
@@ -1122,11 +1121,7 @@
                         }
 
                         if(!sidesChanged.left && !sidesChanged.right && !sidesChanged.top && !sidesChanged.bottom) {
-                            //widget._queryIntersect(request, extent);
-                            widget._onFeatureCollectionLoaded({
-                                type:     "FeatureCollection",
-                                features: []
-                            }, settings, request);
+                            widget._queryIntersect(request, extent);
                         }
                     } else {
                         widget._queryIntersect(request, extent);
