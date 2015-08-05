@@ -447,7 +447,12 @@
                     'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
                 }, {extendDefault: true});
 
-                var layer = schema.layer = new OpenLayers.Layer.Vector(schema.label, {styleMap: styleMap});
+                var strategy = new OpenLayers.Strategy.Cluster({
+                    distance: 15
+                });
+                var layer = schema.layer = new OpenLayers.Layer.Vector(schema.label, {styleMap: styleMap
+                    //, strategies: [strategy]
+                });
 
 
                 // Merge settings with default values from options
