@@ -241,18 +241,37 @@ class Digitizer extends HTMLElement
 //                $applications         = $this->container->get('mapbender')->getApplicationEntities();
 //                $uploads_web_url      = AppComponent::getUploadsUrl($this->container);
 
-                $fid                = $requestService->get('fid');
-                $feature            = $featureType->getById($fid);
-                $results["feature"] = $feature->toGeoJson();
-                $results["fid"]     = $fid;
-                $results["schema"]  = $schemaName;
+
+
+//                $options = array(
+//                    'upload_dir' => 'Your upload directory',
+//                    'accept_file_types' => '/\.(gif|jpe?g|png)$/i'
+//                );
+//                $upload_handler = new \UploadHandler($options);
+
+                $featureTypeRootDirName    = "featureTypes";
+                $baseUploadDir             = realpath(AppComponent::getUploadsDir($this->container));
+                $featureTypesUploadDir     = $baseUploadDir . "/" . $featureTypeRootDirName;
+                $shemaUploadDir            = $featureTypesUploadDir . "/" . $schemaName;
+                $fid                       = $requestService->get('fid');
+                $feature                   = $featureType->getById($fid);
+                $results["feature"]        = $feature->toGeoJson();
+                $results["fid"]            = $fid;
+                $results["schemaName"]     = $schemaName;
+                $results["schema"]         = $schema;
+                $results["shemaUploadDir"] = $shemaUploadDir;
+
+
                 $results["webUrl"]  = AppComponent::getUploadsUrl($this->container);
+                $results["fileDir"]  = realpath(AppComponent::getUploadsDir($this->container)) ;
+
+
                 $elementEntity      = $this->getEntity();
                 $elemntId           = $elementEntity->getId();
                 $application        = $elementEntity->getApplication();
                 $slug               = $application->getSlug();
 
-                // Cre
+
                 AppComponent::createAppWebDir($this->container, $slug);
 
 
