@@ -199,14 +199,15 @@
 
         _containerInfo:   null,
         getContainerInfo: function() {
-            var widget = this.element;
+            var widget = this;
+            var element = widget.element;
 
             if(!widget._containerInfo) {
                 widget._containerInfo = new function() {
                     var self = this;
-                    var toolBar = $(widget).closest(".toolBar");
-                    var contentPane = $(widget).closest(".contentPane");
-                    var sidePane = $(widget).closest(".contentPane");
+                    var toolBar = $(element).closest(".toolBar");
+                    var contentPane = $(element).closest(".contentPane");
+                    var sidePane = $(element).closest(".sidePane");
                     var container = null;
 
                     if(contentPane.size()) {
@@ -256,6 +257,9 @@
                     self.getContainer = function() {
                         return container;
                     }
+
+
+
                 }
             }
             return widget._containerInfo;
@@ -351,10 +355,6 @@
             var selector = widget.selector = $("select.selector", element);
             var options = widget.options;
             var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
-            //var styleMap = new OpenLayers.StyleMap({
-            //    'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], widget.styles.default)),
-            //    'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], widget.styles.select))
-            //}, {extendDefault: true});
             var hasOnlyOneScheme = _.size(options.schemes) === 1;
 
             if(hasOnlyOneScheme) {
@@ -612,7 +612,10 @@
                 var layer = settings.layer;
 
                 frame.css('display', 'none');
-                layer.setVisibility(false);
+
+                if(!settings.displayPermanent){
+                    layer.setVisibility(false);
+                }
 
                 // https://trac.wheregroup.com/cp/issues/4548
                 if(widget.currentPopup){
@@ -736,6 +739,38 @@
                 }
             });
             onSelectorChange();
+
+            // Check position and react by
+            var info = widget.getContainerInfo();
+            if(info.isSidePane()){
+                var sidepane = info.getContainer();
+                var accordion = $(".accordionContainer", sidepane);
+                var hasAccordion = accordion.length > 0;
+
+                if(hasAccordion) {
+                    var tabs = accordion.find('> div.accordion');
+                    var currentTab = accordion.find('> div.accordion.active');
+
+                    function handleByTab(tab) {
+                        var tabContent = tab.parent().find("> div")[tab.index() + 1];
+                        var hasWidget = $(tabContent).find($(widget.element)).length > 0;
+                        if(hasWidget) {
+                            activateFrame(widget.currentSettings);
+                        } else {
+                            if(!widget.currentSettings.displayOnInactive){
+                                deactivateFrame(widget.currentSettings);
+                            }
+                        }
+                    }
+
+                    tabs.on('click', function(e) {
+                        var tab = $(e.currentTarget);
+
+                        handleByTab(tab);
+                    })
+                    handleByTab(currentTab);
+                }
+            }
         },
 
         /**
