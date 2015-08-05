@@ -447,9 +447,9 @@
                     'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
                 }, {extendDefault: true});
 
-                var strategy = new OpenLayers.Strategy.Cluster({
-                    distance: 15
-                });
+                //var strategy = new OpenLayers.Strategy.Cluster({
+                //    distance: 15
+                //});
                 var layer = schema.layer = new OpenLayers.Layer.Vector(schema.label, {styleMap: styleMap
                     //, strategies: [strategy]
                 });
@@ -1123,9 +1123,12 @@
                     break;
 
                 default: // all
-                    widget.query('select', request).done(function(featureCollection) {
-                        widget._onFeatureCollectionLoaded(featureCollection, settings,  this);
-                    });
+                    if(!settings.allFeaturesQueued) {
+                        settings.allFeaturesQueued = true;
+                        widget.query('select', request).done(function(featureCollection) {
+                            widget._onFeatureCollectionLoaded(featureCollection, settings, this);
+                        });
+                    }
                     break;
             }
         },
