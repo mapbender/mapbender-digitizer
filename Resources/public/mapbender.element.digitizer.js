@@ -578,8 +578,8 @@
                         cssClass: 'onlyExtent',
                         title:    translate('toolset.current-extent'),
                         checked:  schema.searchType == "currentExtent",
-                        change:   function() {
-                            schema.searchType = $('.onlyExtent', schema.frame).prop('checked') ? "currentExtent" : "all";
+                        change:   function(e) {
+                            schema.searchType = $(e.originalEvent.target).prop("checked") ? "currentExtent" : "all";
                             widget._getData();
                         }
                     }]
@@ -600,9 +600,9 @@
                 option.data("schemaSettings",schema);
                 selector.append(option);
                 schema.features = {
-                    loaded:   [],
-                    modified: [],
-                    created:  []
+                    loaded:   {},
+                    modified: {},
+                    created:  {}
                 }
             });
 
@@ -694,6 +694,10 @@
             // register events
             this.map.events.register("moveend", this.map, function(){
                 widget._getData();
+            });
+            this.map.events.register("zoomend", this.map, function(){
+                widget._getData();
+                console.log("zoomend");
             });
             this.map.events.register('click', this, this._mapClick);
 
@@ -1116,6 +1120,14 @@
                         if(sidesChanged.bottom) {
                             widget._queryIntersect(request, new OpenLayers.Bounds(bbox.left - leftDiff, bbox.bottom + bottomDiff * -1, bbox.right - rightDiff, bbox.bottom));
                         }
+
+                        if(!sidesChanged.left && !sidesChanged.right && !sidesChanged.top && !sidesChanged.bottom) {
+                            //widget._queryIntersect(request, extent);
+                            widget._onFeatureCollectionLoaded({
+                                type:     "FeatureCollection",
+                                features: []
+                            }, settings, request);
+                        }
                     } else {
                         widget._queryIntersect(request, extent);
                     }
@@ -1123,6 +1135,11 @@
                     break;
 
                 default: // all
+
+                    if(settings.searchType == "currentExtent") {
+                        settings.allFeaturesQueued = false;
+                    }
+
                     if(!settings.allFeaturesQueued) {
                         settings.allFeaturesQueued = true;
                         widget.query('select', request).done(function(featureCollection) {
@@ -1132,6 +1149,7 @@
                     break;
             }
         },
+
 
         /**
          * Handle feature collection by ajax response.
@@ -1147,11 +1165,26 @@
             var features = settings.features;
             var geoJsonReader = new OpenLayers.Format.GeoJSON();
             var loadedFeatures = [];
+            var existingFeatures = {};
+            var currentExtentOnly =  settings.searchType ==  "currentExtent";
 
             // Break if something goes wrong
             if(!featureCollection || !featureCollection.hasOwnProperty("features")) {
                 Mapbender.error(translate("features.loading.error"), featureCollection, xhr);
                 return;
+            }
+
+            // get and remove invisible features
+            var layer = settings.layer
+            var map = layer.map;
+            var extent = map.getExtent();
+            var bbox = extent.toGeometry().getBounds();
+
+            if(currentExtentOnly){
+                for (var i in features.loaded) {
+                    var feature = features.loaded[i];
+                    existingFeatures[feature.id] = layer.getFeatureByFid(feature.id);
+                }
             }
 
             // Filter feature loaded before
@@ -1162,35 +1195,46 @@
                 }
             });
 
-            if(loadedFeatures.length){
+            if(loadedFeatures.length) {
                 // Replace feature collection
                 featureCollection.features = loadedFeatures;
 
                 // Add features to map
-                settings.layer.addFeatures(geoJsonReader.read(featureCollection));
+                settings.layer.addFeatures(geoJsonReader.read({
+                    type:     "FeatureCollection",
+                    features: loadedFeatures
+                }));
 
                 // Add features to table
-                tableApi.rows.add(featureCollection.features);
+                tableApi.rows.add(loadedFeatures);
                 tableApi.draw();
             }
+
+            if(currentExtentOnly) {
+                var row;
+                var removeFeatures = [];
+                for (var fid in existingFeatures) {
+                    var olFeature = existingFeatures[fid];
+
+                    if(!olFeature.geometry.getBounds().intersectsBounds(bbox)) {
+                        var feature = features.loaded[olFeature.fid];
+                        var row = tableApi.row(settings.table.resultTable("getDomRowByData", feature));
+                        row.remove();//.draw();
+                        removeFeatures.push(olFeature);
+                        features.loaded[fid] = null;
+                        delete features.loaded[fid];
+                    }
+                }
+                if(row){
+                    row.draw();
+                }
+                layer.removeFeatures(removeFeatures);
+            }
+            //console.log("removeFeatures", removeFeatures.length);
+            //console.log("features.loaded", _.size(features.loaded));
+
             return;
-
-
-            // - find all new (not saved) features
-            // - collect it to the select result list
-            //$.each(tableApi.data(), function(i, tableJson) {
-            //    if(tableJson.hasOwnProperty('isNew')) {
-            //        featureCollection.features.push(tableJson);
-            //    }
-            //});
-
-            ////settings.layer.removeAllFeatures();
-            //settings.layer.addFeatures(geoJsonReader.read(featureCollection));
-            //tableApi.clear();
-            //tableApi.rows.add(featureCollection.features);
-            //tableApi.draw();
         },
-
 
         /**
          * Element controller XHR query
