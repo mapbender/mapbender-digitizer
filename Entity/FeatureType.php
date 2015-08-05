@@ -396,6 +396,7 @@ class FeatureType extends ContainerAware
         $intersect    = isset($criteria['intersectGeometry']) ? $criteria['intersectGeometry'] : null;
         $returnType   = isset($criteria['returnType']) ? $criteria['returnType'] : null;
         $srid         = isset($criteria['srid']) ? $criteria['srid'] : $this->getSrid();
+        $where        = isset($criteria['where']) ? $criteria['where'] : null;
         $queryBuilder = $this->getSelectQueryBuilder($srid);
 
         // add GEOM where condition
@@ -407,6 +408,11 @@ class FeatureType extends ContainerAware
         // add filter (https://trac.wheregroup.com/cp/issues/3733)
         if(!empty($this->sqlFilter)){
             $queryBuilder->andWhere($this->sqlFilter);
+        }
+
+        // add second filter (https://trac.wheregroup.com/cp/issues/4643)
+        if($where){
+            $queryBuilder->andWhere($where);
         }
 
         $queryBuilder->setMaxResults($maxResults);

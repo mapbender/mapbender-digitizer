@@ -7,6 +7,7 @@ use Mapbender\CoreBundle\Element\HTMLElement;
 use Mapbender\CoreBundle\Entity\Application;
 use Mapbender\CoreBundle\Component\Application as AppComponent;
 use Mapbender\CoreBundle\Entity\Element;
+use Mapbender\DigitizerBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Entity\FeatureType;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -166,13 +167,14 @@ class Digitizer extends HTMLElement
         /**
          * @var $requestService Request
          */
-        $configuration  = $this->getConfiguration();
-        $requestService = $this->container->get('request');
-        $request        = json_decode($requestService->getContent(), true);
-        $schemas        = $configuration["schemes"];
-        $debugMode      = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
-        $schemaName     = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
-
+        $configuration   = $this->getConfiguration();
+        $requestService  = $this->container->get('request');
+        $request         = json_decode($requestService->getContent(), true);
+        $schemas         = $configuration["schemes"];
+        $debugMode       = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
+        $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
+        $defaultCriteria = array('returnType' => 'FeatureCollection',
+                                 'maxResults' => 2);
         if (empty($schemaName)) {
             throw new Exception('For initialization there is no name of the declared scheme');
         }
@@ -189,8 +191,7 @@ class Digitizer extends HTMLElement
 
         switch ($action) {
             case 'select':
-                $defaultCriteria = array('returnType' => 'FeatureCollection',
-                                         'maxResults' => 2);
+
                 $results         = $featureType->search(array_merge($defaultCriteria, $request));
                 break;
 
@@ -204,8 +205,13 @@ class Digitizer extends HTMLElement
                     // save collection
                     if (isset($request['features']) && is_array($request['features'])) {
                         foreach ($request['features'] as $feature) {
-                            $feature   = $this->prepareQueredFeatureData($feature, $schema['formItems']);
-                            $results[] = $featureType->save($feature);
+                            /**
+                             * @var $feature Feature
+                             */
+                            $featureData = $this->prepareQueredFeatureData($feature, $schema['formItems']);
+                            $feature = $featureType->save($featureData);
+                            $results = array_merge($featureType->search(array(
+                                'where' => $featureType->getUniqueId() . '=' . $feature->getId())));
                         }
                     }
                     $results = $featureType->toFeatureCollection($results);

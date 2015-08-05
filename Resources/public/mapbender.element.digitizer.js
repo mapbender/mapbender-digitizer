@@ -752,7 +752,10 @@
                 widget.currentPopup.popupDialog('close');
             }
             var schema = widget.findSchemaByLayer(olFeature.layer);
+            var table = schema.table;
+            var tableApi = table.resultTable('getApi');
             var buttons = [];
+
             if(schema.allowEditData){
                 var saveButton = {
                     text: translate("feature.save"),
@@ -782,6 +785,7 @@
                                 feature: jsonFeature
                             }).done(function(response){
 
+
                                 if(response.hasOwnProperty('errors')) {
                                     form.enableForm();
                                     $.each(response.errors, function(i, error) {
@@ -795,9 +799,22 @@
                                     return;
                                 }
 
+                                var hasFeatureAfterSave = response.features.length < 1;
+
+                                if(hasFeatureAfterSave){
+                                    var origFeature = widget.findFeatureByOpenLayerFeature(olFeature);
+                                    var row = tableApi.row(schema.table.resultTable("getDomRowByData", origFeature));
+
+                                    // remove from map
+                                    olFeature.layer.removeFeatures(olFeature);
+                                    // remove from table
+                                    row.remove().draw();
+
+                                    widget.currentPopup.popupDialog('close');
+                                    return;
+                                }
+
                                 var dbFeature = response.features[0];
-                                var table = widget.currentSettings.table;
-                                var tableApi = table.resultTable('getApi');
                                 var isNew = !olFeature.hasOwnProperty('fid');
                                 var tableJson = null;
 
