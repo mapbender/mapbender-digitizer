@@ -23,3 +23,7 @@ $ cd application/
 $ ../composer.phar self-update
 $ ../composer.phar update
 ```
+
+# Architecture
+
+![Architecture](Documents/Digitizer.png)
