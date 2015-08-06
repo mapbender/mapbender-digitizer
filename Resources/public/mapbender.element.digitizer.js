@@ -27,7 +27,6 @@
         return item;
     }
 
-
     /**
      * Regular Expression to get checked if string should be translated
      *
@@ -116,6 +115,8 @@
         return dialog;
     }
 
+
+
     /**
      * Digitizing tool set
      *
@@ -195,74 +196,6 @@
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
 
 
-        },
-
-        _containerInfo:   null,
-        getContainerInfo: function() {
-            var widget = this;
-            var element = widget.element;
-
-            if(!widget._containerInfo) {
-                widget._containerInfo = new function() {
-                    var self = this;
-                    var toolBar = $(element).closest(".toolBar");
-                    var contentPane = $(element).closest(".contentPane");
-                    var sidePane = $(element).closest(".sidePane");
-                    var container = null;
-
-                    if(contentPane.size()) {
-                        container = contentPane;
-                    }
-
-                    if(toolBar.size()) {
-                        container = toolBar;
-                    }
-
-                    if(sidePane.size()) {
-                        container = sidePane;
-                    }
-
-                    self.isSidePane = function() {
-                        return sidePane.size() > 0;
-                    }
-
-                    self.isContentPane = function() {
-                        return contentPane.size() > 0;
-                    }
-
-                    self.isToolBar = function() {
-                        return toolBar.size() > 0;
-                    }
-
-                    self.isOnTop = function() {
-                        return toolBar.hasClass('top');
-                    }
-
-                    self.isOnBottom = function() {
-                        return toolBar.hasClass('bottom');
-                    }
-
-                    self.isOnTop = function() {
-                        return toolBar.hasClass('top');
-                    }
-
-                    self.isOnLeft = function() {
-                        return sidePane.hasClass('left');
-                    }
-
-                    self.isOnRight = function() {
-                        return sidePane.hasClass('right');
-                    }
-
-                    self.getContainer = function() {
-                        return container;
-                    }
-
-
-
-                }
-            }
-            return widget._containerInfo;
         },
 
         /**
@@ -744,36 +677,16 @@
             onSelectorChange();
 
             // Check position and react by
-            var info = widget.getContainerInfo();
-            if(info.isSidePane()){
-                var sidepane = info.getContainer();
-                var accordion = $(".accordionContainer", sidepane);
-                var hasAccordion = accordion.length > 0;
-
-                if(hasAccordion) {
-                    var tabs = accordion.find('> div.accordion');
-                    var currentTab = accordion.find('> div.accordion.active');
-
-                    function handleByTab(tab) {
-                        var tabContent = tab.parent().find("> div")[tab.index() + 1];
-                        var hasWidget = $(tabContent).find($(widget.element)).length > 0;
-                        if(hasWidget) {
-                            activateFrame(widget.currentSettings);
-                        } else {
-                            if(!widget.currentSettings.displayOnInactive){
-                                deactivateFrame(widget.currentSettings);
-                            }
-                        }
+            var containerInfo = new MapbenderContainerInfo(widget, {
+                onactive:   function() {
+                    activateFrame(widget.currentSettings);
+                },
+                oninactive: function() {
+                    if(!widget.currentSettings.displayOnInactive) {
+                        deactivateFrame(widget.currentSettings);
                     }
-
-                    tabs.on('click', function(e) {
-                        var tab = $(e.currentTarget);
-
-                        handleByTab(tab);
-                    })
-                    handleByTab(currentTab);
                 }
-            }
+            });
         },
 
         /**
@@ -1106,6 +1019,17 @@
                             right:  rightDiff > 0,
                             top:    topDiff > 0
                         };
+
+                        var maxResultDiff = 0;
+                        for(var k in sidesChanged){
+                            if( sidesChanged[k]){
+                                maxResultDiff++;
+                            }
+                        }
+
+                        if(maxResultDiff){
+                            request.maxResults = request.maxResults / maxResultDiff;
+                        }
 
                         if(sidesChanged.left) {
                             widget._queryIntersect(request, new OpenLayers.Bounds(bbox.left, bbox.bottom, bbox.left + leftDiff * -1, bbox.top));

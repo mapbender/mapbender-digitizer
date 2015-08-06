@@ -60,7 +60,9 @@ class Digitizer extends HTMLElement
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
                         "/components/jquery-context-menu/jquery-context-menu-built.js",
-                        'mapbender.element.digitizer.js'),
+                        'mapbender.container.info.js',
+                        'mapbender.element.digitizer.js'
+        ),
                      'css'   => array('sass/element/digitizer.scss'),
                      'trans' => array('@MapbenderDigitizerBundle/Resources/views/Element/digitizer.json.twig'));
     }
