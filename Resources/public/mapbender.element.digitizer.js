@@ -855,7 +855,7 @@
                         item.origSrc = item.src;
                     }
 
-                    if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name)) {
+                    if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name) && olFeature.data[item.name]) {
                         item.dbSrc = olFeature.data[item.name];
                         if(schema.featureType.files) {
                             $.each(schema.featureType.files, function(k, fileInfo) {

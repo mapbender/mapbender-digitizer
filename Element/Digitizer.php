@@ -244,39 +244,35 @@ class Digitizer extends HTMLElement
                 break;
 
             case 'file-upload':
-                $fid        = $requestService->get('fid');
-                $fieldName  = $requestService->get('field');
-                $sessionKey = "feature-type-" . $schemaName . "sss" . $fieldName . "_" . $fid;
-                //                $feature    = $featureType->getById($fid);
-                if (!isset($_SESSION[$sessionKey]) ) {
-                    $urlParameters         = array('schema' => $schemaName,
-                                                   'fid'    => $fid,
-                                                   'field'  => $fieldName);
-                    $serverUrl             = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
-                    $uploadDir             = $featureType->genFilePath($fieldName);
-                    $_SESSION[$sessionKey] = array('options' => array(
-                        'upload_dir'                   => $uploadDir["src"] . "/",
-                        'script_url'                   => $serverUrl,
-                        'upload_url'                   => $featureType->getFileUrl($fieldName) . "/" . $uploadDir["path"] . "/",
-                        'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
-                        'access_control_allow_methods' => array(
-                            'OPTIONS',
-                            'HEAD',
-                            'GET',
-                            'POST',
-                            'PUT',
-                            'PATCH',
-                            'DELETE'
-                        ),
-                    ));
-                }
-                $options               = $_SESSION[$sessionKey]["options"];
-
                 if (!class_exists('UploadHandler')) {
                     include_once('../vendor/blueimp/jquery-file-upload/server/php/UploadHandler.php');
                 }
-                $uploadHandler = new \UploadHandler($options);
-                exit();
+
+                $fieldName     = $requestService->get('field');
+                $urlParameters = array('schema' => $schemaName,
+                                       'fid'    => $requestService->get('fid'),
+                                       'field'  => $fieldName);
+                $serverUrl     = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
+                $uploadDir     = $featureType->getFilePath($fieldName);
+                $uploadHandler = new \UploadHandler(array(
+                    'upload_dir'                   => $uploadDir . "/",
+                    'script_url'                   => $serverUrl,
+                    'upload_url'                   => $featureType->getFileUrl($fieldName) . "/",
+                    'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
+                    'print_response'               => false,
+                    'access_control_allow_methods' => array(
+                        'OPTIONS',
+                        'HEAD',
+                        'GET',
+                        'POST',
+                        'PUT',
+                        'PATCH',
+//                        'DELETE'
+                    ),
+                ));
+                $results       = array_merge($uploadHandler->get_response(), $urlParameters);
+
+                break;
 
             default:
                 $results = array(
