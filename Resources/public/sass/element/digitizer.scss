@@ -83,9 +83,15 @@ $selectColor: #F7F79A;
 
     .progress-bar{
       width: 0;
-      height: 2px;
+      height: 100%;
       background-color: #00ccaa;
       float: none;
+      transition: none;
+      padding: 0;
+      margin: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
 
     .fileinput-button {
