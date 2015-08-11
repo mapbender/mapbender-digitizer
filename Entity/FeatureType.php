@@ -6,9 +6,12 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Query;
+use Mapbender\DigitizerBundle\Utils\System;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Security\Acl\Exception\Exception;
+use Mapbender\CoreBundle\Component\Application as AppComponent;
 
 /**
  * Class FeatureType handles Feature objects.
@@ -28,6 +31,7 @@ class FeatureType extends ContainerAware
     const ORACLE_PLATFORM     = 'oracle';
     const POSTGRESQL_PLATFORM = 'postgresql';
     const SQLITE_PLATFORM     = 'sqlite';
+    const UPLOAD_DIR_NAME     = "featureTypes";
 
     /**
      *  Default max results by search
@@ -65,6 +69,8 @@ class FeatureType extends ContainerAware
     protected $fields = array();
     protected $sqlFilter;
 
+
+    protected $filesInfo = array();
 
     /**
      * @param ContainerInterface $container
@@ -714,5 +720,132 @@ class FeatureType extends ContainerAware
     public function repairTableSequence()
     {
         return $this->getConnection()->executeQuery("SELECT setval('" . $this->getTableSequenceName() . "', (SELECT MAX(" . $this->getUniqueId() . ") FROM " . $this->getTableName() . "))")->fetchColumn();
+    }
+
+    /**
+     * Get files directory, relative to base upload directory
+     *
+     * @param null $fieldName
+     * @return string
+     */
+    public function getFileUri($fieldName = null)
+    {
+        $path = self::UPLOAD_DIR_NAME . "/" . $this->getTableName();
+
+        if ($fieldName) {
+            $path .= "/" . $fieldName;
+        }
+
+        foreach ($this->getFileInfo() as $fileInfo) {
+            if (isset($fileInfo["field"]) && isset($fileInfo["uri"]) && $fieldName == $fileInfo["field"]) {
+                $path = $fileInfo["uri"];
+                break;
+            }
+        }
+
+        return $path;
+    }
+
+    /**
+     * Get files base path
+     *
+     * @param null $fieldName  file field name
+     * @param bool $createPath check and create path?
+     * @return string
+     */
+    public function getFilePath($fieldName = null, $createPath = true)
+    {
+        $path = realpath(AppComponent::getUploadsDir($this->container)) . "/" . $this->getFileUri($fieldName);
+
+        foreach ($this->getFileInfo() as $fileInfo) {
+            if (isset($fileInfo["field"]) && isset($fileInfo["path"]) && $fieldName == $fileInfo["field"]) {
+                $path = $fileInfo["path"];
+                break;
+            }
+        }
+
+        if ($createPath && !is_dir($path)) {
+            mkdir($path, 0775, true);
+        }
+
+        return $path;
+    }
+
+    /**
+     * @param string $fieldName
+     * @return string
+     */
+    public function getFileUrl($fieldName = "")
+    {
+        $baseUrl   = AppComponent::getBaseUrl($this->container);
+        $uploadDir = AppComponent::getUploadsDir($this->container, true) . "/";
+
+        foreach ($this->getFileInfo() as $fileInfo) {
+            if (isset($fileInfo["field"]) && isset($fileInfo["uri"]) && $fieldName == $fileInfo["field"]) {
+                $uploadDir = "";
+                break;
+            }
+        }
+
+        $fileUri = $this->getFileUri($fieldName);
+        $url     = $baseUrl . '/' . $uploadDir . $fileUri;
+        return $url;
+    }
+
+    /**
+     * Generate unique file name for a field.
+     *
+     * @param null $fieldName Field
+     * @return string
+     * @internal param string $extension File extension
+     */
+    public function genFilePath($fieldName = null)
+    {
+        $id   = $this->countFiles($fieldName)+1;
+        $src  = null;
+        $path = null;
+
+        while (1) {
+            $path = $id; //. "-" . System::generatePassword(12) ;
+            $src  = $this->getFilePath($fieldName) . "/" . $path;
+            if (!file_exists($src)) {
+                break;
+            }
+            $id++;
+        }
+
+        return array(
+            "src"  => $src,
+            "path" => $path
+        );
+    }
+
+    /**
+     * Count files in the field directory
+     *
+     * @param null $fieldName
+     * @return int
+     */
+    private function countFiles($fieldName = null)
+    {
+        $finder = new Finder();
+        $finder->files()->in($this->getFilePath($fieldName));
+        return count($finder);
+    }
+
+    /**
+     * @param $fileInfo
+     * @internal param $fileInfos
+     */
+    public function setFiles($fileInfo){
+        $this->filesInfo = $fileInfo;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFileInfo()
+    {
+        return $this->filesInfo;
     }
 }

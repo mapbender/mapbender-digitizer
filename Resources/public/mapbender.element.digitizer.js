@@ -380,11 +380,8 @@
                     'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
                 }, {extendDefault: true});
 
-                //var strategy = new OpenLayers.Strategy.Cluster({
-                //    distance: 15
-                //});
                 var layer = schema.layer = new OpenLayers.Layer.Vector(schema.label, {styleMap: styleMap
-                    //, strategies: [strategy]
+                    //, strategies: [ new OpenLayers.Strategy.Cluster({distance: 15})]
                 });
 
 
@@ -736,7 +733,6 @@
                                 feature: jsonFeature
                             }).done(function(response){
 
-
                                 if(response.hasOwnProperty('errors')) {
                                     form.enableForm();
                                     $.each(response.errors, function(i, error) {
@@ -746,13 +742,13 @@
                                             className: 'error'
                                         });
                                         console.error(error.message);
-                                    })
+                                    });
                                     return;
                                 }
 
-                                var hasFeatureAfterSave = response.features.length < 1;
+                                var hasFeatureAfterSave = response.features.length > 0;
 
-                                if(hasFeatureAfterSave){
+                                if(!hasFeatureAfterSave){
                                     var origFeature = widget.findFeatureByOpenLayerFeature(olFeature);
                                     var row = tableApi.row(schema.table.resultTable("getDomRowByData", origFeature));
 
@@ -850,17 +846,26 @@
 
             eachItem(widget.currentSettings.formItems, function(item) {
                 if(item.type == "file") {
-                    item.uploadHanderUrl = widget.elementUrl + "file-upload?schema="+schema.schemaName+"&fid="+olFeature.fid;
+                    item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + olFeature.fid + "&field=" + item.name;
                 }
 
                 if(item.type == 'image') {
 
-                    if(!item.origSrc){
+                    if(!item.origSrc) {
                         item.origSrc = item.src;
                     }
 
                     if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name)) {
-                        item.dbSrc = item.path ? item.path + olFeature.data[item.name] : olFeature.data[item.name];
+                        item.dbSrc = olFeature.data[item.name];
+                        if(schema.featureType.files) {
+                            $.each(schema.featureType.files, function(k, fileInfo) {
+                                if(fileInfo.field && fileInfo.field == item.name) {
+                                    if(fileInfo.uri) {
+                                        item.dbSrc = fileInfo.uri + "/" + item.dbSrc;
+                                    }
+                                }
+                            });
+                        }
                     }
 
                     var src = item.dbSrc ? item.dbSrc : item.origSrc;

@@ -211,6 +211,19 @@ class Digitizer extends HTMLElement
                              * @var $feature Feature
                              */
                             $featureData = $this->prepareQueredFeatureData($feature, $schema['formItems']);
+
+                            foreach ($featureType->getFileInfo() as $fileConfig) {
+                                if (!isset($fileConfig['field'])) {
+                                    continue;
+                                }
+                                $url                                             = $featureType->getFileUrl($fileConfig['field']);
+                                $requestUrl                                      = $featureData["properties"][$fileConfig['field']];
+                                $newUrl                                          = str_replace($url . "/", "", $requestUrl);
+//                                var_dump($url,$requestUrl,$newUrl);
+//                                    die();
+                                $featureData["properties"][$fileConfig['field']] = $newUrl;
+                            }
+
                             $feature = $featureType->save($featureData);
                             $results = array_merge($featureType->search(array(
                                 'where' => $featureType->getUniqueId() . '=' . $feature->getId())));
@@ -232,64 +245,39 @@ class Digitizer extends HTMLElement
                 break;
 
             case 'file-upload':
-                /**
-                 * Application entity.
-                 * Holds element configuration
-                 * @var $elementEntity Mapbender\CoreBundle\Entity\Element
-                 */
+                $fid        = $requestService->get('fid');
+                $fieldName  = $requestService->get('field');
+                $sessionKey = "feature-type-" . $schemaName . "_" . $fieldName . "_" . $fid;
+                //                $feature    = $featureType->getById($fid);
+                if (!isset($_SESSION[$sessionKey]) ) {
+                    $urlParameters         = array('schema' => $schemaName,
+                                                   'fid'    => $fid,
+                                                   'field'  => $fieldName);
+                    $serverUrl             = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
+                    $uploadDir             = $featureType->genFilePath($fieldName);
+                    $_SESSION[$sessionKey] = array('options' => array(
+                        'upload_dir'                   => $uploadDir["src"] . "/",
+                        'script_url'                   => $serverUrl,
+                        'upload_url'                   => $featureType->getFileUrl($fieldName) . "/" . $uploadDir["path"] . "/",
+                        'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
+                        'access_control_allow_methods' => array(
+                            'OPTIONS',
+                            'HEAD',
+                            'GET',
+                            'POST',
+                            'PUT',
+                            'PATCH',
+                            'DELETE'
+                        ),
+                    ));
+                }
+                $options               = $_SESSION[$sessionKey]["options"];
 
-                /**
-                 * @var $application Application
-                 */
-                /**
-                 * Application short name used as ID
-                 *
-                 * @var $slug string
-                 */
-//                $applications         = $this->container->get('mapbender')->getApplicationEntities();
-//                $uploads_web_url      = AppComponent::getUploadsUrl($this->container);
-
-
-
-//                $options = array(
-//                    'upload_dir' => 'Your upload directory',
-//                    'accept_file_types' => '/\.(gif|jpe?g|png)$/i'
-//                );
-//                $upload_handler = new \UploadHandler($options);
-
-                $featureTypeRootDirName    = "featureTypes";
-                $baseUploadDir             = realpath(AppComponent::getUploadsDir($this->container));
-                $featureTypesUploadDir     = $baseUploadDir . "/" . $featureTypeRootDirName;
-                $shemaUploadDir            = $featureTypesUploadDir . "/" . $schemaName;
-                $fid                       = $requestService->get('fid');
-                $feature                   = $featureType->getById($fid);
-                $results["feature"]        = $feature->toGeoJson();
-                $results["fid"]            = $fid;
-                $results["schemaName"]     = $schemaName;
-                $results["schema"]         = $schema;
-                $results["shemaUploadDir"] = $shemaUploadDir;
-
-
-                $results["webUrl"]  = AppComponent::getUploadsUrl($this->container);
-                $results["fileDir"]  = realpath(AppComponent::getUploadsDir($this->container)) ;
-
-
-                $elementEntity      = $this->getEntity();
-                $elemntId           = $elementEntity->getId();
-                $application        = $elementEntity->getApplication();
-                $slug               = $application->getSlug();
-
-
-                AppComponent::createAppWebDir($this->container, $slug);
-
-
-                $results["webUrl"]  = AppComponent::getAppWebUrl($this->container, $slug);
-                $results["slug"]    = $slug;
-
-
-                //                $results["list"]   = $featureType->search(array("returnType" => 'FeatureCollection'));
-
-                break;
+                if (!class_exists('UploadHandler')) {
+                    include_once('../vendor/blueimp/jquery-file-upload/server/php/UploadHandler.php');
+                }
+                $uploadHandler = new \UploadHandler($options);
+                exit();
 
             default:
                 $results = array(
@@ -298,6 +286,7 @@ class Digitizer extends HTMLElement
                     ))
                 );
         }
+
 
         return new JsonResponse($results);
     }
