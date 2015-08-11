@@ -85,8 +85,9 @@ class Digitizer extends HTMLElement
      */
     public function getConfiguration()
     {
-        $configuration          = parent::getConfiguration();
-        $configuration['debug'] = isset($configuration['debug']) ? $configuration['debug'] : false;
+        $configuration            = parent::getConfiguration();
+        $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
+        $configuration['fileUri'] = $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
 
         if ($configuration["schemes"] && is_array($configuration["schemes"])) {
             foreach ($configuration["schemes"] as $key => &$scheme) {
@@ -245,7 +246,7 @@ class Digitizer extends HTMLElement
             case 'file-upload':
                 $fid        = $requestService->get('fid');
                 $fieldName  = $requestService->get('field');
-                $sessionKey = "feature-type-" . $schemaName . "_" . $fieldName . "_" . $fid;
+                $sessionKey = "feature-type-" . $schemaName . "sss" . $fieldName . "_" . $fid;
                 //                $feature    = $featureType->getById($fid);
                 if (!isset($_SESSION[$sessionKey]) ) {
                     $urlParameters         = array('schema' => $schemaName,

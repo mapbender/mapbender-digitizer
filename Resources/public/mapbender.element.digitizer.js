@@ -860,8 +860,11 @@
                         if(schema.featureType.files) {
                             $.each(schema.featureType.files, function(k, fileInfo) {
                                 if(fileInfo.field && fileInfo.field == item.name) {
+
                                     if(fileInfo.uri) {
                                         item.dbSrc = fileInfo.uri + "/" + item.dbSrc;
+                                    } else {
+                                        item.dbSrc = widget.options.fileUri + "/" + schema.featureType.table + "/" + item.name + "/" + item.dbSrc;
                                     }
                                 }
                             });
