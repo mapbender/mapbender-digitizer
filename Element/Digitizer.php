@@ -213,14 +213,12 @@ class Digitizer extends HTMLElement
                             $featureData = $this->prepareQueredFeatureData($feature, $schema['formItems']);
 
                             foreach ($featureType->getFileInfo() as $fileConfig) {
-                                if (!isset($fileConfig['field'])) {
+                                if (!isset($fileConfig['field']) || !isset($featureData["properties"][$fileConfig['field']])) {
                                     continue;
                                 }
                                 $url                                             = $featureType->getFileUrl($fileConfig['field']);
                                 $requestUrl                                      = $featureData["properties"][$fileConfig['field']];
                                 $newUrl                                          = str_replace($url . "/", "", $requestUrl);
-//                                var_dump($url,$requestUrl,$newUrl);
-//                                    die();
                                 $featureData["properties"][$fileConfig['field']] = $newUrl;
                             }
 
