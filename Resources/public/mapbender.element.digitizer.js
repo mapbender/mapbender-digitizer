@@ -847,6 +847,19 @@
             eachItem(widget.currentSettings.formItems, function(item) {
                 if(item.type == "file") {
                     item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + olFeature.fid + "&field=" + item.name;
+                    if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name) && olFeature.data[item.name]) {
+                        item.dbSrc = olFeature.data[item.name];
+                        if(schema.featureType.files) {
+                            $.each(schema.featureType.files, function(k, fileInfo) {
+                                if(fileInfo.field && fileInfo.field == item.name) {
+                                    if(fileInfo.formats) {
+                                        item.accept = fileInfo.formats;
+                                    }
+                                }
+                            });
+                        }
+                    }
+
                 }
 
                 if(item.type == 'image') {
