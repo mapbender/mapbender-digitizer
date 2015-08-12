@@ -788,7 +788,7 @@ class FeatureType extends ContainerAware
         }
 
         $fileUri = $this->getFileUri($fieldName);
-        $url     = $baseUrl . '/' . $uploadDir . $fileUri;
+        $url     = strpos($fileUri, "/") === 0 ? $fileUri : $baseUrl . '/' . $uploadDir . $fileUri;
         return $url;
     }
 
