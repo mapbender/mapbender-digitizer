@@ -7,6 +7,7 @@ use Mapbender\CoreBundle\Element\HTMLElement;
 use Mapbender\CoreBundle\Entity\Application;
 use Mapbender\CoreBundle\Component\Application as AppComponent;
 use Mapbender\CoreBundle\Entity\Element;
+use Mapbender\DigitizerBundle\Component\Uploader;
 use Mapbender\DigitizerBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Entity\FeatureType;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -244,20 +245,18 @@ class Digitizer extends HTMLElement
                 break;
 
             case 'file-upload':
-                if (!class_exists('UploadHandler')) {
-                    include_once('../vendor/blueimp/jquery-file-upload/server/php/UploadHandler.php');
-                }
-
                 $fieldName     = $requestService->get('field');
                 $urlParameters = array('schema' => $schemaName,
                                        'fid'    => $requestService->get('fid'),
                                        'field'  => $fieldName);
                 $serverUrl     = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
                 $uploadDir     = $featureType->getFilePath($fieldName);
-                $uploadHandler = new \UploadHandler(array(
+                $uploadUrl = $featureType->getFileUrl($fieldName) . "/";
+                $urlParameters['uploadUrl'] = $uploadUrl;
+                $uploadHandler = new Uploader(array(
                     'upload_dir'                   => $uploadDir . "/",
                     'script_url'                   => $serverUrl,
-                    'upload_url'                   => $featureType->getFileUrl($fieldName) . "/",
+                    'upload_url'                   => $uploadUrl,
                     'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
                     'print_response'               => false,
                     'access_control_allow_methods' => array(
