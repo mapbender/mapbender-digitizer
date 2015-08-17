@@ -1156,6 +1156,12 @@
                 for (var fid in existingFeatures) {
                     var olFeature = existingFeatures[fid];
 
+                    if(!olFeature){
+                        // TODO: by digitizing it's find
+                        continue;
+                    }
+
+
                     if(!olFeature.geometry.getBounds().intersectsBounds(bbox)) {
                         var feature = features.loaded[olFeature.fid];
                         var row = tableApi.row(settings.table.resultTable("getDomRowByData", feature));
