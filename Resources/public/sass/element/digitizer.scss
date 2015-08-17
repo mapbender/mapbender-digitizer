@@ -73,6 +73,10 @@ $selectColor: #F7F79A;
   .image-container {
     position: relative;
     overflow: hidden;
+    > div.sub-container{
+      display: table-cell;
+      vertical-align: middle;
+    }
 //    > img {
 //      width: 100%;
 //      height: auto;
