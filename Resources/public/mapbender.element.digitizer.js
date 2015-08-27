@@ -137,6 +137,7 @@
             oneInstanceEdit: true,
             searchType: "currentExtent",
             inlineSearch: false,
+            useContextMenu: false,
             clustering: [
                 {scale: 5000000, distance: 30}
             ]
@@ -342,6 +343,7 @@
             /**
              * Set map context menu
              */
+
             $(map.div).contextMenu({
                 selector: 'div',
                 build:    function(trigger, e) {
@@ -353,6 +355,11 @@
                             var olFeature = olFeatures[i];
                             var layer = olFeature.layer;
                             var schema = widget.findSchemaByLayer(layer);
+
+                            if(!schema.useContextMenu){
+                                continue;
+                            }
+
                             var subItems = {
                                 zoomTo: {
                                     name:   "Zoom to",
@@ -411,16 +418,17 @@
                     var api = resultTable.resultTable('getApi');
                     var feature = api.row(tr).data();
                     var schema = widget.findFeatureSchema(feature);
-                    var items =  {
-                        zoom: {name: "Zoom to"}
-                    };
+                    var items = {};
 
-                    if(schema.allowDelete) {
-                        items['removeFeature'] = {name: "Remove"};
-                    }
+                    if(schema.useContextMenu) {
+                        items['zoom'] = {name: "Zoom to"};
+                        if(schema.allowDelete) {
+                            items['removeFeature'] = {name: "Remove"};
+                        }
 
-                    if(schema.allowEditData) {
-                        items['edit'] = {name: "Edit"};
+                        if(schema.allowEditData) {
+                            items['edit'] = {name: "Edit"};
+                        }
                     }
 
                     return {
