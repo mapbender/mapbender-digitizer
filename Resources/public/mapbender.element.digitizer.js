@@ -339,49 +339,67 @@
                 titleElement.css('display', 'none');
             }
 
+            /**
+             * Set map context menu
+             */
             $(map.div).contextMenu({
                 selector: 'div',
                 build:    function(trigger, e) {
-                    var menu = {
-                        items:    {},
-                        callback: function(key, options) {
-                            if(key == "no-items"){
-                                return;
-                            }
-                            var parameters = options.items[key];
-                            widget._openFeatureEditDialog(parameters.olFeature)
-                        }
-                    };
-
+                    var items = {};
                     var olFeatures = widget._getFeaturesFromEvent(e.clientX, e.clientY);
+
                     if(olFeatures.length) {
                         for (var i in olFeatures) {
                             var olFeature = olFeatures[i];
-                            menu.items[olFeature.fid] = {
+                            var layer = olFeature.layer;
+                            var schema = widget.findSchemaByLayer(layer);
+                            var subItems = {
+                                zoomTo: {
+                                    name:   "Zoom to",
+                                    action: function(key, options, parameters) {
+                                        widget.zoomToJsonFeature(widget.findFeatureByOpenLayerFeature(parameters.olFeature));
+                                    }
+                                }
+                            };
+
+                            if(schema.allowEditData) {
+                                subItems['edit'] = {
+                                    name: translate('feature.edit'),
+                                    action: function(key, options, parameters) {
+                                        widget._openFeatureEditDialog(parameters.olFeature);
+                                    }
+                                }
+                            }
+                            if(schema.allowDelete) {
+                                subItems['remove'] = {
+                                    name: translate('feature.remove'),
+                                    action: function(key, options, parameters) {
+                                        widget.removeFeature(widget.findFeatureByOpenLayerFeature(parameters.olFeature));
+                                    }
+                                }
+                            }
+
+                            items[olFeature.fid] = {
                                 name:      "Feature #" + olFeature.fid,
                                 olFeature: olFeature,
-                                items: {
-                                    "fold1-key1": {"name": "Foo bar"},
-                                    "sep2": "---------",
-                                    "fold2": {
-                                        "name": "Sub group 2",
-                                        "items": {
-                                            "fold2-key1": {"name": "alpha"},
-                                            "fold2-key2": {"name": "bravo"},
-                                            "fold2-key3": {"name": "charlie"}
-                                        }
-                                    },
-                                    "fold1-key3": {"name": "delta"}
-                                }
+                                items:     subItems
                             };
                         }
                     }
 
-                    if(!_.size(menu.items)){
-                        menu.items['no-items'] = {name: "Nothing selected!"}
+                    if(!_.size(items)) {
+                        items['no-items'] = {name: "Nothing selected!"}
                     }
 
-                    return menu;
+                    return {
+                        items:    items,
+                        callback: function(key, options) {
+                            var parameters = options.items[options.$selected.parent().closest('.context-menu-item').data('contextMenuKey')];
+                            if(parameters.items[key].action) {
+                                parameters.items[key].action(key, options, parameters);
+                            }
+                        }
+                    };
                 }
             });
 
@@ -918,7 +936,6 @@
                 $.extend(popupConfiguration,widget.currentSettings.popup);
             }
 
-            console.log(popupConfiguration);
             var dialog = $("<div/>");
 
             if(!schema.elementsTranslated){
