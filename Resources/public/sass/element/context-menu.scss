@@ -1,0 +1,102 @@
+.context-menu-list {
+  margin: 0;
+  padding: 0;
+  min-width: 120px;
+  max-width: 250px;
+  display: inline-block;
+  position: absolute;
+  list-style-type: none;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+
+  > .context-menu-item {
+    padding: 2px 2px 2px 20px;
+    position: relative;
+    user-select: none;
+    &.context-menu-separator {
+      padding-bottom: 0;
+      padding-top: 0;
+      border-bottom: 1px solid #DDD;
+    }
+
+    &.context-menu-submenu:after {
+      content: "\f0da";
+      font-family: FontAwesome;
+      position: absolute;
+      top: 2px;
+      right: 5px;
+      z-index: 1;
+    }
+
+    > label > input,
+    > label > textarea {
+      user-select: text;
+    }
+    &.hover {
+      cursor: pointer;
+      background-color: #39F;
+      > .context-menu-list {
+        display: block;
+      }
+    }
+    /* icons
+        #protip:
+        In case you want to use sprites for icons (which I would suggest you do) have a look at
+        http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement
+        .context-menu-item.icon:before {}
+     */
+    &.icon {
+      min-height: 18px;
+      background: no-repeat 4px 2px;
+      list-style-type: none;
+    }
+
+    > .context-menu-list {
+      display: none;
+      /* re-positioned by js */
+      right: -5px;
+      top: 5px;
+    }
+  }
+  .context-menu-item.disabled,
+  .context-menu-input {
+    > label {
+
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+
+      > input[type="text"],
+      > textarea,
+      > select {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      > textarea {
+        height: 100px;
+      }
+      > span {
+        margin-left: 5px;
+      }
+      > input {
+        &[type="checkbox"], &input[type="radio"] {
+          margin-left: -17px;
+        }
+      }
+      > * {
+        vertical-align: top;
+      }
+    }
+
+    &.disabled {
+      &.hover {
+        cursor: default;
+        background-color: #EEE;
+      }
+    }
+  }
+  .context-menu-accesskey {
+    text-decoration: underline;
+  }
+}

@@ -79,13 +79,13 @@
 
     /**
      * Example:
-     *     confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
+     *     Mapbender.confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
                   return false;
            }});
      * @param options
      * @returns {*}
      */
-    function confirmDialog(options) {
+    Mapbender.confirmDialog = function (options) {
         var dialog = $("<div class='confirm-dialog'>" + (options.hasOwnProperty('html') ? options.html : "") + "</div>").popupDialog({
             title:       options.hasOwnProperty('title') ? options.title : "",
             maximizable: false,
@@ -93,11 +93,12 @@
             minimizable: false,
             resizable:   false,
             collapsable: false,
+            modal:       true,
             buttons:     [{
                 text:  "OK",
                 click: function(e) {
-                    if(!options.hasOwnProperty('onSuccess') || options.onSuccess(e)) {
-                        dialog.popupDialog('hide');
+                    if(!options.hasOwnProperty('onSuccess') || options.onSuccess(e) !== false) {
+                        dialog.popupDialog('close');
                     }
                     return false;
                 }
@@ -105,15 +106,15 @@
                 text:    "Abbrechen",
                 'class': 'critical',
                 click:   function(e) {
-                    if(!options.hasOwnProperty('onCancel') || options.onSuccess(e)) {
-                        dialog.popupDialog('hide');
+                    if(!options.hasOwnProperty('onCancel') || options.onCancel(e) !== false) {
+                        dialog.popupDialog('close');
                     }
                     return false;
                 }
             }]
         });
         return dialog;
-    }
+    };
 
 
 
@@ -135,7 +136,10 @@
             maxResults: 1000,
             oneInstanceEdit: true,
             searchType: "currentExtent",
-            inlineSearch: false
+            inlineSearch: false,
+            clustering: [
+                {scale: 5000000, distance: 30}
+            ]
         },
         // Default tool-sets
         toolsets: {
@@ -186,16 +190,23 @@
             }
 
         },
+
+        /**
+         * Constructor.
+         *
+         * At this moment not all elements (like a OpenLayers) are avaible.
+         *
+         * @private
+         */
         _create:                function() {
             var widget = this;
+            this.widget = this;
             if(!Mapbender.checkTarget("mbDigitizer", widget.options.target)){
                 return;
             }
             var element = widget.element;
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
-
-
         },
 
         /**
@@ -208,21 +219,20 @@
             var widget = this;
             var schema = null;
             var options = widget.options;
-            var schemas = options.schemes;
 
             // find schema by feature
-            $.each(schemas, function(k, _schema) {
+            $.each(options.schemes, function(k, _schema) {
                 $.each(_schema.features, function(i, featureCollection) {
                     $.each(featureCollection, function(i, _feature) {
                         if(_feature == feature) {
                             schema = _schema;
                             return false;
                         }
-                    })
+                    });
                     if(schema){
                         return false;
                     }
-                })
+                });
                 if(schema){
                     return false;
                 }
@@ -249,35 +259,67 @@
                 return;
             }
 
-            if(feature.hasOwnProperty('isNew')) {
-                olFeature = layer.getFeatureById(feature.id);
-            } else {
-                olFeature = layer.getFeatureByFid(feature.id);
-                if(!Mapbender.confirm(translate("feature.remove.from.database"))) {
-                    return;
-                }
+            function _removeFeatureFromUI() {
+                // remove from map
+                olFeature.layer.removeFeatures(olFeature);
 
-                widget.query('delete', {
-                    schema:  schema.schemaName,
-                    feature: feature
-                }).done(function(fid) {
-                    $.notify(translate('feature.remove.successfully'), 'info');
+                // remove from table
+                row.remove().draw();
+
+                widget._trigger('featureRemoved', null, {
+                    feature:   feature,
+                    schema:    schema,
+                    olFeature: olFeature
                 });
             }
 
-            // remove from map
-            olFeature.layer.removeFeatures(olFeature);
-
-            // remove from table
-            row.remove().draw();
-
-            widget._trigger('featureRemoved', null, {
-                feautre:   feature,
-                schema:    schema,
-                olFeature: olFeature
-            });
+            if(feature.hasOwnProperty('isNew')) {
+                olFeature = layer.getFeatureById(feature.id);
+                _removeFeatureFromUI()
+            } else {
+                olFeature = layer.getFeatureByFid(feature.id);
+                Mapbender.confirmDialog({
+                    html:      translate("feature.remove.from.database"),
+                    onSuccess: function() {
+                        console.log("LÖSCHT!");
+                        widget.query('delete', {
+                            schema:  schema.schemaName,
+                            feature: feature
+                        }).done(function(fid) {
+                            _removeFeatureFromUI();
+                            $.notify(translate('feature.remove.successfully'), 'info');
+                        });
+                    }
+                });
+            }
 
             return olFeature;
+        },
+        /**
+         * Create vector feature layer
+         *
+         * @param schema
+         * @returns {OpenLayers.Layer.Vector}
+         */
+        createSchemaFeatureLayer: function(schema, strategies) {
+            var widget = this;
+            var styles = schema.styles ? schema.styles : {};
+            var styleMap = new OpenLayers.StyleMap({
+                'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? styles['default'] : widget.styles.default)),
+                'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
+            }, {extendDefault: true});
+
+            var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 0});
+            var layer = new OpenLayers.Layer.Vector(schema.label, {
+                styleMap:   styleMap,
+                //strategies: [clusterStrategy]
+            });
+            layer.name = schema.label;
+
+            //debugger;
+            //clusterStrategy.deactivate();
+            //layer.refresh({force: true});
+            return layer;
         },
 
         _setup: function() {
@@ -297,28 +339,51 @@
                 titleElement.css('display', 'none');
             }
 
-            // Cancel context menu on right click
-            //map.div.oncontextmenu = function() {
-            //    return false;
-            //};
-            //
-            //$(map.div).on("mousedown", function(e) {
-            //    console.log(e.button)
-            //    return true;
-            //});
+            $(map.div).contextMenu({
+                selector: 'div',
+                build:    function(trigger, e) {
+                    var menu = {
+                        items:    {},
+                        callback: function(key, options) {
+                            if(key == "no-items"){
+                                return;
+                            }
+                            var parameters = options.items[key];
+                            widget._openFeatureEditDialog(parameters.olFeature)
+                        }
+                    };
 
-            //myMap.div.oncontextmenu = function noContextMenu(e) {
-            //    if(!e){ //dear IE...
-            //        var e = window.event;
-            //        e.returnValue = false;
-            //    }
-            //
-            //    var f = myVectorLayer.getFeatureFromEvent(e);
-            //    alert(f);
-            //    //f is the pointed vector.feature :)
-            //
-            //    return false; //Prevent display of browser context menu
-            //}
+                    var olFeatures = widget._getFeaturesFromEvent(e.clientX, e.clientY);
+                    if(olFeatures.length) {
+                        for (var i in olFeatures) {
+                            var olFeature = olFeatures[i];
+                            menu.items[olFeature.fid] = {
+                                name:      "Feature #" + olFeature.fid,
+                                olFeature: olFeature,
+                                items: {
+                                    "fold1-key1": {"name": "Foo bar"},
+                                    "sep2": "---------",
+                                    "fold2": {
+                                        "name": "Sub group 2",
+                                        "items": {
+                                            "fold2-key1": {"name": "alpha"},
+                                            "fold2-key2": {"name": "bravo"},
+                                            "fold2-key3": {"name": "charlie"}
+                                        }
+                                    },
+                                    "fold1-key3": {"name": "delta"}
+                                }
+                            };
+                        }
+                    }
+
+                    if(!_.size(menu.items)){
+                        menu.items['no-items'] = {name: "Nothing selected!"}
+                    }
+
+                    return menu;
+                }
+            });
 
             $.contextMenu({
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
@@ -330,7 +395,7 @@
                     var schema = widget.findFeatureSchema(feature);
                     var items =  {
                         zoom: {name: "Zoom to"}
-                    }
+                    };
 
                     if(schema.allowDelete) {
                         items['removeFeature'] = {name: "Remove"};
@@ -365,7 +430,6 @@
                 }
             });
 
-
             if(options.tableTranslation) {
                 translateObject(options.tableTranslation);
             }
@@ -374,15 +438,8 @@
             $.each(options.schemes, function(schemaName){
                 var schema = this;
                 var option = $("<option/>");
-                var styles = schema.styles ? schema.styles : {};
-                var styleMap = new OpenLayers.StyleMap({
-                    'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? styles['default'] : widget.styles.default)),
-                    'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
-                }, {extendDefault: true});
-
-                var layer = schema.layer = new OpenLayers.Layer.Vector(schema.label, {styleMap: styleMap
-                    //, strategies: [ new OpenLayers.Strategy.Cluster({distance: 15})]
-                });
+                var layer = schema.layer = widget.createSchemaFeatureLayer(schema);
+                //schema.clusterStrategy = layer.strategies[0];
 
 
                 // Merge settings with default values from options
@@ -393,24 +450,25 @@
                     schema[k] = schema.hasOwnProperty(k) ? schema[k] : options[k];
                 }
 
-                var deleteButton = {
-                    title:     translate("feature.remove"),
-                    className: 'remove',
-                    cssClass:  'critical',
-                    onClick:   function(feature, ui) {
-                        widget.removeFeature(feature);
-                    }
-                };
-                var editButton = {
-                    title: translate('feature.edit'),
+                var buttons = [];
+
+                buttons.push({
+                    title:     translate('feature.edit'),
                     className: 'edit',
-                    onClick: function(feature, ui) {
-                       widget.openFeatureEditDialog(feature);
+                    onClick:   function(feature, ui) {
+                        widget.openFeatureEditDialog(feature);
                     }
-                };
-                var buttons = [editButton];
+                });
+
                 if(schema.allowDelete) {
-                    buttons.push(deleteButton);
+                    buttons.push({
+                        title:     translate("feature.remove"),
+                        className: 'remove',
+                        cssClass:  'critical',
+                        onClick:   function(feature, ui) {
+                            widget.removeFeature(feature);
+                        }
+                    });
                 }
 
                 option.val(schemaName).html(schema.label);
@@ -621,25 +679,26 @@
 
             selector.on('change',onSelectorChange);
 
-            // register events
-            this.map.events.register("moveend", this.map, function(){
-                widget._getData();
-            });
-            this.map.events.register("zoomend", this.map, function(){
-                widget._getData();
-            });
-            this.map.events.register('click', this, this._mapClick);
-
+            var featuresInFocus = [];
             var featureEventHandler = function(e) {
-                var feature = e.feature;
-                var table = widget.currentSettings.table;
-                var tableWidget = table.data('visUiJsResultTable');
 
-                if(feature.layer.name != widget.currentSettings.label) {
-                    return
+                var olFeature = e.feature.cluster ? _.last(e.feature.cluster) : e.feature;
+                var layer = olFeature.layer;
+                var schema = widget.findSchemaByLayer(layer);
+
+                if(!schema) {
+                    return;
                 }
 
-                var jsonFeature = tableWidget.getDataById(feature.fid);
+
+                var table = schema.table;
+                var tableWidget = table.data('visUiJsResultTable');
+
+                //if(layer != widget.currentSettings.layer) {
+                //    return
+                //}
+
+                var jsonFeature = tableWidget.getDataById(olFeature.fid);
                 var domRow = tableWidget.getDomRowByData(jsonFeature);
 
                 if(!domRow) {
@@ -650,20 +709,38 @@
                     case "featureover":
                         tableWidget.showByRow(domRow);
                         domRow.addClass('hover');
-                        feature.layer.drawFeature(feature, 'select');
+                        layer.drawFeature(olFeature, 'select');
+                        featuresInFocus.push(e.feature) ;
                         break;
                     case "featureout":
                         domRow.removeClass('hover');
-                        feature.layer.drawFeature(feature, 'default');
+                        layer.drawFeature(olFeature, 'default');
+
+                        featuresInFocus.splice(featuresInFocus.indexOf(e.feature), 1);
+                        break;
+                    case "featureclick":
+                        if(_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
+                            return;
+                        }
+                        widget._openFeatureEditDialog(olFeature);
                         break;
 
                 }
             };
 
-            widget.map.events.register('featureover', this, featureEventHandler);
-            widget.map.events.register('featureout', this, featureEventHandler);
+            map.events.register('featureover', this, featureEventHandler);
+            map.events.register('featureout', this, featureEventHandler);
+            map.events.register('featureclick', this, featureEventHandler);
+            map.events.register("moveend", this, function() {
+                widget._getData();
+            });
+            map.events.register("zoomend", this, function(e) {
+                widget._getData();
+                widget.updateClusterStrategies();
+            });
             widget.map.resetLayersZIndex();
             widget._trigger('ready');
+
             element.bind("mbdigitizerbeforechangedigitizing", function(e, sets) {
                 var previousSettings = sets.previous;
                 if(previousSettings){
@@ -684,6 +761,9 @@
                     }
                 }
             });
+
+            widget.updateClusterStrategies();
+
         },
 
         /**
@@ -699,6 +779,7 @@
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
             }
+
             var schema = widget.findSchemaByLayer(olFeature.layer);
             var table = schema.table;
             var tableApi = table.resultTable('getApi');
@@ -837,6 +918,7 @@
                 $.extend(popupConfiguration,widget.currentSettings.popup);
             }
 
+            console.log(popupConfiguration);
             var dialog = $("<div/>");
 
             if(!schema.elementsTranslated){
@@ -903,36 +985,17 @@
             return dialog;
         },
 
-        _mapClick: function(evt) {
-            var self = this;
-            var x = evt.pageX;
-            var y = evt.pageY;
-
-            // return if modifycontrol is active
-            var controls = this.map.getControlsByClass('OpenLayers.Control.ModifyFeature');
-            for (var i = 0; i <  controls.length; i++){
-                if(controls[i].active === true) {
-                    return;
-                }
-            }
-
-            // getFeatures from Event
-            var features = this._getFeaturesFromEvent(x, y);
-            if(features.length === 0) {
-                return;
-            }
-            var feature = features[0];
-
-            self._openFeatureEditDialog(feature);
-        },
 
         _getFeaturesFromEvent: function(x, y) {
             var features = [], targets = [], layers = [];
             var layer, target, feature, i, len;
-            this.map.resetLayersZIndex();
+            var map = this.map;
+
+            map.resetLayersZIndex();
+
             // go through all layers looking for targets
-            for (i=this.map.layers.length-1; i>=0; --i) {
-                layer = this.map.layers[i];
+            for (i=map.layers.length-1; i>=0; --i) {
+                layer = map.layers[i];
                 if (layer.div.style.display !== "none") {
                     if (layer === this.activeLayer) {
                         target = document.elementFromPoint(x, y);
@@ -962,7 +1025,7 @@
                 layers[i].div.style.display = "block";
             }
 
-            this.map.resetLayersZIndex();
+            map.resetLayersZIndex();
             return features;
         },
 
@@ -1090,23 +1153,23 @@
             }
         },
 
-
         /**
          * Handle feature collection by ajax response.
          *
          * @param featureCollection FeatureCollection
+         * @param schema
          * @param xhr ajax request object
          * @todo compare new, existing and loaded features
          * @private
          */
-        _onFeatureCollectionLoaded: function(featureCollection, settings, xhr) {
+        _onFeatureCollectionLoaded: function(featureCollection, schema, xhr) {
             var widget = this;
-            var tableApi = settings.table.resultTable('getApi');
-            var features = settings.features;
+            var tableApi = schema.table.resultTable('getApi');
+            var features = schema.features;
             var geoJsonReader = new OpenLayers.Format.GeoJSON();
             var loadedFeatures = [];
             var existingFeatures = {};
-            var currentExtentOnly =  settings.searchType ==  "currentExtent";
+            var currentExtentOnly =  schema.searchType ==  "currentExtent";
 
             // Break if something goes wrong
             if(!featureCollection || !featureCollection.hasOwnProperty("features")) {
@@ -1115,7 +1178,7 @@
             }
 
             // get and remove invisible features
-            var layer = settings.layer
+            var layer = schema.layer
             var map = layer.map;
             var extent = map.getExtent();
             var bbox = extent.toGeometry().getBounds();
@@ -1140,7 +1203,7 @@
                 featureCollection.features = loadedFeatures;
 
                 // Add features to map
-                settings.layer.addFeatures(geoJsonReader.read({
+                schema.layer.addFeatures(geoJsonReader.read({
                     type:     "FeatureCollection",
                     features: loadedFeatures
                 }));
@@ -1161,10 +1224,9 @@
                         continue;
                     }
 
-
                     if(!olFeature.geometry.getBounds().intersectsBounds(bbox)) {
                         var feature = features.loaded[olFeature.fid];
-                        var row = tableApi.row(settings.table.resultTable("getDomRowByData", feature));
+                        var row = tableApi.row(schema.table.resultTable("getDomRowByData", feature));
                         row.remove();//.draw();
                         removeFeatures.push(olFeature);
                         features.loaded[fid] = null;
@@ -1178,6 +1240,16 @@
             }
             //console.log("removeFeatures", removeFeatures.length);
             //console.log("features.loaded", _.size(features.loaded));
+            //debugger;
+            if(schema.clusterStrategy && schema.clusterStrategy.active) {
+                schema.clusterStrategy.deactivate();
+                schema.clusterStrategy.activate();
+            }
+            layer.refresh({force: true});
+
+            widget._trigger('schemaFeaturesLoaded', null, {
+                schema: schema
+            });
 
             return;
         },
@@ -1274,17 +1346,7 @@
          * @param layer
          */
         findSchemaByLayer: function(layer) {
-            var widget = this;
-            var schema = null;
-
-            $.each(widget.options.schemes, function(i, _schema) {
-                if(_schema.layer == layer) {
-                    schema = _schema;
-                    return false;
-                }
-            });
-
-            return schema;
+            return _.find(this.options.schemes, {layer: layer});
         },
 
         /**
@@ -1317,6 +1379,63 @@
 
             return feature;
         },
+
+        /**
+         * Update cluster strategies
+         */
+        updateClusterStrategies: function() {
+            var widget = this;
+            var options = widget.options;
+            var scale = Math.round(widget.map.getScale());
+            var map = widget.map;
+            var clusterSettings;
+            var closestClusterSettings;
+
+            return;
+
+            $.each(options.schemes, function(i, schema) {
+                clusterSettings = null;
+
+                $.each(schema.clustering, function(y, _clusterSettings) {
+                    if(_clusterSettings.scale == scale) {
+                        clusterSettings = _clusterSettings;
+                        return false;
+                    }
+
+                    if(_clusterSettings.scale < scale) {
+                        if(closestClusterSettings && _clusterSettings.scale > closestClusterSettings.scale) {
+                            console.log("closestClusterSettings");
+                            closestClusterSettings = _clusterSettings;
+                        } else {
+                            if(!closestClusterSettings){
+                                closestClusterSettings = _clusterSettings;
+                            }
+                        }
+                    }
+                });
+
+                if(!clusterSettings && closestClusterSettings) {
+                    clusterSettings = closestClusterSettings
+                }
+
+                if(clusterSettings) {
+                    //debugger;
+                    schema.clusterStrategy.distance = clusterSettings.distance;
+                    schema.clusterStrategy.activate();
+                } else {
+                    schema.clusterStrategy.deactivate();
+                }
+                schema.layer.refresh({force: true});
+                console.log(scale, clusterSettings);
+            });
+        },
+
+        /**
+         *
+         */
+        updateSchemaFeatureLayerVisibility: function(schema){
+
+        }
     });
 
 })(jQuery);
