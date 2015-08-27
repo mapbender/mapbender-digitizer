@@ -1,4 +1,10 @@
 (function($) {
+    /**
+     * Regular Expression to get checked if string should be translated
+     *
+     * @type {RegExp}
+     */
+    var translationReg = /^trans:\w+\.(\w|-|\.{1}\w+)+\w+$/;
 
     /**
      * Translate digitizer keywords
@@ -28,13 +34,6 @@
     }
 
     /**
-     * Regular Expression to get checked if string should be translated
-     *
-     * @type {RegExp}
-     */
-    var translationReg = /^trans:\w+\.(\w|-|\.{1}\w+)+\w+$/;
-
-    /**
      * Check and replace values recursive if they should be translated.
      * For checking used "translationReg" variable
      *
@@ -53,30 +52,6 @@
             }
         }
     }
-
-    /**
-     * Check and replace values recursive if they should be translated.
-     * For checking used "translationReg" variable
-     *
-     *
-     * @param items
-     */
-    function eachItem(items, callback) {
-        var isArray = items instanceof Array;
-        if(isArray) {
-            for (var k in items) {
-                eachItem(items[k], callback);
-            }
-        } else {
-            if(typeof items["type"] !== 'undefined'){
-                callback(items);
-            }
-            if(typeof items["children"] !== 'undefined') {
-                eachItem(items["children"], callback);
-            }
-        }
-    }
-
     /**
      * Example:
      *     Mapbender.confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
@@ -951,7 +926,7 @@
                 schema.elementsTranslated = true;
             }
 
-            eachItem(widget.currentSettings.formItems, function(item) {
+            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
                 if(item.type == "file") {
                     item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + olFeature.fid + "&field=" + item.name;
                     if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name) && olFeature.data[item.name]) {
@@ -966,7 +941,6 @@
                             });
                         }
                     }
-
                 }
 
                 if(item.type == 'image') {
