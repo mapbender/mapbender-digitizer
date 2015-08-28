@@ -92,7 +92,6 @@
     };
 
 
-
     /**
      * Digitizing tool set
      *
@@ -151,6 +150,10 @@
         map:      null,
         currentSettings: null,
         featureEditDialogWidth: "423px",
+
+        /**
+         * Default styles merged by schema styles if defined
+         */
         styles: {
             'default': {
                 strokeWidth: 1,
@@ -163,8 +166,14 @@
                 fillColor:   "#F7F79A",
                 strokeColor: '#6fb536',
                 fillOpacity: 0.5
+            },
+            'cluster':  {
+                fillColor:   "#F7F79A",
+                strokeColor: '#6fb536',
+                text: 1,
+                strokeWidth: 10,
+                fillOpacity: 1
             }
-
         },
 
         /**
@@ -183,37 +192,6 @@
             var element = widget.element;
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
-        },
-
-        /**
-         * Find feature schema by feature data
-         *
-         * @param feature
-         * @returns {*}
-         */
-        findFeatureSchema: function(feature){
-            var widget = this;
-            var schema = null;
-            var options = widget.options;
-
-            // find schema by feature
-            $.each(options.schemes, function(k, _schema) {
-                $.each(_schema.features, function(i, featureCollection) {
-                    $.each(featureCollection, function(i, _feature) {
-                        if(_feature == feature) {
-                            schema = _schema;
-                            return false;
-                        }
-                    });
-                    if(schema){
-                        return false;
-                    }
-                });
-                if(schema){
-                    return false;
-                }
-            });
-            return schema;
         },
 
         /**
@@ -279,24 +257,21 @@
          */
         createSchemaFeatureLayer: function(schema, strategies) {
             var widget = this;
-            var styles = schema.styles ? schema.styles : {};
-            var styleMap = new OpenLayers.StyleMap({
-                'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? styles['default'] : widget.styles.default)),
-                'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
-            }, {extendDefault: true});
-
             var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 0});
             var layer = new OpenLayers.Layer.Vector(schema.label, {
-                styleMap:   styleMap,
-                //strategies: [clusterStrategy]
+                styleMap:   widget.getSchemaStyleMap(schema),
+                strategies: [clusterStrategy]
             });
-            layer.name = schema.label;
 
-            //debugger;
-            //clusterStrategy.deactivate();
-            //layer.refresh({force: true});
+            layer.name = schema.label;
+            schema.clusterStrategy = clusterStrategy;
+
+            clusterStrategy.deactivate();
+            layer.refresh({force: true});
+
             return layer;
         },
+
 
         _setup: function() {
             var frames = [];
@@ -318,12 +293,12 @@
             /**
              * Set map context menu
              */
-
             $(map.div).contextMenu({
                 selector: 'div',
                 build:    function(trigger, e) {
                     var items = {};
-                    var olFeatures = widget._getFeaturesFromEvent(e.clientX, e.clientY);
+                    var olFeaturesRaw = widget._getFeaturesFromEvent(e.clientX, e.clientY);
+                    var olFeatures = widget.getFeaturesFromCluster(olFeaturesRaw);
 
                     if(olFeatures.length) {
                         for (var i in olFeatures) {
@@ -440,8 +415,6 @@
                 var schema = this;
                 var option = $("<option/>");
                 var layer = schema.layer = widget.createSchemaFeatureLayer(schema);
-                //schema.clusterStrategy = layer.strategies[0];
-
 
                 // Merge settings with default values from options
                 for (var k in options) {
@@ -683,23 +656,23 @@
             var featuresInFocus = [];
             var featureEventHandler = function(e) {
 
-                var olFeature = e.feature.cluster ? _.last(e.feature.cluster) : e.feature;
-                var layer = olFeature.layer;
+                var layer = e.feature.layer;
+                var olFeature = e.feature;
+                var olFeatureNormalized = widget.normalizeOpenLayerFeature(olFeature);
                 var schema = widget.findSchemaByLayer(layer);
 
                 if(!schema) {
                     return;
                 }
 
-
                 var table = schema.table;
                 var tableWidget = table.data('visUiJsResultTable');
 
-                //if(layer != widget.currentSettings.layer) {
-                //    return
-                //}
+                if(layer != widget.currentSettings.layer) {
+                    return
+                }
 
-                var jsonFeature = tableWidget.getDataById(olFeature.fid);
+                var jsonFeature = tableWidget.getDataById(olFeatureNormalized.fid);
                 var domRow = tableWidget.getDomRowByData(jsonFeature);
 
                 if(!domRow) {
@@ -723,7 +696,7 @@
                         if(_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
                             return;
                         }
-                        widget._openFeatureEditDialog(olFeature);
+                        widget._openFeatureEditDialog(widget.normalizeOpenLayerFeature(e.feature));
                         break;
 
                 }
@@ -1239,7 +1212,6 @@
             }
             //console.log("removeFeatures", removeFeatures.length);
             //console.log("features.loaded", _.size(features.loaded));
-            //debugger;
             if(schema.clusterStrategy && schema.clusterStrategy.active) {
                 schema.clusterStrategy.deactivate();
                 schema.clusterStrategy.activate();
@@ -1249,8 +1221,6 @@
             widget._trigger('schemaFeaturesLoaded', null, {
                 schema: schema
             });
-
-            return;
         },
 
         /**
@@ -1276,15 +1246,15 @@
             });
         },
 
-        _highlightFeature: function(jsonFeature, highlight) {
+        _highlightFeature: function(feature, highlight) {
             var layer = this.activeLayer;
-            var feature = jsonFeature.hasOwnProperty('isNew') ? layer.getFeatureById(jsonFeature.id) : layer.getFeatureByFid(jsonFeature.id);
+            var olFeature = feature.hasOwnProperty('isNew') ? layer.getFeatureById(feature.id) : layer.getFeatureByFid(feature.id);
 
-            if(!feature) {
+            if(!olFeature) {
                 return;
             }
 
-            feature.renderIntent = highlight ? 'select' : 'default';
+            olFeature.renderIntent = highlight ? 'select' : 'default';
             this.activeLayer.redraw();
         },
 
@@ -1294,15 +1264,14 @@
          * @param feature
          */
         zoomToJsonFeature: function(feature) {
-            var layer = this.activeLayer;
-            var olMap = this.map;
-            var olFeature = feature.hasOwnProperty('isNew') ? layer.getFeatureById(feature.id) : layer.getFeatureByFid(feature.id);
-            var bounds = olFeature.geometry.getBounds();
-            var schema = this.findFeatureSchema(feature);
+            var widget = this;
+            var olFeature = widget.findOpenLayerFeature(feature);
+            var olMap = widget.map;
+            var schema = widget.findFeatureSchema(feature);
 
-            olMap.zoomToExtent(bounds);
+            olMap.zoomToExtent(olFeature.geometry.getBounds());
 
-            if(schema.hasOwnProperty('zoomScaleDenominator')){
+            if(schema.hasOwnProperty('zoomScaleDenominator')) {
                 olMap.zoomToScale(schema.zoomScaleDenominator);
             }
         },
@@ -1314,7 +1283,8 @@
          */
         openFeatureEditDialog: function(feature) {
             var widget = this;
-            var olFeature;
+            var olFeature  = widget.findFeatureSchema(feature);
+
             if(feature.hasOwnProperty('isNew') ){
                 olFeature =  layer.getFeatureById(feature.id);
             }else{
@@ -1390,8 +1360,6 @@
             var clusterSettings;
             var closestClusterSettings;
 
-            return;
-
             $.each(options.schemes, function(i, schema) {
                 clusterSettings = null;
 
@@ -1418,7 +1386,6 @@
                 }
 
                 if(clusterSettings) {
-                    //debugger;
                     schema.clusterStrategy.distance = clusterSettings.distance;
                     schema.clusterStrategy.activate();
                 } else {
@@ -1430,11 +1397,121 @@
         },
 
         /**
+         * Get schema style map
          *
+         * @param schema
+         * @returns {OpenLayers.StyleMap}
          */
-        updateSchemaFeatureLayerVisibility: function(schema){
+        getSchemaStyleMap: function(schema) {
+            var widget = this;
+            var styles = schema.styles ? schema.styles : {};
+            for (var k in widget.styles) {
+                styles[k] = new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style[k], styles[k] ? styles[k] : widget.styles[k]));
+            }
+            return new OpenLayers.StyleMap(styles, {extendDefault: true});
+        },
 
-        }
+        /**
+         * Get features from cluster
+         *
+         * @param olFeaturesRaw
+         * @returns {Array}
+         */
+        getFeaturesFromCluster: function(olFeaturesRaw) {
+            var olFeatures = [];
+            $.each(olFeaturesRaw, function(i, olFeature) {
+                if(olFeature.cluster) {
+                    $.each(olFeature.cluster, function(i, _olFeature) {
+                        _olFeature.layer = olFeature.layer;
+                        olFeatures.push(_olFeature);
+                    })
+                } else {
+                    olFeatures.push(olFeature);
+                }
+            });
+            return olFeatures;
+        },
+
+        /**
+         * Find open layer feature by native feature
+         * @param feature
+         * @returns {*}
+         */
+        findOpenLayerFeature: function(feature) {
+            var widget = this;
+            var isNew = feature.hasOwnProperty('isNew');
+            var olFeature;
+
+            $.each(widget.options.schemes, function(i, schema) {
+                $.each(schema.layer.features, function(k, _olFeature) {
+                    if(_olFeature.cluster) {
+                        $.each(_olFeature.cluster, function(z, _olSubFeature) {
+                            if((isNew && _olSubFeature.data == feature ) || _olSubFeature.fid == feature.id) {
+                                olFeature = _olSubFeature;
+                                olFeature.layer = _olSubFeature.layer;
+                                return false;
+                            }
+                        })
+                    } else {
+                        if((isNew && _olFeature.data == feature ) || _olFeature.fid == feature.id) {
+                            olFeature = _olFeature;
+                            return false;
+                        }
+                    }
+                });
+                if(olFeature) {
+                    return false;
+                }
+            });
+
+            return olFeature;
+        },
+
+        /**
+         * Find feature schema by feature data
+         *
+         * @param feature
+         * @returns {*}
+         */
+        findFeatureSchema: function(feature) {
+            var widget = this;
+            var schema = null;
+            var options = widget.options;
+
+            // find schema by feature
+            $.each(options.schemes, function(k, _schema) {
+                $.each(_schema.features, function(i, featureCollection) {
+                    $.each(featureCollection, function(y, _feature) {
+                        if(_feature == feature) {
+                            schema = _schema;
+                            return false;
+                        }
+                    });
+                    if(schema) {
+                        return false;
+                    }
+                });
+                if(schema) {
+                    return false;
+                }
+            });
+            return schema;
+        },
+
+        /**
+         * Normalize open layer feature
+         * @param _olFeature
+         * @returns {*}
+         */
+        normalizeOpenLayerFeature: function(_olFeature) {
+            var olFeature = _olFeature;
+            if(_olFeature.cluster) {
+                olFeature = _.last(_olFeature.cluster);
+                olFeature.layer = _olFeature.layer;
+            }
+            return olFeature;
+        },
+
     });
 
 })(jQuery);
