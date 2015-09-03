@@ -25,4 +25,6 @@ $ ../composer.phar update
 ```
 
 # Architecture
-![Architecture](Documents/Digitizer.png)(https://www.draw.io/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmapbender%2Fmapbender-digitizer%2Fmaster%2FDocuments%2FDigitizer.xml)
+![Architecture](Documents/Digitizer.png)
+
+[Diagram](https://www.draw.io/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmapbender%2Fmapbender-digitizer%2Fmaster%2FDocuments%2FDigitizer.xml)
