@@ -159,21 +159,16 @@
                 strokeWidth: 1,
                 strokeColor: '#6fb536',
                 fillColor:   "#6fb536",
-                fillOpacity: 0.3
+                fillOpacity: 0.3,
+                label: '${label}'
             },
             'select':  {
                 strokeWidth: 3,
                 fillColor:   "#F7F79A",
                 strokeColor: '#6fb536',
                 fillOpacity: 0.5
-            },
-            'cluster':  {
-                fillColor:   "#F7F79A",
-                strokeColor: '#6fb536',
-                text: 1,
-                strokeWidth: 10,
-                fillOpacity: 1
             }
+
         },
 
         /**
@@ -235,7 +230,6 @@
                 Mapbender.confirmDialog({
                     html:      translate("feature.remove.from.database"),
                     onSuccess: function() {
-                        console.log("LÖSCHT!");
                         widget.query('delete', {
                             schema:  schema.schemaName,
                             feature: feature
@@ -255,19 +249,39 @@
          * @param schema
          * @returns {OpenLayers.Layer.Vector}
          */
-        createSchemaFeatureLayer: function(schema, strategies) {
+        createSchemaFeatureLayer: function(schema) {
             var widget = this;
-            var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 0});
+            var styles = schema.styles ? schema.styles : {};
+            var isClustered = schema.isClustered = schema.hasOwnProperty('clustering');
+            var strategies = [];
+            var styleMap = new OpenLayers.StyleMap({
+                'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), {
+                    context: {
+                        label: function(feature) {
+                            return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
+                        }
+                    }
+                }),
+                'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
+            }, {extendDefault: true});
+
+            if(isClustered) {
+                var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
+                strategies.push(clusterStrategy);
+                schema.clusterStrategy = clusterStrategy;
+            }
             var layer = new OpenLayers.Layer.Vector(schema.label, {
-                styleMap:   widget.getSchemaStyleMap(schema),
-                strategies: [clusterStrategy]
+                styleMap:   styleMap,
+                strategies: strategies
             });
 
             layer.name = schema.label;
-            schema.clusterStrategy = clusterStrategy;
 
-            clusterStrategy.deactivate();
-            layer.refresh({force: true});
+            //if(isClustered){
+            //    clusterStrategy.activate();
+            //}
+
+            layer.refresh({force: true})
 
             return layer;
         },
@@ -290,6 +304,43 @@
                 titleElement.css('display', 'none');
             }
 
+
+            function createSubMenu(olFeature) {
+                var layer = olFeature.layer;
+                var schema = widget.findSchemaByLayer(layer);
+                var subItems = {
+                    zoomTo: {
+                        name:   "Zoom to",
+                        action: function(key, options, parameters) {
+                            widget.zoomToJsonFeature(widget.findFeatureByOpenLayerFeature(parameters.olFeature));
+                        }
+                    }
+                };
+
+                if(schema.allowEditData) {
+                    subItems['edit'] = {
+                        name:   translate('feature.edit'),
+                        action: function(key, options, parameters) {
+                            widget._openFeatureEditDialog(parameters.olFeature);
+                        }
+                    }
+                }
+                if(schema.allowDelete) {
+                    subItems['remove'] = {
+                        name:   translate('feature.remove'),
+                        action: function(key, options, parameters) {
+                            widget.removeFeature(widget.findFeatureByOpenLayerFeature(parameters.olFeature));
+                        }
+                    }
+                }
+
+                return {
+                    name:      "Feature #" + olFeature.fid,
+                    olFeature: olFeature,
+                    items:     subItems
+                };
+            }
+
             /**
              * Set map context menu
              */
@@ -297,50 +348,25 @@
                 selector: 'div',
                 build:    function(trigger, e) {
                     var items = {};
-                    var olFeaturesRaw = widget._getFeaturesFromEvent(e.clientX, e.clientY);
-                    var olFeatures = widget.getFeaturesFromCluster(olFeaturesRaw);
+                    var olFeatures = widget._getFeaturesFromEvent(e.clientX, e.clientY);
 
                     if(olFeatures.length) {
                         for (var i in olFeatures) {
-                            var olFeature = olFeatures[i];
-                            var layer = olFeature.layer;
-                            var schema = widget.findSchemaByLayer(layer);
 
-                            if(!schema.useContextMenu){
+                            var olFeature = olFeatures[i];
+                            var schema = widget.findSchemaByLayer(olFeature.layer);
+                            var clusterFeatures = olFeature.cluster ? olFeature.cluster : [olFeature];
+
+                            if(!schema.useContextMenu) {
                                 continue;
                             }
 
-                            var subItems = {
-                                zoomTo: {
-                                    name:   "Zoom to",
-                                    action: function(key, options, parameters) {
-                                        widget.zoomToJsonFeature(widget.findFeatureByOpenLayerFeature(parameters.olFeature));
-                                    }
+                            $.each(clusterFeatures, function(y, olSubFeature) {
+                                if(!olSubFeature.layer) {
+                                    olSubFeature.layer = olFeature.layer;
                                 }
-                            };
-
-                            if(schema.allowEditData) {
-                                subItems['edit'] = {
-                                    name: translate('feature.edit'),
-                                    action: function(key, options, parameters) {
-                                        widget._openFeatureEditDialog(parameters.olFeature);
-                                    }
-                                }
-                            }
-                            if(schema.allowDelete) {
-                                subItems['remove'] = {
-                                    name: translate('feature.remove'),
-                                    action: function(key, options, parameters) {
-                                        widget.removeFeature(widget.findFeatureByOpenLayerFeature(parameters.olFeature));
-                                    }
-                                }
-                            }
-
-                            items[olFeature.fid] = {
-                                name:      "Feature #" + olFeature.fid,
-                                olFeature: olFeature,
-                                items:     subItems
-                            };
+                                items[olSubFeature.fid] = createSubMenu(olSubFeature);
+                            });
                         }
                     }
 
@@ -415,6 +441,8 @@
                 var schema = this;
                 var option = $("<option/>");
                 var layer = schema.layer = widget.createSchemaFeatureLayer(schema);
+                //schema.clusterStrategy = layer.strategies[0];
+
 
                 // Merge settings with default values from options
                 for (var k in options) {
@@ -914,6 +942,7 @@
                             });
                         }
                     }
+
                 }
 
                 if(item.type == 'image') {
@@ -1362,6 +1391,10 @@
 
             $.each(options.schemes, function(i, schema) {
                 clusterSettings = null;
+
+                if(!schema.isClustered) {
+                    return
+                }
 
                 $.each(schema.clustering, function(y, _clusterSettings) {
                     if(_clusterSettings.scale == scale) {
