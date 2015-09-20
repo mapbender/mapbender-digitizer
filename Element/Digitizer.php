@@ -178,7 +178,7 @@ class Digitizer extends HTMLElement
         $debugMode       = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
         $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
         $defaultCriteria = array('returnType' => 'FeatureCollection',
-                                 'maxResults' => 2);
+                                 'maxResults' => 2500);
         if (empty($schemaName)) {
             throw new Exception('For initialization there is no name of the declared scheme');
         }
