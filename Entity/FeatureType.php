@@ -36,7 +36,7 @@ class FeatureType extends ContainerAware
     /**
      *  Default max results by search
      */
-    const MAX_RESULTS = 1000;
+    const MAX_RESULTS = 5000;
 
     /**
      * @var Connection
