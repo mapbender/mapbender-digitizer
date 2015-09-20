@@ -450,13 +450,7 @@
                                 olFeature.attributes = olFeature.data = properties;
                                 olFeature.layer = layer;
 
-
                                 widget.reloadFeatures(layer);
-
-
-                                //var tableApi = table.resultTable('getApi');
-                                //tableApi.rows.add([olFeature]);
-                                //tableApi.draw();
 
                                 digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
 
@@ -548,21 +542,13 @@
                 table.delegate("tbody > tr", 'mouseenter', function() {
                     var tr = this;
                     var row = tableApi.row(tr);
-                    var jsonData = row.data();
-                    if(!jsonData) {
-                        return;
-                    }
-                    widget._highlightFeature(jsonData, true);
+                    widget._highlightFeature(row.data(), true);
                 });
 
                 table.delegate("tbody > tr", 'mouseleave', function() {
                     var tr = this;
                     var row = tableApi.row(tr);
-                    var jsonData = row.data();
-                    if(!jsonData) {
-                        return;
-                    }
-                    widget._highlightFeature(jsonData, false);
+                    widget._highlightFeature(row.data(), false);
                 });
 
                 table.delegate("tbody > tr", 'click', function() {
@@ -629,7 +615,6 @@
             map.events.register("zoomend", this, function(e) {
                 widget._getData();
                 widget.updateClusterStrategies();
-                console.log("zoomend");
             });
             widget.map.resetLayersZIndex();
             widget._trigger('ready');
@@ -754,8 +739,7 @@
                     text:  translate("feature.remove"),
                     'class': 'critical',
                     click: function() {
-                        var feature = widget.findFeatureByOpenLayerFeature(olFeature);
-                        widget.removeFeature(feature);
+                        widget.removeFeature(olFeature);
                         widget.currentPopup.popupDialog('close');
                     }
                 });
@@ -953,147 +937,10 @@
             }
         },
 
-        /**
-         * Handle feature collection by ajax response.
-         *
-         * @param featureCollection FeatureCollection
-         * @param schema
-         * @param xhr ajax request object
-         * @todo compare new, existing and loaded features
-         * @private
-         */
-        _onFeatureCollectionLoaded2: function(featureCollection, schema, xhr) {
-            var widget = this;
-            var tableApi = schema.table.resultTable('getApi');
-            var features = schema.features;
-            var geoJsonReader = new OpenLayers.Format.GeoJSON();
-            var loadedFeatures = [];
-            var existingFeatures = {};
-            var currentExtentOnly =  schema.searchType ==  "currentExtent";
-
-            // Break if something goes wrong
-            if(!featureCollection || !featureCollection.hasOwnProperty("features")) {
-                Mapbender.error(translate("features.loading.error"), featureCollection, xhr);
-                return;
-            }
-
-            // get and remove invisible features
-            var layer = schema.layer;
-            var map = layer.map;
-            var extent = map.getExtent();
-            var bbox = extent.toGeometry().getBounds();
-
-            if(currentExtentOnly){
-                //Patch OpenLayers get feature by FID
-                if(schema.isClustered) {
-                    function getFeatureByFid (fid) {
-                        for (var i in this.features) {
-                            var olFeatureCluster = this.features[i].cluster;
-                            for (var y in olFeatureCluster) {
-                                var olFeature = olFeatureCluster[y];
-                                if(olFeature.fid == fid) {
-                                    return olFeature;
-                                }
-                            }
-                        }
-                    };
-                }
-
-                for (var i in features.loaded) {
-                    var feature = features.loaded[i];
-                    existingFeatures[feature.id] = layer.getFeatureByFid(feature.id);
-                }
-            }
-
-            // Filter feature loaded before
-            $.each(featureCollection.features, function(i, feature) {
-                if(!features.loaded.hasOwnProperty(feature.id)) {
-                    features.loaded[feature.id] = feature;
-                    loadedFeatures.push(feature);
-                };
-            });
-
-            if(loadedFeatures.length) {
-                // Replace feature collection
-                featureCollection.features = loadedFeatures;
-
-                // Add features to map
-                schema.layer.addFeatures(geoJsonReader.read({
-                    type:     "FeatureCollection",
-                    features: loadedFeatures
-                }));
-
-                // Add features to table
-                tableApi.rows.add(loadedFeatures);
-                tableApi.draw();
-            }
-
-            if(currentExtentOnly) {
-                var row;
-                var removeFeatures = [];
-                for (var fid in existingFeatures) {
-                    var olFeature = existingFeatures[fid];
-
-                    if(!olFeature){
-                        // TODO: by digitizing it's find
-                        continue;
-                    }
-
-                    if(!olFeature.geometry.getBounds().intersectsBounds(bbox)) {
-                        var feature = features.loaded[olFeature.fid];
-                        var row = tableApi.row(schema.table.resultTable("getDomRowByData", feature));
-                        row.remove();//.draw();
-                        removeFeatures.push(olFeature);
-                        features.loaded[fid] = null;
-                        delete features.loaded[fid];
-                    }
-                }
-                if(row){
-                    row.draw();
-                }
-                layer.removeFeatures(removeFeatures);
-
-                //for (var i1 in layer.features) {
-                //    for (var i2 in layer.features[i1].cluster) {
-                //        for (var i3 in removeFeatures) {
-                //            if(layer.features[i1].cluster[i2].fid == removeFeatures[i3].fid) {
-                //                layer.features[i1].cluster.splice(layer.features[i1].cluster.indexOf(layer.features[i1].cluster[i2]), 1);
-                //            }
-                //        }
-                //    }
-                //}
-            }
-
-            layer.strategies = [schema.clusterStrategy];
-            //schema.clusterStrategy.deactivate();
-            //schema.clusterStrategy.activate();
-            //layer.refresh({force: true});
-            //layer.redraw();
-
-            window.setTimeout(function(){
-                schema.clusterStrategy.clearCache();
-                schema.clusterStrategy.deactivate();
-                layer.refresh({force: true});
-                layer.redraw();
-            },2000);
-
-            //if(schema.clusterStrategy && schema.clusterStrategy.active) {
-            //    schema.clusterStrategy.deactivate();
-            //    schema.clusterStrategy.activate();
-            //}
-
-            //layer.refresh({force: true});
-            //widget._trigger('schemaFeaturesLoaded', null, {
-            //    schema: schema
-            //});
-        },
-
         _highlightFeature: function(olFeature, highlight) {
-
             if(!olFeature) {
                 return;
             }
-
             olFeature.renderIntent = highlight ? 'select' : 'default';
             olFeature.layer.redraw();
         },
@@ -1120,23 +967,6 @@
          *
          * @param feature
          */
-        openFeatureEditDialog: function(feature) {
-            var widget = this;
-            var olFeature  = widget.findFeatureSchema(feature);
-
-            if(feature.hasOwnProperty('isNew') ){
-                olFeature =  layer.getFeatureById(feature.id);
-            }else{
-                olFeature = widget.activeLayer.getFeatureByFid(feature.id);
-            }
-            widget._openFeatureEditDialog(olFeature);
-        },
-
-        /**
-         * Open feature edit dialog
-         *
-         * @param feature
-         */
         exportGeoJson: function(feature) {
             var widget = this;
             widget.query('export', {
@@ -1155,37 +985,6 @@
          */
         findSchemaByLayer: function(layer) {
             return _.find(this.options.schemes, {layer: layer});
-        },
-
-        /**
-         * Find feature data by open layer feature object
-         * @returns {*}
-         */
-        findFeatureByOpenLayerFeature: function(olFeature) {
-            var widget = this;
-            var feature = null;
-            var data = olFeature.data;
-            var isNew = !olFeature.fid;
-            var schema = widget.findSchemaByLayer(olFeature.layer);
-
-
-            $.each(schema.features, function(i, featureCollection) {
-                if(!isNew) {
-                    if(featureCollection.hasOwnProperty(olFeature.fid)) {
-                        feature = featureCollection[olFeature.fid];
-                        return false;
-                    }
-                } else {
-                    $.each(featureCollection, function(k, _feature) {
-                        if(_feature == data) {
-                            feature = data;
-                            return false;
-                        }
-                    });
-                }
-            });
-
-            return feature;
         },
 
         /**
@@ -1215,7 +1014,6 @@
 
                     if(_clusterSettings.scale < scale) {
                         if(closestClusterSettings && _clusterSettings.scale > closestClusterSettings.scale) {
-                            console.log("closestClusterSettings");
                             closestClusterSettings = _clusterSettings;
                         } else {
                             if(!closestClusterSettings){
@@ -1288,40 +1086,6 @@
             return olFeatures;
         },
 
-        /**
-         * Find open layer feature by native feature
-         * @param feature
-         * @returns {*}
-         */
-        findOpenLayerFeature: function(feature) {
-            var widget = this;
-            var isNew = feature.hasOwnProperty('isNew');
-            var olFeature;
-
-            $.each(widget.options.schemes, function(i, schema) {
-                $.each(schema.layer.features, function(k, _olFeature) {
-                    if(_olFeature.cluster) {
-                        $.each(_olFeature.cluster, function(z, _olSubFeature) {
-                            if((isNew && _olSubFeature.data == feature ) || _olSubFeature.fid == feature.id) {
-                                olFeature = _olSubFeature;
-                                olFeature.layer = _olSubFeature.layer;
-                                return false;
-                            }
-                        })
-                    } else {
-                        if((isNew && _olFeature.data == feature ) || _olFeature.fid == feature.id) {
-                            olFeature = _olFeature;
-                            return false;
-                        }
-                    }
-                });
-                if(olFeature) {
-                    return false;
-                }
-            });
-
-            return olFeature;
-        },
 
         /**
          * Find olFeature schema by olFeature data
@@ -1515,7 +1279,7 @@
             var bbox = extent.toGeometry().getBounds();
             var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
             var visibleFeatures = currentExtentOnly ? _.filter(existingFeatures, function(olFeature) {
-                return olFeature.isNew || olFeature.geometry.getBounds().intersectsBounds(bbox);
+                return olFeature && (olFeature.hasOwnProperty('isNew') || olFeature.geometry.getBounds().intersectsBounds(bbox));
             }) : existingFeatures;
             var visibleFeatureIds = _.pluck(visibleFeatures, "fid");
             var filteredNewFeatures = _.filter(featureCollection.features, function(feature) {
