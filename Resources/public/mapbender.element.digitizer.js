@@ -568,11 +568,7 @@
                 table.delegate("tbody > tr", 'click', function() {
                     var tr = this;
                     var row = tableApi.row(tr);
-                    var jsonData = row.data();
-                    if(!jsonData) {
-                        return;
-                    }
-                    widget.zoomToJsonFeature(jsonData);
+                    widget.zoomToJsonFeature(row.data());
                 });
 
                 widget._getData();
@@ -987,7 +983,6 @@
             var extent = map.getExtent();
             var bbox = extent.toGeometry().getBounds();
 
-
             if(currentExtentOnly){
                 //Patch OpenLayers get feature by FID
                 if(schema.isClustered) {
@@ -1093,24 +1088,20 @@
             //});
         },
 
-
-
-        _highlightFeature: function(feature, highlight) {
-            var layer = this.activeLayer;
-            var olFeature = feature.hasOwnProperty('isNew') ? layer.getFeatureById(feature.id) : layer.getFeatureByFid(feature.id);
+        _highlightFeature: function(olFeature, highlight) {
 
             if(!olFeature) {
                 return;
             }
 
             olFeature.renderIntent = highlight ? 'select' : 'default';
-            this.activeLayer.redraw();
+            olFeature.layer.redraw();
         },
 
         /**
          * Zoom to JSON feature
          *
-         * @param feature
+         * @param olFeature
          */
         zoomToJsonFeature: function(olFeature) {
             var widget = this;
