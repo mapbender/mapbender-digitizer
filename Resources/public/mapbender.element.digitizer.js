@@ -440,17 +440,21 @@
                                 var schema = widget.findSchemaByLayer(layer);
                                 var digitizerToolSetElement = $(".digitizing-tool-set", frame);
                                 var properties = jQuery.extend(true, {}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
-
-                                if(schema.isClustered){
-                                    $.notify('Create new feature is by clusterring not posible');
-                                    return false;
-                                }
+                                //
+                                //if(schema.isClustered){
+                                //    $.notify('Create new feature is by clusterring not posible');
+                                //    return false;
+                                //}
 
                                 olFeature.isNew = true;
                                 olFeature.attributes = olFeature.data = properties;
                                 olFeature.layer = layer;
 
-                                widget.reloadFeatures(layer);
+                                //widget.reloadFeatures(layer);
+                                window.setTimeout(function(){
+
+                                },1000);
+                                layer.redraw();
 
                                 digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
 
@@ -458,7 +462,7 @@
                                     widget._openFeatureEditDialog(olFeature);
                                 }
 
-                                return true;
+                                //return true;
                             }
                         }
                     }, {
@@ -568,6 +572,8 @@
                 if(layer != widget.currentSettings.layer) {
                     return
                 }
+
+                //console.log(e.type);
 
                 var olFeature = e.feature;
                 var olFeatureNormalized = widget.normalizeOpenLayerFeature(olFeature);
@@ -711,7 +717,7 @@
                                 var hasFeatureAfterSave = response.features.length > 0;
 
                                 if(!hasFeatureAfterSave) {
-                                    widget.reloadFeatures(layer, _.without(schema.layer.features, olFeature));
+                                    widget.reloadFeatures( schema.layer, _.without(schema.layer.features, olFeature));
                                     widget.currentPopup.popupDialog('close');
                                     return;
                                 }
@@ -728,6 +734,7 @@
                                 form.enableForm();
                                 widget.currentPopup.popupDialog('close');
                                 $.notify(translate("feature.save.successfully"), 'info');
+
                             });
                         }
                     }
@@ -871,21 +878,21 @@
          */
         _getData: function() {
             var widget = this;
-            var settings = widget.currentSettings;
+            var schema = widget.currentSettings;
             var map = widget.map;
             var projection = map.getProjectionObject();
             var extent = map.getExtent();
             var request = {
                 srid:       projection.proj.srsProjNumber,
-                maxResults: settings.maxResults,
-                schema:     settings.schemaName
+                maxResults: schema.maxResults,
+                schema:     schema.schemaName
             };
 
-            switch (settings.searchType){
+            switch (schema.searchType){
                 case  "currentExtent":
-                    if(settings.hasOwnProperty("lastBbox")) {
+                    if(schema.hasOwnProperty("lastBbox")) {
                         var bbox = extent.toGeometry().getBounds();
-                        var lastBbox = settings.lastBbox;
+                        var lastBbox = schema.lastBbox;
 
                         var topDiff = bbox.top - lastBbox.top;
                         var leftDiff = bbox.left - lastBbox.left;
@@ -918,19 +925,19 @@
                     } else {
                         widget._queryIntersect(request, extent);
                     }
-                    settings.lastBbox = $.extend(true, {}, extent.toGeometry().getBounds());
+                    schema.lastBbox = $.extend(true, {}, extent.toGeometry().getBounds());
                     break;
 
                 default: // all
 
-                    if(settings.searchType == "currentExtent") {
-                        settings.allFeaturesQueued = false;
+                    if(schema.searchType == "currentExtent") {
+                        schema.allFeaturesQueued = false;
                     }
 
-                    if(!settings.allFeaturesQueued) {
-                        settings.allFeaturesQueued = true;
+                    if(!schema.allFeaturesQueued) {
+                        schema.allFeaturesQueued = true;
                         widget.query('select', request).done(function(featureCollection) {
-                            widget._onFeatureCollectionLoaded(featureCollection, settings, this);
+                            widget._onFeatureCollectionLoaded(featureCollection, schema, this);
                         });
                     }
                     break;
@@ -1030,10 +1037,13 @@
                 if(clusterSettings) {
 
                     if(clusterSettings.hasOwnProperty('disable') && clusterSettings.disable) {
-                        schema.clusterStrategy.distance = 1;
+                        schema.clusterStrategy.distance = -1;
+                        var features = schema.layer.features;
+                        widget.reloadFeatures(schema.layer,[]);
                         schema.clusterStrategy.deactivate();
+                        //schema.layer.redraw();
                         schema.isClustered = false;
-                        widget.reloadFeatures(schema.layer);
+                        widget.reloadFeatures(schema.layer,features);
 
                     } else {
                         schema.clusterStrategy.activate();
@@ -1046,7 +1056,6 @@
                 } else {
                     //schema.clusterStrategy.deactivate();
                 }
-                console.log(scale, clusterSettings);
             });
         },
 
@@ -1305,6 +1314,10 @@
             var schema = widget.findSchemaByLayer(layer);
             var tableApi = schema.table.resultTable('getApi');
             var features = _features ? _features : layer.features;
+
+            if(features.length && features[0].cluster) {
+                features = _.flatten(_.pluck(layer.features, "cluster"));
+            }
 
             layer.removeAllFeatures();
             layer.addFeatures(features);
