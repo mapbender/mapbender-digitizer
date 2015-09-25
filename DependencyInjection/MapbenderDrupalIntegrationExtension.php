@@ -18,6 +18,6 @@ class MapbenderDigitizerExtension extends Extension
 
     public function getAlias()
     {
-        return 'mapbender_drupal_integration';
+        return  'mapbender_digitizer_extension_loader';
     }
 }

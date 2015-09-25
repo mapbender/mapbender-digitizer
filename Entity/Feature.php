@@ -2,6 +2,7 @@
 namespace Mapbender\DigitizerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Mapbender\DataSourceBundle\Entity\DataItem;
 
 /**
  * Class Feature
@@ -9,45 +10,29 @@ use Doctrine\ORM\Mapping as ORM;
  * @package   Mapbender\CoreBundle\Entity
  * @author    Andriy Oblivantsev <eslider@gmail.com>
  */
-class Feature
+class Feature extends DataItem
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
-     */
-    protected $id;
 
     /**
-     * @ORM\Column(name="GEOM", type="text", nullable=true)
+     * Geometries as WKT
+     *
+     * @ORM\Column(name="geom", type="text", nullable=true)
      */
     protected $geom;
 
     /**
-     * @var
+     * Geometry SRID
+     *
+     * @ORM\Column(name="srid", type="text", nullable=true)
      */
     protected $srid;
 
     /**
-     * @var
-     */
-    protected $attributes;
-
-    /** @var string */
-    private $uniqueIdField;
-
-    /** @var string */
-    private $geomField;
-
-    /**
-     * Get id
+     * GEOM field name
      *
-     * @return integer
+     * @ORM\Column(name="geomFieldName", type="text", nullable=true)
      */
-    public function getId()
-    {
-        return $this->id;
-    }
+    private $geomField;
 
     /**
      * @param $geom
@@ -92,25 +77,6 @@ class Feature
     }
 
     /**
-     * Get attributes (parameters)
-     *
-     * @return mixed
-     */
-    public function getAttributes()
-    {
-        $this->attributes[$this->uniqueIdField] = $this->getId();
-        return $this->attributes;
-    }
-
-    /**
-     * @param mixed $attributes
-     */
-    public function setAttributes($attributes)
-    {
-        $this->attributes = $attributes;
-    }
-
-    /**
      * @param mixed $args JSON or array(
      * @param int $srid
      * @param string $uniqueIdField ID field name
@@ -118,6 +84,8 @@ class Feature
      */
     public function __construct($args = null, $srid = null, $uniqueIdField = 'id', $geomField = "geom")
     {
+        $this->geomField = $geomField;
+
         // decode JSON
         if (is_string($args)) {
             $args = json_decode($args, true);
@@ -125,7 +93,7 @@ class Feature
                 $args["geom"] = \geoPHP::load($args["geometry"], 'json')->out('wkt');
             }
         }
-        
+
         $this->setSrid($srid);
 
         // Is JSON feature array?
@@ -139,7 +107,7 @@ class Feature
             }
 
             if (isset($args['srid'])) {
-               $this->setSrid($args['srid']);
+                $this->setSrid($args['srid']);
             }
 
             $args = $properties;
@@ -151,19 +119,7 @@ class Feature
             unset($args[$geomField]);
         }
 
-        // set ID
-        if (isset($args[$uniqueIdField])) {
-            $this->setId($args[$uniqueIdField]);
-            unset($args[$uniqueIdField]);
-        }
-
-        // set attributes
-        $this->setAttributes($args);
-
-
-        $this->uniqueIdField = $uniqueIdField;
-        $this->geomField = $geomField;
-
+        parent::__construct($args, $uniqueIdField);
     }
 
     /**
@@ -222,23 +178,6 @@ class Feature
         }
 
         return $data;
-    }
-
-    /**
-     * @param mixed $id
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * Is id set
-     *
-     * @return bool
-     */
-    public function hasId(){
-        return !is_null($this->id);
     }
 
     /**
