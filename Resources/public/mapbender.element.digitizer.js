@@ -249,30 +249,22 @@
                 selector: 'div',
                 build:    function(trigger, e) {
                     var items = {};
-                    var olFeatures = widget._getFeaturesFromEvent(e.clientX, e.clientY);
+                    var schema = widget.currentSettings;
+                    var feature = schema.layer.getFeatureFromEvent(e);
+                    var features;
 
-                    if(olFeatures.length) {
-                        for (var i in olFeatures) {
-
-                            var olFeature = olFeatures[i];
-                            var schema = widget.findSchemaByLayer(olFeature.layer);
-                            var clusterFeatures = olFeature.cluster ? olFeature.cluster : [olFeature];
-
-                            if(!schema.useContextMenu) {
-                                continue;
-                            }
-
-                            $.each(clusterFeatures, function(y, olSubFeature) {
-                                if(!olSubFeature.layer) {
-                                    olSubFeature.layer = olFeature.layer;
-                                }
-                                items[olSubFeature.fid] = createSubMenu(olSubFeature);
-                            });
-                        }
-                    }
-
-                    if(!_.size(items)) {
+                    if(!feature) {
                         items['no-items'] = {name: "Nothing selected!"}
+                    } else {
+                        features = feature.cluster ? feature.cluster : [feature];
+                        //features = widget._getFeaturesFromEvent(e.clientX, e.clientY);
+
+                        _.each(features, function(feature) {
+                            if(!feature.layer) {
+                                feature.layer = olFeature.layer;
+                            }
+                            items[feature.fid] = createSubMenu(feature);
+                        });
                     }
 
                     return {
@@ -375,7 +367,7 @@
                 }
 
                 option.val(schemaName).html(schema.label);
-                widget.map.addLayer(layer);
+                map.addLayer(layer);
 
                 var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
                 var columns = [];
@@ -404,7 +396,7 @@
                     autoWidth: false,
                     columns:  columns,
                     buttons: buttons
-                }
+                };
 
                 if(options.tableTranslation) {
                     resultTableSettings.oLanguage = options.tableTranslation;
@@ -491,55 +483,101 @@
                 element.append(frame);
                 option.data("schemaSettings",schema);
                 selector.append(option);
+
+                var tableWidget = table.data('visUiJsResultTable');
+                var selectControl = new OpenLayers.Control.SelectFeature(layer, {
+                    hover:        true,
+                    clickFeature: function(feature) {
+                        var features = feature.cluster ? feature.cluster : [feature];
+
+                        if(_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
+                            return;
+                        }
+                        widget._openFeatureEditDialog(features[0]);
+                    },
+                    overFeature:  function(feature) {
+                        var features = feature.cluster ? feature.cluster : [feature];
+                        var lastFeatureRow;
+
+                        _.each(features, function(feature) {
+                            var domRow = tableWidget.getDomRowByData(feature);
+                            tableWidget.showByRow(domRow);
+                            domRow.addClass('hover');
+                            lastFeatureRow = domRow;
+                        });
+                        tableWidget.showByRow(lastFeatureRow);
+
+                        layer.drawFeature(feature, 'select');
+                    },
+                    outFeature:   function(feature) {
+                        var features = feature.cluster ? feature.cluster : [feature];
+
+                        _.each(features, function(feature) {
+                            var domRow = tableWidget.getDomRowByData(feature);
+                            domRow.removeClass('hover');
+                        });
+
+                        layer.drawFeature(feature, 'default');
+                    }
+                });
+
+                schema.selectControl = selectControl;
+                selectControl.deactivate();
+                map.addControl(selectControl);
             });
 
-            function deactivateFrame(settings) {
-                var frame = settings.frame;
-                //var tableApi = settings.table.resultTable('getApi');
-                var layer = settings.layer;
+            function deactivateFrame(schema) {
+                var frame = schema.frame;
+                //var tableApi = schema.table.resultTable('getApi');
+                var layer = schema.layer;
 
                 frame.css('display', 'none');
 
-                if(!settings.displayPermanent){
+                if(!schema.displayPermanent){
                     layer.setVisibility(false);
                 }
+
+                schema.selectControl.deactivate();
 
                 // https://trac.wheregroup.com/cp/issues/4548
                 if(widget.currentPopup){
                     widget.currentPopup.popupDialog('close');
                 }
 
+
                 //layer.redraw();
                 //layer.removeAllFeatures();
                 //tableApi.clear();
             }
 
-            function activateFrame(settings) {
-                var frame = settings.frame;
-                var layer = settings.layer;
+            function activateFrame(schema) {
+                var frame = schema.frame;
+                var layer = schema.layer;
 
-                widget.activeLayer = settings.layer;
-                widget.schemaName = settings.schemaName;
-                widget.currentSettings = settings;
+                widget.activeLayer = schema.layer;
+                widget.schemaName = schema.schemaName;
+                widget.currentSettings = schema;
                 layer.setVisibility(true);
                 //layer.redraw();
                 frame.css('display', 'block');
+
+                schema.selectControl.activate();
             }
 
             function onSelectorChange() {
                 var option = selector.find(":selected");
-                var settings = option.data("schemaSettings");
-                var table = settings.table;
+                var schema = option.data("schemaSettings");
+                var table = schema.table;
                 var tableApi = table.resultTable('getApi');
 
 
-                widget._trigger("beforeChangeDigitizing", null, {next: settings, previous: widget.currentSettings});
+                widget._trigger("beforeChangeDigitizing", null, {next: schema, previous: widget.currentSettings});
 
                 if(widget.currentSettings) {
                     deactivateFrame(widget.currentSettings);
                 }
 
-                activateFrame(settings);
+                activateFrame(schema);
 
                 table.off('mouseenter', 'mouseleave', 'click');
 
@@ -566,55 +604,6 @@
 
             selector.on('change',onSelectorChange);
 
-            var featureEventHandler = function(e) {
-                var layer = e.feature.layer;
-
-                if(layer != widget.currentSettings.layer) {
-                    return
-                }
-
-                //console.log(e.type);
-
-                var olFeature = e.feature;
-                var olFeatureNormalized = widget.normalizeOpenLayerFeature(olFeature);
-                var schema = widget.findSchemaByLayer(layer);
-
-                if(!schema) {
-                    return;
-                }
-
-                var table = schema.table;
-                var tableWidget = table.data('visUiJsResultTable');
-                var domRow = tableWidget.getDomRowByData(olFeatureNormalized);
-
-                if(!domRow) {
-                    return;
-                }
-
-                switch (e.type) {
-                    case "featureover":
-                        tableWidget.showByRow(domRow);
-                        domRow.addClass('hover');
-                        layer.drawFeature(olFeature, 'select');
-                        break;
-                    case "featureout":
-                        domRow.removeClass('hover');
-                        layer.drawFeature(olFeature, 'default');
-                        break;
-                    case "featureclick":
-                        if(_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
-                            return;
-                        }
-                        tableWidget.showByRow(domRow);
-                        widget._openFeatureEditDialog(olFeatureNormalized);
-                        break;
-
-                }
-            };
-
-            map.events.register('featureover', this, featureEventHandler);
-            map.events.register('featureout', this, featureEventHandler);
-            map.events.register('featureclick', this, featureEventHandler);
             map.events.register("moveend", this, function() {
                 widget._getData();
             });
@@ -622,7 +611,7 @@
                 widget._getData();
                 widget.updateClusterStrategies();
             });
-            widget.map.resetLayersZIndex();
+            //widget.map.resetLayersZIndex();
             widget._trigger('ready');
 
             element.bind("mbdigitizerbeforechangedigitizing", function(e, sets) {
