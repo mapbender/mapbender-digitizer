@@ -937,8 +937,32 @@
             if(!olFeature) {
                 return;
             }
-            olFeature.renderIntent = highlight ? 'select' : 'default';
-            olFeature.layer.redraw();
+
+            var layer = olFeature.layer;
+            var isClustered = !!layer.features[0].cluster;
+
+
+            if(isClustered){
+                var cluster;
+                _.each(layer.features,function(clusteredFeature){
+                    _.each(clusteredFeature.cluster, function(_feature){
+                        if(_feature == olFeature){
+                            cluster = clusteredFeature;
+                            return false;
+                        }
+                    });
+                    if(cluster){
+                        layer.drawFeature(olFeature, highlight ? 'select' : 'default');
+                        return false;
+                    }
+                });
+            }else{
+                layer.drawFeature(olFeature, highlight ? 'select' : 'default');
+            }
+
+
+            //olFeature.renderIntent = highlight ? 'select' : 'default';
+            //olFeature.layer.redraw();
         },
 
         /**
