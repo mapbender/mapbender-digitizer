@@ -6,7 +6,6 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Query;
-use Mapbender\DigitizerBundle\Utils\System;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
@@ -185,7 +184,8 @@ class FeatureType extends ContainerAware
                 break;
         }
 
-        foreach ($this->fields = $this->getConnection()->executeQuery($sql)->fetchAll() as $fieldInfo) {
+        $connection = $this->getConnection();
+        foreach ($this->fields = $connection->fetchAll($sql) as $fieldInfo) {
             $fields[] = current($fieldInfo);
         }
         return $fields;
@@ -315,7 +315,7 @@ class FeatureType extends ContainerAware
             switch ($connection->getDatabasePlatform()->getName()) {
                 case self::POSTGRESQL_PLATFORM:
                     $sql    = "SELECT currval(pg_get_serial_sequence('" . $this->tableName . "','" . $this->getUniqueId() . "'))";
-                    $lastId =  $connection->executeQuery($sql)->fetchColumn();
+                    $lastId =  $connection->fetchColumn($sql);
                     break;
             }
         }
@@ -324,17 +324,16 @@ class FeatureType extends ContainerAware
         return $feature;
     }
 
-    // TODO: oracle and posgresql switch
     /**
      * @param      $geom
      * @param null $srid
      * @return bool|string
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function transformEwkt($geom,$srid=null)
+    public function transformEwkt($geom, $srid = null)
     {
         $srid = $srid ? $srid : $this->getSrid();
-        $sql = null;
+        $sql  = null;
         switch ($this->getPlatformName()) {
             case self::POSTGRESQL_PLATFORM:
                 $sql = "SELECT ST_TRANSFORM(ST_GEOMFROMTEXT('$geom'), $srid)";
@@ -344,7 +343,7 @@ class FeatureType extends ContainerAware
                 break;
         }
 
-        return $this->connection->executeQuery($sql)->fetchColumn();
+        return $this->connection->fetchColumn($sql);
     }
 
     /**
@@ -395,7 +394,6 @@ class FeatureType extends ContainerAware
      */
     public function search(array $criteria = array())
     {
-
         /** @var Statement $statement */
         /** @var Feature $feature */
         $maxResults   = isset($criteria['maxResults']) ? intval($criteria['maxResults']) : self::MAX_RESULTS;
@@ -430,7 +428,7 @@ class FeatureType extends ContainerAware
 
         // Convert to Feature object
         if ($hasResults) {
-            $this->prepareResults($rows,$srid);
+            $this->prepareResults($rows);
         }
 
         if ($returnType == "FeatureCollection") {
@@ -576,7 +574,7 @@ class FeatureType extends ContainerAware
      * @param Feature[] $rows
      * @return Feature[]
      */
-    public function prepareResults(&$rows,$srid = null)
+    public function prepareResults(&$rows)
     {
         // Transform Oracle result column names from upper to lower case
         if ($this->isOracle()) {
@@ -584,7 +582,7 @@ class FeatureType extends ContainerAware
         }
 
         foreach ($rows as $key => &$row) {
-            $row = $this->create($row,$srid);
+            $row = $this->create($row);
         }
 
         return $rows;
@@ -593,6 +591,7 @@ class FeatureType extends ContainerAware
     /**
      * Get query builder prepared to select from the source table
      *
+     * @param null $srid
      * @return QueryBuilder
      */
     public function getSelectQueryBuilder($srid = null)
@@ -637,14 +636,11 @@ class FeatureType extends ContainerAware
             $connection = $this->getConnection();
             switch ($this->getPlatformName()) {
                 case self::POSTGRESQL_PLATFORM:
-                    $this->srid = $connection->executeQuery("SELECT Find_SRID(concat(current_schema()), '$this->tableName', '$this->geomField')")->fetchColumn();
+                    $this->srid = $connection->fetchColumn("SELECT Find_SRID(concat(current_schema()), '$this->tableName', '$this->geomField')");
                     break;
                 // TODO: not tested
                 case self::ORACLE_PLATFORM:
-                    $this->srid = $connection->executeQuery("SELECT {$this->tableName}.{$this->geomField}.SDO_SRID FROM TABLE {$this->tableName}")->fetchColumn();
-                    //                $str = "SELECT ST_SRID('$wkt')";
-                    //                var_dump($str );
-                    //                $srid = $this->getConnection()->executeQuery($str )->fetchColumn();  ;
+                    $this->srid = $connection->fetchColumn("SELECT {$this->tableName}.{$this->geomField}.SDO_SRID FROM TABLE {$this->tableName}");
                     break;
             }
         }
@@ -703,10 +699,11 @@ class FeatureType extends ContainerAware
      * @return string sequence name
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function getTableSequenceName(){
+    public function getTableSequenceName()
+    {
         $connection = $this->getConnection();
-        $result = $connection->executeQuery("SELECT column_default from information_schema.columns where table_name='" . $this->getTableName() . "' and column_name='" . $this->getUniqueId() . "'")->fetchColumn();
-        $result = explode("'",$result);
+        $result     = $connection->fetchColumn("SELECT column_default from information_schema.columns where table_name='" . $this->getTableName() . "' and column_name='" . $this->getUniqueId() . "'");
+        $result     = explode("'", $result);
         return $result[0];
     }
 
@@ -719,7 +716,7 @@ class FeatureType extends ContainerAware
      */
     public function repairTableSequence()
     {
-        return $this->getConnection()->executeQuery("SELECT setval('" . $this->getTableSequenceName() . "', (SELECT MAX(" . $this->getUniqueId() . ") FROM " . $this->getTableName() . "))")->fetchColumn();
+        return $this->getConnection()->fetchColumn("SELECT setval('" . $this->getTableSequenceName() . "', (SELECT MAX(" . $this->getUniqueId() . ") FROM " . $this->getTableName() . "))");
     }
 
     /**
