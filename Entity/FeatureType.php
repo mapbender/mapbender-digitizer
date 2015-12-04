@@ -66,9 +66,16 @@ class FeatureType extends ContainerAware
      * @var array Dield to select from the table
      */
     protected $fields = array();
+
+    /**
+     * @var string SQL where filter
+     */
     protected $sqlFilter;
 
 
+    /**
+     * @var array file info list
+     */
     protected $filesInfo = array();
 
     /**
