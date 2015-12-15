@@ -241,7 +241,7 @@ class Digitizer extends HTMLElement
                 break;
 
             case 'delete':
-                $results = $featureType->remove($request['feature'])->getId();
+                $results = $featureType->remove($request['feature']);
                 break;
 
             case 'file-upload':

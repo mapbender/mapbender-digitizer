@@ -1,12 +1,12 @@
 <?php
 namespace Mapbender\DigitizerBundle\Entity;
 
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Query;
-use Symfony\Component\DependencyInjection\ContainerAware;
+use Mapbender\DataSourceBundle\Component\DataStore;
+use Mapbender\DataSourceBundle\Entity\DataItem;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Security\Acl\Exception\Exception;
@@ -20,37 +20,19 @@ use Mapbender\CoreBundle\Component\Application as AppComponent;
  * with spatial abilities like Oracle or PostgreSQL.
  *
  *
- * @link      https://troubadix.wheregroup.com/wiki/index.php/Mapbender3_Digitalisierung#Schema
  * @package   Mapbender\CoreBundle\Entity
  * @author    Andriy Oblivantsev <eslider@gmail.com>
  * @copyright 2015 by WhereGroup GmbH & Co. KG
+ * @link      https://github.com/mapbender/mapbender-digitizer
  */
-class FeatureType extends ContainerAware
+class FeatureType extends DataStore
 {
-    const ORACLE_PLATFORM     = 'oracle';
-    const POSTGRESQL_PLATFORM = 'postgresql';
-    const SQLITE_PLATFORM     = 'sqlite';
-    const UPLOAD_DIR_NAME     = "featureTypes";
+    const UPLOAD_DIR_NAME = "featureTypes";
 
     /**
      *  Default max results by search
      */
     const MAX_RESULTS = 5000;
-
-    /**
-     * @var Connection
-     */
-    protected $connection;
-
-    /**
-     * @var string Table name
-     */
-    protected $tableName;
-
-    /**
-     * @var mixed Unique id field name
-     */
-    protected $uniqueId = 'id';
 
     /**
      * @var string Geometry field name
@@ -63,15 +45,9 @@ class FeatureType extends ContainerAware
     protected $srid = null;
 
     /**
-     * @var array Dield to select from the table
-     */
-    protected $fields = array();
-
-    /**
      * @var string SQL where filter
      */
     protected $sqlFilter;
-
 
     /**
      * @var array file info list
@@ -84,72 +60,16 @@ class FeatureType extends ContainerAware
      */
     public function __construct(ContainerInterface $container, $args = null)
     {
-        $this->setContainer($container);
         $hasFields = isset($args["fields"]) && is_array($args["fields"]);
 
-        if (!$hasFields) {
-            $args["fields"] = array();
-        }
-
-        // init $methods by $args
-        if (is_array($args)) {
-            $methods = get_class_methods(get_class($this));
-            foreach ($args as $key => $value) {
-                $keyMethod = "set" . ucwords($key);
-                if (in_array($keyMethod, $methods)) {
-                    $this->$keyMethod($value);
-                }
-            }
-        }
+        parent::__construct($container, $args);
 
         // if no fields defined, but geomField, find it all and remove geo field from the list
         if (!$hasFields && isset($args["geomField"])) {
-            $fields = $this->getTableFields();
+            $fields = $this->getDriver()->getStoreFields();
             unset($fields[array_search($args["geomField"], $fields, false)]);
             $this->setFields($fields);
         }
-    }
-
-    /**
-     * Set connection
-     *
-     * @param $name
-     * @return $this
-     */
-    public function setConnection($name)
-    {
-        $this->connection = $this->container->get("doctrine.dbal.{$name}_connection");
-        return $this;
-    }
-
-    /**
-     * Set table name
-     *
-     * @param $name
-     * @return $this
-     */
-    public function setTable($name)
-    {
-        $this->tableName = $name;
-        return $this;
-    }
-
-    /**
-     * Get DBAL Connection
-     *
-     * @return Connection
-     */
-    public function getConnection()
-    {
-        return $this->connection;
-    }
-
-    /**
-     * @param int $uniqueId
-     */
-    public function setUniqueId($uniqueId)
-    {
-        $this->uniqueId = $uniqueId;
     }
 
     /**
@@ -169,105 +89,37 @@ class FeatureType extends ContainerAware
     }
 
     /**
-     * Get all table fields
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @return array field names
-     */
-    public function getTableFields()
-    {
-        $tableName = $this->getTableName();
-        $fields    = array();
-        $sql       = null;
-
-        switch ($this->getPlatformName()) {
-            case self::ORACLE_PLATFORM:
-                $sql = "SELECT column_name, data_type, data_length FROM USER_TAB_COLUMNS WHERE table_name = '$tableName'";
-                break;
-
-            case self::SQLITE_PLATFORM:
-            case self::POSTGRESQL_PLATFORM:
-                $sql = "SELECT column_name FROM information_schema.columns WHERE (table_schema || '.' || table_name = '{$tableName}' OR table_name = '{$tableName}')";
-                break;
-        }
-
-        $connection = $this->getConnection();
-        foreach ($this->fields = $connection->fetchAll($sql) as $fieldInfo) {
-            $fields[] = current($fieldInfo);
-        }
-        return $fields;
-    }
-
-    /**
      * @param array $fields
+     * @return array
      */
     public function setFields(array $fields)
     {
-        $this->fields = $fields;
+        return $this->driver->setFields($fields);
     }
 
     /**
-     * Get platform name
+     * Get feature by ID
      *
-     * @return string
+     * @param $id
+     * @return Feature
      */
-    public function getPlatformName()
+    public function getById($id)
     {
-        static $name = null;
-        if (!$name) {
-            $name = $this->getConnection()->getDatabasePlatform()->getName();
-        }
-        return $name;
-    }
-
-    /**
-     * Is oralce platform
-     *
-     * @return bool
-     */
-    public function isOracle()
-    {
-        static $r;
-        if (is_null($r)) {
-            $r = $this->getPlatformName() == self::ORACLE_PLATFORM;
-        }
-        return $r;
-    }
-
-    /**
-     * Is SQLite platform
-     *
-     * @return bool
-     */
-    public function isSqlite()
-    {
-        static $r;
-        if (is_null($r)) {
-            $r = $this->getPlatformName() == self::SQLITE_PLATFORM;
-        }
-        return $r;
-    }
-
-    /**
-     * Is postgres platform
-     *
-     * @return bool
-     */
-    public function isPostgres()
-    {
-        static $r;
-        if (is_null($r)) {
-            $r = $this->getPlatformName() == self::POSTGRESQL_PLATFORM;
-        }
-        return $r;
+        $rows = $this->getSelectQueryBuilder()
+            ->where($this->getUniqueId() . " = :id")
+            ->setParameter('id', $id)
+            ->execute()
+            ->fetchAll();
+        $this->prepareResults($rows);
+        return reset($rows);
     }
 
     /**
      * Save feature
      *
-     * @param array|Feature $featureData
-     * @param bool          $autoUpdate update instead of insert if ID given
-     * @return Feature
+     * @param array|Feature|DataItem $featureData
+     * @param bool                   $autoUpdate update instead of insert if ID given
+     * @return DataItem|Feature
      * @throws \Exception
      */
     public function save($featureData, $autoUpdate = true)
@@ -276,7 +128,6 @@ class FeatureType extends ContainerAware
             throw new \Exception("Feature data given isn't compatible to save into the table: " . $this->getTableName());
         }
 
-        /** @var Feature $feature */
         $feature = $this->create($featureData);
 
         try {
@@ -315,14 +166,14 @@ class FeatureType extends ContainerAware
         $data                        = $this->cleanFeatureData($feature->toArray());
         $connection                  = $this->getConnection();
         $data[$this->getGeomField()] = $this->transformEwkt($data[$this->getGeomField()], $this->getSrid());
-        $result                      = $connection->insert($this->tableName, $data);
+        $result                      = $connection->insert($this->getTableName(), $data);
         $lastId                      = $connection->lastInsertId();
 
-        if($lastId < 1){
+        if ($lastId < 1) {
             switch ($connection->getDatabasePlatform()->getName()) {
                 case self::POSTGRESQL_PLATFORM:
-                    $sql    = "SELECT currval(pg_get_serial_sequence('" . $this->tableName . "','" . $this->getUniqueId() . "'))";
-                    $lastId =  $connection->fetchColumn($sql);
+                    $sql    = "SELECT currval(pg_get_serial_sequence('" . $this->getTableName() . "','" . $this->getUniqueId() . "'))";
+                    $lastId = $connection->fetchColumn($sql);
                     break;
             }
         }
@@ -350,7 +201,7 @@ class FeatureType extends ContainerAware
                 break;
         }
 
-        return $this->connection->fetchColumn($sql);
+        return $this->getConnection()->fetchColumn($sql);
     }
 
     /**
@@ -374,29 +225,14 @@ class FeatureType extends ContainerAware
             throw new \Exception("Feature can't be updated without criteria");
         }
 
-        $connection->update($this->tableName, $data, array($this->uniqueId => $feature->getId()));
+        $connection->update($this->getTableName(), $data, array($this->getUniqueId() => $feature->getId()));
         return $feature;
     }
-
-    /**
-     * Remove feature
-     *
-     * @param  Feature|array|int $featureData
-     * @return int
-     * @throws Exception
-     */
-    public function remove($featureData)
-    {
-        $feature = $this->create($featureData);
-        $this->getConnection()->delete($this->tableName, array($this->uniqueId => $feature->getId()));
-        return $feature;
-    }
-
 
     /**
      * Search feature by criteria
      *
-     * @param array  $criteria
+     * @param array $criteria
      * @return Feature[]
      */
     public function search(array $criteria = array())
@@ -412,26 +248,27 @@ class FeatureType extends ContainerAware
 
         // add GEOM where condition
         if ($intersect) {
-            $geometry = self::roundGeometry($intersect,2);
+            $geometry = self::roundGeometry($intersect, 2);
             $queryBuilder->andWhere(self::genIntersectCondition($this->getPlatformName(), $geometry, $this->geomField, $srid, $this->getSrid()));
         }
 
         // add filter (https://trac.wheregroup.com/cp/issues/3733)
-        if(!empty($this->sqlFilter)){
+        if (!empty($this->sqlFilter)) {
             $queryBuilder->andWhere($this->sqlFilter);
         }
 
         // add second filter (https://trac.wheregroup.com/cp/issues/4643)
-        if($where){
+        if ($where) {
             $queryBuilder->andWhere($where);
         }
 
         $queryBuilder->setMaxResults($maxResults);
         // $queryBuilder->setParameters($params);
+        // $sql = $queryBuilder->getSQL();
+
         $statement  = $queryBuilder->execute();
         $rows       = $statement->fetchAll();
         $hasResults = count($rows) > 0;
-
 
         // Convert to Feature object
         if ($hasResults) {
@@ -446,31 +283,13 @@ class FeatureType extends ContainerAware
     }
 
     /**
-     * Get feature by ID
-     *
-     * @param $id
-     * @return Feature
-     */
-    public function getById($id)
-    {
-        /** @var Statement $statement */
-        $queryBuilder = $this->getSelectQueryBuilder();
-        $queryBuilder->where($this->getUniqueId() . " = :id");
-        $queryBuilder->setParameter('id', $id);
-        $statement = $queryBuilder->execute();
-        $rows      = $statement->fetchAll();
-        $this->prepareResults($rows);
-        return reset($rows);
-    }
-
-    /**
      * Get unique ID
      *
      * @return mixed unique ID
      */
     public function getUniqueId()
     {
-        return $this->uniqueId;
+        return $this->driver->getUniqueId();
     }
 
     /**
@@ -478,7 +297,7 @@ class FeatureType extends ContainerAware
      */
     public function getTableName()
     {
-        return $this->tableName;
+        return $this->driver->getTableName();
     }
 
     /**
@@ -494,7 +313,7 @@ class FeatureType extends ContainerAware
      */
     public function getFields()
     {
-        return $this->fields;
+        return $this->getDriver()->getFields();
     }
 
     /**
@@ -520,7 +339,8 @@ class FeatureType extends ContainerAware
      * @param $platformName
      * @param $geometry
      * @param $geometryAttribute
-     * @param $srid
+     * @param $srid   string SRID from
+     * @param $sridTo string SRID to
      * @return null|string
      */
     public static function genIntersectCondition($platformName, $geometry, $geometryAttribute, $srid, $sridTo)
@@ -604,10 +424,10 @@ class FeatureType extends ContainerAware
     public function getSelectQueryBuilder($srid = null)
     {
         $connection         = $this->getConnection();
-        $geomFieldCondition = self::getGeomAttribute($this->getPlatformName(), $this->geomField, $srid? $srid: $this->getSrid());
-        $spatialFields      = array($this->uniqueId, $geomFieldCondition);
-        $attributes         = array_merge($spatialFields, $this->fields);
-        $queryBuilder       = $connection->createQueryBuilder()->select($attributes)->from($this->tableName, 't');
+        $geomFieldCondition = self::getGeomAttribute($this->getPlatformName(), $this->geomField, $srid ? $srid : $this->getSrid());
+        $spatialFields      = array($this->getUniqueId(), $geomFieldCondition);
+        $attributes         = array_merge($spatialFields, $this->getFields());
+        $queryBuilder       = $connection->createQueryBuilder()->select($attributes)->from($this->getTableName(), 't');
         return $queryBuilder;
     }
 
@@ -629,7 +449,7 @@ class FeatureType extends ContainerAware
         } elseif (is_numeric($args)) {
             $args = array($this->getUniqueId() => intval($args));
         }
-        return $feature ? $feature : new Feature($args, $this->getSrid(), $this->getUniqueId(), $this->getGeomField());
+        return $feature && $feature instanceof Feature ? $feature : new Feature($args, $this->getSrid(), $this->getUniqueId(), $this->getGeomField());
     }
 
     /**
@@ -639,15 +459,16 @@ class FeatureType extends ContainerAware
      */
     public function getSrid()
     {
-        if(!$this->srid){
+        if (!$this->srid) {
             $connection = $this->getConnection();
+            $tableName  = $this->getTableName();
             switch ($this->getPlatformName()) {
                 case self::POSTGRESQL_PLATFORM:
-                    $this->srid = $connection->fetchColumn("SELECT Find_SRID(concat(current_schema()), '$this->tableName', '$this->geomField')");
+                    $this->srid = $connection->fetchColumn("SELECT Find_SRID(concat(current_schema()), '" . $tableName . "', '$this->geomField')");
                     break;
                 // TODO: not tested
                 case self::ORACLE_PLATFORM:
-                    $this->srid = $connection->fetchColumn("SELECT {$this->tableName}.{$this->geomField}.SDO_SRID FROM TABLE {$this->tableName}");
+                    $this->srid = $connection->fetchColumn("SELECT {$tableName}.{$this->geomField}.SDO_SRID FROM TABLE " . $tableName);
                     break;
             }
         }
@@ -696,7 +517,8 @@ class FeatureType extends ContainerAware
      * @see $this->search()
      * @param $sqlFilter
      */
-    protected function setFilter($sqlFilter){
+    protected function setFilter($sqlFilter)
+    {
         $this->sqlFilter = $sqlFilter;
     }
 
@@ -805,7 +627,7 @@ class FeatureType extends ContainerAware
      */
     public function genFilePath($fieldName = null)
     {
-        $id   = $this->countFiles($fieldName)+1;
+        $id   = $this->countFiles($fieldName) + 1;
         $src  = null;
         $path = null;
 
@@ -841,7 +663,8 @@ class FeatureType extends ContainerAware
      * @param $fileInfo
      * @internal param $fileInfos
      */
-    public function setFiles($fileInfo){
+    public function setFiles($fileInfo)
+    {
         $this->filesInfo = $fileInfo;
     }
 
