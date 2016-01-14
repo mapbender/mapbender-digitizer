@@ -4,9 +4,6 @@ namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\DBALException;
 use Mapbender\CoreBundle\Element\HTMLElement;
-use Mapbender\CoreBundle\Entity\Application;
-use Mapbender\CoreBundle\Component\Application as AppComponent;
-use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DigitizerBundle\Component\Uploader;
 use Mapbender\DigitizerBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Entity\FeatureType;

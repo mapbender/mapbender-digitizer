@@ -270,7 +270,11 @@
                     return {
                         items:    items,
                         callback: function(key, options) {
-                            var parameters = options.items[options.$selected.parent().closest('.context-menu-item').data('contextMenuKey')];
+                            var selectedElement = options.$selected;
+                            if(!selectedElement) {
+                                return
+                            }
+                            var parameters = options.items[selectedElement.parent().closest('.context-menu-item').data('contextMenuKey')];
                             if(parameters.items[key].action) {
                                 parameters.items[key].action(key, options, parameters);
                             }
