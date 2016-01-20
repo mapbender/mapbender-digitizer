@@ -662,6 +662,24 @@
             var tableApi = table.resultTable('getApi');
             var buttons = [];
 
+            if(schema.popup && schema.popup.buttons) {
+                $.each(schema.popup.buttons, function(k, button){
+                    $.each(button, function(k, property) {
+                        if(k == "click") {
+                            button[k] = function() {
+                                var form = $(this).closest(".ui-dialog-content");
+                                var data = form.formData();
+                                eval(property);
+                            }
+                        }
+                        if(k == "title") {
+                            button[k] = translate(property, false);
+                        }
+                    });
+                    buttons.push(button)
+                });
+            }
+
             if(schema.allowEditData){
                 var saveButton = {
                     text: translate("feature.save"),
@@ -753,11 +771,11 @@
             var popupConfiguration = {
                 title: translate("feature.attributes"),
                 width: widget.featureEditDialogWidth,
-                buttons: buttons
             };
 
-            if(widget.currentSettings.hasOwnProperty('popup')){
-                $.extend(popupConfiguration,widget.currentSettings.popup);
+            if(schema.popup) {
+                $.extend(popupConfiguration, schema.popup);
+                popupConfiguration.buttons = buttons;
             }
 
             var dialog = $("<div/>");
