@@ -11,7 +11,7 @@
     "require": {
         "php": ">=5.3.3",
         "blueimp/jquery-file-upload": "9.*",
-        "mapbender/data-source": "0.*",
+        "mapbender/data-source": "0.*@dev",
         "phayes/geophp": "1.2"
     },
     "require-dev": {
