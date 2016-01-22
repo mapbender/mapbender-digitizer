@@ -14,6 +14,9 @@
         "mapbender/data-source": "0.*",
         "phayes/geophp": "1.2"
     },
+    "require-dev": {
+        "mapbender/data-source": "*"
+    },
     "minimum-stability": "dev",
     "config": {
         "bin-dir": "bin"
