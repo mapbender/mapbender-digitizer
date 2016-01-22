@@ -27,8 +27,28 @@ $selectColor: #F7F79A;
   .mapbender-element-result-table {
     margin-top: 10px;
 
-    > .dataTables_wrapper.no-footer{
-      overflow: hidden;
+    > .dataTables_wrapper{
+      > .dataTables_filter {
+        > label {
+          width: 100%;
+          line-height: 14px;
+          > input[type="search"] {
+            display: block;
+            width: 100%;
+            margin-bottom: 8px;
+            border: 1px solid rgb(169, 169, 169);
+            color: #555;
+            font-size: 14px;
+            font-weight: normal;
+            height: 29px;
+            padding: 2px 24px 2px 7px;
+            line-height: 1.42857143;
+          }
+        }
+      }
+      .no-footer{
+        overflow: hidden;
+      }
     }
 
     // Row higlight by feature select
