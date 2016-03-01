@@ -62,7 +62,7 @@ class Digitizer extends HTMLElement
                         'mapbender.element.digitizer.js'
         ),
                      'css'   => array('sass/element/digitizer.scss'),
-                     'trans' => array('@MapbenderDigitizerBundle/Resources/views/Element/digitizer.json.twig'));
+                     'trans' => array('MapbenderDigitizerBundle:Element:digitizer.json.twig'));
     }
 
     /**
@@ -100,7 +100,6 @@ class Digitizer extends HTMLElement
         }
         return $configuration;
     }
-
     /**
      * @inheritdoc
      */
