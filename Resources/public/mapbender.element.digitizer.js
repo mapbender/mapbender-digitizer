@@ -662,24 +662,6 @@
             var tableApi = table.resultTable('getApi');
             var buttons = [];
 
-            if(schema.popup && schema.popup.buttons) {
-                $.each(schema.popup.buttons, function(k, button){
-                    $.each(button, function(k, property) {
-                        if(k == "click") {
-                            button[k] = function() {
-                                var form = $(this).closest(".ui-dialog-content");
-                                var data = form.formData();
-                                eval(property);
-                            }
-                        }
-                        if(k == "title") {
-                            button[k] = translate(property, false);
-                        }
-                    });
-                    buttons.push(button)
-                });
-            }
-
             if(schema.allowEditData){
                 var saveButton = {
                     text: translate("feature.save"),
@@ -775,7 +757,34 @@
 
             if(schema.popup) {
                 $.extend(popupConfiguration, schema.popup);
-                popupConfiguration.buttons = buttons;
+
+                if(popupConfiguration.buttons && !schema._popupButtonsInitialized) {
+                    // Initialize custom button events
+                    _.each(popupConfiguration.buttons, function(button) {
+                        if(button.click) {
+                            var eventHandlerCode = button.click;
+                            button.click = function(e) {
+                                var _widget = widget;
+                                var el = $(this);
+                                var form = $(this).closest(".ui-dialog-content");
+                                var feature = form.data('feature');
+                                var data = feature.data;
+
+                                eval(eventHandlerCode);
+
+                                e.preventDefault();
+                                return false;
+                            }
+                        }
+                    });
+
+                    // Merge default and custom buttons
+                    _.each(buttons, function(button) {
+                        popupConfiguration.buttons.push(button);
+                    });
+
+                    schema._popupButtonsInitialized = true;
+                }
             }
 
             var dialog = $("<div/>");
@@ -837,6 +846,7 @@
             dialog.generateElements({children: widget.currentSettings.formItems});
             dialog.popupDialog(popupConfiguration);
             widget.currentPopup = dialog;
+            dialog.data('feature',olFeature);
             setTimeout(function() {
                 dialog.formData(olFeature.data);
             }, 21);
