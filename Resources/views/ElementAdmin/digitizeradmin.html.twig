@@ -155,9 +155,15 @@
             // Resize popup and elements
             var popupContainer = $(".popupContainer.modal.show > .popup");
             var yamlEditorElement = $("#elementForm > div > div.inputWrapper.code-yaml > div");
-            popupContainer.width($(document).width() - 100);
-            popupContainer.height($(window).height()-200);
-            yamlEditorElement.height($(window).height() - 450);
+
+            popupContainer.animate({
+                width:  $(document).width() - 100,
+                height: $(window).height() - 200
+            }, 350);
+
+            yamlEditorElement.animate({
+                height: $(window).height() - 480
+            }, 350);
         })
     </script>
     {{ form_label(form.title) }}{{ form_widget(form.title) }}
