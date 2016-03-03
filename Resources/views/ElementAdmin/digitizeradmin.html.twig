@@ -128,15 +128,28 @@
 
             var textarea = document.getElementById("form_configuration_schemes");
             var yamlEditor = CodeMirror.fromTextArea(textarea, {
-                //                lineNumbers: true,
                 mode: "text/x-yaml",
                 styleActiveLine: true,
                 lineNumbers: true,
+                indentUnit: 2,
+                tabSize: 4,
+                indentWithTabs: false,
                 lineWrapping: true
             });
 
+            yamlEditor.setOption("extraKeys", {
+                Tab: function(cm) {
+                    if(cm.somethingSelected()) {
+                        cm.indentSelection("add");
+                    } else {
+                        cm.replaceSelection(cm.getOption("indentWithTabs") ? "\t" : Array(cm.getOption("indentUnit") + 1).join(" "), "end", "+input");
+                    }
+                }
+            });
+
             yamlEditor.on("change",function(obj, changedObject){
-                $(textarea).val(obj.getValue());
+                var value = obj.getValue().replace(/\t/g,"    ");
+                $(textarea).val(value);
             });
 
             // Resize popup and elements
