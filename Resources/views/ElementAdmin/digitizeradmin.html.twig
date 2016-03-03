@@ -1,7 +1,7 @@
 <div class="elementForm defaultForm elementFormDigitizer">
     <style media="all">
         .elementFormDigitizer {
-            width: 513px;
+            width: 100%;
         }
 
         .elementFormDigitizer label.labelInput {
@@ -19,8 +19,8 @@
         }
 
         .elementFormDigitizer .dropdown {
-            min-width: 432px;
-            float: right;
+            min-width: auto;
+            width: 100%;
         }
 
         /* Dirty fix */
@@ -137,7 +137,14 @@
 
             yamlEditor.on("change",function(obj, changedObject){
                 $(textarea).val(obj.getValue());
-            })
+            });
+
+            // Resize popup and elements
+            var popupContainer = $(".popupContainer.modal.show > .popup");
+            var yamlEditorElement = $("#elementForm > div > div.inputWrapper.code-yaml > div");
+            popupContainer.width($(document).width() - 100);
+            popupContainer.height($(window).height()-200);
+            yamlEditorElement.height($(window).height() - 450);
         })
     </script>
     {{ form_label(form.title) }}{{ form_widget(form.title) }}
