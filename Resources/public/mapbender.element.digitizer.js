@@ -756,6 +756,9 @@
             };
 
             if(schema.popup) {
+                if(!schema.popup.buttons) {
+                    schema.popup.buttons = [];
+                }
                 $.extend(popupConfiguration, schema.popup);
 
                 if(popupConfiguration.buttons && !schema._popupButtonsInitialized) {
