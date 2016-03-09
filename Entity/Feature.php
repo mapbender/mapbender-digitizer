@@ -12,6 +12,13 @@ use Mapbender\DataSourceBundle\Entity\DataItem;
  */
 class Feature extends DataItem
 {
+    const TYPE_POINT              = 'POINT';
+    const TYPE_LINESTRING         = 'LINESTRING';
+    const TYPE_POLYGON            = 'POLYGON';
+    const TYPE_MULTIPOINT         = 'MULTIPOINT';
+    const TYPE_MULTILINESTRING    = 'MULTILINESTRING';
+    const TYPE_MULTIPOLYGON       = 'MULTIPOLYGON';
+    const TYPE_GEOMETRYCOLLECTION = 'GEOMETRYCOLLECTION';
 
     /**
      * Geometries as WKT
@@ -32,7 +39,14 @@ class Feature extends DataItem
      *
      * @ORM\Column(name="geomFieldName", type="text", nullable=true)
      */
-    private $geomField;
+    protected $geomField;
+
+    /**
+     * Geometry type.
+     *
+     * @ORM\Column(name="type", type="text", nullable=true)
+     */
+    protected $type;
 
     /**
      * @param $geom
@@ -187,5 +201,27 @@ class Feature extends DataItem
      */
     public function hasGeom(){
         return !is_null($this->geom);
+    }
+
+    /**
+     * Get geometry type
+     *
+     * TODO: recover type from geometry.
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * Set geometry type
+     *
+     * @param string $type Feature::TYPE_*
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
     }
 }
