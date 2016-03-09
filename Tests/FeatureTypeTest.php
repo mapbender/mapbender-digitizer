@@ -19,6 +19,14 @@ class FeatureTypeTest extends SymfonyTest
 {
     protected $configuration;
 
+    const WKT_POINT              = "POINT(0 0)";
+    const WKT_LINESTRING         = "LINESTRING(0 0,1 1,1 2)";
+    const WKT_POLYGON            = "POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))";
+    const WKT_MULTIPOINT         = "MULTIPOINT((0 0),(1 2))";
+    const WKT_MULTILINESTRING    = "MULTILINESTRING((0 0,1 1,1 2),(2 3,3 2,5 4))";
+    const WKT_MULTIPOLYGON       = "MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1)))";
+    const WKT_GEOMETRYCOLLECTION = "GEOMETRYCOLLECTION(POINT(2 3),LINESTRING(2 3,3 4))";
+
     public function setUp()
     {
         $this->configuration = array();
