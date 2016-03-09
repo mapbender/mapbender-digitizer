@@ -5,12 +5,13 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Query;
+use Mapbender\CoreBundle\Component\Application as AppComponent;
 use Mapbender\DataSourceBundle\Component\DataStore;
+use Mapbender\DataSourceBundle\Component\Drivers\PostgreSQL;
 use Mapbender\DataSourceBundle\Entity\DataItem;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Security\Acl\Exception\Exception;
-use Mapbender\CoreBundle\Component\Application as AppComponent;
 
 /**
  * Class FeatureType handles Feature objects.
@@ -177,7 +178,6 @@ class FeatureType extends DataStore
                     break;
             }
         }
-
         $feature->setId($lastId);
         return $feature;
     }
@@ -508,6 +508,35 @@ class FeatureType extends DataStore
             }
         }
         return $data;
+    }
+
+    /**
+     * Add geometry column
+     *
+     * @param string $tableName
+     * @param string $type
+     * @param string $srid
+     * @param string $geomFieldName
+     * @param string $schemaName
+     * @param int    $dimensions
+     * @return bool
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function addGeometryColumn($tableName,
+        $type,
+        $srid,
+        $geomFieldName = "geom",
+        $schemaName = "public",
+        $dimensions = 2)
+    {
+        $r = false;
+        if ($this->getDriver()->getPlatformName() == self::POSTGRESQL_PLATFORM) {
+            /** @var PostgreSQL $driver */
+            $driver = $this->getDriver();
+            $driver->addGeometryColumn($tableName, $type, $srid, $geomFieldName, $schemaName, $dimensions);
+            $r = true;
+        }
+        return $r;
     }
 
     /**
