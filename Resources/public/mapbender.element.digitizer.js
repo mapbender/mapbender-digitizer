@@ -1495,7 +1495,7 @@
                     }).done(function(response) {
 
                         //widget.removeData(dataItem);
-                        widget.currentPopup.popupDialog('close');
+                        widget.currentPopup.currentPopup.popupDialog('close');
                         widget.currentPopup.currentPopup = null;
                     })
                 }
