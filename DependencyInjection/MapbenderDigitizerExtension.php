@@ -2,7 +2,7 @@
 
 namespace Mapbender\DigitizerBundle\DependencyInjection;
 
-use Mapbender\DataSourceBundle\Extension\BaseXmlLoaderExtension;
+use Mapbender\DigitizerBundle\Extension\BaseXmlLoaderExtension;
 
 /**
  * Class MapbenderDigitizerExtension
