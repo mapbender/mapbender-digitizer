@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Query;
 use Mapbender\CoreBundle\Component\Application as AppComponent;
 use Mapbender\DataSourceBundle\Component\DataStore;
-use Mapbender\DataSourceBundle\Component\Drivers\PostgreSQL;
+use Mapbender\DataSourceBundle\Component\Drivers\Geographic;
 use Mapbender\DataSourceBundle\Entity\DataItem;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
@@ -537,8 +537,8 @@ class FeatureType extends DataStore
         $dimensions = 2)
     {
         $r = false;
-        if ($this->getDriver()->getPlatformName() == self::POSTGRESQL_PLATFORM) {
-            /** @var PostgreSQL $driver */
+        if ($this->driver instanceof Geographic) {
+            /** @var Geographic $driver */
             $driver = $this->getDriver();
             $driver->addGeometryColumn($tableName, $type, $srid, $geomFieldName, $schemaName, $dimensions);
             $r = true;
