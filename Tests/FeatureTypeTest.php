@@ -7,6 +7,7 @@ use Doctrine\DBAL\Driver\Connection;
 use Mapbender\DataSourceBundle\Component\Drivers\Geographic;
 use Mapbender\DataSourceBundle\Component\Drivers\PostgreSQL;
 use Mapbender\DataSourceBundle\Tests\SymfonyTest;
+use Mapbender\DigitizerBundle\Component\Features;
 use Mapbender\DigitizerBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Entity\FeatureType;
 
@@ -61,50 +62,54 @@ class FeatureTypeTest extends SymfonyTest
     }
 
     /**
-     * POINT
-     * • LINESTRING
-    • POLYGON
-    • MULTIPOINT
-    • MULTILINESTRING
-    • MULTIPOLYGON
-    • GEOMETRYCOLLECTION
+     * Test save and recognize geometries
      */
-    public function testSomething()
+    public function testGeometries()
     {
         /** @var Connection $db */
         /** @var Registry $doctrine */
+        /** @var PostgreSQL|Geographic $driver */
+        /** @var Features $features */
         $container      = self::$container;
         $doctrine       = $container->get("doctrine");
+        $features       = $container->get("features");
         $connectionName = $this->configuration['connection'];
         $db             = $doctrine->getConnection($connectionName);
-        $version        = $db->query("SELECT version()")->fetchColumn();
         $schemaName     = 'public';
-        $tableName      = "test_points";
-        $srid           = 4326;
-        $type           = 'POINT';
-        $geomFieldName  = 'geom';
-        $uniqueIdField  = 'id';
-        $wkt            = 'POINT(-110 30)';
-        $featureType    = new FeatureType($container, array(
-            'connection' => $connectionName,
-            'table'      => $tableName,
-            'srid'       => $srid,
-            'geomField'  => $geomFieldName
-        ));
-        $feature = new Feature(array(
-            'geometry'   => $wkt,
-            'properties' => array(
-            )
-        ), $srid, $uniqueIdField, $geomFieldName);
 
-        /** @var PostgreSQL|Geographic $driver */
-        $driver = $featureType->getDriver();
-        $driver->addGeometryColumn();
-        $driver->createTable($tableName, $uniqueIdField, true);
-        $featureType->addGeometryColumn($tableName, $type, $srid, $geomFieldName);
-        $savedFeature = $featureType->save($feature);
-        $this->assertEquals($savedFeature->getGeom(), $wkt);
+        foreach (array(
+                     'POINT'        => self::WKT_POINT,
+                     'POLYGON'      => self::WKT_POLYGON,
+                     'MULTIPOLYGON' => self::WKT_MULTIPOLYGON,
+                 ) as $type => $wkt) {
 
+            $wkt           = preg_replace('/,\s+/s', ',', $wkt);
+            $tableName     = "test_" . strtolower($type);
+            $srid          = 4326;
+            $geomFieldName = 'geom';
+            $uniqueIdField = 'id';
+            $featureType   = new FeatureType($container, array(
+                'connection' => $connectionName,
+                'table'      => $tableName,
+                'srid'       => $srid,
+                'geomField'  => $geomFieldName
+            ));
+            $driver        = $featureType->getDriver();
+            $feature       = new Feature(array(
+                'geometry'   => $wkt,
+                'properties' => array()
+            ), $srid, $uniqueIdField, $geomFieldName);
+
+            $driver->createTable($tableName, $uniqueIdField, true);
+            //$db->exec("DELETE FROM " . $tableName);
+            $featureType->addGeometryColumn($tableName, $type, $srid, $geomFieldName);
+            for ($i = 0; $i < 100; $i++) {
+                $savedFeature = $featureType->save($feature);
+                $feature->setId(null);
+                $this->assertEquals($savedFeature->getGeom(), $wkt);
+            }
+        }
+        //$driver->dropTable($tableName);
         //CREATE TABLE gtest ( gid serial primary key, name varchar(20)
         //, geom geometry(LINESTRING) );
         //$featureType = new FeatureType(self::$container);
