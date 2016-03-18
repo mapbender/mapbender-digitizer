@@ -331,6 +331,16 @@
 
             if(options.tableTranslation) {
                 translateObject(options.tableTranslation);
+            } else {
+                options.tableTranslation = {
+                    sSearch:       translate("search.title") + ':',
+                    sEmptyTable:   translate("search.table.empty"),
+                    sZeroRecords:  translate("search.table.zerorecords"),
+                    sInfo:         translate("search.table.info.status"),
+                    sInfoEmpty:    translate("info.empty"),
+                    sInfoFiltered: translate("search.table.info.filtered")
+                };
+                //translateObject(options.tableTranslation);
             }
 
             // build select options
