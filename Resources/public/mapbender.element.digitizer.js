@@ -337,7 +337,7 @@
                     sEmptyTable:   translate("search.table.empty"),
                     sZeroRecords:  translate("search.table.zerorecords"),
                     sInfo:         translate("search.table.info.status"),
-                    sInfoEmpty:    translate("info.empty"),
+                    sInfoEmpty:    translate("search.table.info.empty"),
                     sInfoFiltered: translate("search.table.info.filtered")
                 };
                 //translateObject(options.tableTranslation);
