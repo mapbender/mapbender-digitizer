@@ -8,6 +8,7 @@ use Doctrine\ORM\Query;
 use Mapbender\CoreBundle\Component\Application as AppComponent;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\Drivers\Geographic;
+use Mapbender\DataSourceBundle\Component\Drivers\PostgreSQL;
 use Mapbender\DataSourceBundle\Entity\DataItem;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
@@ -163,17 +164,18 @@ class FeatureType extends DataStore
     public function insert($featureData)
     {
         /** @var Feature $feature */
-        $feature                     = $this->create($featureData);
-        $data                        = $this->cleanFeatureData($feature->toArray());
-        $connection                  = $this->getConnection();
-        $data[$this->getGeomField()] = $this->transformEwkt($data[$this->getGeomField()], $this->getSrid());
-        $result                      = $connection->insert($this->getTableName(), $data);
-        $lastId                      = $connection->lastInsertId();
+        $tableName                     = $this->getTableName();
+        $feature                       = $this->create($featureData);
+        $data                          = $this->cleanFeatureData($feature->toArray());
+        $connection                    = $this->getConnection();
+        $data[ $this->getGeomField() ] = $this->transformEwkt($data[ $this->getGeomField() ], $this->getSrid());
+        $result                        = $connection->insert($tableName, $data);
+        $lastId                        = $connection->lastInsertId();
 
         if ($lastId < 1) {
             switch ($connection->getDatabasePlatform()->getName()) {
                 case self::POSTGRESQL_PLATFORM:
-                    $sql    = "SELECT currval(pg_get_serial_sequence('" . $this->getTableName() . "','" . $this->getUniqueId() . "'))";
+                    $sql    = "SELECT currval(pg_get_serial_sequence('" . $tableName . "','" . $this->getUniqueId() . "'))";
                     $lastId = $connection->fetchColumn($sql);
                     break;
             }
@@ -183,25 +185,37 @@ class FeatureType extends DataStore
     }
 
     /**
-     * @param      $geom
+     * @param      $wkt
      * @param null $srid
      * @return bool|string
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function transformEwkt($geom, $srid = null)
+    public function transformEwkt($wkt, $srid = null)
     {
-        $srid = $srid ? $srid : $this->getSrid();
-        $sql  = null;
+        $srid       = $srid ? $srid : $this->getSrid();
+        $sql        = null;
+        $connection = $this->getConnection();
         switch ($this->getPlatformName()) {
             case self::POSTGRESQL_PLATFORM:
-                $sql = "SELECT ST_TRANSFORM(ST_GEOMFROMTEXT('$geom'), $srid)";
+                $type = $this->getGeomType($this->getTableName());
+                if ($type) {
+                    $wktType = self::getWktType($wkt);
+                    if ($wktType != $type) {
+                        if ($type == "MULTIPOLYGON" || $type == "MULTILINESTRING" || $type == "MULTIPOINT") {
+                            if ($wktType == "POLYGON" || $wktType == "LINESTRING" || $wktType == "POINT") {
+                                $wkt = 'SRID=' . $srid . ';' . $connection->fetchColumn("SELECT ST_ASTEXT(ST_MULTI(" . $connection->quote($wkt) . "))");
+                            }
+                        }
+                    }
+                }
+                $sql    = "SELECT ST_TRANSFORM(ST_GEOMFROMTEXT('$wkt'), $srid)";
                 break;
             case self::ORACLE_PLATFORM:
-                $sql = "SELECT SDO_CS.TRANSFORM(SDO_UTIL.TO_WKBGEOMETRY('$geom'), $srid)";
+                $sql = "SELECT SDO_CS.TRANSFORM(SDO_UTIL.TO_WKBGEOMETRY('$wkt'), $srid)";
                 break;
         }
 
-        return $this->getConnection()->fetchColumn($sql);
+        return $connection->fetchColumn($sql);
     }
 
     /**
@@ -218,14 +232,15 @@ class FeatureType extends DataStore
         $feature                     = $this->create($featureData);
         $data                        = $this->cleanFeatureData($feature->toArray());
         $connection                  = $this->getConnection();
-        $data[$this->getGeomField()] = $this->transformEwkt($data[$this->getGeomField()], $this->getSrid());
+        $data[$this->getGeomField()] = $this->transformEwkt($data[$this->getGeomField()]);
         unset($data[$this->getUniqueId()]);
 
         if (empty($data)) {
             throw new \Exception("Feature can't be updated without criteria");
         }
 
-        $connection->update($this->getTableName(), $data, array($this->getUniqueId() => $feature->getId()));
+        $tableName = $this->getTableName();
+        $connection->update($tableName, $data, array($this->getUniqueId() => $feature->getId()));
         return $feature;
     }
 
@@ -703,5 +718,36 @@ class FeatureType extends DataStore
     public function getFileInfo()
     {
         return $this->filesInfo;
+    }
+
+    /**
+     * @param        $tableName
+     * @param string $schema
+     * @return mixed|null
+     */
+    public function getGeomType($tableName, $schema = null)
+    {
+        $driver = $this->getDriver();
+        $type   = null;
+        if($driver instanceof Geographic){
+            /** @var Geographic|PostgreSQL $driver */
+            $type = $driver->getTableGeomType($tableName,$schema);
+        }
+        return $type;
+    }
+
+    /**
+     * Detect (E)WKT geometry type
+     *
+     * @param $wkt
+     * @return string
+     */
+    public static function getWktType($wkt)
+    {
+        $isEwkt = strpos($wkt, 'SRID') === 0;
+        if ($isEwkt) {
+            $wkt = substr($wkt, strpos($wkt, ';') + 1);
+        }
+        return substr($wkt, 0, strpos($wkt, '('));
     }
 }
