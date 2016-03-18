@@ -1,6 +1,6 @@
 <?php
 
-namespace Mapbender\DigitizerBundle\Tests;
+namespace Mapbender\gitizerBundle\Tests;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\DBAL\Driver\Connection;
@@ -19,13 +19,15 @@ use Mapbender\DigitizerBundle\Entity\FeatureType;
  */
 class FeatureTypeTest extends SymfonyTest
 {
+    const REMOVE_TEST_TABLES = false;
+
     protected $configuration;
 
     // The OGC and ISO specifications
     const WKT_POINT              = "POINT(0 0)";
     const WKT_LINESTRING         = "LINESTRING(0 0,1 1,1 2)";
     const WKT_POLYGON            = "POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))";
-    const WKT_MULTIPOINT         = "MULTIPOINT((0 0),(1 2))";
+    const WKT_MULTIPOINT         = "MULTIPOINT(0 0,1 2)";
     const WKT_MULTILINESTRING    = "MULTILINESTRING((0 0,1 1,1 2),(2 3,3 2,5 4))";
     const WKT_MULTIPOLYGON       = "MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1)))";
     const WKT_GEOMETRYCOLLECTION = "GEOMETRYCOLLECTION(POINT(2 3),LINESTRING(2 3,3 4))";
@@ -78,11 +80,16 @@ class FeatureTypeTest extends SymfonyTest
         $schemaName     = 'public';
 
         foreach (array(
-                     'POINT'        => self::WKT_POINT,
-                     'POLYGON'      => self::WKT_POLYGON,
-                     'MULTIPOLYGON' => self::WKT_MULTIPOLYGON,
-                 ) as $type => $wkt) {
+                     self::WKT_POINT,
+                     self::WKT_POLYGON,
+                     self::WKT_LINESTRING,
+                     self::WKT_MULTIPOINT,
+                     self::WKT_MULTILINESTRING,
+                     self::WKT_MULTIPOLYGON,
+                     self::WKT_GEOMETRYCOLLECTION,
+                 ) as $wkt) {
 
+            $type          = FeatureType::getWktType($wkt);
             $wkt           = preg_replace('/,\s+/s', ',', $wkt);
             $tableName     = "test_" . strtolower($type);
             $srid          = 4326;
@@ -103,15 +110,16 @@ class FeatureTypeTest extends SymfonyTest
             $driver->createTable($tableName, $uniqueIdField, true);
             //$db->exec("DELETE FROM " . $tableName);
             $featureType->addGeometryColumn($tableName, $type, $srid, $geomFieldName);
-            for ($i = 0; $i < 100; $i++) {
+
+            for ($i = 0; $i < 10; $i++) {
                 $savedFeature = $featureType->save($feature);
                 $feature->setId(null);
                 $this->assertEquals($savedFeature->getGeom(), $wkt);
             }
+
+            if(self::REMOVE_TEST_TABLES){
+                $driver->dropTable($tableName);
+            }
         }
-        //$driver->dropTable($tableName);
-        //CREATE TABLE gtest ( gid serial primary key, name varchar(20)
-        //, geom geometry(LINESTRING) );
-        //$featureType = new FeatureType(self::$container);
     }
 }
