@@ -156,13 +156,14 @@
             var popupContainer = $(".popupContainer.modal.show > .popup");
             var yamlEditorElement = $("#elementForm > div > div.inputWrapper.code-yaml > div");
 
+            popupContainer.css('margin-top', 0);
             popupContainer.animate({
-                width:  $(document).width() - 100,
-                height: $(window).height() - 200
+                width:  $(document).width() ,
+                height: $(window).height() -10
             }, 350);
 
             yamlEditorElement.animate({
-                height: $(window).height() - 480
+                height: $(window).height() - 285
             }, 350);
         })
     </script>
