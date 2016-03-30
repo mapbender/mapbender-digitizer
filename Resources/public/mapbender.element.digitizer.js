@@ -267,6 +267,15 @@
                         });
                     }
 
+                    if(!schema.useContextMenu){
+                        return {
+                            callback: function(){},
+                            items: {
+                                menuItem: {}
+                            }
+                        };
+                    }
+
                     return {
                         items:    items,
                         callback: function(key, options) {
@@ -302,6 +311,13 @@
                         if(schema.allowEditData) {
                             items['edit'] = {name: "Edit"};
                         }
+                    }else{
+                        return {
+                            callback: function(){},
+                            items: {
+                                menuItem: {}
+                            }
+                        };
                     }
 
                     return {
