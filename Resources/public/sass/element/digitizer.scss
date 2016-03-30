@@ -86,6 +86,10 @@ $selectColor: #F7F79A;
 }
 
 .modal-body {
+  &.popup-dialog > form {
+    padding: 10px;
+  }
+
   div.notifyjs-container > div.notifyjs-bootstrap-base > span {
     display: block;
     width: auto;
