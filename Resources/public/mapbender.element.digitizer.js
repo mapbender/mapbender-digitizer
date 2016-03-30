@@ -108,6 +108,7 @@
             allowEditData:true,
             openFormAfterEdit: true,
             maxResults: 5001,
+            pageLength: 10,
             oneInstanceEdit: true,
             searchType: "currentExtent",
             inlineSearch: false,
@@ -416,7 +417,7 @@
 
                 var resultTableSettings = {
                     lengthChange: false,
-                    pageLength: 10,
+                    pageLength: schema.pageLength,
                     searching: schema.inlineSearch,
                     info: true,
                     processing: false,
