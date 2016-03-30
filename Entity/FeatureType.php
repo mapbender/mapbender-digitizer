@@ -203,7 +203,7 @@ class FeatureType extends DataStore
                     if ($wktType != $type) {
                         if ($type == "MULTIPOLYGON" || $type == "MULTILINESTRING" || $type == "MULTIPOINT") {
                             if ($wktType == "POLYGON" || $wktType == "LINESTRING" || $wktType == "POINT") {
-                                $wkt = 'SRID=' . $srid . ';' . $connection->fetchColumn("SELECT ST_ASTEXT(ST_MULTI(" . $connection->quote($wkt) . "))");
+                                $wkt = 'SRID=' . $srid . ';' . $connection->fetchColumn("SELECT ST_ASTEXT(ST_TRANSFORM(ST_MULTI(" . $connection->quote($wkt) . "),$srid))");
                             }
                         }
                     }
