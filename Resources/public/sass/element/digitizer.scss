@@ -86,8 +86,14 @@ $selectColor: #F7F79A;
 }
 
 .modal-body {
-  &.popup-dialog > form {
-    padding: 10px;
+  &.popup-dialog {
+    > form,
+    > .form-group{
+      margin: 5px 10px 0;
+      &:last-child{
+        margin-bottom: 10px;
+      }
+    }
   }
 
   div.notifyjs-container > div.notifyjs-bootstrap-base > span {
