@@ -87,6 +87,10 @@ $selectColor: #F7F79A;
 
 .modal-body {
   &.popup-dialog {
+    > fieldset.form-group{
+      margin-left: -5px;
+      margin-right: -5px;
+    }
     > form,
     > .form-group{
       margin: 5px 10px 0;
