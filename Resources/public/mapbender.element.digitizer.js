@@ -474,9 +474,6 @@
                                 olFeature.layer = layer;
 
                                 //widget.reloadFeatures(layer);
-                                window.setTimeout(function(){
-
-                                },1000);
                                 layer.redraw();
 
                                 digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
@@ -1002,7 +999,7 @@
 
             for (var k in features) {
                 domRow = tableWidget.getDomRowByData(features[k]);
-                if(domRow) {
+                if(domRow && domRow.size()) {
                     tableWidget.showByRow(domRow);
                     if(highlight) {
                         domRow.addClass('hover');
@@ -1177,28 +1174,6 @@
         },
 
         /**
-         * Get features from cluster
-         *
-         * @param olFeaturesRaw
-         * @returns {Array}
-         */
-        getFeaturesFromCluster: function(olFeaturesRaw) {
-            var olFeatures = [];
-            $.each(olFeaturesRaw, function(i, olFeature) {
-                if(olFeature.cluster) {
-                    $.each(olFeature.cluster, function(i, _olFeature) {
-                        _olFeature.layer = olFeature.layer;
-                        olFeatures.push(_olFeature);
-                    })
-                } else {
-                    olFeatures.push(olFeature);
-                }
-            });
-            return olFeatures;
-        },
-
-
-        /**
          * Find olFeature schema by olFeature data
          *
          * @param olFeature
@@ -1208,20 +1183,6 @@
             var widget = this;
             var options = widget.options;
             return _.find(options.schemes, {layer: olFeature.layer});
-        },
-
-        /**
-         * Normalize open layer feature
-         * @param _olFeature
-         * @returns {*}
-         */
-        normalizeOpenLayerFeature: function(_olFeature) {
-            var olFeature = _olFeature;
-            if(_olFeature.cluster) {
-                olFeature = _.last(_olFeature.cluster);
-                olFeature.layer = _olFeature.layer;
-            }
-            return olFeature;
         },
 
         /**
