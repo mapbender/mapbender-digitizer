@@ -1011,36 +1011,17 @@
             }
         },
 
-        _highlightFeature: function(olFeature, highlight) {
-            if(!olFeature) {
+        _highlightFeature: function(feature, highlight) {
+            if(!feature || (feature && !feature.layer) || (feature && feature.cluster)) {
                 return;
             }
 
-            var layer = olFeature.layer;
-            var isClustered = !!layer.features[0].cluster;
+            var layer = feature.layer;
+            var features = feature.cluster ? feature.cluster : [feature];
 
-
-            if(isClustered){
-                var cluster;
-                _.each(layer.features,function(clusteredFeature){
-                    _.each(clusteredFeature.cluster, function(_feature){
-                        if(_feature == olFeature){
-                            cluster = clusteredFeature;
-                            return false;
-                        }
-                    });
-                    if(cluster){
-                        layer.drawFeature(olFeature, highlight ? 'select' : 'default');
-                        return false;
-                    }
-                });
-            }else{
-                layer.drawFeature(olFeature, highlight ? 'select' : 'default');
-            }
-
-
-            //olFeature.renderIntent = highlight ? 'select' : 'default';
-            //olFeature.layer.redraw();
+            _.each(features, function(feature) {
+                layer.drawFeature(feature, highlight ? 'select' : 'default');
+            });
         },
 
         /**
