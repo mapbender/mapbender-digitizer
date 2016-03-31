@@ -527,25 +527,41 @@
                         widget._openFeatureEditDialog(features[0]);
                     },
                     overFeature:  function(feature) {
+                        var isScetchFeature = !feature.cluster && feature._sketch && _.size(feature.data) == 0;
                         var features = feature.cluster ? feature.cluster : [feature];
                         var lastFeatureRow;
 
-                        _.each(features, function(feature) {
-                            var domRow = tableWidget.getDomRowByData(feature);
-                            tableWidget.showByRow(domRow);
-                            domRow.addClass('hover');
-                            lastFeatureRow = domRow;
+                        if(isScetchFeature) {
+                            return;
+                        }
+
+                        _.each(features, function(_feature) {
+                            var domRow = tableWidget.getDomRowByData(_feature);
+                            if(domRow){
+                                tableWidget.showByRow(domRow);
+                                domRow.addClass('hover');
+                                lastFeatureRow = domRow;
+                            }
                         });
-                        tableWidget.showByRow(lastFeatureRow);
+                        if(lastFeatureRow){
+                            tableWidget.showByRow(lastFeatureRow);
+                        }
 
                         layer.drawFeature(feature, 'select');
                     },
                     outFeature:   function(feature) {
+                        var isScetchFeature = !feature.cluster && feature._sketch && _.size(feature.data) == 0;
                         var features = feature.cluster ? feature.cluster : [feature];
+
+                        if(isScetchFeature) {
+                            return;
+                        }
 
                         _.each(features, function(feature) {
                             var domRow = tableWidget.getDomRowByData(feature);
-                            domRow.removeClass('hover');
+                            if(domRow){
+                                domRow.removeClass('hover');
+                            }
                         });
 
                         layer.drawFeature(feature, 'default');
