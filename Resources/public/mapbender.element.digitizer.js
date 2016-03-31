@@ -462,7 +462,7 @@
                                 var layer = event.object.layer;
                                 var schema = widget.findSchemaByLayer(layer);
                                 var digitizerToolSetElement = $(".digitizing-tool-set", frame);
-                                var properties = jQuery.extend(true, {}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
+                                var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
                                 //
                                 //if(schema.isClustered){
                                 //    $.notify('Create new feature is by clusterring not posible');
@@ -672,6 +672,7 @@
                     text: translate("feature.save"),
                     click: function() {
                         var form = $(this).closest(".ui-dialog-content");
+                        var olFeature = form.data('feature');
                         var formData = form.formData();
                         var wkt = new OpenLayers.Format.WKT().write(olFeature);
                         var srid = widget.map.getProjectionObject().proj.srsProjNumber;
@@ -854,7 +855,7 @@
             dialog.generateElements({children: widget.currentSettings.formItems});
             dialog.popupDialog(popupConfiguration);
             widget.currentPopup = dialog;
-            dialog.data('feature',olFeature);
+            dialog.data('feature', olFeature);
             setTimeout(function() {
                 dialog.formData(olFeature.data);
             }, 21);
