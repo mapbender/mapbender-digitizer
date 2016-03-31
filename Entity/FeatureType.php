@@ -130,15 +130,30 @@ class FeatureType extends DataStore
             throw new \Exception("Feature data given isn't compatible to save into the table: " . $this->getTableName());
         }
 
-        $feature = $this->create($featureData);
+        $feature         = $this->create($featureData);
+        $event           = array(
+            'item'    => &$featureData,
+            'feature' => $feature
+        );
+        $this->allowSave = true;
 
         try {
-            // Insert if no ID given
-            if (!$autoUpdate || !$feature->hasId()) {
-                $feature = $this->insert($feature);
-            } // Replace if has ID
-            else {
-                $feature = $this->update($feature);
+            if (isset($this->events['onBeforeSave'])) {
+                $this->secureEval($this->events['onBeforeSave'], $event);
+            }
+
+            if ($this->allowSave) {
+                // Insert if no ID given
+                if (!$autoUpdate || !$feature->hasId()) {
+                    $feature = $this->insert($feature);
+                } // Replace if has ID
+                else {
+                    $feature = $this->update($feature);
+                }
+            }
+
+            if (isset($this->events['onAfterSave'])) {
+                $this->secureEval($this->events['onAfterSave'], $event);
             }
 
             // Get complete feature data
