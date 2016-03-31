@@ -515,7 +515,6 @@
                 option.data("schemaSettings",schema);
                 selector.append(option);
 
-                var tableWidget = table.data('visUiJsResultTable');
                 var selectControl = new OpenLayers.Control.SelectFeature(layer, {
                     hover:        true,
                     clickFeature: function(feature) {
@@ -527,44 +526,10 @@
                         widget._openFeatureEditDialog(features[0]);
                     },
                     overFeature:  function(feature) {
-                        var isScetchFeature = !feature.cluster && feature._sketch && _.size(feature.data) == 0;
-                        var features = feature.cluster ? feature.cluster : [feature];
-                        var lastFeatureRow;
-
-                        if(isScetchFeature) {
-                            return;
-                        }
-
-                        _.each(features, function(_feature) {
-                            var domRow = tableWidget.getDomRowByData(_feature);
-                            if(domRow){
-                                tableWidget.showByRow(domRow);
-                                domRow.addClass('hover');
-                                lastFeatureRow = domRow;
-                            }
-                        });
-                        if(lastFeatureRow){
-                            tableWidget.showByRow(lastFeatureRow);
-                        }
-
-                        layer.drawFeature(feature, 'select');
+                        widget._highlightSchemaFeature(schema, feature, true);
                     },
                     outFeature:   function(feature) {
-                        var isScetchFeature = !feature.cluster && feature._sketch && _.size(feature.data) == 0;
-                        var features = feature.cluster ? feature.cluster : [feature];
-
-                        if(isScetchFeature) {
-                            return;
-                        }
-
-                        _.each(features, function(feature) {
-                            var domRow = tableWidget.getDomRowByData(feature);
-                            if(domRow){
-                                domRow.removeClass('hover');
-                            }
-                        });
-
-                        layer.drawFeature(feature, 'default');
+                        widget._highlightSchemaFeature(schema, feature, false);
                     }
                 });
 
@@ -1012,9 +977,47 @@
         },
 
         /**
+         * Highlight schema feature on the map and table view
+         *
+         * @param {object} schema
+         * @param {OpenLayers.Feature} feature
+         * @param {boolean} highlight
+         * @private
+         */
+        _highlightSchemaFeature: function(schema, feature, highlight) {
+            var widget = this;
+            var table = schema.table;
+            var tableWidget = table.data('visUiJsResultTable');
+            var isSketchFeature = !feature.cluster && feature._sketch && _.size(feature.data) == 0;
+            var features = feature.cluster ? feature.cluster : [feature];
+            var layer = feature.layer;
+            var domRow;
+
+            if(isSketchFeature) {
+                return;
+            }
+
+            //widget._highlightFeature(feature, highlight);
+            layer.drawFeature(feature, highlight ? 'select' : 'default');
+
+            for (var k in features) {
+                domRow = tableWidget.getDomRowByData(features[k]);
+                if(domRow) {
+                    tableWidget.showByRow(domRow);
+                    if(highlight) {
+                        domRow.addClass('hover');
+                    } else {
+                        domRow.removeClass('hover');
+                    }
+                    break;
+                }
+            }
+        },
+
+        /**
          * Highlight feature on the map
          *
-         * @param {olFeature} feature
+         * @param {OpenLayers.Feature} feature
          * @param {boolean} highlight
          * @private
          */
@@ -1022,36 +1025,47 @@
             if(!feature || (feature && !feature.layer)) {
                 return;
             }
+
             var layer = feature.layer;
             var isFeatureVisible = _.contains(feature.layer.features, feature);
+            var features = [];
 
             if(isFeatureVisible) {
-                layer.drawFeature(feature, highlight ? 'select' : 'default');
+                features.push(feature);
             } else {
                 _.each(feature.layer.features, function(_feature) {
-                    if(!_feature.cluster) {
-                        return true;
+                    if(_feature.cluster && _.contains(_feature.cluster, feature)) {
+                        features.push(_feature);
+                        return false;
                     }
-                    if(_.contains(_feature.cluster, feature)){
-                        layer.drawFeature(_feature, highlight ? 'select' : 'default');
-                    }
-                    return false;
                 });
             }
+
+            _.each(features, function(feature) {
+                layer.drawFeature(feature, highlight ? 'select' : 'default');
+            })
+        },
+
+        /**
+         * Get target OpenLayers map object
+         *
+         * @returns  {OpenLayers.Map}
+         */
+        getMap: function(){
+            return this.map;
         },
 
         /**
          * Zoom to JSON feature
          *
-         * @param olFeature
+         * @param {OpenLayers.Feature} feature
          */
-        zoomToJsonFeature: function(olFeature) {
+        zoomToJsonFeature: function(feature) {
             var widget = this;
-            var olMap = widget.map;
-            var schema = widget.findFeatureSchema(olFeature);
+            var olMap = widget.getMap();
+            var schema = widget.findFeatureSchema(feature);
 
-            olMap.zoomToExtent(olFeature.geometry.getBounds());
-
+            olMap.zoomToExtent(feature.geometry.getBounds());
             if(schema.hasOwnProperty('zoomScaleDenominator')) {
                 olMap.zoomToScale(schema.zoomScaleDenominator);
             }
@@ -1060,7 +1074,7 @@
         /**
          * Open feature edit dialog
          *
-         * @param feature
+         * @param {OpenLayers.Feature} feature
          */
         exportGeoJson: function(feature) {
             var widget = this;
