@@ -1011,17 +1011,33 @@
             }
         },
 
+        /**
+         * Highlight feature on the map
+         *
+         * @param {olFeature} feature
+         * @param {boolean} highlight
+         * @private
+         */
         _highlightFeature: function(feature, highlight) {
-            if(!feature || (feature && !feature.layer) || (feature && feature.cluster)) {
+            if(!feature || (feature && !feature.layer)) {
                 return;
             }
-
             var layer = feature.layer;
-            var features = feature.cluster ? feature.cluster : [feature];
+            var isFeatureVisible = _.contains(feature.layer.features, feature);
 
-            _.each(features, function(feature) {
+            if(isFeatureVisible) {
                 layer.drawFeature(feature, highlight ? 'select' : 'default');
-            });
+            } else {
+                _.each(feature.layer.features, function(_feature) {
+                    if(!_feature.cluster) {
+                        return true;
+                    }
+                    if(_.contains(_feature.cluster, feature)){
+                        layer.drawFeature(_feature, highlight ? 'select' : 'default');
+                    }
+                    return false;
+                });
+            }
         },
 
         /**
