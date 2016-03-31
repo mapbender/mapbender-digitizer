@@ -472,6 +472,7 @@
                                 olFeature.isNew = true;
                                 olFeature.attributes = olFeature.data = properties;
                                 olFeature.layer = layer;
+                                olFeature.schema = schema;
 
                                 //widget.reloadFeatures(layer);
                                 layer.redraw();
@@ -649,93 +650,110 @@
         },
 
         /**
+         * On save button click
+         *
+         * @param {OpenLayers.Feature} feature OpenLayers feature
+         * @private
+         */
+        saveFeature: function(feature) {
+            var widget = this;
+            var schema = feature.schema;
+            var dialog = feature.editDialog;
+            var table = schema.table;
+            var tableWidget = table.data('visUiJsResultTable');
+            var tableApi = table.resultTable('getApi');
+            var formData = dialog.formData();
+            var wkt = new OpenLayers.Format.WKT().write(feature);
+            var srid = widget.map.getProjectionObject().proj.srsProjNumber;
+            var request = {
+                properties: formData,
+                geometry:   wkt,
+                srid:       srid,
+                type:       "Feature"
+            };
+
+            $.extend(feature.data, formData);
+            tableApi.draw({"paging": "page"});
+
+            if(!feature.isNew && feature.fid) {
+                request.id = feature.fid;
+            }
+
+            var errorInputs = $(".has-error", dialog);
+            var hasErrors = errorInputs.size() > 0;
+
+            if(!hasErrors) {
+                dialog.disableForm();
+                widget.query('save', {
+                    schema:  schema.schemaName,
+                    feature: request
+                }).done(function(response) {
+
+                    if(response.hasOwnProperty('errors')) {
+                        dialog.enableForm();
+                        $.each(response.errors, function(i, error) {
+                            $.notify(error.message, {
+                                title:     'API Error',
+                                autoHide:  false,
+                                className: 'error'
+                            });
+                            console.error(error.message);
+                        });
+                        return;
+                    }
+
+                    var hasFeatureAfterSave = response.features.length > 0;
+
+                    if(!hasFeatureAfterSave) {
+                        widget.reloadFeatures(schema.layer, _.without(schema.layer.features, feature));
+                        dialog.popupDialog('close');
+                        return;
+                    }
+
+                    var dbFeature = response.features[0];
+                    feature.fid = dbFeature.id;
+                    feature.state = null;
+                    $.extend(feature.data, dbFeature.properties);
+
+                    if(feature.isNew) {
+                        tableApi.rows.add([feature]);
+                    }
+
+                    tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
+                    tableApi.draw();
+
+                    delete feature.isNew;
+
+                    dialog.enableForm();
+                    dialog.popupDialog('close');
+                    $.notify(translate("feature.save.successfully"), 'info');
+                });
+            }
+        },
+
+        /**
          * Open edit feature dialog
          *
          * @param olFeature open layer feature
          * @private
          */
-
         _openFeatureEditDialog: function(olFeature) {
             var widget = this;
+            var schema = olFeature.schema;
+            var buttons = [];
 
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
             }
 
-            var schema = widget.findSchemaByLayer(olFeature.layer);
-            var table = schema.table;
-            var tableApi = table.resultTable('getApi');
-            var buttons = [];
-
-            if(schema.allowEditData){
+            if(schema.allowEditData) {
                 var saveButton = {
-                    text: translate("feature.save"),
+                    text:  translate("feature.save"),
                     click: function() {
-                        var form = $(this).closest(".ui-dialog-content");
-                        var olFeature = form.data('feature');
-                        var formData = form.formData();
-                        var wkt = new OpenLayers.Format.WKT().write(olFeature);
-                        var srid = widget.map.getProjectionObject().proj.srsProjNumber;
-                        var request = {
-                            properties: formData,
-                            geometry:   wkt,
-                            srid:       srid,
-                            type:       "Feature"
-                        };
-
-                        $.extend(olFeature.data, formData);
-                        tableApi.draw({"paging":"page"});
-
-                        if(!olFeature.isNew && olFeature.fid){
-                            request.id = olFeature.fid;
-                        }
-
-                        var errorInputs = $(".has-error", dialog);
-                        var hasErrors = errorInputs.size() > 0;
-
-                        if( !hasErrors ){
-                            form.disableForm();
-                            widget.query('save', {
-                                schema:  widget.schemaName,
-                                feature: request
-                            }).done(function(response) {
-
-                                if(response.hasOwnProperty('errors')) {
-                                    form.enableForm();
-                                    $.each(response.errors, function(i, error) {
-                                        $.notify(error.message, {
-                                            title:     'API Error',
-                                            autoHide:  false,
-                                            className: 'error'
-                                        });
-                                        console.error(error.message);
-                                    });
-                                    return;
-                                }
-
-                                var hasFeatureAfterSave = response.features.length > 0;
-
-                                if(!hasFeatureAfterSave) {
-                                    widget.reloadFeatures( schema.layer, _.without(schema.layer.features, olFeature));
-                                    widget.currentPopup.popupDialog('close');
-                                    return;
-                                }
-
-                                var dbFeature = response.features[0];
-                                olFeature.fid = dbFeature.id;
-                                olFeature.state = null;
-                                $.extend(olFeature.data, dbFeature.properties);
-
-                                tableApi.draw();
-
-                                delete olFeature.isNew;
-
-                                form.enableForm();
-                                widget.currentPopup.popupDialog('close');
-                                $.notify(translate("feature.save.successfully"), 'info');
-
-                            });
-                        }
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var feature = dialog.data('feature');
+                        feature.editDialog = dialog;
+                        widget.saveFeature(feature);
                     }
                 };
                 buttons.push(saveButton);
@@ -854,8 +872,10 @@
 
             dialog.generateElements({children: widget.currentSettings.formItems});
             dialog.popupDialog(popupConfiguration);
+            schema.editDialog = dialog;
             widget.currentPopup = dialog;
             dialog.data('feature', olFeature);
+
             setTimeout(function() {
                 dialog.formData(olFeature.data);
             }, 21);
@@ -1389,6 +1409,7 @@
             // Add layer to feature
             _.each(features, function(feature) {
                 feature.layer = layer;
+                feature.schema = schema;
             });
 
             layer.redraw();
