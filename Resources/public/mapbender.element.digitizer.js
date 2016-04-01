@@ -656,6 +656,10 @@
          * @private
          */
         saveFeature: function(feature) {
+            if(feature.disabled){
+                return;
+            }
+
             var widget = this;
             var schema = feature.schema;
             var dialog = feature.editDialog;
@@ -682,6 +686,7 @@
             var hasErrors = errorInputs.size() > 0;
 
             if(!hasErrors) {
+                feature.disabled = true;
                 dialog.disableForm();
                 widget.query('save', {
                     schema:  schema.schemaName,
@@ -690,6 +695,7 @@
 
                     if(response.hasOwnProperty('errors')) {
                         dialog.enableForm();
+                        feature.disabled = false;
                         $.each(response.errors, function(i, error) {
                             $.notify(error.message, {
                                 title:     'API Error',
@@ -719,7 +725,7 @@
                     var newFeatures = geoJsonReader.read(response);
                     var newFeature = _.first(newFeatures);
 
-                    _.each(['fid', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent'], function(key) {
+                    _.each(['fid', 'disabled', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent'], function(key) {
                         newFeature[key] = feature[key];
                     });
 
@@ -736,6 +742,7 @@
                     delete feature.isNew;
 
                     dialog.enableForm();
+                    feature.disabled = false;
                     dialog.popupDialog('close');
                     $.notify(translate("feature.save.successfully"), 'info');
                 });
