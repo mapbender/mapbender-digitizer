@@ -715,10 +715,7 @@
                     feature.state = null;
                     $.extend(feature.data, dbFeature.properties);
 
-                    var geoJsonReader = new OpenLayers.Format.GeoJSON({
-                        internalProjection: layer.map.projection,
-                        externalProjection: new OpenLayers.Projection("EPSG:" + response.features[0].srid)
-                    });
+                    var geoJsonReader = new OpenLayers.Format.GeoJSON();
                     var newFeatures = geoJsonReader.read(response);
                     var newFeature = _.first(newFeatures);
 
