@@ -672,7 +672,6 @@
                 type:       "Feature"
             };
 
-            $.extend(feature.data, formData);
             tableApi.draw({"paging": "page"});
 
             if(!feature.isNew && feature.fid) {
@@ -710,10 +709,25 @@
                         return;
                     }
 
+                    var layer = feature.layer;
                     var dbFeature = response.features[0];
                     feature.fid = dbFeature.id;
                     feature.state = null;
                     $.extend(feature.data, dbFeature.properties);
+
+                    var geoJsonReader = new OpenLayers.Format.GeoJSON({
+                        internalProjection: layer.map.projection,
+                        externalProjection: new OpenLayers.Projection("EPSG:" + response.features[0].srid)
+                    });
+                    var newFeatures = geoJsonReader.read(response);
+                    var newFeature = _.first(newFeatures);
+
+                    _.each(['fid', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent'], function(key) {
+                        newFeature[key] = feature[key];
+                    });
+
+                    widget.reloadFeatures(schema.layer, _.union(_.without(layer.features, feature), [newFeature]));
+                    feature = newFeature;
 
                     if(feature.isNew) {
                         tableApi.rows.add([feature]);
