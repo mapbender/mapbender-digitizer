@@ -100,19 +100,20 @@ class FeatureType extends DataStore
     }
 
     /**
-     * Get feature by ID
+     * Get feature by ID and SRID
      *
-     * @param $id
+     * @param int $id
+     * @param int $srid SRID
      * @return Feature
      */
-    public function getById($id)
+    public function getById($id, $srid = null)
     {
-        $rows = $this->getSelectQueryBuilder()
+        $rows = $this->getSelectQueryBuilder($srid)
             ->where($this->getUniqueId() . " = :id")
             ->setParameter('id', $id)
             ->execute()
             ->fetchAll();
-        $this->prepareResults($rows);
+        $this->prepareResults($rows, $srid);
         return reset($rows);
     }
 
@@ -129,6 +130,7 @@ class FeatureType extends DataStore
         if (!is_array($featureData) && !is_object($featureData)) {
             throw new \Exception("Feature data given isn't compatible to save into the table: " . $this->getTableName());
         }
+
 
         $feature         = $this->create($featureData);
         $event           = array(
@@ -157,8 +159,7 @@ class FeatureType extends DataStore
             }
 
             // Get complete feature data
-            $result = $this->getById($feature->getId());
-
+            $result = $this->getById($feature->getId(), $feature->getSrid());
         } catch (Exception $e) {
             $result = array(
                 "exception"   => $e,
@@ -309,7 +310,7 @@ class FeatureType extends DataStore
 
         // Convert to Feature object
         if ($hasResults) {
-            $this->prepareResults($rows);
+            $this->prepareResults($rows, $srid);
         }
 
         if ($returnType == "FeatureCollection") {
@@ -436,10 +437,12 @@ class FeatureType extends DataStore
      * Convert results to Feature objects
      *
      * @param Feature[] $rows
+     * @param null      $srid
      * @return Feature[]
      */
-    public function prepareResults(&$rows)
+    public function prepareResults(&$rows, $srid = null)
     {
+        $hasSrid = $srid != null;
         // Transform Oracle result column names from upper to lower case
         if ($this->isOracle()) {
             self::transformColumnNames($rows, "strtolower");
@@ -447,6 +450,9 @@ class FeatureType extends DataStore
 
         foreach ($rows as $key => &$row) {
             $row = $this->create($row);
+            if ($hasSrid) {
+                $row->setSrid($srid);
+            }
         }
 
         return $rows;
