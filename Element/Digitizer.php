@@ -222,6 +222,7 @@ class Digitizer extends HTMLElement
 
                             $feature = $featureType->save($featureData);
                             $results = array_merge($featureType->search(array(
+                                'srid'  => $feature->getSrid(),
                                 'where' => $featureType->getUniqueId() . '=' . $feature->getId())));
                         }
                     }
