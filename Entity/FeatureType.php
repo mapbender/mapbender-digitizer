@@ -245,6 +245,7 @@ class FeatureType extends DataStore
         $srid         = isset($criteria['srid']) ? $criteria['srid'] : $this->getSrid();
         $where        = isset($criteria['where']) ? $criteria['where'] : null;
         $queryBuilder = $this->getSelectQueryBuilder($srid);
+        $connection   = $queryBuilder->getConnection();
 
         // add GEOM where condition
         if ($intersect) {
@@ -260,6 +261,12 @@ class FeatureType extends DataStore
         // add second filter (https://trac.wheregroup.com/cp/issues/4643)
         if ($where) {
             $queryBuilder->andWhere($where);
+        }
+
+        if (isset($criteria["source"]) && isset($criteria["distance"])) {
+            $queryBuilder->andWhere("ST_DWithin(t." . $this->getGeomField() . ","
+                . $connection->quote($criteria["source"])
+                . "," . $criteria['distance'].')');
         }
 
         $queryBuilder->setMaxResults($maxResults);
