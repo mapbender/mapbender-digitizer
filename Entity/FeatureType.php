@@ -1,6 +1,7 @@
 <?php
 namespace Mapbender\DigitizerBundle\Entity;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\Mapping as ORM;
@@ -55,6 +56,18 @@ class FeatureType extends DataStore
      * @var array file info list
      */
     protected $filesInfo = array();
+
+
+    /**
+     * @var string Routing ways node table name.
+     */
+    protected $waysTableName     = "ways";
+
+    /**
+     * @var string Routing ways geometry field name
+     */
+    protected $waysGeomFieldName = "the_geom";
+
 
     /**
      * @param ContainerInterface $container
@@ -576,6 +589,22 @@ class FeatureType extends DataStore
     }
 
     /**
+     * @param string $waysTableName
+     */
+    public function setWaysTableName($waysTableName)
+    {
+        $this->waysTableName = $waysTableName;
+    }
+
+    /**
+     * @param string $waysGeomFieldName
+     */
+    public function setWaysGeomFieldName($waysGeomFieldName)
+    {
+        $this->waysGeomFieldName = $waysGeomFieldName;
+    }
+
+    /**
      * Set FeatureType permanent SQL filter used by $this->search()
      * https://trac.wheregroup.com/cp/issues/3733
      *
@@ -770,5 +799,43 @@ class FeatureType extends DataStore
             $wkt = substr($wkt, strpos($wkt, ';') + 1);
         }
         return substr($wkt, 0, strpos($wkt, '('));
+    }
+
+    /**
+     * Route between nodes
+     *
+     * @param int  $startNodeId
+     * @param int  $endNodeId
+     * @param bool $directedGraph  directed graph
+     * @param bool $hasReverseCost Has reverse cost, only can be true, if  directed graph=true
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function routeBetweenNodes($startNodeId, $endNodeId, $directedGraph = false, $hasReverseCost = false)
+    {
+        /** @var Connection $db */
+        $db             = $this->driver->getConnection();
+        $waysTableName  = $db->quoteIdentifier($this->waysTableName);
+        $geomFieldName  = $db->quoteIdentifier($this->waysGeomFieldName);
+        $directedGraph  = $directedGraph ? 'TRUE' : 'FALSE'; // directed graph [true|false]
+        $hasReverseCost = $hasReverseCost && $directedGraph ? 'TRUE' : 'FALSE'; // directed graph [true|false]
+        $srid           = $db->fetchColumn("SELECT st_srid($geomFieldName) FROM $waysTableName LIMIT 1");
+        $results        = $db->query("SELECT
+                route.seq as orderId,
+                route.id1 as startNodeId,
+                route.id2 as endNodeId,
+                route.cost as distance,
+                ST_AsWKT ($waysTableName.$geomFieldName) AS geom
+            FROM
+                pgr_dijkstra (
+                    'SELECT gid AS id, source, target, length AS cost FROM $waysTableName',
+                    $startNodeId,
+                    $endNodeId,
+                    $directedGraph,
+                    $hasReverseCost
+                ) AS route
+            LEFT JOIN ways ON route.id2 = $waysTableName.gid")->fetchAll();
+
+        return $this->prepareResults($results, $srid);
     }
 }
