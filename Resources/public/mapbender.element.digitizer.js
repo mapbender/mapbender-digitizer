@@ -732,10 +732,6 @@
                     widget.reloadFeatures(schema.layer, _.union(_.without(layer.features, feature), [newFeature]));
                     feature = newFeature;
 
-                    if(feature.isNew) {
-                        tableApi.rows.add([feature]);
-                    }
-
                     tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
                     tableApi.draw();
 
