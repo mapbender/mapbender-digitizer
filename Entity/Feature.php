@@ -145,9 +145,12 @@ class Feature extends DataItem
      */
     public function toGeoJson( $decodeGeometry = true)
     {
-        $wkt = \geoPHP::load($this->getGeom(), 'wkt')->out('json');
-        if($decodeGeometry){
-            $wkt = json_decode($wkt, true);
+        $wkt = $this->getGeom();
+        if($wkt){
+            $wkt = \geoPHP::load($wkt, 'wkt')->out('json');
+            if($decodeGeometry){
+                $wkt = json_decode($wkt, true);
+            }
         }
 
         return array('type'       => 'Feature',
