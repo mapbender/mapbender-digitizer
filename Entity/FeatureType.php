@@ -783,9 +783,9 @@ class FeatureType extends DataStore
     {
         $driver = $this->getDriver();
         $type   = null;
-        if($driver instanceof Geographic){
+        if ($driver instanceof Geographic) {
             /** @var Geographic|PostgreSQL $driver */
-            $type = $driver->getTableGeomType($tableName,$schema);
+            $type = $driver->getTableGeomType($tableName, $schema);
         }
         return $type;
     }
@@ -838,8 +838,27 @@ class FeatureType extends DataStore
                     $directedGraph,
                     $hasReverseCost
                 ) AS route
-            LEFT JOIN ways ON route.id2 = $waysTableName.gid")->fetchAll();
+            LEFT JOIN $waysTableName ON route.id2 = $waysTableName.gid")->fetchAll();
 
         return $this->prepareResults($results, $srid);
     }
+
+    public function routeBetweenGeom($sourceGeom, $targetGeom)
+    {
+        $sourceNode = $this->getNodeFromGeom($sourceGeom);
+        $targetNode = $this->getNodeFromGeom($targetGeom);
+        return $this->routeBetweenNodes($sourceNode, $targetNode);
+
+    }
+
+    public function getNodeFromGeom($geom)
+    {
+        $db                    = $this->driver->getConnection();
+        $waysVerticesTableName = $db->quoteIdentifier($this->waysVerticesTableName);
+        $geomFieldName         = $db->quoteIdentifier($this->waysGeomFieldName);
+        $nodeId                = $db->fetchColumn("SELECT id FROM $waysVerticesTableName  ORDER BY $geomFieldName <-> $geom  LIMIT 1");
+        return $nodeId;
+    }
+
+
 }
