@@ -479,11 +479,8 @@ class FeatureType extends DataStore
      */
     public function getSelectQueryBuilder($srid = null)
     {
-        $connection         = $this->getConnection();
         $geomFieldCondition = self::getGeomAttribute($this->getPlatformName(), $this->geomField, $srid ? $srid : $this->getSrid());
-        $spatialFields      = array($this->getUniqueId(), $geomFieldCondition);
-        $attributes         = array_merge($spatialFields, $this->getFields());
-        $queryBuilder       = $connection->createQueryBuilder()->select($attributes)->from($this->getTableName(), 't');
+        $queryBuilder       = $this->driver->getSelectQueryBuilder(array($geomFieldCondition));
         return $queryBuilder;
     }
 
