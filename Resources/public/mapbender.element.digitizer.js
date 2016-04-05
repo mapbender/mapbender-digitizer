@@ -91,6 +91,7 @@
         return dialog;
     };
 
+
     /**
      * Digitizing tool set
      *
@@ -189,11 +190,6 @@
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
         },
 
-        /**
-         * TODO: Implenent edit technical data
-         *
-         * @private
-         */
         _setup: function() {
             var frames = [];
             var widget = this;

@@ -3,7 +3,6 @@
 namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\DBALException;
-use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DigitizerBundle\Component\Uploader;
 use Mapbender\DigitizerBundle\Entity\Feature;
