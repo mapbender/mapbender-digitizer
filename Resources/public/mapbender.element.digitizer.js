@@ -836,6 +836,50 @@
             }
 
             DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+
+                if(item.type == "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
+
+                    item.type = "fieldSet";
+                    // TODO: merge item with new select
+                    item.children = [{
+                        type:    "select",
+                        id:      item.id,
+                        options: item.options,
+                        name:    item.name
+
+                    }, {
+                        type:  "button",
+                        title: "Edit",
+                        click: function() {
+                            var dataItemId = $(this).siblings().find('select').val();
+                            var selectRef = $(this).siblings().find('select');
+
+                            var dataStoreId = item.dataStore.id;
+                            widget.query("datastore/get", {
+                                schema:     widget.schemaName,
+                                id:         dataStoreId,
+                                dataItemId: dataItemId
+                            }).done(function(data) {
+
+                                widget._openEditDialog(data, item.dataStore.popupItems, item, selectRef);
+                                console.log(data)
+
+                            });
+
+                            return false;
+                        }
+                    }, {
+                        type:  "button",
+                        title: "New",
+                        click: function() {
+                            var selectRef = $(this).siblings().find('select');
+                            widget._openEditDialog({}, item.dataStore.popupItems, item, selectRef);
+
+                            return false;
+                        }
+                    }]
+                }
+
                 if(item.type == "file") {
                     item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + olFeature.fid + "&field=" + item.name;
                     if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name) && olFeature.data[item.name]) {
@@ -1115,7 +1159,7 @@
                 feature: feature,
                 format:  'GeoJSON'
             }).done(function(response) {
-                debugger;
+
             })
         },
 
@@ -1280,7 +1324,6 @@
                 var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
                 widget.reloadFeatures(layer, _.without(existingFeatures, olFeature));
 
-
                 widget._trigger('featureRemoved', null, {
                     schema:  schema,
                     feature: featureData
@@ -1431,6 +1474,181 @@
             tableApi.clear();
             tableApi.rows.add(features);
             tableApi.draw();
+        },
+
+        _openEditDialog: function(dataItem, formItems, schema, ref) {
+            var schemaName = this.schemaName;
+            var widget = this;
+
+            var uniqueKey = schema.dataStore.uniqueId;
+            var buttons = [];
+
+            if(widget.currentPopup.currentPopup) {
+                widget.currentPopup.currentPopup.popupDialog('close');
+                widget.currentPopup.currentPopup = null;
+            }
+
+            var saveButton = {
+                text:  translate("mb.data.store.save", true),
+                click: function() {
+                    var form = $(this).closest(".ui-dialog-content");
+                    var errorInputs = $(".has-error", dialog);
+                    var hasErrors = errorInputs.size() > 0;
+
+                    if(!hasErrors) {
+                        var formData = form.formData();
+                        var uniqueIdKey = schema.dataStore.uniqueId;
+                        var isNew = !dataItem.hasOwnProperty(uniqueIdKey) && !!dataItem[uniqueIdKey];
+
+                        if(!isNew) {
+                            formData[uniqueIdKey] = dataItem[uniqueIdKey];
+                        } else {
+                            delete formData[uniqueIdKey];
+                        }
+
+                        form.disableForm();
+                        widget.query('datastore/save', {
+                            schema:     schemaName,
+                            dataItem:   formData,
+                            id:         schema.dataStore.id,
+                            dataItemId: dataItem[uniqueKey]
+                        }).done(function(response) {
+                            if(response.hasOwnProperty('errors')) {
+                                form.enableForm();
+                                $.each(response.errors, function(i, error) {
+                                    $.notify(error.message, {
+                                        title:     'API Error',
+                                        autoHide:  false,
+                                        className: 'error'
+                                    });
+                                    console.error(error.message);
+                                });
+                                return;
+                            }
+                            _.extend(dataItem, response.dataItem);
+                            if(isNew) {
+                                var textKey = item.dataStore.text;
+                                var uniqueKey = item.dataStore.uniqueId;
+
+                                ref.append('<option value="' + dataItem[uniqueKey] + '">' + dataItem[textKey] + '</option>');
+                            }
+                            widget.currentPopup.currentPopup.popupDialog('close');
+                            widget.currentPopup.currentPopup = null;
+                            $.notify(translate("mb.data.store.save.successfully", true), 'info');
+                        }).done(function() {
+                            form.enableForm();
+                        });
+                    }
+                }
+            };
+            buttons.push(saveButton);
+
+            buttons.push({
+                text:    translate("mb.data.store.remove", true),
+                'class': 'critical',
+                click:   function() {
+                    widget.query('datastore/remove', {
+                        schema:     schemaName,
+                        dataItem:  dataItem,
+                        id:         schema.dataStore.id,
+
+                    }).done(function(response) {
+
+                        //widget.removeData(dataItem);
+                        widget.currentPopup.currentPopup.popupDialog('close');
+                        widget.currentPopup.currentPopup = null;
+                    })
+                }
+            });
+
+            buttons.push({
+                text:  translate("cancel"),
+                click: function() {
+                    widget.currentPopup.currentPopup.popupDialog('close');
+                    widget.currentPopup.currentPopup = null;
+                }
+            });
+            var dialog = $("<div/>");
+            dialog.on("popupdialogopen", function(event, ui) {
+                setTimeout(function() {
+                    dialog.formData(dataItem);
+
+                }, 1);
+            });
+
+            /*   if(!schema.elementsTranslated) {
+             translateStructure(widget.currentSettings.formItems);
+             schema.elementsTranslated = true;
+             } */
+
+            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+                if(item.type == "file") {
+                    item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + dataItem.fid + "&field=" + item.name;
+                    if(item.hasOwnProperty("name") && dataItem.data.hasOwnProperty(item.name) && dataItem.data[item.name]) {
+                        item.dbSrc = dataItem.data[item.name];
+                        if(schema.featureType.files) {
+                            $.each(schema.featureType.files, function(k, fileInfo) {
+                                if(fileInfo.field && fileInfo.field == item.name) {
+                                    if(fileInfo.formats) {
+                                        item.accept = fileInfo.formats;
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                }
+
+                if(item.type == 'image') {
+
+                    if(!item.origSrc) {
+                        item.origSrc = item.src;
+                    }
+
+                    if(item.hasOwnProperty("name") && dataItem.data.hasOwnProperty(item.name) && dataItem.data[item.name]) {
+                        item.dbSrc = dataItem.data[item.name];
+                        if(schema.featureType.files) {
+                            $.each(schema.featureType.files, function(k, fileInfo) {
+                                if(fileInfo.field && fileInfo.field == item.name) {
+
+                                    if(fileInfo.uri) {
+                                        item.dbSrc = fileInfo.uri + "/" + item.dbSrc;
+                                    } else {
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    var src = item.dbSrc ? item.dbSrc : item.origSrc;
+                    if(item.relative) {
+                        item.src = src.match(/^(http[s]?\:|\/{2})/) ? src : Mapbender.configuration.application.urls.asset + src;
+                    } else {
+                        item.src = src;
+                    }
+                }
+            });
+            /*  if(schema.popup.buttons) {
+             buttons = _.union(schema.popup.buttons, buttons);
+             } */
+            var popupConfig = _.extend({
+                title: translate("edit.title"),
+                width: widget.featureEditDialogWidth,
+            }, schema.popup);
+
+            popupConfig.buttons = buttons;
+
+            dialog.generateElements({children: formItems});
+            dialog.popupDialog(popupConfig);
+            dialog.addClass("data-store-edit-data");
+            widget.currentPopup.currentPopup = dialog;
+            return dialog;
+        },
+
+        save: function(dataItem) {
+            debugger;
+            //dataItem.uniqueId
+
         },
 
         /**

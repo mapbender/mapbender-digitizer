@@ -3,7 +3,7 @@
 namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\DBALException;
-use Mapbender\CoreBundle\Element\HTMLElement;
+use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DigitizerBundle\Component\Uploader;
 use Mapbender\DigitizerBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Entity\FeatureType;
@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  *
  */
-class Digitizer extends HTMLElement
+class Digitizer extends BaseElement
 {
 
     /**
@@ -270,6 +270,47 @@ class Digitizer extends HTMLElement
 
                 break;
 
+            case 'datastore/get':
+                // TODO: get request ID and check
+                if (!isset($request['id']) || !isset($request['dataItemId'])) {
+                    $results = array(
+                        array('errors' => array(
+                            array('message' => $action . ": id or dataItemId not defined!")
+                        ))
+                    );
+                }
+
+                $id           = $request['id'];
+                $dataItemId   = $request['dataItemId'];
+                $dataStore    = $this->container->get("data.source")->get($id);
+                $dataItem     = $dataStore->get($dataItemId);
+                $dataItemData = null;
+                if ($dataItem) {
+                    $dataItemData = $dataItem->toArray();
+                }
+
+                $results = $dataItemData;
+                break;
+
+            case 'datastore/save':
+
+                $id          = $request['id'];
+                $dataItem    = $request['dataItem'];
+                $dataStore   = $this->container->get("data.source")->get($id);
+                $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
+                if (empty($request['dataItem'][ $uniqueIdKey ])) {
+                    unset($request['dataItem'][ $uniqueIdKey ]);
+                }
+                $results = $dataStore->save($dataItem);
+
+                break;
+            case 'datastore/remove':
+                $id          = $request['id'];
+                $dataStore   = $this->container->get("data.source")->get($id);
+                $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
+                $dataItemId  = $request['dataItem'][ $uniqueIdKey ];
+                $dataStore->remove($dataItemId);
+                break;
             default:
                 $results = array(
                     array('errors' => array(
