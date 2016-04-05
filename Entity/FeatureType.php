@@ -830,7 +830,7 @@ class FeatureType extends DataStore
      * @param int  $endNodeId
      * @param bool $directedGraph  directed graph
      * @param bool $hasReverseCost Has reverse cost, only can be true, if  directed graph=true
-     * @return array
+     * @return Feature[]
      * @throws \Doctrine\DBAL\DBALException
      */
     public function routeBetweenNodes($startNodeId, $endNodeId, $directedGraph = false, $hasReverseCost = false)
@@ -841,13 +841,13 @@ class FeatureType extends DataStore
         $geomFieldName  = $db->quoteIdentifier($this->waysGeomFieldName);
         $directedGraph  = $directedGraph ? 'TRUE' : 'FALSE'; // directed graph [true|false]
         $hasReverseCost = $hasReverseCost && $directedGraph ? 'TRUE' : 'FALSE'; // directed graph [true|false]
-        $srid           = $this->getSrid(); // $db->fetchColumn("SELECT st_srid($geomFieldName) FROM $waysTableName LIMIT 1");
+        $srid           = $this->getSrid(); // $db->fetchColumn("SELECT Find_SRID($geomFieldName) FROM $waysTableName LIMIT 1");
         $results        = $db->query("SELECT
                 route.seq as orderId,
                 route.id1 as startNodeId,
                 route.id2 as endNodeId,
                 route.cost as distance,
-                ST_asText ($waysTableName.$geomFieldName) AS geom
+                ST_AsEWKT ($waysTableName.$geomFieldName) AS geom
             FROM
                 pgr_dijkstra (
                     'SELECT gid AS id, source, target, length AS cost FROM $waysTableName',
@@ -861,24 +861,39 @@ class FeatureType extends DataStore
         return $this->prepareResults($results, $srid);
     }
 
+    /**
+     * Get route nodes between geometries
+     *
+     * @param string $sourceGeom EWKT geometry
+     * @param string $targetGeom EWKT geometry
+     * @return Feature[]
+     */
     public function routeBetweenGeom($sourceGeom, $targetGeom)
     {
-
         $sourceNode = $this->getNodeFromGeom($sourceGeom);
         $targetNode = $this->getNodeFromGeom($targetGeom);
         return $this->routeBetweenNodes($sourceNode, $targetNode);
-
     }
 
+    /**
+     * Get nearest node to given geometry
+     *
+     * Important: <-> operator works not well!!
+     * @param string $geom EWKT
+     * @return int Node id
+     */
     public function getNodeFromGeom($geom)
     {
-
         $db                    = $this->driver->getConnection();
         $waysVerticesTableName = $db->quoteIdentifier($this->waysVerticesTableName);
         $geomFieldName         = $db->quoteIdentifier($this->waysGeomFieldName);
-        $nodeId                = $db->fetchColumn("SELECT id FROM $waysVerticesTableName  ORDER BY $geomFieldName <-> '$geom'  LIMIT 1");
+        $srid                  = $this->getSrid();
+        $nodeId                = $db->fetchColumn("SELECT
+            id,
+            ST_Distance($geomFieldName, ST_TRANSFORM(ST_GeometryFromText('$geom'),$srid)) as distance
+            FROM $waysVerticesTableName
+            ORDER BY distance ASC
+            LIMIT 1");
         return $nodeId;
     }
-
-
 }
