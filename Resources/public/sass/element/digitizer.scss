@@ -86,6 +86,20 @@ $selectColor: #F7F79A;
 }
 
 .modal-body {
+
+  .form-group {
+    button {
+      // TODO: remove it after fixed in vis-ui.js
+      width: auto;
+      display: inline-block;
+      vertical-align: middle;
+      margin-bottom: 7px;
+      position: relative;
+      height: 24px;
+      margin-left: 5px;
+    }
+  }
+
   &.popup-dialog {
     > fieldset.form-group{
       margin-left: -5px;
