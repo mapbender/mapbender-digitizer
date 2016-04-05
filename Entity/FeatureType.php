@@ -63,6 +63,8 @@ class FeatureType extends DataStore
      */
     protected $waysTableName     = "ways";
 
+    protected $waysVerticesTableName = 'ways_vertices_pgr';
+
     /**
      * @var string Routing ways geometry field name
      */
@@ -609,6 +611,22 @@ class FeatureType extends DataStore
     }
 
     /**
+     * @return string
+     */
+    public function getWaysVerticesTableName()
+    {
+        return $this->waysVerticesTableName;
+    }
+
+    /**
+     * @param string $waysVerticesTableName
+     */
+    public function setWaysVerticesTableName($waysVerticesTableName)
+    {
+        $this->waysVerticesTableName = $waysVerticesTableName;
+    }
+
+    /**
      * Set FeatureType permanent SQL filter used by $this->search()
      * https://trac.wheregroup.com/cp/issues/3733
      *
@@ -823,13 +841,13 @@ class FeatureType extends DataStore
         $geomFieldName  = $db->quoteIdentifier($this->waysGeomFieldName);
         $directedGraph  = $directedGraph ? 'TRUE' : 'FALSE'; // directed graph [true|false]
         $hasReverseCost = $hasReverseCost && $directedGraph ? 'TRUE' : 'FALSE'; // directed graph [true|false]
-        $srid           = $db->fetchColumn("SELECT st_srid($geomFieldName) FROM $waysTableName LIMIT 1");
+        $srid           = $this->getSrid(); // $db->fetchColumn("SELECT st_srid($geomFieldName) FROM $waysTableName LIMIT 1");
         $results        = $db->query("SELECT
                 route.seq as orderId,
                 route.id1 as startNodeId,
                 route.id2 as endNodeId,
                 route.cost as distance,
-                ST_AsWKT ($waysTableName.$geomFieldName) AS geom
+                ST_asText ($waysTableName.$geomFieldName) AS geom
             FROM
                 pgr_dijkstra (
                     'SELECT gid AS id, source, target, length AS cost FROM $waysTableName',
@@ -845,6 +863,7 @@ class FeatureType extends DataStore
 
     public function routeBetweenGeom($sourceGeom, $targetGeom)
     {
+
         $sourceNode = $this->getNodeFromGeom($sourceGeom);
         $targetNode = $this->getNodeFromGeom($targetGeom);
         return $this->routeBetweenNodes($sourceNode, $targetNode);
@@ -853,10 +872,11 @@ class FeatureType extends DataStore
 
     public function getNodeFromGeom($geom)
     {
+
         $db                    = $this->driver->getConnection();
         $waysVerticesTableName = $db->quoteIdentifier($this->waysVerticesTableName);
         $geomFieldName         = $db->quoteIdentifier($this->waysGeomFieldName);
-        $nodeId                = $db->fetchColumn("SELECT id FROM $waysVerticesTableName  ORDER BY $geomFieldName <-> $geom  LIMIT 1");
+        $nodeId                = $db->fetchColumn("SELECT id FROM $waysVerticesTableName  ORDER BY $geomFieldName <-> '$geom'  LIMIT 1");
         return $nodeId;
     }
 
