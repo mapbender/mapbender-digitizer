@@ -845,6 +845,7 @@ class FeatureType extends DataStore
         $results        = $db->query("SELECT
                 route.seq as orderId,
                 route.id1 as startNodeId,
+                $waysTableName.name as wayName,
                 route.id2 as endNodeId,
                 route.cost as distance,
                 ST_AsEWKT ($waysTableName.$geomFieldName) AS geom
