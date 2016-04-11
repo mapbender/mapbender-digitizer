@@ -24,5 +24,10 @@
     "autoload": {
 		"psr-0": {"Mapbender\\DigitizerBundle": "."}
     },
-    "target-dir": "Mapbender/DigitizerBundle"
+    "target-dir": "Mapbender/DigitizerBundle",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.1-dev"
+        }
+    }
 }
