@@ -828,12 +828,13 @@ class FeatureType extends DataStore
      *
      * @param int  $startNodeId
      * @param int  $endNodeId
+     * @param null $sridTo
      * @param bool $directedGraph  directed graph
      * @param bool $hasReverseCost Has reverse cost, only can be true, if  directed graph=true
      * @return Feature[]
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function routeBetweenNodes($startNodeId, $endNodeId, $directedGraph = false, $hasReverseCost = false)
+    public function routeBetweenNodes($startNodeId, $endNodeId, $sridTo = null, $directedGraph = false, $hasReverseCost = false)
     {
         /** @var Connection $db */
         $db             = $this->driver->getConnection();
@@ -842,12 +843,14 @@ class FeatureType extends DataStore
         $directedGraph  = $directedGraph ? 'TRUE' : 'FALSE'; // directed graph [true|false]
         $hasReverseCost = $hasReverseCost && $directedGraph ? 'TRUE' : 'FALSE'; // directed graph [true|false]
         $srid           = $this->getSrid(); // $db->fetchColumn("SELECT Find_SRID($geomFieldName) FROM $waysTableName LIMIT 1");
+        $sridTo         = $sridTo ? $sridTo : $this->getSrid();
         $results        = $db->query("SELECT
                 route.seq as orderId,
                 route.id1 as startNodeId,
+                $waysTableName.name as name,
                 route.id2 as endNodeId,
                 route.cost as distance,
-                ST_AsEWKT ($waysTableName.$geomFieldName) AS geom
+                ST_AsEWKT (ST_TRANSFORM($waysTableName.$geomFieldName, $sridTo)) AS geom
             FROM
                 pgr_dijkstra (
                     'SELECT gid AS id, source, target, length AS cost FROM $waysTableName',
@@ -858,7 +861,7 @@ class FeatureType extends DataStore
                 ) AS route
             LEFT JOIN $waysTableName ON route.id2 = $waysTableName.gid")->fetchAll();
 
-        return $this->prepareResults($results, $srid);
+        return $this->prepareResults($results, $sridTo);
     }
 
     /**
@@ -866,13 +869,14 @@ class FeatureType extends DataStore
      *
      * @param string $sourceGeom EWKT geometry
      * @param string $targetGeom EWKT geometry
+     * @param string $sridTo
      * @return Feature[]
      */
-    public function routeBetweenGeom($sourceGeom, $targetGeom)
+    public function routeBetweenGeom($sourceGeom, $targetGeom, $sridTo = null)
     {
         $sourceNode = $this->getNodeFromGeom($sourceGeom);
         $targetNode = $this->getNodeFromGeom($targetGeom);
-        return $this->routeBetweenNodes($sourceNode, $targetNode);
+        return $this->routeBetweenNodes($sourceNode, $targetNode, $sridTo);
     }
 
     /**
