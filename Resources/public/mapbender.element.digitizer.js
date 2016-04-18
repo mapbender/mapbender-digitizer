@@ -457,7 +457,71 @@
 
                         // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
                         controlEvents: {
-                            featureadded: function(event) {
+
+                            /**
+                             * This function allows the easy use of the olEvent onStart( called on drag start) with the yml configurration
+                             * e.G. to prevent the move or add additional data on move
+                             * */
+                            onStart:               function(feature, px) {
+
+                                var control = this;
+                                var schema = feature.schema;
+                                var attributes = feature.attributes;
+                                var preventDefault = false;
+
+                                if(!schema.events && !schema.events.onStart) {
+                                    return;
+                                }
+
+                                try {
+                                    preventDefault = eval(schema.events.onStart);
+                                } catch (e) {
+
+                                    $.notify(e);
+                                    return;
+                                }
+
+                                if(preventDefault) {
+                                    $.notify(translate('move.denied'));
+                                    control.cancel();
+
+                                }
+                            },
+
+                            /**
+                             * This function allows the easy use of the olEvent onModificationStart with the yml configurration
+                             * e.G. to prevent the modification or add additional data on modification
+                             * */
+                            onModificationStart:   function event(feature) {
+
+                                var control = this;
+                                var schema = feature.schema;
+                                var attributes = feature.attributes;
+                                var preventDefault = false;
+
+                                if(!schema.events && !schema.events.onModificationStart) {
+                                    return;
+                                }
+
+                                try {
+                                    preventDefault = eval(schema.events.onModificationStart);
+                                } catch (e) {
+
+                                    $.notify(e);
+                                    return;
+                                }
+
+                                if(preventDefault) {
+                                    control.deactivate();
+                                    control.activate();
+
+                                    $.notify(translate('move.denied'));
+
+                                }
+
+                            },
+
+                            featureadded:          function(event) {
                                 var olFeature = event.feature;
                                 var layer = event.object.layer;
                                 var schema = widget.findSchemaByLayer(layer);
