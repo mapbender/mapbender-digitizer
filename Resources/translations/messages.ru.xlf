@@ -74,6 +74,10 @@
         <source>mb.digitizer.search.table.info.filtered</source>
         <target>(отфильтровано из _MAX_ объектов.)</target>
       </trans-unit>
+      <trans-unit id="24d72c67bcda1a9997119046df768a4f" resname="mb.digitizer.move.denied">
+        <source>mb.digitizer.move.denied</source>
+        <target></target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
