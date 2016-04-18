@@ -469,12 +469,12 @@
                                 var attributes = feature.attributes;
                                 var preventDefault = false;
 
-                                if(!schema.events && !schema.events.onStart) {
+                                if(!schema.hooks || !schema.hooks.onStart) {
                                     return;
                                 }
 
                                 try {
-                                    preventDefault = eval(schema.events.onStart);
+                                    preventDefault = eval(schema.hooks.onStart);
                                 } catch (e) {
 
                                     $.notify(e);
@@ -499,12 +499,12 @@
                                 var attributes = feature.attributes;
                                 var preventDefault = false;
 
-                                if(!schema.events && !schema.events.onModificationStart) {
+                                if(!schema.hooks || !schema.hooks.onModificationStart) {
                                     return;
                                 }
 
                                 try {
-                                    preventDefault = eval(schema.events.onModificationStart);
+                                    preventDefault = eval(schema.hooks.onModificationStart);
                                 } catch (e) {
 
                                     $.notify(e);
