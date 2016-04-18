@@ -52,6 +52,7 @@
             }
         }
     }
+
     /**
      * Example:
      *     Mapbender.confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
@@ -60,7 +61,7 @@
      * @param options
      * @returns {*}
      */
-    Mapbender.confirmDialog = function (options) {
+    Mapbender.confirmDialog = function(options) {
         var dialog = $("<div class='confirm-dialog'>" + (options.hasOwnProperty('html') ? options.html : "") + "</div>").popupDialog({
             title:       options.hasOwnProperty('title') ? options.title : "",
             maximizable: false,
@@ -91,7 +92,6 @@
         return dialog;
     };
 
-
     /**
      * Digitizing tool set
      *
@@ -101,55 +101,37 @@
      * @copyright 20.04.2015 by WhereGroup GmbH & Co. KG
      */
     $.widget("mapbender.mbDigitizer", {
-        options: {
+        options:                {
             // Default option values
-            allowDigitize: true,
-            allowDelete: true,
-            allowEditData:true,
+            allowDigitize:     true,
+            allowDelete:       true,
+            allowEditData:     true,
             openFormAfterEdit: true,
-            maxResults: 5001,
-            pageLength: 10,
-            oneInstanceEdit: true,
-            searchType: "currentExtent",
-            inlineSearch: false,
-            useContextMenu: false,
-            clustering: [
-                {scale: 5000000, distance: 30}
-            ]
-        },
-        // Default tool-sets
-        toolsets: {
-            point: [
-              {type: 'drawPoint'},
-              //{type: 'modifyFeature'},
-              {type: 'moveFeature'},
-              {type: 'selectFeature'},
-              {type: 'removeSelected'}
-              //{type: 'removeAll'}
+            maxResults:        5001,
+            pageLength:        10,
+            oneInstanceEdit:   true,
+            searchType:        "currentExtent",
+            inlineSearch:      false,
+            useContextMenu:    false,
+            clustering:        [{
+                scale:    5000000,
+                distance: 30
+            }]
+        }, // Default tool-sets
+        toolsets:               {
+            point:   [{type: 'drawPoint'}, //{type: 'modifyFeature'},
+                {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}
+                //{type: 'removeAll'}
             ],
-            line: [
-              {type: 'drawLine'},
-              {type: 'modifyFeature'},
-              {type: 'moveFeature'},
-              {type: 'selectFeature'},
-              {type: 'removeSelected'}
-              //{type: 'removeAll'}
+            line:    [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}
+                //{type: 'removeAll'}
             ],
-            polygon: [
-              {type: 'drawPolygon'},
-              {type: 'drawRectangle'},
-              {type: 'drawCircle'},
-              {type: 'drawEllipse'},
-              {type: 'drawDonut'},
-              {type: 'modifyFeature'},
-              {type: 'moveFeature'},
-              {type: 'selectFeature'},
-              {type: 'removeSelected'}
+            polygon: [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}
                 //{type: 'removeAll'}
             ]
         },
-        map:      null,
-        currentSettings: null,
+        map:                    null,
+        currentSettings:        null,
         featureEditDialogWidth: "423px",
 
         /**
@@ -161,7 +143,7 @@
                 strokeColor: '#6fb536',
                 fillColor:   "#6fb536",
                 fillOpacity: 0.3,
-                label: '${label}'
+                label:       '${label}'
             },
             'select':  {
                 strokeWidth: 3,
@@ -268,10 +250,11 @@
                         });
                     }
 
-                    if(!schema.useContextMenu){
+                    if(!schema.useContextMenu) {
                         return {
-                            callback: function(){},
-                            items: {
+                            callback: function() {
+                            },
+                            items:    {
                                 menuItem: {}
                             }
                         };
@@ -312,10 +295,11 @@
                         if(schema.allowEditData) {
                             items['edit'] = {name: "Edit"};
                         }
-                    }else{
+                    } else {
                         return {
-                            callback: function(){},
-                            items: {
+                            callback: function() {
+                            },
+                            items:    {
                                 menuItem: {}
                             }
                         };
@@ -361,12 +345,11 @@
             }
 
             // build select options
-            $.each(options.schemes, function(schemaName){
+            $.each(options.schemes, function(schemaName) {
                 var schema = this;
                 var option = $("<option/>");
                 var layer = schema.layer = widget.createSchemaFeatureLayer(schema);
                 //schema.clusterStrategy = layer.strategies[0];
-
 
                 // Merge settings with default values from options
                 for (var k in options) {
@@ -403,8 +386,8 @@
                 var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
                 var columns = [];
                 var newFeatureDefaultProperties = {};
-                if( !schema.hasOwnProperty("tableFields")){
-                    console.error(translate("table.fields.not.defined"),schema );
+                if(!schema.hasOwnProperty("tableFields")) {
+                    console.error(translate("table.fields.not.defined"), schema);
                 }
 
                 $.each(schema.tableFields, function(fieldName, fieldSettings) {
@@ -414,19 +397,18 @@
                     columns.push(fieldSettings);
                 });
 
-
                 var resultTableSettings = {
                     lengthChange: false,
-                    pageLength: schema.pageLength,
-                    searching: schema.inlineSearch,
-                    info: true,
-                    processing: false,
-                    ordering: true,
-                    paging: true,
-                    selectable: false,
-                    autoWidth: false,
-                    columns:  columns,
-                    buttons: buttons
+                    pageLength:   schema.pageLength,
+                    searching:    schema.inlineSearch,
+                    info:         true,
+                    processing:   false,
+                    ordering:     true,
+                    paging:       true,
+                    selectable:   false,
+                    autoWidth:    false,
+                    columns:      columns,
+                    buttons:      buttons
                 };
 
                 if(options.tableTranslation) {
@@ -438,21 +420,21 @@
                 schema.schemaName = schemaName;
 
                 var toolset = widget.toolsets[schema.featureType.geomType];
-                if(schema.hasOwnProperty("toolset")){
+                if(schema.hasOwnProperty("toolset")) {
                     toolset = schema.toolset;
                 }
-                if(!schema.allowDelete){
-                    $.each(toolset,function(k,tool){
-                        if(tool.type == "removeSelected"){
-                            toolset.splice(k,1);
+                if(!schema.allowDelete) {
+                    $.each(toolset, function(k, tool) {
+                        if(tool.type == "removeSelected") {
+                            toolset.splice(k, 1);
                         }
                     })
                 }
 
                 frame.generateElements({
                     children: [{
-                        type:           'digitizingToolSet',
-                        children:       toolset,
+                        type:     'digitizingToolSet',
+                        children: toolset,
                         layer:    layer,
 
                         // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
@@ -498,19 +480,19 @@
                     }]
                 });
 
-                if(!schema.allowDigitize){
-                    $(".digitizing-tool-set",frame).css('display','none');
+                if(!schema.allowDigitize) {
+                    $(".digitizing-tool-set", frame).css('display', 'none');
                 }
 
                 frame.append(table);
 
                 frames.push(schema);
-                frame.css('display','none');
+                frame.css('display', 'none');
 
                 frame.data("schemaSettings", schema);
 
                 element.append(frame);
-                option.data("schemaSettings",schema);
+                option.data("schemaSettings", schema);
                 selector.append(option);
 
                 var selectControl = new OpenLayers.Control.SelectFeature(layer, {
@@ -543,17 +525,16 @@
 
                 frame.css('display', 'none');
 
-                if(!schema.displayPermanent){
+                if(!schema.displayPermanent) {
                     layer.setVisibility(false);
                 }
 
                 schema.selectControl.deactivate();
 
                 // https://trac.wheregroup.com/cp/issues/4548
-                if(widget.currentPopup){
+                if(widget.currentPopup) {
                     widget.currentPopup.popupDialog('close');
                 }
-
 
                 //layer.redraw();
                 //layer.removeAllFeatures();
@@ -580,8 +561,10 @@
                 var table = schema.table;
                 var tableApi = table.resultTable('getApi');
 
-
-                widget._trigger("beforeChangeDigitizing", null, {next: schema, previous: widget.currentSettings});
+                widget._trigger("beforeChangeDigitizing", null, {
+                    next:     schema,
+                    previous: widget.currentSettings
+                });
 
                 if(widget.currentSettings) {
                     deactivateFrame(widget.currentSettings);
@@ -612,7 +595,7 @@
                 widget._getData();
             }
 
-            selector.on('change',onSelectorChange);
+            selector.on('change', onSelectorChange);
 
             map.events.register("moveend", this, function() {
                 widget._getData();
@@ -626,7 +609,7 @@
 
             element.bind("mbdigitizerbeforechangedigitizing", function(e, sets) {
                 var previousSettings = sets.previous;
-                if(previousSettings){
+                if(previousSettings) {
                     var digitizerToolSetElement = $("> div.digitizing-tool-set", previousSettings.frame);
                     digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
                 }
@@ -656,7 +639,7 @@
          * @private
          */
         saveFeature: function(feature) {
-            if(feature.disabled){
+            if(feature.disabled) {
                 return;
             }
 
@@ -774,16 +757,16 @@
             }
             if(schema.allowDelete) {
                 buttons.push({
-                    text:  translate("feature.remove"),
+                    text:    translate("feature.remove"),
                     'class': 'critical',
-                    click: function() {
+                    click:   function() {
                         widget.removeFeature(olFeature);
                         widget.currentPopup.popupDialog('close');
                     }
                 });
             }
             buttons.push({
-                text:  translate("mb.digitizer.cancel",true),
+                text:  translate("mb.digitizer.cancel", true),
                 click: function() {
                     widget.currentPopup.popupDialog('close');
                 }
@@ -830,12 +813,36 @@
 
             var dialog = $("<div/>");
 
-            if(!schema.elementsTranslated){
+            if(!schema.elementsTranslated) {
                 translateStructure(widget.currentSettings.formItems);
                 schema.elementsTranslated = true;
             }
 
             DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+
+                if(item.type == "resultTable") {
+                    var buttons = [];
+                    if(item.dataStore && item.dataStore.editable){
+                        //Todo add buttons
+                    }
+                    var columns = item.columns;
+                    var resultTableSettings = {
+                        lengthChange: false,
+                        pageLength:   item.pageLength,
+                        searching:    item.inlineSearch,
+                        info:         true,
+                        processing:   false,
+                        ordering:     true,
+                        paging:       true,
+                        selectable:   false,
+                        autoWidth:    false,
+                        columns:      columns,
+                        buttons:      buttons
+                    };
+
+                    $.extend(item, resultTableSettings);
+
+                }
 
                 if(item.type == "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
 
@@ -862,7 +869,6 @@
                             }).done(function(data) {
 
                                 widget._openEditDialog(data, item.dataStore.popupItems, item, selectRef);
-                                console.log(data)
 
                             });
 
@@ -958,7 +964,7 @@
             var geometry = bbox.toGeometry();
             var _request = $.extend(true, {intersectGeometry: geometry.toString()}, request);
 
-            if(debug){
+            if(debug) {
                 if(!widget._boundLayer) {
                     widget._boundLayer = new OpenLayers.Layer.Vector("bboxGeometry");
                     widget.map.addLayer(widget._boundLayer);
@@ -996,7 +1002,7 @@
                 schema:     schema.schemaName
             };
 
-            switch (schema.searchType){
+            switch (schema.searchType) {
                 case  "currentExtent":
                     if(schema.hasOwnProperty("lastBbox")) {
                         var bbox = extent.toGeometry().getBounds();
@@ -1127,7 +1133,7 @@
          *
          * @returns  {OpenLayers.Map}
          */
-        getMap: function(){
+        getMap: function() {
             return this.map;
         },
 
@@ -1201,7 +1207,7 @@
                         if(closestClusterSettings && _clusterSettings.scale > closestClusterSettings.scale) {
                             closestClusterSettings = _clusterSettings;
                         } else {
-                            if(!closestClusterSettings){
+                            if(!closestClusterSettings) {
                                 closestClusterSettings = _clusterSettings;
                             }
                         }
@@ -1217,11 +1223,11 @@
                     if(clusterSettings.hasOwnProperty('disable') && clusterSettings.disable) {
                         schema.clusterStrategy.distance = -1;
                         var features = schema.layer.features;
-                        widget.reloadFeatures(schema.layer,[]);
+                        widget.reloadFeatures(schema.layer, []);
                         schema.clusterStrategy.deactivate();
                         //schema.layer.redraw();
                         schema.isClustered = false;
-                        widget.reloadFeatures(schema.layer,features);
+                        widget.reloadFeatures(schema.layer, features);
 
                     } else {
                         schema.clusterStrategy.activate();
@@ -1548,9 +1554,9 @@
                 'class': 'critical',
                 click:   function() {
                     widget.query('datastore/remove', {
-                        schema:     schemaName,
-                        dataItem:  dataItem,
-                        id:         schema.dataStore.id,
+                        schema:   schemaName,
+                        dataItem: dataItem,
+                        id:       schema.dataStore.id,
 
                     }).done(function(response) {
 
