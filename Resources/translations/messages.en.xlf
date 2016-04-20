@@ -74,6 +74,10 @@
         <source>mb.digitizer.search.table.info.filtered</source>
         <target>(filter from _MAX_ Objects.)</target>
       </trans-unit>
+      <trans-unit id="24d72c67bcda1a9997119046df768a4f" resname="mb.digitizer.move.denied">
+        <source>mb.digitizer.move.denied</source>
+        <target>It is not allowed to edit this feature</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
