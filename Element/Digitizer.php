@@ -295,12 +295,13 @@ class Digitizer extends BaseElement
             case 'datastore/save':
 
                 $id          = $request['id'];
-                $dataItem    = $request['dataItem'];
                 $dataStore   = $this->container->get("data.source")->get($id);
                 $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
                 if (empty($request['dataItem'][ $uniqueIdKey ])) {
                     unset($request['dataItem'][ $uniqueIdKey ]);
                 }
+                $dataItem    = $request['dataItem'];
+
                 $results = $dataStore->save($dataItem);
 
                 break;
@@ -311,6 +312,26 @@ class Digitizer extends BaseElement
                 $dataItemId  = $request['dataItem'][ $uniqueIdKey ];
                 $dataStore->remove($dataItemId);
                 break;
+
+            case 'dataStore/search':
+                if (!isset($request['mappingId']) || !isset($request['fid'])) {
+                    $results = array(
+                        array('errors' => array(
+                            array('message' => $action . ": id or dataItemId not defined!")
+                        ))
+                    );
+                }
+
+                $fid       = $request['fid'];
+                $mappingId     = $request['mappingId'];
+                $dataItems = $featureType->getTroughMapping($mappingId, $fid);
+
+                //$dataStore         = $this->container->get("data.source")->get($id);
+                //$criteria['where'] = $request['where'];
+                //$dataItems         = $dataStore->search($criteria);
+
+               $results = $dataItems;
+                break;
             default:
                 $results = array(
                     array('errors' => array(
@@ -318,7 +339,6 @@ class Digitizer extends BaseElement
                     ))
                 );
         }
-
 
         return new JsonResponse($results);
     }
