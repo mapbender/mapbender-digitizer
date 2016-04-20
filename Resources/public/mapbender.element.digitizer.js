@@ -893,7 +893,7 @@
                     var button = {
                         type:     "button",
                         title:    "",
-                        cssClass: "fa-plus",
+                        cssClass: "fa fa-plus",
                         click:    function(e) {
                             var item = $(this).next().data("item");
                             var popup = item.popupItems;
