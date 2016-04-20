@@ -817,30 +817,54 @@
                 translateStructure(widget.currentSettings.formItems);
                 schema.elementsTranslated = true;
             }
+            var formItem = widget.currentSettings.formItems.slice();
 
-            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+            DataUtil.eachItem(formItem, function(item) {
 
-                if(item.type == "resultTable") {
-                    var buttons = [];
-                    if(item.dataStore && item.dataStore.editable){
-                        //Todo add buttons
-                    }
-                    var columns = item.columns;
-                    var resultTableSettings = {
-                        lengthChange: false,
-                        pageLength:   item.pageLength,
-                        searching:    item.inlineSearch,
-                        info:         true,
-                        processing:   false,
-                        ordering:     true,
-                        paging:       true,
-                        selectable:   false,
-                        autoWidth:    false,
-                        columns:      columns,
-                        buttons:      buttons
+                if(item.type == "resultTable" && item.editable && !item.isProcessed) {
+
+                    cloneItem = $.extend({}, item);
+                    cloneItem.isProcessed = true;
+                    item.type = "container";
+                    var button = {
+                        type:     "button",
+                        title:    "",
+                        cssClass: "fa-plus",
+                        click:    function(e) {
+                            var item = $(this).next().data("item");
+                            var popup = item.popupItems;
+                            var table = $(this).siblings(".mapbender-element-result-table")
+
+                            var feature = table.data('olFeature');
+                            var data = {};
+                            item.dataStore.id = item.mappingId;
+                            item.allowRemove = false;
+                            data[item.mapping.to] = feature.attributes[item.mapping.from];
+                            widget._openEditDialog(data, popup, item, table);
+                            return false;
+                        }
                     };
 
-                    $.extend(item, resultTableSettings);
+                    item.children = [button, cloneItem];
+
+                    var buttons = [];
+
+                    buttons.push({
+                        title:     translate('feature.edit'),
+                        className: 'edit',
+                        onClick:   function(rowData, ui) {
+                            var table = ui.parents('.mapbender-element-result-table');
+                            var popup = rowData.item.popupItems;
+                            var item = rowData.item;
+                            item.dataStore.id = item.mappingId;
+                            item.allowRemove = true
+                            widget._openEditDialog(rowData, popup, item, table);
+                            event.preventDefault();
+                            return false;
+                        }
+                    });
+
+                    cloneItem.buttons = buttons;
 
                 }
 
@@ -867,7 +891,7 @@
                                 id:         dataStoreId,
                                 dataItemId: dataItemId
                             }).done(function(data) {
-
+                                item.allowRemove = true
                                 widget._openEditDialog(data, item.dataStore.popupItems, item, selectRef);
 
                             });
@@ -935,6 +959,39 @@
             });
 
             dialog.generateElements({children: widget.currentSettings.formItems});
+
+            var tables = dialog.find(".mapbender-element-result-table");
+            _.each(tables, function(table, index) {
+
+                var item = $(table).data('item');
+                $(table).data('olFeature', olFeature);
+                if(item.editable) {
+                    item.columns.pop();
+                }
+                var dataStore = item.dataStore;
+                if(dataStore) {
+                    var attributes = olFeature.attributes;
+                    var requestData = {
+                        schema:     widget.schemaName,
+                        id:         dataStore.id,
+                        fid: olFeature.fid,
+                        mappingId : item.mappingId
+                    };
+
+                    widget.query('dataStore/search', requestData).done(function(data) {
+                        _.each(data, function(el, i) {
+                            el.item = item;
+                        });
+                        var tableApi = $(table).resultTable('getApi');
+                        tableApi.clear();
+                        tableApi.rows.add(data);
+                        tableApi.draw();
+
+                    });
+                }
+
+            });
+
             dialog.popupDialog(popupConfiguration);
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
@@ -1519,6 +1576,7 @@
                             id:         schema.dataStore.id,
                             dataItemId: dataItem[uniqueKey]
                         }).done(function(response) {
+
                             if(response.hasOwnProperty('errors')) {
                                 form.enableForm();
                                 $.each(response.errors, function(i, error) {
@@ -1535,8 +1593,25 @@
                             if(isNew) {
                                 var textKey = item.dataStore.text;
                                 var uniqueKey = item.dataStore.uniqueId;
+                                                              //ref.append('<option value="' + dataItem[uniqueKey] + '">' + dataItem[textKey] + '</option>');
+                            }
+                            if(ref.attr('class') == "mapbender-element-result-table"){
 
-                                ref.append('<option value="' + dataItem[uniqueKey] + '">' + dataItem[textKey] + '</option>');
+                                var requestData = {
+                                    schema:     widget.schemaName,
+                                    id:         ref.data('item').dataStore.id,
+                                    fid: ref.data('olFeature').fid,
+                                    mappingId : ref.data('item').mappingId
+                                };
+
+                                widget.query('dataStore/search', requestData).done(function(data) {
+
+                                    var tableApi = ref.resultTable('getApi');
+                                    tableApi.clear();
+                                    tableApi.rows.add(data);
+                                    tableApi.draw();
+
+                                });
                             }
                             widget.currentPopup.currentPopup.popupDialog('close');
                             widget.currentPopup.currentPopup = null;
@@ -1549,23 +1624,46 @@
             };
             buttons.push(saveButton);
 
-            buttons.push({
+            remove = {
                 text:    translate("mb.data.store.remove", true),
                 'class': 'critical',
                 click:   function() {
-                    widget.query('datastore/remove', {
+                    var request = {
                         schema:   schemaName,
                         dataItem: dataItem,
-                        id:       schema.dataStore.id,
+                        id:       schema.dataStore.id
 
-                    }).done(function(response) {
-
+                    };
+                    widget.query('datastore/remove', request).done(function(response) {
                         //widget.removeData(dataItem);
+
+
+                        if(ref.attr('class') == "mapbender-element-result-table") {
+                            var requestData = {
+                                schema:     widget.schemaName,
+                                id:         ref.data('item').dataStore.id,
+                                fid: ref.data('olFeature').fid,
+                                mappingId : ref.data('item').mappingId
+                            };
+
+                            widget.query('dataStore/search', requestData).done(function(data) {
+
+                                var tableApi = ref.resultTable('getApi');
+                                tableApi.clear();
+                                tableApi.rows.add(data);
+                                tableApi.draw();
+                            });
+                                //widget.currentPopup.currentPopup._trigger("updateTable", event, request);
+                        }
                         widget.currentPopup.currentPopup.popupDialog('close');
                         widget.currentPopup.currentPopup = null;
                     })
                 }
-            });
+            };
+            if(schema.allowRemove == true){
+                buttons.push(remove);
+
+            }
 
             buttons.push({
                 text:  translate("cancel"),
@@ -1638,7 +1736,7 @@
              buttons = _.union(schema.popup.buttons, buttons);
              } */
             var popupConfig = _.extend({
-                title: translate("edit.title"),
+                title: '',
                 width: widget.featureEditDialogWidth,
             }, schema.popup);
 
@@ -1648,11 +1746,11 @@
             dialog.popupDialog(popupConfig);
             dialog.addClass("data-store-edit-data");
             widget.currentPopup.currentPopup = dialog;
+
             return dialog;
         },
 
         save: function(dataItem) {
-            debugger;
             //dataItem.uniqueId
 
         },
