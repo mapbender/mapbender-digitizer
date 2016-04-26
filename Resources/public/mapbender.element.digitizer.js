@@ -916,14 +916,17 @@
                     buttons.push({
                         title:     translate('feature.edit'),
                         className: 'edit',
-                        onClick:   function(rowData, ui) {
+                        onClick:   function(rowData, ui, e) {
                             var table = ui.parents('.mapbender-element-result-table');
                             var popup = rowData.item.popupItems;
                             var item = rowData.item;
                             item.dataStore.id = item.mappingId;
-                            item.allowRemove = true
+                            item.allowRemove = true;
                             widget._openEditDialog(rowData, popup, item, table);
-                            event.preventDefault();
+
+                            e.defaultPrevented && e.defaultPrevented();
+                            e.preventDefault && e.preventDefault();
+
                             return false;
                         }
                     });
