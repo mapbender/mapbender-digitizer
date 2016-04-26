@@ -248,6 +248,12 @@
              */
             $(map.div).contextMenu({
                 selector: 'div',
+                events: {
+                    show: function(options) {
+                        var schema = widget.currentSettings;
+                        return schema.useContextMenu;
+                    }
+                },
                 build:    function(trigger, e) {
                     var items = {};
                     var schema = widget.currentSettings;
@@ -268,15 +274,6 @@
                         });
                     }
 
-                    if(!schema.useContextMenu){
-                        return {
-                            callback: function(){},
-                            items: {
-                                menuItem: {}
-                            }
-                        };
-                    }
-
                     return {
                         items:    items,
                         callback: function(key, options) {
@@ -295,6 +292,16 @@
 
             $.contextMenu({
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
+                events: {
+                    show: function(options) {
+                        var tr = $(options.$trigger);
+                        var resultTable = tr.closest('.mapbender-element-result-table');
+                        var api = resultTable.resultTable('getApi');
+                        var olFeature = api.row(tr).data();
+                        var schema = widget.findFeatureSchema(olFeature);
+                        return schema.useContextMenu;
+                    }
+                },
                 build:    function($trigger, e) {
                     var tr = $($trigger);
                     var resultTable = tr.closest('.mapbender-element-result-table');
@@ -303,22 +310,13 @@
                     var schema = widget.findFeatureSchema(olFeature);
                     var items = {};
 
-                    if(schema.useContextMenu) {
-                        items['zoom'] = {name: "Zoom to"};
-                        if(schema.allowDelete) {
-                            items['removeFeature'] = {name: "Remove"};
-                        }
+                    items['zoom'] = {name: "Zoom to"};
+                    if(schema.allowDelete) {
+                        items['removeFeature'] = {name: "Remove"};
+                    }
 
-                        if(schema.allowEditData) {
-                            items['edit'] = {name: "Edit"};
-                        }
-                    }else{
-                        return {
-                            callback: function(){},
-                            items: {
-                                menuItem: {}
-                            }
-                        };
+                    if(schema.allowEditData) {
+                        items['edit'] = {name: "Edit"};
                     }
 
                     return {
