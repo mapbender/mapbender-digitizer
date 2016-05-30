@@ -137,16 +137,15 @@ class Digitizer extends BaseElement
      * @param $formItems
      * @return array
      */
-    protected function prepareQueredFeatureData($feature, $formItems)
+    protected function prepareQueriedFeatureData($feature, $formItems)
     {
         foreach ($formItems as $key => $formItem) {
             if (isset($formItem['children'])) {
-                $feature = array_merge($feature, $this->prepareQueredFeatureData($feature, $formItem['children']));
+                $feature = array_merge($feature, $this->prepareQueriedFeatureData($feature, $formItem['children']));
             } elseif (isset($formItem['type']) && isset($formItem['name'])) {
                 switch ($formItem['type']) {
                     case 'select':
                         if (isset($formItem['multiple'])) {
-                            $fieldType                  = isset($formItem['fieldType']) ? $formItem['fieldType'] : 'text';
                             $separator                  = isset($formItem['separator']) ? $formItem['separator'] : ',';
                             if(is_array($feature["properties"][$formItem['name']])){
                                 $feature["properties"][$formItem['name']] = implode($separator, $feature["properties"][$formItem['name']]);
@@ -164,9 +163,7 @@ class Digitizer extends BaseElement
      */
     public function httpAction($action)
     {
-        /**
-         * @var $requestService Request
-         */
+        /** @var $requestService Request */
         $configuration   = $this->getConfiguration();
         $requestService  = $this->container->get('request');
         $request         = json_decode($requestService->getContent(), true);
@@ -208,7 +205,7 @@ class Digitizer extends BaseElement
                             /**
                              * @var $feature Feature
                              */
-                            $featureData = $this->prepareQueredFeatureData($feature, $schema['formItems']);
+                            $featureData = $this->prepareQueriedFeatureData($feature, $schema['formItems']);
 
                             foreach ($featureType->getFileInfo() as $fileConfig) {
                                 if (!isset($fileConfig['field']) || !isset($featureData["properties"][$fileConfig['field']])) {
@@ -323,14 +320,12 @@ class Digitizer extends BaseElement
                 }
 
                 $fid       = $request['fid'];
-                $mappingId     = $request['mappingId'];
+                $mappingId = $request['mappingId'];
                 $dataItems = $featureType->getTroughMapping($mappingId, $fid);
+                foreach ($dataItems as $dataItem) {
+                    $results[] = $dataItem->toArray();
+                }
 
-                //$dataStore         = $this->container->get("data.source")->get($id);
-                //$criteria['where'] = $request['where'];
-                //$dataItems         = $dataStore->search($criteria);
-
-               $results = $dataItems;
                 break;
             default:
                 $results = array(
