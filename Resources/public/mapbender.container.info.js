@@ -29,39 +29,39 @@ function MapbenderContainerInfo(widget, options) {
 
     self.isSidePane = function() {
         return sidePane.size() > 0;
-    }
+    };
 
     self.isContentPane = function() {
         return contentPane.size() > 0;
-    }
+    };
 
     self.isToolBar = function() {
         return toolBar.size() > 0;
-    }
+    };
 
     self.isOnTop = function() {
         return toolBar.hasClass('top');
-    }
+    };
 
     self.isOnBottom = function() {
         return toolBar.hasClass('bottom');
-    }
+    };
 
     self.isOnTop = function() {
         return toolBar.hasClass('top');
-    }
+    };
 
     self.isOnLeft = function() {
         return sidePane.hasClass('left');
-    }
+    };
 
     self.isOnRight = function() {
         return sidePane.hasClass('right');
-    }
+    };
 
     self.getContainer = function() {
         return container;
-    }
+    };
 
     if(self.isSidePane()) {
         var accordion = $(".accordionContainer", sidePane);
@@ -96,7 +96,7 @@ function MapbenderContainerInfo(widget, options) {
             tabs.on('click', function(e) {
                 var tab = $(e.currentTarget);
                 handleByTab(tab);
-            })
+            });
             handleByTab(currentTab);
         }
     }
