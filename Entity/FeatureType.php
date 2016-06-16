@@ -150,7 +150,7 @@ class FeatureType extends DataStore
         $feature         = $this->create($featureData);
         $event           = array(
             'item'    => &$featureData,
-            'feature' => $feature
+            'feature' => $featureData
         );
         $this->allowSave = true;
 
@@ -200,9 +200,9 @@ class FeatureType extends DataStore
         $data                          = $this->cleanFeatureData($feature->toArray());
         $connection                    = $this->getConnection();
         $data[ $this->getGeomField() ] = $this->transformEwkt($data[ $this->getGeomField() ], $this->getSrid());
-        $event                         = array(
-            'item'    => &$featureData,
-            'feature' => $data
+        $event             = array(
+            'item'    => &$data,
+            'feature' => $feature
         );
         $this->allowInsert             = true;
         if (isset($this->events['onBeforeInsert'])) {
