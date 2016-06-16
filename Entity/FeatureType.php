@@ -281,8 +281,8 @@ class FeatureType extends DataStore
         unset($data[ $this->getUniqueId() ]);
 
         $event             = array(
-            'item'    => &$feature,
-            'feature' => $data
+            'item'    => &$data,
+            'feature' => $feature
         );
         $this->allowUpdate = true;
 
@@ -295,7 +295,7 @@ class FeatureType extends DataStore
 
         $tableName = $this->getTableName();
 
-        if ($this->allowSUpdate) {
+        if ($this->allowUpdate) {
             $connection->update($tableName, $data, array($this->getUniqueId() => $feature->getId()));
         }
 
