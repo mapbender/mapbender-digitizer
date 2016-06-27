@@ -150,8 +150,9 @@ class FeatureType extends DataStore
         $feature         = $this->create($featureData);
         $event           = array(
             'item'    => &$featureData,
-            'feature' => $featureData
+            'feature' => $feature
         );
+
         $this->allowSave = true;
 
         try {
