@@ -13,7 +13,6 @@ use Mapbender\DataSourceBundle\Component\Drivers\PostgreSQL;
 use Mapbender\DataSourceBundle\Entity\DataItem;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Security\Acl\Exception\Exception;
 
 /**
  * Class FeatureType handles Feature objects.
@@ -176,7 +175,7 @@ class FeatureType extends DataStore
 
             // Get complete feature data
             $result = $this->getById($feature->getId(), $feature->getSrid());
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $result = array(
                 "exception"   => $e,
                 "feature"     => $feature,
