@@ -13,7 +13,6 @@ use Mapbender\DataSourceBundle\Component\Drivers\PostgreSQL;
 use Mapbender\DataSourceBundle\Entity\DataItem;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Security\Acl\Exception\Exception;
 
 /**
  * Class FeatureType handles Feature objects.
@@ -152,6 +151,7 @@ class FeatureType extends DataStore
             'item'    => &$featureData,
             'feature' => $feature
         );
+
         $this->allowSave = true;
 
         try {
@@ -175,7 +175,7 @@ class FeatureType extends DataStore
 
             // Get complete feature data
             $result = $this->getById($feature->getId(), $feature->getSrid());
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $result = array(
                 "exception"   => $e,
                 "feature"     => $feature,
@@ -200,9 +200,19 @@ class FeatureType extends DataStore
         $data                          = $this->cleanFeatureData($feature->toArray());
         $connection                    = $this->getConnection();
         $data[ $this->getGeomField() ] = $this->transformEwkt($data[ $this->getGeomField() ], $this->getSrid());
-        $result                        = $connection->insert($tableName, $data);
-        $lastId                        = $connection->lastInsertId();
+        $event             = array(
+            'item'    => &$data,
+            'feature' => $feature
+        );
+        $this->allowInsert             = true;
+        if (isset($this->events['onBeforeInsert'])) {
+            $this->secureEval($this->events['onBeforeInsert'], $event);
+        }
 
+        if ($this->allowInsert) {
+            $result = $connection->insert($tableName, $data);
+            $lastId = $connection->lastInsertId();
+        }
         if ($lastId < 1) {
             switch ($connection->getDatabasePlatform()->getName()) {
                 case self::POSTGRESQL_PLATFORM:
@@ -212,8 +222,12 @@ class FeatureType extends DataStore
             }
         }
         $feature->setId($lastId);
+        if (isset($this->events['onAfterInsert'])) {
+            $this->secureEval($this->events['onAfterInsert'], $event);
+        }
         return $feature;
     }
+
 
     /**
      * @param      $wkt
@@ -260,18 +274,34 @@ class FeatureType extends DataStore
     public function update($featureData)
     {
         /** @var Feature $feature */
-        $feature                     = $this->create($featureData);
-        $data                        = $this->cleanFeatureData($feature->toArray());
-        $connection                  = $this->getConnection();
-        $data[$this->getGeomField()] = $this->transformEwkt($data[$this->getGeomField()]);
-        unset($data[$this->getUniqueId()]);
+        $feature                       = $this->create($featureData);
+        $data                          = $this->cleanFeatureData($feature->toArray());
+        $connection                    = $this->getConnection();
+        $data[ $this->getGeomField() ] = $this->transformEwkt($data[ $this->getGeomField() ]);
+        unset($data[ $this->getUniqueId() ]);
 
+        $event             = array(
+            'item'    => &$data,
+            'feature' => $feature
+        );
+        $this->allowUpdate = true;
+
+        if (isset($this->events['onBeforeUpdate'])) {
+            $this->secureEval($this->events['onBeforeUpdate'], $event);
+        }
         if (empty($data)) {
             throw new \Exception("Feature can't be updated without criteria");
         }
 
         $tableName = $this->getTableName();
-        $connection->update($tableName, $data, array($this->getUniqueId() => $feature->getId()));
+
+        if ($this->allowUpdate) {
+            $connection->update($tableName, $data, array($this->getUniqueId() => $feature->getId()));
+        }
+
+        if (isset($this->events['onAfterUpdate'])) {
+            $this->secureEval($this->events['onAfterUpdate'], $event);
+        }
         return $feature;
     }
 
