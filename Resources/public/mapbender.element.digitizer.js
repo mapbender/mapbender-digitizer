@@ -918,8 +918,9 @@
                         className: 'edit',
                         onClick:   function(rowData, ui, e) {
                             var table = ui.parents('.mapbender-element-result-table');
-                            var popup = rowData.item.popupItems;
-                            var item = rowData.item;
+
+                            var item = table.data('item');
+                            var popup = item.popupItems;
                             item.dataStore.id = item.mappingId;
                             item.allowRemove = true;
                             widget._openEditDialog(rowData, popup, item, table);
