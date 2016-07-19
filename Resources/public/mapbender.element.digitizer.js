@@ -1741,12 +1741,7 @@
                 }
             });
             var dialog = $("<div/>");
-            dialog.on("popupdialogopen", function(event, ui) {
-                setTimeout(function() {
-                    dialog.formData(dataItem);
 
-                }, 1);
-            });
 
             /*   if(!schema.elementsTranslated) {
              translateStructure(widget.currentSettings.formItems);
@@ -1814,6 +1809,10 @@
             dialog.popupDialog(popupConfig);
             dialog.addClass("data-store-edit-data");
             widget.currentPopup.currentPopup = dialog;
+
+            setTimeout(function() {
+                dialog.formData(dataItem);
+            }, 30);
 
             return dialog;
         },
