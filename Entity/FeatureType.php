@@ -390,47 +390,59 @@ class FeatureType extends ContainerAware
     /**
      * Search feature by criteria
      *
-     * @param array  $criteria
+     * @param array $criteria
      * @return Feature[]
      */
     public function search(array $criteria = array())
     {
-
         /** @var Statement $statement */
         /** @var Feature $feature */
-        $maxResults   = isset($criteria['maxResults']) ? intval($criteria['maxResults']) : self::MAX_RESULTS;
-        $intersect    = isset($criteria['intersectGeometry']) ? $criteria['intersectGeometry'] : null;
-        $returnType   = isset($criteria['returnType']) ? $criteria['returnType'] : null;
-        $srid         = isset($criteria['srid']) ? $criteria['srid'] : $this->getSrid();
-        $where        = isset($criteria['where']) ? $criteria['where'] : null;
-        $queryBuilder = $this->getSelectQueryBuilder($srid);
+        $maxResults      = isset($criteria['maxResults']) ? intval($criteria['maxResults']) : self::MAX_RESULTS;
+        $intersect       = isset($criteria['intersectGeometry']) ? $criteria['intersectGeometry'] : null;
+        $returnType      = isset($criteria['returnType']) ? $criteria['returnType'] : null;
+        $srid            = isset($criteria['srid']) ? $criteria['srid'] : $this->getSrid();
+        $where           = isset($criteria['where']) ? $criteria['where'] : null;
+        $queryBuilder    = $this->getSelectQueryBuilder($srid);
+        $connection      = $queryBuilder->getConnection();
+        $whereConditions = array();
 
         // add GEOM where condition
         if ($intersect) {
-            $geometry = self::roundGeometry($intersect,2);
-            $queryBuilder->andWhere(self::genIntersectCondition($this->getPlatformName(), $geometry, $this->geomField, $srid, $this->getSrid()));
+            $geometry     = self::roundGeometry($intersect, 2);
+            $whereConditions[] = self::genIntersectCondition($this->getPlatformName(), $geometry, $this->geomField, $srid, $this->getSrid());
         }
 
         // add filter (https://trac.wheregroup.com/cp/issues/3733)
-        if(!empty($this->sqlFilter)){
-            $queryBuilder->andWhere($this->sqlFilter);
+        if (!empty($this->sqlFilter)) {
+            $whereConditions[] = $this->sqlFilter;
         }
 
         // add second filter (https://trac.wheregroup.com/cp/issues/4643)
-        if($where){
-            $queryBuilder->andWhere($where);
+        if ($where) {
+            $whereConditions[] = $where;
+        }
+
+        if (isset($criteria["source"]) && isset($criteria["distance"])) {
+            $whereConditions[] = "ST_DWithin(t." . $this->getGeomField() . ","
+                . $connection->quote($criteria["source"])
+                . "," . $criteria['distance'] . ')';
+        }
+
+        if (count($whereConditions)) {
+            $queryBuilder->where(join(" AND ", $whereConditions));
         }
 
         $queryBuilder->setMaxResults($maxResults);
         // $queryBuilder->setParameters($params);
+        // $sql = $queryBuilder->getSQL();
+
         $statement  = $queryBuilder->execute();
         $rows       = $statement->fetchAll();
         $hasResults = count($rows) > 0;
 
-
         // Convert to Feature object
         if ($hasResults) {
-            $this->prepareResults($rows,$srid);
+            $this->prepareResults($rows, $srid);
         }
 
         if ($returnType == "FeatureCollection") {
