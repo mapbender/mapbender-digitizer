@@ -1,4 +1,10 @@
 (function($) {
+    /**
+     * Regular Expression to get checked if string should be translated
+     *
+     * @type {RegExp}
+     */
+    var translationReg = /^trans:\w+\.(\w|-|\.{1}\w+)+\w+$/;
 
     /**
      * Translate digitizer keywords
@@ -28,13 +34,6 @@
     }
 
     /**
-     * Regular Expression to get checked if string should be translated
-     *
-     * @type {RegExp}
-     */
-    var translationReg = /^trans:\w+\.(\w|-|\.{1}\w+)+\w+$/;
-
-    /**
      * Check and replace values recursive if they should be translated.
      * For checking used "translationReg" variable
      *
@@ -53,30 +52,6 @@
             }
         }
     }
-
-    /**
-     * Check and replace values recursive if they should be translated.
-     * For checking used "translationReg" variable
-     *
-     *
-     * @param items
-     */
-    function eachItem(items, callback) {
-        var isArray = items instanceof Array;
-        if(isArray) {
-            for (var k in items) {
-                eachItem(items[k], callback);
-            }
-        } else {
-            if(typeof items["type"] !== 'undefined'){
-                callback(items);
-            }
-            if(typeof items["children"] !== 'undefined') {
-                eachItem(items["children"], callback);
-            }
-        }
-    }
-
     /**
      * Example:
      *     Mapbender.confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
@@ -117,7 +92,6 @@
     };
 
 
-
     /**
      * Digitizing tool set
      *
@@ -133,7 +107,8 @@
             allowDelete: true,
             allowEditData:true,
             openFormAfterEdit: true,
-            maxResults: 1000,
+            maxResults: 5001,
+            pageLength: 10,
             oneInstanceEdit: true,
             searchType: "currentExtent",
             inlineSearch: false,
@@ -176,12 +151,17 @@
         map:      null,
         currentSettings: null,
         featureEditDialogWidth: "423px",
+
+        /**
+         * Default styles merged by schema styles if defined
+         */
         styles: {
             'default': {
                 strokeWidth: 1,
                 strokeColor: '#6fb536',
                 fillColor:   "#6fb536",
-                fillOpacity: 0.3
+                fillOpacity: 0.3,
+                label: '${label}'
             },
             'select':  {
                 strokeWidth: 3,
@@ -199,128 +179,15 @@
          *
          * @private
          */
-        _create:                function() {
+        _create: function() {
             var widget = this;
             this.widget = this;
-            if(!Mapbender.checkTarget("mbDigitizer", widget.options.target)){
+            if(!Mapbender.checkTarget("mbDigitizer", widget.options.target)) {
                 return;
             }
             var element = widget.element;
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
-        },
-
-        /**
-         * Find feature schema by feature data
-         *
-         * @param feature
-         * @returns {*}
-         */
-        findFeatureSchema: function(feature){
-            var widget = this;
-            var schema = null;
-            var options = widget.options;
-
-            // find schema by feature
-            $.each(options.schemes, function(k, _schema) {
-                $.each(_schema.features, function(i, featureCollection) {
-                    $.each(featureCollection, function(i, _feature) {
-                        if(_feature == feature) {
-                            schema = _schema;
-                            return false;
-                        }
-                    });
-                    if(schema){
-                        return false;
-                    }
-                });
-                if(schema){
-                    return false;
-                }
-            });
-            return schema;
-        },
-
-        /**
-         * Remove feature
-         *
-         * @param feature
-         * @returns {*}
-         */
-        removeFeature: function(feature) {
-            var widget = this;
-            var olFeature = null;
-            var schema = widget.findFeatureSchema(feature);
-            var layer = schema.layer;
-            var tableApi = schema.table.resultTable('getApi');
-            var row = tableApi.row(schema.table.resultTable("getDomRowByData", feature));
-
-            if(!schema) {
-                $.notify("Feature remove failed.", "error");
-                return;
-            }
-
-            function _removeFeatureFromUI() {
-                // remove from map
-                olFeature.layer.removeFeatures(olFeature);
-
-                // remove from table
-                row.remove().draw();
-
-                widget._trigger('featureRemoved', null, {
-                    feature:   feature,
-                    schema:    schema,
-                    olFeature: olFeature
-                });
-            }
-
-            if(feature.hasOwnProperty('isNew')) {
-                olFeature = layer.getFeatureById(feature.id);
-                _removeFeatureFromUI()
-            } else {
-                olFeature = layer.getFeatureByFid(feature.id);
-                Mapbender.confirmDialog({
-                    html:      translate("feature.remove.from.database"),
-                    onSuccess: function() {
-                        console.log("LÖSCHT!");
-                        widget.query('delete', {
-                            schema:  schema.schemaName,
-                            feature: feature
-                        }).done(function(fid) {
-                            _removeFeatureFromUI();
-                            $.notify(translate('feature.remove.successfully'), 'info');
-                        });
-                    }
-                });
-            }
-
-            return olFeature;
-        },
-        /**
-         * Create vector feature layer
-         *
-         * @param schema
-         * @returns {OpenLayers.Layer.Vector}
-         */
-        createSchemaFeatureLayer: function(schema, strategies) {
-            var widget = this;
-            var styles = schema.styles ? schema.styles : {};
-            var styleMap = new OpenLayers.StyleMap({
-                'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? styles['default'] : widget.styles.default)),
-                'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
-            }, {extendDefault: true});
-
-            var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 0});
-            var layer = new OpenLayers.Layer.Vector(schema.label, {
-                styleMap:   styleMap,
-                //strategies: [clusterStrategy]
-            });
-            layer.name = schema.label;
-
-            //debugger;
-            //clusterStrategy.deactivate();
-            //layer.refresh({force: true});
-            return layer;
         },
 
         _setup: function() {
@@ -340,68 +207,81 @@
                 titleElement.css('display', 'none');
             }
 
+            function createSubMenu(olFeature) {
+                var layer = olFeature.layer;
+                var schema = widget.findSchemaByLayer(layer);
+                var subItems = {
+                    zoomTo: {
+                        name:   "Zoom to",
+                        action: function(key, options, parameters) {
+                            widget.zoomToJsonFeature(parameters.olFeature);
+                        }
+                    }
+                };
+
+                if(schema.allowEditData) {
+                    subItems['edit'] = {
+                        name:   translate('feature.edit'),
+                        action: function(key, options, parameters) {
+                            widget._openFeatureEditDialog(parameters.olFeature);
+                        }
+                    }
+                }
+                if(schema.allowDelete) {
+                    subItems['remove'] = {
+                        name:   translate('feature.remove'),
+                        action: function(key, options, parameters) {
+                            widget.removeFeature(parameters.olFeature);
+                        }
+                    }
+                }
+
+                return {
+                    name:      "Feature #" + olFeature.fid,
+                    olFeature: olFeature,
+                    items:     subItems
+                };
+            }
+
             /**
              * Set map context menu
              */
-
             $(map.div).contextMenu({
                 selector: 'div',
+                events: {
+                    show: function(options) {
+                        var schema = widget.currentSettings;
+                        return schema.useContextMenu;
+                    }
+                },
                 build:    function(trigger, e) {
                     var items = {};
-                    var olFeatures = widget._getFeaturesFromEvent(e.clientX, e.clientY);
+                    var schema = widget.currentSettings;
+                    var feature = schema.layer.getFeatureFromEvent(e);
+                    var features;
 
-                    if(olFeatures.length) {
-                        for (var i in olFeatures) {
-                            var olFeature = olFeatures[i];
-                            var layer = olFeature.layer;
-                            var schema = widget.findSchemaByLayer(layer);
-
-                            if(!schema.useContextMenu){
-                                continue;
-                            }
-
-                            var subItems = {
-                                zoomTo: {
-                                    name:   "Zoom to",
-                                    action: function(key, options, parameters) {
-                                        widget.zoomToJsonFeature(widget.findFeatureByOpenLayerFeature(parameters.olFeature));
-                                    }
-                                }
-                            };
-
-                            if(schema.allowEditData) {
-                                subItems['edit'] = {
-                                    name: translate('feature.edit'),
-                                    action: function(key, options, parameters) {
-                                        widget._openFeatureEditDialog(parameters.olFeature);
-                                    }
-                                }
-                            }
-                            if(schema.allowDelete) {
-                                subItems['remove'] = {
-                                    name: translate('feature.remove'),
-                                    action: function(key, options, parameters) {
-                                        widget.removeFeature(widget.findFeatureByOpenLayerFeature(parameters.olFeature));
-                                    }
-                                }
-                            }
-
-                            items[olFeature.fid] = {
-                                name:      "Feature #" + olFeature.fid,
-                                olFeature: olFeature,
-                                items:     subItems
-                            };
-                        }
-                    }
-
-                    if(!_.size(items)) {
+                    if(!feature) {
                         items['no-items'] = {name: "Nothing selected!"}
+                    } else {
+                        features = feature.cluster ? feature.cluster : [feature];
+                        //features = widget._getFeaturesFromEvent(e.clientX, e.clientY);
+
+                        _.each(features, function(feature) {
+                            if(!feature.layer) {
+                                feature.layer = olFeature.layer;
+                            }
+                            items[feature.fid] = createSubMenu(feature);
+                        });
                     }
 
                     return {
                         items:    items,
                         callback: function(key, options) {
-                            var parameters = options.items[options.$selected.parent().closest('.context-menu-item').data('contextMenuKey')];
+                            var selectedElement = options.$selected;
+                            if(!selectedElement) {
+                                return
+                            }
+                            var parameters = options.items[selectedElement.parent().closest('.context-menu-item').data('contextMenuKey')];
                             if(parameters.items[key].action) {
                                 parameters.items[key].action(key, options, parameters);
                             }
@@ -412,42 +292,50 @@
 
             $.contextMenu({
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
+                events: {
+                    show: function(options) {
+                        var tr = $(options.$trigger);
+                        var resultTable = tr.closest('.mapbender-element-result-table');
+                        var api = resultTable.resultTable('getApi');
+                        var olFeature = api.row(tr).data();
+                        var schema = widget.findFeatureSchema(olFeature);
+                        return schema.useContextMenu;
+                    }
+                },
                 build:    function($trigger, e) {
                     var tr = $($trigger);
                     var resultTable = tr.closest('.mapbender-element-result-table');
                     var api = resultTable.resultTable('getApi');
-                    var feature = api.row(tr).data();
-                    var schema = widget.findFeatureSchema(feature);
+                    var olFeature = api.row(tr).data();
+                    var schema = widget.findFeatureSchema(olFeature);
                     var items = {};
 
-                    if(schema.useContextMenu) {
-                        items['zoom'] = {name: "Zoom to"};
-                        if(schema.allowDelete) {
-                            items['removeFeature'] = {name: "Remove"};
-                        }
+                    items['zoom'] = {name: "Zoom to"};
+                    if(schema.allowDelete) {
+                        items['removeFeature'] = {name: "Remove"};
+                    }
 
-                        if(schema.allowEditData) {
-                            items['edit'] = {name: "Edit"};
-                        }
+                    if(schema.allowEditData) {
+                        items['edit'] = {name: "Edit"};
                     }
 
                     return {
                         callback: function(key, options) {
                             switch (key) {
                                 case 'removeFeature':
-                                    widget.removeFeature(feature);
+                                    widget.removeFeature(olFeature);
                                     break;
 
                                 case 'zoom':
-                                    widget.zoomToJsonFeature(feature);
+                                    widget.zoomToJsonFeature(olFeature);
                                     break;
 
                                 case 'edit':
-                                    widget.openFeatureEditDialog(feature);
+                                    widget._openFeatureEditDialog(olFeature);
                                     break;
 
                                 case 'exportGeoJson':
-                                    widget.exportGeoJson(feature);
+                                    widget.exportGeoJson(olFeature);
                                     break;
                             }
                         },
@@ -458,6 +346,16 @@
 
             if(options.tableTranslation) {
                 translateObject(options.tableTranslation);
+            } else {
+                options.tableTranslation = {
+                    sSearch:       translate("search.title") + ':',
+                    sEmptyTable:   translate("search.table.empty"),
+                    sZeroRecords:  translate("search.table.zerorecords"),
+                    sInfo:         translate("search.table.info.status"),
+                    sInfoEmpty:    translate("search.table.info.empty"),
+                    sInfoFiltered: translate("search.table.info.filtered")
+                };
+                //translateObject(options.tableTranslation);
             }
 
             // build select options
@@ -481,8 +379,8 @@
                 buttons.push({
                     title:     translate('feature.edit'),
                     className: 'edit',
-                    onClick:   function(feature, ui) {
-                        widget.openFeatureEditDialog(feature);
+                    onClick:   function(olFeature, ui) {
+                        widget._openFeatureEditDialog(olFeature);
                     }
                 });
 
@@ -491,14 +389,14 @@
                         title:     translate("feature.remove"),
                         className: 'remove',
                         cssClass:  'critical',
-                        onClick:   function(feature, ui) {
-                            widget.removeFeature(feature);
+                        onClick:   function(olFeature, ui) {
+                            widget.removeFeature(olFeature);
                         }
                     });
                 }
 
                 option.val(schemaName).html(schema.label);
-                widget.map.addLayer(layer);
+                map.addLayer(layer);
 
                 var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
                 var columns = [];
@@ -510,14 +408,14 @@
                 $.each(schema.tableFields, function(fieldName, fieldSettings) {
                     newFeatureDefaultProperties[fieldName] = "";
                     fieldSettings.title = fieldSettings.label;
-                    fieldSettings.data = "properties." + fieldName;
+                    fieldSettings.data = "data." + fieldName;
                     columns.push(fieldSettings);
                 });
 
 
                 var resultTableSettings = {
                     lengthChange: false,
-                    pageLength: 10,
+                    pageLength: schema.pageLength,
                     searching: schema.inlineSearch,
                     info: true,
                     processing: false,
@@ -527,7 +425,7 @@
                     autoWidth: false,
                     columns:  columns,
                     buttons: buttons
-                }
+                };
 
                 if(options.tableTranslation) {
                     resultTableSettings.oLanguage = options.tableTranslation;
@@ -557,34 +455,33 @@
 
                         // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
                         controlEvents: {
-                            featureadded: function(event, feature) {
+                            featureadded: function(event) {
                                 var olFeature = event.feature;
-                                var geoJSON = new OpenLayers.Format.GeoJSON();
-                                var srid = olFeature.layer.map.getProjectionObject().proj.srsProjNumber;
+                                var layer = event.object.layer;
+                                var schema = widget.findSchemaByLayer(layer);
                                 var digitizerToolSetElement = $(".digitizing-tool-set", frame);
-                                var properties = jQuery.extend(true, {}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
-                                var jsonGeometry;
+                                var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
+                                //
+                                //if(schema.isClustered){
+                                //    $.notify('Create new feature is by clusterring not posible');
+                                //    return false;
+                                //}
 
-                                eval("jsonGeometry=" + geoJSON.write(olFeature.geometry));
+                                olFeature.isNew = true;
+                                olFeature.attributes = olFeature.data = properties;
+                                olFeature.layer = layer;
+                                olFeature.schema = schema;
 
-                                var jsonFeature = {
-                                    id:         olFeature.id,
-                                    isNew:      true,
-                                    properties: properties,
-                                    geometry:   jsonGeometry,
-                                    type:       "Feature",
-                                    srid:       srid
-                                };
-                                var tableApi = table.resultTable('getApi');
-                                tableApi.rows.add([jsonFeature]);
-
-                                tableApi.draw();
+                                //widget.reloadFeatures(layer);
+                                layer.redraw();
 
                                 digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
 
                                 if(schema.openFormAfterEdit) {
                                     widget._openFeatureEditDialog(olFeature);
                                 }
+
+                                //return true;
                             }
                         }
                     }, {
@@ -613,91 +510,101 @@
                 element.append(frame);
                 option.data("schemaSettings",schema);
                 selector.append(option);
-                schema.features = {
-                    loaded:   {},
-                    modified: {},
-                    created:  {}
-                }
+
+                var selectControl = new OpenLayers.Control.SelectFeature(layer, {
+                    hover:        true,
+                    clickFeature: function(feature) {
+                        var features = feature.cluster ? feature.cluster : [feature];
+
+                        if(_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
+                            return;
+                        }
+                        widget._openFeatureEditDialog(features[0]);
+                    },
+                    overFeature:  function(feature) {
+                        widget._highlightSchemaFeature(schema, feature, true);
+                    },
+                    outFeature:   function(feature) {
+                        widget._highlightSchemaFeature(schema, feature, false);
+                    }
+                });
+
+                schema.selectControl = selectControl;
+                selectControl.deactivate();
+                map.addControl(selectControl);
             });
 
-            function deactivateFrame(settings) {
-                var frame = settings.frame;
-                //var tableApi = settings.table.resultTable('getApi');
-                var layer = settings.layer;
+            function deactivateFrame(schema) {
+                var frame = schema.frame;
+                //var tableApi = schema.table.resultTable('getApi');
+                var layer = schema.layer;
 
                 frame.css('display', 'none');
 
-                if(!settings.displayPermanent){
+                if(!schema.displayPermanent){
                     layer.setVisibility(false);
                 }
+
+                schema.selectControl.deactivate();
 
                 // https://trac.wheregroup.com/cp/issues/4548
                 if(widget.currentPopup){
                     widget.currentPopup.popupDialog('close');
                 }
 
+
                 //layer.redraw();
                 //layer.removeAllFeatures();
                 //tableApi.clear();
             }
 
-            function activateFrame(settings) {
-                var frame = settings.frame;
-                var layer = settings.layer;
+            function activateFrame(schema) {
+                var frame = schema.frame;
+                var layer = schema.layer;
 
-                widget.activeLayer = settings.layer;
-                widget.schemaName = settings.schemaName;
-                widget.currentSettings = settings;
+                widget.activeLayer = schema.layer;
+                widget.schemaName = schema.schemaName;
+                widget.currentSettings = schema;
                 layer.setVisibility(true);
                 //layer.redraw();
                 frame.css('display', 'block');
+
+                schema.selectControl.activate();
             }
 
             function onSelectorChange() {
                 var option = selector.find(":selected");
-                var settings = option.data("schemaSettings");
-                var table = settings.table;
+                var schema = option.data("schemaSettings");
+                var table = schema.table;
                 var tableApi = table.resultTable('getApi');
 
 
-                widget._trigger("beforeChangeDigitizing", null, {next: settings, previous: widget.currentSettings});
+                widget._trigger("beforeChangeDigitizing", null, {next: schema, previous: widget.currentSettings});
 
                 if(widget.currentSettings) {
                     deactivateFrame(widget.currentSettings);
                 }
 
-                activateFrame(settings);
+                activateFrame(schema);
 
                 table.off('mouseenter', 'mouseleave', 'click');
 
                 table.delegate("tbody > tr", 'mouseenter', function() {
                     var tr = this;
                     var row = tableApi.row(tr);
-                    var jsonData = row.data();
-                    if(!jsonData) {
-                        return;
-                    }
-                    widget._highlightFeature(jsonData, true);
+                    widget._highlightFeature(row.data(), true);
                 });
 
                 table.delegate("tbody > tr", 'mouseleave', function() {
                     var tr = this;
                     var row = tableApi.row(tr);
-                    var jsonData = row.data();
-                    if(!jsonData) {
-                        return;
-                    }
-                    widget._highlightFeature(jsonData, false);
+                    widget._highlightFeature(row.data(), false);
                 });
 
                 table.delegate("tbody > tr", 'click', function() {
                     var tr = this;
                     var row = tableApi.row(tr);
-                    var jsonData = row.data();
-                    if(!jsonData) {
-                        return;
-                    }
-                    widget.zoomToJsonFeature(jsonData);
+                    widget.zoomToJsonFeature(row.data());
                 });
 
                 widget._getData();
@@ -705,58 +612,6 @@
 
             selector.on('change',onSelectorChange);
 
-            var featuresInFocus = [];
-            var featureEventHandler = function(e) {
-
-                var olFeature = e.feature.cluster ? _.last(e.feature.cluster) : e.feature;
-                var layer = olFeature.layer;
-                var schema = widget.findSchemaByLayer(layer);
-
-                if(!schema) {
-                    return;
-                }
-
-
-                var table = schema.table;
-                var tableWidget = table.data('visUiJsResultTable');
-
-                //if(layer != widget.currentSettings.layer) {
-                //    return
-                //}
-
-                var jsonFeature = tableWidget.getDataById(olFeature.fid);
-                var domRow = tableWidget.getDomRowByData(jsonFeature);
-
-                if(!domRow) {
-                    return;
-                }
-
-                switch (e.type){
-                    case "featureover":
-                        tableWidget.showByRow(domRow);
-                        domRow.addClass('hover');
-                        layer.drawFeature(olFeature, 'select');
-                        featuresInFocus.push(e.feature) ;
-                        break;
-                    case "featureout":
-                        domRow.removeClass('hover');
-                        layer.drawFeature(olFeature, 'default');
-
-                        featuresInFocus.splice(featuresInFocus.indexOf(e.feature), 1);
-                        break;
-                    case "featureclick":
-                        if(_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
-                            return;
-                        }
-                        widget._openFeatureEditDialog(olFeature);
-                        break;
-
-                }
-            };
-
-            map.events.register('featureover', this, featureEventHandler);
-            map.events.register('featureout', this, featureEventHandler);
-            map.events.register('featureclick', this, featureEventHandler);
             map.events.register("moveend", this, function() {
                 widget._getData();
             });
@@ -764,7 +619,7 @@
                 widget._getData();
                 widget.updateClusterStrategies();
             });
-            widget.map.resetLayersZIndex();
+            //widget.map.resetLayersZIndex();
             widget._trigger('ready');
 
             element.bind("mbdigitizerbeforechangedigitizing", function(e, sets) {
@@ -793,126 +648,124 @@
         },
 
         /**
+         * On save button click
+         *
+         * @param {OpenLayers.Feature} feature OpenLayers feature
+         * @private
+         */
+        saveFeature: function(feature) {
+            if(feature.disabled){
+                return;
+            }
+
+            var widget = this;
+            var schema = feature.schema;
+            var dialog = feature.editDialog;
+            var table = schema.table;
+            var tableWidget = table.data('visUiJsResultTable');
+            var tableApi = table.resultTable('getApi');
+            var formData = dialog.formData();
+            var wkt = new OpenLayers.Format.WKT().write(feature);
+            var srid = widget.map.getProjectionObject().proj.srsProjNumber;
+            var request = {
+                properties: formData,
+                geometry:   wkt,
+                srid:       srid,
+                type:       "Feature"
+            };
+
+            tableApi.draw({"paging": "page"});
+
+            if(!feature.isNew && feature.fid) {
+                request.id = feature.fid;
+            }
+
+            var errorInputs = $(".has-error", dialog);
+            var hasErrors = errorInputs.size() > 0;
+
+            if(!hasErrors) {
+                feature.disabled = true;
+                dialog.disableForm();
+                widget.query('save', {
+                    schema:  schema.schemaName,
+                    feature: request
+                }).done(function(response) {
+
+                    if(response.hasOwnProperty('errors')) {
+                        dialog.enableForm();
+                        feature.disabled = false;
+                        $.each(response.errors, function(i, error) {
+                            $.notify(error.message, {
+                                title:     'API Error',
+                                autoHide:  false,
+                                className: 'error'
+                            });
+                            console.error(error.message);
+                        });
+                        return;
+                    }
+
+                    var hasFeatureAfterSave = response.features.length > 0;
+
+                    if(!hasFeatureAfterSave) {
+                        widget.reloadFeatures(schema.layer, _.without(schema.layer.features, feature));
+                        dialog.popupDialog('close');
+                        return;
+                    }
+
+                    var layer = feature.layer;
+                    var dbFeature = response.features[0];
+                    feature.fid = dbFeature.id;
+                    feature.state = null;
+                    $.extend(feature.data, dbFeature.properties);
+
+                    var geoJsonReader = new OpenLayers.Format.GeoJSON();
+                    var newFeatures = geoJsonReader.read(response);
+                    var newFeature = _.first(newFeatures);
+
+                    _.each(['fid', 'disabled', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent'], function(key) {
+                        newFeature[key] = feature[key];
+                    });
+
+                    widget.reloadFeatures(schema.layer, _.union(_.without(layer.features, feature), [newFeature]));
+                    feature = newFeature;
+
+                    tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
+                    tableApi.draw();
+
+                    delete feature.isNew;
+
+                    dialog.enableForm();
+                    feature.disabled = false;
+                    dialog.popupDialog('close');
+                    $.notify(translate("feature.save.successfully"), 'info');
+                });
+            }
+        },
+
+        /**
          * Open edit feature dialog
          *
          * @param olFeature open layer feature
          * @private
          */
-
         _openFeatureEditDialog: function(olFeature) {
             var widget = this;
+            var schema = olFeature.schema;
+            var buttons = [];
 
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
             }
 
-            var schema = widget.findSchemaByLayer(olFeature.layer);
-            var table = schema.table;
-            var tableApi = table.resultTable('getApi');
-            var buttons = [];
-
-            if(schema.allowEditData){
+            if(schema.allowEditData) {
                 var saveButton = {
-                    text: translate("feature.save"),
+                    text:  translate("feature.save"),
                     click: function() {
-                        var form = $(this).closest(".ui-dialog-content");
-                        var formData = form.formData();
-                        var wkt = new OpenLayers.Format.WKT().write(olFeature);
-                        var srid = widget.map.getProjectionObject().proj.srsProjNumber;
-                        var jsonFeature = {
-                            properties: formData,
-                            geometry:   wkt,
-                            srid: srid
-                        };
-
-                        if(olFeature.fid){
-                            jsonFeature.id = olFeature.fid;
-                        }
-
-                        var errorInputs = $(".has-error", dialog);
-                        var hasErrors = errorInputs.size() > 0;
-
-
-                        if( !hasErrors ){
-                            form.disableForm();
-                            widget.query('save',{
-                                schema: widget.schemaName,
-                                feature: jsonFeature
-                            }).done(function(response){
-
-                                if(response.hasOwnProperty('errors')) {
-                                    form.enableForm();
-                                    $.each(response.errors, function(i, error) {
-                                        $.notify( error.message, {
-                                            title:'API Error',
-                                            autoHide: false,
-                                            className: 'error'
-                                        });
-                                        console.error(error.message);
-                                    });
-                                    return;
-                                }
-
-                                var hasFeatureAfterSave = response.features.length > 0;
-
-                                if(!hasFeatureAfterSave){
-                                    var origFeature = widget.findFeatureByOpenLayerFeature(olFeature);
-                                    var row = tableApi.row(schema.table.resultTable("getDomRowByData", origFeature));
-
-                                    // remove from map
-                                    olFeature.layer.removeFeatures(olFeature);
-                                    // remove from table
-                                    row.remove().draw();
-
-                                    widget.currentPopup.popupDialog('close');
-                                    return;
-                                }
-
-                                var dbFeature = response.features[0];
-                                var isNew = !olFeature.hasOwnProperty('fid');
-                                var tableJson = null;
-
-                                // search jsonData from table
-                                $.each(tableApi.data(),function(i,jsonData){
-                                    if(isNew){
-                                        if(jsonData.id == olFeature.id){
-                                            delete jsonData.isNew;
-                                            tableJson = jsonData;
-                                            return false
-                                        }
-                                    }else{
-                                        if(jsonData.id == olFeature.fid){
-                                            tableJson = jsonData;
-                                            return false
-                                        }
-                                    }
-                                });
-
-
-                                // Merge object2 into object1
-                                $.extend( tableJson, dbFeature );
-
-                                // Redraw table fix
-                                // TODO: find how to drop table cache...
-                                $.each(tableApi.$("tbody > tr"), function (i, tr) {
-                                    var row = tableApi.row(tr);
-                                    if(row.data() == tableJson){
-                                        row.data(tableJson);
-                                        return false;
-                                    }
-                                })
-                                tableApi.draw();
-
-                                // Update open layer feature to...
-                                olFeature.fid = tableJson.id;
-                                olFeature.data = tableJson.properties;
-                                olFeature.attributes = tableJson.properties;
-
-                                form.enableForm();
-                                widget.currentPopup.popupDialog('close');
-                                $.notify(translate("feature.save.successfully"),'info');
-                            });
-                        }
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var feature = dialog.data('feature');
+                        feature.editDialog = dialog;
+                        widget.saveFeature(feature);
                     }
                 };
                 buttons.push(saveButton);
@@ -922,8 +775,7 @@
                     text:  translate("feature.remove"),
                     'class': 'critical',
                     click: function() {
-                        var feature = widget.findFeatureByOpenLayerFeature(olFeature);
-                        widget.removeFeature(feature);
+                        widget.removeFeature(olFeature);
                         widget.currentPopup.popupDialog('close');
                     }
                 });
@@ -937,11 +789,41 @@
             var popupConfiguration = {
                 title: translate("feature.attributes"),
                 width: widget.featureEditDialogWidth,
-                buttons: buttons
             };
 
-            if(widget.currentSettings.hasOwnProperty('popup')){
-                $.extend(popupConfiguration,widget.currentSettings.popup);
+            if(schema.popup) {
+                if(!schema.popup.buttons) {
+                    schema.popup.buttons = [];
+                }
+                $.extend(popupConfiguration, schema.popup);
+
+                if(popupConfiguration.buttons && !schema._popupButtonsInitialized) {
+                    // Initialize custom button events
+                    _.each(popupConfiguration.buttons, function(button) {
+                        if(button.click) {
+                            var eventHandlerCode = button.click;
+                            button.click = function(e) {
+                                var _widget = widget;
+                                var el = $(this);
+                                var form = $(this).closest(".ui-dialog-content");
+                                var feature = form.data('feature');
+                                var data = feature.data;
+
+                                eval(eventHandlerCode);
+
+                                e.preventDefault();
+                                return false;
+                            }
+                        }
+                    });
+
+                    // Merge default and custom buttons
+                    _.each(buttons, function(button) {
+                        popupConfiguration.buttons.push(button);
+                    });
+
+                    schema._popupButtonsInitialized = true;
+                }
             }
 
             var dialog = $("<div/>");
@@ -951,7 +833,51 @@
                 schema.elementsTranslated = true;
             }
 
-            eachItem(widget.currentSettings.formItems, function(item) {
+            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+
+                if(item.type == "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
+
+                    item.type = "fieldSet";
+                    // TODO: merge item with new select
+                    item.children = [{
+                        type:    "select",
+                        id:      item.id,
+                        options: item.options,
+                        name:    item.name
+
+                    }, {
+                        type:  "button",
+                        title: "Edit",
+                        click: function() {
+                            var dataItemId = $(this).siblings().find('select').val();
+                            var selectRef = $(this).siblings().find('select');
+
+                            var dataStoreId = item.dataStore.id;
+                            widget.query("datastore/get", {
+                                schema:     widget.schemaName,
+                                id:         dataStoreId,
+                                dataItemId: dataItemId
+                            }).done(function(data) {
+
+                                widget._openEditDialog(data, item.dataStore.popupItems, item, selectRef);
+                                console.log(data)
+
+                            });
+
+                            return false;
+                        }
+                    }, {
+                        type:  "button",
+                        title: "New",
+                        click: function() {
+                            var selectRef = $(this).siblings().find('select');
+                            widget._openEditDialog({}, item.dataStore.popupItems, item, selectRef);
+
+                            return false;
+                        }
+                    }]
+                }
+
                 if(item.type == "file") {
                     item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + olFeature.fid + "&field=" + item.name;
                     if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name) && olFeature.data[item.name]) {
@@ -1002,59 +928,16 @@
 
             dialog.generateElements({children: widget.currentSettings.formItems});
             dialog.popupDialog(popupConfiguration);
+            schema.editDialog = dialog;
             widget.currentPopup = dialog;
+            dialog.data('feature', olFeature);
+
             setTimeout(function() {
                 dialog.formData(olFeature.data);
             }, 21);
 
             return dialog;
         },
-
-
-        _getFeaturesFromEvent: function(x, y) {
-            var features = [], targets = [], layers = [];
-            var layer, target, feature, i, len;
-            var map = this.map;
-
-            map.resetLayersZIndex();
-
-            // go through all layers looking for targets
-            for (i=map.layers.length-1; i>=0; --i) {
-                layer = map.layers[i];
-                if (layer.div.style.display !== "none") {
-                    if (layer === this.activeLayer) {
-                        target = document.elementFromPoint(x, y);
-                        while (target && target._featureId) {
-                            feature = layer.getFeatureById(target._featureId);
-                            if (feature) {
-                                features.push(feature);
-                                target.style.visibility = 'hidden';
-                                targets.push(target);
-                                target = document.elementFromPoint(x, y);
-                            } else {
-                                target = false;
-                            }
-                        }
-                    }
-                    layers.push(layer);
-                    layer.div.style.display = "none";
-                }
-            }
-            // restore feature visibility
-            for (i=0, len=targets.length; i<len; ++i) {
-                targets[i].style.display = "";
-                targets[i].style.visibility = 'visible';
-            }
-            // restore layer visibility
-            for (i=layers.length-1; i>=0; --i) {
-                layers[i].div.style.display = "block";
-            }
-
-            map.resetLayersZIndex();
-            return features;
-        },
-
-        _boundLayer: null,
 
         /**
          * Query intersect by bounding box
@@ -1088,9 +971,9 @@
                     fillOpacity:   0.1
                 });
             }
-
             return widget.query('select', _request).done(function(featureCollection) {
-                widget._onFeatureCollectionLoaded(featureCollection, widget.currentSettings, this);
+                var schema = widget.options.schemes[_request["schema"]];
+                widget._onFeatureCollectionLoaded(featureCollection, schema, this);
             });
         },
 
@@ -1101,21 +984,21 @@
          */
         _getData: function() {
             var widget = this;
-            var settings = widget.currentSettings;
+            var schema = widget.currentSettings;
             var map = widget.map;
             var projection = map.getProjectionObject();
             var extent = map.getExtent();
             var request = {
                 srid:       projection.proj.srsProjNumber,
-                maxResults: settings.maxResults,
-                schema:     settings.schemaName
+                maxResults: schema.maxResults,
+                schema:     schema.schemaName
             };
 
-            switch (settings.searchType){
+            switch (schema.searchType){
                 case  "currentExtent":
-                    if(settings.hasOwnProperty("lastBbox")) {
+                    if(schema.hasOwnProperty("lastBbox")) {
                         var bbox = extent.toGeometry().getBounds();
-                        var lastBbox = settings.lastBbox;
+                        var lastBbox = schema.lastBbox;
 
                         var topDiff = bbox.top - lastBbox.top;
                         var leftDiff = bbox.left - lastBbox.left;
@@ -1128,17 +1011,6 @@
                             right:  rightDiff > 0,
                             top:    topDiff > 0
                         };
-
-                        var maxResultDiff = 0;
-                        for(var k in sidesChanged){
-                            if( sidesChanged[k]){
-                                maxResultDiff++;
-                            }
-                        }
-
-                        if(maxResultDiff){
-                            request.maxResults = request.maxResults / maxResultDiff;
-                        }
 
                         if(sidesChanged.left) {
                             widget._queryIntersect(request, new OpenLayers.Bounds(bbox.left, bbox.bottom, bbox.left + leftDiff * -1, bbox.top));
@@ -1159,19 +1031,19 @@
                     } else {
                         widget._queryIntersect(request, extent);
                     }
-                    settings.lastBbox = $.extend(true, {}, extent.toGeometry().getBounds());
+                    schema.lastBbox = $.extend(true, {}, extent.toGeometry().getBounds());
                     break;
 
                 default: // all
 
-                    if(settings.searchType == "currentExtent") {
-                        settings.allFeaturesQueued = false;
+                    if(schema.searchType == "currentExtent") {
+                        schema.allFeaturesQueued = false;
                     }
 
-                    if(!settings.allFeaturesQueued) {
-                        settings.allFeaturesQueued = true;
+                    if(!schema.allFeaturesQueued) {
+                        schema.allFeaturesQueued = true;
                         widget.query('select', request).done(function(featureCollection) {
-                            widget._onFeatureCollectionLoaded(featureCollection, settings, this);
+                            widget._onFeatureCollectionLoaded(featureCollection, schema, this);
                         });
                     }
                     break;
@@ -1179,156 +1051,96 @@
         },
 
         /**
-         * Handle feature collection by ajax response.
+         * Highlight schema feature on the map and table view
          *
-         * @param featureCollection FeatureCollection
-         * @param schema
-         * @param xhr ajax request object
-         * @todo compare new, existing and loaded features
+         * @param {object} schema
+         * @param {OpenLayers.Feature} feature
+         * @param {boolean} highlight
          * @private
          */
-        _onFeatureCollectionLoaded: function(featureCollection, schema, xhr) {
+        _highlightSchemaFeature: function(schema, feature, highlight) {
             var widget = this;
-            var tableApi = schema.table.resultTable('getApi');
-            var features = schema.features;
-            var geoJsonReader = new OpenLayers.Format.GeoJSON();
-            var loadedFeatures = [];
-            var existingFeatures = {};
-            var currentExtentOnly =  schema.searchType ==  "currentExtent";
+            var table = schema.table;
+            var tableWidget = table.data('visUiJsResultTable');
+            var isSketchFeature = !feature.cluster && feature._sketch && _.size(feature.data) == 0;
+            var features = feature.cluster ? feature.cluster : [feature];
+            var layer = feature.layer;
+            var domRow;
 
-            // Break if something goes wrong
-            if(!featureCollection || !featureCollection.hasOwnProperty("features")) {
-                Mapbender.error(translate("features.loading.error"), featureCollection, xhr);
+            if(isSketchFeature) {
                 return;
             }
 
-            // get and remove invisible features
-            var layer = schema.layer
-            var map = layer.map;
-            var extent = map.getExtent();
-            var bbox = extent.toGeometry().getBounds();
+            //widget._highlightFeature(feature, highlight);
+            layer.drawFeature(feature, highlight ? 'select' : 'default');
 
-            if(currentExtentOnly){
-                for (var i in features.loaded) {
-                    var feature = features.loaded[i];
-                    existingFeatures[feature.id] = layer.getFeatureByFid(feature.id);
-                }
-            }
-
-            // Filter feature loaded before
-            $.each(featureCollection.features, function(i, feature) {
-                if(!features.loaded.hasOwnProperty(feature.id)) {
-                    features.loaded[feature.id] = feature;
-                    loadedFeatures.push(feature);
-                }
-            });
-
-            if(loadedFeatures.length) {
-                // Replace feature collection
-                featureCollection.features = loadedFeatures;
-
-                // Add features to map
-                schema.layer.addFeatures(geoJsonReader.read({
-                    type:     "FeatureCollection",
-                    features: loadedFeatures
-                }));
-
-                // Add features to table
-                tableApi.rows.add(loadedFeatures);
-                tableApi.draw();
-            }
-
-            if(currentExtentOnly) {
-                var row;
-                var removeFeatures = [];
-                for (var fid in existingFeatures) {
-                    var olFeature = existingFeatures[fid];
-
-                    if(!olFeature){
-                        // TODO: by digitizing it's find
-                        continue;
+            for (var k in features) {
+                domRow = tableWidget.getDomRowByData(features[k]);
+                if(domRow && domRow.size()) {
+                    tableWidget.showByRow(domRow);
+                    if(highlight) {
+                        domRow.addClass('hover');
+                    } else {
+                        domRow.removeClass('hover');
                     }
-
-                    if(!olFeature.geometry.getBounds().intersectsBounds(bbox)) {
-                        var feature = features.loaded[olFeature.fid];
-                        var row = tableApi.row(schema.table.resultTable("getDomRowByData", feature));
-                        row.remove();//.draw();
-                        removeFeatures.push(olFeature);
-                        features.loaded[fid] = null;
-                        delete features.loaded[fid];
-                    }
+                    break;
                 }
-                if(row){
-                    row.draw();
-                }
-                layer.removeFeatures(removeFeatures);
             }
-            //console.log("removeFeatures", removeFeatures.length);
-            //console.log("features.loaded", _.size(features.loaded));
-            //debugger;
-            if(schema.clusterStrategy && schema.clusterStrategy.active) {
-                schema.clusterStrategy.deactivate();
-                schema.clusterStrategy.activate();
-            }
-            layer.refresh({force: true});
-
-            widget._trigger('schemaFeaturesLoaded', null, {
-                schema: schema
-            });
-
-            return;
         },
 
         /**
-         * Element controller XHR query
+         * Highlight feature on the map
          *
-         * @param uri
-         * @param request
-         * @return {*}
+         * @param {OpenLayers.Feature} feature
+         * @param {boolean} highlight
+         * @private
          */
-        query: function(uri, request) {
-            var widget = this;
-            //request.schema = this.activeSchemaName;
-            return $.ajax({
-                url:         widget.elementUrl + uri,
-                type:        'POST',
-                contentType: "application/json; charset=utf-8",
-                dataType:    "json",
-                data:        JSON.stringify(request)
-            }).error(function(xhr) {
-                var errorMessage = translate('api.query.error-message');
-                $.notify(errorMessage + JSON.stringify(xhr.responseText));
-                console.log(errorMessage, xhr);
-            });
-        },
-
-        _highlightFeature: function(jsonFeature, highlight) {
-            var layer = this.activeLayer;
-            var feature = jsonFeature.hasOwnProperty('isNew') ? layer.getFeatureById(jsonFeature.id) : layer.getFeatureByFid(jsonFeature.id);
-
-            if(!feature) {
+        _highlightFeature: function(feature, highlight) {
+            if(!feature || (feature && !feature.layer)) {
                 return;
             }
 
-            feature.renderIntent = highlight ? 'select' : 'default';
-            this.activeLayer.redraw();
+            var layer = feature.layer;
+            var isFeatureVisible = _.contains(feature.layer.features, feature);
+            var features = [];
+
+            if(isFeatureVisible) {
+                features.push(feature);
+            } else {
+                _.each(feature.layer.features, function(_feature) {
+                    if(_feature.cluster && _.contains(_feature.cluster, feature)) {
+                        features.push(_feature);
+                        return false;
+                    }
+                });
+            }
+
+            _.each(features, function(feature) {
+                layer.drawFeature(feature, highlight ? 'select' : 'default');
+            })
+        },
+
+        /**
+         * Get target OpenLayers map object
+         *
+         * @returns  {OpenLayers.Map}
+         */
+        getMap: function(){
+            return this.map;
         },
 
         /**
          * Zoom to JSON feature
          *
-         * @param feature
+         * @param {OpenLayers.Feature} feature
          */
         zoomToJsonFeature: function(feature) {
-            var layer = this.activeLayer;
-            var olMap = this.map;
-            var olFeature = feature.hasOwnProperty('isNew') ? layer.getFeatureById(feature.id) : layer.getFeatureByFid(feature.id);
-            var bounds = olFeature.geometry.getBounds();
-            var schema = this.findFeatureSchema(feature);
+            var widget = this;
+            var olMap = widget.getMap();
+            var schema = widget.findFeatureSchema(feature);
 
-            olMap.zoomToExtent(bounds);
-
-            if(schema.hasOwnProperty('zoomScaleDenominator')){
+            olMap.zoomToExtent(feature.geometry.getBounds());
+            if(schema.hasOwnProperty('zoomScaleDenominator')) {
                 olMap.zoomToScale(schema.zoomScaleDenominator);
             }
         },
@@ -1336,23 +1148,7 @@
         /**
          * Open feature edit dialog
          *
-         * @param feature
-         */
-        openFeatureEditDialog: function(feature) {
-            var widget = this;
-            var olFeature;
-            if(feature.hasOwnProperty('isNew') ){
-                olFeature =  layer.getFeatureById(feature.id);
-            }else{
-                olFeature = widget.activeLayer.getFeatureByFid(feature.id);
-            }
-            widget._openFeatureEditDialog(olFeature);
-        },
-
-        /**
-         * Open feature edit dialog
-         *
-         * @param feature
+         * @param {OpenLayers.Feature} feature
          */
         exportGeoJson: function(feature) {
             var widget = this;
@@ -1361,7 +1157,7 @@
                 feature: feature,
                 format:  'GeoJSON'
             }).done(function(response) {
-                debugger;
+
             })
         },
 
@@ -1375,40 +1171,10 @@
         },
 
         /**
-         * Find feature data by open layer feature object
-         * @returns {*}
-         */
-        findFeatureByOpenLayerFeature: function(olFeature) {
-            var widget = this;
-            var feature = null;
-            var data = olFeature.data;
-            var isNew = !olFeature.fid;
-            var schema = widget.findSchemaByLayer(olFeature.layer);
-
-
-            $.each(schema.features, function(i, featureCollection) {
-                if(!isNew) {
-                    if(featureCollection.hasOwnProperty(olFeature.fid)) {
-                        feature = featureCollection[olFeature.fid];
-                        return false;
-                    }
-                } else {
-                    $.each(featureCollection, function(k, _feature) {
-                        if(_feature == data) {
-                            feature = data;
-                            return false;
-                        }
-                    });
-                }
-            });
-
-            return feature;
-        },
-
-        /**
          * Update cluster strategies
          */
         updateClusterStrategies: function() {
+
             var widget = this;
             var options = widget.options;
             var scale = Math.round(widget.map.getScale());
@@ -1416,10 +1182,12 @@
             var clusterSettings;
             var closestClusterSettings;
 
-            return;
-
             $.each(options.schemes, function(i, schema) {
                 clusterSettings = null;
+
+                if(!schema.clustering) {
+                    return
+                }
 
                 $.each(schema.clustering, function(y, _clusterSettings) {
                     if(_clusterSettings.scale == scale) {
@@ -1429,7 +1197,6 @@
 
                     if(_clusterSettings.scale < scale) {
                         if(closestClusterSettings && _clusterSettings.scale > closestClusterSettings.scale) {
-                            console.log("closestClusterSettings");
                             closestClusterSettings = _clusterSettings;
                         } else {
                             if(!closestClusterSettings){
@@ -1444,22 +1211,480 @@
                 }
 
                 if(clusterSettings) {
-                    //debugger;
-                    schema.clusterStrategy.distance = clusterSettings.distance;
-                    schema.clusterStrategy.activate();
+
+                    if(clusterSettings.hasOwnProperty('disable') && clusterSettings.disable) {
+                        schema.clusterStrategy.distance = -1;
+                        var features = schema.layer.features;
+                        widget.reloadFeatures(schema.layer,[]);
+                        schema.clusterStrategy.deactivate();
+                        //schema.layer.redraw();
+                        schema.isClustered = false;
+                        widget.reloadFeatures(schema.layer,features);
+
+                    } else {
+                        schema.clusterStrategy.activate();
+                        schema.isClustered = true;
+                    }
+                    if(clusterSettings.hasOwnProperty('distance')) {
+                        schema.clusterStrategy.distance = clusterSettings.distance;
+                    }
+
                 } else {
-                    schema.clusterStrategy.deactivate();
+                    //schema.clusterStrategy.deactivate();
                 }
-                schema.layer.refresh({force: true});
-                console.log(scale, clusterSettings);
             });
         },
 
         /**
+         * Get schema style map
          *
+         * @param schema
+         * @returns {OpenLayers.StyleMap}
          */
-        updateSchemaFeatureLayerVisibility: function(schema){
+        getSchemaStyleMap: function(schema) {
+            var widget = this;
+            var styles = schema.styles ? schema.styles : {};
+            for (var k in widget.styles) {
+                styles[k] = new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style[k], styles[k] ? styles[k] : widget.styles[k]));
+            }
+            return new OpenLayers.StyleMap(styles, {extendDefault: true});
+        },
 
+        /**
+         * Find olFeature schema by olFeature data
+         *
+         * @param olFeature
+         * @returns {*}
+         */
+        findFeatureSchema: function(olFeature) {
+            var widget = this;
+            var options = widget.options;
+            return _.find(options.schemes, {layer: olFeature.layer});
+        },
+
+        /**
+         * Create vector feature layer
+         *
+         * @param schema
+         * @returns {OpenLayers.Layer.Vector}
+         */
+        createSchemaFeatureLayer: function(schema) {
+            var widget = this;
+            var styles = schema.styles ? schema.styles : {};
+            var isClustered = schema.isClustered = schema.hasOwnProperty('clustering');
+            var strategies = [];
+            var styleMap = new OpenLayers.StyleMap({
+                'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), {
+                    context: {
+                        label: function(feature) {
+                            return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
+                        }
+                    }
+                }),
+                'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
+            }, {extendDefault: true});
+
+            if(isClustered) {
+                var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
+                strategies.push(clusterStrategy);
+                schema.clusterStrategy = clusterStrategy;
+            }
+            var layer = new OpenLayers.Layer.Vector(schema.label, {
+                styleMap:   styleMap,
+                strategies: strategies
+            });
+
+            layer.name = schema.label;
+            return layer;
+        },
+
+        /**
+         * Remove OL feature
+         *
+         * @param feature
+         * @version 0.2
+         * @returns {*}
+         */
+        removeFeature: function(olFeature) {
+            var widget = this;
+            var schema = widget.findFeatureSchema(olFeature);
+            var isNew = olFeature.hasOwnProperty('isNew');
+            var layer = olFeature.layer;
+            var featureData = olFeature.attributes;
+
+            if(!schema) {
+                $.notify("Feature remove failed.", "error");
+                return;
+            }
+
+            function _removeFeatureFromUI() {
+                //var clonedFeature = jQuery.extend(true, {}, olFeature);
+                var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
+                widget.reloadFeatures(layer, _.without(existingFeatures, olFeature));
+
+                widget._trigger('featureRemoved', null, {
+                    schema:  schema,
+                    feature: featureData
+                });
+            }
+
+            if(isNew) {
+                _removeFeatureFromUI()
+            } else {
+                Mapbender.confirmDialog({
+                    html:      translate("feature.remove.from.database"),
+                    onSuccess: function() {
+                        widget.query('delete', {
+                            schema:  schema.schemaName,
+                            feature: featureData
+                        }).done(function(fid) {
+                            _removeFeatureFromUI();
+                            $.notify(translate('feature.remove.successfully'), 'info');
+                        });
+                    }
+                });
+            }
+
+            return olFeature;
+        },
+
+        /**
+         * Get OL feature by X:Y coordinates.
+         *
+         * Dirty but works.
+         *
+         * @param x
+         * @param y
+         * @returns {Array}
+         * @private
+         */
+        _getFeaturesFromEvent: function(x, y) {
+            var features = [], targets = [], layers = [];
+            var layer, target, feature, i, len;
+            var map = this.map;
+
+            //map.resetLayersZIndex();
+
+            // go through all layers looking for targets
+            for (i = map.layers.length - 1; i >= 0; --i) {
+                layer = map.layers[i];
+                if(layer.div.style.display !== "none") {
+                    if(layer === this.activeLayer) {
+                        target = document.elementFromPoint(x, y);
+                        while (target && target._featureId) {
+                            feature = layer.getFeatureById(target._featureId);
+                            if(feature) {
+                                features.push(feature);
+                                target.style.visibility = 'hidden';
+                                targets.push(target);
+                                target = document.elementFromPoint(x, y);
+                            } else {
+                                target = false;
+                            }
+                        }
+                    }
+                    layers.push(layer);
+                    layer.div.style.display = "none";
+                }
+            }
+
+            // restore feature visibility
+            for (i = 0, len = targets.length; i < len; ++i) {
+                targets[i].style.display = "";
+                targets[i].style.visibility = 'visible';
+            }
+
+            // restore layer visibility
+            for (i = layers.length - 1; i >= 0; --i) {
+                layers[i].div.style.display = "block";
+            }
+
+            //map.resetLayersZIndex();
+            return features;
+        },
+
+        /**
+         * Handle feature collection by ajax response.
+         *
+         * @param featureCollection FeatureCollection
+         * @param schema
+         * @param xhr ajax request object
+         * @private
+         * @version 0.2
+         */
+        _onFeatureCollectionLoaded: function(featureCollection, schema, xhr) {
+
+            if(!featureCollection || !featureCollection.hasOwnProperty("features")) {
+                Mapbender.error(translate("features.loading.error"), featureCollection, xhr);
+                return;
+            }
+            var widget = this;
+            var geoJsonReader = new OpenLayers.Format.GeoJSON();
+            var currentExtentOnly = schema.searchType == "currentExtent";
+            var layer = schema.layer;
+            var map = layer.map;
+            var extent = map.getExtent();
+            var bbox = extent.toGeometry().getBounds();
+            var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
+            var visibleFeatures = currentExtentOnly ? _.filter(existingFeatures, function(olFeature) {
+                return olFeature && (olFeature.hasOwnProperty('isNew') || olFeature.geometry.getBounds().intersectsBounds(bbox));
+            }) : existingFeatures;
+            var visibleFeatureIds = _.pluck(visibleFeatures, "fid");
+            var filteredNewFeatures = _.filter(featureCollection.features, function(feature) {
+                return !_.contains(visibleFeatureIds, feature.id);
+            });
+            var newUniqueFeatures = geoJsonReader.read({
+                type:     "FeatureCollection",
+                features: filteredNewFeatures
+            });
+
+            widget.reloadFeatures(layer, _.union(newUniqueFeatures, visibleFeatures));
+        },
+
+        /**
+         * Reload or replace features from the layer and feature table
+         * - Fix OpenLayer bug by clustered features.
+         *
+         * @param layer
+         * @version 0.2
+         */
+        reloadFeatures: function(layer, _features) {
+            var widget = this;
+            var schema = widget.findSchemaByLayer(layer);
+            var tableApi = schema.table.resultTable('getApi');
+            var features = _features ? _features : layer.features;
+
+            if(features.length && features[0].cluster) {
+                features = _.flatten(_.pluck(layer.features, "cluster"));
+            }
+
+            layer.removeAllFeatures();
+            layer.addFeatures(features);
+
+            // Add layer to feature
+            _.each(features, function(feature) {
+                feature.layer = layer;
+                feature.schema = schema;
+            });
+
+            layer.redraw();
+
+            tableApi.clear();
+            tableApi.rows.add(features);
+            tableApi.draw();
+        },
+
+        _openEditDialog: function(dataItem, formItems, schema, ref) {
+            var schemaName = this.schemaName;
+            var widget = this;
+
+            var uniqueKey = schema.dataStore.uniqueId;
+            var buttons = [];
+
+            if(widget.currentPopup.currentPopup) {
+                widget.currentPopup.currentPopup.popupDialog('close');
+                widget.currentPopup.currentPopup = null;
+            }
+
+            var saveButton = {
+                text:  translate("mb.data.store.save", true),
+                click: function() {
+                    var form = $(this).closest(".ui-dialog-content");
+                    var errorInputs = $(".has-error", dialog);
+                    var hasErrors = errorInputs.size() > 0;
+
+                    if(!hasErrors) {
+                        var formData = form.formData();
+                        var uniqueIdKey = schema.dataStore.uniqueId;
+                        var isNew = !dataItem.hasOwnProperty(uniqueIdKey) && !!dataItem[uniqueIdKey];
+
+                        if(!isNew) {
+                            formData[uniqueIdKey] = dataItem[uniqueIdKey];
+                        } else {
+                            delete formData[uniqueIdKey];
+                        }
+
+                        form.disableForm();
+                        widget.query('datastore/save', {
+                            schema:     schemaName,
+                            dataItem:   formData,
+                            id:         schema.dataStore.id,
+                            dataItemId: dataItem[uniqueKey]
+                        }).done(function(response) {
+                            if(response.hasOwnProperty('errors')) {
+                                form.enableForm();
+                                $.each(response.errors, function(i, error) {
+                                    $.notify(error.message, {
+                                        title:     'API Error',
+                                        autoHide:  false,
+                                        className: 'error'
+                                    });
+                                    console.error(error.message);
+                                });
+                                return;
+                            }
+                            _.extend(dataItem, response.dataItem);
+                            if(isNew) {
+                                var textKey = item.dataStore.text;
+                                var uniqueKey = item.dataStore.uniqueId;
+
+                                ref.append('<option value="' + dataItem[uniqueKey] + '">' + dataItem[textKey] + '</option>');
+                            }
+                            widget.currentPopup.currentPopup.popupDialog('close');
+                            widget.currentPopup.currentPopup = null;
+                            $.notify(translate("mb.data.store.save.successfully", true), 'info');
+                        }).done(function() {
+                            form.enableForm();
+                        });
+                    }
+                }
+            };
+            buttons.push(saveButton);
+
+            buttons.push({
+                text:    translate("mb.data.store.remove", true),
+                'class': 'critical',
+                click:   function() {
+                    widget.query('datastore/remove', {
+                        schema:     schemaName,
+                        dataItem:  dataItem,
+                        id:         schema.dataStore.id,
+
+                    }).done(function(response) {
+
+                        //widget.removeData(dataItem);
+                        widget.currentPopup.currentPopup.popupDialog('close');
+                        widget.currentPopup.currentPopup = null;
+                    })
+                }
+            });
+
+            buttons.push({
+                text:  translate("cancel"),
+                click: function() {
+                    widget.currentPopup.currentPopup.popupDialog('close');
+                    widget.currentPopup.currentPopup = null;
+                }
+            });
+            var dialog = $("<div/>");
+            dialog.on("popupdialogopen", function(event, ui) {
+                setTimeout(function() {
+                    dialog.formData(dataItem);
+
+                }, 1);
+            });
+
+            /*   if(!schema.elementsTranslated) {
+             translateStructure(widget.currentSettings.formItems);
+             schema.elementsTranslated = true;
+             } */
+
+            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+                if(item.type == "file") {
+                    item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + dataItem.fid + "&field=" + item.name;
+                    if(item.hasOwnProperty("name") && dataItem.data.hasOwnProperty(item.name) && dataItem.data[item.name]) {
+                        item.dbSrc = dataItem.data[item.name];
+                        if(schema.featureType.files) {
+                            $.each(schema.featureType.files, function(k, fileInfo) {
+                                if(fileInfo.field && fileInfo.field == item.name) {
+                                    if(fileInfo.formats) {
+                                        item.accept = fileInfo.formats;
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                }
+
+                if(item.type == 'image') {
+
+                    if(!item.origSrc) {
+                        item.origSrc = item.src;
+                    }
+
+                    if(item.hasOwnProperty("name") && dataItem.data.hasOwnProperty(item.name) && dataItem.data[item.name]) {
+                        item.dbSrc = dataItem.data[item.name];
+                        if(schema.featureType.files) {
+                            $.each(schema.featureType.files, function(k, fileInfo) {
+                                if(fileInfo.field && fileInfo.field == item.name) {
+
+                                    if(fileInfo.uri) {
+                                        item.dbSrc = fileInfo.uri + "/" + item.dbSrc;
+                                    } else {
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    var src = item.dbSrc ? item.dbSrc : item.origSrc;
+                    if(item.relative) {
+                        item.src = src.match(/^(http[s]?\:|\/{2})/) ? src : Mapbender.configuration.application.urls.asset + src;
+                    } else {
+                        item.src = src;
+                    }
+                }
+            });
+            /*  if(schema.popup.buttons) {
+             buttons = _.union(schema.popup.buttons, buttons);
+             } */
+            var popupConfig = _.extend({
+                title: translate("edit.title"),
+                width: widget.featureEditDialogWidth,
+            }, schema.popup);
+
+            popupConfig.buttons = buttons;
+
+            dialog.generateElements({children: formItems});
+            dialog.popupDialog(popupConfig);
+            dialog.addClass("data-store-edit-data");
+            widget.currentPopup.currentPopup = dialog;
+            return dialog;
+        },
+
+        save: function(dataItem) {
+            debugger;
+            //dataItem.uniqueId
+
+        },
+
+        /**
+         * Digitizer API connection query
+         *
+         * @param uri suffix
+         * @param request query
+         * @return xhr jQuery XHR object
+         * @version 0.2
+         */
+        query: function(uri, request) {
+            var widget = this;
+            return $.ajax({
+                url:         widget.elementUrl + uri,
+                type:        'POST',
+                contentType: "application/json; charset=utf-8",
+                dataType:    "json",
+                data:        JSON.stringify(request)
+            }).error(function(xhr) {
+                var errorMessage = translate('api.query.error-message');
+                var errorDom = $(xhr.responseText);
+
+                if(errorDom.size() && errorDom.is(".sf-reset")) {
+                    errorMessage += "\n" + errorDom.find(".block_exception h2").text() + "\n";
+                    errorMessage += "Trace:\n";
+                    _.each(errorDom.find(".traces li"), function(li) {
+                        errorMessage += $(li).text() + "\n";
+                    });
+
+                } else {
+                    errorMessage += JSON.stringify(xhr.responseText);
+                }
+
+                $.notify(errorMessage,{
+                    autoHide: false
+                });
+                console.log(errorMessage, xhr);
+            });
         }
     });
 
