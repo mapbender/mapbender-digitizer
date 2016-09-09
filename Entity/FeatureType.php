@@ -5,7 +5,6 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Query;
 use Mapbender\CoreBundle\Component\Application as AppComponent;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\Drivers\Geographic;
@@ -145,43 +144,34 @@ class FeatureType extends DataStore
             throw new \Exception("Feature data given isn't compatible to save into the table: " . $this->getTableName());
         }
 
-
-        $feature         = $this->create($featureData);
-        $event           = array(
+        $feature = $this->create($featureData);
+        $event   = array(
             'item'    => &$featureData,
             'feature' => $feature
         );
 
         $this->allowSave = true;
 
-        try {
-            if (isset($this->events['onBeforeSave'])) {
-                $this->secureEval($this->events['onBeforeSave'], $event);
-            }
-
-            if ($this->allowSave) {
-                // Insert if no ID given
-                if (!$autoUpdate || !$feature->hasId()) {
-                    $feature = $this->insert($feature);
-                } // Replace if has ID
-                else {
-                    $feature = $this->update($feature);
-                }
-            }
-
-            if (isset($this->events['onAfterSave'])) {
-                $this->secureEval($this->events['onAfterSave'], $event);
-            }
-
-            // Get complete feature data
-            $result = $this->getById($feature->getId(), $feature->getSrid());
-        } catch (\Exception $e) {
-            $result = array(
-                "exception"   => $e,
-                "feature"     => $feature,
-                "featureData" => $featureData
-            );
+        if (isset($this->events['onBeforeSave'])) {
+            $this->secureEval($this->events['onBeforeSave'], $event);
         }
+
+        if ($this->allowSave) {
+            // Insert if no ID given
+            if (!$autoUpdate || !$feature->hasId()) {
+                $feature = $this->insert($feature);
+            } // Replace if has ID
+            else {
+                $feature = $this->update($feature);
+            }
+        }
+
+        if (isset($this->events['onAfterSave'])) {
+            $this->secureEval($this->events['onAfterSave'], $event);
+        }
+
+        // Get complete feature data
+        $result = $this->getById($feature->getId(), $feature->getSrid());
 
         return $result;
     }
@@ -213,6 +203,7 @@ class FeatureType extends DataStore
             $result = $connection->insert($tableName, $data);
             $lastId = $connection->lastInsertId();
         }
+
         if ($lastId < 1) {
             switch ($connection->getDatabasePlatform()->getName()) {
                 case self::POSTGRESQL_PLATFORM:
