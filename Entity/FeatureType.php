@@ -218,6 +218,27 @@ class FeatureType extends DataStore
                 case self::POSTGRESQL_PLATFORM:
                     $sql    = "SELECT currval(pg_get_serial_sequence('" . $tableName . "','" . $this->getUniqueId() . "'))";
                     $lastId = $connection->fetchColumn($sql);
+                    if ($lastId < 1) {
+                        switch ($connection->getDatabasePlatform()->getName()) {
+                            case self::POSTGRESQL_PLATFORM:
+                                $sql    = "SELECT currval(pg_get_serial_sequence('" . $this->tableName . "','" . $this->getUniqueId() . "'))";
+                                $lastId = $connection->executeQuery($sql)->fetchColumn();
+                                if ($lastId < 1) {
+                                    $fullTableName    = '"' . $this->tableName . '"';
+                                    $fullUniqueIdName = $fullTableName . '."' . $this->getUniqueId() . '"';
+                                    $sql              = /** @lang SQL */ "
+                                        SELECT $fullUniqueIdName 
+                                        FROM $fullTableName
+                                        LIMIT 1 
+                                        OFFSET (
+                                            SELECT count($fullUniqueIdName)-1 
+                                            FROM $fullTableName
+                                        )";
+                                    $lastId           = $connection->executeQuery($sql)->fetchColumn();
+                                }
+                                break;
+                        }
+                    }
                     break;
             }
         }
@@ -315,34 +336,39 @@ class FeatureType extends DataStore
     {
         /** @var Statement $statement */
         /** @var Feature $feature */
-        $maxResults   = isset($criteria['maxResults']) ? intval($criteria['maxResults']) : self::MAX_RESULTS;
-        $intersect    = isset($criteria['intersectGeometry']) ? $criteria['intersectGeometry'] : null;
-        $returnType   = isset($criteria['returnType']) ? $criteria['returnType'] : null;
-        $srid         = isset($criteria['srid']) ? $criteria['srid'] : $this->getSrid();
-        $where        = isset($criteria['where']) ? $criteria['where'] : null;
-        $queryBuilder = $this->getSelectQueryBuilder($srid);
-        $connection   = $queryBuilder->getConnection();
+        $maxResults      = isset($criteria['maxResults']) ? intval($criteria['maxResults']) : self::MAX_RESULTS;
+        $intersect       = isset($criteria['intersectGeometry']) ? $criteria['intersectGeometry'] : null;
+        $returnType      = isset($criteria['returnType']) ? $criteria['returnType'] : null;
+        $srid            = isset($criteria['srid']) ? $criteria['srid'] : $this->getSrid();
+        $where           = isset($criteria['where']) ? $criteria['where'] : null;
+        $queryBuilder    = $this->getSelectQueryBuilder($srid);
+        $connection      = $queryBuilder->getConnection();
+        $whereConditions = array();
 
         // add GEOM where condition
         if ($intersect) {
-            $geometry = self::roundGeometry($intersect, 2);
-            $queryBuilder->andWhere(self::genIntersectCondition($this->getPlatformName(), $geometry, $this->geomField, $srid, $this->getSrid()));
+            $geometry     = self::roundGeometry($intersect, 2);
+            $whereConditions[] = self::genIntersectCondition($this->getPlatformName(), $geometry, $this->geomField, $srid, $this->getSrid());
         }
 
         // add filter (https://trac.wheregroup.com/cp/issues/3733)
         if (!empty($this->sqlFilter)) {
-            $queryBuilder->andWhere($this->sqlFilter);
+            $whereConditions[] = $this->sqlFilter;
         }
 
         // add second filter (https://trac.wheregroup.com/cp/issues/4643)
         if ($where) {
-            $queryBuilder->andWhere($where);
+            $whereConditions[] = $where;
         }
 
         if (isset($criteria["source"]) && isset($criteria["distance"])) {
-            $queryBuilder->andWhere("ST_DWithin(t." . $this->getGeomField() . ","
+            $whereConditions[] = "ST_DWithin(t." . $this->getGeomField() . ","
                 . $connection->quote($criteria["source"])
-                . "," . $criteria['distance'].')');
+                . "," . $criteria['distance'] . ')';
+        }
+
+        if (count($whereConditions)) {
+            $queryBuilder->where(join(" AND ", $whereConditions));
         }
 
         $queryBuilder->setMaxResults($maxResults);
