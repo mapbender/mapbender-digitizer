@@ -212,10 +212,10 @@ class FeatureType extends DataStore
                     if ($lastId < 1) {
                         switch ($connection->getDatabasePlatform()->getName()) {
                             case self::POSTGRESQL_PLATFORM:
-                                $sql    = "SELECT currval(pg_get_serial_sequence('" . $this->tableName . "','" . $this->getUniqueId() . "'))";
+                                $sql    = "SELECT currval(pg_get_serial_sequence('" . $tableName . "','" . $this->getUniqueId() . "'))";
                                 $lastId = $connection->executeQuery($sql)->fetchColumn();
                                 if ($lastId < 1) {
-                                    $fullTableName    = '"' . $this->tableName . '"';
+                                    $fullTableName    = '"' . $tableName . '"';
                                     $fullUniqueIdName = $fullTableName . '."' . $this->getUniqueId() . '"';
                                     $sql              = /** @lang SQL */ "
                                         SELECT $fullUniqueIdName 
