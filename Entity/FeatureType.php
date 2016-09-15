@@ -216,14 +216,16 @@ class FeatureType extends DataStore
                                 $lastId = $connection->executeQuery($sql)->fetchColumn();
                                 if ($lastId < 1) {
                                     $fullTableName    = '"' . $tableName . '"';
-                                    $fullUniqueIdName = $fullTableName . '."' . $this->getUniqueId() . '"';
+                                    $fullUniqueIdName = $tableName . '."' . $this->getUniqueId() . '"';
+                                    $id = $this->getUniqueId();
+
                                     $sql              = /** @lang SQL */ "
-                                        SELECT $fullUniqueIdName 
-                                        FROM $fullTableName
+                                        SELECT $id 
+                                        FROM $tableName
                                         LIMIT 1 
                                         OFFSET (
                                             SELECT count($fullUniqueIdName)-1 
-                                            FROM $fullTableName
+                                            FROM $tableName
                                         )";
                                     $lastId           = $connection->executeQuery($sql)->fetchColumn();
                                 }
