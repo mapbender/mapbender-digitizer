@@ -68,6 +68,7 @@ class FeatureType extends DataStore
      * @var string Routing ways geometry field name
      */
     protected $waysGeomFieldName = "the_geom";
+    protected $allowInsert;
 
 
     /**
@@ -199,18 +200,20 @@ class FeatureType extends DataStore
         $feature                       = $this->create($featureData);
         $data                          = $this->cleanFeatureData($feature->toArray());
         $connection                    = $this->getConnection();
+        $lastId                        = null;
         $data[ $this->getGeomField() ] = $this->transformEwkt($data[ $this->getGeomField() ], $this->getSrid());
-        $event             = array(
+        $event                         = array(
             'item'    => &$data,
             'feature' => $feature
         );
         $this->allowInsert             = true;
+
         if (isset($this->events['onBeforeInsert'])) {
             $this->secureEval($this->events['onBeforeInsert'], $event);
         }
 
         if ($this->allowInsert) {
-            $result = $connection->insert($tableName, $data);
+            $connection->insert($tableName, $data);
             $lastId = $connection->lastInsertId();
         }
         if ($lastId < 1) {
@@ -221,10 +224,10 @@ class FeatureType extends DataStore
                     if ($lastId < 1) {
                         switch ($connection->getDatabasePlatform()->getName()) {
                             case self::POSTGRESQL_PLATFORM:
-                                $sql    = "SELECT currval(pg_get_serial_sequence('" . $this->tableName . "','" . $this->getUniqueId() . "'))";
+                                $sql    = "SELECT currval(pg_get_serial_sequence('" . $tableName . "','" . $this->getUniqueId() . "'))";
                                 $lastId = $connection->executeQuery($sql)->fetchColumn();
                                 if ($lastId < 1) {
-                                    $fullTableName    = '"' . $this->tableName . '"';
+                                    $fullTableName    = '"' . $tableName . '"';
                                     $fullUniqueIdName = $fullTableName . '."' . $this->getUniqueId() . '"';
                                     $sql              = /** @lang SQL */ "
                                         SELECT $fullUniqueIdName 
