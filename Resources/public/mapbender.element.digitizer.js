@@ -78,6 +78,21 @@
     }
 
     /**
+     * Escape HTML chars
+     * @param text
+     * @returns {string}
+     */
+    function escapeHtml(text) {
+        'use strict';
+        return text.replace(/[\"&'\/<>]/g, function (a) {
+            return {
+                '"': '&quot;', '&': '&amp;', "'": '&#39;',
+                '/': '&#47;',  '<': '&lt;',  '>': '&gt;'
+            }[a];
+        });
+    }
+
+    /**
      * Example:
      *     Mapbender.confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
                   return false;
@@ -510,7 +525,10 @@
                 $.each(schema.tableFields, function(fieldName, fieldSettings) {
                     newFeatureDefaultProperties[fieldName] = "";
                     fieldSettings.title = fieldSettings.label;
-                    fieldSettings.data = "properties." + fieldName;
+                    fieldSettings.data = function(row) {
+                        var data = row.properties[fieldName];
+                        return typeof(data) == 'string' ? escapeHtml(data) : data;
+                    };
                     columns.push(fieldSettings);
                 });
 
