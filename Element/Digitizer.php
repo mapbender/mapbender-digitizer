@@ -16,38 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class Digitizer extends BaseElement
 {
-
-    /**
-     * @inheritdoc
-     */
-    static public function getClassTitle()
-    {
-        return "Digitizer";
-    }
-
-    /**
-     * @inheritdoc
-     */
-    static public function getClassDescription()
-    {
-        return "Digitizer";
-    }
-
-    /**
-     * @inheritdoc
-     */
-    static public function getTags()
-    {
-        return array();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getWidgetName()
-    {
-        return 'mapbender.mbDigitizer';
-    }
+    protected static $title                = "Digitizer";
+    protected static $description          = "Georeferencing and Digitizing";
 
     /**
      * @inheritdoc
@@ -58,7 +28,6 @@ class Digitizer extends BaseElement
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
                         "/components/jquery-context-menu/jquery-context-menu-built.js",
-                        'mapbender.container.info.js',
                         'mapbender.element.digitizer.js'
         ),
                      'css'   => array('sass/element/digitizer.scss'),
@@ -99,35 +68,6 @@ class Digitizer extends BaseElement
             }
         }
         return $configuration;
-    }
-    /**
-     * @inheritdoc
-     */
-    public static function getType()
-    {
-        return 'Mapbender\DigitizerBundle\Element\Type\DigitizerAdminType';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function getFormTemplate()
-    {
-        return 'MapbenderDigitizerBundle:ElementAdmin:digitizeradmin.html.twig';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function render()
-    {
-        return $this->container->get('templating')
-            ->render('MapbenderDigitizerBundle:Element:digitizer.html.twig',
-                array(
-                    'id'            => $this->getId(),
-                    'title'         => $this->getTitle(),
-                    'configuration' => $this->getConfiguration()
-                ));
     }
 
     /**
@@ -316,27 +256,6 @@ class Digitizer extends BaseElement
                 );
         }
 
-
         return new JsonResponse($results);
-    }
-
-    /**
-     * Get assets. This method is overloaded,
-     * course of needing to aggregate CSS from configuration.
-     *
-     * @inheritdoc
-     */
-    public function getAssets()
-    {
-        $configuration = $this->getConfiguration();
-        $assets        = parent::getAssets();
-        if (isset($configuration['css'])) {
-            if (is_array($configuration['css'])) {
-                $assets['css'] = array_merge($assets['css'], $configuration['css']);
-            } else {
-                $assets['css'][] = $configuration['css'];
-            }
-        }
-        return $assets;
     }
 }
