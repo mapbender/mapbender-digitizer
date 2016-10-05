@@ -1,0 +1,19 @@
+.elementFormDigitizer {
+  width: 100%;
+  label.labelInput {
+    display: block;
+    margin: 0;
+    height: 23px;
+  }
+
+  .inputWrapper {
+    width: 100%;
+    &.code-yaml textarea {
+      height: 325px;
+    }
+  }
+  .dropdown {
+    min-width: auto;
+    width: 100%;
+  }
+}
