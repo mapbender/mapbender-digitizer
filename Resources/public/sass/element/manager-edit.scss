@@ -8,12 +8,19 @@
 
   .inputWrapper {
     width: 100%;
-    &.code-yaml textarea {
-      height: 325px;
-    }
   }
   .dropdown {
     min-width: auto;
     width: 100%;
+  }
+}
+
+.popupContainer {
+  > .popup {
+    > .popupScroll {
+      > .popupSubContent {
+        margin-bottom: 0;
+      }
+    }
   }
 }

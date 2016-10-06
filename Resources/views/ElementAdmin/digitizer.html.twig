@@ -8,21 +8,24 @@
   <script language="JavaScript">
     $(function() {
 
-      CodeMirror.initTextAreaAsYaml(document.getElementById("form_configuration_schemes"));
+      var winHeight = $(window).height();
+      var popupContainer = $(".popupContainer.modal > .popup");
+      popupContainer.css({
+        'margin-top': 0,
+        'width':      $(document).width(),
+        'height':    winHeight - 10
+      });
 
-      // Resize popup and elements
-      var popupContainer = $(".popupContainer.modal.show > .popup");
-      var yamlEditorElement = $("#elementForm > div > div.inputWrapper.code-yaml > div");
+      var formHolder = $(".popupScroll > .popupSubContent", this);
+      var form = $("> .contentItem", formHolder);
+      var textarea = $("textarea", form);
 
-      popupContainer.css('margin-top', 0);
-      popupContainer.animate({
-        width:  $(document).width(),
-        height: $(window).height() - 10
-      }, 350);
-
-      yamlEditorElement.animate({
-        height: $(window).height() - 285
-      }, 350);
+        textarea.css("height", formHolder.height() - (form.height() - textarea.height()));
+        CodeMirror.initTextAreaAsYaml(textarea[0]).setSize(textarea.width(), textarea.height());
+        //        var yamlEditorElement = yy(( $("#elementForm > div > div.inputWrapper.code-yaml > div");
+//        yamlEditorElement.animate({
+//          height: $(window).height() - 285
+//        }, 20);
     })
   </script>
   {{ form_label(form.title) }}{{ form_widget(form.title) }}
