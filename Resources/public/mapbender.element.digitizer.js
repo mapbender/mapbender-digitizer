@@ -306,7 +306,7 @@
                 }
             });
 
-            $.contextMenu({
+            $(element).contextMenu({
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
                 events: {
                     show: function(options) {
