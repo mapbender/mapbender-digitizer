@@ -138,6 +138,8 @@ class Digitizer extends BaseElement
                     $request['features'] = array($request['feature']);
                 }
 
+                $connection = $featureType->getDriver()->getConnection();
+
                 try {
                     // save collection
                     if (isset($request['features']) && is_array($request['features'])) {
@@ -160,7 +162,7 @@ class Digitizer extends BaseElement
                             $feature = $featureType->save($featureData);
                             $results = array_merge($featureType->search(array(
                                 'srid'  => $feature->getSrid(),
-                                'where' => $featureType->getUniqueId() . '=' . $feature->getId())));
+                                'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
                         }
                     }
                     $results = $featureType->toFeatureCollection($results);
