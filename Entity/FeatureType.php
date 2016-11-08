@@ -219,32 +219,18 @@ class FeatureType extends DataStore
         if ($lastId < 1) {
             switch ($connection->getDatabasePlatform()->getName()) {
                 case self::POSTGRESQL_PLATFORM:
-                    $sql    = "SELECT currval(pg_get_serial_sequence('" . $tableName . "','" . $this->getUniqueId() . "'))";
+                    $fullTableName    = $this->driver->getTableName();
+                    $fullUniqueIdName = $connection->quoteIdentifier($this->getUniqueId());
+                    $sql              = /** @lang PostgreSQL */
+                        "SELECT $fullUniqueIdName 
+                         FROM $fullTableName
+                         LIMIT 1 
+                         OFFSET (SELECT count($fullUniqueIdName)-1 FROM $fullTableName )";
                     $lastId = $connection->fetchColumn($sql);
-                    if ($lastId < 1) {
-                        switch ($connection->getDatabasePlatform()->getName()) {
-                            case self::POSTGRESQL_PLATFORM:
-                                $sql    = "SELECT currval(pg_get_serial_sequence('" . $tableName . "','" . $this->getUniqueId() . "'))";
-                                $lastId = $connection->executeQuery($sql)->fetchColumn();
-                                if ($lastId < 1) {
-                                    $fullTableName    = '"' . $tableName . '"';
-                                    $fullUniqueIdName = $fullTableName . '."' . $this->getUniqueId() . '"';
-                                    $sql              = /** @lang SQL */ "
-                                        SELECT $fullUniqueIdName 
-                                        FROM $fullTableName
-                                        LIMIT 1 
-                                        OFFSET (
-                                            SELECT count($fullUniqueIdName)-1 
-                                            FROM $fullTableName
-                                        )";
-                                    $lastId           = $connection->executeQuery($sql)->fetchColumn();
-                                }
-                                break;
-                        }
-                    }
                     break;
             }
         }
+
         $feature->setId($lastId);
         if (isset($this->events['onAfterInsert'])) {
             $this->secureEval($this->events['onAfterInsert'], $event);
