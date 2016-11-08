@@ -1,0 +1,24 @@
+mb.digitizer:
+  feature:
+    remove: Löschen
+    remove.successfully: 'Objekt wurde gelöscht.'
+    remove.from.database: 'Objekt löschen?'
+    edit: Bearbeiten
+    attributes: Objektinformationen
+    save: Speichern
+    save.successfully: 'Objekt wurde gespeichert.'
+    print: Druck
+  cancel: Abbrechen
+  toolset:
+    current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
+  api.query.error-message: 'Feature API: Abfrage fehlgeschlagen.'
+  table.fields.not.defined: 'Felder der Tabelle sind nicht definiert!'
+  features.loading.error: 'Objekte konnten nicht geladen werden!'
+  search:
+    title: Suche
+    table:
+      empty: 'Keine Ergebnisse'
+      zerorecords: 'Keine Ergebnisse'
+      info.status: '_START_ bis _END_ von _TOTAL_'
+      info.empty: 'Keine Ergebnisse'
+      info.filtered: '(gefiltert von _MAX_ Objekte.)'

@@ -780,6 +780,21 @@
                 widget.currentPopup.popupDialog('close');
             }
 
+            if(schema.printable) {
+                var printButton = {
+                    text:  translate("feature.print"),
+                    click: function() {
+                        var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
+                        if(printWidget) {
+                            printWidget.printDigitizerFeature(olFeature.schema.featureTypeName ? olFeature.schema.featureTypeName : olFeature.schema.schemaName, olFeature.fid);
+                        } else {
+                            $.notify("Druck element ist nicht verfügbar!");
+                        }
+                    }
+                };
+                buttons.push(printButton);
+            }
+
             if(schema.allowEditData) {
                 var saveButton = {
                     text:  translate("feature.save"),
