@@ -90,8 +90,10 @@ class Digitizer extends BaseElement
         if ($configuration["schemes"] && is_array($configuration["schemes"])) {
             foreach ($configuration["schemes"] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
-                    $featureTypes          = $this->container->getParameter('featureTypes');
-                    $scheme['featureType'] = $featureTypes[$scheme['featureType']];
+                    $featureTypeName           = $scheme['featureType'];
+                    $featureTypes              = $this->container->getParameter('featureTypes');
+                    $scheme['featureType']     = $featureTypes[ $featureTypeName ];
+                    $scheme['featureTypeName'] = $featureTypeName;
                 }
                 if (isset($scheme['formItems'])) {
                     $scheme['formItems'] = $this->prepareItems($scheme['formItems']);

@@ -782,11 +782,11 @@
 
             if(schema.printable) {
                 var printButton = {
-                    text:   translate("feature.print"),
+                    text:  translate("feature.print"),
                     click: function() {
                         var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
                         if(printWidget) {
-                            printWidget.printDigitizerFeature(olFeature.schema.schemaName, olFeature.fid);
+                            printWidget.printDigitizerFeature(olFeature.schema.featureTypeName ? olFeature.schema.featureTypeName : olFeature.schema.schemaName, olFeature.fid);
                         } else {
                             $.notify("Druck element ist nicht verfügbar!");
                         }
