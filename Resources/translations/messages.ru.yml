@@ -17,3 +17,5 @@ mb.digitizer.search.table.info.status: 'от _START_ до _END_ из _TOTAL_'
 mb.digitizer.search.table.info.empty: 'Без результатов'
 mb.digitizer.search.table.info.filtered: '(отфильтровано из _MAX_ объектов.)'
 mb.digitizer.feature.print: Печать
+mb.digitizer.feature.style.change: Изменть стиль
+mb.digitizer.feature.zoomTo: Приблизить

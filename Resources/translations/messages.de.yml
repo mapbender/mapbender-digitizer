@@ -8,6 +8,9 @@ mb.digitizer:
     save: Speichern
     save.successfully: 'Objekt wurde gespeichert.'
     print: Druck
+    zoomTo: Heranzoomen
+    style:
+      change: Stil ändern
   cancel: Abbrechen
   toolset:
     current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
