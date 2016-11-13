@@ -176,8 +176,8 @@
                 strokeWidth: 1,
                 strokeColor: '#6fb536',
                 fillColor:   "#6fb536",
-                fillOpacity: 0.3,
-                label: '${label}'
+                fillOpacity: 0.3
+                //, label: '${label}'
             },
             'select':  {
                 strokeWidth: 3,
@@ -206,6 +206,30 @@
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
         },
 
+        /**
+         * Open change style dialog
+         * @returns {*}
+         */
+        openChangeStyleDialog: function(olFeature) {
+            var layer = olFeature.layer;
+            var styleMap = layer.styleMap;
+            var styles = styleMap.styles;
+            var defaultStyleData = olFeature.style ? olFeature.style : _.extend({}, styles["default"].defaultStyle);
+
+            var styleEditor = $("<div/>")
+                .featureStyleEditor({
+                    data:      defaultStyleData,
+                    commonTab: false
+                })
+                .bind('featurestyleeditorsubmit', function(e, context) {
+                    var formData = styleEditor.formData();
+                    olFeature.style = _.extend({}, styleMap.createSymbolizer(olFeature), formData);
+                    layer.drawFeature(olFeature);
+                    styleEditor.featureStyleEditor("close");
+                });
+            return styleEditor;
+        },
+
         _setup: function() {
             var frames = [];
             var widget = this;
@@ -228,10 +252,17 @@
                 var schema = widget.findSchemaByLayer(layer);
                 var subItems = {
                     zoomTo: {
-                        name:   "Zoom to",
+                        name:   translate('feature.zoomTo'),
                         action: function(key, options, parameters) {
                             widget.zoomToJsonFeature(parameters.olFeature);
                         }
+                    }
+                };
+
+                subItems['style'] = {
+                    name:   translate('feature.style.change'),
+                    action: function(key, options, parameters) {
+                       widget.openChangeStyleDialog(olFeature);
                     }
                 };
 
@@ -326,13 +357,14 @@
                     var schema = widget.findFeatureSchema(olFeature);
                     var items = {};
 
-                    items['zoom'] = {name: "Zoom to"};
+                    items['changeStyle'] = {name: translate('feature.style.change')};
+                    items['zoom'] = {name: translate('feature.zoomTo')};
                     if(schema.allowDelete) {
-                        items['removeFeature'] = {name: "Remove"};
+                        items['removeFeature'] = {name:  translate('feature.remove')};
                     }
 
                     if(schema.allowEditData) {
-                        items['edit'] = {name: "Edit"};
+                        items['edit'] = {name:  translate('feature.edit')};
                     }
 
                     return {
@@ -352,6 +384,10 @@
 
                                 case 'exportGeoJson':
                                     widget.exportGeoJson(olFeature);
+                                    break;
+
+                                case 'changeStyle':
+                                    widget.openChangeStyleDialog(olFeature);
                                     break;
                             }
                         },
@@ -392,11 +428,20 @@
 
                 var buttons = [];
 
+
                 buttons.push({
                     title:     translate('feature.edit'),
                     className: 'edit',
                     onClick:   function(olFeature, ui) {
                         widget._openFeatureEditDialog(olFeature);
+                    }
+                });
+
+                buttons.push({
+                    title:     translate('feature.style.change'),
+                    className: 'style',
+                    onClick:   function(olFeature, ui) {
+                        widget.openChangeStyleDialog(olFeature);
                     }
                 });
 
@@ -818,7 +863,7 @@
                 });
             }
             buttons.push({
-                text:  translate("mb.digitizer.cancel",true),
+                text:  translate("cancel"),
                 click: function() {
                     widget.currentPopup.popupDialog('close');
                 }
@@ -1681,9 +1726,7 @@
         },
 
         save: function(dataItem) {
-            debugger;
             //dataItem.uniqueId
-
         },
 
         /**
