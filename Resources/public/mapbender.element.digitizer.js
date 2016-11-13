@@ -1359,6 +1359,9 @@
                 'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), {
                     context: {
                         label: function(feature) {
+                            if(feature.attributes.hasOwnProperty("label")){
+                                return feature.attributes.label;
+                            }
                             return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
                         }
                     }
