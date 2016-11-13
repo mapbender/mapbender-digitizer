@@ -71,6 +71,10 @@ $selectColor: #F7F79A;
         word-wrap: break-word;       /* Internet Explorer 5.5+ */
         word-break: break-all;
         white-space: normal;
+        .icon-style:before{
+          font-family: FontAwesome;
+          content: "\f1fb";
+        }
       }
     }
   }
