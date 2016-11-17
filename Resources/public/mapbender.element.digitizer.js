@@ -329,6 +329,11 @@
                                 return
                             }
                             var parameters = options.items[selectedElement.parent().closest('.context-menu-item').data('contextMenuKey')];
+
+                            if(!parameters){
+                                return;
+                            }
+
                             if(parameters.items[key].action) {
                                 parameters.items[key].action(key, options, parameters);
                             }
