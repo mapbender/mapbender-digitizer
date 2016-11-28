@@ -1066,17 +1066,9 @@
                     break;
 
                 default: // all
-
-                    if(settings.searchType == "currentExtent") {
-                        settings.allFeaturesQueued = false;
-                    }
-
-                    if(!settings.allFeaturesQueued) {
-                        settings.allFeaturesQueued = true;
-                        widget.query('select', request).done(function(featureCollection) {
-                            widget._onFeatureCollectionLoaded(featureCollection, settings, this);
-                        });
-                    }
+                    widget.query('select', request).done(function(featureCollection) {
+                        widget._onFeatureCollectionLoaded(featureCollection, settings, this);
+                    });
                     break;
             }
         },
