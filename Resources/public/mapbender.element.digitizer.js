@@ -1072,17 +1072,9 @@
                     break;
 
                 default: // all
-
-                    if(schema.searchType == "currentExtent") {
-                        schema.allFeaturesQueued = false;
-                    }
-
-                    if(!schema.allFeaturesQueued) {
-                        schema.allFeaturesQueued = true;
-                        widget.query('select', request).done(function(featureCollection) {
-                            widget._onFeatureCollectionLoaded(featureCollection, schema, this);
-                        });
-                    }
+                    widget.query('select', request).done(function(featureCollection) {
+                        widget._onFeatureCollectionLoaded(featureCollection, schema, this);
+                    });
                     break;
             }
         },
