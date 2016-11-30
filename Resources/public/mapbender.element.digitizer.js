@@ -788,7 +788,6 @@
                         if(printWidget) {
                             var dialog = $(this).closest(".ui-dialog-content");
                             var olFeature = dialog.data('feature');
-                            console.log(olFeature.fid);
                             printWidget.printDigitizerFeature(olFeature.schema.featureTypeName ? olFeature.schema.featureTypeName : olFeature.schema.schemaName, olFeature.fid);
                         } else {
                             $.notify("Druck element ist nicht verfügbar!");
@@ -900,10 +899,7 @@
                                 id:         dataStoreId,
                                 dataItemId: dataItemId
                             }).done(function(data) {
-
                                 widget._openEditDialog(data, item.dataStore.popupItems, item, selectRef);
-                                console.log(data)
-
                             });
 
                             return false;
