@@ -786,6 +786,9 @@
                     click: function() {
                         var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
                         if(printWidget) {
+                            var dialog = $(this).closest(".ui-dialog-content");
+                            var olFeature = dialog.data('feature');
+                            console.log(olFeature.fid);
                             printWidget.printDigitizerFeature(olFeature.schema.featureTypeName ? olFeature.schema.featureTypeName : olFeature.schema.schemaName, olFeature.fid);
                         } else {
                             $.notify("Druck element ist nicht verfügbar!");
@@ -812,6 +815,8 @@
                     text:  translate("feature.remove"),
                     'class': 'critical',
                     click: function() {
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var olFeature = dialog.data('feature');
                         widget.removeFeature(olFeature);
                         widget.currentPopup.popupDialog('close');
                     }
