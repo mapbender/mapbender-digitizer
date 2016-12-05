@@ -836,6 +836,8 @@
                     click: function() {
                         var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
                         if(printWidget) {
+                            var dialog = $(this).closest(".ui-dialog-content");
+                            var olFeature = dialog.data('feature');
                             printWidget.printDigitizerFeature(olFeature.schema.featureTypeName ? olFeature.schema.featureTypeName : olFeature.schema.schemaName, olFeature.fid);
                         } else {
                             $.notify("Druck element ist nicht verfügbar!");
@@ -862,6 +864,8 @@
                     text:  translate("feature.remove"),
                     'class': 'critical',
                     click: function() {
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var olFeature = dialog.data('feature');
                         widget.removeFeature(olFeature);
                         widget.currentPopup.popupDialog('close');
                     }
@@ -945,10 +949,7 @@
                                 id:         dataStoreId,
                                 dataItemId: dataItemId
                             }).done(function(data) {
-
                                 widget._openEditDialog(data, item.dataStore.popupItems, item, selectRef);
-                                console.log(data)
-
                             });
 
                             return false;
@@ -1122,17 +1123,9 @@
                     break;
 
                 default: // all
-
-                    if(schema.searchType == "currentExtent") {
-                        schema.allFeaturesQueued = false;
-                    }
-
-                    if(!schema.allFeaturesQueued) {
-                        schema.allFeaturesQueued = true;
-                        widget.query('select', request).done(function(featureCollection) {
-                            widget._onFeatureCollectionLoaded(featureCollection, schema, this);
-                        });
-                    }
+                    widget.query('select', request).done(function(featureCollection) {
+                        widget._onFeatureCollectionLoaded(featureCollection, schema, this);
+                    });
                     break;
             }
         },
