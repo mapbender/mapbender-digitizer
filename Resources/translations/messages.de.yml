@@ -18,10 +18,11 @@ mb.digitizer:
   table.fields.not.defined: 'Felder der Tabelle sind nicht definiert!'
   features.loading.error: 'Objekte konnten nicht geladen werden!'
   search:
-    title: Suche
+    title: Filter
     table:
       empty: 'Keine Ergebnisse'
       zerorecords: 'Keine Ergebnisse'
-      info.status: '_START_ bis _END_ von _TOTAL_'
-      info.empty: 'Keine Ergebnisse'
-      info.filtered: '(gefiltert von _MAX_ Objekte.)'
+      info:
+        status: 'Anzeige _START_ bis _END_ von _TOTAL_ Treffern'
+        empty: 'Keine Ergebnisse'
+        filtered: '(gefiltert von _MAX_ Objekte.)'
