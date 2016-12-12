@@ -521,9 +521,23 @@
 
                 frame.generateElements({
                     children: [{
-                        type:           'digitizingToolSet',
-                        children:       toolset,
-                        layer:    layer,
+                        type:         'digitizingToolSet',
+                        children:     toolset,
+                        layer:        layer,
+                        translations: {
+                            drawPoint:             "Punkt setzen",
+                            drawLine:              "Linie zeichnen",
+                            drawPolygon:           "Polygon zeichnen",
+                            drawRectangle:         "Rechteck zeichen",
+                            drawCircle:            "Kreis zeichen",
+                            drawEllipse:           "Ellipse zeichen",
+                            drawDonut:             "Polygon mit Enklave zeichnen",
+                            selectAndEditGeometry: "Objekt Position/Größe beabeiten",
+                            moveGeometry:          "Objekt bewegen",
+                            selectGeometry:        "Objekt selektieren",
+                            removeSelected:        "Selektierte objekte löschen",
+                            removeAll:             "Alle Objekte löschen"
+                        },
 
                         // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
                         controlEvents: {
