@@ -705,7 +705,7 @@
                 widget._getData();
                 widget.updateClusterStrategies();
             });
-            //widget.map.resetLayersZIndex();
+            map.resetLayersZIndex();
             widget._trigger('ready');
 
             element.bind("mbdigitizerbeforechangedigitizing", function(e, sets) {
@@ -1387,8 +1387,9 @@
                 schema.clusterStrategy = clusterStrategy;
             }
             var layer = new OpenLayers.Layer.Vector(schema.label, {
-                styleMap:   styleMap,
-                strategies: strategies
+                styleMap:        styleMap,
+                // rendererOptions: {zIndexing: true},
+                strategies:      strategies
             });
 
             layer.name = schema.label;
@@ -1398,9 +1399,9 @@
         /**
          * Remove OL feature
          *
-         * @param feature
          * @version 0.2
          * @returns {*}
+         * @param  {OpenLayers.Feature} olFeature
          */
         removeFeature: function(olFeature) {
             var widget = this;
@@ -1535,7 +1536,34 @@
                 features: filteredNewFeatures
             });
 
-            widget.reloadFeatures(layer, _.union(newUniqueFeatures, visibleFeatures));
+            var _features = _.union(newUniqueFeatures, visibleFeatures);
+            var features = [];
+            var polygones = [];
+            var lineStrings = [];
+            var points = [];
+
+            _.each(_features, function(feature) {
+                switch (feature.geometry.CLASS_NAME) {
+                    case  "OpenLayers.Geometry.Polygon":
+                        polygones.push(feature);
+                        break;
+                    case  "OpenLayers.Geometry.LineString":
+                        lineStrings.push(feature);
+                        break;
+                    case  "OpenLayers.Geometry.Point":
+                        points.push(feature);
+                        // if(feature.attributes.label) {
+                        //     feature.style = new OpenLayers.Style({
+                        //         'label': '${label}'
+                        //     });
+                        // }
+                        break;
+                    default:
+                        features.push(feature);
+                }
+            });
+
+            widget.reloadFeatures(layer, _.union(features, polygones, lineStrings, points));
         },
 
         /**
