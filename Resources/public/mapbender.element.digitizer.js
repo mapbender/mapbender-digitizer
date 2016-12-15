@@ -1799,11 +1799,22 @@
                         errorMessage += $(li).text() + "\n";
                     });
 
+                } else if(errorDom.has(".loginBox.login").size()) {
+                    var loginURL = errorDom.find(".loginBox.login form").attr("action").replace(/\/check$/, '');
+                    location.href = loginURL;
+                    // $("<div/>")
+                    //     .popupDialog({
+                    //         modal:  true,
+                    //         height: 400,
+                    //         width:  "600px"
+                    //     })
+                    //     .append($("<iframe src='" + loginURL + "'> "))
+                    $.notify("Bitte loggen sie sich ein.");
                 } else {
                     errorMessage += JSON.stringify(xhr.responseText);
                 }
 
-                $.notify(errorMessage,{
+                $.notify(errorMessage, {
                     autoHide: false
                 });
                 console.log(errorMessage, xhr);
