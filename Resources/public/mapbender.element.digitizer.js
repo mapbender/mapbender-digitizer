@@ -615,6 +615,14 @@
                     }
                 });
 
+                // Workaround to move map by touch vector features
+                if(typeof(selectControl.handlers) != "undefined") { // OL 2.7
+                    selectControl.handlers.feature.stopDown = false;
+                } else if(typeof(selectFeatureControl.handler) != "undefined") { // OL < 2.7
+                    selectControl.handler.stopDown = false;
+                    selectControl.handler.stopUp = false;
+                }
+
                 schema.selectControl = selectControl;
                 selectControl.deactivate();
                 map.addControl(selectControl);
@@ -1388,7 +1396,7 @@
             }
             var layer = new OpenLayers.Layer.Vector(schema.label, {
                 styleMap:        styleMap,
-                // rendererOptions: {zIndexing: true},
+                rendererOptions: {zIndexing: true},
                 strategies:      strategies
             });
 
@@ -1607,7 +1615,6 @@
         _openEditDialog: function(dataItem, formItems, schema, ref) {
             var schemaName = this.schemaName;
             var widget = this;
-
             var uniqueKey = schema.dataStore.uniqueId;
             var buttons = [];
 
