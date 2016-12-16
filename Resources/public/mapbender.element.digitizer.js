@@ -1543,6 +1543,9 @@
             var points = [];
 
             _.each(_features, function(feature) {
+                if(!feature.geometry){
+                    return;
+                }
                 switch (feature.geometry.CLASS_NAME) {
                     case  "OpenLayers.Geometry.Polygon":
                         polygones.push(feature);
