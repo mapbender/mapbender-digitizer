@@ -122,6 +122,7 @@
             allowDigitize: true,
             allowDelete: true,
             allowEditData:true,
+            allowCustomerStyle: true,
             openFormAfterEdit: true,
             maxResults: 5001,
             pageLength: 10,
@@ -259,12 +260,15 @@
                     }
                 };
 
-                subItems['style'] = {
-                    name:   translate('feature.style.change'),
-                    action: function(key, options, parameters) {
-                       widget.openChangeStyleDialog(olFeature);
-                    }
-                };
+                if(schema.allowCustomerStyle) {
+                    subItems['style'] = {
+                        name:   translate('feature.style.change'),
+                        action: function(key, options, parameters) {
+                            widget.openChangeStyleDialog(olFeature);
+                        }
+                    };
+                }
+
 
                 if(schema.allowEditData) {
                     subItems['edit'] = {
@@ -274,6 +278,7 @@
                         }
                     }
                 }
+
                 if(schema.allowDelete) {
                     subItems['remove'] = {
                         name:   translate('feature.remove'),
