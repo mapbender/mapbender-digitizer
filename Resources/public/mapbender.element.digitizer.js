@@ -123,6 +123,7 @@
             allowDelete: true,
             allowEditData:true,
             allowCustomerStyle: true,
+            allowChangeVisibility: true,
             openFormAfterEdit: true,
             maxResults: 5001,
             pageLength: 10,
@@ -260,6 +261,15 @@
                     }
                 };
 
+                if(schema.allowChangeVisibility) {
+                    subItems['style'] = {
+                        name:   translate('feature.visibility.change'),
+                        action: function(key, options, parameters) {
+                            widget.openChangeStyleDialog(olFeature);
+                        }
+                    };
+                }
+
                 if(schema.allowCustomerStyle) {
                     subItems['style'] = {
                         name:   translate('feature.style.change'),
@@ -268,7 +278,6 @@
                         }
                     };
                 }
-
 
                 if(schema.allowEditData) {
                     subItems['edit'] = {
@@ -447,13 +456,34 @@
                     }
                 });
 
-                buttons.push({
-                    title:     translate('feature.style.change'),
-                    className: 'style',
-                    onClick:   function(olFeature, ui) {
-                        widget.openChangeStyleDialog(olFeature);
-                    }
-                });
+                if(schema.allowCustomerStyle) {
+                    buttons.push({
+                        title:     translate('feature.style.change'),
+                        className: 'style',
+                        onClick:   function(olFeature, ui) {
+                            widget.openChangeStyleDialog(olFeature);
+                        }
+                    });
+                }
+
+                if(schema.allowChangeVisibility) {
+                    buttons.push({
+                        title:     translate('feature.visibility.change'),
+                        className: 'visibility',
+                        onClick:   function(olFeature, ui, b, c) {
+                            var layer = olFeature.layer;
+                            if(!olFeature.renderIntent || olFeature.renderIntent != 'invisible') {
+                                layer.drawFeature(olFeature, 'invisible');
+                                ui.addClass("icon-invisibility");
+                                ui.closest('tr').addClass('invisible-feature');
+                            } else {
+                                layer.drawFeature(olFeature, 'default');
+                                ui.removeClass("icon-invisibility");
+                                ui.closest('tr').removeClass('invisible-feature');
+                            }
+                        }
+                    });
+                }
 
                 if(schema.allowDelete) {
                     buttons.push({
@@ -1174,6 +1204,10 @@
             var layer = feature.layer;
             var domRow;
 
+            if(feature.renderIntent && feature.renderIntent == 'invisible') {
+                return;
+            }
+
             if(isSketchFeature) {
                 return;
             }
@@ -1204,6 +1238,10 @@
          */
         _highlightFeature: function(feature, highlight) {
             if(!feature || (feature && !feature.layer)) {
+                return;
+            }
+
+            if(feature.renderIntent && feature.renderIntent == 'invisible') {
                 return;
             }
 
@@ -1391,7 +1429,13 @@
                         }
                     }
                 }),
-                'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
+                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select)),
+                'invisible': new OpenLayers.Style({
+                    strokeWidth: 1,
+                    fillColor:   "#F7F79A",
+                    strokeColor: '#6fb536',
+                    display: 'none'
+                })
             }, {extendDefault: true});
 
             if(isClustered) {
@@ -1615,6 +1659,20 @@
             tableApi.clear();
             tableApi.rows.add(featuresWithoutDrawElements);
             tableApi.draw();
+
+            // var tbody = $(tableApi.body());
+
+            // Post handling
+            var nodes = tableApi.rows(function(idx, data, row) {
+                var isInvisible = data.renderIntent == 'invisible';
+                if(isInvisible) {
+                    var $row = $(row);
+                    var visibilityButton = $row.find('.button.icon-visibility');
+                    visibilityButton.addClass('icon-invisibility');
+                    $row.addClass('invisible-feature');
+                }
+                return true;
+            });
         },
 
         _openEditDialog: function(dataItem, formItems, schema, ref) {

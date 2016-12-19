@@ -75,6 +75,16 @@ $selectColor: #F7F79A;
           font-family: FontAwesome;
           content: "\f1fb";
         }
+
+        .icon-visibility:before{
+          font-family: FontAwesome;
+          content: "\f06e";
+        }
+
+        .icon-invisibility:before{
+          font-family: FontAwesome;
+          content: "\f070";
+        }
       }
     }
   }
