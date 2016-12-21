@@ -503,7 +503,7 @@
                 var columns = [];
                 var newFeatureDefaultProperties = {};
                 if( !schema.hasOwnProperty("tableFields")){
-                    console.error(translate("table.fields.not.defined"),schema );
+                    console.error(translate("table.fields.not.defined"), schema);
                 }
 
                 $.each(schema.tableFields, function(fieldName, fieldSettings) {
@@ -514,11 +514,15 @@
                         if(typeof (data) == 'string') {
                             data = escapeHtml(data); //.replace(/\//g, '&#x2F;');
                         }
+
                         return data;
                     };
+
+                    if(fieldSettings.render) {
+                        eval('fieldSettings.render = ' + fieldSettings.render);
+                    }
                     columns.push(fieldSettings);
                 });
-
 
                 var resultTableSettings = {
                     lengthChange: false,
