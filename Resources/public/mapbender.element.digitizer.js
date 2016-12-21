@@ -488,7 +488,7 @@
 
                 if(schema.allowChangeVisibility) {
                     buttons.push({
-                        title:     translate('feature.visibility.change'),
+                        title:     'Objekt anzeigen/ausblenden', //translate('feature.visibility.change'),
                         className: 'visibility',
                         onClick:   function(olFeature, ui, b, c) {
                             var layer = olFeature.layer;
