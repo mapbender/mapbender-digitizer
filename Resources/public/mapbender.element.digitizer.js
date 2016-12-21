@@ -231,20 +231,27 @@
                 .bind('featurestyleeditorsubmit', function(e, context) {
                     var styleData = styleEditor.formData();
                     styleEditor.disableForm();
+                    var styleId = Mapbender.Util.UUID();
+                    var style = new OpenLayers.Style(styleData);
+
+                    styleMap.styles[styleId] = style;
+                    olFeature.styleId = styleId;
+                    layer.drawFeature(olFeature, styleId);
+
                     widget.query('style/save', {
                         style:     styleData,
                         featureId: olFeature.fid,
                         schema:    widget.currentSettings.schemaName
                     }).done(function(response) {
-                        var styleData = response.style;
-                        var styleId = styleData.id;
-                        var style = new OpenLayers.Style(styleData, {uid: styleId});
                         // style.id = styleId;
+                        var styleData = response.style;
+                        var style = new OpenLayers.Style(styleData);
+                        styleMap.styles[styleData.id] = style;
+                        layer.drawFeature(olFeature, styleData.id);
+                        olFeature.styleId = styleData.id;
 
-                        styleMap.styles[styleId] = style;
-                        olFeature.styleId = styleId;
+                        delete  styleMap.styles[styleId];
 
-                        layer.drawFeature(olFeature, styleId);
                         styleEditor.enableForm();
                     });
 
@@ -851,7 +858,6 @@
                 dialog.disableForm();
                 widget.query('save', {
                     schema:  schema.schemaName,
-                    style:   feature.styleId ? feature.layer.options.styleMap.styles[feature.styleId].defaultStyle : null,
                     feature: request
                 }).done(function(response) {
 
@@ -887,7 +893,7 @@
                     var newFeatures = geoJsonReader.read(response);
                     var newFeature = _.first(newFeatures);
 
-                    _.each(['fid', 'disabled', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent'], function(key) {
+                    _.each(['fid', 'disabled', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent', 'styleId'], function(key) {
                         newFeature[key] = feature[key];
                     });
 
