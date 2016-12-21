@@ -7,6 +7,7 @@ use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
+use Mapbender\SearchBundle\Component\StyleManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +29,8 @@ class Digitizer extends BaseElement
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
                         "/components/jquery-context-menu/jquery-context-menu-built.js",
+                        //'/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
+                        //'@MapbenderSearchBundle/Resources/public/feature-style-editor.js',
                         'mapbender.element.digitizer.js'
         ),
                      'css'   => array('sass/element/digitizer.scss'),
@@ -52,6 +55,7 @@ class Digitizer extends BaseElement
      */
     public function getConfiguration()
     {
+        $styleManager             = new StyleManager($this->container);
         $configuration            = parent::getConfiguration();
         $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
         $configuration['fileUri'] = $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
@@ -67,8 +71,11 @@ class Digitizer extends BaseElement
                 if (isset($scheme['formItems'])) {
                     $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
                 }
+
+                $scheme['featureStyles'] = $styleManager->getSchemaStyles($scheme);
             }
         }
+
         return $configuration;
     }
 
@@ -140,6 +147,11 @@ class Digitizer extends BaseElement
                     $request['features'] = array($request['feature']);
                 }
 
+                // save once
+                if (isset($request['style'])) {
+                    $request['features'] = array($request['feature']);
+                }
+
                 $connection = $featureType->getDriver()->getConnection();
 
                 try {
@@ -162,6 +174,7 @@ class Digitizer extends BaseElement
                             }
 
                             $feature = $featureType->save($featureData);
+
                             $results = array_merge($featureType->search(array(
                                 'srid'  => $feature->getSrid(),
                                 'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
@@ -252,6 +265,26 @@ class Digitizer extends BaseElement
                 $dataItemId  = $request['dataItem'][ $uniqueIdKey ];
                 $dataStore->remove($dataItemId);
                 break;
+
+            case 'style/save':
+                $styleManager    = new StyleManager($this->container);
+                $styleData       = array_merge($request['style'], array(
+                    'schemaName' => $request['schema'],
+                    'featureId'  => $request['featureId'],
+                ));
+                $style           = $styleManager->createStyle($styleData);
+                $style           = $styleManager->save($style);
+                $styleData       = $style->toArray();
+                $styleData['id'] = $style->getId();
+
+                unset($styleData['userId']);
+                unset($styleData['name']);
+                unset($styleData['styleMaps']);
+                unset($styleData['title']);
+                $results['style'] = $styleData;
+                //$this->getId();
+                break;
+
             default:
                 $results = array(
                     array('errors' => array(

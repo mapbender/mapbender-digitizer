@@ -213,10 +213,15 @@
          * @returns {*}
          */
         openChangeStyleDialog: function(olFeature) {
+            var widget = this;
             var layer = olFeature.layer;
-            var styleMap = layer.styleMap;
+            var styleMap = layer.options.styleMap;
             var styles = styleMap.styles;
             var defaultStyleData = olFeature.style ? olFeature.style : _.extend({}, styles["default"].defaultStyle);
+
+            if(olFeature.styleId) {
+                _.extend(defaultStyleData, styles[olFeature.styleId].defaultStyle);
+            }
 
             var styleEditor = $("<div/>")
                 .featureStyleEditor({
@@ -224,9 +229,25 @@
                     commonTab: false
                 })
                 .bind('featurestyleeditorsubmit', function(e, context) {
-                    var formData = styleEditor.formData();
-                    olFeature.style = _.extend({}, styleMap.createSymbolizer(olFeature), formData);
-                    layer.drawFeature(olFeature);
+                    var styleData = styleEditor.formData();
+                    styleEditor.disableForm();
+                    widget.query('style/save', {
+                        style:     styleData,
+                        featureId: olFeature.fid,
+                        schema:    widget.currentSettings.schemaName
+                    }).done(function(response) {
+                        var styleData = response.style;
+                        var styleId = styleData.id;
+                        var style = new OpenLayers.Style(styleData, {uid: styleId});
+                        // style.id = styleId;
+
+                        styleMap.styles[styleId] = style;
+                        olFeature.styleId = styleId;
+
+                        layer.drawFeature(olFeature, styleId);
+                        styleEditor.enableForm();
+                    });
+
                     styleEditor.featureStyleEditor("close");
                 });
             return styleEditor;
@@ -446,7 +467,6 @@
                 }
 
                 var buttons = [];
-
 
                 buttons.push({
                     title:     translate('feature.edit'),
@@ -821,6 +841,7 @@
                 dialog.disableForm();
                 widget.query('save', {
                     schema:  schema.schemaName,
+                    style:   feature.styleId ? feature.layer.options.styleMap.styles[feature.styleId].defaultStyle : null,
                     feature: request
                 }).done(function(response) {
 
@@ -907,6 +928,19 @@
                 };
                 buttons.push(printButton);
             }
+
+            if(schema.allowCustomerStyle) {
+                var styleButton = {
+                    text:   translate('feature.style.change'),
+                    click: function(e) {
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var feature = dialog.data('feature');
+                        widget.openChangeStyleDialog(feature);
+                    }
+                };
+                buttons.push(styleButton);
+            }
+
 
             if(schema.allowEditData) {
                 var saveButton = {
@@ -1216,8 +1250,8 @@
                 return;
             }
 
-            //widget._highlightFeature(feature, highlight);
-            layer.drawFeature(feature, highlight ? 'select' : 'default');
+            var styleId = feature.styleId ? feature.styleId : 'default';
+            layer.drawFeature(feature, highlight ? 'select' : styleId);
 
             for (var k in features) {
                 domRow = tableWidget.getDomRowByData(features[k]);
@@ -1241,6 +1275,7 @@
          * @private
          */
         _highlightFeature: function(feature, highlight) {
+
             if(!feature || (feature && !feature.layer)) {
                 return;
             }
@@ -1265,7 +1300,8 @@
             }
 
             _.each(features, function(feature) {
-                layer.drawFeature(feature, highlight ? 'select' : 'default');
+                var styleId = feature.styleId ? feature.styleId : 'default';
+                layer.drawFeature(feature, highlight ? 'select' : styleId);
             })
         },
 
@@ -1433,14 +1469,16 @@
                         }
                     }
                 }),
-                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select)),
-                'invisible': new OpenLayers.Style({
-                    strokeWidth: 1,
-                    fillColor:   "#F7F79A",
-                    strokeColor: '#6fb536',
-                    display: 'none'
-                })
+                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select)) //,
+                // 'invisible':
             }, {extendDefault: true});
+
+            styleMap.styles.invisible = new OpenLayers.Style({
+                strokeWidth: 1,
+                fillColor:   "#F7F79A",
+                strokeColor: '#6fb536',
+                display: 'none'
+            });
 
             if(isClustered) {
                 var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
@@ -1449,7 +1487,7 @@
             }
             var layer = new OpenLayers.Layer.Vector(schema.label, {
                 styleMap:        styleMap,
-                rendererOptions: {zIndexing: true},
+                // rendererOptions: {zIndexing: true},
                 strategies:      strategies
             });
 
@@ -1656,6 +1694,21 @@
             _.each(features, function(feature) {
                 feature.layer = layer;
                 feature.schema = schema;
+
+                if(schema.featureStyles && schema.featureStyles[feature.fid]) {
+                    if(!feature.styleId){
+                        var styleData = schema.featureStyles[feature.fid];
+                        var styleMap = layer.options.styleMap;
+                        var styles = styleMap.styles;
+                        var styleId = styleData.id;
+                        var style = new OpenLayers.Style(styleData, {uid: styleId});
+                        // style.id = styleId;
+                        styles[styleId] = style;
+                        feature.styleId = styleId;
+                        widget._highlightFeature(feature);
+                    }
+                }
+
             });
 
             layer.redraw();
