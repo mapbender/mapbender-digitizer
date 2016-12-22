@@ -24,6 +24,12 @@ $selectColor: #F7F79A;
     margin-bottom: 10px;
   }
 
+  > .frame{
+    .fa:before {
+      font-family: FontAwesome;
+    }
+  }
+
   .mapbender-element-result-table {
     margin-top: 10px;
 

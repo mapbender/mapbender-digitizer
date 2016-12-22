@@ -504,7 +504,11 @@
                                 ui.addClass("icon-invisibility");
                                 ui.closest('tr').addClass('invisible-feature');
                             } else {
-                                layer.drawFeature(olFeature, 'default');
+                                if(olFeature.styleId) {
+                                    layer.drawFeature(olFeature, olFeature.styleId);
+                                } else {
+                                    layer.drawFeature(olFeature, 'default');
+                                }
                                 ui.removeClass("icon-invisibility");
                                 ui.closest('tr').removeClass('invisible-feature');
                             }
@@ -657,6 +661,43 @@
                         }
                     }]
                 });
+
+                frame.generateElements({
+                    type:     'fieldSet',
+                    cssClass: 'right',
+                    children: [{
+                        type:     'button',
+                        cssClass: 'fa fa-eye-slash',
+                        title:    'Alle ausblenden',
+                        click:    function(e) {
+                            var tableApi = table.resultTable('getApi');
+                            tableApi.rows(function(idx, feature, row) {
+                                var $row = $(row);
+                                var visibilityButton = $row.find('.button.icon-visibility');
+                                visibilityButton.addClass('icon-invisibility');
+                                $row.addClass('invisible-feature');
+                                feature.layer.drawFeature(feature, 'invisible');
+                            });
+                        }
+                    }, {
+                        type:  'button',
+                        title: 'Alle einblenden',
+                        cssClass: 'fa fa-eye',
+                        click: function(e) {
+                            var tableApi = table.resultTable('getApi');
+                            tableApi.rows(function(idx, feature, row) {
+                                var $row = $(row);
+                                var visibilityButton = $row.find('.button.icon-visibility');
+                                visibilityButton.removeClass('icon-invisibility');
+                                $row.removeClass('invisible-feature');
+                                var styleId = feature.styleId ? feature.styleId : 'default';
+                                feature.layer.drawFeature(feature, styleId);
+                            });
+                        }
+                    }]
+                });
+
+                frame.append('<div style="clear:both;"/>');
 
                 if(!schema.allowDigitize){
                     $(".digitizing-tool-set",frame).css('display','none');
