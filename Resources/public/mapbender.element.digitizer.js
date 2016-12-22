@@ -289,14 +289,6 @@
                     }
                 };
 
-                if(schema.allowChangeVisibility) {
-                    subItems['style'] = {
-                        name:   translate('feature.visibility.change'),
-                        action: function(key, options, parameters) {
-                            widget.openChangeStyleDialog(olFeature);
-                        }
-                    };
-                }
 
                 if(schema.allowCustomerStyle) {
                     subItems['style'] = {
