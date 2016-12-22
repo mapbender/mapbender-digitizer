@@ -3,11 +3,14 @@
 namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\DBALException;
+use Eslider\Driver\SqliteExtended;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
+use Mapbender\DigitizerBundle\Component\DigitizerStyleManager;
 use Mapbender\DigitizerBundle\Component\Uploader;
 use Mapbender\SearchBundle\Component\StyleManager;
+use Mapbender\SearchBundle\Entity\Style;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -55,7 +58,7 @@ class Digitizer extends BaseElement
      */
     public function getConfiguration()
     {
-        $styleManager             = new StyleManager($this->container);
+        $styleManager             = new DigitizerStyleManager($this->container);
         $configuration            = parent::getConfiguration();
         $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
         $configuration['fileUri'] = $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
@@ -267,22 +270,20 @@ class Digitizer extends BaseElement
                 break;
 
             case 'style/save':
-                $styleManager    = new StyleManager($this->container);
-                $styleData       = array_merge($request['style'], array(
+
+                $styleManager = new DigitizerStyleManager($this->container);
+                $style        = new Style(array_merge($request['style'], array(
                     'schemaName' => $request['schema'],
                     'featureId'  => $request['featureId'],
-                ));
-                $style           = $styleManager->createStyle($styleData);
-                $style           = $styleManager->save($style);
-                $styleData       = $style->toArray();
-                $styleData['id'] = $style->getId();
+                    'userId'     => $this->getUserId()
+                )));
 
+                $styleData = $styleManager->save($style)->toArray();
                 unset($styleData['userId']);
                 unset($styleData['name']);
                 unset($styleData['styleMaps']);
                 unset($styleData['title']);
-                $results['style'] = $styleData;
-                //$this->getId();
+                $results['style']   = $styleData;
                 break;
 
             default:
