@@ -662,7 +662,7 @@
                     }]
                 });
 
-                frame.generateElements({
+                frame.find('.digitizing-tool-set').generateElements({
                     type:     'fieldSet',
                     cssClass: 'right',
                     children: [{
