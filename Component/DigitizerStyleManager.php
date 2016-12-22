@@ -113,9 +113,15 @@ class DigitizerStyleManager
     {
         $db     = $this->db;
         $styles = array();
-        foreach ($db->queryAndFetch("SELECT * FROM " . $db->quote($this->tableName) . " 
-          WHERE " . $db->quote("userId") . "=" . SqliteExtended::escapeValue($this->userId) . " 
-          AND " . $db->quote("schemaName") . " LIKE " . SqliteExtended::escapeValue($schema['featureTypeName'])) as $styleData) {
+        $sql    = "SELECT * FROM " . $db->quote($this->tableName)
+            . " WHERE " . $db->quote("userId") . "=" . SqliteExtended::escapeValue($this->userId);
+
+        if (isset($schema["group"]) && $schema["group"] != "all") {
+            $sql .= " AND " . $db->quote("schemaName")
+                . " LIKE " . SqliteExtended::escapeValue($schema['featureTypeName']);
+        }
+
+        foreach ($db->queryAndFetch($sql) as $styleData) {
             $style                       = new Style($styleData);
             $styles[ $style->featureId ] = $styleData;
         }
