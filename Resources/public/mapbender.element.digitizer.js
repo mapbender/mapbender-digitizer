@@ -1304,7 +1304,12 @@
             }
 
             var styleId = feature.styleId ? feature.styleId : 'default';
-            layer.drawFeature(feature, highlight ? 'select' : styleId);
+
+            if(feature.attributes && feature.attributes.label) {
+                layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
+            }else{
+                layer.drawFeature(feature, highlight ? 'select' : styleId);
+            }
 
             for (var k in features) {
                 domRow = tableWidget.getDomRowByData(features[k]);
@@ -1354,7 +1359,13 @@
 
             _.each(features, function(feature) {
                 var styleId = feature.styleId ? feature.styleId : 'default';
-                layer.drawFeature(feature, highlight ? 'select' : styleId);
+
+                if(feature.attributes && feature.attributes.label) {
+                    layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
+                } else {
+                    layer.drawFeature(feature, highlight ? 'select' : styleId);
+                }
+
             })
         },
 
@@ -1541,6 +1552,15 @@
                 pointRadius:   15,
                 label:         '${label}',
                 fontSize:      15
+            });
+            styleMap.styles.labelTextHover = new OpenLayers.Style({
+                strokeWidth: 0,
+                fillColor:   '#cccccc',
+                strokeColor: '#2340d3',
+                fillOpacity: 1,
+                pointRadius: 15,
+                label:       '${label}',
+                fontSize:    15
             });
 
             if(isClustered) {
@@ -1766,7 +1786,7 @@
                 feature.layer = layer;
                 feature.schema = schema;
 
-                if(feature.attributes.label) {
+                if(feature.attributes && feature.attributes.label) {
                     feature.styleId = "labelText";
                     widget._highlightFeature(feature);
                     return;
