@@ -653,8 +653,16 @@
                         }
                     }]
                 });
+                var toolSetView = $(".digitizing-tool-set",frame);
 
-                frame.find('.digitizing-tool-set').generateElements({
+                if(!schema.allowDigitize){
+                    toolSetView.css('display','none');
+                    toolSetView = $("<div class='digitizing-tool-sets'/>");
+                    toolSetView.insertBefore(frame.find('.onlyExtent'));
+                }
+
+
+                toolSetView.generateElements({
                     type:     'fieldSet',
                     cssClass: 'right',
                     children: [{
@@ -691,9 +699,6 @@
 
                 frame.append('<div style="clear:both;"/>');
 
-                if(!schema.allowDigitize){
-                    $(".digitizing-tool-set",frame).css('display','none');
-                }
 
                 frame.append(table);
 
