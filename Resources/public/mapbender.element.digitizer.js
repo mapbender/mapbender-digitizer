@@ -768,11 +768,15 @@
                 widget.activeLayer = schema.layer;
                 widget.schemaName = schema.schemaName;
                 widget.currentSettings = schema;
-                layer.setVisibility(true);
-                //layer.redraw();
-                frame.css('display', 'block');
 
-                schema.selectControl.activate();
+                widget.query('style/list', {schema: schema.schemaName}).done(function(r) {
+                    schema.featureStyles = r.featureStyles
+                    widget.reloadFeatures(layer);
+                    layer.setVisibility(true);
+                    frame.css('display', 'block');
+                    schema.selectControl.activate();
+                });
+
             }
 
             function onSelectorChange() {
@@ -1528,6 +1532,16 @@
                 strokeColor: '#6fb536',
                 display: 'none'
             });
+            styleMap.styles.labelText = new OpenLayers.Style({
+                strokeWidth:   0,
+                fillColor:     '#cccccc',
+                fillOpacity:   0,
+                strokeColor:   '#5e1a2b',
+                strokeOpacity: 0,
+                pointRadius:   15,
+                label:         '${label}',
+                fontSize:      15
+            });
 
             if(isClustered) {
                 var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
@@ -1685,6 +1699,14 @@
             });
 
             var _features = _.union(newUniqueFeatures, visibleFeatures);
+
+            if(schema.group && schema.group == "all") {
+                _features = geoJsonReader.read({
+                    type:     "FeatureCollection",
+                    features: featureCollection.features
+                });
+            }
+
             var features = [];
             var polygones = [];
             var lineStrings = [];
@@ -1744,6 +1766,12 @@
                 feature.layer = layer;
                 feature.schema = schema;
 
+                if(feature.attributes.label) {
+                    feature.styleId = "labelText";
+                    widget._highlightFeature(feature);
+                    return;
+                }
+
                 if(schema.featureStyles && schema.featureStyles[feature.fid]) {
                     if(!feature.styleId){
                         var styleData = schema.featureStyles[feature.fid];
@@ -1780,6 +1808,7 @@
                 return true;
             });
         },
+
 
         _openEditDialog: function(dataItem, formItems, schema, ref) {
             var schemaName = this.schemaName;
