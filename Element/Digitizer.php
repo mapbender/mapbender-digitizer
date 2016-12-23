@@ -75,7 +75,7 @@ class Digitizer extends BaseElement
                     $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
                 }
 
-                $scheme['featureStyles'] = $styleManager->getSchemaStyles($scheme);
+                $scheme['featureStyles'] = array();
             }
         }
 
@@ -284,6 +284,11 @@ class Digitizer extends BaseElement
                 unset($styleData['styleMaps']);
                 unset($styleData['title']);
                 $results['style']   = $styleData;
+                break;
+
+            case 'style/list':
+                $styleManager             = new DigitizerStyleManager($this->container);
+                $results['featureStyles'] = $styleManager->getSchemaStyles($schema);
                 break;
 
             default:
