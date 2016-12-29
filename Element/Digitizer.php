@@ -25,6 +25,7 @@ class Digitizer extends BaseElement
     static public function listAssets()
     {
         return array('js'    => array(
+                        "@MapbenderCoreBundle/Resources/public/mapbender.container.info.js",
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
                         "/components/jquery-context-menu/jquery-context-menu-built.js",
