@@ -742,48 +742,6 @@
                 map.addControl(selectControl);
             });
 
-            function deactivateFrame(schema) {
-                var frame = schema.frame;
-                //var tableApi = schema.table.resultTable('getApi');
-                var layer = schema.layer;
-
-                frame.css('display', 'none');
-
-                if(!schema.displayPermanent){
-                    layer.setVisibility(false);
-                }
-
-                schema.selectControl.deactivate();
-
-                // https://trac.wheregroup.com/cp/issues/4548
-                if(widget.currentPopup){
-                    widget.currentPopup.popupDialog('close');
-                }
-
-
-                //layer.redraw();
-                //layer.removeAllFeatures();
-                //tableApi.clear();
-            }
-
-            function activateFrame(schema) {
-                var frame = schema.frame;
-                var layer = schema.layer;
-
-                widget.activeLayer = schema.layer;
-                widget.schemaName = schema.schemaName;
-                widget.currentSettings = schema;
-
-                widget.query('style/list', {schema: schema.schemaName}).done(function(r) {
-                    schema.featureStyles = r.featureStyles
-                    widget.reloadFeatures(layer);
-                    layer.setVisibility(true);
-                    frame.css('display', 'block');
-                    schema.selectControl.activate();
-                });
-
-            }
-
             function onSelectorChange() {
                 var option = selector.find(":selected");
                 var schema = option.data("schemaSettings");
@@ -794,10 +752,10 @@
                 widget._trigger("beforeChangeDigitizing", null, {next: schema, previous: widget.currentSettings});
 
                 if(widget.currentSettings) {
-                    deactivateFrame(widget.currentSettings);
+                    widget.deactivateFrame(widget.currentSettings);
                 }
 
-                activateFrame(schema);
+                widget.activateFrame(schema);
 
                 table.off('mouseenter', 'mouseleave', 'click');
 
@@ -846,17 +804,14 @@
             // Check position and react by
             var containerInfo = new MapbenderContainerInfo(widget, {
                 onactive:   function() {
-                    activateFrame(widget.currentSettings);
+                    widget.activate();
                 },
                 oninactive: function() {
-                    if(!widget.currentSettings.displayOnInactive) {
-                        deactivateFrame(widget.currentSettings);
-                    }
+                    widget.deactivate();
                 }
             });
 
             widget.updateClusterStrategies();
-
         },
 
         /**
@@ -1574,9 +1529,9 @@
                 schema.clusterStrategy = clusterStrategy;
             }
             var layer = new OpenLayers.Layer.Vector(schema.label, {
-                styleMap:        styleMap,
-                // rendererOptions: {zIndexing: true},
-                strategies:      strategies
+                styleMap:   styleMap,
+                visibility: false, // rendererOptions: {zIndexing: true},
+                strategies: strategies
             });
 
             layer.name = schema.label;
@@ -1819,6 +1774,10 @@
             tableApi.rows.add(featuresWithoutDrawElements);
             tableApi.draw();
 
+            if(widget.options.__disabled){
+                widget.deactivate();
+            }
+
             // var tbody = $(tableApi.body());
 
             // Post handling
@@ -2054,6 +2013,64 @@
                 });
                 console.log(errorMessage, xhr);
             });
+        },
+
+        activate: function() {
+            var widget = this;
+            widget.options.__disabled = false;
+            widget.activateFrame(widget.currentSettings);
+        },
+
+        deactivate: function() {
+            var widget = this;
+            widget.options.__disabled = true;
+
+            if(!widget.currentSettings.displayOnInactive) {
+                widget.deactivateFrame(widget.currentSettings);
+            }
+        },
+
+        activateFrame:   function(schema) {
+            var widget = this;
+            var frame = schema.frame;
+            var layer = schema.layer;
+
+            if(widget.options.__disabled){
+                return;
+            }
+
+            widget.activeLayer = schema.layer;
+            widget.schemaName = schema.schemaName;
+            widget.currentSettings = schema;
+
+            widget.query('style/list', {schema: schema.schemaName}).done(function(r) {
+                schema.featureStyles = r.featureStyles;
+                widget.reloadFeatures(layer);
+                layer.setVisibility(true);
+                frame.css('display', 'block');
+                schema.selectControl.activate();
+            });
+
+        },
+
+        deactivateFrame: function(schema) {
+            var widget = this;
+            var frame = schema.frame;
+            //var tableApi = schema.table.resultTable('getApi');
+            var layer = schema.layer;
+
+            frame.css('display', 'none');
+
+            if(!schema.displayPermanent) {
+                layer.setVisibility(false);
+            }
+
+            schema.selectControl.deactivate();
+
+            // https://trac.wheregroup.com/cp/issues/4548
+            if(widget.currentPopup) {
+                widget.currentPopup.popupDialog('close');
+            }
         }
     });
 
