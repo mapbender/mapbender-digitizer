@@ -91,6 +91,18 @@ $selectColor: #F7F79A;
           font-family: FontAwesome;
           content: "\f070";
         }
+
+        .icon-printmetadata-active:before{
+            font-family: FontAwesome;
+            content: "\f02f";
+            color: black;
+        }
+
+        .icon-printmetadata-inactive:before{
+            font-family: FontAwesome;
+            content: "\f02f";
+            color: grey;
+        }
       }
     }
   }

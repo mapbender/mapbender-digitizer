@@ -124,6 +124,7 @@
             allowEditData:true,
             allowCustomerStyle: true,
             allowChangeVisibility: true,
+            allowPrintMetadata: false,
             openFormAfterEdit: true,
             maxResults: 5001,
             pageLength: 10,
@@ -503,6 +504,24 @@
                                 }
                                 ui.removeClass("icon-invisibility");
                                 ui.closest('tr').removeClass('invisible-feature');
+                            }
+                        }
+                    });
+                }
+
+                if(schema.allowPrintMetadata) {
+                    buttons.push({
+                        title:     'Sachdaten drucken',
+                        className: 'printmetadata-inactive',
+                        onClick:   function(olFeature, ui, b, c) {
+                            if(!olFeature.printMetadata || olFeature.printMetadata == false) {
+                                olFeature.printMetadata = true;
+                                ui.addClass("icon-printmetadata-active");
+                                ui.removeClass("icon-printmetadata-inactive");
+                            } else {
+                                olFeature.printMetadata = false;
+                                ui.removeClass("icon-printmetadata-active");
+                                ui.addClass("icon-printmetadata-inactive");
                             }
                         }
                     });
