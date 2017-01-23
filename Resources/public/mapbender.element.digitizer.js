@@ -342,6 +342,10 @@
                     var feature = schema.layer.getFeatureFromEvent(e);
                     var features;
 
+                    if(feature._sketch){
+                        return items;
+                    }
+
                     if(!feature) {
                         items['no-items'] = {name: "Nothing selected!"}
                     } else {
