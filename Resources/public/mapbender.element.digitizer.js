@@ -224,11 +224,17 @@
                 _.extend(defaultStyleData, styles[olFeature.styleId].defaultStyle);
             }
 
+            var styleOptions = {
+                data:      defaultStyleData,
+                commonTab: false
+            };
+
+            if(olFeature.geometry.CLASS_NAME == "OpenLayers.Geometry.LineString") {
+                styleOptions.fillTab = false;
+            }
+
             var styleEditor = $("<div/>")
-                .featureStyleEditor({
-                    data:      defaultStyleData,
-                    commonTab: false
-                })
+                .featureStyleEditor(styleOptions)
                 .bind('featurestyleeditorsubmit', function(e, context) {
                     var styleData = styleEditor.formData();
                     styleEditor.disableForm();
