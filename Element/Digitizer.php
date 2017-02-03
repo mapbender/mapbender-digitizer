@@ -51,7 +51,7 @@ class Digitizer extends BaseElement
      *
      * @inheritdoc
      */
-    public function getConfiguration()
+    public function getConfiguration($public = true)
     {
         $configuration            = parent::getConfiguration();
         $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
@@ -65,6 +65,11 @@ class Digitizer extends BaseElement
                     $scheme['featureType']     = $featureTypes[ $featureTypeName ];
                     $scheme['featureTypeName'] = $featureTypeName;
                 }
+
+                if ($public) {
+                    $this->cleanFromInternConfiguration($scheme['featureType']);
+                }
+
                 if (isset($scheme['formItems'])) {
                     $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
                 }
@@ -107,7 +112,7 @@ class Digitizer extends BaseElement
     public function httpAction($action)
     {
         /** @var $requestService Request */
-        $configuration   = $this->getConfiguration();
+        $configuration   = $this->getConfiguration(false);
         $requestService  = $this->container->get('request');
         $request         = json_decode($requestService->getContent(), true);
         $schemas         = $configuration["schemes"];
@@ -262,5 +267,27 @@ class Digitizer extends BaseElement
         }
 
         return new JsonResponse($results);
+    }
+
+    /**
+     * Clean feature type configuration for public use
+     *
+     * @param array $featureType
+     * @return array
+     */
+    protected function cleanFromInternConfiguration(array &$featureType)
+    {
+        foreach (array(
+                     'filter',
+                     'geomField',
+                     'table',
+                     'connection',
+                     'uniqueId',
+                     'sql',
+                     'events'
+                 ) as $keyName) {
+            unset($featureType[ $keyName ]);
+        }
+        return $featureType;
     }
 }
