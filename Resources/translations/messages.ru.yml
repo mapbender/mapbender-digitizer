@@ -1,0 +1,21 @@
+mb.digitizer.feature.remove: Удалить
+mb.digitizer.feature.edit: Редактировать
+mb.digitizer.toolset.current-extent: 'Ограничить поиск в пределах видимости'
+mb.digitizer.feature.attributes: Атрибуты
+mb.digitizer.feature.save: Сохранить
+mb.digitizer.api.query.error-message: 'Ошибка коммуникации с сервером геометрий.'
+mb.digitizer.feature.save.successfully: 'Геометрия сохранена.'
+mb.digitizer.feature.remove.successfully: 'Геометрия удалена'
+mb.digitizer.table.fields.not.defined: 'Поля таблиц геометрий не настроены.'
+mb.digitizer.features.loading.error: 'Ошибка при загрузке геометрий.'
+mb.digitizer.feature.remove.from.database: 'Удалить геометрию с сервера'
+mb.digitizer.cancel: Отменить
+mb.digitizer.search.title: Поиск
+mb.digitizer.search.table.empty: 'Пустая таблица'
+mb.digitizer.search.table.zerorecords: 'Без результатов'
+mb.digitizer.search.table.info.status: 'от _START_ до _END_ из _TOTAL_'
+mb.digitizer.search.table.info.empty: 'Без результатов'
+mb.digitizer.search.table.info.filtered: '(отфильтровано из _MAX_ объектов.)'
+mb.digitizer.feature.print: Печать
+mb.digitizer.feature.style.change: Изменть стиль
+mb.digitizer.feature.zoomTo: Приблизить

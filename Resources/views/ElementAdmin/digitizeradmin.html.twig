@@ -152,9 +152,10 @@
                 $(textarea).val(value);
             });
 
-            // Resize popup and elements
-            var popupContainer = $(".popupContainer.modal.show > .popup");
+            // Resize popup dand elements
+            var popupContainer = $(".popupContainer.modal > .popup");
             var yamlEditorElement = $("#elementForm > div > div.inputWrapper.code-yaml > div");
+            debugger;
 
             popupContainer.css('margin-top', 0);
             popupContainer.animate({

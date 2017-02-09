@@ -1,0 +1,21 @@
+mb.digitizer.feature.remove: Remove
+mb.digitizer.feature.zoomTo: Zoom to
+mb.digitizer.feature.edit: 'Edit feature'
+mb.digitizer.toolset.current-extent: 'Select by current extent only'
+mb.digitizer.feature.attributes: 'Feature attributes'
+mb.digitizer.feature.save: Save
+mb.digitizer.api.query.error-message: 'Feature API query error.'
+mb.digitizer.feature.save.successfully: 'Feature saved.'
+mb.digitizer.feature.remove.successfully: 'Feature removed.'
+mb.digitizer.table.fields.not.defined: 'Feature table fields aren''t defined.'
+mb.digitizer.features.loading.error: 'Features loading error.'
+mb.digitizer.feature.remove.from.database: 'Delete feature.'
+mb.digitizer.cancel: Cancel
+mb.digitizer.search.title: Search
+mb.digitizer.search.table.empty: Empty.
+mb.digitizer.search.table.zerorecords: 'No entries.'
+mb.digitizer.search.table.info.status: '_START_ to _END_ from _TOTAL_'
+mb.digitizer.search.table.info.empty: 'No results'
+mb.digitizer.search.table.info.filtered: '(filter from _MAX_ Objects.)'
+mb.digitizer.feature.print: Print
+mb.digitizer.feature.style.change: Change style
