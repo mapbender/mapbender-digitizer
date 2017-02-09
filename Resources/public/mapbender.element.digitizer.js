@@ -1071,11 +1071,11 @@
                 }
             });
 
+            dialog.data('feature', olFeature);
             dialog.generateElements({children: widget.currentSettings.formItems});
             dialog.popupDialog(popupConfiguration);
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
-            dialog.data('feature', olFeature);
 
             setTimeout(function() {
                 dialog.formData(olFeature.data);
