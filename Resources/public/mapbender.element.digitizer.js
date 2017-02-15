@@ -124,7 +124,7 @@
             allowEditData:true,
             allowCustomerStyle: false,
             allowChangeVisibility: false,
-            allowDeleteByCancelNewGeometry: true,
+            allowDeleteByCancelNewGeometry: false,
             openFormAfterEdit: true,
             maxResults: 5001,
             pageLength: 10,
