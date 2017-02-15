@@ -124,7 +124,7 @@
             allowEditData:true,
             allowCustomerStyle: false,
             allowChangeVisibility: false,
-            allowDeleteByCancelNewGeometry: false,
+            allowDeleteByCancelNewGeometry: true,
             openFormAfterEdit: true,
             maxResults: 5001,
             pageLength: 10,
@@ -602,6 +602,8 @@
                                 if(schema.openFormAfterEdit) {
                                     widget._openFeatureEditDialog(olFeature);
                                 }
+
+                                widget.reloadFeatures(layer);
 
                                 //return true;
                             }
