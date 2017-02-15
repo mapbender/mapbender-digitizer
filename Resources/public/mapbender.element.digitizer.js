@@ -124,6 +124,7 @@
             allowEditData:true,
             allowCustomerStyle: false,
             allowChangeVisibility: false,
+            allowDeleteByCancelNewGeometry: false,
             openFormAfterEdit: true,
             maxResults: 5001,
             pageLength: 10,
@@ -931,15 +932,21 @@
             buttons.push({
                 text:  translate("cancel"),
                 click: function() {
+                    var dialog = $(this).closest(".ui-dialog-content");
+                    var olFeature = dialog.data('feature');
+                    var options = widget.options;
+                    if(olFeature.hasOwnProperty('isNew') && options.allowDeleteByCancelNewGeometry) {
+                        widget.removeFeature(olFeature);
+                    }
                     widget.currentPopup.popupDialog('close');
                 }
             });
             var popupConfiguration = {
                 title: translate("feature.attributes"),
-                width: widget.featureEditDialogWidth,
+                width: widget.featureEditDialogWidth
             };
 
-            if(schema.popup) {
+            if(schema.popup) {widget
                 if(!schema.popup.buttons) {
                     schema.popup.buttons = [];
                 }
