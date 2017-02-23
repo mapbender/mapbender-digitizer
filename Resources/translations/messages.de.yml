@@ -1,28 +1,39 @@
-mb.digitizer:
-  feature:
-    remove: Löschen
-    remove.successfully: 'Objekt wurde gelöscht.'
-    remove.from.database: 'Objekt löschen?'
-    edit: Bearbeiten
-    attributes: Objektinformationen
-    save: Speichern
-    save.successfully: 'Objekt wurde gespeichert.'
-    print: Druck
-    zoomTo: Heranzoomen
-    style:
-      change: Stil ändern
-  cancel: Abbrechen
-  toolset:
-    current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
-  api.query.error-message: 'Feature API: Abfrage fehlgeschlagen.'
-  table.fields.not.defined: 'Felder der Tabelle sind nicht definiert!'
-  features.loading.error: 'Objekte konnten nicht geladen werden!'
-  search:
-    title: Filter
-    table:
-      empty: 'Keine Ergebnisse'
-      zerorecords: 'Keine Ergebnisse'
-      info:
-        status: 'Anzeige _START_ bis _END_ von _TOTAL_ Treffern'
-        empty: 'Keine Ergebnisse'
-        filtered: '(gefiltert von _MAX_ Objekte.)'
+mb.digitizer.feature.remove: 'Löschen'
+mb.digitizer.feature.remove.successfully: 'Objekt wurde gelöscht.'
+mb.digitizer.feature.remove.from.database: 'Objekt löschen?'
+mb.digitizer.feature.edit: 'Bearbeiten'
+mb.digitizer.feature.attributes: 'Objektinformationen'
+mb.digitizer.feature.save: 'Speichern'
+mb.digitizer.feature.save.successfully: 'Objekt wurde gespeichert.'
+mb.digitizer.feature.print: 'Druck'
+mb.digitizer.feature.zoomTo: 'Heranzoomen'
+mb.digitizer.feature.style.change: 'Stil ändern'
+mb.digitizer.feature.cancel: 'Abbrechen'
+mb.digitizer.feature.toolset.current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
+mb.digitizer.toolset.point.drawpoint: 'Punkt erstellen'
+mb.digitizer.toolset.point.movefeature: 'Punkt verschieben'
+mb.digitizer.toolset.point.selectfeature: 'Punkte de-/selektieren'
+mb.digitizer.toolset.point.removeselected: 'selektierte Punkte löschen'
+mb.digitizer.toolset.line.drawline: 'Line erstellen'
+mb.digitizer.toolset.line.modifyfeature: 'Linie bearbeiten'
+mb.digitizer.toolset.line.movefeature: 'Linie verschieben'
+mb.digitizer.toolset.line.selectfeature: 'Linien de-/selektieren'
+mb.digitizer.toolset.line.removeselected: 'selektierten Linien löschen'
+mb.digitizer.toolset.polygon.drawpolygon: 'Fläche erstellen'
+mb.digitizer.toolset.polygon.drawrectangle: 'Rechteck erstellen'
+mb.digitizer.toolset.polygon.drawcircle: 'Kreis erstellen'
+mb.digitizer.toolset.polygon.drawellipse: 'Ellipse erstellen'
+mb.digitizer.toolset.polygon.drawdonut: 'Donut erstellen oder die bestehende Geometrien editieren'
+mb.digitizer.toolset.polygon.modifyfeature: 'Fläche bearbeiten'
+mb.digitizer.toolset.polygon.movefeature: 'Fläche verschieben'
+mb.digitizer.toolset.polygon.selectfeature: 'Flächen de-/selektieren'
+mb.digitizer.toolset.polygon.removeselected: 'selektierte Flächen löschen'    
+mb.digitizer.api.query.error-message: 'Feature API: Abfrage fehlgeschlagen.'
+mb.digitizer.table.fields.not.defined: 'Felder der Tabelle sind nicht definiert!'
+mb.digitizer.features.loading.error: 'Objekte konnten nicht geladen werden!'
+mb.digitizer.search.title: 'Filter'
+mb.digitizer.search.table.empty: 'Keine Ergebnisse'
+mb.digitizer.search.table.zerorecords: 'Keine Ergebnisse'
+mb.digitizer.search.table.info.status: 'Anzeige _START_ bis _END_ von _TOTAL_ Treffern'
+mb.digitizer.search.table.info.empty: 'Keine Ergebnisse'
+mb.digitizer.search.table.info.filtered: '(gefiltert von _MAX_ Objekte.)'
