@@ -1463,6 +1463,14 @@
                 strategies:      strategies
             });
 
+            if(schema.maxScale) {
+                layer.options.maxScale = schema.maxScale;
+            }
+
+            if(schema.minScale) {
+                layer.options.minScale = schema.minScale;
+            }
+
             layer.name = schema.label;
             return layer;
         },
