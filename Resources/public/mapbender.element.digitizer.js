@@ -191,11 +191,6 @@
 
         },
         /**
-         * Save buffer for feature style. Used to "remember" style for newly created features
-         * (styles would initially be saved with empty featureId, and would not be found again on reload)
-         */
-        _newFeatureStyleData: null,
-        /**
          * Constructor.
          *
          * At this moment not all elements (like a OpenLayers) are avaible.
@@ -253,7 +248,7 @@
                     } else {
                         // defer style saving until the feature itself is saved, and has an id to associate with
                         var styleDataCopy = $.extend({}, styleData);
-                        olFeature.saveStyleDataCallback = widget._saveStyle.bind(widget, schemaName, styleDataCopy);
+                        olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
                     }
                     styleEditor.featureStyleEditor("close");
                 });
