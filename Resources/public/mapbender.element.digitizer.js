@@ -190,7 +190,11 @@
             }
 
         },
-
+        /**
+         * Save buffer for feature style. Used to "remember" style for newly created features
+         * (styles would initially be saved with empty featureId, and would not be found again on reload)
+         */
+        _newFeatureStyleData: null,
         /**
          * Constructor.
          *
@@ -237,36 +241,43 @@
                 .featureStyleEditor(styleOptions)
                 .bind('featurestyleeditorsubmit', function(e, context) {
                     var styleData = styleEditor.formData();
+                    var schemaName = widget.currentSettings.schemaName;
                     styleEditor.disableForm();
-                    var styleId = Mapbender.Util.UUID();
-                    var style = new OpenLayers.Style(styleData);
-
-                    styleMap.styles[styleId] = style;
-                    olFeature.styleId = styleId;
-                    layer.drawFeature(olFeature, styleId);
-
-                    widget.query('style/save', {
-                        style:     styleData,
-                        featureId: olFeature.fid,
-                        schema:    widget.currentSettings.schemaName
-                    }).done(function(response) {
-                        // style.id = styleId;
-                        var styleData = response.style;
-                        var style = new OpenLayers.Style(styleData);
-                        styleMap.styles[styleData.id] = style;
-                        layer.drawFeature(olFeature, styleData.id);
-                        olFeature.styleId = styleData.id;
-
-                        delete  styleMap.styles[styleId];
-
-                        styleEditor.enableForm();
-                    });
-
+                    widget._applyStyle(styleData, olFeature);
+                    if (olFeature.fid) {
+                        widget._saveStyle(schemaName, styleData, olFeature)
+                            .done(function(response) {
+                                widget._applyStyle(response.style, olFeature);
+                                styleEditor.enableForm();
+                            });
+                    } else {
+                        // defer style saving until the feature itself is saved, and has an id to associate with
+                        var styleDataCopy = $.extend({}, styleData);
+                        olFeature.saveStyleDataCallback = widget._saveStyle.bind(widget, schemaName, styleDataCopy);
+                    }
                     styleEditor.featureStyleEditor("close");
                 });
             return styleEditor;
         },
-
+        _applyStyle: function(styleData, olFeature) {
+            var style = new OpenLayers.Style(styleData);
+            var styleMap = olFeature.layer.options.styleMap;
+            var styleId = styleData.id || Mapbender.Util.UUID();
+            var oldStyleId = olFeature.styleId || null;
+            styleMap.styles[styleId] = style;
+            olFeature.styleId = styleId;
+            olFeature.layer.drawFeature(olFeature, styleId);
+            if (oldStyleId && oldStyleId != styleId) {
+                delete styleMap.styles[oldStyleId];
+            }
+        },
+        _saveStyle: function(schemaName, styleData, olFeature) {
+            return this.query('style/save', {
+                style:     styleData,
+                featureId: olFeature.fid,
+                schema:    schemaName
+            });
+        },
         _setup: function() {
             var frames = [];
             var widget = this;
@@ -913,6 +924,11 @@
                     var dbFeature = response.features[0];
                     feature.fid = dbFeature.id;
                     feature.state = null;
+                    if (feature.saveStyleDataCallback) {
+                        // console.log("Late-saving style for feature", feature);
+                        feature.saveStyleDataCallback(feature);
+                        delete feature["saveStyleDataCallback"];
+                    }
                     $.extend(feature.data, dbFeature.properties);
 
                     var geoJsonReader = new OpenLayers.Format.GeoJSON();
