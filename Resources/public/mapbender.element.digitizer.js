@@ -134,7 +134,6 @@
             inlineSearch: false,
             useContextMenu: false,
             clustering: [
-                {scale: 5000000, distance: 30}
             ]
         },
         // Default tool-sets
