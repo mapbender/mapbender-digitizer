@@ -939,7 +939,7 @@
                         var dialog = $(this).closest(".ui-dialog-content");
                         var olFeature = dialog.data('feature');
                         var options = widget.options;
-                        if(olFeature.hasOwnProperty('isNew') && options.allowDeleteByCancelNewGeometry) {
+                        if(olFeature.hasOwnProperty('isNew') && schema.allowDeleteByCancelNewGeometry) {
                             widget.removeFeature(olFeature);
                         }
                         widget.currentPopup.popupDialog('close');
