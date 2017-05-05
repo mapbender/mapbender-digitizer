@@ -29,6 +29,7 @@ class Digitizer extends BaseElement
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
                         "/components/jquery-context-menu/jquery-context-menu-built.js",
+                        "/components/select2/select2-built.js",
                         'mapbender.element.digitizer.js'
         ),
                      'css'   => array('sass/element/digitizer.scss'),
