@@ -22,7 +22,7 @@
         "bin-dir": "bin"
     },
     "autoload": {
-        "psr-0": {"Mapbender\\DigitizerBundle": "."}
+        "psr-0": {"Mapbender\\DigitizerBundle\\": "."}
     },
     "extra": {
         "branch-alias": {
