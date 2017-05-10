@@ -12,15 +12,17 @@
         "php": ">=5.3.3",
         "blueimp/jquery-file-upload": "9.*",
         "mapbender/data-source": "0.*",
-        "viscreation/vis-ui.js": "0.*"
+        "phayes/geophp": "1.2"
     },
+    "require-dev": {
+        "mapbender/data-source": "@dev"
+    },
+    "minimum-stability": "dev",
     "config": {
         "bin-dir": "bin"
     },
     "autoload": {
-        "psr-4": {
-            "Mapbender\\DigitizerBundle\\": "."
-        }
+        "psr-0": {"Mapbender\\DigitizerBundle": "."}
     },
     "extra": {
         "branch-alias": {
