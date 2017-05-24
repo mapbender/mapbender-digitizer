@@ -34,6 +34,42 @@
     }
 
     /**
+     * "Fake" form data for a feature that hasn't gone through attribute
+     * editing, for saving. This is used when we save a feature that has only
+     * been moved / dragged. The popup dialog with the form is not initialized
+     * in these cases.
+     * Assigned values are copied from the feature's data, if it was already
+     * stored in the db, empty otherwise.
+     *
+     * @param feature
+     * @returns {{}}
+     */
+    function initialFormData(feature) {
+        var formData = {};
+        var extractFormData;
+        extractFormData = function(definition) {
+            _.forEach(definition, function(item) {
+                if (_.isArray(item)) {
+                    // recurse into lists
+                    extractFormData(item);
+                } else if (item.name) {
+                    var currentValue = (feature.data || {})[item.name];
+                    // keep empty string, but replace undefined => null
+                    if (typeof(currentValue) === 'undefined') {
+                        currentValue = null;
+                    }
+                    formData[item.name] = currentValue;
+                } else if (item.children) {
+                    // recurse into child property (should be a list)
+                    extractFormData(item.children);
+                }
+            });
+        };
+        extractFormData(feature.schema.formItems);
+        return formData;
+    }
+
+    /**
      * Check and replace values recursive if they should be translated.
      * For checking used "translationReg" variable
      *
@@ -68,6 +104,15 @@
         });
     }
 
+    function findFeatureByPropertyValue(layer, propName, propValue) {
+        for (var i=0; i< layer.features.length ; i++) {
+            if (layer.features[i][propName] === propValue) {
+                return layer.features[i];
+            }
+        }
+        return null;
+    }
+
     /**
      * Example:
      *     Mapbender.confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
@@ -85,8 +130,8 @@
             resizable:   false,
             collapsable: false,
             modal:       true,
-            buttons:     [{
-                text:  "OK",
+            buttons:     options.buttons || [{
+                text:  options.okText || "OK",
                 click: function(e) {
                     if(!options.hasOwnProperty('onSuccess') || options.onSuccess(e) !== false) {
                         dialog.popupDialog('close');
@@ -94,7 +139,7 @@
                     return false;
                 }
             }, {
-                text:    "Abbrechen",
+                text:    options.cancelText || "Abbrechen",
                 'class': 'critical',
                 click:   function(e) {
                     if(!options.hasOwnProperty('onCancel') || options.onCancel(e) !== false) {
@@ -125,6 +170,9 @@
             allowCustomerStyle: true,
             allowChangeVisibility: true,
             allowPrintMetadata: false,
+            // pop a confirmation dialog when deactivating, to ask the user to save or discard
+            // current in-memory changes
+            confirmSaveOnDeactivate: true,
             openFormAfterEdit: true,
             maxResults: 5001,
             pageLength: 10,
@@ -170,6 +218,7 @@
         map:      null,
         currentSettings: null,
         featureEditDialogWidth: "423px",
+        unsavedFeatures: {},
 
         /**
          * Default styles merged by schema styles if defined
@@ -670,11 +719,22 @@
 
                                 digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
 
+                                widget.unsavedFeatures[olFeature.id] = olFeature;
+
                                 if(schema.openFormAfterEdit) {
                                     widget._openFeatureEditDialog(olFeature);
                                 }
 
                                 //return true;
+                            },
+                            onModification: function(event) {
+                                var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                                widget.unsavedFeatures[event.id] = feature;
+                            },
+                            // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
+                            onComplete: function(event) {
+                                var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                                widget.unsavedFeatures[event.id] = feature;
                             }
                         }
                     }, {
@@ -866,7 +926,7 @@
             var table = schema.table;
             var tableWidget = table.data('visUiJsResultTable');
             var tableApi = table.resultTable('getApi');
-            var formData = dialog.formData();
+            var formData = dialog && dialog.formData() || initialFormData(feature);
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
             var request = {
@@ -887,14 +947,14 @@
 
             if(!hasErrors) {
                 feature.disabled = true;
-                dialog.disableForm();
+                dialog && dialog.disableForm();
                 widget.query('save', {
                     schema:  schema.schemaName,
                     feature: request
                 }).done(function(response) {
 
                     if(response.hasOwnProperty('errors')) {
-                        dialog.enableForm();
+                        dialog && dialog.enableForm();
                         feature.disabled = false;
                         $.each(response.errors, function(i, error) {
                             $.notify(error.message, {
@@ -908,10 +968,11 @@
                     }
 
                     var hasFeatureAfterSave = response.features.length > 0;
+                    delete widget.unsavedFeatures[feature.id];
 
                     if(!hasFeatureAfterSave) {
                         widget.reloadFeatures(schema.layer, _.without(schema.layer.features, feature));
-                        dialog.popupDialog('close');
+                        dialog && dialog.popupDialog('close');
                         return;
                     }
 
@@ -942,9 +1003,9 @@
 
                     delete feature.isNew;
 
-                    dialog.enableForm();
+                    dialog && dialog.enableForm();
                     feature.disabled = false;
-                    dialog.popupDialog('close');
+                    dialog && dialog.popupDialog('close');
                     $.notify(translate("feature.save.successfully"), 'info');
                 });
             }
@@ -993,15 +1054,12 @@
                 };
                 buttons.push(styleButton);
             }
-
-
             if(schema.allowEditData) {
                 var saveButton = {
                     text:  translate("feature.save"),
                     click: function() {
                         var dialog = $(this).closest(".ui-dialog-content");
                         var feature = dialog.data('feature');
-                        feature.editDialog = dialog;
                         widget.saveFeature(feature);
                     }
                 };
@@ -1066,6 +1124,7 @@
             }
 
             var dialog = $("<div/>");
+            olFeature.editDialog = dialog;
 
             if(!schema.elementsTranslated){
                 translateStructure(widget.currentSettings.formItems);
@@ -1276,6 +1335,9 @@
                     });
                     break;
             }
+        },
+        _initialFormData: function(feature) {
+            return initialFormData(feature);
         },
 
         /**
@@ -2063,10 +2125,64 @@
 
         deactivate: function() {
             var widget = this;
-            widget.options.__disabled = true;
-
-            if(!widget.currentSettings.displayOnInactive) {
-                widget.deactivateFrame(widget.currentSettings);
+            // clear unsaved features to prevent multiple confirmation popups
+            var unsavedFeatures = widget.unsavedFeatures;
+            widget.unsavedFeatures = {};
+            var always = function() {
+                if(!widget.currentSettings.displayOnInactive) {
+                    widget.deactivateFrame(widget.currentSettings);
+                }
+                widget.options.__disabled = true;
+            };
+            if (widget.options.confirmSaveOnDeactivate) {
+                widget._confirmSave(unsavedFeatures, always);
+            } else {
+                always();
+            }
+        },
+        _confirmSave: function(unsavedFeatures, callback) {
+            var widget = this;
+            var numUnsaved = _.size(unsavedFeatures);
+            if (numUnsaved) {
+                var html = "<p>Sie haben "
+                    + ((numUnsaved > 1) ?
+                        "" + numUnsaved + " ungespeicherte &Auml;nderungen"
+                        : "eine ungespeicherte &Auml;nderung")
+                    + " vorgenommen</p>"
+                    + "<p>Wollen sie diese speichern oder verwerfen?</p>";
+                var confirmOptions = {
+                    okText:     "Speichern",
+                    cancelText: "Verwerfen",
+                    html:       html,
+                    title:      "Ungespeicherte Änderungen",
+                    onSuccess: function() {
+                        _.forEach(unsavedFeatures, function(feature) {
+                            widget.saveFeature(feature);
+                        });
+                        callback();
+                    },
+                    onCancel: function() {
+                        var layersToReset = {};
+                        _.forEach(unsavedFeatures, function(feature) {
+                            if (feature.isNew) {
+                                widget.removeFeature(feature);
+                            } else if (feature.layer) {
+                                layersToReset[feature.layer.id] = feature.layer;
+                            }
+                        });
+                        if (_.size(layersToReset)) {
+                            _.forEach(layersToReset, function(layer) {
+                                // _getData will skip existing features, so we need
+                                // to clean up first before ...
+                                layer.removeAllFeatures();
+                            });
+                            // ... we reload (from server) and reinitialize all features
+                            widget._getData();
+                        }
+                        callback();
+                    }
+                };
+                Mapbender.confirmDialog(confirmOptions);
             }
         },
 
