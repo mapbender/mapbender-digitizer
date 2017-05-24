@@ -1956,10 +1956,10 @@
             var unsavedFeatures = widget.unsavedFeatures;
             widget.unsavedFeatures = {};
             var always = function() {
+                widget.options.__disabled = true;
                 if(!widget.currentSettings.displayOnInactive) {
                     widget.deactivateFrame(widget.currentSettings);
                 }
-                widget.options.__disabled = true;
             };
             if (widget.options.confirmSaveOnDeactivate) {
                 widget._confirmSave(unsavedFeatures, always);
@@ -2010,6 +2010,8 @@
                     }
                 };
                 Mapbender.confirmDialog(confirmOptions);
+            } else {
+                callback();
             }
         },
 
