@@ -857,6 +857,7 @@
                     }
 
                     var hasFeatureAfterSave = response.features.length > 0;
+                    delete widget.unsavedFeatures[feature.id];
 
                     if(!hasFeatureAfterSave) {
                         widget.reloadFeatures(schema.layer, _.without(schema.layer.features, feature));
@@ -877,7 +878,6 @@
                     _.each(['fid', 'disabled', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent'], function(key) {
                         newFeature[key] = feature[key];
                     });
-                    var oldOpenlayersId = feature.id;
 
                     widget.reloadFeatures(schema.layer, _.union(_.without(layer.features, feature), [newFeature]));
                     feature = newFeature;
@@ -886,7 +886,6 @@
                     tableApi.draw();
 
                     delete feature.isNew;
-                    delete widget.unsavedFeatures[oldOpenLayersId];
 
                     dialog && dialog.enableForm();
                     feature.disabled = false;
@@ -1972,8 +1971,12 @@
             var widget = this;
             var numUnsaved = _.size(unsavedFeatures);
             if (numUnsaved) {
-                var html = "<p>Sie haben ungespeicherte &Auml;nderungen an " + numUnsaved + "</p>"
-                    + "<p>Wollen sie diese &Auml;nderungen speichern oder verwerfen?</p>";
+                var html = "<p>Sie haben "
+                    + ((numSaved > 1) ?
+                        "" + numSaved + " ungespeicherte &Auml;nderungen"
+                        : "eine ungespeicherte &Auml;nderung")
+                    + " vorgenommen</p>"
+                    + "<p>Wollen sie diese speichern oder verwerfen?</p>";
                 var confirmOptions = {
                     okText:     "Speichern",
                     cancelText: "Verwerfen",
