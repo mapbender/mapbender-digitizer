@@ -68,6 +68,15 @@
         });
     }
 
+    function findFeatureByPropertyValue(layer, propName, propValue) {
+        for (var i=0; i< layer.features.length ; i++) {
+            if (layer.features[i][propName] === propValue) {
+                return layer.features[i];
+            }
+        }
+        return null;
+    }
+
     /**
      * Example:
      *     Mapbender.confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
@@ -85,8 +94,8 @@
             resizable:   false,
             collapsable: false,
             modal:       true,
-            buttons:     [{
-                text:  "OK",
+            buttons:     options.buttons || [{
+                text:  options.okText || "OK",
                 click: function(e) {
                     if(!options.hasOwnProperty('onSuccess') || options.onSuccess(e) !== false) {
                         dialog.popupDialog('close');
@@ -94,7 +103,7 @@
                     return false;
                 }
             }, {
-                text:    "Abbrechen",
+                text:    options.cancelText || "Abbrechen",
                 'class': 'critical',
                 click:   function(e) {
                     if(!options.hasOwnProperty('onCancel') || options.onCancel(e) !== false) {
@@ -126,6 +135,9 @@
             allowChangeVisibility: false,
             allowDeleteByCancelNewGeometry: false,
             allowCancelButton: true,
+            // pop a confirmation dialog when deactivating, to ask the user to save or discard
+            // current in-memory changes
+            confirmSaveOnDeactivate: true,
             openFormAfterEdit: true,
             maxResults: 5001,
             pageLength: 10,
@@ -170,6 +182,7 @@
         map:      null,
         currentSettings: null,
         featureEditDialogWidth: "423px",
+        unsavedFeatures: {},
 
         /**
          * Default styles merged by schema styles if defined
@@ -599,6 +612,8 @@
 
                                 digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
 
+                                widget.unsavedFeatures[olFeature.id] = olFeature;
+
                                 if(schema.openFormAfterEdit) {
                                     widget._openFeatureEditDialog(olFeature);
                                 }
@@ -606,6 +621,10 @@
                                 widget.reloadFeatures(layer);
 
                                 //return true;
+                            },
+                            onModification: function(event) {
+                                var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                                widget.unsavedFeatures[event.id] = feature;
                             }
                         }
                     }, {
@@ -872,7 +891,6 @@
                     click: function() {
                         var dialog = $(this).closest(".ui-dialog-content");
                         var feature = dialog.data('feature');
-                        feature.editDialog = dialog;
                         widget.saveFeature(feature);
                     }
                 };
@@ -947,6 +965,7 @@
             }
 
             var dialog = $("<div/>");
+            olFeature.editDialog = dialog;
 
             if(!schema.elementsTranslated){
                 translateStructure(widget.currentSettings.formItems);
@@ -1888,10 +1907,46 @@
 
         deactivate: function() {
             var widget = this;
-            widget.options.__disabled = true;
-
-            if(!widget.currentSettings.displayOnInactive) {
-                widget.deactivateFrame(widget.currentSettings);
+            // clear unsaved features to prevent multiple confirmation popups
+            var unsavedFeatures = widget.unsavedFeatures;
+            widget.unsavedFeatures = {};
+            var always = function() {
+                if(!widget.currentSettings.displayOnInactive) {
+                    widget.deactivateFrame(widget.currentSettings);
+                }
+                widget.options.__disabled = true;
+            };
+            if (widget.options.confirmSaveOnDeactivate) {
+                widget._confirmSave(unsavedFeatures, always);
+            } else {
+                always();
+            }
+        },
+        _confirmSave: function(unsavedFeatures, callback) {
+            var widget = this;
+            var numUnsaved = _.size(unsavedFeatures);
+            if (numUnsaved) {
+                var html = "<p>Sie haben ungespeicherte &Auml;nderungen an " + numUnsaved + "</p>"
+                    + "<p>Wollen sie diese &Auml;nderungen speichern oder verwerfen?</p>";
+                var confirmOptions = {
+                    okText:     "Speichern",
+                    cancelText: "Verwerfen",
+                    html:       html,
+                    title:      "Ungespeicherte Änderungen",
+                    onSuccess: function() {
+                        _.forEach(unsavedFeatures, function(feature) {
+                            widget.saveFeature(feature);
+                        });
+                        callback();
+                    },
+                    onCancel: function() {
+                        _.forEach(unsavedFeatures, function(feature) {
+                            widget.removeFeature(feature);
+                        });
+                        callback();
+                    }
+                };
+                Mapbender.confirmDialog(confirmOptions);
             }
         },
 
