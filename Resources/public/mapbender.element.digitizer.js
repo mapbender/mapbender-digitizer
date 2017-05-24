@@ -34,6 +34,42 @@
     }
 
     /**
+     * "Fake" form data for a feature that hasn't gone through attribute
+     * editing, for saving. This is used when we save a feature that has only
+     * been moved / dragged. The popup dialog with the form is not initialized
+     * in these cases.
+     * Assigned values are copied from the feature's data, if it was already
+     * stored in the db, empty otherwise.
+     *
+     * @param feature
+     * @returns {{}}
+     */
+    function initialFormData(feature) {
+        var formData = {};
+        var extractFormData;
+        extractFormData = function(definition) {
+            _.forEach(definition, function(item) {
+                if (_.isArray(item)) {
+                    // recurse into lists
+                    extractFormData(item);
+                } else if (item.name) {
+                    var currentValue = (feature.data || {})[item.name];
+                    // keep empty string, but replace undefined => null
+                    if (typeof(currentValue) === 'undefined') {
+                        currentValue = null;
+                    }
+                    formData[item.name] = currentValue;
+                } else if (item.children) {
+                    // recurse into child property (should be a list)
+                    extractFormData(item.children);
+                }
+            });
+        };
+        extractFormData(feature.schema.formItems);
+        return formData;
+    }
+
+    /**
      * Check and replace values recursive if they should be translated.
      * For checking used "translationReg" variable
      *
@@ -625,6 +661,11 @@
                             onModification: function(event) {
                                 var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
                                 widget.unsavedFeatures[event.id] = feature;
+                            },
+                            // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
+                            onComplete: function(event) {
+                                var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                                widget.unsavedFeatures[event.id] = feature;
                             }
                         }
                     }, {
@@ -774,7 +815,7 @@
             var table = schema.table;
             var tableWidget = table.data('visUiJsResultTable');
             var tableApi = table.resultTable('getApi');
-            var formData = dialog.formData();
+            var formData = dialog && dialog.formData() || initialFormData(feature);
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
             var request = {
@@ -795,14 +836,14 @@
 
             if(!hasErrors) {
                 feature.disabled = true;
-                dialog.disableForm();
+                dialog && dialog.disableForm();
                 widget.query('save', {
                     schema:  schema.schemaName,
                     feature: request
                 }).done(function(response) {
 
                     if(response.hasOwnProperty('errors')) {
-                        dialog.enableForm();
+                        dialog && dialog.enableForm();
                         feature.disabled = false;
                         $.each(response.errors, function(i, error) {
                             $.notify(error.message, {
@@ -819,7 +860,7 @@
 
                     if(!hasFeatureAfterSave) {
                         widget.reloadFeatures(schema.layer, _.without(schema.layer.features, feature));
-                        dialog.popupDialog('close');
+                        dialog && dialog.popupDialog('close');
                         return;
                     }
 
@@ -836,6 +877,7 @@
                     _.each(['fid', 'disabled', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent'], function(key) {
                         newFeature[key] = feature[key];
                     });
+                    var oldOpenlayersId = feature.id;
 
                     widget.reloadFeatures(schema.layer, _.union(_.without(layer.features, feature), [newFeature]));
                     feature = newFeature;
@@ -844,10 +886,11 @@
                     tableApi.draw();
 
                     delete feature.isNew;
+                    delete widget.unsavedFeatures[oldOpenLayersId];
 
-                    dialog.enableForm();
+                    dialog && dialog.enableForm();
                     feature.disabled = false;
-                    dialog.popupDialog('close');
+                    dialog && dialog.popupDialog('close');
                     $.notify(translate("feature.save.successfully"), 'info');
                 });
             }
@@ -1176,6 +1219,9 @@
                     });
                     break;
             }
+        },
+        _initialFormData: function(feature) {
+            return initialFormData(feature);
         },
 
         /**
@@ -1940,9 +1986,23 @@
                         callback();
                     },
                     onCancel: function() {
+                        var layersToReset = {};
                         _.forEach(unsavedFeatures, function(feature) {
-                            widget.removeFeature(feature);
+                            if (feature.isNew) {
+                                widget.removeFeature(feature);
+                            } else if (feature.layer) {
+                                layersToReset[feature.layer.id] = feature.layer;
+                            }
                         });
+                        if (_.size(layersToReset)) {
+                            _.forEach(layersToReset, function(layer) {
+                                // _getData will skip existing features, so we need
+                                // to clean up first before ...
+                                layer.removeAllFeatures();
+                            });
+                            // ... we reload (from server) and reinitialize all features
+                            widget._getData();
+                        }
                         callback();
                     }
                 };
