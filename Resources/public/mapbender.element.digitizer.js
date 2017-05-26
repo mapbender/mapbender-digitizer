@@ -1973,12 +1973,12 @@
             if (numUnsaved) {
                 var html = "<p>Sie haben "
                     + ((numUnsaved > 1) ?
-                        "" + numUnsaved + " ungespeicherte &Auml;nderungen"
-                        : "eine ungespeicherte &Auml;nderung")
-                    + " vorgenommen</p>"
-                    + "<p>Wollen sie diese speichern oder verwerfen?</p>";
+                        "" + numUnsaved + " &Auml;nderungen"
+                        : "eine &Auml;nderung")
+                    + " vorgenommen und noch nicht gespeichert.</p>"
+                    + "<p>Wollen sie diese jetzt speichern oder verwerfen?</p>";
                 var confirmOptions = {
-                    okText:     "Speichern",
+                    okText:     "Jetzt Speichern",
                     cancelText: "Verwerfen",
                     html:       html,
                     title:      "Ungespeicherte Änderungen",
