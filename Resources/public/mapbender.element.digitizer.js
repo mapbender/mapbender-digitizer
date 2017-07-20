@@ -981,7 +981,7 @@
                 width: widget.featureEditDialogWidth
             };
 
-            if(schema.popup) {widget
+            if(schema.popup) {
                 if(!schema.popup.buttons) {
                     schema.popup.buttons = [];
                 }
