@@ -503,20 +503,43 @@
                 var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
                 var columns = [];
                 var newFeatureDefaultProperties = {};
-                if( !schema.hasOwnProperty("tableFields")){
-                    console.error(translate("table.fields.not.defined"),schema );
+
+                if(!schema.hasOwnProperty("tableFields")) {
+
+                    schema.tableFields = {
+                        id: {
+                            label: '',
+                            data: function(row, type, val, meta) {
+                                var table = $('<table/>');
+                                _.each(row.data, function(value, key){
+                                    var tableRow = $('<tr/>');
+                                    var keyCell = $('<td style="font-weight: bold; padding-right: 5px"/>');
+                                    var valueCell = $('<td/>');
+
+                                    keyCell.text(key + ':');
+                                    valueCell.text(value);
+                                    tableRow.append(keyCell).append(valueCell);
+                                    table.append(tableRow);
+
+                                });
+                                return table.prop('outerHTML');
+                            }
+                        }
+                    };
                 }
 
                 $.each(schema.tableFields, function(fieldName, fieldSettings) {
                     newFeatureDefaultProperties[fieldName] = "";
                     fieldSettings.title = fieldSettings.label;
-                    fieldSettings.data = function(row, type, val, meta) {
-                        var data = row.data[fieldName];
-                        if(typeof (data) == 'string') {
-                            data = escapeHtml(data); //.replace(/\//g, '&#x2F;');
-                        }
-                        return data;
-                    };
+                    if(!fieldSettings.data){
+                        fieldSettings.data = function(row, type, val, meta) {
+                            var data = row.data[fieldName];
+                            if(typeof (data) == 'string') {
+                                data = escapeHtml(data);
+                            }
+                            return data;
+                        };
+                    }
                     columns.push(fieldSettings);
                 });
 
