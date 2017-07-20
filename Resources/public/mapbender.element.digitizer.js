@@ -919,6 +919,20 @@
                 widget.currentPopup.popupDialog('close');
             }
 
+            var formItems = widget.currentSettings.formItems;
+
+            // If pop up isn't defined, generate inputs
+            if(!_.size(formItems)) {
+                formItems = [];
+                _.each(olFeature.data, function(value, key) {
+                    formItems.push({
+                        type:        'input',
+                        name:        key,
+                        title: key
+                    })
+                })
+            }
+
             if(schema.printable) {
                 var printButton = {
                     text:  translate("feature.print"),
@@ -1019,11 +1033,11 @@
             var dialog = $("<div/>");
 
             if(!schema.elementsTranslated){
-                translateStructure(widget.currentSettings.formItems);
+                translateStructure(formItems);
                 schema.elementsTranslated = true;
             }
 
-            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+            DataUtil.eachItem(formItems, function(item) {
 
                 if(item.type == "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
 
@@ -1114,7 +1128,7 @@
             });
 
             dialog.data('feature', olFeature);
-            dialog.generateElements({children: widget.currentSettings.formItems});
+            dialog.generateElements({children: formItems});
             dialog.popupDialog(popupConfiguration);
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
