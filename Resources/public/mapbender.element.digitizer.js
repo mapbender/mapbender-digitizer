@@ -1,4 +1,6 @@
 (function($) {
+    "use strict";
+
     /**
      * Regular Expression to get checked if string should be translated
      *
@@ -642,6 +644,10 @@
                         }
                     }]
                 });
+
+                if(!schema.showExtendSearchSwitch){
+                    $(".onlyExtent",frame).css('display','none');
+                }
 
                 if(!schema.allowDigitize){
                     $(".digitizing-tool-set",frame).css('display','none');
