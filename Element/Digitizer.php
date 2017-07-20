@@ -135,6 +135,33 @@ class Digitizer extends BaseElement
     }
 
     /**
+     * Eval code string
+     *
+     * Example:
+     *  self::evalString('Hello, $name', array('name' => 'John'))
+     *  returns 'Hello, John'
+     *
+     * @param string $code Code string.
+     * @param array  $args Variables this should be able by evaluating.
+     * @return string Returns evaluated result.
+     * @throws \Exception
+     */
+    protected static function evalString($code, $args)
+    {
+        foreach ($args as $key => &$value) {
+            ${$key} = &$value;
+        }
+
+        $_return = null;
+        if (eval("\$_return = \"" . str_replace('"', '\"', $code) . "\";") === false && ($errorDetails = error_get_last())) {
+            $lastError = end($errorDetails);
+            throw new \Exception($lastError["message"], $lastError["type"]);
+        }
+        return $_return;
+    }
+
+
+    /**
      * Select/search features and return feature collection
      *
      * @param array $request
@@ -147,6 +174,28 @@ class Digitizer extends BaseElement
 
         if (isset($request["where"])) {
             unset($request["where"]);
+        }
+
+        if (isset($request["search"])) {
+            $connection    = $featureType->getConnection();
+            $schema        = $this->getSchemaByName($schemaName);
+            $conditionCode = $schema['search']['condition'];
+            $vars          = array();
+
+            foreach ($request["search"] as $key => $value) {
+                $quotedValue = null;
+                if (is_numeric($value)) {
+                    $quotedValue = intval($value);
+                } else {
+                    $quotedValue = $connection->quote($value);
+                    if ($quotedValue[0] === '\'') {
+                        $quotedValue = preg_replace("/^\'|\'$/", null, $quotedValue);
+                    }
+                }
+
+                $vars[ $key ] = $quotedValue;
+            }
+            $request["where"] = '(' . self::evalString($conditionCode, $vars) . ')';
         }
 
         return $featureType->search(

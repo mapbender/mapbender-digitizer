@@ -645,6 +645,29 @@
                     }]
                 });
 
+                // If searching defined, then try to generate a form
+                if(schema.search) {
+                    frame.generateElements({
+                        type:     'form',
+                        cssClass: 'search',
+                        children: schema.search.form
+                    });
+
+                    var searchForm = $('form.search', frame);
+
+                    searchForm.on('submit', function() {
+                        schema.search.request = searchForm.formData();
+                        layer.removeAllFeatures();
+                        widget._getData();
+                        return false;
+                    });
+                    $(' :input', searchForm).on('change keyup', function(e) {
+                        schema.search.request = searchForm.formData();
+                        layer.removeAllFeatures();
+                        widget._getData();
+                    });
+                }
+
                 if(!schema.showExtendSearchSwitch){
                     $(".onlyExtent",frame).css('display','none');
                 }
@@ -1194,6 +1217,10 @@
                 maxResults: schema.maxResults,
                 schema:     schema.schemaName
             };
+
+            if(schema.search && schema.search.request) {
+                request.search = schema.search.request;
+            }
 
             switch (schema.searchType){
                 case  "currentExtent":
