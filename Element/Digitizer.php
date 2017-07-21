@@ -82,6 +82,10 @@ class Digitizer extends BaseElement
                 if (isset($scheme['formItems'])) {
                     $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
                 }
+
+                if (isset($scheme['search']) && isset($scheme['search']["form"])) {
+                    $scheme['search']["form"] = $this->prepareItems($scheme['search']["form"]);
+                }
             }
         }
         return $configuration;
@@ -217,6 +221,13 @@ class Digitizer extends BaseElement
      */
     public function deleteAction($request)
     {
+        $schemaName = $request["schema"];
+        $schema     = $this->getSchemaByName($schemaName);
+
+        if (!$schema["allowDelete"] || !$schema["allowEditData"]) {
+            throw new Exception("It is forbidden to delete objects", 2);
+        }
+
         $schemaName  = $request["schema"];
         $featureType = $this->getFeatureTypeBySchemaName($schemaName);
 
@@ -238,6 +249,10 @@ class Digitizer extends BaseElement
         $connection    = $featureType->getDriver()->getConnection();
         $results       = array();
         $debugMode     = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
+
+        if (!$schema["allowEditData"]) {
+            throw new Exception("It is forbidden to save objects", 2);
+        }
 
         // save once
         if (isset($request['feature'])) {
@@ -290,8 +305,13 @@ class Digitizer extends BaseElement
      */
     public function uploadFileAction($request)
     {
-
         $schemaName                 = $request["schema"];
+        $schema                     = $this->getSchemaByName($schemaName);
+
+        if (!$schema["allowEditData"]) {
+            throw new Exception("It is forbidden to save objects", 2);
+        }
+
         $featureType                = $this->getFeatureTypeBySchemaName($schemaName);
         $fieldName                  = $request['field'];
         $urlParameters              = array('schema' => $schemaName,
@@ -317,6 +337,7 @@ class Digitizer extends BaseElement
                 //                        'DELETE'
             ),
         ));
+
         return array_merge(
             $uploadHandler->get_response(),
             $urlParameters
