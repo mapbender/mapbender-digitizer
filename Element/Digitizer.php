@@ -7,6 +7,7 @@ use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
+use Mapbender\DigitizerBundle\Entity\Style;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
@@ -33,6 +34,7 @@ class Digitizer extends BaseElement
                 "@MapbenderCoreBundle/Resources/public/mapbender.container.info.js",
                 '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                 '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
+                '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
                 "/components/jquery-context-menu/jquery-context-menu-built.js",
                 "/components/select2/select2-built.js",
                 'feature-style-editor.js',
@@ -451,8 +453,20 @@ class Digitizer extends BaseElement
      * @param $request
      * @return array
      */
-    public function listStyleAction($request){
+    public function listStyleAction($request)
+    {
         return array();
     }
 
+    /**
+     * @param $request
+     * @return array
+     */
+    public function saveStyleAction($request)
+    {
+        $style = new Style($request['style']);
+        return array(
+            'style' => $style->toArray()
+        );
+    }
 }
