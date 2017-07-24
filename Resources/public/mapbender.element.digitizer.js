@@ -36,6 +36,42 @@
     }
 
     /**
+     * "Fake" form data for a feature that hasn't gone through attribute
+     * editing, for saving. This is used when we save a feature that has only
+     * been moved / dragged. The popup dialog with the form is not initialized
+     * in these cases.
+     * Assigned values are copied from the feature's data, if it was already
+     * stored in the db, empty otherwise.
+     *
+     * @param feature
+     * @returns {{}}
+     */
+    function initialFormData(feature) {
+        var formData = {};
+        var extractFormData;
+        extractFormData = function(definition) {
+            _.forEach(definition, function(item) {
+                if (_.isArray(item)) {
+                    // recurse into lists
+                    extractFormData(item);
+                } else if (item.name) {
+                    var currentValue = (feature.data || {})[item.name];
+                    // keep empty string, but replace undefined => null
+                    if (typeof(currentValue) === 'undefined') {
+                        currentValue = null;
+                    }
+                    formData[item.name] = currentValue;
+                } else if (item.children) {
+                    // recurse into child property (should be a list)
+                    extractFormData(item.children);
+                }
+            });
+        };
+        extractFormData(feature.schema.formItems);
+        return formData;
+    }
+
+    /**
      * Check and replace values recursive if they should be translated.
      * For checking used "translationReg" variable
      *
@@ -70,6 +106,15 @@
         });
     }
 
+    function findFeatureByPropertyValue(layer, propName, propValue) {
+        for (var i=0; i< layer.features.length ; i++) {
+            if (layer.features[i][propName] === propValue) {
+                return layer.features[i];
+            }
+        }
+        return null;
+    }
+
     /**
      * Example:
      *     Mapbender.confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
@@ -87,8 +132,8 @@
             resizable:   false,
             collapsable: false,
             modal:       true,
-            buttons:     [{
-                text:  "OK",
+            buttons:     options.buttons || [{
+                text:  options.okText || "OK",
                 click: function(e) {
                     if(!options.hasOwnProperty('onSuccess') || options.onSuccess(e) !== false) {
                         dialog.popupDialog('close');
@@ -96,7 +141,7 @@
                     return false;
                 }
             }, {
-                text:    "Abbrechen",
+                text:    options.cancelText || "Abbrechen",
                 'class': 'critical',
                 click:   function(e) {
                     if(!options.hasOwnProperty('onCancel') || options.onCancel(e) !== false) {
@@ -124,10 +169,12 @@
             allowDigitize: true,
             allowDelete: true,
             allowEditData:true,
-            allowCustomerStyle: false,
-            allowChangeVisibility: false,
-            allowDeleteByCancelNewGeometry: false,
-            allowCancelButton: true,
+            allowCustomerStyle: true,
+            allowChangeVisibility: true,
+            allowPrintMetadata: false,
+            // pop a confirmation dialog when deactivating, to ask the user to save or discard
+            // current in-memory changes
+            confirmSaveOnDeactivate: true,
             openFormAfterEdit: true,
             maxResults: 5001,
             pageLength: 10,
@@ -136,42 +183,44 @@
             inlineSearch: false,
             useContextMenu: false,
             clustering: [
+                {scale: 5000000, distance: 30}
             ]
         },
         // Default tool-sets
         toolsets: {
             point: [
-              {type: 'drawPoint'},
-              //{type: 'modifyFeature'},
-              {type: 'moveFeature'},
-              {type: 'selectFeature'},
-              {type: 'removeSelected'}
-              //{type: 'removeAll'}
+                {type: 'drawPoint'},
+                //{type: 'modifyFeature'},
+                {type: 'moveFeature'},
+                {type: 'selectFeature'},
+                {type: 'removeSelected'}
+                //{type: 'removeAll'}
             ],
             line: [
-              {type: 'drawLine'},
-              {type: 'modifyFeature'},
-              {type: 'moveFeature'},
-              {type: 'selectFeature'},
-              {type: 'removeSelected'}
-              //{type: 'removeAll'}
+                {type: 'drawLine'},
+                {type: 'modifyFeature'},
+                {type: 'moveFeature'},
+                {type: 'selectFeature'},
+                {type: 'removeSelected'}
+                //{type: 'removeAll'}
             ],
             polygon: [
-              {type: 'drawPolygon'},
-              {type: 'drawRectangle'},
-              {type: 'drawCircle'},
-              {type: 'drawEllipse'},
-              {type: 'drawDonut'},
-              {type: 'modifyFeature'},
-              {type: 'moveFeature'},
-              {type: 'selectFeature'},
-              {type: 'removeSelected'}
+                {type: 'drawPolygon'},
+                {type: 'drawRectangle'},
+                {type: 'drawCircle'},
+                {type: 'drawEllipse'},
+                {type: 'drawDonut'},
+                {type: 'modifyFeature'},
+                {type: 'moveFeature'},
+                {type: 'selectFeature'},
+                {type: 'removeSelected'}
                 //{type: 'removeAll'}
             ]
         },
         map:      null,
         currentSettings: null,
         featureEditDialogWidth: "423px",
+        unsavedFeatures: {},
 
         /**
          * Default styles merged by schema styles if defined
@@ -192,7 +241,6 @@
             }
 
         },
-
         /**
          * Constructor.
          *
@@ -216,25 +264,66 @@
          * @returns {*}
          */
         openChangeStyleDialog: function(olFeature) {
+            var widget = this;
             var layer = olFeature.layer;
-            var styleMap = layer.styleMap;
+            var styleMap = layer.options.styleMap;
             var styles = styleMap.styles;
             var defaultStyleData = olFeature.style ? olFeature.style : _.extend({}, styles["default"].defaultStyle);
 
+            if(olFeature.styleId) {
+                _.extend(defaultStyleData, styles[olFeature.styleId].defaultStyle);
+            }
+
+            var styleOptions = {
+                data:      defaultStyleData,
+                commonTab: false
+            };
+
+            if(olFeature.geometry.CLASS_NAME == "OpenLayers.Geometry.LineString") {
+                styleOptions.fillTab = false;
+            }
+
             var styleEditor = $("<div/>")
-                .featureStyleEditor({
-                    data:      defaultStyleData,
-                    commonTab: false
-                })
+                .featureStyleEditor(styleOptions)
                 .bind('featurestyleeditorsubmit', function(e, context) {
-                    var formData = styleEditor.formData();
-                    olFeature.style = _.extend({}, styleMap.createSymbolizer(olFeature), formData);
-                    layer.drawFeature(olFeature);
+                    var styleData = styleEditor.formData();
+                    var schemaName = widget.currentSettings.schemaName;
+                    styleEditor.disableForm();
+                    widget._applyStyle(styleData, olFeature);
+                    if (olFeature.fid) {
+                        widget._saveStyle(schemaName, styleData, olFeature)
+                            .done(function(response) {
+                                widget._applyStyle(response.style, olFeature);
+                                styleEditor.enableForm();
+                            });
+                    } else {
+                        // defer style saving until the feature itself is saved, and has an id to associate with
+                        var styleDataCopy = $.extend({}, styleData);
+                        olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
+                    }
                     styleEditor.featureStyleEditor("close");
                 });
             return styleEditor;
         },
-
+        _applyStyle: function(styleData, olFeature) {
+            var style = new OpenLayers.Style(styleData);
+            var styleMap = olFeature.layer.options.styleMap;
+            var styleId = styleData.id || Mapbender.Util.UUID();
+            var oldStyleId = olFeature.styleId || null;
+            styleMap.styles[styleId] = style;
+            olFeature.styleId = styleId;
+            olFeature.layer.drawFeature(olFeature, styleId);
+            if (oldStyleId && oldStyleId != styleId) {
+                delete styleMap.styles[oldStyleId];
+            }
+        },
+        _saveStyle: function(schemaName, styleData, olFeature) {
+            return this.query('style/save', {
+                style:     styleData,
+                featureId: olFeature.fid,
+                schema:    schemaName
+            });
+        },
         _setup: function() {
             var frames = [];
             var widget = this;
@@ -323,6 +412,10 @@
                     var schema = widget.currentSettings;
                     var feature = schema.layer.getFeatureFromEvent(e);
                     var features;
+
+                    if(feature._sketch){
+                        return items;
+                    }
 
                     if(!feature) {
                         items['no-items'] = {name: "Nothing selected!"}
@@ -450,7 +543,6 @@
 
                 var buttons = [];
 
-
                 buttons.push({
                     title:     translate('feature.edit'),
                     className: 'edit',
@@ -471,7 +563,7 @@
 
                 if(schema.allowChangeVisibility) {
                     buttons.push({
-                        title:     translate('feature.visibility.change'),
+                        title:     'Objekt anzeigen/ausblenden', //translate('feature.visibility.change'),
                         className: 'visibility',
                         onClick:   function(olFeature, ui, b, c) {
                             var layer = olFeature.layer;
@@ -480,9 +572,31 @@
                                 ui.addClass("icon-invisibility");
                                 ui.closest('tr').addClass('invisible-feature');
                             } else {
-                                layer.drawFeature(olFeature, 'default');
+                                if(olFeature.styleId) {
+                                    layer.drawFeature(olFeature, olFeature.styleId);
+                                } else {
+                                    layer.drawFeature(olFeature, 'default');
+                                }
                                 ui.removeClass("icon-invisibility");
                                 ui.closest('tr').removeClass('invisible-feature');
+                            }
+                        }
+                    });
+                }
+
+                if(schema.allowPrintMetadata) {
+                    buttons.push({
+                        title:     'Sachdaten drucken',
+                        className: 'printmetadata-inactive',
+                        onClick:   function(olFeature, ui, b, c) {
+                            if(!olFeature.printMetadata || olFeature.printMetadata == false) {
+                                olFeature.printMetadata = true;
+                                ui.addClass("icon-printmetadata-active");
+                                ui.removeClass("icon-printmetadata-inactive");
+                            } else {
+                                olFeature.printMetadata = false;
+                                ui.removeClass("icon-printmetadata-active");
+                                ui.addClass("icon-printmetadata-inactive");
                             }
                         }
                     });
@@ -542,9 +656,12 @@
                             return data;
                         };
                     }
+
+                    if(fieldSettings.render) {
+                        eval('fieldSettings.render = ' + fieldSettings.render);
+                    }
                     columns.push(fieldSettings);
                 });
-
 
                 var resultTableSettings = {
                     lengthChange: false,
@@ -565,6 +682,16 @@
                 }
 
                 var table = schema.table = $("<div/>").resultTable(resultTableSettings);
+                var searchableColumnTitles = _.pluck(_.reject(resultTableSettings.columns, function(column) {
+                    if(!column.sTitle) {
+                        return true;
+                    }
+
+                    if(column.hasOwnProperty('searchable') && column.searchable == false) {
+                        return true;
+                    }
+                }), 'sTitle');
+                table.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
 
                 schema.schemaName = schemaName;
 
@@ -624,13 +751,22 @@
 
                                 digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
 
+                                widget.unsavedFeatures[olFeature.id] = olFeature;
+
                                 if(schema.openFormAfterEdit) {
                                     widget._openFeatureEditDialog(olFeature);
                                 }
 
-                                widget.reloadFeatures(layer);
-
                                 //return true;
+                            },
+                            onModification: function(event) {
+                                var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                                widget.unsavedFeatures[event.id] = feature;
+                            },
+                            // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
+                            onComplete: function(event) {
+                                var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                                widget.unsavedFeatures[event.id] = feature;
                             }
                         }
                     }, {
@@ -644,6 +780,7 @@
                         }
                     }]
                 });
+                var toolSetView = $(".digitizing-tool-set",frame);
 
                 // If searching defined, then try to generate a form
                 if(schema.search) {
@@ -673,8 +810,49 @@
                 }
 
                 if(!schema.allowDigitize){
-                    $(".digitizing-tool-set",frame).css('display','none');
+                    toolSetView.css('display','none');
+                    toolSetView = $("<div class='digitizing-tool-sets'/>");
+                    toolSetView.insertBefore(frame.find('.onlyExtent'));
                 }
+
+
+                toolSetView.generateElements({
+                    type:     'fieldSet',
+                    cssClass: 'right',
+                    children: [{
+                        type:     'button',
+                        cssClass: 'fa fa-eye-slash',
+                        title:    'Alle ausblenden',
+                        click:    function(e) {
+                            var tableApi = table.resultTable('getApi');
+                            tableApi.rows(function(idx, feature, row) {
+                                var $row = $(row);
+                                var visibilityButton = $row.find('.button.icon-visibility');
+                                visibilityButton.addClass('icon-invisibility');
+                                $row.addClass('invisible-feature');
+                                feature.layer.drawFeature(feature, 'invisible');
+                            });
+                        }
+                    }, {
+                        type:  'button',
+                        title: 'Alle einblenden',
+                        cssClass: 'fa fa-eye',
+                        click: function(e) {
+                            var tableApi = table.resultTable('getApi');
+                            tableApi.rows(function(idx, feature, row) {
+                                var $row = $(row);
+                                var visibilityButton = $row.find('.button.icon-visibility');
+                                visibilityButton.removeClass('icon-invisibility');
+                                $row.removeClass('invisible-feature');
+                                var styleId = feature.styleId ? feature.styleId : 'default';
+                                feature.layer.drawFeature(feature, styleId);
+                            });
+                        }
+                    }]
+                });
+
+                frame.append('<div style="clear:both;"/>');
+
 
                 frame.append(table);
 
@@ -718,44 +896,6 @@
                 map.addControl(selectControl);
             });
 
-            function deactivateFrame(schema) {
-                var frame = schema.frame;
-                //var tableApi = schema.table.resultTable('getApi');
-                var layer = schema.layer;
-
-                frame.css('display', 'none');
-
-                if(!schema.displayPermanent){
-                    layer.setVisibility(false);
-                }
-
-                schema.selectControl.deactivate();
-
-                // https://trac.wheregroup.com/cp/issues/4548
-                if(widget.currentPopup){
-                    widget.currentPopup.popupDialog('close');
-                }
-
-
-                //layer.redraw();
-                //layer.removeAllFeatures();
-                //tableApi.clear();
-            }
-
-            function activateFrame(schema) {
-                var frame = schema.frame;
-                var layer = schema.layer;
-
-                widget.activeLayer = schema.layer;
-                widget.schemaName = schema.schemaName;
-                widget.currentSettings = schema;
-                layer.setVisibility(true);
-                //layer.redraw();
-                frame.css('display', 'block');
-
-                schema.selectControl.activate();
-            }
-
             function onSelectorChange() {
                 var option = selector.find(":selected");
                 var schema = option.data("schemaSettings");
@@ -766,10 +906,10 @@
                 widget._trigger("beforeChangeDigitizing", null, {next: schema, previous: widget.currentSettings});
 
                 if(widget.currentSettings) {
-                    deactivateFrame(widget.currentSettings);
+                    widget.deactivateFrame(widget.currentSettings);
                 }
 
-                activateFrame(schema);
+                widget.activateFrame(schema);
 
                 table.off('mouseenter', 'mouseleave', 'click');
 
@@ -818,17 +958,14 @@
             // Check position and react by
             var containerInfo = new MapbenderContainerInfo(widget, {
                 onactive:   function() {
-                    activateFrame(widget.currentSettings);
+                    widget.activate();
                 },
                 oninactive: function() {
-                    if(!widget.currentSettings.displayOnInactive) {
-                        deactivateFrame(widget.currentSettings);
-                    }
+                    widget.deactivate();
                 }
             });
 
             widget.updateClusterStrategies();
-
         },
 
         /**
@@ -848,7 +985,7 @@
             var table = schema.table;
             var tableWidget = table.data('visUiJsResultTable');
             var tableApi = table.resultTable('getApi');
-            var formData = dialog.formData();
+            var formData = dialog && dialog.formData() || initialFormData(feature);
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
             var request = {
@@ -869,14 +1006,14 @@
 
             if(!hasErrors) {
                 feature.disabled = true;
-                dialog.disableForm();
+                dialog && dialog.disableForm();
                 widget.query('save', {
                     schema:  schema.schemaName,
                     feature: request
                 }).done(function(response) {
 
                     if(response.hasOwnProperty('errors')) {
-                        dialog.enableForm();
+                        dialog && dialog.enableForm();
                         feature.disabled = false;
                         $.each(response.errors, function(i, error) {
                             $.notify(error.message, {
@@ -890,10 +1027,11 @@
                     }
 
                     var hasFeatureAfterSave = response.features.length > 0;
+                    delete widget.unsavedFeatures[feature.id];
 
                     if(!hasFeatureAfterSave) {
                         widget.reloadFeatures(schema.layer, _.without(schema.layer.features, feature));
-                        dialog.popupDialog('close');
+                        dialog && dialog.popupDialog('close');
                         return;
                     }
 
@@ -901,13 +1039,18 @@
                     var dbFeature = response.features[0];
                     feature.fid = dbFeature.id;
                     feature.state = null;
+                    if (feature.saveStyleDataCallback) {
+                        // console.log("Late-saving style for feature", feature);
+                        feature.saveStyleDataCallback(feature);
+                        delete feature["saveStyleDataCallback"];
+                    }
                     $.extend(feature.data, dbFeature.properties);
 
                     var geoJsonReader = new OpenLayers.Format.GeoJSON();
                     var newFeatures = geoJsonReader.read(response);
                     var newFeature = _.first(newFeatures);
 
-                    _.each(['fid', 'disabled', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent'], function(key) {
+                    _.each(['fid', 'disabled', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent', 'styleId'], function(key) {
                         newFeature[key] = feature[key];
                     });
 
@@ -919,9 +1062,9 @@
 
                     delete feature.isNew;
 
-                    dialog.enableForm();
+                    dialog && dialog.enableForm();
                     feature.disabled = false;
-                    dialog.popupDialog('close');
+                    dialog && dialog.popupDialog('close');
                     $.notify(translate("feature.save.successfully"), 'info');
                 });
             }
@@ -973,6 +1116,17 @@
                 buttons.push(printButton);
             }
 
+            if(schema.allowCustomerStyle) {
+                var styleButton = {
+                    text:   translate('feature.style.change'),
+                    click: function(e) {
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var feature = dialog.data('feature');
+                        widget.openChangeStyleDialog(feature);
+                    }
+                };
+                buttons.push(styleButton);
+            }
             if(schema.allowEditData) {
                 var saveButton = {
                     text:  translate("feature.save"),
@@ -1054,13 +1208,14 @@
             }
 
             var dialog = $("<div/>");
+            olFeature.editDialog = dialog;
 
             if(!schema.elementsTranslated){
-                translateStructure(formItems);
+                translateStructure(widget.currentSettings.formItems);
                 schema.elementsTranslated = true;
             }
 
-            DataUtil.eachItem(formItems, function(item) {
+            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
 
                 if(item.type == "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
 
@@ -1269,6 +1424,9 @@
                     break;
             }
         },
+        _initialFormData: function(feature) {
+            return initialFormData(feature);
+        },
 
         /**
          * Highlight schema feature on the map and table view
@@ -1295,8 +1453,13 @@
                 return;
             }
 
-            //widget._highlightFeature(feature, highlight);
-            layer.drawFeature(feature, highlight ? 'select' : 'default');
+            var styleId = feature.styleId ? feature.styleId : 'default';
+
+            if(feature.attributes && feature.attributes.label) {
+                layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
+            }else{
+                layer.drawFeature(feature, highlight ? 'select' : styleId);
+            }
 
             for (var k in features) {
                 domRow = tableWidget.getDomRowByData(features[k]);
@@ -1320,6 +1483,7 @@
          * @private
          */
         _highlightFeature: function(feature, highlight) {
+
             if(!feature || (feature && !feature.layer)) {
                 return;
             }
@@ -1344,7 +1508,14 @@
             }
 
             _.each(features, function(feature) {
-                layer.drawFeature(feature, highlight ? 'select' : 'default');
+                var styleId = feature.styleId ? feature.styleId : 'default';
+
+                if(feature.attributes && feature.attributes.label) {
+                    layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
+                } else {
+                    layer.drawFeature(feature, highlight ? 'select' : styleId);
+                }
+
             })
         },
 
@@ -1512,14 +1683,35 @@
                         }
                     }
                 }),
-                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select)),
-                'invisible': new OpenLayers.Style({
-                    strokeWidth: 1,
-                    fillColor:   "#F7F79A",
-                    strokeColor: '#6fb536',
-                    display: 'none'
-                })
+                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select)) //,
+                // 'invisible':
             }, {extendDefault: true});
+
+            styleMap.styles.invisible = new OpenLayers.Style({
+                strokeWidth: 1,
+                fillColor:   "#F7F79A",
+                strokeColor: '#6fb536',
+                display: 'none'
+            });
+            styleMap.styles.labelText = new OpenLayers.Style({
+                strokeWidth:   0,
+                fillColor:     '#cccccc',
+                fillOpacity:   0,
+                strokeColor:   '#5e1a2b',
+                strokeOpacity: 0,
+                pointRadius:   15,
+                label:         '${label}',
+                fontSize:      15
+            });
+            styleMap.styles.labelTextHover = new OpenLayers.Style({
+                strokeWidth: 0,
+                fillColor:   '#cccccc',
+                strokeColor: '#2340d3',
+                fillOpacity: 1,
+                pointRadius: 15,
+                label:       '${label}',
+                fontSize:    15
+            });
 
             if(isClustered) {
                 var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
@@ -1527,9 +1719,9 @@
                 schema.clusterStrategy = clusterStrategy;
             }
             var layer = new OpenLayers.Layer.Vector(schema.label, {
-                styleMap:        styleMap,
-                rendererOptions: {zIndexing: true},
-                strategies:      strategies
+                styleMap:   styleMap,
+                visibility: false, // rendererOptions: {zIndexing: true},
+                strategies: strategies
             });
 
             if(schema.maxScale) {
@@ -1685,6 +1877,14 @@
             });
 
             var _features = _.union(newUniqueFeatures, visibleFeatures);
+
+            if(schema.group && schema.group == "all") {
+                _features = geoJsonReader.read({
+                    type:     "FeatureCollection",
+                    features: featureCollection.features
+                });
+            }
+
             var features = [];
             var polygones = [];
             var lineStrings = [];
@@ -1743,6 +1943,27 @@
             _.each(features, function(feature) {
                 feature.layer = layer;
                 feature.schema = schema;
+
+                if(feature.attributes && feature.attributes.label) {
+                    feature.styleId = "labelText";
+                    widget._highlightFeature(feature);
+                    return;
+                }
+
+                if(schema.featureStyles && schema.featureStyles[feature.fid]) {
+                    if(!feature.styleId){
+                        var styleData = schema.featureStyles[feature.fid];
+                        var styleMap = layer.options.styleMap;
+                        var styles = styleMap.styles;
+                        var styleId = styleData.id;
+                        var style = new OpenLayers.Style(styleData, {uid: styleId});
+                        // style.id = styleId;
+                        styles[styleId] = style;
+                        feature.styleId = styleId;
+                        widget._highlightFeature(feature);
+                    }
+                }
+
             });
 
             layer.redraw();
@@ -1750,6 +1971,10 @@
             tableApi.clear();
             tableApi.rows.add(featuresWithoutDrawElements);
             tableApi.draw();
+
+            if(widget.options.__disabled){
+                widget.deactivate();
+            }
 
             // var tbody = $(tableApi.body());
 
@@ -1985,6 +2210,120 @@
                 });
                 console.log(errorMessage, xhr);
             });
+        },
+
+        activate: function() {
+            var widget = this;
+            widget.options.__disabled = false;
+            widget.activateFrame(widget.currentSettings);
+        },
+
+        deactivate: function() {
+            var widget = this;
+            // clear unsaved features to prevent multiple confirmation popups
+            var unsavedFeatures = widget.unsavedFeatures;
+            widget.unsavedFeatures = {};
+            var always = function() {
+                widget.options.__disabled = true;
+                if(!widget.currentSettings.displayOnInactive) {
+                    widget.deactivateFrame(widget.currentSettings);
+                }
+            };
+            if (widget.options.confirmSaveOnDeactivate) {
+                widget._confirmSave(unsavedFeatures, always);
+            } else {
+                always();
+            }
+        },
+        _confirmSave: function(unsavedFeatures, callback) {
+            var widget = this;
+            var numUnsaved = _.size(unsavedFeatures);
+            if (numUnsaved) {
+                var html = "<p>Sie haben "
+                           + ((numUnsaved > 1) ?
+                           "" + numUnsaved + " &Auml;nderungen"
+                        : "eine &Auml;nderung")
+                           + " vorgenommen und noch nicht gespeichert.</p>"
+                           + "<p>Wollen sie diese jetzt speichern oder verwerfen?</p>";
+                var confirmOptions = {
+                    okText:     "Jetzt Speichern",
+                    cancelText: "Verwerfen",
+                    html:       html,
+                    title:      "Ungespeicherte Änderungen",
+                    onSuccess: function() {
+                        _.forEach(unsavedFeatures, function(feature) {
+                            widget.saveFeature(feature);
+                        });
+                        callback();
+                    },
+                    onCancel: function() {
+                        var layersToReset = {};
+                        _.forEach(unsavedFeatures, function(feature) {
+                            if (feature.isNew) {
+                                widget.removeFeature(feature);
+                            } else if (feature.layer) {
+                                layersToReset[feature.layer.id] = feature.layer;
+                            }
+                        });
+                        if (_.size(layersToReset)) {
+                            _.forEach(layersToReset, function(layer) {
+                                // _getData will skip existing features, so we need
+                                // to clean up first before ...
+                                layer.removeAllFeatures();
+                            });
+                            // ... we reload (from server) and reinitialize all features
+                            widget._getData();
+                        }
+                        callback();
+                    }
+                };
+                Mapbender.confirmDialog(confirmOptions);
+            } else {
+                callback();
+            }
+        },
+
+        activateFrame:   function(schema) {
+            var widget = this;
+            var frame = schema.frame;
+            var layer = schema.layer;
+
+            if(widget.options.__disabled){
+                return;
+            }
+
+            widget.activeLayer = schema.layer;
+            widget.schemaName = schema.schemaName;
+            widget.currentSettings = schema;
+
+            widget.query('style/list', {schema: schema.schemaName}).done(function(r) {
+                schema.featureStyles = r.featureStyles;
+                widget.reloadFeatures(layer);
+                layer.setVisibility(true);
+                frame.css('display', 'block');
+                schema.selectControl.activate();
+            });
+
+        },
+
+        deactivateFrame: function(schema) {
+            var widget = this;
+            var frame = schema.frame;
+            //var tableApi = schema.table.resultTable('getApi');
+            var layer = schema.layer;
+
+            frame.css('display', 'none');
+
+            if(!schema.displayPermanent) {
+                layer.setVisibility(false);
+            }
+
+            schema.selectControl.deactivate();
+
+            // https://trac.wheregroup.com/cp/issues/4548
+            if(widget.currentPopup) {
+                widget.currentPopup.popupDialog('close');
+            }
         }
     });
 

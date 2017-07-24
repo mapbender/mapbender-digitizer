@@ -11,6 +11,7 @@
     "require": {
         "php": ">=5.3.3",
         "blueimp/jquery-file-upload": "9.*",
+        "debugteam/bootstrap-colorpicker": "1.x",
         "mapbender/data-source": "0.*",
         "phayes/geophp": "1.2"
     },

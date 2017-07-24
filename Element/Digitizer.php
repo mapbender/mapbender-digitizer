@@ -35,6 +35,7 @@ class Digitizer extends BaseElement
                 '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
                 "/components/jquery-context-menu/jquery-context-menu-built.js",
                 "/components/select2/select2-built.js",
+                'feature-style-editor.js',
                 'mapbender.element.digitizer.js'
             ),
             'css'   => array(
@@ -444,6 +445,14 @@ class Digitizer extends BaseElement
 
         $schema = $schemas[ $name ];
         return $schema;
+    }
+
+    /**
+     * @param $request
+     * @return array
+     */
+    public function listStyleAction($request){
+        return array();
     }
 
 }

@@ -25,6 +25,12 @@ $selectColor: #F7F79A;
     margin-bottom: 10px;
   }
 
+  > .frame{
+    .fa:before {
+      font-family: FontAwesome;
+    }
+  }
+
   .mapbender-element-result-table {
     margin-top: 10px;
 
@@ -85,6 +91,18 @@ $selectColor: #F7F79A;
         .icon-invisibility:before{
           font-family: FontAwesome;
           content: "\f070";
+        }
+
+        .icon-printmetadata-active:before{
+            font-family: FontAwesome;
+            content: "\f02f";
+            color: black;
+        }
+
+        .icon-printmetadata-inactive:before{
+            font-family: FontAwesome;
+            content: "\f02f";
+            color: grey;
         }
       }
     }
