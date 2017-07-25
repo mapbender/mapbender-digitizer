@@ -171,6 +171,7 @@
             allowEditData:true,
             allowCustomerStyle: true,
             allowChangeVisibility: true,
+            showVisibilityNavigation: false,
             allowPrintMetadata: false,
             // pop a confirmation dialog when deactivating, to ask the user to save or discard
             // current in-memory changes
@@ -784,13 +785,47 @@
 
                 // If searching defined, then try to generate a form
                 if(schema.search) {
-                    frame.generateElements({
-                        type:     'form',
-                        cssClass: 'search',
-                        children: schema.search.form
-                    });
+                    var searchForm;
 
-                    var searchForm = $('form.search', frame);
+                    if(schema.search.form) {
+                        if(schema.search.form) {
+
+                            var foreachItemTree = function(items, callback) {
+                                _.each(items, function(item) {
+                                    callback(item);
+                                    if(item.children && $.isArray(item.children)) {
+                                        foreachItemTree(item.children, callback);
+                                    }
+                                })
+                            };
+
+                            foreachItemTree(schema.search.form, function(item) {
+                                if(item.type && item.type === 'select') {
+                                    if(item.ajax) {
+                                        var ajax = item.ajax;
+                                        ajax.dataType = 'json';
+                                        ajax.url = widget.elementUrl + 'form/select';
+                                        ajax.data = function(params) {
+                                            return {
+                                                schema: schema.schemaName,
+                                                item:   item,
+                                                form:   searchForm.formData(),
+                                                params: params
+                                            };
+                                        };
+
+                                    }
+                                }
+                            });
+                        }
+                        frame.generateElements({
+                            type:     'form',
+                            cssClass: 'search',
+                            children: schema.search.form
+                        });
+                    }
+
+                    searchForm = $('form.search', frame);
 
                     searchForm.on('submit', function() {
                         schema.search.request = searchForm.formData();
@@ -815,41 +850,42 @@
                     toolSetView.insertBefore(frame.find('.onlyExtent'));
                 }
 
-
-                toolSetView.generateElements({
-                    type:     'fieldSet',
-                    cssClass: 'right',
-                    children: [{
-                        type:     'button',
-                        cssClass: 'fa fa-eye-slash',
-                        title:    'Alle ausblenden',
-                        click:    function(e) {
-                            var tableApi = table.resultTable('getApi');
-                            tableApi.rows(function(idx, feature, row) {
-                                var $row = $(row);
-                                var visibilityButton = $row.find('.button.icon-visibility');
-                                visibilityButton.addClass('icon-invisibility');
-                                $row.addClass('invisible-feature');
-                                feature.layer.drawFeature(feature, 'invisible');
-                            });
-                        }
-                    }, {
-                        type:  'button',
-                        title: 'Alle einblenden',
-                        cssClass: 'fa fa-eye',
-                        click: function(e) {
-                            var tableApi = table.resultTable('getApi');
-                            tableApi.rows(function(idx, feature, row) {
-                                var $row = $(row);
-                                var visibilityButton = $row.find('.button.icon-visibility');
-                                visibilityButton.removeClass('icon-invisibility');
-                                $row.removeClass('invisible-feature');
-                                var styleId = feature.styleId ? feature.styleId : 'default';
-                                feature.layer.drawFeature(feature, styleId);
-                            });
-                        }
-                    }]
-                });
+                if(schema.showVisibilityNavigation) {
+                    toolSetView.generateElements({
+                        type:     'fieldSet',
+                        cssClass: 'right',
+                        children: [{
+                            type:     'button',
+                            cssClass: 'fa fa-eye-slash',
+                            title:    'Alle ausblenden',
+                            click:    function(e) {
+                                var tableApi = table.resultTable('getApi');
+                                tableApi.rows(function(idx, feature, row) {
+                                    var $row = $(row);
+                                    var visibilityButton = $row.find('.button.icon-visibility');
+                                    visibilityButton.addClass('icon-invisibility');
+                                    $row.addClass('invisible-feature');
+                                    feature.layer.drawFeature(feature, 'invisible');
+                                });
+                            }
+                        }, {
+                            type:     'button',
+                            title:    'Alle einblenden',
+                            cssClass: 'fa fa-eye',
+                            click:    function(e) {
+                                var tableApi = table.resultTable('getApi');
+                                tableApi.rows(function(idx, feature, row) {
+                                    var $row = $(row);
+                                    var visibilityButton = $row.find('.button.icon-visibility');
+                                    visibilityButton.removeClass('icon-invisibility');
+                                    $row.removeClass('invisible-feature');
+                                    var styleId = feature.styleId ? feature.styleId : 'default';
+                                    feature.layer.drawFeature(feature, styleId);
+                                });
+                            }
+                        }]
+                    });
+                }
 
                 frame.append('<div style="clear:both;"/>');
 
