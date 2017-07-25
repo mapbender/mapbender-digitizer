@@ -2,7 +2,10 @@
 
 namespace Mapbender\DigitizerBundle\Element;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
+use Mapbender\DataSourceBundle\Component\DataStore;
+use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
@@ -166,6 +169,61 @@ class Digitizer extends BaseElement
             throw new \Exception($lastError["message"], $lastError["type"]);
         }
         return $_return;
+    }
+
+    /**
+     * Get form item by name
+     *
+     * @param $items
+     * @param $name
+     */
+    public function getFormItemByName($items, $name)
+    {
+        foreach ($items as $item) {
+            if (isset($item['name']) && $item['name'] == $name) {
+                return $item;
+            }
+            if (isset($item['children']) && is_array($item['children'])) {
+                return $this->getFormItemByName($item['children'], $name);
+            }
+        }
+    }
+
+    /**
+     * Search form fields AJAX API
+     *
+     * TODO: PosgreSQL need CREATE EXTENSION fuzzystrmatch
+     * @param $request
+     * @return array
+     */
+    public function selectFormAction($request)
+    {
+        /** @var Connection $connection */
+        $itemDefinition = $request["item"];
+        $schemaName     = $request["schema"];
+        $formData       = $request["form"];
+        $params         = $request["params"];
+        $config         = $this->getConfiguration();
+        $schemaConfig   = $config['schemes'][ $schemaName ];
+        $searchConfig   = $schemaConfig["search"];
+        $searchForm     = $searchConfig["form"];
+        $item           = $this->getFormItemByName($searchForm, $itemDefinition["name"]);
+        $query          = isset($params["term"]) ? $params["term"] : '';
+        $ajaxSettings   = $item['ajax'];
+        $connection     = $this->container->get("doctrine.dbal." . $ajaxSettings['connection'] . "_connection");
+        $formData       = array_merge($formData, array($item["name"] => $query));
+        $sql            = self::evalString($ajaxSettings["sql"], $formData);
+        $rows           = $connection->fetchAll($sql);
+        $results        = array();
+
+        foreach ($rows as $row) {
+            $results[] = array(
+                'id'   => current($row),
+                'text' => end($row),
+            );
+        }
+
+        return array('results' => $results);
     }
 
 
@@ -468,5 +526,22 @@ class Digitizer extends BaseElement
         return array(
             'style' => $style->toArray()
         );
+    }
+
+    /**
+     * Get data store by settings or name
+     *
+     * @param $settings
+     * @return DataStore
+     * @internal param $ajaxSettings
+     */
+    public function getDataStore($settings)
+    {
+        if (is_array($settings)) {
+            $dataStore = new DataStore($settings);
+        } else {
+            $dataStore = $this->container->get('data.source')->get($settings);
+        }
+        return $dataStore;
     }
 }
