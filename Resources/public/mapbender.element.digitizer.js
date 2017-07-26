@@ -186,7 +186,7 @@
             zoomDependentVisibility: {
                 // in same unit as scale display
                 min: null,
-                max: null
+                max: 25000
             }
         },
         // Default tool-sets
@@ -2238,8 +2238,8 @@
         },
         _getLayerVisibility: function(schema) {
             var visible = true;
-            if (this.options.zoomDependentVisibility && !(schema && schema.displayPermanent)) {
-                var zoomConfig = this.options.zoomDependentVisibility;
+            if (schema.zoomDependentVisibility && !schema.displayPermanent) {
+                var zoomConfig = schema.zoomDependentVisibility;
                 var scale = Math.ceil(this.map.getScale());
                 visible &= !zoomConfig.max || zoomConfig.max >= scale;
                 visible &= !zoomConfig.min || zoomConfig.min <= scale;
