@@ -182,7 +182,12 @@
             useContextMenu: false,
             clustering: [
                 {scale: 5000000, distance: 30}
-            ]
+            ],
+            zoomDependentVisibility: {
+                // in same unit as scale display
+                min: null,
+                max: null
+            }
         },
         // Default tool-sets
         toolsets: {
@@ -1840,6 +1845,8 @@
 
             var featuresWithoutDrawElements = _.difference(features, _.where(features, {_sketch: true}));
 
+            layer.setVisibility(widget._getLayerVisibility(schema));
+
             layer.removeAllFeatures();
             layer.addFeatures(features);
 
@@ -2187,7 +2194,6 @@
                 callback();
             }
         },
-
         activateFrame:   function(schema) {
             var widget = this;
             var frame = schema.frame;
@@ -2204,7 +2210,7 @@
             widget.query('style/list', {schema: schema.schemaName}).done(function(r) {
                 schema.featureStyles = r.featureStyles;
                 widget.reloadFeatures(layer);
-                layer.setVisibility(true);
+                layer.setVisibility(widget._getLayerVisibility(schema));
                 frame.css('display', 'block');
                 schema.selectControl.activate();
             });
@@ -2229,6 +2235,16 @@
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
             }
+        },
+        _getLayerVisibility: function(schema) {
+            var visible = true;
+            if (this.options.zoomDependentVisibility && !(schema && schema.displayPermanent)) {
+                var zoomConfig = this.options.zoomDependentVisibility;
+                var scale = Math.ceil(this.map.getScale());
+                visible &= !zoomConfig.max || zoomConfig.max >= scale;
+                visible &= !zoomConfig.min || zoomConfig.min <= scale;
+            }
+            return visible;
         }
     });
 
