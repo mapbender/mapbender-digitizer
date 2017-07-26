@@ -802,10 +802,28 @@
                             foreachItemTree(schema.search.form, function(item) {
                                 if(item.type && item.type === 'select') {
                                     if(item.ajax) {
+
+                                        // Hack to get display results as an HTML
+                                        item.escapeMarkup = function(m) {
+                                            return m;
+                                        };
+
+                                        item.templateResult = function(d, selectDom, c) {
+                                            var html = d && d.text ? $(d.text) : '';
+                                            if(d && d.id && d.text) {
+                                                // Highlight results
+                                                html = d.text.replace(new RegExp(ajax.lastTerm, "gmi"), '<span style="background-color: #fffb67;">\$&</span>');
+                                            }
+                                            return html;
+                                        };
                                         var ajax = item.ajax;
                                         ajax.dataType = 'json';
                                         ajax.url = widget.elementUrl + 'form/select';
                                         ajax.data = function(params) {
+                                            if(params && params.term) {
+                                                // Save last given term to get highlighted in templateResult
+                                                ajax.lastTerm = params.term;
+                                            }
                                             return {
                                                 schema: schema.schemaName,
                                                 item:   item,
@@ -833,7 +851,8 @@
                         widget._getData();
                         return false;
                     });
-                    $(' :input', searchForm).on('change keyup', function(e) {
+                    $(' :input', searchForm).on('change', function(e) {
+                        console.log("submit search");
                         schema.search.request = searchForm.formData();
                         layer.removeAllFeatures();
                         widget._getData();
@@ -1572,7 +1591,7 @@
         zoomToJsonFeature: function(feature) {
             var widget = this;
             var olMap = widget.getMap();
-            var schema = widget.findFeatureSchema(feature);
+            var schema = feature.schema ? feature.schema : widget.findFeatureSchema(feature);
 
             olMap.zoomToExtent(feature.geometry.getBounds());
             if(schema.hasOwnProperty('zoomScaleDenominator')) {
