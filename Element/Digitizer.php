@@ -10,6 +10,7 @@ use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
+use Mapbender\DigitizerBundle\Entity\Condition;
 use Mapbender\DigitizerBundle\Entity\Style;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
@@ -243,25 +244,41 @@ class Digitizer extends BaseElement
         }
 
         if (isset($request["search"])) {
-            $connection    = $featureType->getConnection();
-            $schema        = $this->getSchemaByName($schemaName);
-            $conditionCode = $schema['search']['condition'];
-            $vars          = array();
+            $connection = $featureType->getConnection();
+            $schema = $this->getSchemaByName($schemaName);
+            $vars = $this->escapeValues($request["search"], $connection);
 
-            foreach ($request["search"] as $key => $value) {
-                $quotedValue = null;
-                if (is_numeric($value)) {
-                    $quotedValue = intval($value);
-                } else {
-                    $quotedValue = $connection->quote($value);
-                    if ($quotedValue[0] === '\'') {
-                        $quotedValue = preg_replace("/^\'|\'$/", null, $quotedValue);
-                    }
+            $whereConditions = array();
+            foreach ($schema['search']['conditions'] as $condition) {
+                $condition = new Condition($condition);
+                if ($condition->isSql()) {
+                    $whereConditions[] = $condition->getOperator();
+                    $whereConditions[] = '(' . static::evalString($condition->getCode(), $vars) . ')';
                 }
 
-                $vars[ $key ] = $quotedValue;
+                if ($condition->isSqlArray()) {
+                    $subConditions = array();
+                    foreach ($vars[ $condition->getKey() ] as $value) {
+                        $subConditions[] = '(' .
+                            static::evalString(
+                                $condition->getCode(),
+                                array_merge($vars, array('value' => $value)))
+                            . ')';
+                    }
+                    $whereConditions[] = 'AND';
+                    $whereConditions[] = '(' . implode(' ' . $condition->getOperator() . ' ', $subConditions) . ')';
+                }
             }
-            $request["where"] = '(' . self::evalString($conditionCode, $vars) . ')';
+
+            // Remove first operator
+            array_splice($whereConditions, 0, 1);
+            //var_dump($whereConditions);
+            //die();
+
+            $request["where"] = implode(' ', $whereConditions);
+            //var_dump($request["where"]);
+            //die();
+
         }
 
         return $featureType->search(
@@ -543,5 +560,33 @@ class Digitizer extends BaseElement
             $dataStore = $this->container->get('data.source')->get($settings);
         }
         return $dataStore;
+    }
+
+    /**
+     * Escape request variables.
+     * Deny SQL injections.
+     *
+     * @param array $vars
+     * @param Connection $connection
+     * @return array
+     */
+    protected function escapeValues($vars, $connection)
+    {
+        $results = array();
+        foreach ($vars as $key => $value) {
+            $quotedValue = null;
+            if (is_numeric($value)) {
+                $quotedValue = intval($value);
+            } elseif (is_array($value)) {
+                $quotedValue = $this->escapeValues($value, $connection);
+            } else {
+                $quotedValue = $connection->quote($value);
+                if ($quotedValue[0] === '\'') {
+                    $quotedValue = preg_replace("/^\'|\'$/", null, $quotedValue);
+                }
+            }
+            $results[ $key ] = $quotedValue;
+        }
+        return $results;
     }
 }
