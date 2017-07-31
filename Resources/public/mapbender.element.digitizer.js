@@ -1400,9 +1400,15 @@
                 request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
             }
 
-            return widget.query('select', request).done(function(featureCollection) {
+            if(schema.xhr) {
+                schema.xhr.abort();
+            }
+
+            schema.xhr = widget.query('select', request).done(function(featureCollection) {
                 widget._onFeatureCollectionLoaded(featureCollection, schema, this);
             });
+
+            return schema.xhr;
         },
 
         /**
@@ -1483,7 +1489,6 @@
                     }
                 });
             }
-
             _.each(features, function(feature) {
                 var styleId = feature.styleId ? feature.styleId : 'default';
                 if(feature.attributes && feature.attributes.label) {
@@ -1492,7 +1497,9 @@
                     layer.drawFeature(feature, highlight ? 'select' : styleId);
                 }
 
-            })
+            });
+
+            // layer.renderer.textRoot = layer.renderer.vectorRoot;
         },
 
         /**
@@ -2156,10 +2163,14 @@
                 contentType: "application/json; charset=utf-8",
                 dataType:    "json",
                 data:        JSON.stringify(request)
-            }).error(function(xhr) {
+            }).error(function(xhr, textStatus) {
+
+                if(textStatus === "abort"){
+                    return;
+                }
+
                 var errorMessage = translate('api.query.error-message');
                 var errorDom = $(xhr.responseText);
-
                 if(errorDom.size() && errorDom.is(".sf-reset")) {
                     errorMessage += "\n" + errorDom.find(".block_exception h2").text() + "\n";
                     errorMessage += "Trace:\n";
