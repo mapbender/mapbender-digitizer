@@ -238,7 +238,8 @@
                 strokeWidth: 3,
                 fillColor:   "#F7F79A",
                 strokeColor: '#6fb536',
-                fillOpacity: 0.5
+                fillOpacity: 0.5,
+                graphicZIndex: 15
             }
 
         },
@@ -414,13 +415,14 @@
                     var feature = schema.layer.getFeatureFromEvent(e);
                     var features;
 
-                    if(feature._sketch){
-                        return items;
-                    }
-
                     if(!feature) {
                         items['no-items'] = {name: "Nothing selected!"}
                     } else {
+
+                        if(feature._sketch){
+                            return items;
+                        }
+
                         features = feature.cluster ? feature.cluster : [feature];
                         //features = widget._getFeaturesFromEvent(e.clientX, e.clientY);
 
@@ -1484,7 +1486,6 @@
 
             _.each(features, function(feature) {
                 var styleId = feature.styleId ? feature.styleId : 'default';
-
                 if(feature.attributes && feature.attributes.label) {
                     layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
                 } else {
@@ -1695,7 +1696,8 @@
             }
             var layer = new OpenLayers.Layer.Vector(schema.label, {
                 styleMap:   styleMap,
-                visibility: false, // rendererOptions: {zIndexing: true},
+                visibility: false,
+                rendererOptions: {zIndexing: true},
                 strategies: strategies
             });
 
