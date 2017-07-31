@@ -851,8 +851,8 @@
                         widget._getData();
                         return false;
                     });
+
                     $(' :input', searchForm).on('change', function(e) {
-                        console.log("submit search");
                         schema.search.request = searchForm.formData();
                         layer.removeAllFeatures();
                         widget._getData();
@@ -1374,44 +1374,6 @@
         },
 
         /**
-         * Query intersect by bounding box
-         *
-         * @param request Request for ajax
-         * @param bbox Bounding box or some object, which has toGeometry() method.
-         * @param debug Drag
-         *
-         * @returns ajax XHR object
-         *
-         * @private
-         *
-         */
-        _queryIntersect: function(request, bbox, debug) {
-            var widget = this;
-            var geometry = bbox.toGeometry();
-            var _request = $.extend(true, {intersectGeometry: geometry.toString()}, request);
-
-            if(debug){
-                if(!widget._boundLayer) {
-                    widget._boundLayer = new OpenLayers.Layer.Vector("bboxGeometry");
-                    widget.map.addLayer(widget._boundLayer);
-                }
-
-                var feature = new OpenLayers.Feature.Vector(geometry);
-                widget._boundLayer.addFeatures([feature], null, {
-                    strokeColor:   "#ff3300",
-                    strokeOpacity: 0,
-                    strokeWidth:   0,
-                    fillColor:     "#FF9966",
-                    fillOpacity:   0.1
-                });
-            }
-            return widget.query('select', _request).done(function(featureCollection) {
-                var schema = widget.options.schemes[_request["schema"]];
-                widget._onFeatureCollectionLoaded(featureCollection, schema, this);
-            });
-        },
-
-        /**
          * Analyse changed bounding box geometrie and load features as FeatureCollection.
          *
          * @private
@@ -1432,55 +1394,13 @@
                 request.search = schema.search.request;
             }
 
-            switch (schema.searchType){
-                case  "currentExtent":
-                    if(schema.hasOwnProperty("lastBbox")) {
-                        var bbox = extent.toGeometry().getBounds();
-                        var lastBbox = schema.lastBbox;
-
-                        var topDiff = bbox.top - lastBbox.top;
-                        var leftDiff = bbox.left - lastBbox.left;
-                        var rightDiff = bbox.right - lastBbox.right;
-                        var bottomDiff = bbox.bottom - lastBbox.bottom;
-
-                        var sidesChanged = {
-                            left:   leftDiff < 0,
-                            bottom: bottomDiff < 0,
-                            right:  rightDiff > 0,
-                            top:    topDiff > 0
-                        };
-
-                        if(sidesChanged.left) {
-                            widget._queryIntersect(request, new OpenLayers.Bounds(bbox.left, bbox.bottom, bbox.left + leftDiff * -1, bbox.top));
-                        }
-                        if(sidesChanged.right) {
-                            widget._queryIntersect(request, new OpenLayers.Bounds(bbox.right - rightDiff, bbox.bottom, bbox.right, bbox.top));
-                        }
-                        if(sidesChanged.top) {
-                            widget._queryIntersect(request, new OpenLayers.Bounds(bbox.left - leftDiff, bbox.top - topDiff, bbox.right - rightDiff, bbox.top));
-                        }
-                        if(sidesChanged.bottom) {
-                            widget._queryIntersect(request, new OpenLayers.Bounds(bbox.left - leftDiff, bbox.bottom + bottomDiff * -1, bbox.right - rightDiff, bbox.bottom));
-                        }
-
-                        if(!sidesChanged.left && !sidesChanged.right && !sidesChanged.top && !sidesChanged.bottom) {
-                            widget._queryIntersect(request, extent);
-                        }
-                    } else {
-                        widget._queryIntersect(request, extent);
-                    }
-                    schema.lastBbox = $.extend(true, {}, extent.toGeometry().getBounds());
-                    break;
-
-                default: // all
-                    widget.query('select', request).done(function(featureCollection) {
-                        widget._onFeatureCollectionLoaded(featureCollection, schema, this);
-                    });
-                    break;
+            if(schema.searchType === "currentExtent"){
+                request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
             }
-        },
-        _initialFormData: function(feature) {
-            return initialFormData(feature);
+
+            return widget.query('select', request).done(function(featureCollection) {
+                widget._onFeatureCollectionLoaded(featureCollection, schema, this);
+            });
         },
 
         /**
