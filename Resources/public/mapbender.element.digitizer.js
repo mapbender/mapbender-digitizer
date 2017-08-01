@@ -464,6 +464,11 @@
                         var resultTable = tr.closest('.mapbender-element-result-table');
                         var api = resultTable.resultTable('getApi');
                         var olFeature = api.row(tr).data();
+
+                        if(!olFeature){
+                            return false;
+                        }
+
                         var schema = widget.findFeatureSchema(olFeature);
                         return schema.useContextMenu;
                     }
@@ -473,6 +478,13 @@
                     var resultTable = tr.closest('.mapbender-element-result-table');
                     var api = resultTable.resultTable('getApi');
                     var olFeature = api.row(tr).data();
+
+                    if(!olFeature) {
+                        return {
+                            callback:  function(key, options) {}
+                        };
+                    }
+
                     var schema = widget.findFeatureSchema(olFeature);
                     var items = {};
 
@@ -678,7 +690,8 @@
                     selectable: false,
                     autoWidth: false,
                     columns:  columns,
-                    buttons: buttons
+                    buttons: buttons,
+                    // order: [[ 1, "asc" ]]
                 };
 
                 if(options.tableTranslation) {
@@ -789,8 +802,6 @@
                 // If searching defined, then try to generate a form
                 if(schema.search) {
                     var searchForm;
-
-
                     if(schema.search.form) {
 
                         var foreachItemTree = function(items, callback) {
@@ -1402,6 +1413,7 @@
 
             // Only if search is defined
             if(schema.search) {
+                console.log("ema.search.request")
 
                 // No user inputs - no search :)
                 if(!schema.search.request) {
@@ -1434,11 +1446,11 @@
                         }
                     });
 
+                    // Remove all features
+                    widget.reloadFeatures(schema.layer,[]);
 
                     // Input fields are note
                     if(_.size(errors)) {
-                        console.log("REMOVE ALLL");
-                        widget.reloadFeatures(schema.layer,[]);
                         // console.log("Search mandatory rules isn't complete", errors);
                         return;
                     }
@@ -1571,6 +1583,11 @@
          * @param {OpenLayers.Feature} feature
          */
         zoomToJsonFeature: function(feature) {
+
+            if(!feature){
+                return
+            }
+
             var widget = this;
             var olMap = widget.getMap();
             var schema = feature.schema ? feature.schema : widget.findFeatureSchema(feature);
