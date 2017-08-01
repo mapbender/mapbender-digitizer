@@ -258,7 +258,13 @@ class Digitizer extends BaseElement
 
                 if ($condition->isSqlArray()) {
                     $subConditions = array();
-                    foreach ($vars[ $condition->getKey() ] as $value) {
+                    $arrayVars     = $vars[ $condition->getKey() ];
+
+                    if (!is_array($arrayVars)) {
+                        continue;
+                    }
+
+                    foreach ($arrayVars as $value) {
                         $subConditions[] = '(' .
                             static::evalString(
                                 $condition->getCode(),
@@ -272,16 +278,11 @@ class Digitizer extends BaseElement
 
             // Remove first operator
             array_splice($whereConditions, 0, 1);
-            //var_dump($whereConditions);
-            //die();
 
             $request["where"] = implode(' ', $whereConditions);
-            //var_dump($request["where"]);
-            //die();
-
         }
 
-        return $featureType->search(
+        $featureCollection = $featureType->search(
             array_merge(
                 array(
                     'returnType' => 'FeatureCollection',
@@ -290,6 +291,12 @@ class Digitizer extends BaseElement
                 $request
             )
         );
+
+        //if(count($featureCollection["features"]) ==  $this->maxResults){
+        //    $featureCollection["info"] = "Limit erreicht";
+        //}
+
+        return $featureCollection;
     }
 
     /**
