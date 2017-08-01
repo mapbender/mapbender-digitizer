@@ -172,6 +172,7 @@
             allowEditData:true,
             allowCustomerStyle: true,
             allowChangeVisibility: true,
+            allowLocate: true,
             showVisibilityNavigation: false,
             allowPrintMetadata: false,
             // pop a confirmation dialog when deactivating, to ask the user to save or discard
@@ -559,13 +560,24 @@
 
                 var buttons = [];
 
-                buttons.push({
-                    title:     translate('feature.edit'),
-                    className: 'edit',
-                    onClick:   function(olFeature, ui) {
-                        widget._openFeatureEditDialog(olFeature);
-                    }
-                });
+                if(schema.allowLocate){
+                    buttons.push({
+                        title:     'Hineinzoomen',
+                        className: 'fa fa-crosshairs',
+                        onClick:   function(olFeature, ui) {
+                            widget.zoomToJsonFeature(olFeature);
+                        }
+                    });
+                }
+                if(schema.allowEditData){
+                    buttons.push({
+                        title:     translate('feature.edit'),
+                        className: 'edit',
+                        onClick:   function(olFeature, ui) {
+                            widget._openFeatureEditDialog(olFeature);
+                        }
+                    });
+                }
 
                 if(schema.allowCustomerStyle) {
                     buttons.push({
@@ -691,7 +703,7 @@
                     autoWidth: false,
                     columns:  columns,
                     buttons: buttons,
-                    // order: [[ 1, "asc" ]]
+                    order: [[ 1, "asc" ]]
                 };
 
                 if(options.tableTranslation) {
@@ -1413,8 +1425,6 @@
 
             // Only if search is defined
             if(schema.search) {
-                console.log("ema.search.request")
-
                 // No user inputs - no search :)
                 if(!schema.search.request) {
                     return;
