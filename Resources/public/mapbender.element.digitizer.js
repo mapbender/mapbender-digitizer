@@ -702,12 +702,15 @@
                     selectable: false,
                     autoWidth: false,
                     columns:  columns,
-                    buttons: buttons,
-                    order: [[ 1, "asc" ]]
+                    buttons: buttons
                 };
 
                 if(options.tableTranslation) {
                     resultTableSettings.oLanguage = options.tableTranslation;
+                }
+
+                if(schema.view && schema.view.settings) {
+                    _.extend(resultTableSettings, schema.view.settings);
                 }
 
                 var table = schema.table = $("<div/>").resultTable(resultTableSettings);
@@ -825,6 +828,8 @@
                             })
                         };
                         var elementUrl = widget.elementUrl;
+                        // $.fn.select2.defaults.set('amdBase', 'select2/');
+                        // $.fn.select2.defaults.set('amdLanguageBase', 'select2/dist/js/i18n/');
 
                         foreachItemTree(schema.search.form, function(item) {
                             // TODO: Refactor this to new type:search form generator element !
@@ -835,7 +840,6 @@
                                     item.escapeMarkup = function(m) {
                                         return m;
                                     };
-
                                     // Replace auto-complete results with required key word
                                     item.templateResult = function(d, selectDom, c) {
                                         var html = d && d.text ? d.text : '';
