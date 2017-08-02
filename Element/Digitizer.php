@@ -41,6 +41,7 @@ class Digitizer extends BaseElement
                 '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
                 "/components/jquery-context-menu/jquery-context-menu-built.js",
                 "/components/select2/select2-built.js",
+                "/components/select2/dist/js/i18n/de.js",
                 'feature-style-editor.js',
                 'mapbender.element.digitizer.js'
             ),
@@ -193,7 +194,6 @@ class Digitizer extends BaseElement
     /**
      * Search form fields AJAX API
      *
-     * TODO: PosgreSQL need CREATE EXTENSION fuzzystrmatch
      * @param $request
      * @return array
      */
