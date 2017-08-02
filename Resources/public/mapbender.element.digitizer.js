@@ -1427,20 +1427,22 @@
             };
             var isExtentOnly = schema.searchType === "currentExtent";
 
+            if(isExtentOnly){
+                request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
+            }
+
             // Only if search is defined
             if(schema.search) {
+
                 // No user inputs - no search :)
                 if(!schema.search.request) {
                     return;
                 }
 
-                // Prevent send same request
-                if(!isExtentOnly // only if search isn't for current extent
-                   && schema.search.lastRequest
-                   && schema.search.lastRequest == JSON.stringify(schema.search.request)){
-                    return;
+                // Aggregate request with search form values
+                if(schema.search.request) {
+                    request.search = schema.search.request;
                 }
-                schema.search.lastRequest = JSON.stringify(schema.search.request);
 
                 // Check mandatory settings
                 if(schema.search.mandatory) {
@@ -1460,26 +1462,32 @@
                         }
                     });
 
-                    // Remove all features
-                    widget.reloadFeatures(schema.layer,[]);
-
                     // Input fields are note
                     if(_.size(errors)) {
                         // console.log("Search mandatory rules isn't complete", errors);
+                        // Remove all features
+                        widget.reloadFeatures(schema.layer,[]);
+                        schema.lastRequest = null;
                         return;
                     }
                 }
-
-                // Aggregate request with search form values
-                if(schema.search.request) {
-                    request.search = schema.search.request;
-                }
             }
 
-            if(isExtentOnly){
-                request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
+            // Prevent send same request
+            if(!isExtentOnly // only if search isn't for current extent
+               && schema.lastRequest
+               && schema.lastRequest === JSON.stringify(request)){
+                return;
+            }
+            schema.lastRequest = JSON.stringify(request);
+
+            // If schema search activated, then only
+            if(schema.search){
+                // Remove all features
+                widget.reloadFeatures(schema.layer,[]);
             }
 
+            // Abort previous request
             if(schema.xhr) {
                 schema.xhr.abort();
             }
