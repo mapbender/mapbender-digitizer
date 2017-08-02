@@ -1482,9 +1482,9 @@
             schema.lastRequest = JSON.stringify(request);
 
             // If schema search activated, then only
-            if(schema.search){
+            if(schema.search && !isExtentOnly) {
                 // Remove all features
-                widget.reloadFeatures(schema.layer,[]);
+                widget.reloadFeatures(schema.layer, []);
             }
 
             // Abort previous request
