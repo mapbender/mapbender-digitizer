@@ -884,6 +884,10 @@
                             xhr.done(function() {
                                 var olMap = widget.getMap();
                                 olMap.zoomToExtent(layer.getDataExtent());
+
+                                if(schema.search.hasOwnProperty('zoomScale')) {
+                                    olMap.zoomToScale(schema.search.zoomScale);
+                                }
                             });
                         }
                         return false;
