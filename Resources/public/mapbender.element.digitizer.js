@@ -242,6 +242,13 @@
                 strokeColor: '#6fb536',
                 fillOpacity: 0.5,
                 graphicZIndex: 15
+            },
+            'selected':  {
+                strokeWidth:   3,
+                fillColor:     "#74b1f7",
+                strokeColor:   '#b5ac14',
+                fillOpacity:   0.7,
+                graphicZIndex: 15
             }
 
         },
@@ -640,6 +647,16 @@
                         }
                     });
                 }
+                // if(true) {
+                //     buttons.push({
+                //         title:     translate("feature.remove"),
+                //         className: 'remove',
+                //         cssClass:  'critical',
+                //         onClick:   function(olFeature, ui) {
+                //             widget.removeFeature(olFeature);
+                //         }
+                //     });
+                // }
 
                 option.val(schemaName).html(schema.label);
                 map.addLayer(layer);
@@ -968,7 +985,22 @@
                         if(_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
                             return;
                         }
-                        widget._openFeatureEditDialog(features[0]);
+
+                        feature.selected = !feature.selected;
+
+                        var selectionManager = table.resultTable("getSelection");
+
+                        if(feature.selected) {
+                            selectionManager.add(feature);
+                        } else {
+                            selectionManager.remove(feature);
+                        }
+
+                        widget._highlightSchemaFeature(schema, feature, true);
+
+                        if(schema.allowEditData){
+                            widget._openFeatureEditDialog(features[0]);
+                        }
                     },
                     overFeature:  function(feature) {
                         widget._highlightSchemaFeature(schema, feature, true);
@@ -1023,7 +1055,13 @@
                 table.delegate("tbody > tr", 'click', function() {
                     var tr = this;
                     var row = tableApi.row(tr);
-                    widget.zoomToJsonFeature(row.data());
+                    var feature = row.data();
+
+                    feature.selected = $('.selection input', tr).is(':checked');
+
+                    widget._highlightFeature(feature);
+
+                    widget.zoomToJsonFeature(feature);
                 });
 
                 widget._getData();
@@ -1533,18 +1571,31 @@
             if(feature.attributes && feature.attributes.label) {
                 layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
             }else{
-                layer.drawFeature(feature, highlight ? 'select' : styleId);
+
+                if(highlight) {
+                    layer.drawFeature(feature, 'select');
+                } else {
+                    if(feature.selected) {
+                        layer.drawFeature(feature, 'selected');
+                    } else {
+                        layer.drawFeature(feature, styleId);
+                    }
+                }
             }
 
             for (var k in features) {
-                domRow = tableWidget.getDomRowByData(features[k]);
+                var feature = features[k];
+                domRow = tableWidget.getDomRowByData(feature);
                 if(domRow && domRow.size()) {
                     tableWidget.showByRow(domRow);
+
                     if(highlight) {
                         domRow.addClass('hover');
                     } else {
                         domRow.removeClass('hover');
                     }
+                    // $('.selection input', domRow).prop("checked", feature.selected);
+
                     break;
                 }
             }
@@ -1586,9 +1637,16 @@
                 if(feature.attributes && feature.attributes.label) {
                     layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
                 } else {
-                    layer.drawFeature(feature, highlight ? 'select' : styleId);
+                    if(highlight) {
+                        layer.drawFeature(feature, 'select');
+                    } else {
+                         if(feature.selected) {
+                             layer.drawFeature(feature, 'selected');
+                         } else {
+                            layer.drawFeature(feature, styleId);
+                         }
+                    }
                 }
-
             });
 
             // layer.renderer.textRoot = layer.renderer.vectorRoot;
@@ -1763,7 +1821,8 @@
                         }
                     }
                 }),
-                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select)) //,
+                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select)), //,
+                'selected':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] ? styles['selected'] : widget.styles.selected)) //,
                 // 'invisible':
             }, {extendDefault: true});
 
