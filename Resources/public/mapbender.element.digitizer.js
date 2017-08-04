@@ -718,9 +718,12 @@
                     paging: true,
                     selectable: false,
                     autoWidth: false,
-                    columns:  columns,
-                    buttons: buttons
+                    columns:  columns
                 };
+
+                if(_.size(buttons)){
+                    resultTableSettings.buttons = buttons;
+                }
 
                 if(options.tableTranslation) {
                     resultTableSettings.oLanguage = options.tableTranslation;
