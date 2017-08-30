@@ -36,6 +36,76 @@
         return item;
     }
 
+    Mapbender.layerManager = new function() {
+        var layerManager = this;
+        /**
+         * @define {OpenLayers.Map}
+         */
+        var olMap;
+
+        /**
+         * Set map object to handle with
+         *
+         * @param {OpenLayers.Map} map
+         */
+        layerManager.setMap = function(map) {
+            olMap = map;
+            return layerManager;
+        };
+
+        /**
+         * Refresh layer. Only if visible.
+         *
+         * @see http://osgeo-org.1560.x6.nabble.com/layer-WMS-don-t-redraw-td5086852.html
+         * @see http://dev.openlayers.org/apidocs/files/OpenLayers/Layer-js.html#OpenLayers.Layer.redraw
+         * @see https://gis.stackexchange.com/questions/36741/how-to-update-a-vector-layer-with-wfs-protocol-after-updating-the-filter
+         * @param {OpenLayers.Layer} layer
+         * @return {OpenLayers.Layer}
+         */
+        layerManager.refreshLayer = function(layer) {
+            if(!layer.getVisibility()) {
+                return layer;
+            }
+
+            layer.setVisibility(false);
+            layer.setVisibility(true);
+
+            if(layer.redraw) {
+                layer.redraw(true);
+            }
+
+            if(layer.refresh) {
+                layer.refresh({force: true});
+            }
+            return layer;
+        };
+
+        /**
+         * Get layers by layer instance ID
+         *
+         * @param {number|string} _layerInstanceId
+         * @return {Array<OpenLayers.Layer>}
+         */
+        layerManager.getLayersByInstanceId = function(_layerInstanceId) {
+            var layers = [];
+            _.each(Mapbender.configuration.layersets, function(layerSet) {
+                _.each(layerSet, function(layerCollection) {
+                    _.each(layerCollection, function(layerInstanceInfo) {
+                        var layerInstanceId = layerInstanceInfo.origId;
+                        var layerId = layerInstanceInfo.ollid;
+                        if(layerInstanceId == _layerInstanceId) {
+                            var items = _.where(olMap.layers, {id: layerId});
+                            layers = layers.concat(items);
+                        }
+                    });
+                })
+            });
+            return layers;
+        }
+    };
+
+
+
     /**
      * "Fake" form data for a feature that hasn't gone through attribute
      * editing, for saving. This is used when we save a feature that has only
@@ -185,6 +255,9 @@
             searchType: "currentExtent",
             inlineSearch: false,
             useContextMenu: false,
+
+            // Layer list names/ids to be refreshed after feature save complete
+            refreshLayersAfterFeatureSave: [],
             clustering: [
                 {scale: 5000000, distance: 30}
             ]
@@ -260,14 +333,33 @@
          * @private
          */
         _create: function() {
-            var widget = this;
-            this.widget = this;
+            var widget = this.widget = this;
+            var element = widget.element;
+
             if(!Mapbender.checkTarget("mbDigitizer", widget.options.target)) {
                 return;
             }
-            var element = widget.element;
+
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
+
+            /**
+             * Reload schema layers after feature was modified or removed
+             */
+            element.bind('mbdigitizerfeaturesaved mbdigitizerfeatureremove', function(event, feature) {
+                var schema = feature.schema;
+                var refreshLayerNames = schema.refreshLayersAfterFeatureSave;
+
+                if(_.size(refreshLayerNames)) {
+                    Mapbender.layerManager.setMap(schema.layer.map);
+                    _.each(refreshLayerNames, function(layerInstanceId) {
+                        var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
+                        _.each(layers, function(layer) {
+                            Mapbender.layerManager.refreshLayer(layer);
+                        });
+                    });
+                }
+            });
         },
 
         /**
@@ -1201,7 +1293,11 @@
                     dialog && dialog.enableForm();
                     feature.disabled = false;
                     dialog && dialog.popupDialog('close');
+
                     $.notify(translate("feature.save.successfully"), 'info');
+
+                    widget._trigger( "featuresaved", null, feature);
+
                 });
             }
         },
@@ -1903,10 +1999,12 @@
                 var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
                 widget.reloadFeatures(layer, _.without(existingFeatures, olFeature));
 
+                /** @deprecated */
                 widget._trigger('featureRemoved', null, {
                     schema:  schema,
                     feature: featureData
                 });
+                widget._trigger('featureremove', null, olFeature);
             }
 
             if(isNew) {
