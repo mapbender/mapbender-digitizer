@@ -303,21 +303,23 @@ class Digitizer extends BaseElement
      * Remove feature
      *
      * @param $request
-     * @return bool
+     * @return array
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
      */
     public function deleteAction($request)
     {
         $schemaName = $request["schema"];
         $schema     = $this->getSchemaByName($schemaName);
 
-        if (!$schema["allowDelete"] || !$schema["allowEditData"]) {
-            throw new Exception("It is forbidden to delete objects", 2);
+        if (!$schema['allowDelete'] || !$schema['allowEditData']) {
+            throw new Exception('It is forbidden to delete objects', 2);
         }
 
-        $schemaName  = $request["schema"];
         $featureType = $this->getFeatureTypeBySchemaName($schemaName);
 
-        return $featureType->remove($request['feature']);
+        return array(
+            'result' => $featureType->remove($request['feature'])
+        );
     }
 
     /**
