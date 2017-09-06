@@ -218,7 +218,7 @@
                             // shortdot:        'Kleine Punkte',
                             // shortdashdot:    'Strichpunkt, kurz',
                             // shortdashdotdot: 'Strichpunktpunkt, kurz',
-                            dot:             'Punktiert',
+                            dot:             'Gepunktet',
                             dash:            'Gestrichelt',
                             longdash:        'Gestrichelt, lang',
                             dashdot:         'Strichpunkt',
@@ -377,7 +377,7 @@
                                 options:  {
                                     'regular': 'Normal',
                                     'bold':    'Fett',
-                                    'italic':  'Kursive'
+                                    'italic':  'Kursiv'
                                 },
                                 css:      {width: "30%"},
                                 infoText: 'The font weight for the label, to be provided like in CSS.'
