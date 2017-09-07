@@ -323,6 +323,35 @@ class Digitizer extends BaseElement
     }
 
     /**
+     * Clone feature
+     *
+     * @param $request
+     * @return array
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     */
+    public function cloneFeature($request)
+    {
+        $schemaName = $request["schema"];
+        $schema      = $this->getSchemaByName($schemaName);
+        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
+        $results = array();
+
+        if (!$schema['allowDuplicate']) {
+            throw new Exception('Clone feature is forbidden', 2);
+        }
+
+        $baseId  = $request['id'];
+        $feature = $featureType->getById($baseId);
+        $feature->setId(null);
+        $feature = $featureType->save($feature);
+
+        return array(
+            'baseId'  => $baseId,
+            'feature' => $feature,
+        );
+    }
+
+    /**
      * Save feature by request data
      *
      * @param array $request
