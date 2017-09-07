@@ -1,22 +1,30 @@
 mb.digitizer:
   feature:
     remove: Löschen
-    remove.successfully: 'Objekt wurde gelöscht.'
-    remove.from.database: 'Objekt löschen?'
+    remove:
+      successfully: 'Objekt wurde gelöscht.'
+      from:
+        database: 'Objekt löschen?'
+    zoomTo: Heranzoomen
     edit: Bearbeiten
     attributes: Objektinformationen
     save: Speichern
-    save.successfully: 'Objekt wurde gespeichert.'
+    save:
+      successfully: 'Objekt wurde gespeichert.'
+    loading:
+      error: 'Objekte konnten nicht geladen werden!'
     print: Druck
-    zoomTo: Heranzoomen
     style:
       change: Stil ändern
-  cancel: Abbrechen
   toolset:
     current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
-  api.query.error-message: 'Feature API: Abfrage fehlgeschlagen.'
-  table.fields.not.defined: 'Felder der Tabelle sind nicht definiert!'
-  features.loading.error: 'Objekte konnten nicht geladen werden!'
+  cancel: Abbrechen
+  api:
+    query:
+      error-message: 'Feature API - Abfrage fehlgeschlagen.'
+  table:
+    fields:
+      not.defined: 'Felder der Tabelle sind nicht definiert!'
   search:
     title: Filter
     table:
