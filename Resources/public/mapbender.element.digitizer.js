@@ -245,6 +245,7 @@
             allowLocate: true,
             showVisibilityNavigation: false,
             allowPrintMetadata: false,
+            allowDuplicate: false,
             // pop a confirmation dialog when deactivating, to ask the user to save or discard
             // current in-memory changes
             confirmSaveOnDeactivate: true,
@@ -322,6 +323,13 @@
                 strokeColor:   '#b5ac14',
                 fillOpacity:   0.7,
                 graphicZIndex: 15
+            },
+            'copy':  {
+                strokeWidth:   5,
+                fillColor:     "#f7ef7e",
+                strokeColor:   '#4250b5',
+                fillOpacity:   0.7,
+                graphicZIndex: 15
             }
 
         },
@@ -392,7 +400,6 @@
                     var styleData = styleEditor.formData();
                     var schemaName = widget.currentSettings.schemaName;
                     styleEditor.disableForm();
-                    widget._applyStyle(styleData, olFeature);
                     if (olFeature.fid) {
                         widget._saveStyle(schemaName, styleData, olFeature)
                             .done(function(response) {
@@ -404,6 +411,7 @@
                         var styleDataCopy = $.extend({}, styleData);
                         olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
                     }
+                    widget._applyStyle(styleData, olFeature);
                     styleEditor.featureStyleEditor("close");
                 });
             return styleEditor;
@@ -668,6 +676,7 @@
                         }
                     });
                 }
+
                 if(schema.allowEditData){
                     buttons.push({
                         title:     translate('feature.edit'),
@@ -677,7 +686,20 @@
                         }
                     });
                 }
-
+                if(schema.allowDuplicate){
+                    buttons.push({
+                        title:     translate('feature.clone.title'),
+                        className: 'clone',
+                        cssClass:  ' fa fa-files-o',
+                        onClick:   function(olFeature, ui) {
+                            var layer = olFeature.layer;
+                            var newFeature = widget.copyFeature(olFeature);
+                            layer.addFeatures([newFeature]);
+                            // widget._applyStyle(widget.styles.copy, newFeature);
+                            widget._openFeatureEditDialog(newFeature);
+                        }
+                    });
+                }
                 if(schema.allowCustomerStyle) {
                     buttons.push({
                         title:     translate('feature.style.change'),
@@ -998,7 +1020,8 @@
                                 olMap.zoomToExtent(layer.getDataExtent());
 
                                 if(schema.search.hasOwnProperty('zoomScale')) {
-                                    olMap.zoomToScale(schema.search.zoomScale);
+                                    console.log("Zoom scale", schema.search.zoomScale);
+                                    olMap.zoomToScale(schema.search.zoomScale, true);
                                 }
                             });
                         }
@@ -1196,11 +1219,31 @@
             widget.updateClusterStrategies();
         },
 
+        copyFeature: function(feature) {
+            var widget = this;
+            var newFeature = feature.clone();
+
+            newFeature.isNew = true;
+            newFeature.schema = feature.schema;
+
+            widget.saveFeature(newFeature).done(function(response) {
+                if(response.errors) {
+                    Mapbender.error(translate("feature.copy.error"));
+                    return;
+                }
+                console.log(translate("feature.copy.success"), newFeature);
+                widget._trigger("copyfeature", null, newFeature);
+            });
+
+            return newFeature;
+        },
+
         /**
          * On save button click
          *
          * @param {OpenLayers.Feature} feature OpenLayers feature
          * @private
+         * @return {jQuery.jqXHR} ajax XHR
          */
         saveFeature: function(feature) {
             if(feature.disabled){
@@ -1235,7 +1278,7 @@
             if(!hasErrors) {
                 feature.disabled = true;
                 dialog && dialog.disableForm();
-                widget.query('save', {
+                return widget.query('save', {
                     schema:  schema.schemaName,
                     feature: request
                 }).done(function(response) {
@@ -1777,7 +1820,7 @@
 
             olMap.zoomToExtent(feature.geometry.getBounds());
             if(schema.hasOwnProperty('zoomScaleDenominator')) {
-                olMap.zoomToScale(schema.zoomScaleDenominator);
+                olMap.zoomToScale(schema.zoomScaleDenominator,true);
             }
         },
 
