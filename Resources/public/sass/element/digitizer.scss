@@ -1,6 +1,6 @@
 // @i mport url("components/jQuery-contextMenu/src/jquery.contextMenu.css");
 @import "../vendor/viscreation/vis-ui.js/src/styles/modal";
-@import "../vendor/mapbender/digitizer/Mapbender/DigitizerBundle/Resources/public/sass/element/context-menu";
+@import "../vendor/mapbender/digitizer/Resources/public/sass/element/context-menu";
 
 $selectColor: #F7F79A;
 
@@ -71,6 +71,20 @@ $selectColor: #F7F79A;
         word-wrap: break-word;       /* Internet Explorer 5.5+ */
         word-break: break-all;
         white-space: normal;
+        .icon-style:before{
+          font-family: FontAwesome;
+          content: "\f1fb";
+        }
+
+        .icon-visibility:before{
+          font-family: FontAwesome;
+          content: "\f06e";
+        }
+
+        .icon-invisibility:before{
+          font-family: FontAwesome;
+          content: "\f070";
+        }
       }
     }
   }
@@ -181,31 +195,6 @@ $selectColor: #F7F79A;
       filter: alpha(opacity=0);
       font-size: 100%;
       height: 100%;
-    }
-  }
-}
-
-// Pop-Up
-.ui-dialog.modal-content{
-  > .modal-header{
-    > .ui-dialog-titlebar-buttonpane{
-      button {
-        font-size: 0;
-        > .ui-icon-closethick {
-          &::before{
-            font-family: FontAwesome;
-            font-size: 23px;
-            content: "\f00d";
-            margin-left: 3px;
-            margin-top: -2px;
-            display: inline-block;
-            font-weight: bold;
-          }
-        }
-        > .ui-button-icon-space {
-          display: none;
-        }
-      }
     }
   }
 }

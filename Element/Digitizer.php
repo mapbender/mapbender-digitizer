@@ -3,10 +3,10 @@
 namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\DBALException;
+use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
+use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
-use Mapbender\DigitizerBundle\Entity\Feature;
-use Mapbender\DigitizerBundle\Entity\FeatureType;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,38 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class Digitizer extends BaseElement
 {
-
-    /**
-     * @inheritdoc
-     */
-    static public function getClassTitle()
-    {
-        return "Digitizer";
-    }
-
-    /**
-     * @inheritdoc
-     */
-    static public function getClassDescription()
-    {
-        return "Digitizer";
-    }
-
-    /**
-     * @inheritdoc
-     */
-    static public function getTags()
-    {
-        return array();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getWidgetName()
-    {
-        return 'mapbender.mbDigitizer';
-    }
+    protected static $title                = "Digitizer";
+    protected static $description          = "Georeferencing and Digitizing";
 
     /**
      * @inheritdoc
@@ -55,10 +25,10 @@ class Digitizer extends BaseElement
     static public function listAssets()
     {
         return array('js'    => array(
+                        "@MapbenderCoreBundle/Resources/public/mapbender.container.info.js",
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                         '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
                         "/components/jquery-context-menu/jquery-context-menu-built.js",
-                        'mapbender.container.info.js',
                         'mapbender.element.digitizer.js'
         ),
                      'css'   => array('sass/element/digitizer.scss'),
@@ -81,7 +51,7 @@ class Digitizer extends BaseElement
      *
      * @inheritdoc
      */
-    public function getConfiguration()
+    public function getConfiguration($public = true)
     {
         $configuration            = parent::getConfiguration();
         $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
@@ -90,44 +60,22 @@ class Digitizer extends BaseElement
         if ($configuration["schemes"] && is_array($configuration["schemes"])) {
             foreach ($configuration["schemes"] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
-                    $featureTypes          = $this->container->getParameter('featureTypes');
-                    $scheme['featureType'] = $featureTypes[$scheme['featureType']];
+                    $featureTypeName           = $scheme['featureType'];
+                    $featureTypes              = $this->container->getParameter('featureTypes');
+                    $scheme['featureType']     = $featureTypes[ $featureTypeName ];
+                    $scheme['featureTypeName'] = $featureTypeName;
                 }
+
+                if ($public) {
+                    $this->cleanFromInternConfiguration($scheme['featureType']);
+                }
+
                 if (isset($scheme['formItems'])) {
                     $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
                 }
             }
         }
         return $configuration;
-    }
-    /**
-     * @inheritdoc
-     */
-    public static function getType()
-    {
-        return 'Mapbender\DigitizerBundle\Element\Type\DigitizerAdminType';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function getFormTemplate()
-    {
-        return 'MapbenderDigitizerBundle:ElementAdmin:digitizeradmin.html.twig';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function render()
-    {
-        return $this->container->get('templating')
-            ->render('MapbenderDigitizerBundle:Element:digitizer.html.twig',
-                array(
-                    'id'            => $this->getId(),
-                    'title'         => $this->getTitle(),
-                    'configuration' => $this->getConfiguration()
-                ));
     }
 
     /**
@@ -164,7 +112,7 @@ class Digitizer extends BaseElement
     public function httpAction($action)
     {
         /** @var $requestService Request */
-        $configuration   = $this->getConfiguration();
+        $configuration   = $this->getConfiguration(false);
         $requestService  = $this->container->get('request');
         $request         = json_decode($requestService->getContent(), true);
         $schemas         = $configuration["schemes"];
@@ -198,6 +146,8 @@ class Digitizer extends BaseElement
                     $request['features'] = array($request['feature']);
                 }
 
+                $connection = $featureType->getDriver()->getConnection();
+
                 try {
                     // save collection
                     if (isset($request['features']) && is_array($request['features'])) {
@@ -220,7 +170,7 @@ class Digitizer extends BaseElement
                             $feature = $featureType->save($featureData);
                             $results = array_merge($featureType->search(array(
                                 'srid'  => $feature->getSrid(),
-                                'where' => $featureType->getUniqueId() . '=' . $feature->getId())));
+                                'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
                         }
                     }
                     $results = $featureType->toFeatureCollection($results);
@@ -339,22 +289,24 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * Get assets. This method is overloaded,
-     * course of needing to aggregate CSS from configuration.
+     * Clean feature type configuration for public use
      *
-     * @inheritdoc
+     * @param array $featureType
+     * @return array
      */
-    public function getAssets()
+    protected function cleanFromInternConfiguration(array &$featureType)
     {
-        $configuration = $this->getConfiguration();
-        $assets        = parent::getAssets();
-        if (isset($configuration['css'])) {
-            if (is_array($configuration['css'])) {
-                $assets['css'] = array_merge($assets['css'], $configuration['css']);
-            } else {
-                $assets['css'][] = $configuration['css'];
-            }
+        foreach (array(
+                     'filter',
+                     'geomField',
+                     'table',
+                     'connection',
+                     'uniqueId',
+                     'sql',
+                     'events'
+                 ) as $keyName) {
+            unset($featureType[ $keyName ]);
         }
-        return $assets;
+        return $featureType;
     }
 }
