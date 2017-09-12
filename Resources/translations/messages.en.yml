@@ -1,5 +1,6 @@
 mb.digitizer.feature.remove: Remove
 mb.digitizer.feature.zoomTo: Zoom to
+mb.digitizer.feature.visibility.change: Display on/off
 mb.digitizer.feature.edit: 'Edit feature'
 mb.digitizer.toolset.current-extent: 'Select by current extent only'
 mb.digitizer.feature.attributes: 'Feature attributes'
