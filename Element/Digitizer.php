@@ -442,7 +442,7 @@ class Digitizer extends BaseElement
             'upload_dir'                   => $uploadDir . "/",
             'script_url'                   => $serverUrl,
             'upload_url'                   => $uploadUrl,
-            'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
+            'accept_file_types'            => '/\.(gif|jpe?g|png|pdf|zip)$/i',
             'print_response'               => false,
             'access_control_allow_methods' => array(
                 'OPTIONS',
