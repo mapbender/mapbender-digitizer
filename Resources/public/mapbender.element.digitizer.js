@@ -256,7 +256,7 @@
             allowDelete: true,
             allowEditData: true,
             allowCustomerStyle: false,
-            allowChangeVisibility: true,
+            allowChangeVisibility: false,
             allowLocate: false,
             showVisibilityNavigation: false,
             allowPrintMetadata: false,
