@@ -36,6 +36,21 @@
         return item;
     }
 
+    function getValueOrDefault(o, s, d) {
+        s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+        s = s.replace(/^\./, '');           // strip a leading dot
+        var a = s.split('.');
+        for (var i = 0, n = a.length; i < n; i++) {
+            var k = a[i];
+            if(k in o) {
+                o = o[k];
+            } else {
+                return d;
+            }
+        }
+        return o;
+    }
+
     Mapbender.layerManager = new function() {
         var layerManager = this;
         /**
@@ -239,13 +254,31 @@
             // Default option values
             allowDigitize: true,
             allowDelete: true,
-            allowEditData:true,
-            allowCustomerStyle: true,
+            allowEditData: true,
+            allowCustomerStyle: false,
             allowChangeVisibility: true,
-            allowLocate: true,
+            allowLocate: false,
             showVisibilityNavigation: false,
             allowPrintMetadata: false,
-            allowDuplicate: false,
+
+            // Copy data
+            copy: {
+                enable: false,
+                rules:  [],
+                data:   {},
+                style:  {
+                    strokeWidth:   5,
+                    fillColor:     "#f7ef7e",
+                    strokeColor:   '#4250b5',
+                    fillOpacity:   0.7,
+                    graphicZIndex: 15
+                }
+            },
+
+            // Save data
+            save: {
+            },
+
             // pop a confirmation dialog when deactivating, to ask the user to save or discard
             // current in-memory changes
             confirmSaveOnDeactivate: true,
@@ -686,17 +719,33 @@
                         }
                     });
                 }
-                if(schema.allowDuplicate){
+                if(schema.copy.enable){
                     buttons.push({
                         title:     translate('feature.clone.title'),
                         className: 'clone',
                         cssClass:  ' fa fa-files-o',
                         onClick:   function(olFeature, ui) {
                             var layer = olFeature.layer;
+                            var schema = olFeature.schema;
+                            var allowCopy = true;
+
+                            _.each(schema.copy.rules, function(ruleCode) {
+                                var feature = olFeature;
+                                eval('allowCopy = ' + ruleCode + ';');
+                                if(!allowCopy) {
+                                    return false;
+                                }
+                            });
+
+                            if(!allowCopy) {
+                                $.notify("Copy for the object is denied.");
+                                return;
+                            }
+
                             var newFeature = widget.copyFeature(olFeature);
+
                             layer.addFeatures([newFeature]);
                             // widget._applyStyle(widget.styles.copy, newFeature);
-                            widget._openFeatureEditDialog(newFeature);
                         }
                     });
                 }
@@ -1020,7 +1069,6 @@
                                 olMap.zoomToExtent(layer.getDataExtent());
 
                                 if(schema.search.hasOwnProperty('zoomScale')) {
-                                    console.log("Zoom scale", schema.search.zoomScale);
                                     olMap.zoomToScale(schema.search.zoomScale, true);
                                 }
                             });
@@ -1219,20 +1267,52 @@
             widget.updateClusterStrategies();
         },
 
+        /**
+         * Evalute handler code
+         * @param handlerCode
+         * @param context
+         * @private
+         */
+        _evaluateHandler: function (handlerCode, context){
+
+        },
+
+        /**
+         * Copy feature
+         *
+         * @param feature
+         */
         copyFeature: function(feature) {
             var widget = this;
+            var schema = feature.schema;
             var newFeature = feature.clone();
+            var config = schema.copy;
+            var defaultAttributes = getValueOrDefault(config, "data",{});
 
+            newFeature.attrubites = _.extend({}, defaultAttributes, feature.attributes);
+            _.each(defaultAttributes,function(key,value) {
+               if(newFeature.attrubites[key] === null){
+                   newFeature.attrubites[key] = value;
+               }
+            });
             newFeature.isNew = true;
-            newFeature.schema = feature.schema;
+            newFeature.schema = schema;
 
             widget.saveFeature(newFeature).done(function(response) {
                 if(response.errors) {
                     Mapbender.error(translate("feature.copy.error"));
                     return;
                 }
-                console.log(translate("feature.copy.success"), newFeature);
                 widget._trigger("copyfeature", null, newFeature);
+
+                var successHandler = getValueOrDefault(config, "on.success");
+                if(successHandler) {
+                    var r = function(feature) {
+                        return eval(successHandler + ";");
+                    }(newFeature);
+                } else {
+                    widget._openFeatureEditDialog(feature);
+                }
             });
 
             return newFeature;
@@ -1340,6 +1420,12 @@
                     $.notify(translate("feature.save.successfully"), 'info');
 
                     widget._trigger( "featuresaved", null, feature);
+
+
+                    var successHandler = getValueOrDefault(schema, "save.on.success");
+                    if(successHandler) {
+                        eval(successHandler);
+                    }
 
                 });
             }
