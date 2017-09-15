@@ -477,6 +477,7 @@
             var options = widget.options;
             var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
             var hasOnlyOneScheme = _.size(options.schemes) === 1;
+            var currentSchemaName = getValueOrDefault(options,"schema");
 
             if(hasOnlyOneScheme) {
                 titleElement.html(_.toArray(options.schemes)[0].label);
@@ -1231,6 +1232,10 @@
                 });
 
                 widget._getData();
+            }
+
+            if(currentSchemaName !== undefined) {
+                selector.val(currentSchemaName);
             }
 
             selector.on('change',onSelectorChange);
