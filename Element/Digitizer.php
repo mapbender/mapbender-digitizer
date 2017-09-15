@@ -434,18 +434,27 @@ class Digitizer extends BaseElement
      * Save data store item
      *
      * @param $request
-     * @return \Mapbender\DataSourceBundle\Entity\DataItem
+     * @return array
      */
     public function saveDatastoreAction ($request)
     {
-        $id          = $request['id'];
+        $schema          = $request['schema'];
+        $dataStoreLinkFieldName          = $request['dataStoreLinkFieldName'];
+        $linkId  = $request['linkId'];
         $dataItem    = $request['dataItem'];
-        $dataStore   = $this->container->get("data.source")->get($id);
+
+        /** @var DataStore $dataStore */
+        $dataStore   = $this->container->get("data.source")->get($schema);
         $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
+
         if (empty($request['dataItem'][ $uniqueIdKey ])) {
             unset($request['dataItem'][ $uniqueIdKey ]);
         }
-        return $dataStore->save($dataItem);
+
+        //var_dump($dataItem);die;
+        $f = $dataStore->save($dataItem);
+        $a = $this->getDatastoreAction(array('dataStoreLinkName'=>$schema , 'fid' =>$linkId, 'fieldName'=>$dataStoreLinkFieldName ));
+        return array('processedItem' => $f, 'dataItems'  => $a);
     }
 
     /**
@@ -454,7 +463,7 @@ class Digitizer extends BaseElement
      */
     public function getDatastoreAction($request)
     {
-        if (!isset($request['id']) || !isset($request['dataItemId'])) {
+        if (!isset($request['dataStoreLinkName']) || !isset($request['fid']) || !isset($request['fieldName']) ) {
             $results = array(
                 array('errors' => array(
                     array('message' => "datastore/get: id or dataItemId not defined!")
@@ -462,17 +471,19 @@ class Digitizer extends BaseElement
             );
             return $results;
         }
+        $dataStoreLinkName           = $request['dataStoreLinkName'];
+        $dataItemId   = $request['fid'];
+        /** @var DataStore $dataStore */
+        $dataStore    = $this->getDataStore($dataStoreLinkName);
+        $fieldName = $request['fieldName'];
+        $criteria['where'] = $fieldName . ' = '  . $dataItemId;
 
-        $id           = $request['id'];
-        $dataItemId   = $request['dataItemId'];
-        $dataStore    = $this->container->get("data.source")->get($id);
-        $dataItem     = $dataStore->get($dataItemId);
-        $dataItemData = null;
-        if ($dataItem) {
-            $dataItemData = $dataItem->toArray();
-        }
+        $dataItem     = $dataStore->search($criteria);
 
-        return $dataItemData;
+
+
+
+        return $dataItem;
     }
 
     /**
@@ -483,11 +494,17 @@ class Digitizer extends BaseElement
      */
     public function removeDatastoreAction($request)
     {
-        $id          = $request['id'];
-        $dataStore   = $this->container->get("data.source")->get($id);
-        $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
-        $dataItemId  = $request['dataItem'][ $uniqueIdKey ];
-        return $dataStore->remove($dataItemId);
+        $schema          = $request['schema'];
+        $dataStoreLinkFieldName          = $request['dataStoreLinkFieldName'];
+        $dataItemId  = $request['dataItemId'];
+        $linkId   = $request['linkId'];
+
+        $dataStore   = $this->container->get("data.source")->get($schema);
+
+
+        $f = $dataStore->remove($dataItemId);
+        $a = $this->getDatastoreAction(array('dataStoreLinkName'=>$schema , 'fid' =>$linkId, 'fieldName'=>$dataStoreLinkFieldName ));
+        return array('processedItem'=>$f,'dataItems' =>$a) ;
     }
 
     /**

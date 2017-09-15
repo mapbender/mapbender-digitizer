@@ -1408,9 +1408,9 @@
 
             DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
 
-                if(item.type == "resultTable" && item.editable && !item.isProcessed) {
+                if(item.type === "resultTable" && item.editable && !item.isProcessed) {
 
-                    cloneItem = $.extend({}, item);
+                    var cloneItem = $.extend({}, item);
                     cloneItem.isProcessed = true;
                     item.type = "container";
                     var button = {
@@ -1418,15 +1418,20 @@
                         title:    "",
                         cssClass: "fa fa-plus",
                         click:    function(e) {
+
+                            e.preventDefault();
                             var item = $(this).next().data("item");
                             var popup = item.popupItems;
                             var table = $(this).siblings(".mapbender-element-result-table")
+                            var uniqueIdKey = item.dataStore.uniqueId;
 
                             var feature = table.data('olFeature');
                             var data = {};
-                            item.dataStore.id = item.mappingId;
+
                             item.allowRemove = false;
-                            data[item.mapping.to] = feature.attributes[item.mapping.from];
+                            data['linkId'] = feature.attributes[item.dataStoreLink.uniqueId];
+                            data.item = item;
+                            data[uniqueIdKey] = null;
                             widget._openEditDialog(data, popup, item, table);
                             return false;
                         }
@@ -1440,16 +1445,18 @@
                         title:     translate('feature.edit'),
                         className: 'edit',
                         onClick:   function(rowData, ui, e) {
-                            var table = ui.parents('.mapbender-element-result-table');
-
-                            var item = table.data('item');
-                            var popup = item.popupItems;
-                            item.dataStore.id = item.mappingId;
-                            item.allowRemove = true;
-                            widget._openEditDialog(rowData, popup, item, table);
-
                             e.defaultPrevented && e.defaultPrevented();
                             e.preventDefault && e.preventDefault();
+
+                            var table = ui.parents('.mapbender-element-result-table');
+                            var item = table.data('item');
+                            var popup = item.popupItems;
+                            var feature = table.data('olFeature');
+
+                            item.allowRemove = true;
+                            rowData.externalId = feature.attributes[item.dataStoreLink.uniqueId];
+
+                            widget._openEditDialog(rowData, popup, item, table);
 
                             return false;
                         }
@@ -1459,7 +1466,7 @@
 
                 }
 
-                if(item.type == "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
+                if(item.type === "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
 
                     item.type = "fieldSet";
                     // TODO: merge item with new select
@@ -1499,7 +1506,7 @@
                     }]
                 }
 
-                if(item.type == "file") {
+                if(item.type === "file") {
                     item.uploadHanderUrl = widget.elementUrl + "file/upload?schema=" + schema.schemaName + "&fid=" + olFeature.fid + "&field=" + item.name;
                     if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name) && olFeature.data[item.name]) {
                         item.dbSrc = olFeature.data[item.name];
@@ -1516,7 +1523,7 @@
 
                 }
 
-                if(item.type == 'image') {
+                if(item.type === 'image') {
 
                     if(!item.origSrc) {
                         item.origSrc = item.src;
@@ -1547,45 +1554,59 @@
                 }
             });
 
+
+
+
             dialog.data('feature', olFeature);
             dialog.generateElements({children: widget.currentSettings.formItems});
+            dialog.popupDialog(popupConfiguration);
+
+            schema.editDialog = dialog;
+            widget.currentPopup = dialog;
+
 
             var tables = dialog.find(".mapbender-element-result-table");
             _.each(tables, function(table, index) {
-
+                console.log(schema);
                 var item = $(table).data('item');
                 $(table).data('olFeature', olFeature);
                 if(item.editable) {
                     item.columns.pop();
                 }
-                var dataStore = item.dataStore;
-                if(dataStore) {
-                    var attributes = olFeature.attributes;
-                    var requestData = {
-                        schema:     widget.schemaName,
-                        id:         dataStore.id,
+
+
+                var dataStoreLinkName = item.dataStoreLink.name;
+                if(dataStoreLinkName) {
+                        var requestData = {
+                        dataStoreLinkName:     dataStoreLinkName,
                         fid: olFeature.fid,
-                        mappingId : item.mappingId
+                        fieldName : item.dataStoreLink.fieldName
                     };
 
-                    widget.query('dataStore/search', requestData).done(function(data) {
-                        _.each(data, function(el, i) {
-                            el.item = item;
-                        });
+                    widget.query('dataStore/get', requestData).done(function(data) {
+                        if(Object.prototype.toString.call(data) === '[object Array]') {
+
+                            var dataItems= [];
+                            _.each(data, function(el, i) {
+                                el.attributes.item = item;
+                                dataItems.push(el.attributes)
+
+                            });
+
+                        } else {
+                            data.item = item;
+                            data = [data];
+                        }
+
                         var tableApi = $(table).resultTable('getApi');
                         tableApi.clear();
-                        tableApi.rows.add(data);
+                        tableApi.rows.add(dataItems);
                         tableApi.draw();
 
                     });
                 }
 
             });
-
-            dialog.generateElements({children: formItems});
-            dialog.popupDialog(popupConfiguration);
-            schema.editDialog = dialog;
-            widget.currentPopup = dialog;
 
             setTimeout(function() {
                 dialog.formData(olFeature.data);
@@ -2275,9 +2296,7 @@
         },
 
         _openEditDialog: function(dataItem, formItems, schema, ref) {
-            var schemaName = this.schemaName;
             var widget = this;
-            var uniqueKey = schema.dataStore.uniqueId;
             var buttons = [];
 
             if(widget.currentPopup.currentPopup) {
@@ -2286,110 +2305,74 @@
             }
 
             var saveButton = {
-                text:  translate("mb.data.store.save", true),
+                text:  translate("feature.save", false),
                 click: function() {
-                    var form = $(this).closest(".ui-dialog-content");
-                    var errorInputs = $(".has-error", dialog);
-                    var hasErrors = errorInputs.size() > 0;
 
-                    if(!hasErrors) {
-                        var formData = form.formData();
-                        var uniqueIdKey = schema.dataStore.uniqueId;
-                        var isNew = !dataItem.hasOwnProperty(uniqueIdKey) && !!dataItem[uniqueIdKey];
+                    widget.saveForeignDataStoreItem(dataItem);
 
-                        if(!isNew) {
-                            formData[uniqueIdKey] = dataItem[uniqueIdKey];
-                        } else {
-                            delete formData[uniqueIdKey];
-                        }
-
-                        form.disableForm();
-                        widget.query('datastore/save', {
-                            schema:     schemaName,
-                            dataItem:   formData,
-                            id:         schema.dataStore.id,
-                            dataItemId: dataItem[uniqueKey]
-                        }).done(function(response) {
-                            if(response.hasOwnProperty('errors')) {
-                                form.enableForm();
-                                $.each(response.errors, function(i, error) {
-                                    $.notify(error.message, {
-                                        title:     'API Error',
-                                        autoHide:  false,
-                                        className: 'error'
-                                    });
-                                    console.error(error.message);
-                                });
-                                return;
-                            }
-                            _.extend(dataItem, response.dataItem);
-                            if(isNew) {
-                                var textKey = item.dataStore.text;
-                                var uniqueKey = item.dataStore.uniqueId;
-                                                              //ref.append('<option value="' + dataItem[uniqueKey] + '">' + dataItem[textKey] + '</option>');
-                            }
-                            if(ref.attr('class') == "mapbender-element-result-table"){
-
-                                var requestData = {
-                                    schema:     widget.schemaName,
-                                    id:         ref.data('item').dataStore.id,
-                                    fid: ref.data('olFeature').fid,
-                                    mappingId : ref.data('item').mappingId
-                                };
-
-                                widget.query('dataStore/search', requestData).done(function(data) {
-
-                                    var tableApi = ref.resultTable('getApi');
-                                    tableApi.clear();
-                                    tableApi.rows.add(data);
-                                    tableApi.draw();
-
-                                });
-                            }
-                            widget.currentPopup.currentPopup.popupDialog('close');
-                            widget.currentPopup.currentPopup = null;
-                            $.notify(translate("mb.data.store.save.successfully", true), 'info');
-                        }).done(function() {
-                            form.enableForm();
-                        });
-                    }
                 }
             };
             buttons.push(saveButton);
 
             buttons.push({
-                text:    translate("mb.data.store.remove", true),
+                text:    translate("feature.remove", false ),
                 'class': 'critical',
                 click:   function() {
+
+                    var uniqueIdKey = schema.dataStore.uniqueId;
                     widget.query('datastore/remove', {
-                        schema:     schemaName,
-                        dataItem:  dataItem,
-                        id:         schema.dataStore.id,
-
-                    }).done(function(response) {
-
-                        //widget.removeData(dataItem);
+                        schema:     dataItem.item.dataStoreLink.name,
+                        dataItemId: dataItem[uniqueIdKey],
+                        dataStoreLinkFieldName : schema.dataStoreLink.fieldName,
+                        linkId: dataItem[dataItem.item.dataStoreLink.fieldName]
 
 
-                        if(ref.attr('class') == "mapbender-element-result-table") {
-                            var requestData = {
-                                schema:     widget.schemaName,
-                                id:         ref.data('item').dataStore.id,
-                                fid: ref.data('olFeature').fid,
-                                mappingId : ref.data('item').mappingId
-                            };
+                }).done(function(response) {
 
-                            widget.query('dataStore/search', requestData).done(function(data) {
-
-                                var tableApi = ref.resultTable('getApi');
-                                tableApi.clear();
-                                tableApi.rows.add(data);
-                                tableApi.draw();
+                        if(response.processedItem.hasOwnProperty('errors')) {
+                            $(dialog).enableForm();
+                            $.each(response.errors, function(i, error) {
+                                $.notify(error.message, {
+                                    title:     'API Error',
+                                    autoHide:  false,
+                                    className: 'error'
+                                });
+                                console.error(error.message);
                             });
-                                //widget.currentPopup.currentPopup._trigger("updateTable", event, request);
+                            return;
                         }
+                        var data  = response.dataItems;
+                        var tableApi = $(dialog).data('table').resultTable('getApi');
+                        var item = $(dialog).data('table').data('item');
+                        if(Object.prototype.toString.call(data) === '[object Array]') {
+                            var a = [];
+                            _.each(data, function(e,i){
+                                if(e.hasOwnProperty('attributes')){
+                                    e.attributes.item = item;
+                                    a.push( e.attributes);
+                                }
+                            });
+
+                            data = a;
+
+                        } else {
+                            if(data.hasOwnProperty('attributes')){
+                                data = [data.attributes];
+
+                            }
+
+
+                        }
+                        tableApi.clear();
+                        tableApi.rows.add(data);
+                        tableApi.draw();
                         widget.currentPopup.currentPopup.popupDialog('close');
                         widget.currentPopup.currentPopup = null;
+                        $.notify(translate("feature.remove.successfully", false), 'info');
+
+
+
+
                     })
                 }
             });
@@ -2465,7 +2448,7 @@
              buttons = _.union(schema.popup.buttons, buttons);
              } */
             var popupConfig = _.extend({
-                title: translate("edit.title"),
+                title: translate("feature.attributes",false),
                 width: widget.featureEditDialogWidth,
             }, schema.popup);
 
@@ -2475,7 +2458,99 @@
             dialog.popupDialog(popupConfig);
             dialog.addClass("data-store-edit-data");
             widget.currentPopup.currentPopup = dialog;
+            dialog.parentDialog = widget.currentPopup;
+            dialog.data('schema',schema);
+            dialog.data('table', ref);
             return dialog;
+        },
+
+        saveForeignDataStoreItem : function(dataItem){
+
+
+            var widget = this;
+            var dialog = widget.currentPopup.currentPopup;
+            var uniqueIdKey = dataItem.item.dataStore.uniqueId;
+            var isNew =  dataItem[uniqueIdKey] === null;
+            var formData = dialog.formData();
+            var schema = dialog.data('schema');
+            debugger;
+            if(!isNew) {
+
+                formData[uniqueIdKey] = dataItem[uniqueIdKey];
+                dataItem['linkId'] = dataItem[schema.dataStoreLink.fieldName];
+
+
+            } else {
+                delete formData[uniqueIdKey];
+
+                formData[schema.dataStoreLink.fieldName] = dataItem.linkId;
+
+            }
+            var errorInputs = $(".has-error", dialog);
+            var hasErrors = errorInputs.size() > 0;
+            if(hasErrors){
+                return false;
+
+            }
+
+
+
+            $(dialog).disableForm();
+
+            widget.query('datastore/save', {
+                schema:     dataItem.item.dataStoreLink.name,
+                dataItem:   formData,
+                dataItemId: dataItem[uniqueIdKey],
+                linkId : dataItem.linkId,
+                dataStoreLinkFieldName : schema.dataStoreLink.fieldName
+            }).done(function(response) {
+                if(response.processedItem.hasOwnProperty('errors')) {
+                    $(dialog).enableForm();
+                    $.each(response.errors, function(i, error) {
+                        $.notify(error.message, {
+                            title:     'API Error',
+                            autoHide:  false,
+                            className: 'error'
+                        });
+                        console.error(error.message);
+                    });
+                    return;
+                }
+                var data  = response.dataItems;
+                var tableApi = $(dialog).data('table').resultTable('getApi');
+                var item = $(dialog).data('table').data('item');
+                if(Object.prototype.toString.call(data) === '[object Array]') {
+                    var a = [];
+                    _.each(data, function(e,i){
+                        if(e.hasOwnProperty('attributes')){
+                            e.attributes.item = item;
+                            a.push( e.attributes);
+                        }
+                    });
+
+                    data = a;
+
+                } else {
+                    if(data.hasOwnProperty('attributes')){
+                        data = [data.attributes];
+
+                    }
+
+
+                }
+                        tableApi.clear();
+                        tableApi.rows.add(data);
+                        tableApi.draw();
+
+
+
+                widget.currentPopup.currentPopup.popupDialog('close');
+                widget.currentPopup.currentPopup = null;
+                $(dialog).enableForm();
+                $.notify(translate("feature.save.successfully", false), 'info');
+            });
+
+
         },
 
         save: function(dataItem) {
