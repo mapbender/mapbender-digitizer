@@ -14,6 +14,7 @@ use Mapbender\SearchBundle\Entity\Style;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  *
@@ -48,6 +49,25 @@ class Digitizer extends BaseElement
         return array(
             "target" => null
         );
+    }
+
+    /**
+     * @param Request $request
+     * @param string[]|string $allowedMethods
+     * @throws BadRequestHttpException
+     *
+     */
+    protected static function requireMethod($request, $allowedMethods)
+    {
+        if (!is_array($allowedMethods)) {
+            $allowedMethods = explode(',', strtoupper($allowedMethods));
+        } else {
+            $allowedMethods = array_map('strtoupper', $allowedMethods);
+        }
+        $method = $request->getMethod();
+        if (!in_array($method, $allowedMethods)) {
+            throw new BadRequestHttpException("Unsupported method $method");
+        }
     }
 
     /**
@@ -115,13 +135,14 @@ class Digitizer extends BaseElement
      */
     public function httpAction($action)
     {
-        /** @var $requestService Request */
+        /** @var $request Request */
         $configuration   = $this->getConfiguration();
-        $requestService  = $this->container->get('request');
-        $request         = json_decode($requestService->getContent(), true);
+        $request         = $this->container->get('request');
+        $queryParams     = $request->query->all();
+        $postData        = json_decode($request->getContent(), true);
         $schemas         = $configuration["schemes"];
         $debugMode       = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
-        $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
+        $schemaName      = isset($postData["schema"]) ? $postData["schema"] : $request->get("schema");
         $defaultCriteria = array('returnType' => 'FeatureCollection',
                                  'maxResults' => 2500);
         if (empty($schemaName)) {
@@ -140,27 +161,28 @@ class Digitizer extends BaseElement
 
         switch ($action) {
             case 'select':
-
-                $results         = $featureType->search(array_merge($defaultCriteria, $request));
+                $this->requireMethod($request, 'GET');
+                $results         = $featureType->search(array_merge($defaultCriteria, $queryParams));
                 break;
 
             case 'save':
                 // save once
-                if (isset($request['feature'])) {
-                    $request['features'] = array($request['feature']);
+                $this->requireMethod($request, 'POST');
+                if (isset($postData['feature'])) {
+                    $postData['features'] = array($postData['feature']);
                 }
 
                 // save once
-                if (isset($request['style'])) {
-                    $request['features'] = array($request['feature']);
+                if (isset($postData['style'])) {
+                    $postData['features'] = array($postData['feature']);
                 }
 
                 $connection = $featureType->getDriver()->getConnection();
 
                 try {
                     // save collection
-                    if (isset($request['features']) && is_array($request['features'])) {
-                        foreach ($request['features'] as $feature) {
+                    if (isset($postData['features']) && is_array($postData['features'])) {
+                        foreach ($postData['features'] as $feature) {
                             /**
                              * @var $feature Feature
                              */
@@ -195,13 +217,13 @@ class Digitizer extends BaseElement
                 break;
 
             case 'delete':
-                $results = $featureType->remove($request['feature']);
+                $results = $featureType->remove($postData['feature']);
                 break;
 
             case 'file-upload':
-                $fieldName     = $requestService->get('field');
+                $fieldName     = $request->get('field');
                 $urlParameters = array('schema' => $schemaName,
-                                       'fid'    => $requestService->get('fid'),
+                                       'fid'    => $request->get('fid'),
                                        'field'  => $fieldName);
                 $serverUrl     = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
                 $uploadDir     = $featureType->getFilePath($fieldName);
@@ -229,7 +251,7 @@ class Digitizer extends BaseElement
 
             case 'datastore/get':
                 // TODO: get request ID and check
-                if (!isset($request['id']) || !isset($request['dataItemId'])) {
+                if (!isset($postData['id']) || !isset($postData['dataItemId'])) {
                     $results = array(
                         array('errors' => array(
                             array('message' => $action . ": id or dataItemId not defined!")
@@ -237,8 +259,8 @@ class Digitizer extends BaseElement
                     );
                 }
 
-                $id           = $request['id'];
-                $dataItemId   = $request['dataItemId'];
+                $id           = $postData['id'];
+                $dataItemId   = $postData['dataItemId'];
                 $dataStore    = $this->container->get("data.source")->get($id);
                 $dataItem     = $dataStore->get($dataItemId);
                 $dataItemData = null;
@@ -251,30 +273,30 @@ class Digitizer extends BaseElement
 
             case 'datastore/save':
 
-                $id          = $request['id'];
-                $dataItem    = $request['dataItem'];
+                $id          = $postData['id'];
+                $dataItem    = $postData['dataItem'];
                 $dataStore   = $this->container->get("data.source")->get($id);
                 $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
-                if (empty($request['dataItem'][ $uniqueIdKey ])) {
-                    unset($request['dataItem'][ $uniqueIdKey ]);
+                if (empty($postData['dataItem'][ $uniqueIdKey ])) {
+                    unset($postData['dataItem'][ $uniqueIdKey ]);
                 }
                 $results = $dataStore->save($dataItem);
 
                 break;
             case 'datastore/remove':
-                $id          = $request['id'];
+                $id          = $postData['id'];
                 $dataStore   = $this->container->get("data.source")->get($id);
                 $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
-                $dataItemId  = $request['dataItem'][ $uniqueIdKey ];
+                $dataItemId  = $postData['dataItem'][ $uniqueIdKey ];
                 $dataStore->remove($dataItemId);
                 break;
 
             case 'style/save':
 
                 $styleManager = new DigitizerStyleManager($this->container);
-                $style        = new Style(array_merge($request['style'], array(
-                    'schemaName' => $request['schema'],
-                    'featureId'  => $request['featureId'],
+                $style        = new Style(array_merge($postData['style'], array(
+                    'schemaName' => $postData['schema'],
+                    'featureId'  => $postData['featureId'],
                     'userId'     => $this->getUserId()
                 )));
 
@@ -287,6 +309,7 @@ class Digitizer extends BaseElement
                 break;
 
             case 'style/list':
+                $this->requireMethod($request, 'GET');
                 $styleManager             = new DigitizerStyleManager($this->container);
                 $results['featureStyles'] = $styleManager->getSchemaStyles($schema);
                 break;

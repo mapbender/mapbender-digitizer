@@ -1271,7 +1271,7 @@
                     fillOpacity:   0.1
                 });
             }
-            return widget.query('select', _request).done(function(featureCollection) {
+            return widget.query('select', _request, 'GET').done(function(featureCollection) {
                 var schema = widget.options.schemes[_request["schema"]];
                 widget._onFeatureCollectionLoaded(featureCollection, schema, this);
             });
@@ -1335,7 +1335,7 @@
                     break;
 
                 default: // all
-                    widget.query('select', request).done(function(featureCollection) {
+                    widget.query('select', request, 'GET').done(function(featureCollection) {
                         widget._onFeatureCollectionLoaded(featureCollection, schema, this);
                     });
                     break;
@@ -2079,18 +2079,19 @@
          * Digitizer API connection query
          *
          * @param uri suffix
-         * @param request query
+         * @param data object or null
+         * @param method string (default 'POST'; @todo: 'GET' should be default)
          * @return xhr jQuery XHR object
          * @version 0.2
          */
-        query: function(uri, request) {
+        query: function(uri, data, method) {
             var widget = this;
             return $.ajax({
                 url:         widget.elementUrl + uri,
-                type:        'POST',
+                method:      method || 'POST',
                 contentType: "application/json; charset=utf-8",
                 dataType:    "json",
-                data:        JSON.stringify(request)
+                data:        data && (method === 'GET' && data || JSON.stringify(data)) || null
             }).error(function(xhr) {
                 var errorMessage = translate('api.query.error-message');
                 var errorDom = $(xhr.responseText);
@@ -2207,7 +2208,7 @@
             widget.schemaName = schema.schemaName;
             widget.currentSettings = schema;
 
-            widget.query('style/list', {schema: schema.schemaName}).done(function(r) {
+            widget.query('style/list', {schema: schema.schemaName}, 'GET').done(function(r) {
                 schema.featureStyles = r.featureStyles;
                 widget.reloadFeatures(layer);
                 layer.setVisibility(widget._getLayerVisibility(schema));
