@@ -614,26 +614,36 @@
                 var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
                 var columns = [];
                 var newFeatureDefaultProperties = {};
-                if( !schema.hasOwnProperty("tableFields")){
-                    console.error(translate("table.fields.not.defined"), schema);
-                }
-
-                $.each(schema.tableFields, function(fieldName, fieldSettings) {
-                    newFeatureDefaultProperties[fieldName] = "";
-                    fieldSettings.title = fieldSettings.label;
-                    fieldSettings.data = function(row, type, val, meta) {
-                        var data = row.data[fieldName];
-                        if(typeof (data) == 'string') {
-                            data = escapeHtml(data); //.replace(/\//g, '&#x2F;');
-                        }
-
-                        return data;
-                    };
-
-                    if(fieldSettings.render) {
-                        eval('fieldSettings.render = ' + fieldSettings.render);
+                var listTheme = Mapbender.theme.mb.digitizer.featureListings;
+                var fieldRefs = listTheme.schemaFields[schemaName];
+                var fieldTypePool = listTheme.fieldTypes;
+                var _escapeHtml = function(x) {
+                    /** @todo: handle booleans? (=> need translations) */
+                    /** @todo: display null as "n/a"? (=> need translations) */
+                    if (x === null || x === undefined) {
+                        return '';
+                    } else {
+                        return escapeHtml('' + x);
                     }
-                    columns.push(fieldSettings);
+                };
+                $.each(fieldRefs, function(ix, fieldName) {
+                    newFeatureDefaultProperties[fieldName] = "";
+                    var fieldOptions = fieldTypePool[fieldName];
+                    if (!fieldOptions) {
+                        console.log("No field options for " + fieldName + " field for schema " + schemaName);
+                    }
+                    if (!fieldOptions.data) {
+                        fieldOptions.data = function(row) {
+                            return row.data[fieldName];
+                        };
+                    }
+                    if (fieldOptions.render && typeof(fieldOptions.render) === 'string') {
+                        fieldOptions.render = eval(fieldOptions.render);
+                    }
+                    if (!fieldOptions.render) {
+                        fieldOptions.render = _escapeHtml; //escapeRowField.bind(null, fieldName);
+                    }
+                    columns.push(fieldOptions);
                 });
 
                 var resultTableSettings = {
