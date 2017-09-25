@@ -3,6 +3,7 @@ namespace Mapbender\DigitizerBundle\Component;
 
 use Eslider\Driver\SqliteExtended;
 use Mapbender\SearchBundle\Entity\Style;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -34,7 +35,26 @@ class DigitizerStyleManager
     {
         $this->container = $container;
         $kernel          = $this->container->get('kernel');
-        $this->path      = $kernel->getRootDir() . "/config/" . $this->tableName . ".sqlite";
+        $rootDir = $kernel->getRootDir();
+        /** @var LoggerInterface $logger */
+        $logger = $container->get('logger');
+        $dbPaths = array(
+            // what we want: <approot>/db/ exists in all Mapbender projects and is writable
+            'db'        => "$rootDir/db/{$this->tableName}.sqlite",
+            // legacy: <approot>/config always exists, but may not be writable depending on deployment
+            'config'    => "$rootDir/config/{$this->tableName}.sqlite",
+        );
+        if (@file_exists($dbPaths['db'])) {
+            // reuse existing file in desired location, ignoring potentially present dangling files in /config
+            $this->path = $dbPaths['db'];
+        } elseif (@file_exists($dbPaths['config'])) {
+            $logger->warning("Found {$this->tableName}.sqlite in <approot>/config directory, please move it to {$dbPaths['db']}!");
+            $this->path = $dbPaths['config'];
+        } else {
+            // sqlite file exists in neither location, ensure new one is created in /db directory
+            $this->path = $dbPaths['db'];
+        }
+
         $this->setUserId($container->get("security.context")->getUser()->getId());
         $this->createDB();
     }
