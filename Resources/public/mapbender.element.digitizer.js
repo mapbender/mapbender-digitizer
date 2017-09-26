@@ -344,6 +344,11 @@
                 titleElement.css('display', 'none');
             }
 
+            // assign key in "schemes" object to each schema as schemaName property (if not already set) for
+            // introspection / reverse lookup
+            $.each(options.schemes, function(s, schemaName) {
+                s.schemaName = s.schemaName || schemaName;
+            });
             function createSubMenu(olFeature) {
                 var layer = olFeature.layer;
                 var schema = widget.findSchemaByLayer(layer);
@@ -1234,6 +1239,30 @@
                         item.src = src;
                     }
                 }
+            });
+
+            // merge elements defined in theme
+            var themeData = Mapbender.theme.mb.digitizer.popupData;
+            var themeItems = Array.prototype.concat(
+                themeData['__all__pre__'] || [],
+                themeData[schema.schemaName] || [],
+                themeData['__all__post__'] || []);
+            $.each(themeItems, function() {
+                /**
+                 * Workaround HACK for vis-ui: "text" type entries ONLY SUPPORT eval'd strings, BUT NO CALLABLES
+                 * @todo: fork vis-ui, fix it
+                 */
+                if (this.text && typeof this.text === 'function') {
+                    if (!window.vis_ui_hack_wrappers) {
+                        window.vis_ui_hack_wrappers = {'_n': 0};
+                    }
+                    var bound_hack_name = 'wrap' + window.vis_ui_hack_wrappers['_n'];
+                    window.vis_ui_hack_wrappers[bound_hack_name] = (function(data) { return this(data); }).bind(this.text);
+                    var evalThat = '(window.vis_ui_hack_wrappers["' + bound_hack_name + '"](data))';
+                    window.vis_ui_hack_wrappers['_n'] += 1;
+                    this.text = evalThat;
+                }
+                widget.currentSettings.formItems.push(this);
             });
 
             dialog.generateElements({children: widget.currentSettings.formItems});
