@@ -92,9 +92,23 @@ class Digitizer extends BaseElement
                     $scheme['featureTypeName'] = $featureTypeName;
                 }
                 if (isset($scheme['formItems'])) {
-                    $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
+                    $preparedItems = $this->prepareItems($scheme['formItems']);
+                    /**
+                     * Strip 'breakLine' and 'text' type items, we do this via theme.js now
+                     * @todo: perform this stripping in entity so the values disappear from the backend
+                     */
+                    $scheme['formItems'] = array();
+                    foreach ($preparedItems as $preparedItem) {
+                        if (empty($preparedItem['type']) || !in_array($preparedItem['type'], array('breakLine', 'text'))) {
+                            $scheme['formItems'][] = $preparedItem;
+                        }
+                    }
                 }
-
+                /**
+                 * Also nuke `tableFields`, also controlled via theme.js
+                 * @todo: perform this stripping in entity so the values disappear from the backend
+                 */
+                unset($scheme['tableFields']);
                 $scheme['featureStyles'] = array();
             }
         }
