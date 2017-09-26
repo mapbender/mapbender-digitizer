@@ -1845,13 +1845,6 @@
 
             var _features = _.union(newUniqueFeatures, visibleFeatures);
 
-            if(schema.group && schema.group == "all") {
-                _features = geoJsonReader.read({
-                    type:     "FeatureCollection",
-                    features: featureCollection.features
-                });
-            }
-
             var features = [];
             var polygones = [];
             var lineStrings = [];
