@@ -260,6 +260,7 @@
             var element = widget.element;
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
+            this._popupFormItemsByScheme = {};
         },
 
         /**
@@ -1150,9 +1151,38 @@
                 translateStructure(widget.currentSettings.formItems);
                 schema.elementsTranslated = true;
             }
+            var formItems = widget._getPopupFormItems(schema);
+            dialog.generateElements({children: formItems});
+            dialog.popupDialog(popupConfiguration);
+            schema.editDialog = dialog;
+            widget.currentPopup = dialog;
+            dialog.data('feature', olFeature);
 
-            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+            setTimeout(function() {
+                dialog.formData(olFeature.data);
+            }, 21);
 
+            return dialog;
+        },
+        _getPopupFormItems: function(schema) {
+            var schemaName = schema && (typeof schema === 'string' && schema || schema.schemaName) || this.schemaName;
+            if (!this._popupFormItemsByScheme[schemaName]) {
+                this._popupFormItemsByScheme[schemaName] = this._buildPopupFormItems(schemaName);
+            }
+            return this._popupFormItemsByScheme[schemaName];
+        },
+        _buildPopupFormItems: function(schemaName) {
+            // copy initial definition
+            var definitionCopy = [];
+            $.each(this.options.schemes[schemaName].formItems, function() {
+                // strip legacy server-side dynamic elements
+                if (this.type && this.type === 'text' || this.type === 'breakLine') {
+                    // do nothing
+                } else {
+                    definitionCopy.push(this);
+                }
+            });
+            DataUtil.eachItem(definitionCopy, function(item) {
                 if(item.type == "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
 
                     item.type = "fieldSet";
@@ -1245,7 +1275,7 @@
             var themeData = Mapbender.theme.mb.digitizer.popupData;
             var themeItems = Array.prototype.concat(
                 themeData['__all__pre__'] || [],
-                themeData[schema.schemaName] || [],
+                themeData[schemaName] || [],
                 themeData['__all__post__'] || []);
             $.each(themeItems, function() {
                 /**
@@ -1262,20 +1292,9 @@
                     window.vis_ui_hack_wrappers['_n'] += 1;
                     this.text = evalThat;
                 }
-                widget.currentSettings.formItems.push(this);
+                definitionCopy.push(this);
             });
-
-            dialog.generateElements({children: widget.currentSettings.formItems});
-            dialog.popupDialog(popupConfiguration);
-            schema.editDialog = dialog;
-            widget.currentPopup = dialog;
-            dialog.data('feature', olFeature);
-
-            setTimeout(function() {
-                dialog.formData(olFeature.data);
-            }, 21);
-
-            return dialog;
+            return definitionCopy;
         },
 
         /**
