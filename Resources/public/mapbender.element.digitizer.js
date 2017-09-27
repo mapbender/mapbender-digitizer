@@ -991,9 +991,10 @@
                         });
                         return;
                     }
+                    delete feature.isNew;
+                    delete widget.unsavedFeatures[feature.id];
 
                     var hasFeatureAfterSave = response.features.length > 0;
-                    delete widget.unsavedFeatures[feature.id];
 
                     if(!hasFeatureAfterSave) {
                         widget.reloadFeatures(schema.layer, _.without(schema.layer.features, feature));
@@ -1026,8 +1027,6 @@
                     tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
                     tableApi.draw();
 
-                    delete feature.isNew;
-
                     dialog && dialog.enableForm();
                     feature.disabled = false;
                     dialog && dialog.popupDialog('close');
@@ -1050,7 +1049,6 @@
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
             }
-
             if(schema.printable) {
                 var printButton = {
                     text:  translate("feature.print"),
@@ -1111,6 +1109,14 @@
             var popupConfiguration = {
                 title: translate("feature.attributes"),
                 width: widget.featureEditDialogWidth,
+                close: function() {
+                    var feature = $(this).data('feature');
+                    if (feature && feature.isNew) {
+                        // console.log("Removing new feature", feature);
+                        widget.removeFeature(feature);
+                        delete widget.unsavedFeatures[feature.id];
+                    }
+                }
             };
 
             if(schema.popup) {
@@ -1154,6 +1160,7 @@
             var formItems = widget._getPopupFormItems(schema);
             dialog.generateElements({children: formItems});
             dialog.popupDialog(popupConfiguration);
+
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
             dialog.data('feature', olFeature);
@@ -1715,7 +1722,7 @@
         removeFeature: function(olFeature) {
             var widget = this;
             var schema = widget.findFeatureSchema(olFeature);
-            var isNew = olFeature.hasOwnProperty('isNew');
+            var isNew = !!olFeature.isNew;
             var layer = olFeature.layer;
             var featureData = olFeature.attributes;
 
@@ -1834,7 +1841,7 @@
             var bbox = extent.toGeometry().getBounds();
             var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
             var visibleFeatures = currentExtentOnly ? _.filter(existingFeatures, function(olFeature) {
-                return olFeature && (olFeature.hasOwnProperty('isNew') || olFeature.geometry.getBounds().intersectsBounds(bbox));
+                return olFeature && (!!olFeature.isNew || olFeature.geometry.getBounds().intersectsBounds(bbox));
             }) : existingFeatures;
             var visibleFeatureIds = _.pluck(visibleFeatures, "fid");
             var filteredNewFeatures = _.filter(featureCollection.features, function(feature) {
