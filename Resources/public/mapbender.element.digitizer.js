@@ -336,6 +336,7 @@
             var selector = widget.selector = $("select.selector", element);
             var options = widget.options;
             var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
+            /** @todo: provide default theme (eliminate external requirement), merge */
             widget.theme = Mapbender.theme.mb.digitizer;
 
             // Preprocess schemes:
@@ -651,11 +652,8 @@
                             return row.data[fieldName];
                         };
                     }
-                    if (fieldOptions.render && typeof(fieldOptions.render) === 'string') {
-                        fieldOptions.render = eval(fieldOptions.render);
-                    }
                     if (!fieldOptions.render) {
-                        fieldOptions.render = _escapeHtml; //escapeRowField.bind(null, fieldName);
+                        fieldOptions.render = _escapeHtml;
                     }
                     columns.push(fieldOptions);
                 });
