@@ -336,8 +336,21 @@
             var selector = widget.selector = $("select.selector", element);
             var options = widget.options;
             var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
-            var hasOnlyOneScheme = _.size(options.schemes) === 1;
+            widget.theme = Mapbender.theme.mb.digitizer;
 
+            // Preprocess schemes:
+            // 1) assign key in "schemes" object to each schema as schemaName property (if not already set) for reverse lookup
+            // 2) assign label from theme (ignore legacy db setting if any)
+            // 3) translate strings
+            $.each(options.schemes, function(schemaName, s) {
+                s.schemaName = s.schemaName || schemaName;
+                s.label = widget.theme.objectTypes[schemaName].groupLabel;
+                translateStructure(s.formItems);
+                // setting this property is redundant here, but it may be inspected by "data-source" bundle code
+                s.elementsTranslated = true;
+            });
+
+            var hasOnlyOneScheme = _.size(options.schemes) === 1;
             if(hasOnlyOneScheme) {
                 titleElement.html(_.toArray(options.schemes)[0].label);
                 selector.css('display', 'none');
@@ -345,11 +358,6 @@
                 titleElement.css('display', 'none');
             }
 
-            // assign key in "schemes" object to each schema as schemaName property (if not already set) for
-            // introspection / reverse lookup
-            $.each(options.schemes, function(s, schemaName) {
-                s.schemaName = s.schemaName || schemaName;
-            });
             function createSubMenu(olFeature) {
                 var layer = olFeature.layer;
                 var schema = widget.findSchemaByLayer(layer);
@@ -620,9 +628,9 @@
                 var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
                 var columns = [];
                 var newFeatureDefaultProperties = {};
-                var listTheme = Mapbender.theme.mb.digitizer.featureListings;
-                var fieldRefs = listTheme.schemaFields[schemaName];
-                var fieldTypePool = listTheme.fieldTypes;
+
+                var fieldRefs = widget.theme.featureListings.schemaFields[schemaName];
+                var fieldTypePool = widget.theme.featureListings.fieldTypes;
                 var _escapeHtml = function(x) {
                     /** @todo: handle booleans? (=> need translations) */
                     /** @todo: display null as "n/a"? (=> need translations) */
@@ -681,8 +689,6 @@
                     }
                 }), 'sTitle');
                 table.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
-
-                schema.schemaName = schemaName;
 
                 var toolset = widget.toolsets[schema.featureType.geomType];
                 if(schema.hasOwnProperty("toolset")){
@@ -1147,10 +1153,6 @@
             var dialog = $("<div/>");
             olFeature.editDialog = dialog;
 
-            if(!schema.elementsTranslated){
-                translateStructure(widget.currentSettings.formItems);
-                schema.elementsTranslated = true;
-            }
             var formItems = widget._getPopupFormItems(schema);
             dialog.generateElements({children: formItems});
             dialog.popupDialog(popupConfiguration);
@@ -1693,13 +1695,15 @@
                 strategies.push(clusterStrategy);
                 schema.clusterStrategy = clusterStrategy;
             }
-            var layer = new OpenLayers.Layer.Vector(schema.label, {
+            var layerLabel = widget.theme.objectTypes[schema.schemaName].groupLabel;
+
+            var layer = new OpenLayers.Layer.Vector(layerLabel, {
                 styleMap:   styleMap,
                 visibility: false, // rendererOptions: {zIndexing: true},
                 strategies: strategies
             });
 
-            layer.name = schema.label;
+            layer.name = layerLabel;
             return layer;
         },
 
@@ -2052,11 +2056,6 @@
 
                 }, 1);
             });
-
-            /*   if(!schema.elementsTranslated) {
-             translateStructure(widget.currentSettings.formItems);
-             schema.elementsTranslated = true;
-             } */
 
             DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
                 if(item.type == "file") {
