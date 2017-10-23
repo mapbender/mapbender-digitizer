@@ -536,7 +536,6 @@ class Digitizer extends BaseElement
         foreach (array(
                      'filter',
                      'geomField',
-                     'table',
                      'connection',
                      'uniqueId',
                      'sql',
