@@ -1672,6 +1672,7 @@
             });
 
             dialog.data('feature', olFeature);
+            dialog.data('digitizerWidget', widget);
             dialog.generateElements({children: formItems});
             dialog.popupDialog(popupConfiguration);
             schema.editDialog = dialog;
@@ -2703,6 +2704,21 @@
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
             }
+        },
+
+        /**
+         * Download file by feature and his attribute name
+         *
+         * @param {OpenLayers.Feature} feature OpenLayers
+         * @param {String} attributeName
+         */
+        download: function(feature, attributeName) {
+            var widget = this;
+            var schema = feature.schema;
+            var attributes = feature.attributes;
+            var tableName = schema.featureType.table;
+            var relativeWebPath = Mapbender.configuration.application.urls.asset;
+            window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
         }
     });
 
