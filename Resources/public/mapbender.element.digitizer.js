@@ -551,77 +551,7 @@
                     schema[k] = schema.hasOwnProperty(k) ? schema[k] : options[k];
                 }
 
-                var buttons = [];
 
-                buttons.push({
-                    title:     translate('feature.edit'),
-                    className: 'edit',
-                    onClick:   function(olFeature, ui) {
-                        widget._openFeatureEditDialog(olFeature);
-                    }
-                });
-
-                if(schema.allowCustomerStyle) {
-                    buttons.push({
-                        title:     translate('feature.style.change'),
-                        className: 'style',
-                        onClick:   function(olFeature, ui) {
-                            widget.openChangeStyleDialog(olFeature);
-                        }
-                    });
-                }
-
-                if(schema.allowChangeVisibility) {
-                    buttons.push({
-                        title:     'Objekt anzeigen/ausblenden', //translate('feature.visibility.change'),
-                        className: 'visibility',
-                        onClick:   function(olFeature, ui, b, c) {
-                            var layer = olFeature.layer;
-                            if(!olFeature.renderIntent || olFeature.renderIntent != 'invisible') {
-                                layer.drawFeature(olFeature, 'invisible');
-                                ui.addClass("icon-invisibility");
-                                ui.closest('tr').addClass('invisible-feature');
-                            } else {
-                                if(olFeature.styleId) {
-                                    layer.drawFeature(olFeature, olFeature.styleId);
-                                } else {
-                                    layer.drawFeature(olFeature, 'default');
-                                }
-                                ui.removeClass("icon-invisibility");
-                                ui.closest('tr').removeClass('invisible-feature');
-                            }
-                        }
-                    });
-                }
-
-                if(schema.allowPrintMetadata) {
-                    buttons.push({
-                        title:     'Sachdaten drucken',
-                        className: 'printmetadata-inactive',
-                        onClick:   function(olFeature, ui, b, c) {
-                            if(!olFeature.printMetadata || olFeature.printMetadata == false) {
-                                olFeature.printMetadata = true;
-                                ui.addClass("icon-printmetadata-active");
-                                ui.removeClass("icon-printmetadata-inactive");
-                            } else {
-                                olFeature.printMetadata = false;
-                                ui.removeClass("icon-printmetadata-active");
-                                ui.addClass("icon-printmetadata-inactive");
-                            }
-                        }
-                    });
-                }
-
-                if(schema.allowDelete) {
-                    buttons.push({
-                        title:     translate("feature.remove"),
-                        className: 'remove',
-                        cssClass:  'critical',
-                        onClick:   function(olFeature, ui) {
-                            widget.removeFeature(olFeature);
-                        }
-                    });
-                }
 
                 option.val(schemaName).html(schema.label);
                 map.addLayer(layer);
@@ -669,7 +599,7 @@
                     selectable: false,
                     autoWidth: false,
                     columns:  columns,
-                    buttons: buttons
+                    buttons: widget._setupTableRowButtons(schema)
                 };
 
                 if(options.tableTranslation) {
@@ -719,49 +649,7 @@
                             removeSelected:        "Selektierte objekte löschen",
                             removeAll:             "Alle Objekte löschen"
                         },
-
-                        // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
-                        controlEvents: {
-                            featureadded: function(event) {
-                                var olFeature = event.feature;
-                                var layer = event.object.layer;
-                                var schema = widget.findSchemaByLayer(layer);
-                                var digitizerToolSetElement = $(".digitizing-tool-set", frame);
-                                var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
-                                //
-                                //if(schema.isClustered){
-                                //    $.notify('Create new feature is by clusterring not posible');
-                                //    return false;
-                                //}
-
-                                olFeature.isNew = true;
-                                olFeature.attributes = olFeature.data = properties;
-                                olFeature.layer = layer;
-                                olFeature.schema = schema;
-
-                                //widget.reloadFeatures(layer);
-                                layer.redraw();
-
-                                digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
-
-                                widget.unsavedFeatures[olFeature.id] = olFeature;
-
-                                if(schema.openFormAfterEdit) {
-                                    widget._openFeatureEditDialog(olFeature);
-                                }
-
-                                //return true;
-                            },
-                            onModification: function(event) {
-                                var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
-                                widget.unsavedFeatures[event.id] = feature;
-                            },
-                            // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
-                            onComplete: function(event) {
-                                var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
-                                widget.unsavedFeatures[event.id] = feature;
-                            }
-                        }
+                        controlEvents: widget._setupControlEvents(frame, newFeatureDefaultProperties)
                     }, {
                         type:     'checkbox',
                         cssClass: 'onlyExtent',
@@ -785,36 +673,7 @@
                 toolSetView.generateElements({
                     type:     'fieldSet',
                     cssClass: 'right',
-                    children: [{
-                        type:     'button',
-                        cssClass: 'fa fa-eye-slash',
-                        title:    'Alle ausblenden',
-                        click:    function(e) {
-                            var tableApi = table.resultTable('getApi');
-                            tableApi.rows(function(idx, feature, row) {
-                                var $row = $(row);
-                                var visibilityButton = $row.find('.button.icon-visibility');
-                                visibilityButton.addClass('icon-invisibility');
-                                $row.addClass('invisible-feature');
-                                feature.layer.drawFeature(feature, 'invisible');
-                            });
-                        }
-                    }, {
-                        type:  'button',
-                        title: 'Alle einblenden',
-                        cssClass: 'fa fa-eye',
-                        click: function(e) {
-                            var tableApi = table.resultTable('getApi');
-                            tableApi.rows(function(idx, feature, row) {
-                                var $row = $(row);
-                                var visibilityButton = $row.find('.button.icon-visibility');
-                                visibilityButton.removeClass('icon-invisibility');
-                                $row.removeClass('invisible-feature');
-                                var styleId = feature.styleId ? feature.styleId : 'default';
-                                feature.layer.drawFeature(feature, styleId);
-                            });
-                        }
-                    }]
+                    children: widget._setupToolSetViewButtons(table)
                 });
 
                 frame.append('<div style="clear:both;"/>');
@@ -932,6 +791,178 @@
             });
 
             widget.updateClusterStrategies();
+        },
+
+        /**
+         * Setup control buttons for a table row
+         *
+         * @param {object} schema
+         * @returns {Array} control buttons
+         * @private
+         */
+        _setupTableRowButtons: function(schema) {
+            var buttons = [];
+
+            buttons.push({
+                title:     translate('feature.edit'),
+                className: 'edit',
+                onClick:   function(olFeature, ui) {
+                    widget._openFeatureEditDialog(olFeature);
+                }
+            });
+
+            if(schema.allowCustomerStyle) {
+                buttons.push({
+                    title:     translate('feature.style.change'),
+                    className: 'style',
+                    onClick:   function(olFeature, ui) {
+                        widget.openChangeStyleDialog(olFeature);
+                    }
+                });
+            }
+
+            if(schema.allowChangeVisibility) {
+                buttons.push({
+                    title:     'Objekt anzeigen/ausblenden', //translate('feature.visibility.change'),
+                    className: 'visibility',
+                    onClick:   function(olFeature, ui, b, c) {
+                        var layer = olFeature.layer;
+                        if(!olFeature.renderIntent || olFeature.renderIntent != 'invisible') {
+                            layer.drawFeature(olFeature, 'invisible');
+                            ui.addClass("icon-invisibility");
+                            ui.closest('tr').addClass('invisible-feature');
+                        } else {
+                            if(olFeature.styleId) {
+                                layer.drawFeature(olFeature, olFeature.styleId);
+                            } else {
+                                layer.drawFeature(olFeature, 'default');
+                            }
+                            ui.removeClass("icon-invisibility");
+                            ui.closest('tr').removeClass('invisible-feature');
+                        }
+                    }
+                });
+            }
+
+            if(schema.allowPrintMetadata) {
+                buttons.push({
+                    title:     'Sachdaten drucken',
+                    className: 'printmetadata-inactive',
+                    onClick:   function(olFeature, ui, b, c) {
+                        if(!olFeature.printMetadata || olFeature.printMetadata == false) {
+                            olFeature.printMetadata = true;
+                            ui.addClass("icon-printmetadata-active");
+                            ui.removeClass("icon-printmetadata-inactive");
+                        } else {
+                            olFeature.printMetadata = false;
+                            ui.removeClass("icon-printmetadata-active");
+                            ui.addClass("icon-printmetadata-inactive");
+                        }
+                    }
+                });
+            }
+
+            if(schema.allowDelete) {
+                buttons.push({
+                    title:     translate("feature.remove"),
+                    className: 'remove',
+                    cssClass:  'critical',
+                    onClick:   function(olFeature, ui) {
+                        widget.removeFeature(olFeature);
+                    }
+                });
+            }
+
+            return buttons;
+        },
+
+        /**
+         * Setup tool set view buttons
+         *
+         * @param table
+         * @returns {Array} buttons
+         * @private
+         */
+        _setupToolSetViewButtons: function(table) {
+            var toolSetViewButtons = [{
+                type:     'button',
+                cssClass: 'fa fa-eye-slash',
+                title:    'Alle ausblenden',
+                click:    function(e) {
+                    var tableApi = table.resultTable('getApi');
+                    tableApi.rows(function(idx, feature, row) {
+                        var $row = $(row);
+                        var visibilityButton = $row.find('.button.icon-visibility');
+                        visibilityButton.addClass('icon-invisibility');
+                        $row.addClass('invisible-feature');
+                        feature.layer.drawFeature(feature, 'invisible');
+                    });
+                }
+            }, {
+                type:  'button',
+                title: 'Alle einblenden',
+                cssClass: 'fa fa-eye',
+                click: function(e) {
+                    var tableApi = table.resultTable('getApi');
+                    tableApi.rows(function(idx, feature, row) {
+                        var $row = $(row);
+                        var visibilityButton = $row.find('.button.icon-visibility');
+                        visibilityButton.removeClass('icon-invisibility');
+                        $row.removeClass('invisible-feature');
+                        var styleId = feature.styleId ? feature.styleId : 'default';
+                        feature.layer.drawFeature(feature, styleId);
+                    });
+                }
+            }];
+
+            return toolSetViewButtons;
+        },
+
+        /**
+         * Setup control events
+         * Info: http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
+         *
+         * @param frame
+         * @param newFeatureDefaultProperties
+         * @returns {{featureadded: featureadded, onModification: onModification, onComplete: onComplete}}
+         * @private
+         */
+        _setupControlEvents: function(frame, newFeatureDefaultProperties) {
+            var widget = this;
+            var controlEvents = {
+                featureadded: function(event) {
+                    var olFeature = event.feature;
+                    var layer = event.object.layer;
+                    var schema = widget.findSchemaByLayer(layer);
+                    var digitizerToolSetElement = $(".digitizing-tool-set", frame);
+                    var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
+
+                    olFeature.isNew = true;
+                    olFeature.attributes = olFeature.data = properties;
+                    olFeature.layer = layer;
+                    olFeature.schema = schema;
+
+                    layer.redraw();
+
+                    digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
+
+                    widget.unsavedFeatures[olFeature.id] = olFeature;
+
+                    if(schema.openFormAfterEdit) {
+                        widget._openFeatureEditDialog(olFeature);
+                    }
+                },
+                onModification: function(event) {
+                    var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                    widget.unsavedFeatures[event.id] = feature;
+                },
+                onComplete: function(event) {
+                    var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                    widget.unsavedFeatures[event.id] = feature;
+                }
+            };
+
+            return controlEvents;
         },
 
         /**
