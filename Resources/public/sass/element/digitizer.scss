@@ -1,6 +1,6 @@
 // @i mport url("components/jQuery-contextMenu/src/jquery.contextMenu.css");
 @import "../vendor/viscreation/vis-ui.js/src/styles/modal";
-@import "../vendor/mapbender/digitizer/Mapbender/DigitizerBundle/Resources/public/sass/element/context-menu";
+@import "../vendor/mapbender/digitizer/Resources/public/sass/element/context-menu";
 
 $selectColor: #F7F79A;
 
@@ -71,6 +71,20 @@ $selectColor: #F7F79A;
         word-wrap: break-word;       /* Internet Explorer 5.5+ */
         word-break: break-all;
         white-space: normal;
+        .icon-style:before{
+          font-family: FontAwesome;
+          content: "\f1fb";
+        }
+
+        .icon-visibility:before{
+          font-family: FontAwesome;
+          content: "\f06e";
+        }
+
+        .icon-invisibility:before{
+          font-family: FontAwesome;
+          content: "\f070";
+        }
       }
     }
   }
@@ -86,6 +100,36 @@ $selectColor: #F7F79A;
 }
 
 .modal-body {
+
+  .form-group {
+    button {
+      // TODO: remove it after fixed in vis-ui.js
+      width: auto;
+      display: inline-block;
+      vertical-align: middle;
+      margin-bottom: 7px;
+      position: relative;
+      height: 24px;
+      margin-left: 5px;
+    }
+  }
+
+  &.popup-dialog {
+    > fieldset.form-group{
+      margin-left: -5px;
+      margin-right: 10px;
+      margin-top: 0px;
+    }
+    > label,
+    > form,
+    > .form-group{
+      margin: 5px 10px 0;
+      &:last-child{
+        margin-bottom: 10px;
+      }
+    }
+  }
+
   div.notifyjs-container > div.notifyjs-bootstrap-base > span {
     display: block;
     width: auto;

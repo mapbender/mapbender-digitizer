@@ -11,15 +11,21 @@
     "require": {
         "php": ">=5.3.3",
         "blueimp/jquery-file-upload": "9.*",
-        "mapbender/data-source": "0.* || dev-master",
-        "phayes/geophp": "1.2"
+        "mapbender/data-source": "0.*",
+        "viscreation/vis-ui.js": "0.*"
     },
-    "minimum-stability": "dev",
     "config": {
         "bin-dir": "bin"
     },
     "autoload": {
-		"psr-0": {"Mapbender\\DigitizerBundle": "."}
+        "psr-0": {
+            "Mapbender\\DigitizerBundle": "."
+        }
     },
-    "target-dir": "Mapbender/DigitizerBundle"
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.1.x-dev",
+            "dev-release/1.0": "1.0.x-dev"
+        }
+    }
 }

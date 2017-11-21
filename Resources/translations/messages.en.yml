@@ -1,0 +1,36 @@
+mb.digitizer:
+  feature:
+    remove: Remove
+    remove:
+      successfully: 'Feature removed.'
+      from:
+        database: 'Delete feature.'
+    zoomTo: Zoom to
+    edit: 'Edit feature'
+    attributes: 'Feature attributes'
+    save: Save
+    save:
+      successfully: 'Feature saved.'
+    loading:
+      error: 'Features loading error.'
+    print: Print
+    style:
+      change: Change style
+  toolset:
+    current-extent: 'Select by current extent only'
+  cancel: Cancel
+  api:
+    query:
+      error-message: 'Feature API query error.'
+  table:
+    fields:
+      not.defined: 'Feature table fields aren''t defined.'
+  search:
+    title: Search
+    table:
+      empty: Empty.
+      zerorecords: 'No entries.'
+      info:
+        status: '_START_ to _END_ from _TOTAL_'
+        empty: 'No results'
+        filtered: '(filter from _MAX_ Objects.)'

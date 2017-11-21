@@ -52,6 +52,22 @@
             }
         }
     }
+
+    /**
+     * Escape HTML chars
+     * @param text
+     * @returns {string}
+     */
+    function escapeHtml(text) {
+        'use strict';
+        return text.replace(/[\"&'\/<>]/g, function (a) {
+            return {
+                '"': '&quot;', '&': '&amp;', "'": '&#39;',
+                '/': '&#47;',  '<': '&lt;',  '>': '&gt;'
+            }[a];
+        });
+    }
+
     /**
      * Example:
      *     Mapbender.confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
@@ -106,14 +122,18 @@
             allowDigitize: true,
             allowDelete: true,
             allowEditData:true,
+            allowCustomerStyle: false,
+            allowChangeVisibility: false,
+            allowDeleteByCancelNewGeometry: false,
+            allowCancelButton: true,
             openFormAfterEdit: true,
             maxResults: 5001,
+            pageLength: 10,
             oneInstanceEdit: true,
             searchType: "currentExtent",
             inlineSearch: false,
             useContextMenu: false,
             clustering: [
-                {scale: 5000000, distance: 30}
             ]
         },
         // Default tool-sets
@@ -159,8 +179,8 @@
                 strokeWidth: 1,
                 strokeColor: '#6fb536',
                 fillColor:   "#6fb536",
-                fillOpacity: 0.3,
-                label: '${label}'
+                fillOpacity: 0.3
+                //, label: '${label}'
             },
             'select':  {
                 strokeWidth: 3,
@@ -189,6 +209,30 @@
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
         },
 
+        /**
+         * Open change style dialog
+         * @returns {*}
+         */
+        openChangeStyleDialog: function(olFeature) {
+            var layer = olFeature.layer;
+            var styleMap = layer.styleMap;
+            var styles = styleMap.styles;
+            var defaultStyleData = olFeature.style ? olFeature.style : _.extend({}, styles["default"].defaultStyle);
+
+            var styleEditor = $("<div/>")
+                .featureStyleEditor({
+                    data:      defaultStyleData,
+                    commonTab: false
+                })
+                .bind('featurestyleeditorsubmit', function(e, context) {
+                    var formData = styleEditor.formData();
+                    olFeature.style = _.extend({}, styleMap.createSymbolizer(olFeature), formData);
+                    layer.drawFeature(olFeature);
+                    styleEditor.featureStyleEditor("close");
+                });
+            return styleEditor;
+        },
+
         _setup: function() {
             var frames = [];
             var widget = this;
@@ -211,12 +255,30 @@
                 var schema = widget.findSchemaByLayer(layer);
                 var subItems = {
                     zoomTo: {
-                        name:   "Zoom to",
+                        name:   translate('feature.zoomTo'),
                         action: function(key, options, parameters) {
                             widget.zoomToJsonFeature(parameters.olFeature);
                         }
                     }
                 };
+
+                if(schema.allowChangeVisibility) {
+                    subItems['style'] = {
+                        name:   translate('feature.visibility.change'),
+                        action: function(key, options, parameters) {
+                            widget.openChangeStyleDialog(olFeature);
+                        }
+                    };
+                }
+
+                if(schema.allowCustomerStyle) {
+                    subItems['style'] = {
+                        name:   translate('feature.style.change'),
+                        action: function(key, options, parameters) {
+                            widget.openChangeStyleDialog(olFeature);
+                        }
+                    };
+                }
 
                 if(schema.allowEditData) {
                     subItems['edit'] = {
@@ -226,6 +288,7 @@
                         }
                     }
                 }
+
                 if(schema.allowDelete) {
                     subItems['remove'] = {
                         name:   translate('feature.remove'),
@@ -247,6 +310,12 @@
              */
             $(map.div).contextMenu({
                 selector: 'div',
+                events: {
+                    show: function(options) {
+                        var schema = widget.currentSettings;
+                        return schema.useContextMenu;
+                    }
+                },
                 build:    function(trigger, e) {
                     var items = {};
                     var schema = widget.currentSettings;
@@ -275,6 +344,11 @@
                                 return
                             }
                             var parameters = options.items[selectedElement.parent().closest('.context-menu-item').data('contextMenuKey')];
+
+                            if(!parameters){
+                                return;
+                            }
+
                             if(parameters.items[key].action) {
                                 parameters.items[key].action(key, options, parameters);
                             }
@@ -283,8 +357,18 @@
                 }
             });
 
-            $.contextMenu({
+            $(element).contextMenu({
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
+                events: {
+                    show: function(options) {
+                        var tr = $(options.$trigger);
+                        var resultTable = tr.closest('.mapbender-element-result-table');
+                        var api = resultTable.resultTable('getApi');
+                        var olFeature = api.row(tr).data();
+                        var schema = widget.findFeatureSchema(olFeature);
+                        return schema.useContextMenu;
+                    }
+                },
                 build:    function($trigger, e) {
                     var tr = $($trigger);
                     var resultTable = tr.closest('.mapbender-element-result-table');
@@ -293,15 +377,14 @@
                     var schema = widget.findFeatureSchema(olFeature);
                     var items = {};
 
-                    if(schema.useContextMenu) {
-                        items['zoom'] = {name: "Zoom to"};
-                        if(schema.allowDelete) {
-                            items['removeFeature'] = {name: "Remove"};
-                        }
+                    items['changeStyle'] = {name: translate('feature.style.change')};
+                    items['zoom'] = {name: translate('feature.zoomTo')};
+                    if(schema.allowDelete) {
+                        items['removeFeature'] = {name:  translate('feature.remove')};
+                    }
 
-                        if(schema.allowEditData) {
-                            items['edit'] = {name: "Edit"};
-                        }
+                    if(schema.allowEditData) {
+                        items['edit'] = {name:  translate('feature.edit')};
                     }
 
                     return {
@@ -322,6 +405,10 @@
                                 case 'exportGeoJson':
                                     widget.exportGeoJson(olFeature);
                                     break;
+
+                                case 'changeStyle':
+                                    widget.openChangeStyleDialog(olFeature);
+                                    break;
                             }
                         },
                         items:    items
@@ -331,6 +418,16 @@
 
             if(options.tableTranslation) {
                 translateObject(options.tableTranslation);
+            } else {
+                options.tableTranslation = {
+                    sSearch:       translate("search.title") + ':',
+                    sEmptyTable:   translate("search.table.empty"),
+                    sZeroRecords:  translate("search.table.zerorecords"),
+                    sInfo:         translate("search.table.info.status"),
+                    sInfoEmpty:    translate("search.table.info.empty"),
+                    sInfoFiltered: translate("search.table.info.filtered")
+                };
+                //translateObject(options.tableTranslation);
             }
 
             // build select options
@@ -351,6 +448,7 @@
 
                 var buttons = [];
 
+
                 buttons.push({
                     title:     translate('feature.edit'),
                     className: 'edit',
@@ -358,6 +456,35 @@
                         widget._openFeatureEditDialog(olFeature);
                     }
                 });
+
+                if(schema.allowCustomerStyle) {
+                    buttons.push({
+                        title:     translate('feature.style.change'),
+                        className: 'style',
+                        onClick:   function(olFeature, ui) {
+                            widget.openChangeStyleDialog(olFeature);
+                        }
+                    });
+                }
+
+                if(schema.allowChangeVisibility) {
+                    buttons.push({
+                        title:     translate('feature.visibility.change'),
+                        className: 'visibility',
+                        onClick:   function(olFeature, ui, b, c) {
+                            var layer = olFeature.layer;
+                            if(!olFeature.renderIntent || olFeature.renderIntent != 'invisible') {
+                                layer.drawFeature(olFeature, 'invisible');
+                                ui.addClass("icon-invisibility");
+                                ui.closest('tr').addClass('invisible-feature');
+                            } else {
+                                layer.drawFeature(olFeature, 'default');
+                                ui.removeClass("icon-invisibility");
+                                ui.closest('tr').removeClass('invisible-feature');
+                            }
+                        }
+                    });
+                }
 
                 if(schema.allowDelete) {
                     buttons.push({
@@ -383,14 +510,20 @@
                 $.each(schema.tableFields, function(fieldName, fieldSettings) {
                     newFeatureDefaultProperties[fieldName] = "";
                     fieldSettings.title = fieldSettings.label;
-                    fieldSettings.data = "data." + fieldName;
+                    fieldSettings.data = function(row, type, val, meta) {
+                        var data = row.data[fieldName];
+                        if(typeof (data) == 'string') {
+                            data = escapeHtml(data); //.replace(/\//g, '&#x2F;');
+                        }
+                        return data;
+                    };
                     columns.push(fieldSettings);
                 });
 
 
                 var resultTableSettings = {
                     lengthChange: false,
-                    pageLength: 10,
+                    pageLength: schema.pageLength,
                     searching: schema.inlineSearch,
                     info: true,
                     processing: false,
@@ -424,9 +557,23 @@
 
                 frame.generateElements({
                     children: [{
-                        type:           'digitizingToolSet',
-                        children:       toolset,
-                        layer:    layer,
+                        type:         'digitizingToolSet',
+                        children:     toolset,
+                        layer:        layer,
+                        translations: {
+                            drawPoint:             "Punkt setzen",
+                            drawLine:              "Linie zeichnen",
+                            drawPolygon:           "Polygon zeichnen",
+                            drawRectangle:         "Rechteck zeichen",
+                            drawCircle:            "Kreis zeichen",
+                            drawEllipse:           "Ellipse zeichen",
+                            drawDonut:             "Polygon mit Enklave zeichnen",
+                            selectAndEditGeometry: "Objekt Position/Größe beabeiten",
+                            moveGeometry:          "Objekt bewegen",
+                            selectGeometry:        "Objekt selektieren",
+                            removeSelected:        "Selektierte objekte löschen",
+                            removeAll:             "Alle Objekte löschen"
+                        },
 
                         // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
                         controlEvents: {
@@ -435,7 +582,7 @@
                                 var layer = event.object.layer;
                                 var schema = widget.findSchemaByLayer(layer);
                                 var digitizerToolSetElement = $(".digitizing-tool-set", frame);
-                                var properties = jQuery.extend(true, {}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
+                                var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
                                 //
                                 //if(schema.isClustered){
                                 //    $.notify('Create new feature is by clusterring not posible');
@@ -445,11 +592,9 @@
                                 olFeature.isNew = true;
                                 olFeature.attributes = olFeature.data = properties;
                                 olFeature.layer = layer;
+                                olFeature.schema = schema;
 
                                 //widget.reloadFeatures(layer);
-                                window.setTimeout(function(){
-
-                                },1000);
                                 layer.redraw();
 
                                 digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
@@ -457,6 +602,8 @@
                                 if(schema.openFormAfterEdit) {
                                     widget._openFeatureEditDialog(olFeature);
                                 }
+
+                                widget.reloadFeatures(layer);
 
                                 //return true;
                             }
@@ -488,7 +635,6 @@
                 option.data("schemaSettings",schema);
                 selector.append(option);
 
-                var tableWidget = table.data('visUiJsResultTable');
                 var selectControl = new OpenLayers.Control.SelectFeature(layer, {
                     hover:        true,
                     clickFeature: function(feature) {
@@ -500,30 +646,20 @@
                         widget._openFeatureEditDialog(features[0]);
                     },
                     overFeature:  function(feature) {
-                        var features = feature.cluster ? feature.cluster : [feature];
-                        var lastFeatureRow;
-
-                        _.each(features, function(feature) {
-                            var domRow = tableWidget.getDomRowByData(feature);
-                            tableWidget.showByRow(domRow);
-                            domRow.addClass('hover');
-                            lastFeatureRow = domRow;
-                        });
-                        tableWidget.showByRow(lastFeatureRow);
-
-                        layer.drawFeature(feature, 'select');
+                        widget._highlightSchemaFeature(schema, feature, true);
                     },
                     outFeature:   function(feature) {
-                        var features = feature.cluster ? feature.cluster : [feature];
-
-                        _.each(features, function(feature) {
-                            var domRow = tableWidget.getDomRowByData(feature);
-                            domRow.removeClass('hover');
-                        });
-
-                        layer.drawFeature(feature, 'default');
+                        widget._highlightSchemaFeature(schema, feature, false);
                     }
                 });
+
+                // Workaround to move map by touch vector features
+                if(typeof(selectControl.handlers) != "undefined") { // OL 2.7
+                    selectControl.handlers.feature.stopDown = false;
+                } else if(typeof(selectFeatureControl.handler) != "undefined") { // OL < 2.7
+                    selectControl.handler.stopDown = false;
+                    selectControl.handler.stopUp = false;
+                }
 
                 schema.selectControl = selectControl;
                 selectControl.deactivate();
@@ -615,7 +751,7 @@
                 widget._getData();
                 widget.updateClusterStrategies();
             });
-            //widget.map.resetLayersZIndex();
+            map.resetLayersZIndex();
             widget._trigger('ready');
 
             element.bind("mbdigitizerbeforechangedigitizing", function(e, sets) {
@@ -644,110 +780,141 @@
         },
 
         /**
+         * On save button click
+         *
+         * @param {OpenLayers.Feature} feature OpenLayers feature
+         * @private
+         */
+        saveFeature: function(feature) {
+            if(feature.disabled){
+                return;
+            }
+
+            var widget = this;
+            var schema = feature.schema;
+            var dialog = feature.editDialog;
+            var table = schema.table;
+            var tableWidget = table.data('visUiJsResultTable');
+            var tableApi = table.resultTable('getApi');
+            var formData = dialog.formData();
+            var wkt = new OpenLayers.Format.WKT().write(feature);
+            var srid = widget.map.getProjectionObject().proj.srsProjNumber;
+            var request = {
+                properties: formData,
+                geometry:   wkt,
+                srid:       srid,
+                type:       "Feature"
+            };
+
+            tableApi.draw({"paging": "page"});
+
+            if(!feature.isNew && feature.fid) {
+                request.id = feature.fid;
+            }
+
+            var errorInputs = $(".has-error", dialog);
+            var hasErrors = errorInputs.size() > 0;
+
+            if(!hasErrors) {
+                feature.disabled = true;
+                dialog.disableForm();
+                widget.query('save', {
+                    schema:  schema.schemaName,
+                    feature: request
+                }).done(function(response) {
+
+                    if(response.hasOwnProperty('errors')) {
+                        dialog.enableForm();
+                        feature.disabled = false;
+                        $.each(response.errors, function(i, error) {
+                            $.notify(error.message, {
+                                title:     'API Error',
+                                autoHide:  false,
+                                className: 'error'
+                            });
+                            console.error(error.message);
+                        });
+                        return;
+                    }
+
+                    var hasFeatureAfterSave = response.features.length > 0;
+
+                    if(!hasFeatureAfterSave) {
+                        widget.reloadFeatures(schema.layer, _.without(schema.layer.features, feature));
+                        dialog.popupDialog('close');
+                        return;
+                    }
+
+                    var layer = feature.layer;
+                    var dbFeature = response.features[0];
+                    feature.fid = dbFeature.id;
+                    feature.state = null;
+                    $.extend(feature.data, dbFeature.properties);
+
+                    var geoJsonReader = new OpenLayers.Format.GeoJSON();
+                    var newFeatures = geoJsonReader.read(response);
+                    var newFeature = _.first(newFeatures);
+
+                    _.each(['fid', 'disabled', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent'], function(key) {
+                        newFeature[key] = feature[key];
+                    });
+
+                    widget.reloadFeatures(schema.layer, _.union(_.without(layer.features, feature), [newFeature]));
+                    feature = newFeature;
+
+                    tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
+                    tableApi.draw();
+
+                    delete feature.isNew;
+
+                    dialog.enableForm();
+                    feature.disabled = false;
+                    dialog.popupDialog('close');
+                    $.notify(translate("feature.save.successfully"), 'info');
+                });
+            }
+        },
+
+        /**
          * Open edit feature dialog
          *
          * @param olFeature open layer feature
          * @private
          */
-
         _openFeatureEditDialog: function(olFeature) {
             var widget = this;
+            var schema = olFeature.schema;
+            var buttons = [];
 
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
             }
 
-            var schema = widget.findSchemaByLayer(olFeature.layer);
-            var table = schema.table;
-            var tableApi = table.resultTable('getApi');
-            var buttons = [];
-
-            if(schema.popup && schema.popup.buttons) {
-                $.each(schema.popup.buttons, function(k, button){
-                    $.each(button, function(k, property) {
-                        if(k == "click") {
-                            button[k] = function() {
-                                var form = $(this).closest(".ui-dialog-content");
-                                var data = form.formData();
-                                eval(property);
-                            }
+            if(schema.printable) {
+                var printButton = {
+                    text:  translate("feature.print"),
+                    click: function() {
+                        var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
+                        if(printWidget) {
+                            var dialog = $(this).closest(".ui-dialog-content");
+                            var olFeature = dialog.data('feature');
+                            printWidget.printDigitizerFeature(olFeature.schema.featureTypeName ? olFeature.schema.featureTypeName : olFeature.schema.schemaName, olFeature.fid);
+                        } else {
+                            $.notify("Druck element ist nicht verfügbar!");
                         }
-                        if(k == "title") {
-                            button[k] = translate(property, false);
-                        }
-                    });
-                    buttons.push(button)
-                });
+                    }
+                };
+                buttons.push(printButton);
             }
 
-            if(schema.allowEditData){
+            if(schema.allowEditData) {
                 var saveButton = {
-                    text: translate("feature.save"),
+                    text:  translate("feature.save"),
                     click: function() {
-                        var form = $(this).closest(".ui-dialog-content");
-                        var formData = form.formData();
-                        var wkt = new OpenLayers.Format.WKT().write(olFeature);
-                        var srid = widget.map.getProjectionObject().proj.srsProjNumber;
-                        var request = {
-                            properties: formData,
-                            geometry:   wkt,
-                            srid:       srid,
-                            type:       "Feature"
-                        };
-
-                        $.extend(olFeature.data, formData);
-                        tableApi.draw({"paging":"page"});
-
-                        if(!olFeature.isNew && olFeature.fid){
-                            request.id = olFeature.fid;
-                        }
-
-                        var errorInputs = $(".has-error", dialog);
-                        var hasErrors = errorInputs.size() > 0;
-
-                        if( !hasErrors ){
-                            form.disableForm();
-                            widget.query('save', {
-                                schema:  widget.schemaName,
-                                feature: request
-                            }).done(function(response) {
-
-                                if(response.hasOwnProperty('errors')) {
-                                    form.enableForm();
-                                    $.each(response.errors, function(i, error) {
-                                        $.notify(error.message, {
-                                            title:     'API Error',
-                                            autoHide:  false,
-                                            className: 'error'
-                                        });
-                                        console.error(error.message);
-                                    });
-                                    return;
-                                }
-
-                                var hasFeatureAfterSave = response.features.length > 0;
-
-                                if(!hasFeatureAfterSave) {
-                                    widget.reloadFeatures( schema.layer, _.without(schema.layer.features, olFeature));
-                                    widget.currentPopup.popupDialog('close');
-                                    return;
-                                }
-
-                                var dbFeature = response.features[0];
-                                olFeature.fid = dbFeature.id;
-                                olFeature.state = null;
-                                $.extend(olFeature.data, dbFeature.properties);
-
-                                tableApi.draw();
-
-                                delete olFeature.isNew;
-
-                                form.enableForm();
-                                widget.currentPopup.popupDialog('close');
-                                $.notify(translate("feature.save.successfully"), 'info');
-
-                            });
-                        }
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var feature = dialog.data('feature');
+                        feature.editDialog = dialog;
+                        widget.saveFeature(feature);
                     }
                 };
                 buttons.push(saveButton);
@@ -757,25 +924,67 @@
                     text:  translate("feature.remove"),
                     'class': 'critical',
                     click: function() {
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var olFeature = dialog.data('feature');
                         widget.removeFeature(olFeature);
                         widget.currentPopup.popupDialog('close');
                     }
                 });
             }
-            buttons.push({
-                text:  translate("mb.digitizer.cancel",true),
-                click: function() {
-                    widget.currentPopup.popupDialog('close');
-                }
-            });
+
+            if(schema.allowCancelButton){
+                buttons.push({
+                    text:  translate("cancel"),
+                    click: function() {
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var olFeature = dialog.data('feature');
+                        var options = widget.options;
+                        if(olFeature.hasOwnProperty('isNew') && schema.allowDeleteByCancelNewGeometry) {
+                            widget.removeFeature(olFeature);
+                        }
+                        widget.currentPopup.popupDialog('close');
+                    }
+                });
+            }
+
             var popupConfiguration = {
                 title: translate("feature.attributes"),
-                width: widget.featureEditDialogWidth,
+                width: widget.featureEditDialogWidth
             };
 
-            if(schema.popup) {
+            if(schema.popup) {widget
+                if(!schema.popup.buttons) {
+                    schema.popup.buttons = [];
+                }
                 $.extend(popupConfiguration, schema.popup);
-                popupConfiguration.buttons = buttons;
+
+                if(popupConfiguration.buttons && !schema._popupButtonsInitialized) {
+                    // Initialize custom button events
+                    _.each(popupConfiguration.buttons, function(button) {
+                        if(button.click) {
+                            var eventHandlerCode = button.click;
+                            button.click = function(e) {
+                                var _widget = widget;
+                                var el = $(this);
+                                var form = $(this).closest(".ui-dialog-content");
+                                var feature = form.data('feature');
+                                var data = feature.data;
+
+                                eval(eventHandlerCode);
+
+                                e.preventDefault();
+                                return false;
+                            }
+                        }
+                    });
+
+                    // Merge default and custom buttons
+                    _.each(buttons, function(button) {
+                        popupConfiguration.buttons.push(button);
+                    });
+
+                    schema._popupButtonsInitialized = true;
+                }
             }
 
             var dialog = $("<div/>");
@@ -786,6 +995,47 @@
             }
 
             DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+
+                if(item.type == "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
+
+                    item.type = "fieldSet";
+                    // TODO: merge item with new select
+                    item.children = [{
+                        type:    "select",
+                        id:      item.id,
+                        options: item.options,
+                        name:    item.name
+
+                    }, {
+                        type:  "button",
+                        title: "Edit",
+                        click: function() {
+                            var dataItemId = $(this).siblings().find('select').val();
+                            var selectRef = $(this).siblings().find('select');
+
+                            var dataStoreId = item.dataStore.id;
+                            widget.query("datastore/get", {
+                                schema:     widget.schemaName,
+                                id:         dataStoreId,
+                                dataItemId: dataItemId
+                            }).done(function(data) {
+                                widget._openEditDialog(data, item.dataStore.popupItems, item, selectRef);
+                            });
+
+                            return false;
+                        }
+                    }, {
+                        type:  "button",
+                        title: "New",
+                        click: function() {
+                            var selectRef = $(this).siblings().find('select');
+                            widget._openEditDialog({}, item.dataStore.popupItems, item, selectRef);
+
+                            return false;
+                        }
+                    }]
+                }
+
                 if(item.type == "file") {
                     item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + olFeature.fid + "&field=" + item.name;
                     if(item.hasOwnProperty("name") && olFeature.data.hasOwnProperty(item.name) && olFeature.data[item.name]) {
@@ -834,9 +1084,12 @@
                 }
             });
 
+            dialog.data('feature', olFeature);
             dialog.generateElements({children: widget.currentSettings.formItems});
             dialog.popupDialog(popupConfiguration);
+            schema.editDialog = dialog;
             widget.currentPopup = dialog;
+
             setTimeout(function() {
                 dialog.formData(olFeature.data);
             }, 21);
@@ -940,65 +1193,111 @@
                     break;
 
                 default: // all
-
-                    if(schema.searchType == "currentExtent") {
-                        schema.allFeaturesQueued = false;
-                    }
-
-                    if(!schema.allFeaturesQueued) {
-                        schema.allFeaturesQueued = true;
-                        widget.query('select', request).done(function(featureCollection) {
-                            widget._onFeatureCollectionLoaded(featureCollection, schema, this);
-                        });
-                    }
+                    widget.query('select', request).done(function(featureCollection) {
+                        widget._onFeatureCollectionLoaded(featureCollection, schema, this);
+                    });
                     break;
             }
         },
 
-        _highlightFeature: function(olFeature, highlight) {
-            if(!olFeature) {
+        /**
+         * Highlight schema feature on the map and table view
+         *
+         * @param {object} schema
+         * @param {OpenLayers.Feature} feature
+         * @param {boolean} highlight
+         * @private
+         */
+        _highlightSchemaFeature: function(schema, feature, highlight) {
+            var widget = this;
+            var table = schema.table;
+            var tableWidget = table.data('visUiJsResultTable');
+            var isSketchFeature = !feature.cluster && feature._sketch && _.size(feature.data) == 0;
+            var features = feature.cluster ? feature.cluster : [feature];
+            var layer = feature.layer;
+            var domRow;
+
+            if(feature.renderIntent && feature.renderIntent == 'invisible') {
                 return;
             }
 
-            var layer = olFeature.layer;
-            var isClustered = !!layer.features[0].cluster;
+            if(isSketchFeature) {
+                return;
+            }
 
+            //widget._highlightFeature(feature, highlight);
+            layer.drawFeature(feature, highlight ? 'select' : 'default');
 
-            if(isClustered){
-                var cluster;
-                _.each(layer.features,function(clusteredFeature){
-                    _.each(clusteredFeature.cluster, function(_feature){
-                        if(_feature == olFeature){
-                            cluster = clusteredFeature;
-                            return false;
-                        }
-                    });
-                    if(cluster){
-                        layer.drawFeature(olFeature, highlight ? 'select' : 'default');
+            for (var k in features) {
+                domRow = tableWidget.getDomRowByData(features[k]);
+                if(domRow && domRow.size()) {
+                    tableWidget.showByRow(domRow);
+                    if(highlight) {
+                        domRow.addClass('hover');
+                    } else {
+                        domRow.removeClass('hover');
+                    }
+                    break;
+                }
+            }
+        },
+
+        /**
+         * Highlight feature on the map
+         *
+         * @param {OpenLayers.Feature} feature
+         * @param {boolean} highlight
+         * @private
+         */
+        _highlightFeature: function(feature, highlight) {
+            if(!feature || (feature && !feature.layer)) {
+                return;
+            }
+
+            if(feature.renderIntent && feature.renderIntent == 'invisible') {
+                return;
+            }
+
+            var layer = feature.layer;
+            var isFeatureVisible = _.contains(feature.layer.features, feature);
+            var features = [];
+
+            if(isFeatureVisible) {
+                features.push(feature);
+            } else {
+                _.each(feature.layer.features, function(_feature) {
+                    if(_feature.cluster && _.contains(_feature.cluster, feature)) {
+                        features.push(_feature);
                         return false;
                     }
                 });
-            }else{
-                layer.drawFeature(olFeature, highlight ? 'select' : 'default');
             }
 
+            _.each(features, function(feature) {
+                layer.drawFeature(feature, highlight ? 'select' : 'default');
+            })
+        },
 
-            //olFeature.renderIntent = highlight ? 'select' : 'default';
-            //olFeature.layer.redraw();
+        /**
+         * Get target OpenLayers map object
+         *
+         * @returns  {OpenLayers.Map}
+         */
+        getMap: function(){
+            return this.map;
         },
 
         /**
          * Zoom to JSON feature
          *
-         * @param olFeature
+         * @param {OpenLayers.Feature} feature
          */
-        zoomToJsonFeature: function(olFeature) {
+        zoomToJsonFeature: function(feature) {
             var widget = this;
-            var olMap = widget.map;
-            var schema = widget.findFeatureSchema(olFeature);
+            var olMap = widget.getMap();
+            var schema = widget.findFeatureSchema(feature);
 
-            olMap.zoomToExtent(olFeature.geometry.getBounds());
-
+            olMap.zoomToExtent(feature.geometry.getBounds());
             if(schema.hasOwnProperty('zoomScaleDenominator')) {
                 olMap.zoomToScale(schema.zoomScaleDenominator);
             }
@@ -1007,7 +1306,7 @@
         /**
          * Open feature edit dialog
          *
-         * @param feature
+         * @param {OpenLayers.Feature} feature
          */
         exportGeoJson: function(feature) {
             var widget = this;
@@ -1016,7 +1315,7 @@
                 feature: feature,
                 format:  'GeoJSON'
             }).done(function(response) {
-                debugger;
+
             })
         },
 
@@ -1110,28 +1409,6 @@
         },
 
         /**
-         * Get features from cluster
-         *
-         * @param olFeaturesRaw
-         * @returns {Array}
-         */
-        getFeaturesFromCluster: function(olFeaturesRaw) {
-            var olFeatures = [];
-            $.each(olFeaturesRaw, function(i, olFeature) {
-                if(olFeature.cluster) {
-                    $.each(olFeature.cluster, function(i, _olFeature) {
-                        _olFeature.layer = olFeature.layer;
-                        olFeatures.push(_olFeature);
-                    })
-                } else {
-                    olFeatures.push(olFeature);
-                }
-            });
-            return olFeatures;
-        },
-
-
-        /**
          * Find olFeature schema by olFeature data
          *
          * @param olFeature
@@ -1141,20 +1418,6 @@
             var widget = this;
             var options = widget.options;
             return _.find(options.schemes, {layer: olFeature.layer});
-        },
-
-        /**
-         * Normalize open layer feature
-         * @param _olFeature
-         * @returns {*}
-         */
-        normalizeOpenLayerFeature: function(_olFeature) {
-            var olFeature = _olFeature;
-            if(_olFeature.cluster) {
-                olFeature = _.last(_olFeature.cluster);
-                olFeature.layer = _olFeature.layer;
-            }
-            return olFeature;
         },
 
         /**
@@ -1172,11 +1435,20 @@
                 'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), {
                     context: {
                         label: function(feature) {
+                            if(feature.attributes.hasOwnProperty("label")){
+                                return feature.attributes.label;
+                            }
                             return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
                         }
                     }
                 }),
-                'select':  new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select))
+                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select)),
+                'invisible': new OpenLayers.Style({
+                    strokeWidth: 1,
+                    fillColor:   "#F7F79A",
+                    strokeColor: '#6fb536',
+                    display: 'none'
+                })
             }, {extendDefault: true});
 
             if(isClustered) {
@@ -1185,9 +1457,18 @@
                 schema.clusterStrategy = clusterStrategy;
             }
             var layer = new OpenLayers.Layer.Vector(schema.label, {
-                styleMap:   styleMap,
-                strategies: strategies
+                styleMap:        styleMap,
+                rendererOptions: {zIndexing: true},
+                strategies:      strategies
             });
+
+            if(schema.maxScale) {
+                layer.options.maxScale = schema.maxScale;
+            }
+
+            if(schema.minScale) {
+                layer.options.minScale = schema.minScale;
+            }
 
             layer.name = schema.label;
             return layer;
@@ -1196,9 +1477,9 @@
         /**
          * Remove OL feature
          *
-         * @param feature
          * @version 0.2
          * @returns {*}
+         * @param  {OpenLayers.Feature} olFeature
          */
         removeFeature: function(olFeature) {
             var widget = this;
@@ -1216,7 +1497,6 @@
                 //var clonedFeature = jQuery.extend(true, {}, olFeature);
                 var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
                 widget.reloadFeatures(layer, _.without(existingFeatures, olFeature));
-
 
                 widget._trigger('featureRemoved', null, {
                     schema:  schema,
@@ -1334,7 +1614,37 @@
                 features: filteredNewFeatures
             });
 
-            widget.reloadFeatures(layer, _.union(newUniqueFeatures, visibleFeatures));
+            var _features = _.union(newUniqueFeatures, visibleFeatures);
+            var features = [];
+            var polygones = [];
+            var lineStrings = [];
+            var points = [];
+
+            _.each(_features, function(feature) {
+                if(!feature.geometry){
+                    return;
+                }
+                switch (feature.geometry.CLASS_NAME) {
+                    case  "OpenLayers.Geometry.Polygon":
+                        polygones.push(feature);
+                        break;
+                    case  "OpenLayers.Geometry.LineString":
+                        lineStrings.push(feature);
+                        break;
+                    case  "OpenLayers.Geometry.Point":
+                        points.push(feature);
+                        // if(feature.attributes.label) {
+                        //     feature.style = new OpenLayers.Style({
+                        //         'label': '${label}'
+                        //     });
+                        // }
+                        break;
+                    default:
+                        features.push(feature);
+                }
+            });
+
+            widget.reloadFeatures(layer, _.union(features, polygones, lineStrings, points));
         },
 
         /**
@@ -1354,19 +1664,208 @@
                 features = _.flatten(_.pluck(layer.features, "cluster"));
             }
 
+            var featuresWithoutDrawElements = _.difference(features, _.where(features, {_sketch: true}));
+
             layer.removeAllFeatures();
             layer.addFeatures(features);
 
             // Add layer to feature
             _.each(features, function(feature) {
                 feature.layer = layer;
+                feature.schema = schema;
             });
 
             layer.redraw();
 
             tableApi.clear();
-            tableApi.rows.add(features);
+            tableApi.rows.add(featuresWithoutDrawElements);
             tableApi.draw();
+
+            // var tbody = $(tableApi.body());
+
+            // Post handling
+            var nodes = tableApi.rows(function(idx, data, row) {
+                var isInvisible = data.renderIntent == 'invisible';
+                if(isInvisible) {
+                    var $row = $(row);
+                    var visibilityButton = $row.find('.button.icon-visibility');
+                    visibilityButton.addClass('icon-invisibility');
+                    $row.addClass('invisible-feature');
+                }
+                return true;
+            });
+        },
+
+        _openEditDialog: function(dataItem, formItems, schema, ref) {
+            var schemaName = this.schemaName;
+            var widget = this;
+            var uniqueKey = schema.dataStore.uniqueId;
+            var buttons = [];
+
+            if(widget.currentPopup.currentPopup) {
+                widget.currentPopup.currentPopup.popupDialog('close');
+                widget.currentPopup.currentPopup = null;
+            }
+
+            var saveButton = {
+                text:  translate("mb.data.store.save", true),
+                click: function() {
+                    var form = $(this).closest(".ui-dialog-content");
+                    var errorInputs = $(".has-error", dialog);
+                    var hasErrors = errorInputs.size() > 0;
+
+                    if(!hasErrors) {
+                        var formData = form.formData();
+                        var uniqueIdKey = schema.dataStore.uniqueId;
+                        var isNew = !dataItem.hasOwnProperty(uniqueIdKey) && !!dataItem[uniqueIdKey];
+
+                        if(!isNew) {
+                            formData[uniqueIdKey] = dataItem[uniqueIdKey];
+                        } else {
+                            delete formData[uniqueIdKey];
+                        }
+
+                        form.disableForm();
+                        widget.query('datastore/save', {
+                            schema:     schemaName,
+                            dataItem:   formData,
+                            id:         schema.dataStore.id,
+                            dataItemId: dataItem[uniqueKey]
+                        }).done(function(response) {
+                            if(response.hasOwnProperty('errors')) {
+                                form.enableForm();
+                                $.each(response.errors, function(i, error) {
+                                    $.notify(error.message, {
+                                        title:     'API Error',
+                                        autoHide:  false,
+                                        className: 'error'
+                                    });
+                                    console.error(error.message);
+                                });
+                                return;
+                            }
+                            _.extend(dataItem, response.dataItem);
+                            if(isNew) {
+                                var textKey = item.dataStore.text;
+                                var uniqueKey = item.dataStore.uniqueId;
+
+                                ref.append('<option value="' + dataItem[uniqueKey] + '">' + dataItem[textKey] + '</option>');
+                            }
+                            widget.currentPopup.currentPopup.popupDialog('close');
+                            widget.currentPopup.currentPopup = null;
+                            $.notify(translate("mb.data.store.save.successfully", true), 'info');
+                        }).done(function() {
+                            form.enableForm();
+                        });
+                    }
+                }
+            };
+            buttons.push(saveButton);
+
+            buttons.push({
+                text:    translate("mb.data.store.remove", true),
+                'class': 'critical',
+                click:   function() {
+                    widget.query('datastore/remove', {
+                        schema:     schemaName,
+                        dataItem:  dataItem,
+                        id:         schema.dataStore.id,
+
+                    }).done(function(response) {
+
+                        //widget.removeData(dataItem);
+                        widget.currentPopup.currentPopup.popupDialog('close');
+                        widget.currentPopup.currentPopup = null;
+                    })
+                }
+            });
+
+            buttons.push({
+                text:  translate("cancel"),
+                click: function() {
+                    widget.currentPopup.currentPopup.popupDialog('close');
+                    widget.currentPopup.currentPopup = null;
+                }
+            });
+            var dialog = $("<div/>");
+            dialog.on("popupdialogopen", function(event, ui) {
+                setTimeout(function() {
+                    dialog.formData(dataItem);
+
+                }, 1);
+            });
+
+            /*   if(!schema.elementsTranslated) {
+             translateStructure(widget.currentSettings.formItems);
+             schema.elementsTranslated = true;
+             } */
+
+            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+                if(item.type == "file") {
+                    item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + dataItem.fid + "&field=" + item.name;
+                    if(item.hasOwnProperty("name") && dataItem.data.hasOwnProperty(item.name) && dataItem.data[item.name]) {
+                        item.dbSrc = dataItem.data[item.name];
+                        if(schema.featureType.files) {
+                            $.each(schema.featureType.files, function(k, fileInfo) {
+                                if(fileInfo.field && fileInfo.field == item.name) {
+                                    if(fileInfo.formats) {
+                                        item.accept = fileInfo.formats;
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                }
+
+                if(item.type == 'image') {
+
+                    if(!item.origSrc) {
+                        item.origSrc = item.src;
+                    }
+
+                    if(item.hasOwnProperty("name") && dataItem.data.hasOwnProperty(item.name) && dataItem.data[item.name]) {
+                        item.dbSrc = dataItem.data[item.name];
+                        if(schema.featureType.files) {
+                            $.each(schema.featureType.files, function(k, fileInfo) {
+                                if(fileInfo.field && fileInfo.field == item.name) {
+
+                                    if(fileInfo.uri) {
+                                        item.dbSrc = fileInfo.uri + "/" + item.dbSrc;
+                                    } else {
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    var src = item.dbSrc ? item.dbSrc : item.origSrc;
+                    if(item.relative) {
+                        item.src = src.match(/^(http[s]?\:|\/{2})/) ? src : Mapbender.configuration.application.urls.asset + src;
+                    } else {
+                        item.src = src;
+                    }
+                }
+            });
+            /*  if(schema.popup.buttons) {
+             buttons = _.union(schema.popup.buttons, buttons);
+             } */
+            var popupConfig = _.extend({
+                title: translate("edit.title"),
+                width: widget.featureEditDialogWidth,
+            }, schema.popup);
+
+            popupConfig.buttons = buttons;
+
+            dialog.generateElements({children: formItems});
+            dialog.popupDialog(popupConfig);
+            dialog.addClass("data-store-edit-data");
+            widget.currentPopup.currentPopup = dialog;
+            return dialog;
+        },
+
+        save: function(dataItem) {
+            //dataItem.uniqueId
         },
 
         /**
@@ -1387,7 +1886,33 @@
                 data:        JSON.stringify(request)
             }).error(function(xhr) {
                 var errorMessage = translate('api.query.error-message');
-                $.notify(errorMessage + JSON.stringify(xhr.responseText));
+                var errorDom = $(xhr.responseText);
+
+                if(errorDom.size() && errorDom.is(".sf-reset")) {
+                    errorMessage += "\n" + errorDom.find(".block_exception h2").text() + "\n";
+                    errorMessage += "Trace:\n";
+                    _.each(errorDom.find(".traces li"), function(li) {
+                        errorMessage += $(li).text() + "\n";
+                    });
+
+                } else if(errorDom.has(".loginBox.login").size()) {
+                    var loginURL = errorDom.find(".loginBox.login form").attr("action").replace(/\/check$/, '');
+                    location.href = loginURL;
+                    // $("<div/>")
+                    //     .popupDialog({
+                    //         modal:  true,
+                    //         height: 400,
+                    //         width:  "600px"
+                    //     })
+                    //     .append($("<iframe src='" + loginURL + "'> "))
+                    $.notify("Bitte loggen sie sich ein.");
+                } else {
+                    errorMessage += JSON.stringify(xhr.responseText);
+                }
+
+                $.notify(errorMessage, {
+                    autoHide: false
+                });
                 console.log(errorMessage, xhr);
             });
         }
