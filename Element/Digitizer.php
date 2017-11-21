@@ -77,7 +77,6 @@ class Digitizer extends BaseElement
         }
         return $configuration;
     }
-
     /**
      * Prepare request feautre data by the form definition
      *
