@@ -1,6 +1,8 @@
 // @i mport url("components/jQuery-contextMenu/src/jquery.contextMenu.css");
 @import "../vendor/viscreation/vis-ui.js/src/styles/modal";
 @import "../vendor/mapbender/digitizer/Resources/public/sass/element/context-menu";
+@import url("components/select2/select2-built.css");
+@import url("components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css");
 
 $selectColor: #F7F79A;
 
@@ -22,6 +24,12 @@ $selectColor: #F7F79A;
       font-weight: bold;
     }
     margin-bottom: 10px;
+  }
+
+  > .frame{
+    .fa:before {
+      font-family: FontAwesome;
+    }
   }
 
   .mapbender-element-result-table {
@@ -84,6 +92,18 @@ $selectColor: #F7F79A;
         .icon-invisibility:before{
           font-family: FontAwesome;
           content: "\f070";
+        }
+
+        .icon-printmetadata-active:before{
+            font-family: FontAwesome;
+            content: "\f02f";
+            color: black;
+        }
+
+        .icon-printmetadata-inactive:before{
+            font-family: FontAwesome;
+            content: "\f02f";
+            color: grey;
         }
       }
     }
