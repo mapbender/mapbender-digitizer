@@ -688,18 +688,11 @@
                 var schema = this;
                 var option = $("<option/>");
                 var layer = schema.layer = widget.createSchemaFeatureLayer(schema);
+                var buttons = [];
                 //schema.clusterStrategy = layer.strategies[0];
 
-
                 // Merge settings with default values from options
-                for (var k in options) {
-                    if(k == "schemes" || k == "target" || k == "create" || k == 'jsSrc' || k == 'disabled') {
-                        continue;
-                    }
-                    schema[k] = schema.hasOwnProperty(k) ? schema[k] : options[k];
-                }
-
-                var buttons = [];
+                _.defaults(schema,_.omit(options,['schemes', 'target', 'create', 'jsSrc', 'disabled']));
 
                 if(schema.allowLocate){
                     buttons.push({
@@ -911,7 +904,7 @@
 
                 schema.schemaName = schemaName;
 
-                var toolset = widget.toolsets[schema.featureType.geomType];
+                var toolset = widget.toolsets[schema.featureType.geomType ];
                 if(schema.hasOwnProperty("toolset")){
                     toolset = schema.toolset;
                 }
@@ -923,25 +916,40 @@
                     })
                 }
 
+                var toolSetTranslations = {
+                    drawPoint:             "Punkt setzen",
+                    drawLine:              "Linie zeichnen",
+                    drawPolygon:           "Polygon zeichnen",
+                    drawRectangle:         "Rechteck zeichen",
+                    drawCircle:            "Kreis zeichen",
+                    drawEllipse:           "Ellipse zeichen",
+                    drawDonut:             "Polygon mit Enklave zeichnen",
+                    selectAndEditGeometry: "Objekt Position/Größe beabeiten",
+                    moveGeometry:          "Objekt bewegen",
+                    selectGeometry:        "Objekt selektieren",
+                    removeSelected:        "Selektierte objekte löschen",
+                    removeAll:             "Alle Objekte löschen"
+                };
+
+                // Merge subjects with available translations
+                if(schema.featureType && schema.featureType.geomType) {
+                    var geomType = schema.featureType.geomType;
+                    var translationPrefix = 'mb.digitizer.toolset.' + geomType + '.';
+
+                    _.each(Mapbender.i18n, function(v, k) {
+                        if(k.indexOf(translationPrefix) === 0) {
+                            var shortKeyName = k.split(translationPrefix)[1];
+                            toolSetTranslations[shortKeyName] = v;
+                        }
+                    });
+                }
+
                 frame.generateElements({
                     children: [{
                         type:         'digitizingToolSet',
                         children:     toolset,
                         layer:        layer,
-                        translations: {
-                            drawPoint:             "Punkt setzen",
-                            drawLine:              "Linie zeichnen",
-                            drawPolygon:           "Polygon zeichnen",
-                            drawRectangle:         "Rechteck zeichen",
-                            drawCircle:            "Kreis zeichen",
-                            drawEllipse:           "Ellipse zeichen",
-                            drawDonut:             "Polygon mit Enklave zeichnen",
-                            selectAndEditGeometry: "Objekt Position/Größe beabeiten",
-                            moveGeometry:          "Objekt bewegen",
-                            selectGeometry:        "Objekt selektieren",
-                            removeSelected:        "Selektierte objekte löschen",
-                            removeAll:             "Alle Objekte löschen"
-                        },
+                        translations: toolSetTranslations,
 
                         // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
                         controlEvents: {
