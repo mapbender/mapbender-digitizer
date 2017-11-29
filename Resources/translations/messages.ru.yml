@@ -16,6 +16,10 @@ mb.digitizer:
     print: Print
     style:
       change: Change style
+    clone:
+      title: Клонировать
+      on:
+        error: Копирование объекта запрещено.
   toolset:
     current-extent: 'Ограничить поиск в пределах видимости'
   cancel: Отменить

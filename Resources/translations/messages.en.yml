@@ -16,6 +16,10 @@ mb.digitizer:
     print: Print
     style:
       change: Change style
+    clone:
+      title: Copy
+      on:
+        error: Object coping is denied.
   toolset:
     current-extent: 'Select by current extent only'
   cancel: Cancel

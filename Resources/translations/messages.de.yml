@@ -16,6 +16,10 @@ mb.digitizer:
     print: Druck
     style:
       change: Stil ändern
+    clone:
+      title: Duplizieren
+      on:
+        error: Duplizieren des Objektes ist nicht erlaubt.
   toolset:
     current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
   cancel: Abbrechen
