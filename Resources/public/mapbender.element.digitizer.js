@@ -725,28 +725,8 @@
                         title:     translate('feature.clone.title'),
                         className: 'clone',
                         cssClass:  ' fa fa-files-o',
-                        onClick:   function(olFeature, ui) {
-                            var layer = olFeature.layer;
-                            var schema = olFeature.schema;
-                            var allowCopy = true;
-
-                            _.each(schema.copy.rules, function(ruleCode) {
-                                var feature = olFeature;
-                                eval('allowCopy = ' + ruleCode + ';');
-                                if(!allowCopy) {
-                                    return false;
-                                }
-                            });
-
-                            if(!allowCopy) {
-                                $.notify("Copy for the object is denied.");
-                                return;
-                            }
-
-                            var newFeature = widget.copyFeature(olFeature);
-
-                            layer.addFeatures([newFeature]);
-                            // widget._applyStyle(widget.styles.copy, newFeature);
+                        onClick:  function(olFeature, ui){
+                            widget.copyFeature(olFeature);
                         }
                     });
                 }
@@ -1285,16 +1265,32 @@
         /**
          * Copy feature
          *
-         * @param feature
+         * @param {OpenLayers.Feature} feature
          */
-        copyFeature: function(feature) {
+        copyFeature: function(feature ) {
             var widget = this;
             var schema = feature.schema;
+            var layer = feature.layer;
             var newFeature = feature.clone();
             var config = schema.copy;
             var defaultAttributes = getValueOrDefault(config, "data",{});
+            var allowCopy = true;
+
+            _.each(schema.copy.rules, function(ruleCode) {
+                var f = feature;
+                eval('allowCopy = ' + ruleCode + ';');
+                if(!allowCopy) {
+                    return false;
+                }
+            });
+
+            if(!allowCopy) {
+                $.notify(translate('feature.clone.on.error'));
+                return;
+            }
 
             newFeature.attrubites = _.extend({}, defaultAttributes, feature.attributes);
+
             _.each(defaultAttributes,function(key,value) {
                if(newFeature.attrubites[key] === null){
                    newFeature.attrubites[key] = value;
@@ -1319,6 +1315,8 @@
                     widget._openFeatureEditDialog(feature);
                 }
             });
+
+            layer.addFeatures([newFeature]);
 
             return newFeature;
         },
@@ -1480,6 +1478,17 @@
                     }
                 };
                 buttons.push(printButton);
+            }
+
+            if(schema.copy.enable) {
+                buttons.push({
+                    text: translate('feature.clone.title'),
+                    click: function(e) {
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var feature = dialog.data('feature');
+                        widget.copyFeature(olFeature);
+                    }
+                });
             }
 
             if(schema.allowCustomerStyle) {
