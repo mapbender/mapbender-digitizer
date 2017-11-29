@@ -8,8 +8,8 @@ mb.digitizer:
     zoomTo: Heranzoomen
     edit: Bearbeiten
     attributes: Objektinformationen
-    save: Speichern
     save:
+      title: Speichern
       successfully: 'Objekt wurde gespeichert.'
     loading:
       error: 'Objekte konnten nicht geladen werden!'

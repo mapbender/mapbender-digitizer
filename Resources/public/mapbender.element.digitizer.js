@@ -1504,7 +1504,7 @@
             }
             if(schema.allowEditData) {
                 var saveButton = {
-                    text:  translate("feature.save"),
+                    text:  translate("feature.save.title"),
                     click: function() {
                         var dialog = $(this).closest(".ui-dialog-content");
                         var feature = dialog.data('feature');

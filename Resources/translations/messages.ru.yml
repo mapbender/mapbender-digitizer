@@ -8,8 +8,8 @@ mb.digitizer:
     zoomTo: Zoom to
     edit: Редактировать
     attributes: Атрибуты
-    save: Сохранить
     save:
+      title: Сохранить
       successfully: 'Геометрия сохранена.'
     loading:
       error: 'Ошибка при загрузке геометрий.'
