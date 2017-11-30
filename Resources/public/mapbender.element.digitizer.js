@@ -1289,14 +1289,16 @@
                 return;
             }
 
-            newFeature.attrubites = _.extend({}, defaultAttributes, feature.attributes);
-
-            _.each(defaultAttributes,function(key,value) {
-               if(newFeature.attrubites[key] === null){
-                   newFeature.attrubites[key] = value;
-               }
+            var newAttributes = {};
+            _.extend(newAttributes, defaultAttributes);
+            _.each(feature.attributes, function(v, k) {
+                if(v === '' || v === null) {
+                    return;
+                }
+                newAttributes[k] = v;
             });
-            newFeature.isNew = true;
+
+            newFeature.data = newFeature.properties = newFeature.attributes = newAttributes;
             newFeature.schema = schema;
 
             widget.saveFeature(newFeature).done(function(response) {
@@ -1312,7 +1314,7 @@
                         return eval(successHandler + ";");
                     }(newFeature);
                 } else {
-                    widget._openFeatureEditDialog(feature);
+                    widget._openFeatureEditDialog(newFeature);
                 }
             });
 
