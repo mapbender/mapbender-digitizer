@@ -1319,6 +1319,7 @@
             });
 
             layer.addFeatures([newFeature]);
+            layer.drawFeature(feature, 'copy');
 
             return newFeature;
         },
@@ -2096,6 +2097,12 @@
                 label:       '${label}',
                 fontSize:    15
             });
+
+            var copyStyleData = getValueOrDefault(schema, 'copy.style', null);
+
+            if(copyStyleData) {
+                styleMap.styles.copy = new OpenLayers.Style(copyStyleData);
+            }
 
             if(isClustered) {
                 var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
