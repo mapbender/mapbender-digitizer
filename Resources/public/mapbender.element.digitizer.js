@@ -2057,19 +2057,24 @@
             var styles = schema.styles ? schema.styles : {};
             var isClustered = schema.isClustered = schema.hasOwnProperty('clustering');
             var strategies = [];
-            var styleMap = new OpenLayers.StyleMap({
-                'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), {
-                    context: {
-                        label: function(feature) {
-                            if(feature.attributes.hasOwnProperty("label")){
-                                return feature.attributes.label;
-                            }
-                            return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
+            var styleContext = {
+                context: {
+                    webRootPath: Mapbender.configuration.application.urls.asset,
+                    feature: function(feature){
+                        return feature;
+                    },
+                    label: function(feature) {
+                        if(feature.attributes.hasOwnProperty("label")){
+                            return feature.attributes.label;
                         }
+                        return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
                     }
-                }),
-                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select)), //,
-                'selected':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] ? styles['selected'] : widget.styles.selected)) //,
+                }
+            };
+            var styleMap = new OpenLayers.StyleMap({
+                'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), styleContext),
+                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select), styleContext), //,
+                'selected':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] ? styles['selected'] : widget.styles.selected), styleContext) //,
                 // 'invisible':
             }, {extendDefault: true});
 
