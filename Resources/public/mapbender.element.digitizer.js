@@ -2251,6 +2251,11 @@
                 Mapbender.error(translate("features.loading.error"), featureCollection, xhr);
                 return;
             }
+
+            if(featureCollection.features && featureCollection.features.length == schema.maxResults){
+                Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
+            }
+
             var widget = this;
             var geoJsonReader = new OpenLayers.Format.GeoJSON();
             var currentExtentOnly = schema.searchType == "currentExtent";
