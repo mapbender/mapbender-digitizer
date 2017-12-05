@@ -254,6 +254,7 @@
             // Default option values
             allowDigitize: true,
             allowDelete: true,
+            allowSave: true,
             allowEditData: true,
             allowCustomerStyle: false,
             allowChangeVisibility: false,
@@ -1505,7 +1506,7 @@
                 };
                 buttons.push(styleButton);
             }
-            if(schema.allowEditData) {
+            if(schema.allowEditData && schema.allowSave) {
                 var saveButton = {
                     text:  translate("feature.save.title"),
                     click: function() {

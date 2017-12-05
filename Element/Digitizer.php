@@ -375,6 +375,10 @@ class Digitizer extends BaseElement
             throw new Exception("It is forbidden to save objects", 2);
         }
 
+        if (isset($schema["allowSave"]) && !$schema["allowSave"]) {
+            throw new Exception("It is forbidden to save objects", 2);
+        }
+
         // save once
         if (isset($request['feature'])) {
             $request['features'] = array($request['feature']);
