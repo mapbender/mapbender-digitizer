@@ -1448,9 +1448,18 @@
             var widget = this;
             var schema = olFeature.schema;
             var buttons = [];
+            var layer = olFeature.layer;
+            var map = layer.map;
+            var schemaPopupConfig = schema.popup ? schema.popup : {};
+            var isOpenLayerCloudPopup = schemaPopupConfig.type && schemaPopupConfig.type === 'openlayers-cloud';
 
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
+                if(isOpenLayerCloudPopup && schema.olFeatureCloudPopup) {
+                    map.removePopup(schema.olFeatureCloudPopup);
+                    schema.olFeatureCloudPopup.destroy();
+                    schema.olFeatureCloudPopup = null;
+                }
             }
 
             var formItems = widget.currentSettings.formItems;
@@ -1691,8 +1700,32 @@
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
 
+            if(isOpenLayerCloudPopup) {
+                // Hide original popup but not kill it.
+                dialog.closest('.ui-dialog').css({
+                    'margin-left': '-100000px'
+                }).hide(0);
+            }
+
             setTimeout(function() {
                 dialog.formData(olFeature.data);
+
+                if(isOpenLayerCloudPopup){
+                    /**
+                     * @var {OpenLayers.Popup.FramedCloud}
+                     */
+                    var olPopup = new OpenLayers.Popup.FramedCloud(
+                        "popup",
+                        OpenLayers.LonLat.fromString(olFeature.geometry.toShortString()),
+                        null,
+                        dialog.html(),
+                        null,
+                        true
+                    );
+                    schema.olFeatureCloudPopup = olPopup;
+                    map.addPopup(olPopup);
+                }
+
             }, 21);
 
             return dialog;
@@ -2487,6 +2520,7 @@
                     widget.currentPopup.currentPopup = null;
                 }
             });
+
             var dialog = $("<div/>");
             dialog.on("popupdialogopen", function(event, ui) {
                 setTimeout(function() {
