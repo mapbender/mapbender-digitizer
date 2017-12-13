@@ -1271,7 +1271,7 @@
         copyFeature: function(feature ) {
             var widget = this;
             var schema = feature.schema;
-            var layer = feature.layer;
+            var layer = schema.layer;
             var newFeature = feature.clone();
             var config = schema.copy;
             var defaultAttributes = getValueOrDefault(config, "data",{});
@@ -1301,28 +1301,33 @@
 
             newFeature.data = newFeature.properties = newFeature.attributes = newAttributes;
             newFeature.schema = schema;
+            delete newFeature.fid;
 
-            widget.saveFeature(newFeature).done(function(response) {
+            return widget.saveFeature(newFeature).done(function(response) {
                 if(response.errors) {
                     Mapbender.error(translate("feature.copy.error"));
                     return;
                 }
-                widget._trigger("copyfeature", null, newFeature);
+
+                var request = this;
+                var feature = request.feature;
+                var rawFeature = response.features[0];
+
+                // layer.removeFeatures([newFeature]);
+                layer.drawFeature(feature, 'copy');
+                // newFeature.disabled = false;
+
+                widget._trigger("copyfeature", null, feature);
 
                 var successHandler = getValueOrDefault(config, "on.success");
                 if(successHandler) {
                     var r = function(feature) {
                         return eval(successHandler + ";");
-                    }(newFeature);
+                    }(feature);
                 } else {
-                    widget._openFeatureEditDialog(newFeature);
+                    widget._openFeatureEditDialog(feature);
                 }
             });
-
-            layer.addFeatures([newFeature]);
-            layer.drawFeature(feature, 'copy');
-
-            return newFeature;
         },
 
         /**
@@ -1369,7 +1374,6 @@
                     schema:  schema.schemaName,
                     feature: request
                 }).done(function(response) {
-
                     if(response.hasOwnProperty('errors')) {
                         dialog && dialog.enableForm();
                         feature.disabled = false;
@@ -1393,7 +1397,7 @@
                         return;
                     }
 
-                    var layer = feature.layer;
+                    var layer = schema.layer;
                     var dbFeature = response.features[0];
                     feature.fid = dbFeature.id;
                     feature.state = null;
@@ -1423,6 +1427,8 @@
                     dialog && dialog.enableForm();
                     feature.disabled = false;
                     dialog && dialog.popupDialog('close');
+
+                    this.feature = feature;
 
                     $.notify(translate("feature.save.successfully"), 'info');
 
