@@ -801,7 +801,8 @@
          * @private
          */
         _setupTableRowButtons: function(schema) {
-            var buttons = [];
+            var buttons = [],
+                widget = this;
 
             buttons.push({
                 title:     translate('feature.edit'),
