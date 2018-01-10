@@ -34,42 +34,6 @@
     }
 
     /**
-     * "Fake" form data for a feature that hasn't gone through attribute
-     * editing, for saving. This is used when we save a feature that has only
-     * been moved / dragged. The popup dialog with the form is not initialized
-     * in these cases.
-     * Assigned values are copied from the feature's data, if it was already
-     * stored in the db, empty otherwise.
-     *
-     * @param feature
-     * @returns {{}}
-     */
-    function initialFormData(feature) {
-        var formData = {};
-        var extractFormData;
-        extractFormData = function(definition) {
-            _.forEach(definition, function(item) {
-                if (_.isArray(item)) {
-                    // recurse into lists
-                    extractFormData(item);
-                } else if (item.name) {
-                    var currentValue = (feature.data || {})[item.name];
-                    // keep empty string, but replace undefined => null
-                    if (typeof(currentValue) === 'undefined') {
-                        currentValue = null;
-                    }
-                    formData[item.name] = currentValue;
-                } else if (item.children) {
-                    // recurse into child property (should be a list)
-                    extractFormData(item.children);
-                }
-            });
-        };
-        extractFormData(feature.schema.formItems);
-        return formData;
-    }
-
-    /**
      * Check and replace values recursive if they should be translated.
      * For checking used "translationReg" variable
      *
@@ -536,230 +500,11 @@
             }
 
             // build select options
-            $.each(options.schemes, function(schemaName){
-                var schema = this;
-                var option = $("<option/>");
-                var layer = schema.layer = widget.createSchemaFeatureLayer(schema);
-                //schema.clusterStrategy = layer.strategies[0];
+            widget._buildSelectOptions(options, map, element);
 
-
-                // Merge settings with default values from options
-                for (var k in options) {
-                    if(k == "schemes" || k == "target" || k == "create" || k == 'jsSrc' || k == 'disabled') {
-                        continue;
-                    }
-                    schema[k] = schema.hasOwnProperty(k) ? schema[k] : options[k];
-                }
-
-
-
-                option.val(schemaName).html(schema.label);
-                map.addLayer(layer);
-
-                var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
-                var columns = [];
-                var newFeatureDefaultProperties = {};
-
-                var fieldRefs = widget.theme.featureListings.schemaFields[schemaName];
-                var fieldTypePool = widget.theme.featureListings.fieldTypes;
-                var _escapeHtml = function(x) {
-                    /** @todo: handle booleans? (=> need translations) */
-                    /** @todo: display null as "n/a"? (=> need translations) */
-                    if (x === null || x === undefined) {
-                        return '';
-                    } else {
-                        return escapeHtml('' + x);
-                    }
-                };
-                $.each(fieldRefs, function(ix, fieldName) {
-                    newFeatureDefaultProperties[fieldName] = "";
-                    var fieldOptions = fieldTypePool[fieldName];
-                    if (!fieldOptions) {
-                        console.log("No field options for " + fieldName + " field for schema " + schemaName);
-                    }
-                    if (!fieldOptions.data) {
-                        fieldOptions.data = function(row) {
-                            return row.data[fieldName];
-                        };
-                    }
-                    if (!fieldOptions.render) {
-                        fieldOptions.render = _escapeHtml;
-                    }
-                    columns.push(fieldOptions);
-                });
-
-                var resultTableSettings = {
-                    lengthChange: false,
-                    pageLength: schema.pageLength,
-                    searching: schema.inlineSearch,
-                    info: true,
-                    processing: false,
-                    ordering: true,
-                    paging: true,
-                    selectable: false,
-                    autoWidth: false,
-                    columns:  columns,
-                    buttons: widget._setupTableRowButtons(schema)
-                };
-
-                if(options.tableTranslation) {
-                    resultTableSettings.oLanguage = options.tableTranslation;
-                }
-
-                var table = schema.table = $("<div/>").resultTable(resultTableSettings);
-                var searchableColumnTitles = _.pluck(_.reject(resultTableSettings.columns, function(column) {
-                    if(!column.sTitle) {
-                        return true;
-                    }
-
-                    if(column.hasOwnProperty('searchable') && column.searchable == false) {
-                        return true;
-                    }
-                }), 'sTitle');
-                table.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
-
-                var toolset = widget.toolsets[schema.featureType.geomType];
-                if(schema.hasOwnProperty("toolset")){
-                    toolset = schema.toolset;
-                }
-                if(!schema.allowDelete){
-                    $.each(toolset,function(k,tool){
-                        if(tool.type == "removeSelected"){
-                            toolset.splice(k,1);
-                        }
-                    })
-                }
-
-                frame.generateElements({
-                    children: [{
-                        type:         'digitizingToolSet',
-                        children:     toolset,
-                        layer:        layer,
-                        translations: {
-                            drawPoint:             "Punkt setzen",
-                            drawLine:              "Linie zeichnen",
-                            drawPolygon:           "Polygon zeichnen",
-                            drawRectangle:         "Rechteck zeichen",
-                            drawCircle:            "Kreis zeichen",
-                            drawEllipse:           "Ellipse zeichen",
-                            drawDonut:             "Polygon mit Enklave zeichnen",
-                            selectAndEditGeometry: "Objekt Position/Größe beabeiten",
-                            moveGeometry:          "Objekt bewegen",
-                            selectGeometry:        "Objekt selektieren",
-                            removeSelected:        "Selektierte objekte löschen",
-                            removeAll:             "Alle Objekte löschen"
-                        },
-                        controlEvents: widget._setupControlEvents(frame, newFeatureDefaultProperties)
-                    }, {
-                        type:     'checkbox',
-                        cssClass: 'onlyExtent',
-                        title:    translate('toolset.current-extent'),
-                        checked:  schema.searchType == "currentExtent",
-                        change:   function(e) {
-                            schema.searchType = $(e.originalEvent.target).prop("checked") ? "currentExtent" : "all";
-                            widget._getData();
-                        }
-                    }]
-                });
-                var toolSetView = $(".digitizing-tool-set",frame);
-
-                if(!schema.allowDigitize){
-                    toolSetView.css('display','none');
-                    toolSetView = $("<div class='digitizing-tool-sets'/>");
-                    toolSetView.insertBefore(frame.find('.onlyExtent'));
-                }
-
-
-                toolSetView.generateElements({
-                    type:     'fieldSet',
-                    cssClass: 'right',
-                    children: widget._setupToolSetViewButtons(table)
-                });
-
-                frame.append('<div style="clear:both;"/>');
-
-
-                frame.append(table);
-
-                frames.push(schema);
-                frame.css('display','none');
-
-                frame.data("schemaSettings", schema);
-
-                element.append(frame);
-                option.data("schemaSettings",schema);
-                selector.append(option);
-
-                var selectControl = new OpenLayers.Control.SelectFeature(layer, {
-                    hover:        true,
-                    clickFeature: function(feature) {
-                        var features = feature.cluster ? feature.cluster : [feature];
-
-                        if(_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
-                            return;
-                        }
-                        widget._openFeatureEditDialog(features[0]);
-                    },
-                    overFeature:  function(feature) {
-                        widget._highlightSchemaFeature(schema, feature, true);
-                    },
-                    outFeature:   function(feature) {
-                        widget._highlightSchemaFeature(schema, feature, false);
-                    }
-                });
-
-                // Workaround to move map by touch vector features
-                if(typeof(selectControl.handlers) != "undefined") { // OL 2.7
-                    selectControl.handlers.feature.stopDown = false;
-                } else if(typeof(selectFeatureControl.handler) != "undefined") { // OL < 2.7
-                    selectControl.handler.stopDown = false;
-                    selectControl.handler.stopUp = false;
-                }
-
-                schema.selectControl = selectControl;
-                selectControl.deactivate();
-                map.addControl(selectControl);
+            selector.on('change', function() {
+                widget._onSelectorChange(widget);
             });
-
-            function onSelectorChange() {
-                var option = selector.find(":selected");
-                var schema = option.data("schemaSettings");
-                var table = schema.table;
-                var tableApi = table.resultTable('getApi');
-
-
-                widget._trigger("beforeChangeDigitizing", null, {next: schema, previous: widget.currentSettings});
-
-                if(widget.currentSettings) {
-                    widget.deactivateFrame(widget.currentSettings);
-                }
-
-                widget.activateFrame(schema);
-
-                table.off('mouseenter', 'mouseleave', 'click');
-
-                table.delegate("tbody > tr", 'mouseenter', function() {
-                    var tr = this;
-                    var row = tableApi.row(tr);
-                    widget._highlightFeature(row.data(), true);
-                });
-
-                table.delegate("tbody > tr", 'mouseleave', function() {
-                    var tr = this;
-                    var row = tableApi.row(tr);
-                    widget._highlightFeature(row.data(), false);
-                });
-
-                table.delegate("tbody > tr", 'click', function() {
-                    var tr = this;
-                    var row = tableApi.row(tr);
-                    widget.zoomToJsonFeature(row.data());
-                });
-
-                widget._getData();
-            }
-
-            selector.on('change',onSelectorChange);
 
             map.events.register("moveend", this, function() {
                 widget._getData();
@@ -778,7 +523,7 @@
                     digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
                 }
             });
-            onSelectorChange();
+            widget._onSelectorChange(widget);
 
             // Check position and react by
             var containerInfo = new MapbenderContainerInfo(widget, {
@@ -816,6 +561,7 @@
                 buttons.push({
                     title:     translate('feature.style.change'),
                     className: 'style',
+                    width:          "40%",
                     onClick:   function(olFeature, ui) {
                         widget.openChangeStyleDialog(olFeature);
                     }
@@ -966,6 +712,238 @@
             return controlEvents;
         },
 
+        _buildSelectOptions: function (options, map, element) {
+            var widget = this,
+                frames = [];
+
+            $.each(options.schemes, function(schemaName){
+                var schema = this;
+                var option = $("<option/>");
+                var layer = schema.layer = widget.createSchemaFeatureLayer(schema);
+
+                // Merge settings with default values from options
+                for (var k in options) {
+                    if(k == "schemes" || k == "target" || k == "create" || k == 'jsSrc' || k == 'disabled') {
+                        continue;
+                    }
+                    schema[k] = schema.hasOwnProperty(k) ? schema[k] : options[k];
+                }
+
+                option.val(schemaName).html(schema.label);
+                map.addLayer(layer);
+
+                var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
+                var columns = [];
+                var newFeatureDefaultProperties = {};
+
+                var fieldRefs = widget.theme.featureListings.schemaFields[schemaName];
+                var fieldTypePool = widget.theme.featureListings.fieldTypes;
+                var _escapeHtml = function(x) {
+                    /** @todo: handle booleans? (=> need translations) */
+                    /** @todo: display null as "n/a"? (=> need translations) */
+                    if (x === null || x === undefined) {
+                        return '';
+                    } else {
+                        return escapeHtml('' + x);
+                    }
+                };
+                $.each(fieldRefs, function(ix, fieldName) {
+                    newFeatureDefaultProperties[fieldName] = "";
+                    var fieldOptions = fieldTypePool[fieldName];
+                    if (!fieldOptions) {
+                        console.log("No field options for " + fieldName + " field for schema " + schemaName);
+                    }
+                    if (!fieldOptions.data) {
+                        fieldOptions.data = function(row) {
+                            return row.data[fieldName];
+                        };
+                    }
+                    if (!fieldOptions.render) {
+                        fieldOptions.render = _escapeHtml;
+                    }
+                    columns.push(fieldOptions);
+                });
+
+                var resultTableSettings = {
+                    lengthChange: false,
+                    pageLength: schema.pageLength,
+                    searching: schema.inlineSearch,
+                    info: true,
+                    processing: false,
+                    ordering: true,
+                    paging: true,
+                    selectable: false,
+                    autoWidth: false,
+                    columns:  columns,
+                    buttons: widget._setupTableRowButtons(schema)
+                };
+
+                if(options.tableTranslation) {
+                    resultTableSettings.oLanguage = options.tableTranslation;
+                }
+
+                var table = schema.table = $("<div/>").resultTable(resultTableSettings);
+                var searchableColumnTitles = _.pluck(_.reject(resultTableSettings.columns, function(column) {
+                    if(!column.sTitle) {
+                        return true;
+                    }
+
+                    if(column.hasOwnProperty('searchable') && column.searchable == false) {
+                        return true;
+                    }
+                }), 'sTitle');
+                table.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
+
+                var toolset = widget.toolsets[schema.featureType.geomType];
+                if(schema.hasOwnProperty("toolset")){
+                    toolset = schema.toolset;
+                }
+                if(!schema.allowDelete){
+                    $.each(toolset,function(k,tool){
+                        if(tool.type == "removeSelected"){
+                            toolset.splice(k,1);
+                        }
+                    })
+                }
+
+                frame.generateElements({
+                    children: [{
+                        type:         'digitizingToolSet',
+                        children:     toolset,
+                        layer:        layer,
+                        translations: {
+                            drawPoint:             "Punkt setzen",
+                            drawLine:              "Linie zeichnen",
+                            drawPolygon:           "Polygon zeichnen",
+                            drawRectangle:         "Rechteck zeichen",
+                            drawCircle:            "Kreis zeichen",
+                            drawEllipse:           "Ellipse zeichen",
+                            drawDonut:             "Polygon mit Enklave zeichnen",
+                            selectAndEditGeometry: "Objekt Position/Größe beabeiten",
+                            moveGeometry:          "Objekt bewegen",
+                            selectGeometry:        "Objekt selektieren",
+                            removeSelected:        "Selektierte objekte löschen",
+                            removeAll:             "Alle Objekte löschen"
+                        },
+                        controlEvents: widget._setupControlEvents(frame, newFeatureDefaultProperties)
+                    }, {
+                        type:     'checkbox',
+                        cssClass: 'onlyExtent',
+                        title:    translate('toolset.current-extent'),
+                        checked:  schema.searchType == "currentExtent",
+                        change:   function(e) {
+                            schema.searchType = $(e.originalEvent.target).prop("checked") ? "currentExtent" : "all";
+                            widget._getData();
+                        }
+                    }]
+                });
+                var toolSetView = $(".digitizing-tool-set",frame);
+
+                if(!schema.allowDigitize){
+                    toolSetView.css('display','none');
+                    toolSetView = $("<div class='digitizing-tool-sets'/>");
+                    toolSetView.insertBefore(frame.find('.onlyExtent'));
+                }
+
+
+                toolSetView.generateElements({
+                    type:     'fieldSet',
+                    cssClass: 'right',
+                    children: widget._setupToolSetViewButtons(table)
+                });
+
+                frame.append('<div style="clear:both;"/>');
+
+
+                frame.append(table);
+
+                frames.push(schema);
+                frame.css('display','none');
+
+                frame.data("schemaSettings", schema);
+
+                element.append(frame);
+                option.data("schemaSettings",schema);
+                widget.selector.append(option);
+
+                var selectControl = widget._getSelectControls(layer);
+
+                // Workaround to move map by touch vector features
+                if(typeof(selectControl.handlers) != "undefined") { // OL 2.7
+                    selectControl.handlers.feature.stopDown = false;
+                } else if(typeof(selectFeatureControl.handler) != "undefined") { // OL < 2.7
+                    selectControl.handler.stopDown = false;
+                    selectControl.handler.stopUp = false;
+                }
+
+                schema.selectControl = selectControl;
+                selectControl.deactivate();
+                map.addControl(selectControl);
+            });
+        },
+
+        _getSelectControls: function(layer, schema) {
+            var widget = this;
+
+            var selectControl = new OpenLayers.Control.SelectFeature(layer, {
+                hover:        true,
+                clickFeature: function(feature) {
+                    var features = feature.cluster ? feature.cluster : [feature];
+
+                    if(_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
+                        return;
+                    }
+
+                    widget._openFeatureEditDialog(features[0]);
+                },
+                overFeature:  function(feature) {
+                    widget._highlightSchemaFeature(schema, feature, true);
+                },
+                outFeature:   function(feature) {
+                    widget._highlightSchemaFeature(schema, feature, false);
+                }
+            });
+
+            return selectControl;
+        },
+
+        _onSelectorChange: function (widget) {
+            var option = widget.selector.find(":selected");
+            var schema = option.data("schemaSettings");
+            var table = schema.table;
+            var tableApi = table.resultTable('getApi');
+
+            widget._trigger("beforeChangeDigitizing", null, {next: schema, previous: widget.currentSettings});
+
+            if(widget.currentSettings) {
+                widget.deactivateFrame(widget.currentSettings);
+            }
+
+            widget.activateFrame(schema);
+
+            table.off('mouseenter', 'mouseleave', 'click');
+
+            table.delegate("tbody > tr", 'mouseenter', function() {
+                var tr = this;
+                var row = tableApi.row(tr);
+                widget._highlightFeature(row.data(), true);
+            });
+
+            table.delegate("tbody > tr", 'mouseleave', function() {
+                var tr = this;
+                var row = tableApi.row(tr);
+                widget._highlightFeature(row.data(), false);
+            });
+
+            table.delegate("tbody > tr", 'click', function() {
+                var tr = this;
+                var row = tableApi.row(tr);
+                widget.zoomToJsonFeature(row.data());
+            });
+
+            widget._getData();
+        },
+
         /**
          * On save button click
          *
@@ -983,7 +961,7 @@
             var table = schema.table;
             var tableWidget = table.data('visUiJsResultTable');
             var tableApi = table.resultTable('getApi');
-            var formData = dialog && dialog.formData() || initialFormData(feature);
+            var formData = dialog && dialog.formData() || widget.initialFormData(feature);
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
             var request = {
@@ -1144,7 +1122,6 @@
                 close: function() {
                     var feature = $(this).data('feature');
                     if (feature && feature.isNew) {
-                        // console.log("Removing new feature", feature);
                         widget.removeFeature(feature);
                         delete widget.unsavedFeatures[feature.id];
                     }
@@ -1763,19 +1740,8 @@
                 return;
             }
 
-            function _removeFeatureFromUI() {
-                //var clonedFeature = jQuery.extend(true, {}, olFeature);
-                var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
-                widget.reloadFeatures(layer, _.without(existingFeatures, olFeature));
-
-                widget._trigger('featureRemoved', null, {
-                    schema:  schema,
-                    feature: featureData
-                });
-            }
-
             if(isNew) {
-                _removeFeatureFromUI()
+                widget._removeFeatureFromUI(schema, olFeature)
             } else {
                 Mapbender.confirmDialog({
                     html:      translate("feature.remove.from.database"),
@@ -1784,7 +1750,7 @@
                             schema:  schema.schemaName,
                             feature: featureData
                         }).done(function(fid) {
-                            _removeFeatureFromUI();
+                            widget._removeFeatureFromUI(schema, olFeature);
                             $.notify(translate('feature.remove.successfully'), 'info');
                         });
                     }
@@ -1792,6 +1758,19 @@
             }
 
             return olFeature;
+        },
+
+        _removeFeatureFromUI: function (schema, olFeature) {
+            var layer = olFeature.layer,
+                widget = this,
+                existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
+
+            widget.reloadFeatures(layer, _.without(existingFeatures, olFeature));
+
+            widget._trigger('featureRemoved', null, {
+                schema:  schema,
+                feature: olFeature.attributes
+            });
         },
 
         /**
@@ -2333,6 +2312,42 @@
                 visible &= !zoomConfig.min || zoomConfig.min <= scale;
             }
             return visible;
+        },
+
+        /**
+         * "Fake" form data for a feature that hasn't gone through attribute
+         * editing, for saving. This is used when we save a feature that has only
+         * been moved / dragged. The popup dialog with the form is not initialized
+         * in these cases.
+         * Assigned values are copied from the feature's data, if it was already
+         * stored in the db, empty otherwise.
+         *
+         * @param feature
+         * @returns {{}}
+         */
+        initialFormData: function (feature) {
+            var formData = {};
+            var extractFormData;
+            extractFormData = function(definition) {
+                _.forEach(definition, function(item) {
+                    if (_.isArray(item)) {
+                        // recurse into lists
+                        extractFormData(item);
+                    } else if (item.name) {
+                        var currentValue = (feature.data || {})[item.name];
+                        // keep empty string, but replace undefined => null
+                        if (typeof(currentValue) === 'undefined') {
+                            currentValue = null;
+                        }
+                        formData[item.name] = currentValue;
+                    } else if (item.children) {
+                        // recurse into child property (should be a list)
+                        extractFormData(item.children);
+                    }
+                });
+            };
+            extractFormData(feature.schema.formItems);
+            return formData;
         }
     });
 

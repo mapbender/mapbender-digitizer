@@ -163,7 +163,7 @@ class Digitizer extends BaseElement
             throw new Exception('For initialization there is no name of the declared scheme');
         }
 
-        $schema     = $schemas[$schemaName];
+        $schema = $schemas[$schemaName];
 
         if (is_array($schema['featureType'])) {
             $featureType = new FeatureType($this->container, $schema['featureType']);
@@ -175,157 +175,39 @@ class Digitizer extends BaseElement
 
         switch ($action) {
             case 'select':
-                $this->requireMethod($request, 'GET');
-                $results         = $featureType->search(array_merge($defaultCriteria, $queryParams));
+                $results = $this->selectFeatures($request, $schemas, $queryParams, $defaultCriteria, $featureType);
                 break;
 
             case 'save':
-                // save once
-                $this->requireMethod($request, 'POST');
-                if (isset($postData['feature'])) {
-                    $postData['features'] = array($postData['feature']);
-                }
-
-                // save once
-                if (isset($postData['style'])) {
-                    $postData['features'] = array($postData['feature']);
-                }
-
-                $connection = $featureType->getDriver()->getConnection();
-
-                try {
-                    // save collection
-                    if (isset($postData['features']) && is_array($postData['features'])) {
-                        foreach ($postData['features'] as $feature) {
-                            /**
-                             * @var $feature Feature
-                             */
-                            $featureData = $this->prepareQueriedFeatureData($feature, $schema['formItems']);
-
-                            foreach ($featureType->getFileInfo() as $fileConfig) {
-                                if (!isset($fileConfig['field']) || !isset($featureData["properties"][$fileConfig['field']])) {
-                                    continue;
-                                }
-                                $url                                             = $featureType->getFileUrl($fileConfig['field']);
-                                $requestUrl                                      = $featureData["properties"][$fileConfig['field']];
-                                $newUrl                                          = str_replace($url . "/", "", $requestUrl);
-                                $featureData["properties"][$fileConfig['field']] = $newUrl;
-                            }
-
-                            $feature = $featureType->save($featureData);
-
-                            $results = array_merge($featureType->search(array(
-                                'srid'  => $feature->getSrid(),
-                                'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
-                        }
-                    }
-                    $results = $featureType->toFeatureCollection($results);
-                } catch (DBALException $e) {
-                    $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
-                        "For more information have a look at the webserver log file. \n Error code: " .$e->getCode();
-                    $results = array('errors' => array(
-                        array('message' => $message, 'code' => $e->getCode())
-                    ));
-                }
-
+                $results = $this->saveFeatures($request, $postData, $featureType, $schema, $debugMode);
                 break;
 
             case 'delete':
-                $results = $featureType->remove($postData['feature']);
+                $results = $this->deleteFeature($featureType, $postData);
                 break;
 
             case 'file-upload':
-                $fieldName     = $request->get('field');
-                $urlParameters = array('schema' => $schemaName,
-                                       'fid'    => $request->get('fid'),
-                                       'field'  => $fieldName);
-                $serverUrl     = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
-                $uploadDir     = $featureType->getFilePath($fieldName);
-                $uploadUrl = $featureType->getFileUrl($fieldName) . "/";
-                $urlParameters['uploadUrl'] = $uploadUrl;
-                $uploadHandler = new Uploader(array(
-                    'upload_dir'                   => $uploadDir . "/",
-                    'script_url'                   => $serverUrl,
-                    'upload_url'                   => $uploadUrl,
-                    'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
-                    'print_response'               => false,
-                    'access_control_allow_methods' => array(
-                        'OPTIONS',
-                        'HEAD',
-                        'GET',
-                        'POST',
-                        'PUT',
-                        'PATCH',
-//                        'DELETE'
-                    ),
-                ));
-                $results       = array_merge($uploadHandler->get_response(), $urlParameters);
-
+                $results = $this->fileUpload($request, $schemaName, $featureType);
                 break;
 
             case 'datastore/get':
-                // TODO: get request ID and check
-                if (!isset($postData['id']) || !isset($postData['dataItemId'])) {
-                    $results = array(
-                        array('errors' => array(
-                            array('message' => $action . ": id or dataItemId not defined!")
-                        ))
-                    );
-                }
-
-                $id           = $postData['id'];
-                $dataItemId   = $postData['dataItemId'];
-                $dataStore    = $this->container->get("data.source")->get($id);
-                $dataItem     = $dataStore->get($dataItemId);
-                $dataItemData = null;
-                if ($dataItem) {
-                    $dataItemData = $dataItem->toArray();
-                }
-
-                $results = $dataItemData;
+                $results = $this->getDataStore($postData, $action);
                 break;
 
             case 'datastore/save':
-
-                $id          = $postData['id'];
-                $dataItem    = $postData['dataItem'];
-                $dataStore   = $this->container->get("data.source")->get($id);
-                $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
-                if (empty($postData['dataItem'][ $uniqueIdKey ])) {
-                    unset($postData['dataItem'][ $uniqueIdKey ]);
-                }
-                $results = $dataStore->save($dataItem);
-
+                $results = $this->saveDataStore($postData);
                 break;
+
             case 'datastore/remove':
-                $id          = $postData['id'];
-                $dataStore   = $this->container->get("data.source")->get($id);
-                $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
-                $dataItemId  = $postData['dataItem'][ $uniqueIdKey ];
-                $dataStore->remove($dataItemId);
+                $this->removeDataStore($postData);
                 break;
 
             case 'style/save':
-
-                $styleManager = new DigitizerStyleManager($this->container);
-                $style        = new Style(array_merge($postData['style'], array(
-                    'schemaName' => $postData['schema'],
-                    'featureId'  => $postData['featureId'],
-                    'userId'     => $this->getUserId()
-                )));
-
-                $styleData = $styleManager->save($style)->toArray();
-                unset($styleData['userId']);
-                unset($styleData['name']);
-                unset($styleData['styleMaps']);
-                unset($styleData['title']);
-                $results['style']   = $styleData;
+                $results = $this->saveStyle($postData);
                 break;
 
             case 'style/list':
-                $this->requireMethod($request, 'GET');
-                $styleManager             = new DigitizerStyleManager($this->container);
-                $results['featureStyles'] = $styleManager->getSchemaStyles($schema);
+                $results = $this->listStyle($request, $schema);
                 break;
 
             default:
@@ -337,5 +219,245 @@ class Digitizer extends BaseElement
         }
 
         return new JsonResponse($results);
+    }
+
+    /**
+     * Select features
+     *
+     * @param $request
+     * @param $schemas
+     * @param $queryParams
+     * @param $defaultCriteria
+     * @param $featureType
+     * @return mixed
+     */
+    protected function selectFeatures($request, $schemas, $queryParams, $defaultCriteria, $featureType)
+    {
+        $this->requireMethod($request, 'GET');
+        $results = $featureType->search(array_merge($defaultCriteria, $queryParams));
+        return $results;
+    }
+
+    /**
+     * Save features
+     *
+     * @param $request
+     * @param $postData
+     * @param $featureType
+     * @param $schema
+     * @param $debugMode
+     * @return array
+     */
+    protected function saveFeatures($request, $postData, $featureType, $schema, $debugMode)
+    {
+        // save once
+        $this->requireMethod($request, 'POST');
+        if (isset($postData['feature'])) {
+            $postData['features'] = array($postData['feature']);
+        }
+
+        // save once
+        if (isset($postData['style'])) {
+            $postData['features'] = array($postData['feature']);
+        }
+
+        $connection = $featureType->getDriver()->getConnection();
+
+        try {
+            // save collection
+            if (isset($postData['features']) && is_array($postData['features'])) {
+                foreach ($postData['features'] as $feature) {
+                    /**
+                     * @var $feature Feature
+                     */
+                    $featureData = $this->prepareQueriedFeatureData($feature, $schema['formItems']);
+
+                    foreach ($featureType->getFileInfo() as $fileConfig) {
+                        if (!isset($fileConfig['field']) || !isset($featureData["properties"][$fileConfig['field']])) {
+                            continue;
+                        }
+                        $url                                             = $featureType->getFileUrl($fileConfig['field']);
+                        $requestUrl                                      = $featureData["properties"][$fileConfig['field']];
+                        $newUrl                                          = str_replace($url . "/", "", $requestUrl);
+                        $featureData["properties"][$fileConfig['field']] = $newUrl;
+                    }
+
+                    $feature = $featureType->save($featureData);
+
+                    $results = array_merge($featureType->search(array(
+                        'srid'  => $feature->getSrid(),
+                        'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
+                }
+            }
+            $results = $featureType->toFeatureCollection($results);
+        } catch (DBALException $e) {
+            $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
+                "For more information have a look at the webserver log file. \n Error code: " .$e->getCode();
+            $results = array('errors' => array(
+                array('message' => $message, 'code' => $e->getCode())
+            ));
+        }
+
+        return $results;
+    }
+
+    /**
+     * Delete feature
+     *
+     * @param $featureType
+     * @param $postData
+     * @return mixed
+     */
+    protected function deleteFeature($featureType, $postData)
+    {
+        return $featureType->remove($postData['feature']);
+    }
+
+    /**
+     * File upload
+     *
+     * @param $request
+     * @param $schemaName
+     * @param $featureType
+     * @return array
+     */
+    protected function fileUpload($request, $schemaName, $featureType)
+    {
+        $fieldName     = $request->get('field');
+        $urlParameters = array('schema' => $schemaName,
+            'fid'    => $request->get('fid'),
+            'field'  => $fieldName);
+        $serverUrl     = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
+        $uploadDir     = $featureType->getFilePath($fieldName);
+        $uploadUrl = $featureType->getFileUrl($fieldName) . "/";
+        $urlParameters['uploadUrl'] = $uploadUrl;
+        $uploadHandler = new Uploader(array(
+            'upload_dir'                   => $uploadDir . "/",
+            'script_url'                   => $serverUrl,
+            'upload_url'                   => $uploadUrl,
+            'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
+            'print_response'               => false,
+            'access_control_allow_methods' => array(
+                'OPTIONS',
+                'HEAD',
+                'GET',
+                'POST',
+                'PUT',
+                'PATCH',
+            ),
+        ));
+
+        return array_merge($uploadHandler->get_response(), $urlParameters);
+    }
+
+    /**
+     * Get Data Store
+     *
+     * @param $postData
+     * @param $action
+     * @return array|null
+     */
+    protected function getDataStore($postData, $action)
+    {
+        // TODO: get request ID and check
+        if (!isset($postData['id']) || !isset($postData['dataItemId'])) {
+            $results = array(
+                array('errors' => array(
+                    array('message' => $action . ": id or dataItemId not defined!")
+                ))
+            );
+        }
+
+        $id           = $postData['id'];
+        $dataItemId   = $postData['dataItemId'];
+        $dataStore    = $this->container->get("data.source")->get($id);
+        $dataItem     = $dataStore->get($dataItemId);
+        $dataItemData = null;
+        if ($dataItem) {
+            $dataItemData = $dataItem->toArray();
+        }
+
+        $results = $dataItemData;
+
+        return $results;
+    }
+
+    /**
+     * Save Data Store
+     *
+     * @param $postData
+     * @return mixed
+     */
+    protected function saveDataStore($postData)
+    {
+        $id          = $postData['id'];
+        $dataItem    = $postData['dataItem'];
+        $dataStore   = $this->container->get("data.source")->get($id);
+        $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
+        if (empty($postData['dataItem'][ $uniqueIdKey ])) {
+            unset($postData['dataItem'][ $uniqueIdKey ]);
+        }
+        return $dataStore->save($dataItem);
+    }
+
+    /**
+     * Remove Data Store
+     *
+     * @param $postData
+     */
+    protected function removeDataStore($postData)
+    {
+        $id          = $postData['id'];
+        $dataStore   = $this->container->get("data.source")->get($id);
+        $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
+        $dataItemId  = $postData['dataItem'][ $uniqueIdKey ];
+        $dataStore->remove($dataItemId);
+    }
+
+    /**
+     * Save feature style
+     *
+     * @param $postData
+     * @return mixed
+     */
+    protected function saveStyle($postData)
+    {
+        $styleManager = new DigitizerStyleManager($this->container);
+
+        $parameters = array(
+            'schemaName' => $postData['schema'],
+            'featureId'  => $postData['featureId'],
+            'userId'     => $this->getUserId()
+        );
+        $newStyle = $postData['style'];
+
+        $styleParameters = array_merge($newStyle, $parameters);
+
+        $style  = new Style($styleParameters);
+        $styleData = $styleManager->save($style)->toArray();
+        unset($styleData['userId']);
+        unset($styleData['name']);
+        unset($styleData['styleMaps']);
+        unset($styleData['title']);
+        $results['style']   = $styleData;
+
+        return $results;
+    }
+
+    /**
+     * Get styles list
+     *
+     * @param $request
+     * @param $schema
+     * @return mixed
+     */
+    protected function listStyle($request, $schema)
+    {
+        $this->requireMethod($request, 'GET');
+        $styleManager             = new DigitizerStyleManager($this->container);
+
+        $results['featureStyles'] = $styleManager->getSchemaStyles($schema);
+
+        return $results;
     }
 }
