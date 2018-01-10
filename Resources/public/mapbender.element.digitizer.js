@@ -1204,13 +1204,18 @@
                     var tr = this;
                     var row = tableApi.row(tr);
                     var feature = row.data();
+                    var isOpenLayerCloudPopup = schema.popup && schema.popup.type && schema.popup.type === 'openlayers-cloud';
 
                     feature.selected = $('.selection input', tr).is(':checked');
 
                     widget._highlightFeature(feature);
 
-                    widget.zoomToJsonFeature(feature);
-                });
+                    if(isOpenLayerCloudPopup) {
+                        widget._openFeatureEditDialog(feature);
+                    } else {
+                        widget.zoomToJsonFeature(feature);
+                    }
+                 });
 
                 widget._getData();
             }
