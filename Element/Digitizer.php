@@ -25,6 +25,11 @@ class Digitizer extends BaseElement
     protected static $description          = "Georeferencing and Digitizing";
 
     /**
+     * @var DigitizerStyleManager
+     */
+    protected $styleManager;
+
+    /**
      * @inheritdoc
      */
     static public function listAssets()
@@ -83,7 +88,7 @@ class Digitizer extends BaseElement
         $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
         $configuration['fileUri'] = $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
 
-        if ($configuration["schemes"] && is_array($configuration["schemes"])) {
+        if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
             foreach ($configuration["schemes"] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
                     $featureTypeName           = $scheme['featureType'];
@@ -164,6 +169,7 @@ class Digitizer extends BaseElement
         }
 
         $schema = $schemas[$schemaName];
+        $this->styleManager = new DigitizerStyleManager($this->container);
 
         if (is_array($schema['featureType'])) {
             $featureType = new FeatureType($this->container, $schema['featureType']);
@@ -422,19 +428,16 @@ class Digitizer extends BaseElement
      */
     protected function saveStyle($postData)
     {
-        $styleManager = new DigitizerStyleManager($this->container);
-
         $parameters = array(
             'schemaName' => $postData['schema'],
             'featureId'  => $postData['featureId'],
             'userId'     => $this->getUserId()
         );
         $newStyle = $postData['style'];
-
         $styleParameters = array_merge($newStyle, $parameters);
 
         $style  = new Style($styleParameters);
-        $styleData = $styleManager->save($style)->toArray();
+        $styleData = $this->styleManager->save($style)->toArray();
         unset($styleData['userId']);
         unset($styleData['name']);
         unset($styleData['styleMaps']);
@@ -454,9 +457,8 @@ class Digitizer extends BaseElement
     protected function listStyle($request, $schema)
     {
         $this->requireMethod($request, 'GET');
-        $styleManager             = new DigitizerStyleManager($this->container);
 
-        $results['featureStyles'] = $styleManager->getSchemaStyles($schema);
+        $results['featureStyles'] = $this->styleManager->getSchemaStyles($schema);
 
         return $results;
     }
