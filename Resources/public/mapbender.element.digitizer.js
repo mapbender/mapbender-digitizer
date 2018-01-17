@@ -373,7 +373,7 @@
             /**
              * Set map context menu
              */
-            $(map.div).contextMenu({
+            widget.options.useContextMenu && $(map.div).contextMenu({
                 selector: 'div',
                 events: {
                     show: function(options) {
