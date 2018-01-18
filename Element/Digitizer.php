@@ -5,7 +5,6 @@ namespace Mapbender\DigitizerBundle\Element;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Mapbender\DataSourceBundle\Component\DataStore;
-use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
@@ -20,10 +19,10 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 class Digitizer extends BaseElement
 {
     /** @var string Digitizer element title */
-    protected static $title = "Digitizer";
+    protected static $title = 'Digitizer';
 
     /** @var string Digitizer element description */
-    protected static $description = "Georeferencing and Digitizing";
+    protected static $description = 'Georeferencing and Digitizing';
 
     /** @var int Default maximal search results number */
     protected $maxResults = 2500;
@@ -35,13 +34,13 @@ class Digitizer extends BaseElement
     {
         return array(
             'js'    => array(
-                "@MapbenderCoreBundle/Resources/public/mapbender.container.info.js",
+                '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
                 '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                 '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
                 '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
-                "/components/jquery-context-menu/jquery-context-menu-built.js",
-                "/components/select2/select2-built.js",
-                "/components/select2/dist/js/i18n/de.js",
+                '/components/jquery-context-menu/jquery-context-menu-built.js',
+                '/components/select2/select2-built.js',
+                '/components/select2/dist/js/i18n/de.js',
                 'feature-style-editor.js',
                 'mapbender.element.digitizer.js'
             ),
@@ -68,15 +67,17 @@ class Digitizer extends BaseElement
      * Optional: get featureType by name from global context.
      *
      * @inheritdoc
+     * @throws \RuntimeException
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
      */
     public function getConfiguration($public = true)
     {
         $configuration            = parent::getConfiguration();
         $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
-        $configuration['fileUri'] = $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
+        $configuration['fileUri'] = $this->container->getParameter('mapbender.uploads_dir') . "/" . FeatureType::UPLOAD_DIR_NAME;
 
-        if ($configuration["schemes"] && is_array($configuration["schemes"])) {
-            foreach ($configuration["schemes"] as $key => &$scheme) {
+        if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
+            foreach ($configuration['schemes'] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
                     $featureTypeName           = $scheme['featureType'];
                     $featureTypes              = $this->container->getParameter('featureTypes');
@@ -99,7 +100,6 @@ class Digitizer extends BaseElement
         }
         return $configuration;
     }
-
     /**
      * Prepare request feautre data by the form definition
      *
@@ -133,6 +133,7 @@ class Digitizer extends BaseElement
      *
      * @param string $name Feature type name
      * @return FeatureType
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
      */
     protected function getFeatureTypeBySchemaName($name)
     {
@@ -141,7 +142,7 @@ class Digitizer extends BaseElement
         if (is_array($schema['featureType'])) {
             $featureType = new FeatureType($this->container, $schema['featureType']);
         } else {
-            throw new Exception("Feature type schema settings not correct", 2);
+            throw new Exception('Feature type schema settings not correct', 2);
         }
 
         return $featureType;
@@ -233,6 +234,8 @@ class Digitizer extends BaseElement
      *
      * @param array $request
      * @return array Feature collection
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
      */
     public function selectAction($request)
     {
@@ -303,21 +306,52 @@ class Digitizer extends BaseElement
      * Remove feature
      *
      * @param $request
-     * @return bool
+     * @return array
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
      */
     public function deleteAction($request)
     {
         $schemaName = $request["schema"];
         $schema     = $this->getSchemaByName($schemaName);
 
-        if (!$schema["allowDelete"] || !$schema["allowEditData"]) {
-            throw new Exception("It is forbidden to delete objects", 2);
+        if ((isset($schema['allowDelete']) && !$schema['allowDelete']) || (isset($schema["allowEditData"]) && !$schema['allowEditData'])) {
+            throw new Exception('It is forbidden to delete objects', 2);
         }
 
-        $schemaName  = $request["schema"];
         $featureType = $this->getFeatureTypeBySchemaName($schemaName);
 
-        return $featureType->remove($request['feature']);
+        return array(
+            'result' => $featureType->remove($request['feature'])
+        );
+    }
+
+    /**
+     * Clone feature
+     *
+     * @param $request
+     * @return array
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     */
+    public function cloneFeature($request)
+    {
+        $schemaName = $request["schema"];
+        $schema      = $this->getSchemaByName($schemaName);
+        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
+        $results = array();
+
+        if (isset($schema['allowDuplicate']) && !$schema['allowDuplicate']) {
+            throw new Exception('Clone feature is forbidden', 2);
+        }
+
+        $baseId  = $request['id'];
+        $feature = $featureType->getById($baseId);
+        $feature->setId(null);
+        $feature = $featureType->save($feature);
+
+        return array(
+            'baseId'  => $baseId,
+            'feature' => $feature,
+        );
     }
 
     /**
@@ -336,7 +370,7 @@ class Digitizer extends BaseElement
         $results       = array();
         $debugMode     = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
 
-        if (!$schema["allowEditData"]) {
+        if (isset($schema["allowEditData"]) && !$schema["allowEditData"]) {
             throw new Exception("It is forbidden to save objects", 2);
         }
 
@@ -394,7 +428,7 @@ class Digitizer extends BaseElement
         $schemaName                 = $request["schema"];
         $schema                     = $this->getSchemaByName($schemaName);
 
-        if (!$schema["allowEditData"]) {
+        if (isset($schema['allowEditData']) && !$schema['allowEditData']) {
             throw new Exception("It is forbidden to save objects", 2);
         }
 
@@ -411,7 +445,7 @@ class Digitizer extends BaseElement
             'upload_dir'                   => $uploadDir . "/",
             'script_url'                   => $serverUrl,
             'upload_url'                   => $uploadUrl,
-            'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
+            'accept_file_types'            => '/\.(gif|jpe?g|png|pdf|zip)$/i',
             'print_response'               => false,
             'access_control_allow_methods' => array(
                 'OPTIONS',
@@ -518,7 +552,6 @@ class Digitizer extends BaseElement
         foreach (array(
                      'filter',
                      'geomField',
-                     'table',
                      'connection',
                      'uniqueId',
                      'sql',
@@ -534,6 +567,7 @@ class Digitizer extends BaseElement
      *
      * @param $name
      * @return mixed
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
      */
     protected function getSchemaByName($name)
     {

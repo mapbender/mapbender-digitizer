@@ -36,6 +36,91 @@
         return item;
     }
 
+    function getValueOrDefault(o, s, d) {
+        s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+        s = s.replace(/^\./, '');           // strip a leading dot
+        var a = s.split('.');
+        for (var i = 0, n = a.length; i < n; i++) {
+            var k = a[i];
+            if(k in o) {
+                o = o[k];
+            } else {
+                return d;
+            }
+        }
+        return o;
+    }
+
+    Mapbender.layerManager = new function() {
+        var layerManager = this;
+        /**
+         * @define {OpenLayers.Map}
+         */
+        var olMap;
+
+        /**
+         * Set map object to handle with
+         *
+         * @param {OpenLayers.Map} map
+         */
+        layerManager.setMap = function(map) {
+            olMap = map;
+            return layerManager;
+        };
+
+        /**
+         * Refresh layer. Only if visible.
+         *
+         * @see http://osgeo-org.1560.x6.nabble.com/layer-WMS-don-t-redraw-td5086852.html
+         * @see http://dev.openlayers.org/apidocs/files/OpenLayers/Layer-js.html#OpenLayers.Layer.redraw
+         * @see https://gis.stackexchange.com/questions/36741/how-to-update-a-vector-layer-with-wfs-protocol-after-updating-the-filter
+         * @param {OpenLayers.Layer} layer
+         * @return {OpenLayers.Layer}
+         */
+        layerManager.refreshLayer = function(layer) {
+            if(!layer.getVisibility()) {
+                return layer;
+            }
+
+            layer.setVisibility(false);
+            layer.setVisibility(true);
+
+            if(layer.redraw) {
+                layer.redraw(true);
+            }
+
+            if(layer.refresh) {
+                layer.refresh({force: true});
+            }
+            return layer;
+        };
+
+        /**
+         * Get layers by layer instance ID
+         *
+         * @param {number|string} _layerInstanceId
+         * @return {Array<OpenLayers.Layer>}
+         */
+        layerManager.getLayersByInstanceId = function(_layerInstanceId) {
+            var layers = [];
+            _.each(Mapbender.configuration.layersets, function(layerSet) {
+                _.each(layerSet, function(layerCollection) {
+                    _.each(layerCollection, function(layerInstanceInfo) {
+                        var layerInstanceId = layerInstanceInfo.origId;
+                        var layerId = layerInstanceInfo.ollid;
+                        if(layerInstanceId == _layerInstanceId) {
+                            var items = _.where(olMap.layers, {id: layerId});
+                            layers = layers.concat(items);
+                        }
+                    });
+                })
+            });
+            return layers;
+        }
+    };
+
+
+
     /**
      * "Fake" form data for a feature that hasn't gone through attribute
      * editing, for saving. This is used when we save a feature that has only
@@ -169,12 +254,31 @@
             // Default option values
             allowDigitize: true,
             allowDelete: true,
-            allowEditData:true,
-            allowCustomerStyle: true,
-            allowChangeVisibility: true,
-            allowLocate: true,
+            allowEditData: true,
+            allowCustomerStyle: false,
+            allowChangeVisibility: false,
+            allowLocate: false,
             showVisibilityNavigation: false,
             allowPrintMetadata: false,
+
+            // Copy data
+            copy: {
+                enable: false,
+                rules:  [],
+                data:   {},
+                style:  {
+                    strokeWidth:   5,
+                    fillColor:     "#f7ef7e",
+                    strokeColor:   '#4250b5',
+                    fillOpacity:   0.7,
+                    graphicZIndex: 15
+                }
+            },
+
+            // Save data
+            save: {
+            },
+
             // pop a confirmation dialog when deactivating, to ask the user to save or discard
             // current in-memory changes
             confirmSaveOnDeactivate: true,
@@ -185,6 +289,9 @@
             searchType: "currentExtent",
             inlineSearch: false,
             useContextMenu: false,
+
+            // Layer list names/ids to be refreshed after feature save complete
+            refreshLayersAfterFeatureSave: [],
             clustering: [
                 {scale: 5000000, distance: 30}
             ]
@@ -249,6 +356,13 @@
                 strokeColor:   '#b5ac14',
                 fillOpacity:   0.7,
                 graphicZIndex: 15
+            },
+            'copy':  {
+                strokeWidth:   5,
+                fillColor:     "#f7ef7e",
+                strokeColor:   '#4250b5',
+                fillOpacity:   0.7,
+                graphicZIndex: 15
             }
 
         },
@@ -260,14 +374,33 @@
          * @private
          */
         _create: function() {
-            var widget = this;
-            this.widget = this;
+            var widget = this.widget = this;
+            var element = widget.element;
+
             if(!Mapbender.checkTarget("mbDigitizer", widget.options.target)) {
                 return;
             }
-            var element = widget.element;
+
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
+
+            /**
+             * Reload schema layers after feature was modified or removed
+             */
+            element.bind('mbdigitizerfeaturesaved mbdigitizerfeatureremove', function(event, feature) {
+                var schema = feature.schema;
+                var refreshLayerNames = schema.refreshLayersAfterFeatureSave;
+
+                if(_.size(refreshLayerNames)) {
+                    Mapbender.layerManager.setMap(schema.layer.map);
+                    _.each(refreshLayerNames, function(layerInstanceId) {
+                        var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
+                        _.each(layers, function(layer) {
+                            Mapbender.layerManager.refreshLayer(layer);
+                        });
+                    });
+                }
+            });
         },
 
         /**
@@ -312,6 +445,7 @@
                         var styleDataCopy = $.extend({}, styleData);
                         olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
                     }
+                    widget._applyStyle(styleData, olFeature);
                     styleEditor.featureStyleEditor("close");
                 });
             return styleEditor;
@@ -344,6 +478,7 @@
             var options = widget.options;
             var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
             var hasOnlyOneScheme = _.size(options.schemes) === 1;
+            var currentSchemaName = getValueOrDefault(options,"schema");
 
             if(hasOnlyOneScheme) {
                 titleElement.html(_.toArray(options.schemes)[0].label);
@@ -576,6 +711,7 @@
                         }
                     });
                 }
+
                 if(schema.allowEditData){
                     buttons.push({
                         title:     translate('feature.edit'),
@@ -585,7 +721,36 @@
                         }
                     });
                 }
+                if(schema.copy.enable){
+                    buttons.push({
+                        title:     translate('feature.clone.title'),
+                        className: 'clone',
+                        cssClass:  ' fa fa-files-o',
+                        onClick:   function(olFeature, ui) {
+                            var layer = olFeature.layer;
+                            var schema = olFeature.schema;
+                            var allowCopy = true;
 
+                            _.each(schema.copy.rules, function(ruleCode) {
+                                var feature = olFeature;
+                                eval('allowCopy = ' + ruleCode + ';');
+                                if(!allowCopy) {
+                                    return false;
+                                }
+                            });
+
+                            if(!allowCopy) {
+                                $.notify("Copy for the object is denied.");
+                                return;
+                            }
+
+                            var newFeature = widget.copyFeature(olFeature);
+
+                            layer.addFeatures([newFeature]);
+                            // widget._applyStyle(widget.styles.copy, newFeature);
+                        }
+                    });
+                }
                 if(schema.allowCustomerStyle) {
                     buttons.push({
                         title:     translate('feature.style.change'),
@@ -647,6 +812,16 @@
                         }
                     });
                 }
+                // if(true) {
+                //     buttons.push({
+                //         title:     translate("feature.remove"),
+                //         className: 'remove',
+                //         cssClass:  'critical',
+                //         onClick:   function(olFeature, ui) {
+                //             widget.removeFeature(olFeature);
+                //         }
+                //     });
+                // }
 
                 option.val(schemaName).html(schema.label);
                 map.addLayer(layer);
@@ -961,7 +1136,7 @@
                                 olMap.zoomToExtent(layer.getDataExtent());
 
                                 if(schema.search.hasOwnProperty('zoomScale')) {
-                                    olMap.zoomToScale(schema.search.zoomScale);
+                                    olMap.zoomToScale(schema.search.zoomScale, true);
                                 }
                             });
                         }
@@ -1125,6 +1300,10 @@
                 widget._getData();
             }
 
+            if(currentSchemaName !== undefined) {
+                selector.val(currentSchemaName);
+            }
+
             selector.on('change',onSelectorChange);
 
             map.events.register("moveend", this, function() {
@@ -1160,10 +1339,62 @@
         },
 
         /**
+         * Evalute handler code
+         * @param handlerCode
+         * @param context
+         * @private
+         */
+        _evaluateHandler: function (handlerCode, context){
+
+        },
+
+        /**
+         * Copy feature
+         *
+         * @param feature
+         */
+        copyFeature: function(feature) {
+            var widget = this;
+            var schema = feature.schema;
+            var newFeature = feature.clone();
+            var config = schema.copy;
+            var defaultAttributes = getValueOrDefault(config, "data",{});
+
+            newFeature.attrubites = _.extend({}, defaultAttributes, feature.attributes);
+            _.each(defaultAttributes,function(key,value) {
+               if(newFeature.attrubites[key] === null){
+                   newFeature.attrubites[key] = value;
+               }
+            });
+            newFeature.isNew = true;
+            newFeature.schema = schema;
+
+            widget.saveFeature(newFeature).done(function(response) {
+                if(response.errors) {
+                    Mapbender.error(translate("feature.copy.error"));
+                    return;
+                }
+                widget._trigger("copyfeature", null, newFeature);
+
+                var successHandler = getValueOrDefault(config, "on.success");
+                if(successHandler) {
+                    var r = function(feature) {
+                        return eval(successHandler + ";");
+                    }(newFeature);
+                } else {
+                    widget._openFeatureEditDialog(feature);
+                }
+            });
+
+            return newFeature;
+        },
+
+        /**
          * On save button click
          *
          * @param {OpenLayers.Feature} feature OpenLayers feature
          * @private
+         * @return {jQuery.jqXHR} ajax XHR
          */
         saveFeature: function(feature) {
             if(feature.disabled){
@@ -1198,7 +1429,7 @@
             if(!hasErrors) {
                 feature.disabled = true;
                 dialog && dialog.disableForm();
-                widget.query('save', {
+                return widget.query('save', {
                     schema:  schema.schemaName,
                     feature: request
                 }).done(function(response) {
@@ -1256,7 +1487,17 @@
                     dialog && dialog.enableForm();
                     feature.disabled = false;
                     dialog && dialog.popupDialog('close');
+
                     $.notify(translate("feature.save.successfully"), 'info');
+
+                    widget._trigger( "featuresaved", null, feature);
+
+
+                    var successHandler = getValueOrDefault(schema, "save.on.success");
+                    if(successHandler) {
+                        eval(successHandler);
+                    }
+
                 });
             }
         },
@@ -1546,21 +1787,18 @@
                     }
 
                     var src = item.dbSrc ? item.dbSrc : item.origSrc;
-                    if(item.relative) {
-                        item.src = src.match(/^(http[s]?\:|\/{2})/) ? src : Mapbender.configuration.application.urls.asset + src;
-                    } else {
+                    if(!item.hasOwnProperty('relative') && !item.relative) {
                         item.src = src;
+                    } else {
+                        item.src = Mapbender.configuration.application.urls.asset + src;
                     }
                 }
             });
 
-
-
-
             dialog.data('feature', olFeature);
-            dialog.generateElements({children: widget.currentSettings.formItems});
+            dialog.data('digitizerWidget', widget);
+            dialog.generateElements({children: formItems});
             dialog.popupDialog(popupConfiguration);
-
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
 
@@ -1842,7 +2080,7 @@
 
             olMap.zoomToExtent(feature.geometry.getBounds());
             if(schema.hasOwnProperty('zoomScaleDenominator')) {
-                olMap.zoomToScale(schema.zoomScaleDenominator);
+                olMap.zoomToScale(schema.zoomScaleDenominator,true);
             }
         },
 
@@ -2064,10 +2302,12 @@
                 var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
                 widget.reloadFeatures(layer, _.without(existingFeatures, olFeature));
 
+                /** @deprecated */
                 widget._trigger('featureRemoved', null, {
                     schema:  schema,
                     feature: featureData
                 });
+                widget._trigger('featureremove', null, olFeature);
             }
 
             if(isNew) {
@@ -2722,6 +2962,21 @@
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
             }
+        },
+
+        /**
+         * Download file by feature and his attribute name
+         *
+         * @param {OpenLayers.Feature} feature OpenLayers
+         * @param {String} attributeName
+         */
+        download: function(feature, attributeName) {
+            var widget = this;
+            var schema = feature.schema;
+            var attributes = feature.attributes;
+            var tableName = schema.featureType.table;
+            var relativeWebPath = Mapbender.configuration.application.urls.asset;
+            window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
         }
     });
 
