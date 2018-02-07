@@ -151,7 +151,11 @@
                 // in same unit as scale display
                 min: null,
                 max: 25000
-            }
+            },
+            // HACK: assume non-first element in accordion => start up disabled
+            // @TODO: figure out why the current code immediately starts displaying geometries on page load,
+            //        even if it starts in an inactive accordion tab, and support both active and inactive starts
+            "__disabled": true
         },
         // Default tool-sets
         toolsets: {
@@ -523,7 +527,9 @@
                     digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
                 }
             });
-            widget._onSelectorChange(widget);
+            if (!widget.options.__disabled) {
+                widget._onSelectorChange(widget);
+            }
 
             // Check position and react by
             var containerInfo = new MapbenderContainerInfo(widget, {
@@ -2194,7 +2200,12 @@
         activate: function() {
             var widget = this;
             widget.options.__disabled = false;
-            widget.activateFrame(widget.currentSettings);
+            if (!widget.currentSettings) {
+                // calls activateFrame implicitly
+                widget._onSelectorChange(widget);
+            } else {
+                widget.activateFrame(widget.currentSettings);
+            }
         },
 
         deactivate: function() {
@@ -2204,7 +2215,7 @@
             widget.unsavedFeatures = {};
             var always = function() {
                 widget.options.__disabled = true;
-                if(!widget.currentSettings.displayOnInactive) {
+                if (widget.currentSettings && !widget.currentSettings.displayOnInactive) {
                     widget.deactivateFrame(widget.currentSettings);
                 }
             };
@@ -2304,6 +2315,9 @@
             }
         },
         _getLayerVisibility: function(schema) {
+            if (this.options.__disabled) {
+                return false;
+            }
             var visible = true;
             if (schema.zoomDependentVisibility && !schema.displayPermanent) {
                 var zoomConfig = schema.zoomDependentVisibility;
