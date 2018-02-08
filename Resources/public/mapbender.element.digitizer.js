@@ -317,6 +317,9 @@
                 translateStructure(s.formItems);
                 // setting this property is redundant here, but it may be inspected by "data-source" bundle code
                 s.elementsTranslated = true;
+                if (!widget.currentSettings) {
+                    widget.currentSettings = s;
+                }
             });
 
             var hasOnlyOneScheme = _.size(options.schemes) === 1;
