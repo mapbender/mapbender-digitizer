@@ -2792,11 +2792,11 @@
                 schema
                 && schema.featureType
                 && schema.featureType
-                && ((schema.featureType.files) && (schema.featureType.files > 0))
+                && schema.featureType.files[0]
                 && schema.featureType.files[0].uri
             ) {
                 var uri = schema.featureType.files[0].uri;
-                window.open(relativeWebPath + uri + '/' + attributes[attributeName]);
+                window.open(uri + attributes[attributeName]);
             } else {
                 window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
             }
