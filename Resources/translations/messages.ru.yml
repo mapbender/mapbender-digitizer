@@ -8,14 +8,18 @@ mb.digitizer:
     zoomTo: Zoom to
     edit: Редактировать
     attributes: Атрибуты
-    save: Сохранить
     save:
+      title: Сохранить
       successfully: 'Геометрия сохранена.'
     loading:
       error: 'Ошибка при загрузке геометрий.'
     print: Print
     style:
       change: Change style
+    clone:
+      title: Клонировать
+      on:
+        error: Копирование объекта запрещено.
   toolset:
     current-extent: 'Ограничить поиск в пределах видимости'
   cancel: Отменить

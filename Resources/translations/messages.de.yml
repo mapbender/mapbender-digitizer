@@ -8,14 +8,18 @@ mb.digitizer:
     zoomTo: Heranzoomen
     edit: Bearbeiten
     attributes: Objektinformationen
-    save: Speichern
     save:
+      title: Speichern
       successfully: 'Objekt wurde gespeichert.'
     loading:
       error: 'Objekte konnten nicht geladen werden!'
     print: Druck
     style:
       change: Stil ändern
+    clone:
+      title: Duplizieren
+      on:
+        error: Duplizieren des Objektes ist nicht erlaubt.
   toolset:
     current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
   cancel: Abbrechen

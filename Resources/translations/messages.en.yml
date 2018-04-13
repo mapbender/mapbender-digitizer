@@ -8,14 +8,18 @@ mb.digitizer:
     zoomTo: Zoom to
     edit: 'Edit feature'
     attributes: 'Feature attributes'
-    save: Save
     save:
+      title: Save
       successfully: 'Feature saved.'
     loading:
       error: 'Features loading error.'
     print: Print
     style:
       change: Change style
+    clone:
+      title: Copy
+      on:
+        error: Object coping is denied.
   toolset:
     current-extent: 'Select by current extent only'
   cancel: Cancel

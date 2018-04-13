@@ -100,6 +100,7 @@ class Digitizer extends BaseElement
         }
         return $configuration;
     }
+
     /**
      * Prepare request feautre data by the form definition
      *
@@ -371,6 +372,10 @@ class Digitizer extends BaseElement
         $debugMode     = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
 
         if (isset($schema["allowEditData"]) && !$schema["allowEditData"]) {
+            throw new Exception("It is forbidden to save objects", 2);
+        }
+
+        if (isset($schema["allowSave"]) && !$schema["allowSave"]) {
             throw new Exception("It is forbidden to save objects", 2);
         }
 

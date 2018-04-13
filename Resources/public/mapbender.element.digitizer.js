@@ -254,6 +254,7 @@
             // Default option values
             allowDigitize: true,
             allowDelete: true,
+            allowSave: true,
             allowEditData: true,
             allowCustomerStyle: false,
             allowChangeVisibility: false,
@@ -725,28 +726,8 @@
                         title:     translate('feature.clone.title'),
                         className: 'clone',
                         cssClass:  ' fa fa-files-o',
-                        onClick:   function(olFeature, ui) {
-                            var layer = olFeature.layer;
-                            var schema = olFeature.schema;
-                            var allowCopy = true;
-
-                            _.each(schema.copy.rules, function(ruleCode) {
-                                var feature = olFeature;
-                                eval('allowCopy = ' + ruleCode + ';');
-                                if(!allowCopy) {
-                                    return false;
-                                }
-                            });
-
-                            if(!allowCopy) {
-                                $.notify("Copy for the object is denied.");
-                                return;
-                            }
-
-                            var newFeature = widget.copyFeature(olFeature);
-
-                            layer.addFeatures([newFeature]);
-                            // widget._applyStyle(widget.styles.copy, newFeature);
+                        onClick:  function(olFeature, ui){
+                            widget.copyFeature(olFeature);
                         }
                     });
                 }
@@ -1223,13 +1204,18 @@
                     var tr = this;
                     var row = tableApi.row(tr);
                     var feature = row.data();
+                    var isOpenLayerCloudPopup = schema.popup && schema.popup.type && schema.popup.type === 'openlayers-cloud';
 
                     feature.selected = $('.selection input', tr).is(':checked');
 
                     widget._highlightFeature(feature);
 
-                    widget.zoomToJsonFeature(feature);
-                });
+                    if(isOpenLayerCloudPopup) {
+                        widget._openFeatureEditDialog(feature);
+                    } else {
+                        widget.zoomToJsonFeature(feature);
+                    }
+                 });
 
                 widget._getData();
             }
@@ -1285,42 +1271,68 @@
         /**
          * Copy feature
          *
-         * @param feature
+         * @param {OpenLayers.Feature} feature
          */
-        copyFeature: function(feature) {
+        copyFeature: function(feature ) {
             var widget = this;
             var schema = feature.schema;
+            var layer = schema.layer;
             var newFeature = feature.clone();
             var config = schema.copy;
             var defaultAttributes = getValueOrDefault(config, "data",{});
+            var allowCopy = true;
 
-            newFeature.attrubites = _.extend({}, defaultAttributes, feature.attributes);
-            _.each(defaultAttributes,function(key,value) {
-               if(newFeature.attrubites[key] === null){
-                   newFeature.attrubites[key] = value;
-               }
+            _.each(schema.copy.rules, function(ruleCode) {
+                var f = feature;
+                eval('allowCopy = ' + ruleCode + ';');
+                if(!allowCopy) {
+                    return false;
+                }
             });
-            newFeature.isNew = true;
-            newFeature.schema = schema;
 
-            widget.saveFeature(newFeature).done(function(response) {
+            if(!allowCopy) {
+                $.notify(translate('feature.clone.on.error'));
+                return;
+            }
+
+            var newAttributes = {};
+            _.extend(newAttributes, defaultAttributes);
+            _.each(feature.attributes, function(v, k) {
+                if(v === '' || v === null) {
+                    return;
+                }
+                newAttributes[k] = v;
+            });
+
+            newFeature.data = newFeature.properties = newFeature.attributes = newAttributes;
+            newFeature.schema = schema;
+            delete newFeature.fid;
+
+            return widget.saveFeature(newFeature).done(function(response) {
                 if(response.errors) {
                     Mapbender.error(translate("feature.copy.error"));
                     return;
                 }
-                widget._trigger("copyfeature", null, newFeature);
+
+                var request = this;
+                var feature = request.feature;
+                var rawFeature = response.features[0];
+
+                // layer.removeFeatures([newFeature]);
+                layer.drawFeature(feature, 'copy');
+                // newFeature.disabled = false;
+
+                widget._trigger("copyfeature", null, feature);
 
                 var successHandler = getValueOrDefault(config, "on.success");
                 if(successHandler) {
                     var r = function(feature) {
                         return eval(successHandler + ";");
-                    }(newFeature);
+                    }(feature);
                 } else {
                     widget._openFeatureEditDialog(feature);
                 }
             });
-
-            return newFeature;
         },
 
         /**
@@ -1367,7 +1379,6 @@
                     schema:  schema.schemaName,
                     feature: request
                 }).done(function(response) {
-
                     if(response.hasOwnProperty('errors')) {
                         dialog && dialog.enableForm();
                         feature.disabled = false;
@@ -1391,7 +1402,7 @@
                         return;
                     }
 
-                    var layer = feature.layer;
+                    var layer = schema.layer;
                     var dbFeature = response.features[0];
                     feature.fid = dbFeature.id;
                     feature.state = null;
@@ -1422,6 +1433,8 @@
                     feature.disabled = false;
                     dialog && dialog.popupDialog('close');
 
+                    this.feature = feature;
+
                     $.notify(translate("feature.save.successfully"), 'info');
 
                     widget._trigger( "featuresaved", null, feature);
@@ -1446,9 +1459,18 @@
             var widget = this;
             var schema = olFeature.schema;
             var buttons = [];
+            var layer = olFeature.layer;
+            var map = layer.map;
+            var schemaPopupConfig = schema.popup ? schema.popup : {};
+            var isOpenLayerCloudPopup = schemaPopupConfig.type && schemaPopupConfig.type === 'openlayers-cloud';
 
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
+                if(isOpenLayerCloudPopup && schema.olFeatureCloudPopup) {
+                    map.removePopup(schema.olFeatureCloudPopup);
+                    schema.olFeatureCloudPopup.destroy();
+                    schema.olFeatureCloudPopup = null;
+                }
             }
 
             var formItems = widget.currentSettings.formItems;
@@ -1482,6 +1504,17 @@
                 buttons.push(printButton);
             }
 
+            if(schema.copy.enable) {
+                buttons.push({
+                    text: translate('feature.clone.title'),
+                    click: function(e) {
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var feature = dialog.data('feature');
+                        widget.copyFeature(olFeature);
+                    }
+                });
+            }
+
             if(schema.allowCustomerStyle) {
                 var styleButton = {
                     text:   translate('feature.style.change'),
@@ -1493,9 +1526,9 @@
                 };
                 buttons.push(styleButton);
             }
-            if(schema.allowEditData) {
+            if(schema.allowEditData && schema.allowSave) {
                 var saveButton = {
-                    text:  translate("feature.save"),
+                    text:  translate("feature.save.title"),
                     click: function() {
                         var dialog = $(this).closest(".ui-dialog-content");
                         var feature = dialog.data('feature');
@@ -1678,8 +1711,32 @@
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
 
+            if(isOpenLayerCloudPopup) {
+                // Hide original popup but not kill it.
+                dialog.closest('.ui-dialog').css({
+                    'margin-left': '-100000px'
+                }).hide(0);
+            }
+
             setTimeout(function() {
                 dialog.formData(olFeature.data);
+
+                if(isOpenLayerCloudPopup){
+                    /**
+                     * @var {OpenLayers.Popup.FramedCloud}
+                     */
+                    var olPopup = new OpenLayers.Popup.FramedCloud(
+                        "popup",
+                        OpenLayers.LonLat.fromString(olFeature.geometry.toShortString()),
+                        null,
+                        dialog.html(),
+                        null,
+                        true
+                    );
+                    schema.olFeatureCloudPopup = olPopup;
+                    map.addPopup(olPopup);
+                }
+
             }, 21);
 
             return dialog;
@@ -2044,19 +2101,24 @@
             var styles = schema.styles ? schema.styles : {};
             var isClustered = schema.isClustered = schema.hasOwnProperty('clustering');
             var strategies = [];
-            var styleMap = new OpenLayers.StyleMap({
-                'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), {
-                    context: {
-                        label: function(feature) {
-                            if(feature.attributes.hasOwnProperty("label")){
-                                return feature.attributes.label;
-                            }
-                            return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
+            var styleContext = {
+                context: {
+                    webRootPath: Mapbender.configuration.application.urls.asset,
+                    feature: function(feature){
+                        return feature;
+                    },
+                    label: function(feature) {
+                        if(feature.attributes.hasOwnProperty("label")){
+                            return feature.attributes.label;
                         }
+                        return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
                     }
-                }),
-                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select)), //,
-                'selected':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] ? styles['selected'] : widget.styles.selected)) //,
+                }
+            };
+            var styleMap = new OpenLayers.StyleMap({
+                'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), styleContext),
+                'select':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select), styleContext), //,
+                'selected':    new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] ? styles['selected'] : widget.styles.selected), styleContext) //,
                 // 'invisible':
             }, {extendDefault: true});
 
@@ -2085,6 +2147,12 @@
                 label:       '${label}',
                 fontSize:    15
             });
+
+            var copyStyleData = getValueOrDefault(schema, 'copy.style', null);
+
+            if(copyStyleData) {
+                styleMap.styles.copy = new OpenLayers.Style(copyStyleData);
+            }
 
             if(isClustered) {
                 var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
@@ -2232,6 +2300,11 @@
                 Mapbender.error(translate("features.loading.error"), featureCollection, xhr);
                 return;
             }
+
+            if(featureCollection.features && featureCollection.features.length == schema.maxResults){
+                Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
+            }
+
             var widget = this;
             var geoJsonReader = new OpenLayers.Format.GeoJSON();
             var currentExtentOnly = schema.searchType == "currentExtent";
@@ -2458,6 +2531,7 @@
                     widget.currentPopup.currentPopup = null;
                 }
             });
+
             var dialog = $("<div/>");
             dialog.on("popupdialogopen", function(event, ui) {
                 setTimeout(function() {
