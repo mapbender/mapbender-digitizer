@@ -158,6 +158,42 @@
     }
 
     /**
+     * "Fake" form data for a feature that hasn't gone through attribute
+     * editing, for saving. This is used when we save a feature that has only
+     * been moved / dragged. The popup dialog with the form is not initialized
+     * in these cases.
+     * Assigned values are copied from the feature's data, if it was already
+     * stored in the db, empty otherwise.
+     *
+     * @param feature
+     * @returns {{}}
+     */
+    function initialFormData(feature) {
+        var formData = {};
+        var extractFormData;
+        extractFormData = function(definition) {
+            _.forEach(definition, function(item) {
+                if (_.isArray(item)) {
+                    // recurse into lists
+                    extractFormData(item);
+                } else if (item.name) {
+                    var currentValue = (feature.data || {})[item.name];
+                    // keep empty string, but replace undefined => null
+                    if (typeof(currentValue) === 'undefined') {
+                        currentValue = null;
+                    }
+                    formData[item.name] = currentValue;
+                } else if (item.children) {
+                    // recurse into child property (should be a list)
+                    extractFormData(item.children);
+                }
+            });
+        };
+        extractFormData(feature.schema.formItems);
+        return formData;
+    }
+
+    /**
      * Check and replace values recursive if they should be translated.
      * For checking used "translationReg" variable
      *
@@ -258,6 +294,8 @@
             allowEditData: true,
             allowCustomerStyle: false,
             allowChangeVisibility: false,
+            allowDeleteByCancelNewGeometry: false,
+            allowCancelButton: true,
             allowLocate: false,
             showVisibilityNavigation: false,
             allowPrintMetadata: false,
@@ -279,7 +317,6 @@
             // Save data
             save: {
             },
-
             // pop a confirmation dialog when deactivating, to ask the user to save or discard
             // current in-memory changes
             confirmSaveOnDeactivate: true,
@@ -1256,6 +1293,7 @@
             });
 
             widget.updateClusterStrategies();
+
         },
 
         /**
@@ -1265,6 +1303,7 @@
          * @private
          */
         _evaluateHandler: function (handlerCode, context){
+
 
         },
 
@@ -1375,7 +1414,9 @@
             if(!hasErrors) {
                 feature.disabled = true;
                 dialog && dialog.disableForm();
+
                 return widget.query('save', {
+
                     schema:  schema.schemaName,
                     feature: request
                 }).done(function(response) {
@@ -1532,7 +1573,6 @@
                     click: function() {
                         var dialog = $(this).closest(".ui-dialog-content");
                         var feature = dialog.data('feature');
-                        feature.editDialog = dialog;
                         widget.saveFeature(feature);
                     }
                 };
@@ -1830,6 +1870,9 @@
             });
 
             return schema.xhr;
+        },
+        _initialFormData: function(feature) {
+            return initialFormData(feature);
         },
 
         /**
@@ -2696,9 +2739,10 @@
                 var html = "<p>Sie haben "
                            + ((numUnsaved > 1) ?
                            "" + numUnsaved + " &Auml;nderungen"
-                        : "eine &Auml;nderung")
+                            : "eine &Auml;nderung")
                            + " vorgenommen und noch nicht gespeichert.</p>"
                            + "<p>Wollen sie diese jetzt speichern oder verwerfen?</p>";
+
                 var confirmOptions = {
                     okText:     "Jetzt Speichern",
                     cancelText: "Verwerfen",
@@ -2778,6 +2822,7 @@
             if(widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
             }
+
         },
 
         /**
@@ -2793,6 +2838,7 @@
             var tableName = schema.featureType.table;
             var relativeWebPath = Mapbender.configuration.application.urls.asset;
             window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
+
         }
     });
 
