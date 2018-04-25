@@ -1697,9 +1697,11 @@
         },
 
         _openEditDialog: function(dataItem, formItems, schema, ref) {
+
             var schemaName = this.schemaName;
             var widget = this;
             var uniqueKey = schema.dataStore.uniqueId;
+            var textKey = schema.dataStore.text;
             var buttons = [];
 
             if(widget.currentPopup.currentPopup) {
@@ -1708,7 +1710,7 @@
             }
 
             var saveButton = {
-                text:  translate("mb.data.store.save", true),
+                text:  translate("feature.save"),
                 click: function() {
                     var form = $(this).closest(".ui-dialog-content");
                     var errorInputs = $(".has-error", dialog);
@@ -1717,7 +1719,8 @@
                     if(!hasErrors) {
                         var formData = form.formData();
                         var uniqueIdKey = schema.dataStore.uniqueId;
-                        var isNew = !dataItem.hasOwnProperty(uniqueIdKey) && !!dataItem[uniqueIdKey];
+                        var isNew = !dataItem.hasOwnProperty(uniqueIdKey) && !dataItem[uniqueIdKey];
+
 
                         if(!isNew) {
                             formData[uniqueIdKey] = dataItem[uniqueIdKey];
@@ -1744,16 +1747,21 @@
                                 });
                                 return;
                             }
-                            _.extend(dataItem, response.dataItem);
+                            _.extend(dataItem, response);
+                            schema.options[dataItem[uniqueKey]] = dataItem[textKey];
                             if(isNew) {
-                                var textKey = item.dataStore.text;
-                                var uniqueKey = item.dataStore.uniqueId;
 
                                 ref.append('<option value="' + dataItem[uniqueKey] + '">' + dataItem[textKey] + '</option>');
+
+
+                            } else {
+
+                                ref.find('[value='+dataItem[uniqueKey] +']').text(dataItem[textKey])
+
                             }
                             widget.currentPopup.currentPopup.popupDialog('close');
                             widget.currentPopup.currentPopup = null;
-                            $.notify(translate("mb.data.store.save.successfully", true), 'info');
+                            $.notify(translate("feature.successfully"), 'info');
                         }).done(function() {
                             form.enableForm();
                         });
@@ -1763,7 +1771,7 @@
             buttons.push(saveButton);
 
             buttons.push({
-                text:    translate("mb.data.store.remove", true),
+                text:    translate("feature.remove"),
                 'class': 'critical',
                 click:   function() {
                     widget.query('datastore/remove', {
@@ -1851,7 +1859,7 @@
              buttons = _.union(schema.popup.buttons, buttons);
              } */
             var popupConfig = _.extend({
-                title: translate("edit.title"),
+                title: translate("feature.attributes"),
                 width: widget.featureEditDialogWidth,
             }, schema.popup);
 

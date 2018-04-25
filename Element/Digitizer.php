@@ -247,7 +247,9 @@ class Digitizer extends BaseElement
                 if (empty($request['dataItem'][ $uniqueIdKey ])) {
                     unset($request['dataItem'][ $uniqueIdKey ]);
                 }
-                $results = $dataStore->save($dataItem);
+
+                $dataIems = $dataStore->save($dataItem);
+                $results = ($dataIems->toArray());
 
                 break;
             case 'datastore/remove':
