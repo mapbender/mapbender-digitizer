@@ -228,6 +228,7 @@
         });
     }
 
+
     function findFeatureByPropertyValue(layer, propName, propValue) {
         for (var i=0; i< layer.features.length ; i++) {
             if (layer.features[i][propName] === propValue) {
@@ -236,6 +237,7 @@
         }
         return null;
     }
+
 
     /**
      * Example:
@@ -328,8 +330,10 @@
             inlineSearch: false,
             useContextMenu: false,
 
+
             // Layer list names/ids to be refreshed after feature save complete
             refreshLayersAfterFeatureSave: [],
+
             clustering: [
                 {scale: 5000000, distance: 30}
             ]
@@ -337,6 +341,7 @@
         // Default tool-sets
         toolsets: {
             point: [
+
                 {type: 'drawPoint'},
                 //{type: 'modifyFeature'},
                 {type: 'moveFeature'},
@@ -362,6 +367,7 @@
                 {type: 'moveFeature'},
                 {type: 'selectFeature'},
                 {type: 'removeSelected'}
+
                 //{type: 'removeAll'}
             ]
         },
@@ -848,6 +854,7 @@
                 var columns = [];
                 var newFeatureDefaultProperties = {};
 
+
                 if(!schema.hasOwnProperty("tableFields")) {
 
                     schema.tableFields = {
@@ -870,7 +877,8 @@
                             }
                         }
                     };
-                }
+
+
 
                 $.each(schema.tableFields, function(fieldName, fieldSettings) {
                     newFeatureDefaultProperties[fieldName] = "";
@@ -902,7 +910,9 @@
                     paging: true,
                     selectable: false,
                     autoWidth: false,
-                    columns:  columns
+                    columns:  columns,
+                    buttons: buttons
+
                 };
 
                 if(_.size(buttons)){
@@ -1172,9 +1182,11 @@
                 }
 
                 if(!schema.allowDigitize){
+
                     toolSetView.css('display','none');
                     toolSetView = $("<div class='digitizing-tool-sets'/>");
                     toolSetView.insertBefore(frame.find('.onlyExtent'));
+
                 }
 
                 if(schema.showVisibilityNavigation) {
@@ -1274,6 +1286,46 @@
                 map.addControl(selectControl);
             });
 
+
+            function deactivateFrame(schema) {
+                var frame = schema.frame;
+                //var tableApi = schema.table.resultTable('getApi');
+                var layer = schema.layer;
+
+                frame.css('display', 'none');
+
+                if(!schema.displayPermanent){
+                    layer.setVisibility(false);
+                }
+
+                schema.selectControl.deactivate();
+
+                // https://trac.wheregroup.com/cp/issues/4548
+                if(widget.currentPopup){
+                    widget.currentPopup.popupDialog('close');
+                }
+
+
+                //layer.redraw();
+                //layer.removeAllFeatures();
+                //tableApi.clear();
+            }
+
+            function activateFrame(schema) {
+                var frame = schema.frame;
+                var layer = schema.layer;
+
+                widget.activeLayer = schema.layer;
+                widget.schemaName = schema.schemaName;
+                widget.currentSettings = schema;
+                layer.setVisibility(true);
+                //layer.redraw();
+                frame.css('display', 'block');
+
+                schema.selectControl.activate();
+            }
+
+
             function onSelectorChange() {
                 var option = selector.find(":selected");
                 var schema = option.data("schemaSettings");
@@ -1323,9 +1375,11 @@
                 widget._getData();
             }
 
+
             if(currentSchemaName !== undefined) {
                 selector.val(currentSchemaName);
             }
+
 
             selector.on('change',onSelectorChange);
 
@@ -1657,6 +1711,7 @@
                 });
             }
 
+
             if(schema.allowCancelButton){
                 buttons.push({
                     text:  translate("cancel"),
@@ -1671,6 +1726,7 @@
                     }
                 });
             }
+
 
             var popupConfiguration = {
                 title: translate("feature.attributes"),
@@ -1928,6 +1984,7 @@
             });
 
 
+
             setTimeout(function() {
                 dialog.formData(olFeature.data);
 
@@ -1950,6 +2007,46 @@
             }, 21);
 
             return dialog;
+
+        },
+
+        /**
+         * Query intersect by bounding box
+         *
+         * @param request Request for ajax
+         * @param bbox Bounding box or some object, which has toGeometry() method.
+         * @param debug Drag
+         *
+         * @returns ajax XHR object
+         *
+         * @private
+         *
+         */
+        _queryIntersect: function(request, bbox, debug) {
+            var widget = this;
+            var geometry = bbox.toGeometry();
+            var _request = $.extend(true, {intersectGeometry: geometry.toString()}, request);
+
+            if(debug){
+                if(!widget._boundLayer) {
+                    widget._boundLayer = new OpenLayers.Layer.Vector("bboxGeometry");
+                    widget.map.addLayer(widget._boundLayer);
+                }
+
+                var feature = new OpenLayers.Feature.Vector(geometry);
+                widget._boundLayer.addFeatures([feature], null, {
+                    strokeColor:   "#ff3300",
+                    strokeOpacity: 0,
+                    strokeWidth:   0,
+                    fillColor:     "#FF9966",
+                    fillOpacity:   0.1
+                });
+            }
+            return widget.query('select', _request).done(function(featureCollection) {
+                var schema = widget.options.schemes[_request["schema"]];
+                widget._onFeatureCollectionLoaded(featureCollection, schema, this);
+            });
+
         },
 
         /**
@@ -1970,9 +2067,29 @@
             };
             var isExtentOnly = schema.searchType === "currentExtent";
 
+
             if(isExtentOnly){
                 request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
             }
+
+            switch (schema.searchType){
+                case  "currentExtent":
+                    if(schema.hasOwnProperty("lastBbox")) {
+                        var bbox = extent.toGeometry().getBounds();
+                        var lastBbox = schema.lastBbox;
+
+                        var topDiff = bbox.top - lastBbox.top;
+                        var leftDiff = bbox.left - lastBbox.left;
+                        var rightDiff = bbox.right - lastBbox.right;
+                        var bottomDiff = bbox.bottom - lastBbox.bottom;
+
+                        var sidesChanged = {
+                            left:   leftDiff < 0,
+                            bottom: bottomDiff < 0,
+                            right:  rightDiff > 0,
+                            top:    topDiff > 0
+                        };
+
 
             // Only if search is defined
             if(schema.search) {
@@ -2666,7 +2783,43 @@
                 text:  translate("feature.save", false),
                 click: function() {
 
+
                     widget.saveForeignDataStoreItem(dataItem);
+
+
+                        form.disableForm();
+                        widget.query('datastore/save', {
+                            schema:     schemaName,
+                            dataItem:   formData,
+                            id:         schema.dataStore.id,
+                            dataItemId: dataItem[uniqueKey]
+                        }).done(function(response) {
+                            if(response.hasOwnProperty('errors')) {
+                                form.enableForm();
+                                $.each(response.errors, function(i, error) {
+                                    $.notify(error.message, {
+                                        title:     'API Error',
+                                        autoHide:  false,
+                                        className: 'error'
+                                    });
+                                    console.error(error.message);
+                                });
+                                return;
+                            }
+                            _.extend(dataItem, response.dataItem);
+                            if(isNew) {
+                                var textKey = item.dataStore.text;
+                                var uniqueKey = item.dataStore.uniqueId;
+
+                                ref.append('<option value="' + dataItem[uniqueKey] + '">' + dataItem[textKey] + '</option>');
+                            }
+                            widget.currentPopup.currentPopup.popupDialog('close');
+                            widget.currentPopup.currentPopup = null;
+                            $.notify(translate("mb.data.store.save.successfully", true), 'info');
+                        }).done(function() {
+                            form.enableForm();
+                        });
+                    }
 
                 }
             };
@@ -2807,7 +2960,8 @@
              buttons = _.union(schema.popup.buttons, buttons);
              } */
             var popupConfig = _.extend({
-                title: translate("feature.attributes",false),
+
+                title: translate("edit.title"),
                 width: widget.featureEditDialogWidth,
             }, schema.popup);
 
@@ -2820,6 +2974,7 @@
             dialog.parentDialog = widget.currentPopup;
             dialog.data('schema',schema);
             dialog.data('table', ref);
+
             return dialog;
         },
 
@@ -2913,7 +3068,9 @@
         },
 
         save: function(dataItem) {
+            debugger;
             //dataItem.uniqueId
+
         },
 
         /**
