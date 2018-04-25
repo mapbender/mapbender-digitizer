@@ -22,6 +22,27 @@ mb.digitizer:
         error: Duplizieren des Objektes ist nicht erlaubt.
   toolset:
     current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
+    point:
+      drawPoint: Punkt erstellen
+      moveGeometry: Punkt verschieben
+      selectFeature: Punkte de-/selektieren
+      removeSelected: Selektierte Punkte löschen
+    line:
+      drawLine: Line erstellen
+      modifyFeature: Linie bearbeiten
+      moveGeometry: Linie verschieben
+      selectFeature: Linien de-/selektieren
+      removeSelected: selektierten Linien löschen
+    polygon:
+      drawPolygon: Fläche erstellen
+      drawRectangle: Rechteck erstellen
+      drawCircle: Kreis erstellen
+      drawEllipse: Ellipse erstellen
+      drawDonut: Donut erstellen oder die bestehende Geometrien editieren
+      modifyFeature: Fläche bearbeiten
+      moveGeometry: Fläche verschieben
+      selectFeature: Flächen de-/selektieren
+      removeSelected: Selektierte Flächen löschen
   cancel: Abbrechen
   api:
     query:
