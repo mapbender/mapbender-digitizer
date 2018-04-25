@@ -408,6 +408,7 @@ class Digitizer extends BaseElement
                         'srid'  => $feature->getSrid(),
                         'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
                 }
+
             }
             $results = $featureType->toFeatureCollection($results);
         } catch (DBALException $e) {
@@ -486,9 +487,6 @@ class Digitizer extends BaseElement
         $dataStore   = $this->container->get("data.source")->get($schema);
         $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
 
-        if (empty($request['dataItem'][ $uniqueIdKey ])) {
-            unset($request['dataItem'][ $uniqueIdKey ]);
-        }
 
         //var_dump($dataItem);die;
         $f = $dataStore->save($dataItem);

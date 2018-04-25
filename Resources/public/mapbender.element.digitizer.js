@@ -2780,6 +2780,12 @@
 
         _openEditDialog: function(dataItem, formItems, schema, ref) {
             var widget = this;
+
+
+            var schemaName = this.schemaName;
+            var widget = this;
+            var uniqueKey = schema.dataStore.uniqueId;
+            var textKey = schema.dataStore.text;
             var buttons = [];
 
             if(widget.currentPopup.currentPopup) {
@@ -2788,45 +2794,13 @@
             }
 
             var saveButton = {
+
                 text:  translate("feature.save", false),
+
+
                 click: function() {
 
-
                     widget.saveForeignDataStoreItem(dataItem);
-
-
-                        form.disableForm();
-                        widget.query('datastore/save', {
-                            schema:     schemaName,
-                            dataItem:   formData,
-                            id:         schema.dataStore.id,
-                            dataItemId: dataItem[uniqueKey]
-                        }).done(function(response) {
-                            if(response.hasOwnProperty('errors')) {
-                                form.enableForm();
-                                $.each(response.errors, function(i, error) {
-                                    $.notify(error.message, {
-                                        title:     'API Error',
-                                        autoHide:  false,
-                                        className: 'error'
-                                    });
-                                    console.error(error.message);
-                                });
-                                return;
-                            }
-                            _.extend(dataItem, response.dataItem);
-                            if(isNew) {
-                                var textKey = item.dataStore.text;
-                                var uniqueKey = item.dataStore.uniqueId;
-
-                                ref.append('<option value="' + dataItem[uniqueKey] + '">' + dataItem[textKey] + '</option>');
-                            }
-                            widget.currentPopup.currentPopup.popupDialog('close');
-                            widget.currentPopup.currentPopup = null;
-                            $.notify(translate("mb.data.store.save.successfully", true), 'info');
-                        }).done(function() {
-                            form.enableForm();
-                        });
                     }
 
                 }
@@ -2834,8 +2808,9 @@
             buttons.push(saveButton);
 
             buttons.push({
+
                 text:    translate("feature.remove", false ),
-                'class': 'critical',
+                class: 'critical',
                 click:   function() {
 
                     var uniqueIdKey = schema.dataStore.uniqueId;
@@ -2969,7 +2944,8 @@
              } */
             var popupConfig = _.extend({
 
-                title: translate("edit.title"),
+                title: translate("feature.attributes"),
+
                 width: widget.featureEditDialogWidth,
             }, schema.popup);
 
