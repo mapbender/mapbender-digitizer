@@ -21,7 +21,28 @@ mb.digitizer:
       on:
         error: Object coping is denied.
   toolset:
-    current-extent: 'Select by current extent only'
+    current-extent: 'Select by current extent only.'
+    point:
+      drawPoint: Draw point
+      moveGeometry: Move feature
+      selectFeature: Select feature
+      removeSelected: Remove selected
+    line:
+      drawLine: Draw line
+      modifyFeature: Modify feature
+      moveGeometry: Move feature
+      selectFeature: Select feature
+      removeSelected: Remove selected
+    polygon:
+      drawPolygon: Draw polygone
+      drawRectangle: Draw rectangle
+      drawCircle: Draw circle
+      drawEllipse: Draw ellipse
+      drawDonut: Draw donut
+      modifyFeature: Modify feature
+      moveGeometry: Move feature
+      selectFeature: Select feature
+      removeSelected: Remove selected
   cancel: Cancel
   api:
     query:
