@@ -6,13 +6,14 @@
     "license": "MIT",
     "authors": [
         {"name": "Andriy Oblivantsev"},
-        {"name": "Stefan Winkelmann"}
+        {"name": "Stefan Winkelmann"},
+        {"name": "David Patzke"}
     ],
     "require": {
         "php": ">=5.3.3",
         "blueimp/jquery-file-upload": "9.*",
         "mapbender/data-source": "0.*",
-        "viscreation/vis-ui.js": "0.*"
+        "mapbender/vis-ui.js": "*"
     },
     "config": {
         "bin-dir": "bin"
