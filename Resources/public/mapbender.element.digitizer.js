@@ -1616,6 +1616,10 @@
                             case 'Mapbender.MailManager.onSaveFeatureZlhr':
                                 Mapbender.MailManager.onSaveFeatureZlhr(feature);
                                 break;
+
+                            case 'Mapbender.MailManager.onSaveFeature':
+                                Mapbender.MailManager.onSaveFeature(feature);
+                                break;
                         }
 
                         return;
