@@ -1610,6 +1610,17 @@
 
                     widget._trigger( "featuresaved", null, feature);
 
+                    var config = feature.schema;
+                    if (config.mailManager) {
+                        switch (config.mailManager) {
+                            case 'Mapbender.MailManager.onSaveFeatureZlhr':
+                                Mapbender.MailManager.onSaveFeatureZlhr(feature);
+                                break;
+                        }
+
+                        return;
+                    }
+
                     var successHandler = getValueOrDefault(schema, "save.on.success");
                     if(successHandler) {
                         eval(successHandler);
