@@ -871,6 +871,8 @@
                         }
                     };
 
+                }
+
 
 
                 $.each(schema.tableFields, function(fieldName, fieldSettings) {
@@ -1608,7 +1610,6 @@
 
                     widget._trigger( "featuresaved", null, feature);
 
-
                     var successHandler = getValueOrDefault(schema, "save.on.success");
                     if(successHandler) {
                         eval(successHandler);
@@ -2097,7 +2098,8 @@
                             right:  rightDiff > 0,
                             top:    topDiff > 0
                         };
-
+                    }
+            }
 
             // Only if search is defined
             if(schema.search) {
@@ -2166,6 +2168,7 @@
 
             return schema.xhr;
         },
+
         _initialFormData: function(feature) {
             return initialFormData(feature);
         },
@@ -2802,8 +2805,6 @@
 
                     widget.saveForeignDataStoreItem(dataItem);
                     }
-
-                }
             };
             buttons.push(saveButton);
 
