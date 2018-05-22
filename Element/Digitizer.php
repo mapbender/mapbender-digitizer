@@ -34,7 +34,10 @@ class Digitizer extends BaseElement
                         "/components/jquery-context-menu/jquery-context-menu-built.js",
                         'mapbender.element.digitizer.js'
         ),
-                     'css'   => array('sass/element/digitizer.scss'),
+                     'css'   => array(
+                         'sass/element/context-menu.scss',
+                         'sass/element/digitizer.scss',
+                     ),
                      'trans' => array('MapbenderDigitizerBundle:Element:digitizer.json.twig'));
     }
 
