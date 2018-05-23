@@ -1611,18 +1611,8 @@
                     widget._trigger( "featuresaved", null, feature);
 
                     var config = feature.schema;
-                    if (config.mailManager) {
-                        switch (config.mailManager) {
-                            case 'Mapbender.MailManager.onSaveFeatureZlhr':
-                                Mapbender.MailManager.onSaveFeatureZlhr(feature);
-                                break;
-
-                            case 'Mapbender.MailManager.onSaveFeature':
-                                Mapbender.MailManager.onSaveFeature(feature);
-                                break;
-                            default:
-                                Mapbender.MailManager.onSaveFeature(feature);
-                        }
+                    if (config.hasOwnProperty(mailManager) && Mapbender.hasOwnProperty(MailManager)) {
+                        Mapbender.MailManager[config.mailManager](feature);
                     }
 
                     var successHandler = getValueOrDefault(schema, "save.on.success");
