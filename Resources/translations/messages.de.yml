@@ -1,15 +1,15 @@
 mb.digitizer:
   feature:
-    remove: Löschen
     remove:
+      remove: Löschen
       successfully: 'Objekt wurde gelöscht.'
       from:
         database: 'Objekt löschen?'
     zoomTo: Heranzoomen
     edit: Bearbeiten
     attributes: Objektinformationen
-    save: Speichern
     save:
+      save: Speichern
       successfully: 'Objekt wurde gespeichert.'
     loading:
       error: 'Objekte konnten nicht geladen werden!'

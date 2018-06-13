@@ -1,15 +1,15 @@
 mb.digitizer:
   feature:
-    remove: Remove
     remove:
+      remove: Remove      
       successfully: 'Feature removed.'
       from:
         database: 'Delete feature.'
     zoomTo: Zoom to
     edit: 'Edit feature'
     attributes: 'Feature attributes'
-    save: Save
     save:
+      save: Save
       successfully: 'Feature saved.'
     loading:
       error: 'Features loading error.'
