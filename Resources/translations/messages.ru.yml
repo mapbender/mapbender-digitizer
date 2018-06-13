@@ -1,15 +1,15 @@
 mb.digitizer:
   feature:
-    remove: Удалить
     remove:
+      remove: Удалить
       successfully: 'Геометрия удалена'
       from:
         database: 'Удалить геометрию с сервера'
     zoomTo: Zoom to
     edit: Редактировать
     attributes: Атрибуты
-    save: Сохранить
     save:
+      save: Сохранить
       successfully: 'Геометрия сохранена.'
     loading:
       error: 'Ошибка при загрузке геометрий.'
