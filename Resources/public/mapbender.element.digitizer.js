@@ -1580,6 +1580,7 @@
 
                     widget._trigger("featuresaved", null, feature);
 
+
                     var config = feature.schema;
                     if(config.hasOwnProperty("mailManager") && Mapbender.hasOwnProperty("MailManager")) {
                         try {
@@ -1588,6 +1589,7 @@
                             console.warn('The function' + config.mailManager + " is not supported by the Mapbender Mail Manager Extension");
                         }
                     }
+
 
                     var successHandler = getValueOrDefault(schema, "save.on.success");
                     if(successHandler) {
@@ -2759,11 +2761,8 @@
             }
 
             var saveButton = {
-
                 text: translate("feature.save", false),
-
                 click: function() {
-
                     widget.saveForeignDataStoreItem(dataItem);
                 }
             };
