@@ -52,6 +52,14 @@ class Digitizer extends BaseElement
     }
 
     /**
+     * @return mixed[]
+     */
+    protected function getFeatureTypeDeclarations()
+    {
+        return $this->container->getParameter('featureTypes');
+    }
+
+    /**
      * Prepare form items for each scheme definition
      * Optional: get featureType by name from global context.
      *
@@ -62,12 +70,12 @@ class Digitizer extends BaseElement
         $configuration            = parent::getConfiguration();
         $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
         $configuration['fileUri'] = $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
+        $featureTypes              = $this->getFeatureTypeDeclarations();
 
         if ($configuration["schemes"] && is_array($configuration["schemes"])) {
             foreach ($configuration["schemes"] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
                     $featureTypeName           = $scheme['featureType'];
-                    $featureTypes              = $this->container->getParameter('featureTypes');
                     $scheme['featureType']     = $featureTypes[ $featureTypeName ];
                     $scheme['featureTypeName'] = $featureTypeName;
                 }
