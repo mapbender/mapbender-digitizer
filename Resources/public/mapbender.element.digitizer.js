@@ -2167,37 +2167,26 @@
                 contentType: "application/json; charset=utf-8",
                 dataType:    "json",
                 data:        data && (method === 'GET' && data || JSON.stringify(data)) || null
-            }).error(function(xhr) {
+            }).fail(function(xhr) {
+                // this happens on logout: error callback with status code 200 'ok'
+                if (xhr.status === 200 && xhr.getResponseHeader("Content-Type").toLowerCase().indexOf("text/html") >= 0) {
+                    window.location.reload();
+                }
+            }).fail(function(xhr) {
                 var errorMessage = translate('api.query.error-message');
                 var errorDom = $(xhr.responseText);
-
-                if(errorDom.size() && errorDom.is(".sf-reset")) {
-                    errorMessage += "\n" + errorDom.find(".block_exception h2").text() + "\n";
-                    errorMessage += "Trace:\n";
-                    _.each(errorDom.find(".traces li"), function(li) {
-                        errorMessage += $(li).text() + "\n";
-                    });
-
-                } else if(errorDom.has(".loginBox.login").size()) {
-                    var loginURL = errorDom.find(".loginBox.login form").attr("action").replace(/\/check$/, '');
-                    location.href = loginURL;
-                    // $("<div/>")
-                    //     .popupDialog({
-                    //         modal:  true,
-                    //         height: 400,
-                    //         width:  "600px"
-                    //     })
-                    //     .append($("<iframe src='" + loginURL + "'> "))
-                    $.notify("Bitte loggen sie sich ein.");
-                } else {
-                    errorMessage += JSON.stringify(xhr.responseText);
+                // https://stackoverflow.com/a/298758
+                var exceptionTextNodes = $('.sf-reset .text-exception h1', errorDom).contents().filter(function() {
+                    return this.nodeType === (Node && Node.TEXT_NODE || 3) && ((this.nodeValue || '').trim());
+                });
+                if (exceptionTextNodes && exceptionTextNodes.length) {
+                    errorMessage = [errorMessage, exceptionTextNodes[0].nodeValue.trim()].join("\n");
                 }
-
                 $.notify(errorMessage, {
                     autoHide: false
                 });
-                console.log(errorMessage, xhr);
             });
+
         },
 
         activate: function() {
