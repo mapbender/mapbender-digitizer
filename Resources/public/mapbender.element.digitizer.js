@@ -1898,6 +1898,9 @@
                     window.location.reload();
                 }
             }).fail(function(xhr) {
+                if (xhr.statusText === 'abort') {
+                    return;
+                }
                 var errorMessage = translate('api.query.error-message');
                 var errorDom = $(xhr.responseText);
 
