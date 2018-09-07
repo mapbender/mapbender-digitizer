@@ -3,18 +3,19 @@
 namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\DBALException;
-use Eslider\Driver\SqliteExtended;
+use Mapbender\DataSourceBundle\Component\DataStore;
+use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\DigitizerStyleManager;
 use Mapbender\DigitizerBundle\Component\Uploader;
-use Mapbender\SearchBundle\Component\StyleManager;
 use Mapbender\SearchBundle\Entity\Style;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  *
@@ -207,7 +208,15 @@ class Digitizer extends BaseElement
                 break;
 
             case 'datastore/get':
-                $results = $this->getDataStore($postData, $action);
+                $dataStore = $this->getDataStoreById($postData['id']);
+                if (!$dataStore) {
+                    throw new NotFoundHttpException("No such datastore");
+                }
+                $entity = $dataStore->get($postData['dataItemId']);
+                if (!$entity) {
+                    throw new NotFoundHttpException("No such entity");
+                }
+                $results = $entity->toArray();
                 break;
 
             case 'datastore/save':
@@ -244,7 +253,7 @@ class Digitizer extends BaseElement
      * @param $schemas
      * @param $queryParams
      * @param $defaultCriteria
-     * @param $featureType
+     * @param FeatureType $featureType
      * @return mixed
      */
     protected function selectFeatures($request, $schemas, $queryParams, $defaultCriteria, $featureType)
@@ -259,7 +268,7 @@ class Digitizer extends BaseElement
      *
      * @param $request
      * @param $postData
-     * @param $featureType
+     * @param FeatureType $featureType
      * @param $schema
      * @param $debugMode
      * @return array
@@ -279,9 +288,10 @@ class Digitizer extends BaseElement
 
         $connection = $featureType->getDriver()->getConnection();
 
+        $results = array();
         try {
             // save collection
-            if (isset($postData['features']) && is_array($postData['features'])) {
+            if (!empty($postData['features']) && is_array($postData['features'])) {
                 foreach ($postData['features'] as $feature) {
                     /**
                      * @var $feature Feature
@@ -320,7 +330,7 @@ class Digitizer extends BaseElement
     /**
      * Delete feature
      *
-     * @param $featureType
+     * @param FeatureType $featureType
      * @param $postData
      * @return mixed
      */
@@ -332,9 +342,9 @@ class Digitizer extends BaseElement
     /**
      * File upload
      *
-     * @param $request
+     * @param Request $request
      * @param $schemaName
-     * @param $featureType
+     * @param FeatureType $featureType
      * @return array
      */
     protected function fileUpload($request, $schemaName, $featureType)
@@ -370,23 +380,13 @@ class Digitizer extends BaseElement
      * Get Data Store
      *
      * @param $postData
-     * @param $action
      * @return array|null
      */
-    protected function getDataStore($postData, $action)
+    protected function getDataStore($postData)
     {
-        // TODO: get request ID and check
-        if (!isset($postData['id']) || !isset($postData['dataItemId'])) {
-            $results = array(
-                array('errors' => array(
-                    array('message' => $action . ": id or dataItemId not defined!")
-                ))
-            );
-        }
-
         $id           = $postData['id'];
         $dataItemId   = $postData['dataItemId'];
-        $dataStore    = $this->container->get("data.source")->get($id);
+        $dataStore    = $this->getDataStoreById($id);
         $dataItem     = $dataStore->get($dataItemId);
         $dataItemData = null;
         if ($dataItem) {
@@ -408,7 +408,7 @@ class Digitizer extends BaseElement
     {
         $id          = $postData['id'];
         $dataItem    = $postData['dataItem'];
-        $dataStore   = $this->container->get("data.source")->get($id);
+        $dataStore   = $this->getDataStoreById($id);
         $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
         if (empty($postData['dataItem'][ $uniqueIdKey ])) {
             unset($postData['dataItem'][ $uniqueIdKey ]);
@@ -424,7 +424,7 @@ class Digitizer extends BaseElement
     protected function removeDataStore($postData)
     {
         $id          = $postData['id'];
-        $dataStore   = $this->container->get("data.source")->get($id);
+        $dataStore   = $this->getDataStoreById($id);
         $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
         $dataItemId  = $postData['dataItem'][ $uniqueIdKey ];
         $dataStore->remove($dataItemId);
@@ -471,5 +471,16 @@ class Digitizer extends BaseElement
         $results['featureStyles'] = $this->styleManager->getSchemaStyles($schema);
 
         return $results;
+    }
+
+    /**
+     * @param string $id
+     * @return DataStore
+     */
+    protected function getDataStoreById($id)
+    {
+        /** @var DataStoreService $dataStoreService */
+        $dataStoreService = $this->container->get('data.source');
+        return $dataStoreService->get($id);
     }
 }
