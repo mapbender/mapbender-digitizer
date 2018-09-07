@@ -3,6 +3,8 @@
 namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\DBALException;
+use Mapbender\DataSourceBundle\Component\DataStore;
+use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
@@ -10,6 +12,7 @@ use Mapbender\DigitizerBundle\Component\Uploader;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  *
@@ -217,32 +220,24 @@ class Digitizer extends BaseElement
                 break;
 
             case 'datastore/get':
-                // TODO: get request ID and check
-                if (!isset($request['id']) || !isset($request['dataItemId'])) {
-                    $results = array(
-                        array('errors' => array(
-                            array('message' => $action . ": id or dataItemId not defined!")
-                        ))
-                    );
-                }
-
                 $id           = $request['id'];
                 $dataItemId   = $request['dataItemId'];
-                $dataStore    = $this->container->get("data.source")->get($id);
-                $dataItem     = $dataStore->get($dataItemId);
-                $dataItemData = null;
-                if ($dataItem) {
-                    $dataItemData = $dataItem->toArray();
+                $dataStore = $this->getDataStoreById($id);
+                if (!$dataStore) {
+                    throw new NotFoundHttpException("No such datastore");
                 }
-
-                $results = $dataItemData;
+                $entity = $dataStore->get($dataItemId);
+                if (!$entity) {
+                    throw new NotFoundHttpException("No such entity");
+                }
+                $results = $entity->toArray();
                 break;
 
             case 'datastore/save':
 
                 $id          = $request['id'];
                 $dataItem    = $request['dataItem'];
-                $dataStore   = $this->container->get("data.source")->get($id);
+                $dataStore = $this->getDataStoreById($id);
                 $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
                 if (empty($request['dataItem'][ $uniqueIdKey ])) {
                     unset($request['dataItem'][ $uniqueIdKey ]);
@@ -254,7 +249,7 @@ class Digitizer extends BaseElement
                 break;
             case 'datastore/remove':
                 $id          = $request['id'];
-                $dataStore   = $this->container->get("data.source")->get($id);
+                $dataStore = $this->getDataStoreById($id);
                 $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
                 $dataItemId  = $request['dataItem'][ $uniqueIdKey ];
                 $dataStore->remove($dataItemId);
@@ -290,5 +285,16 @@ class Digitizer extends BaseElement
             unset($featureType[ $keyName ]);
         }
         return $featureType;
+    }
+
+    /**
+     * @param string $id
+     * @return DataStore
+     */
+    protected function getDataStoreById($id)
+    {
+        /** @var DataStoreService $dataStoreService */
+        $dataStoreService = $this->container->get('data.source');
+        return $dataStoreService->get($id);
     }
 }
