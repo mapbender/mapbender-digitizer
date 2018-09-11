@@ -8,9 +8,7 @@ use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
-use Mapbender\DigitizerBundle\Component\DigitizerStyleManager;
 use Mapbender\DigitizerBundle\Component\Uploader;
-use Mapbender\SearchBundle\Entity\Style;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,10 +23,6 @@ class Digitizer extends BaseElement
     protected static $title                = "Digitizer";
     protected static $description          = "Georeferencing and Digitizing";
 
-    /**
-     * @var DigitizerStyleManager
-     */
-    protected $styleManager;
 
     /**
      * @inheritdoc
@@ -180,7 +174,6 @@ class Digitizer extends BaseElement
         }
 
         $schema = $schemas[$schemaName];
-        $this->styleManager = new DigitizerStyleManager($this->container);
 
         if (is_array($schema['featureType'])) {
             $featureType = new FeatureType($this->container, $schema['featureType']);
@@ -225,14 +218,6 @@ class Digitizer extends BaseElement
 
             case 'datastore/remove':
                 $this->removeDataStore($postData);
-                break;
-
-            case 'style/save':
-                $results = $this->saveStyle($postData);
-                break;
-
-            case 'style/list':
-                $results = $this->listStyle($request, $schema);
                 break;
 
             default:
@@ -428,49 +413,6 @@ class Digitizer extends BaseElement
         $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
         $dataItemId  = $postData['dataItem'][ $uniqueIdKey ];
         $dataStore->remove($dataItemId);
-    }
-
-    /**
-     * Save feature style
-     *
-     * @param $postData
-     * @return mixed
-     */
-    protected function saveStyle($postData)
-    {
-        $parameters = array(
-            'schemaName' => $postData['schema'],
-            'featureId'  => $postData['featureId'],
-            'userId'     => $this->getUserId()
-        );
-        $newStyle = $postData['style'];
-        $styleParameters = array_merge($newStyle, $parameters);
-
-        $style  = new Style($styleParameters);
-        $styleData = $this->styleManager->save($style)->toArray();
-        unset($styleData['userId']);
-        unset($styleData['name']);
-        unset($styleData['styleMaps']);
-        unset($styleData['title']);
-        $results['style']   = $styleData;
-
-        return $results;
-    }
-
-    /**
-     * Get styles list
-     *
-     * @param $request
-     * @param $schema
-     * @return mixed
-     */
-    protected function listStyle($request, $schema)
-    {
-        $this->requireMethod($request, 'GET');
-
-        $results['featureStyles'] = $this->styleManager->getSchemaStyles($schema);
-
-        return $results;
     }
 
     /**
