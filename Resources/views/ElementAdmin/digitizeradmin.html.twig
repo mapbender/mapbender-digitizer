@@ -1,9 +1,5 @@
 <div class="elementForm defaultForm elementFormDigitizer">
     <style media="all">
-        .elementFormDigitizer {
-            width: 100%;
-        }
-
         .elementFormDigitizer label.labelInput {
             display: block;
             margin: 0;
@@ -23,10 +19,6 @@
             width: 100%;
         }
 
-        /* Dirty fix */
-        .popupContainer.modal.show .popupContent, .popupSubContent {
-            margin-bottom: 0;
-        }
     </style>
     <script language="JavaScript">
         $(function(){
@@ -156,14 +148,12 @@
             var popupContainer = $(".popupContainer.modal > .popup");
             var yamlEditorElement = $("#elementForm > div > div.inputWrapper.code-yaml > div");
 
-            popupContainer.css('margin-top', 0);
             popupContainer.animate({
-                width:  $(document).width() ,
-                height: $(window).height() -10
+                width:  '100%'
             }, 350);
 
             yamlEditorElement.animate({
-                height: $(window).height() - 285
+                height: $(window).height() - 375
             }, 350);
         })
     </script>
