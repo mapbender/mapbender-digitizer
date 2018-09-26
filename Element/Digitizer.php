@@ -70,11 +70,14 @@ class Digitizer extends BaseElement
         $configuration            = parent::getConfiguration();
         $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
         $configuration['fileUri'] = $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
-        $featureTypes              = $this->getFeatureTypeDeclarations();
+        $featureTypes = null;
 
         if ($configuration["schemes"] && is_array($configuration["schemes"])) {
             foreach ($configuration["schemes"] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
+                    if ($featureTypes === null) {
+                        $featureTypes = $this->getFeatureTypeDeclarations();
+                    }
                     $featureTypeName           = $scheme['featureType'];
                     $scheme['featureType']     = $featureTypes[ $featureTypeName ];
                     $scheme['featureTypeName'] = $featureTypeName;
