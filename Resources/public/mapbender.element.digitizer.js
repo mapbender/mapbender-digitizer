@@ -1764,19 +1764,33 @@
                 schema.elementsTranslated = true;
             }
 
-            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+            // dataManager access function
+            // TODO: maybe it would be better to create public methods on dataManager to do this
+            function withSchema(dataManager, schemaName, callback) {
+                var schema = dataManager.options.schemes[schemaName];
+                // FIXME: following lines are a hack to get dataManager to open the correct popup
+                // (it does open the popup for the scheme provided in currentSettings, not
+                // the one passed to the _openEditPopup function)
+                var prevSettings = dataManager.currentSettings;
+                var prevActiveSchema = dataManager.activeSchema;
+                dataManager.activeSchema = dataManager.currentSettings = schema;
 
+                dataManager._getData(schema).then(function() {
+                    callback(schema);
+                    dataManager.currentSettings = prevSettings;
+                    dataManager.activeSchema = prevActiveSchema
+                });
+            }
+
+            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+                
                 if(item.type === "resultTable" && item.editable && !item.isProcessed) {
 
-                    var cloneItem = $.extend({}, item);
-                    cloneItem.isProcessed = true;
-                    item.type = "container";
-                    var button = {
-                        type:     "button",
-                        title:    "",
-                        cssClass: "fa fa-plus",
-                        click:    function(e) {
-
+                    var onCreateClick;
+                    var onEditClick;
+                    
+                    if (!item.hasOwnProperty('dataManagerLink')) {
+                        onCreateClick = function(e) {
                             e.preventDefault();
                             var item = $(this).next().data("item");
                             var popup = item.popupItems;
@@ -1792,17 +1806,9 @@
                             data[uniqueIdKey] = null;
                             widget._openEditDialog(data, popup, item, table);
                             return false;
-                        }
-                    };
-
-                    item.children = [button, cloneItem];
-
-                    var buttons = [];
-
-                    buttons.push({
-                        title:     translate('feature.edit'),
-                        className: 'edit',
-                        onClick:   function(rowData, ui, e) {
+                        };
+                        
+                        onEditClick = function(rowData, ui, e) {
                             e.defaultPrevented && e.defaultPrevented();
                             e.preventDefault && e.preventDefault();
 
@@ -1817,27 +1823,99 @@
                             widget._openEditDialog(rowData, popup, item, table);
 
                             return false;
-                        }
+                        };
+                    } else if (item.hasOwnProperty('dataManagerLink')) {
+                        var schemaName = item.dataManagerLink.schema;
+                        var fieldName = item.dataManagerLink.fieldName;
+                        var schemaFieldName = item.dataManagerLink.schemaFieldName;
+                        
+                        onCreateClick = function(e) {
+                            e.preventDefault && e.preventDefault();
+
+                            var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                            withSchema(dm, schemaName, function (schema) {
+                                dm._openEditDialog(schema.create());
+                            });
+
+                            return false;
+                        };
+                        
+                        onEditClick = function(rowData, ui, e) {
+                            e.defaultPrevented && e.defaultPrevented();
+                            e.preventDefault && e.preventDefault();
+
+                            var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                            
+                            withSchema(dm, schemaName, function (schema) {
+                                var dataItem = _.find(schema.dataItems, function (d) {
+                                    return d[schemaFieldName] === rowData[fieldName];
+                                });
+                                dm._openEditDialog(dataItem);
+                            });
+
+                            return false;
+                        };
+                    }
+
+                    var cloneItem = $.extend({}, item);
+                    cloneItem.isProcessed = true;
+                    item.type = "container";
+                    var button = {
+                        type:     "button",
+                        title:    "",
+                        cssClass: "fa fa-plus",
+                        click:    onCreateClick
+                    };
+
+                    item.children = [button, cloneItem];
+
+                    var buttons = [];
+
+                    buttons.push({
+                        title:     translate('feature.edit'),
+                        className: 'edit',
+                        onClick:   onEditClick
                     });
 
                     cloneItem.buttons = buttons;
 
                 }
 
-                if(item.type === "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
+                if(item.type === "select" && !item.isProcessed && ((item.dataStore && item.dataStore.editable && item.dataStore.popupItems) || item.dataManagerLink)) {
+                    var onCreateClick;
+                    var onEditClick;
+                    
+                    if (item.dataManagerLink) {
+                        var schemaName = item.dataManagerLink.schema;
+                        var schemaFieldName = item.dataManagerLink.schemaFieldName;
+                        
+                        onCreateClick = function(e) {
+                            e.preventDefault && e.preventDefault();
+                            
+                            var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                            withSchema(dm, schemaName, function (schema) {
+                                dm._openEditDialog(schema.create());
+                            });
 
-                    item.type = "fieldSet";
-                    // TODO: merge item with new select
-                    item.children = [{
-                        type:    "select",
-                        id:      item.id,
-                        options: item.options,
-                        name:    item.name
+                            return false;
+                        };
+                        
+                        onEditClick = function(e) {
+                            e.preventDefault && e.preventDefault();
+                            
+                            var val = $(this).siblings().find('select').val();
+                            var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                            withSchema(dm, schemaName, function (schema) {
+                                var dataItem = _.find(schema.dataItems, function (d) {
+                                    return d[schemaFieldName].toString() === val;
+                                });
+                                dm._openEditDialog(dataItem);
+                            });
 
-                    }, {
-                        type:  "button",
-                        title: "Edit",
-                        click: function() {
+                            return false;
+                        };
+                    } else {
+                        onCreateClick = function() {
                             var dataItemId = $(this).siblings().find('select').val();
                             var selectRef = $(this).siblings().find('select');
 
@@ -1851,17 +1929,35 @@
                             });
 
                             return false;
-                        }
-                    }, {
-                        type:  "button",
-                        title: "New",
-                        click: function() {
+                        };
+                        
+                        onEditClick = function() {
                             var selectRef = $(this).siblings().find('select');
                             widget._openEditDialog({}, item.dataStore.popupItems, item, selectRef);
 
                             return false;
+                        };
+                    }
+                    
+                    var cloneItem = $.extend({}, item);
+                    cloneItem.isProcessed = true;
+                    item.type = "fieldSet";
+                    item.title = undefined;
+                    item.children = [
+                        cloneItem,
+                        {
+                            type:      "button",
+                            title:     translate('feature.edit'),
+                            className: 'edit',
+                            onClick:   onEditClick
+                        },
+                        {
+                            type:     "button",
+                            title:    "",
+                            cssClass: "fa fa-plus",
+                            click:    onCreateClick
                         }
-                    }]
+                    ];
                 }
 
                 if(item.type === "file") {
@@ -2894,6 +2990,7 @@
                         item.src = src;
                     }
                 }
+                
             });
             /*  if(schema.popup.buttons) {
              buttons = _.union(schema.popup.buttons, buttons);
