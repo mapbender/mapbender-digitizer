@@ -1778,14 +1778,13 @@
                 dataManager._getData(schema).then(function() {
                     callback(schema);
                     dataManager.currentSettings = prevSettings;
-                    dataManager.activeSchema = prevActiveSchema
+                    dataManager.activeSchema = prevActiveSchema;
                 });
             }
 
             DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
                 
                 if(item.type === "resultTable" && item.editable && !item.isProcessed) {
-
                     var onCreateClick;
                     var onEditClick;
                     
@@ -1948,8 +1947,8 @@
                         {
                             type:      "button",
                             title:     translate('feature.edit'),
-                            className: 'edit',
-                            onClick:   onEditClick
+                            cssClass: 'edit',
+                            click:   onEditClick
                         },
                         {
                             type:     "button",
