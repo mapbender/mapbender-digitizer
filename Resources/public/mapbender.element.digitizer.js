@@ -1616,7 +1616,9 @@
             var isOpenLayerCloudPopup = schemaPopupConfig.type && schemaPopupConfig.type === 'openlayers-cloud';
 
             if (widget.currentPopup) {
+                widget.currentPopup.popupDialog();
                 widget.currentPopup.popupDialog('close');
+                widget.currentPopup = null;
                 if (isOpenLayerCloudPopup && schema.olFeatureCloudPopup) {
                     map.removePopup(schema.olFeatureCloudPopup);
                     schema.olFeatureCloudPopup.destroy();
@@ -1712,6 +1714,7 @@
                             widget.removeFeature(olFeature);
                         }
                         widget.currentPopup.popupDialog('close');
+                        widget.currentPopup = null;
                     }
                 });
             }
