@@ -1898,9 +1898,9 @@
                             });
                             $(dm.element).on('data.manager.item.saved', function (event, eventData) {
                                 var uniqueIdKey = eventData.uniqueIdKey;
-                                var text = item.itemPattern.replace('{id}',eventData.item[uniqueIdKey] ).replace('{name}',eventData.item[item.itemName]);
+                                var text = item.itemPattern.replace('{id}', eventData.item[uniqueIdKey]).replace('{name}', eventData.item[item.itemName]);
                                 var $option = $('<option />').val(eventData.item[uniqueIdKey]).text(text);
-                                var $select = $('select[name='+item.name+']').append($option);
+                                var $select = $('select[name=' + item.name + ']').append($option);
                                 $select.val(eventData.item[uniqueIdKey]);
                             });
                             return false;
@@ -2022,6 +2022,12 @@
             dialog.popupDialog(popupConfiguration);
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
+            if (popupConfiguration.modal) {
+                dialog.bind('popupdialogclose', function () {
+                    widget.currentPopup = null;
+                });
+            }
+
 
             if (isOpenLayerCloudPopup) {
                 // Hide original popup but not kill it.
@@ -2073,7 +2079,28 @@
             });
 
             setTimeout(function () {
-                dialog.formData(olFeature.data);
+                if (popupConfiguration.remoteData) {
+
+
+                    var bbox = dialog.data("feature").geometry.getBounds().toBBOX();
+                    var url = widget.elementUrl + "getFeatureInfo/?bbox=" + bbox + "&schema=" + schema.schemaName;
+
+                    $.ajax({url: url}).success(function (response) {
+                        _.each(response.dataSets, function (dataSet) {
+                            var neData = JSON.parse(dataSet.features[0].properties);
+                            $.extend(data, newData);
+
+
+                        });
+                        dialog.formData(olFeature.data);
+
+                    });
+
+
+                } else {
+                    dialog.formData(olFeature.data);
+                }
+
 
                 if (isOpenLayerCloudPopup) {
                     /**

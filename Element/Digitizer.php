@@ -544,6 +544,27 @@ class Digitizer extends BaseElement
         return array('processedItem'=>$f,'dataItems' =>$a) ;
     }
 
+    public function getFeatureInfoAction($request){
+        $bbox = $request['bbox'];
+        $schemaName = $request['schema'];
+        $dataSets = [];
+        $remoteData = $this->getSchemaByName($schemaName)["popup"]["remoteData"];
+
+        foreach ($remoteData as $url){
+            $url = str_replace("{bbox}", $bbox, $url);
+            try {
+                $dataSets[]  = file_get_contents($url);
+            } catch (\Exception $e) { //Todo Throw correct e in debug.
+
+                throw new \Exception('Can not recieve data form FeatureInfo request');
+            }
+
+        }
+
+
+        return array('dataSets' => array());
+    }
+
     /**
      * Clean feature type configuration for public use
      *
