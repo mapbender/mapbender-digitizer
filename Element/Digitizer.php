@@ -547,11 +547,13 @@ class Digitizer extends BaseElement
     public function getFeatureInfoAction($request){
         $bbox = $request['bbox'];
         $schemaName = $request['schema'];
+        $srid = $request['srid'];
         $dataSets = [];
         $remoteData = $this->getSchemaByName($schemaName)["popup"]["remoteData"];
 
         foreach ($remoteData as $url){
             $url = str_replace("{bbox}", $bbox, $url);
+            $url = str_replace("{srid}", $srid, $url);
             try {
                 $dataSets[]  = file_get_contents($url);
             } catch (\Exception $e) { //Todo Throw correct e in debug.

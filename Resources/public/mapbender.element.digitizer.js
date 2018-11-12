@@ -2079,13 +2079,19 @@
             });
 
             setTimeout(function () {
-                if (popupConfiguration.remoteData) {
+
+                if (popupConfiguration.remoteData && olFeature.isNew) {
 
 
                     var bbox = dialog.data("feature").geometry.getBounds().toBBOX();
-                    var url = widget.elementUrl + "getFeatureInfo/?bbox=" + bbox + "&schema=" + schema.schemaName;
+                    var srid = map.getProjection().replace('EPSG:','');
+                    var url = widget.elementUrl + "getFeatureInfo/";
 
-                    $.ajax({url: url}).success(function (response) {
+                    $.ajax({url: url, data: {
+                            bbox :bbox,
+                            schema: schema.schemaName,
+                            srid: srid
+                        }}).success(function (response) {
                         _.each(response.dataSets, function (dataSet) {
                             var neData = JSON.parse(dataSet.features[0].properties);
                             $.extend(data, newData);
