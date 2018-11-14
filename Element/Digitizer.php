@@ -546,6 +546,17 @@ class Digitizer extends BaseElement
 
     public function getFeatureInfoAction($request){
         $bbox = $request['bbox'];
+        /* BoundingBox corrections */
+
+        $separated_bbox = explode( ',', $bbox);
+
+        $separated_bbox[2] = strval( floatval( $separated_bbox[0] ) + 0.00001);
+
+        $separated_bbox[3] = strval( floatval( $separated_bbox[1] ) + 0.00001);
+
+        $bbox = implode( ',', $separated_bbox );
+
+
         $schemaName = $request['schema'];
         $srid = $request['srid'];
         $dataSets = [];
@@ -553,7 +564,9 @@ class Digitizer extends BaseElement
 
         foreach ($remoteData as $url){
             $url = str_replace("{bbox}", $bbox, $url);
+            $url = str_replace("{BBOX}", $bbox, $url);
             $url = str_replace("{srid}", $srid, $url);
+            $url = str_replace("{SRID}", $srid, $url);
             try {
                 $dataSets[]  = file_get_contents($url);
             } catch (\Exception $e) { //Todo Throw correct e in debug.
@@ -564,7 +577,7 @@ class Digitizer extends BaseElement
         }
 
 
-        return array('dataSets' => array());
+        return array('dataSets' => $dataSets);
     }
 
     /**

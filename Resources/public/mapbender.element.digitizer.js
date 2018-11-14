@@ -119,41 +119,7 @@
         }
     };
 
-    /**
-     * "Fake" form data for a feature that hasn't gone through attribute
-     * editing, for saving. This is used when we save a feature that has only
-     * been moved / dragged. The popup dialog with the form is not initialized
-     * in these cases.
-     * Assigned values are copied from the feature's data, if it was already
-     * stored in the db, empty otherwise.
-     *
-     * @param feature
-     * @returns {{}}
-     */
-    function initialFormData(feature) {
-        var formData = {};
-        var extractFormData;
-        extractFormData = function (definition) {
-            _.forEach(definition, function (item) {
-                if (_.isArray(item)) {
-                    // recurse into lists
-                    extractFormData(item);
-                } else if (item.name) {
-                    var currentValue = (feature.data || {})[item.name];
-                    // keep empty string, but replace undefined => null
-                    if (typeof(currentValue) === 'undefined') {
-                        currentValue = null;
-                    }
-                    formData[item.name] = currentValue;
-                } else if (item.children) {
-                    // recurse into child property (should be a list)
-                    extractFormData(item.children);
-                }
-            });
-        };
-        extractFormData(feature.schema.formItems);
-        return formData;
-    }
+
 
     /**
      * "Fake" form data for a feature that hasn't gone through attribute
@@ -1095,7 +1061,7 @@
                         // $.fn.select2.defaults.set('amdLanguageBase', 'select2/dist/js/i18n/');
 
                         foreachItemTree(schema.search.form, function (item) {
-                            // TODO: Refactor this to new type:search form generator element !
+
                             if (item.type && item.type === 'select') {
                                 if (item.ajax) {
 
@@ -2093,7 +2059,7 @@
                             srid: srid
                         }}).success(function (response) {
                         _.each(response.dataSets, function (dataSet) {
-                            var neData = JSON.parse(dataSet.features[0].properties);
+                            var newData = JSON.parsmne(dataSet.features[0].properties);
                             $.extend(data, newData);
 
 
@@ -3213,11 +3179,12 @@
                     widget.deactivateFrame(widget.currentSettings);
                 }
             };
-            if (widget.options.confirmSaveOnDeactivate) {
+            always()
+            /*if (widget.options.confirmSaveOnDeactivate) {
                 widget._confirmSave(unsavedFeatures, always);
             } else {
                 always();
-            }
+            } */
         },
         _confirmSave: function (unsavedFeatures, callback) {
             var widget = this;
