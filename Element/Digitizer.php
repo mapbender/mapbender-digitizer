@@ -546,17 +546,6 @@ class Digitizer extends BaseElement
 
     public function getFeatureInfoAction($request){
         $bbox = $request['bbox'];
-        /* BoundingBox corrections */
-
-        $separated_bbox = explode( ',', $bbox);
-
-        $separated_bbox[2] = strval( floatval( $separated_bbox[0] ) + 0.00001);
-
-        $separated_bbox[3] = strval( floatval( $separated_bbox[1] ) + 0.00001);
-
-        $bbox = implode( ',', $separated_bbox );
-
-
         $schemaName = $request['schema'];
         $srid = $request['srid'];
         $dataSets = [];
