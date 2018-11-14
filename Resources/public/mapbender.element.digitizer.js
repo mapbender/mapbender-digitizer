@@ -2063,7 +2063,7 @@
                         }}).success(function (response) {
                         _.each(response.dataSets, function (dataSet) {
                             var newData = JSON.parse(dataSet).features[0].properties
-                            $.extend(data, newData);
+                            $.extend(olFeature.data, newData);
 
 
                         });
