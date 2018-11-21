@@ -1671,14 +1671,21 @@
                 buttons.push({
                     text: translate("cancel"),
                     click: function () {
-                        var dialog = $(this).closest(".ui-dialog-content");
+                        this.currentPopup.trigger('edit-cancel', {
+                            'origin' : 'cancel-button',
+                            'feature' : function(){
+                                return olFeature;
+                            },
+                            'schema' : schema
+                        });
+/*
                         var olFeature = dialog.data('feature');
                         var options = widget.options;
                         if (olFeature.hasOwnProperty('isNew') && schema.allowDeleteByCancelNewGeometry) {
                             widget.removeFeature(olFeature);
-                        }
-                        widget.currentPopup.popupDialog('close');
-                    }
+                        } **/
+                        //widget.currentPopup.popupDialog('close');
+                    }.bind(this),
                 });
             }
 
@@ -1988,6 +1995,18 @@
             dialog.popupDialog(popupConfiguration);
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
+            dialog.bind('edit-cancel', this.editCancel.bind(this));
+            dialog.bind('popupdialogclose', function (event) {
+                dialog.trigger('edit-cancel', {
+                    'origin': 'close-button',
+                    'feature': function () {
+                        return dialog.data('feature')
+                    }.bind(this),
+                    'schema': schema
+                });
+            }.bind(this));
+
+
             if (popupConfiguration.modal) {
                 dialog.bind('popupdialogclose', function () {
                     widget.currentPopup = null;
@@ -3273,6 +3292,17 @@
             // https://trac.wheregroup.com/cp/issues/4548
             if (widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
+            }
+
+        },
+
+        editCancel : function(event, eventData) {
+            var feature = eventData.feature();
+            if (feature.hasOwnProperty('isNew') && eventData.schema.allowDeleteByCancelNewGeometry) {
+                this.removeFeature(feature);
+            }
+            if(eventData.origin === 'cancel-button'){
+                this.currentPopup.popupDialog('close');
             }
 
         },
