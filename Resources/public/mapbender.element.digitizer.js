@@ -1028,8 +1028,8 @@
                             onComplete: function (event) {
                                 var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
                                 widget.unsavedFeatures[event.id] = feature;
-                                if(!widget.currentPopup){
-                                    debugger;
+                                if(!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen){
+
                                     if(schema.popup.remoteData){
                                         var bbox = feature.geometry.getBounds();
                                         bbox.right = parseFloat(bbox.right+0.00001);
