@@ -1289,6 +1289,7 @@
             }
 
             function activateFrame(schema) {
+
                 var frame = schema.frame;
                 var layer = schema.layer;
 
@@ -3209,8 +3210,16 @@
 
         activate: function () {
             var widget = this;
-            widget.options.__disabled = false;
-            widget.activateFrame(widget.currentSettings);
+            widget.query('getConfiguration').done(function (response) {
+                _.each(response.schemes, function(schema,schemaName){
+                    widget.options.schemes[schemaName].formItems = response.schemes[schemaName].formItems
+                });
+
+                widget.options.__disabled = false;
+                widget.activateFrame(widget.currentSettings);
+
+            })
+
         },
 
         deactivate: function () {

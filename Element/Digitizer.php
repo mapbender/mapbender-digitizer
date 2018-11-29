@@ -101,6 +101,10 @@ class Digitizer extends BaseElement
         return $configuration;
     }
 
+    public function getConfigurationAction(){
+        return $this->getConfiguration(true);
+    }
+
     /**
      * Prepare request feautre data by the form definition
      *
