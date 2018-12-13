@@ -938,7 +938,7 @@
                                 var schema = feature.schema;
                                 var attributes = feature.attributes;
                                 var preventDefault = false;
-
+                                feature.oldGeom = {x:feature.geometry.x,y:feature.geometry.y};
                                 if (!schema.hooks || !schema.hooks.onStart) {
                                     return;
                                 }
@@ -950,6 +950,7 @@
                                     $.notify(e);
                                     return;
                                 }
+
 
                                 if (preventDefault) {
                                     $.notify(translate('move.denied'));
@@ -1030,27 +1031,33 @@
                                 widget.unsavedFeatures[event.id] = feature;
                                 if(!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen){
 
-                                    if(schema.popup.remoteData){
+                                    if(false && schema.popup.remoteData){
                                         var bbox = feature.geometry.getBounds();
                                         bbox.right = parseFloat(bbox.right+0.00001);
                                         bbox.top = parseFloat(bbox.top+0.00001);
                                         bbox= bbox.toBBOX();
                                         var srid = map.getProjection().replace('EPSG:','');
                                         var url = widget.elementUrl + "getFeatureInfo/";
-
+                                        console.log(schema)
                                         $.ajax({url: url, data: {
                                                 bbox :bbox,
                                                 schema: schema.schemaName,
                                                 srid: srid
-                                            }}).success(function (response) {
+                                            }}).done(function (response) {
                                             _.each(response.dataSets, function (dataSet) {
-                                                var newData = JSON.parse(dataSet).features[0].properties
+                                                var newData = JSON.parse(dataSet).features[0].properties;
+
+
+                                                Object.keys(feature.data)
                                                 $.extend(feature.data, newData);
 
 
                                             });
                                             widget._openFeatureEditDialog(feature);
 
+                                        }).fail(function(){
+                                            $.notfiy("No remote data could be fetched");
+                                            widget._openFeatureEditDialog(feature);
                                         });
 
                                     } else {
@@ -1568,6 +1575,7 @@
 
                     dialog && dialog.enableForm();
                     feature.disabled = false;
+                    feature.oldGeom = false;
                     dialog && dialog.popupDialog('close');
 
                     this.feature = feature;
@@ -1591,7 +1599,11 @@
                     if (successHandler) {
                         eval(successHandler);
                     }
-
+                    if(schema.refreshFeaturesAfterSave){
+                        _.each(schema.refreshFeaturesAfterSave, function(el,index){
+                            widget.refreshConnectedDigitizerFeatures(el);
+                        })
+                    }
                 });
             }
         },
@@ -1701,18 +1713,10 @@
                 buttons.push({
                     text: translate("cancel"),
                     click: function () {
-                        this.currentPopup.trigger('edit-cancel', {
-                            'origin' : 'cancel-button',
-                            'feature' : function(){
-                                return olFeature;
-                            },
-                            'schema' : schema
-                        });
-
-                    }.bind(this),
-                });
+                        this.currentPopup.popupDialog("close");
+                    }.bind(this)
+            });
             }
-
             var popupConfiguration = {
                 title: translate("feature.attributes"),
                 width: widget.featureEditDialogWidth
@@ -3336,6 +3340,37 @@
             if(eventData.origin === 'cancel-button'){
                 this.currentPopup.popupDialog('close');
             }
+            if(!feature.hasOwnProperty('isNew') && feature.hasOwnProperty("oldGeom")){
+
+
+                feature.geometry.x =  feature.oldGeom.x;
+                feature.geometry.y =  feature.oldGeom.y;
+
+
+                feature.layer.redraw();
+                feature.layer.setVisibility(false)
+
+                feature.layer.setVisibility(true)
+
+            }
+
+        },
+
+        refreshConnectedDigitizerFeatures : function(featureTypeName){
+            var schema = {};
+            $(".mb-element-digitizer").not(".mb-element-data-manager").each(function(index,element){
+                var digitzer = $(element).data("mapbenderMbDigitizer")
+                var schemes = digitzer.options.schemes;
+                _.each(schemes, function(schema, key){
+                    if(key === featureTypeName){
+                        if(schema.layer){
+                            digitzer._getData();
+                        }
+                        return true;
+                    }
+                }.bind(this))
+            }.bind(this))
+
 
         },
 
