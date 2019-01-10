@@ -1031,14 +1031,14 @@
                                 widget.unsavedFeatures[event.id] = feature;
                                 if(!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen){
 
-                                    if(false && schema.popup.remoteData){
+                                    if(schema.popup.remoteData){
                                         var bbox = feature.geometry.getBounds();
                                         bbox.right = parseFloat(bbox.right+0.00001);
                                         bbox.top = parseFloat(bbox.top+0.00001);
                                         bbox= bbox.toBBOX();
                                         var srid = map.getProjection().replace('EPSG:','');
                                         var url = widget.elementUrl + "getFeatureInfo/";
-                                        console.log(schema)
+
                                         $.ajax({url: url, data: {
                                                 bbox :bbox,
                                                 schema: schema.schemaName,
@@ -2051,7 +2051,7 @@
 
             var tables = dialog.find(".mapbender-element-result-table");
             _.each(tables, function (table, index) {
-                console.log(schema);
+
                 var item = $(table).data('item');
                 $(table).data('olFeature', olFeature);
                 if (item.editable) {
