@@ -2183,9 +2183,11 @@
          *
          * @private
          */
-        _getData: function () {
+        _getData: function (schema) {
+
             var widget = this;
-            var schema = widget.currentSettings;
+            schema = schema || widget.currentSettings;
+
             var map = widget.map;
             var projection = map.getProjectionObject();
             var extent = map.getExtent();
@@ -3363,8 +3365,9 @@
                 var schemes = digitzer.options.schemes;
                 _.each(schemes, function(schema, key){
                     if(key === featureTypeName){
+
                         if(schema.layer){
-                            digitzer._getData();
+                            digitzer._getData(schema);
                         }
                         return true;
                     }
