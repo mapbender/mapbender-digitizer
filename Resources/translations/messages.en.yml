@@ -1,7 +1,7 @@
 mb.digitizer:
   feature:
-    remove: Remove
     remove:
+      title: Remove
       successfully: 'Feature removed.'
       from:
         database: 'Delete feature.'

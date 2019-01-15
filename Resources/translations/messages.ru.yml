@@ -1,7 +1,7 @@
 mb.digitizer:
   feature:
-    remove: Удалить
     remove:
+      title: Удалить
       successfully: 'Геометрия удалена'
       from:
         database: 'Удалить геометрию с сервера'

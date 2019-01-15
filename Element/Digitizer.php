@@ -5,6 +5,7 @@ namespace Mapbender\DigitizerBundle\Element;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Mapbender\DataSourceBundle\Component\DataStore;
+use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
@@ -12,6 +13,9 @@ use Mapbender\DigitizerBundle\Component\Uploader;
 use Mapbender\DigitizerBundle\Entity\Condition;
 use Mapbender\DigitizerBundle\Entity\Style;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Digitizer Mapbender3 element
@@ -45,6 +49,9 @@ class Digitizer extends BaseElement
                 'mapbender.element.digitizer.js'
             ),
             'css'   => array(
+                '/components/select2/select2-built.css',
+                '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
+                'sass/element/context-menu.scss',
                 'sass/element/digitizer.scss'
             ),
             'trans' => array(
@@ -63,6 +70,14 @@ class Digitizer extends BaseElement
     }
 
     /**
+     * @return mixed[]
+     */
+    protected function getFeatureTypeDeclarations()
+    {
+        return $this->container->getParameter('featureTypes');
+    }
+
+    /**
      * Prepare form items for each scheme definition
      * Optional: get featureType by name from global context.
      *
@@ -75,12 +90,15 @@ class Digitizer extends BaseElement
         $configuration            = parent::getConfiguration();
         $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
         $configuration['fileUri'] = $this->container->getParameter('mapbender.uploads_dir') . "/" . FeatureType::UPLOAD_DIR_NAME;
+        $featureTypes = null;
 
         if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
             foreach ($configuration['schemes'] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
+                    if ($featureTypes === null) {
+                        $featureTypes = $this->getFeatureTypeDeclarations();
+                    }
                     $featureTypeName           = $scheme['featureType'];
-                    $featureTypes              = $this->container->getParameter('featureTypes');
                     $scheme['featureType']     = $featureTypes[ $featureTypeName ];
                     $scheme['featureTypeName'] = $featureTypeName;
                 }
@@ -487,8 +505,7 @@ class Digitizer extends BaseElement
         $linkId  = $request['linkId'];
         $dataItem    = $request['dataItem'];
 
-        /** @var DataStore $dataStore */
-        $dataStore   = $this->container->get("data.source")->get($schema);
+        $dataStore = $this->getDataStoreById($schema);
         $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
 
 
@@ -540,8 +557,7 @@ class Digitizer extends BaseElement
         $dataItemId  = $request['dataItemId'];
         $linkId   = $request['linkId'];
 
-        $dataStore   = $this->container->get("data.source")->get($schema);
-
+        $dataStore = $this->getDataStoreById($schema);
 
         $f = $dataStore->remove($dataItemId);
         $a = $this->getDatastoreAction(array('dataStoreLinkName'=>$schema , 'fid' =>$linkId, 'fieldName'=>$dataStoreLinkFieldName ));
@@ -647,7 +663,7 @@ class Digitizer extends BaseElement
         if (is_array($settings)) {
             $dataStore = new DataStore($settings);
         } else {
-            $dataStore = $this->container->get('data.source')->get($settings);
+            $dataStore = $this->getDataStoreById($settings);
         }
         return $dataStore;
     }
@@ -678,5 +694,16 @@ class Digitizer extends BaseElement
             $results[ $key ] = $quotedValue;
         }
         return $results;
+    }
+
+    /**
+     * @param string $id
+     * @return DataStore
+     */
+    protected function getDataStoreById($id)
+    {
+        /** @var DataStoreService $dataStoreService */
+        $dataStoreService = $this->container->get('data.source');
+        return $dataStoreService->get($id);
     }
 }

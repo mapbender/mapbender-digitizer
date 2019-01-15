@@ -1,7 +1,7 @@
 mb.digitizer:
   feature:
-    remove: Löschen
     remove:
+      title: Löschen
       successfully: 'Objekt wurde gelöscht.'
       from:
         database: 'Objekt löschen?'

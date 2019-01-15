@@ -517,7 +517,7 @@
 
                 if (schema.allowDelete) {
                     subItems['remove'] = {
-                        name: translate('feature.remove'),
+                        name: translate('feature.remove.title'),
                         action: function (key, options, parameters) {
                             widget.removeFeature(parameters.olFeature);
                         }
@@ -624,7 +624,7 @@
                     items['changeStyle'] = {name: translate('feature.style.change')};
                     items['zoom'] = {name: translate('feature.zoomTo')};
                     if (schema.allowDelete) {
-                        items['removeFeature'] = {name: translate('feature.remove')};
+                        items['removeFeature'] = {name: translate('feature.remove.title')};
                     }
 
                     if (schema.allowEditData) {
@@ -767,7 +767,7 @@
 
                 if (schema.allowDelete) {
                     buttons.push({
-                        title: translate("feature.remove"),
+                        title: translate("feature.remove.title"),
                         className: 'remove',
                         cssClass: 'critical',
                         onClick: function (olFeature, ui) {
@@ -777,7 +777,7 @@
                 }
                 // if(true) {
                 //     buttons.push({
-                //         title:     translate("feature.remove"),
+                //         title:     translate("feature.remove.title"),
                 //         className: 'remove',
                 //         cssClass:  'critical',
                 //         onClick:   function(olFeature, ui) {
@@ -1698,7 +1698,7 @@
             }
             if (schema.allowDelete) {
                 buttons.push({
-                    text: translate("feature.remove"),
+                    text: translate("feature.remove.title"),
                     'class': 'critical',
                     click: function () {
                         var dialog = $(this).closest(".ui-dialog-content");
@@ -2925,7 +2925,7 @@
 
             buttons.push({
 
-                text: translate("feature.remove", false),
+                text: translate("feature.remove.title", false),
                 class: 'critical',
                 click: function () {
 
@@ -3175,42 +3175,30 @@
                 url: widget.elementUrl + uri,
                 type: 'POST',
                 contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                data: JSON.stringify(request)
-            }).error(function (xhr, textStatus) {
-
-                if (textStatus === "abort") {
+                dataType:    "json",
+                data:        JSON.stringify(request)
+            }).fail(function(xhr) {
+                // this happens on logout: error callback with status code 200 'ok'
+                if (xhr.status === 200 && xhr.getResponseHeader("Content-Type").toLowerCase().indexOf("text/html") >= 0) {
+                    window.location.reload();
+                }
+            }).fail(function(xhr) {
+                if (xhr.statusText === 'abort') {
                     return;
                 }
-
                 var errorMessage = translate('api.query.error-message');
                 var errorDom = $(xhr.responseText);
-                if (errorDom.size() && errorDom.is(".sf-reset")) {
-                    errorMessage += "\n" + errorDom.find(".block_exception h2").text() + "\n";
-                    errorMessage += "Trace:\n";
-                    _.each(errorDom.find(".traces li"), function (li) {
-                        errorMessage += $(li).text() + "\n";
-                    });
 
-                } else if (errorDom.has(".loginBox.login").size()) {
-                    var loginURL = errorDom.find(".loginBox.login form").attr("action").replace(/\/check$/, '');
-                    location.href = loginURL;
-                    // $("<div/>")
-                    //     .popupDialog({
-                    //         modal:  true,
-                    //         height: 400,
-                    //         width:  "600px"
-                    //     })
-                    //     .append($("<iframe src='" + loginURL + "'> "))
-                    $.notify("Bitte loggen sie sich ein.");
-                } else {
-                    errorMessage += JSON.stringify(xhr.responseText);
+                // https://stackoverflow.com/a/298758
+                var exceptionTextNodes = $('.sf-reset .text-exception h1', errorDom).contents().filter(function() {
+                    return this.nodeType === (Node && Node.TEXT_NODE || 3) && ((this.nodeValue || '').trim());
+                });
+                if (exceptionTextNodes && exceptionTextNodes.length) {
+                    errorMessage = [errorMessage, exceptionTextNodes[0].nodeValue.trim()].join("\n");
                 }
-
                 $.notify(errorMessage, {
                     autoHide: false
                 });
-                console.log(errorMessage, xhr);
             });
         },
 
