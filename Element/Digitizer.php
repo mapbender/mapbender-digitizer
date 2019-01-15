@@ -25,20 +25,24 @@ class Digitizer extends BaseElement
     /**
      * @inheritdoc
      */
-    static public function listAssets()
+    public function getAssets()
     {
-        return array('js'    => array(
-                        "@MapbenderCoreBundle/Resources/public/mapbender.container.info.js",
-                        '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
-                        '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
-                        "/components/jquery-context-menu/jquery-context-menu-built.js",
-                        'mapbender.element.digitizer.js'
-        ),
-                     'css'   => array(
-                         'sass/element/context-menu.scss',
-                         'sass/element/digitizer.scss',
-                     ),
-                     'trans' => array('MapbenderDigitizerBundle:Element:digitizer.json.twig'));
+        return array(
+            'js' => array(
+                "@MapbenderCoreBundle/Resources/public/mapbender.container.info.js",
+                '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
+                '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
+                "/components/jquery-context-menu/jquery-context-menu-built.js",
+                '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
+            ),
+             'css' => array(
+                 '@MapbenderDigitizerBundle/Resources/public/sass/element/context-menu.scss',
+                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
+             ),
+             'trans' => array(
+                 'MapbenderDigitizerBundle:Element:digitizer.json.twig',
+            ),
+        );
     }
 
     /**
