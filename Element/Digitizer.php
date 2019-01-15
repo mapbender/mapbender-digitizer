@@ -33,6 +33,7 @@ class Digitizer extends BaseElement
                 '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                 '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
                 "/components/jquery-context-menu/jquery-context-menu-built.js",
+                '@MapbenderDigitizerBundle/Resources/public/digitizingToolset.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
             ),
              'css' => array(
