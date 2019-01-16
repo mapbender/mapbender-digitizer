@@ -1880,6 +1880,7 @@
             var points = [];
 
             _.each(_features, function(feature) {
+                feature.mbOrigin = 'digitizer';
                 if(!feature.geometry){
                     return;
                 }
