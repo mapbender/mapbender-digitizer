@@ -1730,40 +1730,13 @@
             return popupConfiguration;
         },
 
-
         /**
-         * Open edit feature dialog
          *
-         * @param olFeature open layer feature
          * @private
          */
-        _openFeatureEditDialog: function (olFeature) {
+
+        _processCurrentFormItemsWithDataManager : function() {
             var widget = this;
-            var schema = olFeature.schema;
-            var buttons = [];
-            var layer = olFeature.layer;
-            var map = layer.map;
-            var schemaPopupConfig = schema.popup ? schema.popup : {};
-            var isOpenLayerCloudPopup = schemaPopupConfig.type && schemaPopupConfig.type === 'openlayers-cloud';
-
-            if (widget.currentPopup) {
-                widget.currentPopup.popupDialog('close');
-                if (isOpenLayerCloudPopup && schema.olFeatureCloudPopup) {
-                    map.removePopup(schema.olFeatureCloudPopup);
-                    schema.olFeatureCloudPopup.destroy();
-                    schema.olFeatureCloudPopup = null;
-                }
-            }
-
-            var popupConfiguration = this._createPopupConfiguration(olFeature);
-
-            var dialog = $("<div/>");
-            olFeature.editDialog = dialog;
-
-            if (!schema.elementsTranslated) {
-                translateStructure(widget.currentSettings.formItems);
-                schema.elementsTranslated = true;
-            }
 
             // dataManager access function
             // TODO: maybe it would be better to create public methods on dataManager to do this
@@ -2016,6 +1989,45 @@
                     }
                 }
             });
+        },
+
+
+        /**
+         * Open edit feature dialog
+         *
+         * @param olFeature open layer feature
+         * @private
+         */
+        _openFeatureEditDialog: function (olFeature) {
+            var widget = this;
+            var schema = olFeature.schema;
+            var layer = olFeature.layer;
+            var map = layer.map;
+            var schemaPopupConfig = schema.popup ? schema.popup : {};
+            var isOpenLayerCloudPopup = schemaPopupConfig.type && schemaPopupConfig.type === 'openlayers-cloud';
+
+            if (widget.currentPopup) {
+                widget.currentPopup.popupDialog('close');
+                if (isOpenLayerCloudPopup && schema.olFeatureCloudPopup) {
+                    map.removePopup(schema.olFeatureCloudPopup);
+                    schema.olFeatureCloudPopup.destroy();
+                    schema.olFeatureCloudPopup = null;
+                }
+            }
+
+            var popupConfiguration = this._createPopupConfiguration(olFeature);
+
+            this._processCurrentFormItemsWithDataManager();
+
+            var dialog = $("<div/>");
+            olFeature.editDialog = dialog;
+
+            if (!schema.elementsTranslated) {
+                translateStructure(widget.currentSettings.formItems);
+                schema.elementsTranslated = true;
+            }
+
+
 
             dialog.data('feature', olFeature);
             dialog.data('digitizerWidget', widget);
