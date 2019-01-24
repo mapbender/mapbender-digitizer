@@ -918,9 +918,7 @@
                     });
                 }
 
-                frame.generateElements({
-                    children: [{
-                        type: 'digitizingToolSet',
+                frame.append($('<div/>').digitizingToolSet({
                         children: toolset,
                         layer: layer,
                         translations: toolSetTranslations,
@@ -1066,7 +1064,9 @@
                                 }
                             }
                         }
-                    }, {
+                }));
+                frame.generateElements({
+                    children: [{
                         type: 'checkbox',
                         cssClass: 'onlyExtent',
                         title: translate('toolset.current-extent'),
