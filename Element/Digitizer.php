@@ -34,7 +34,7 @@ class Digitizer extends BaseElement
     /**
      * @inheritdoc
      */
-    static public function listAssets()
+    public function getAssets()
     {
         return array(
             'js'    => array(
@@ -45,18 +45,20 @@ class Digitizer extends BaseElement
                 '/components/jquery-context-menu/jquery-context-menu-built.js',
                 '/components/select2/select2-built.js',
                 '/components/select2/dist/js/i18n/de.js',
-                'feature-style-editor.js',
-                'mapbender.element.digitizer.js'
+                '@MapbenderDigitizerBundle/Resources/public/digitizingToolset.js',
+                '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
+                '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
             ),
             'css'   => array(
                 '/components/select2/select2-built.css',
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
-                'sass/element/context-menu.scss',
-                'sass/element/digitizer.scss'
+                '@MapbenderDigitizerBundle/Resources/public/sass/element/context-menu.scss',
+                '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
             ),
             'trans' => array(
-                'MapbenderDigitizerBundle:Element:digitizer.json.twig'
-            ));
+                'MapbenderDigitizerBundle:Element:digitizer.json.twig',
+            ),
+        );
     }
 
     /**
