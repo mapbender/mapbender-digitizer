@@ -1609,76 +1609,48 @@
         },
 
         /**
-         * Open edit feature dialog
          *
-         * @param olFeature open layer feature
+         * @param olFeature
          * @private
          */
-        _openFeatureEditDialog: function (olFeature) {
+
+        _createPopupConfiguration : function(olFeature) {
+
             var widget = this;
-            var schema = olFeature.schema;
             var buttons = [];
-            var layer = olFeature.layer;
-            var map = layer.map;
-            var schemaPopupConfig = schema.popup ? schema.popup : {};
-            var isOpenLayerCloudPopup = schemaPopupConfig.type && schemaPopupConfig.type === 'openlayers-cloud';
-
-            if (widget.currentPopup) {
-                widget.currentPopup.popupDialog('close');
-                if (isOpenLayerCloudPopup && schema.olFeatureCloudPopup) {
-                    map.removePopup(schema.olFeatureCloudPopup);
-                    schema.olFeatureCloudPopup.destroy();
-                    schema.olFeatureCloudPopup = null;
-                }
-            }
-
-            var formItems = widget.currentSettings.formItems;
-
-            // If pop up isn't defined, generate inputs
-            if (!_.size(formItems)) {
-                formItems = [];
-                _.each(olFeature.data, function (value, key) {
-                    formItems.push({
-                        type: 'input',
-                        name: key,
-                        title: key
-                    })
-                })
-            }
+            var schema = olFeature.schema;
 
             if (schema.printable) {
                 var printButton = {
-                    text: translate("feature.print"),
+                    text: translate('feature.print'),
                     click: function () {
                         var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
                         if (printWidget) {
-                            var dialog = $(this).closest(".ui-dialog-content");
-                            var olFeature = dialog.data('feature');
-                            printWidget.printDigitizerFeature(olFeature.schema.featureTypeName ? olFeature.schema.featureTypeName : olFeature.schema.schemaName, olFeature.fid);
+                            var dialog = $(this).closest('.ui-dialog-content');
+                            var feature = dialog.data('feature');
+                            printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
                         } else {
-                            $.notify("Druck element ist nicht verfügbar!");
+                            $.notify('Druck Element ist nicht verfügbar!');
                         }
                     }
                 };
                 buttons.push(printButton);
             }
-
             if (schema.copy.enable) {
                 buttons.push({
                     text: translate('feature.clone.title'),
                     click: function (e) {
-                        var dialog = $(this).closest(".ui-dialog-content");
+                        var dialog = $(this).closest('.ui-dialog-content');
                         var feature = dialog.data('feature');
-                        widget.copyFeature(olFeature);
+                        widget.copyFeature(olFeature); // TODO possibly a bug?
                     }
                 });
             }
-
             if (schema.allowCustomerStyle) {
                 var styleButton = {
                     text: translate('feature.style.change'),
                     click: function (e) {
-                        var dialog = $(this).closest(".ui-dialog-content");
+                        var dialog = $(this).closest('.ui-dialog-content');
                         var feature = dialog.data('feature');
                         widget.openChangeStyleDialog(feature);
                     }
@@ -1687,9 +1659,9 @@
             }
             if (schema.allowEditData && schema.allowSave) {
                 var saveButton = {
-                    text: translate("feature.save.title"),
+                    text: translate('feature.save.title'),
                     click: function () {
-                        var dialog = $(this).closest(".ui-dialog-content");
+                        var dialog = $(this).closest('.ui-dialog-content');
                         var feature = dialog.data('feature');
                         widget.saveFeature(feature);
                     }
@@ -1698,34 +1670,32 @@
             }
             if (schema.allowDelete) {
                 buttons.push({
-                    text: translate("feature.remove.title"),
+                    text: translate('feature.remove.title'),
                     'class': 'critical',
                     click: function () {
-                        var dialog = $(this).closest(".ui-dialog-content");
-                        var olFeature = dialog.data('feature');
-                        widget.removeFeature(olFeature);
+                        var dialog = $(this).closest('.ui-dialog-content');
+                        var feature = dialog.data('feature');
+                        widget.removeFeature(feature);
                         widget.currentPopup.popupDialog('close');
                     }
                 });
             }
-
             if (schema.allowCancelButton) {
                 buttons.push({
-                    text: translate("cancel"),
+                    text: translate('cancel'),
                     click: function () {
-                        this.currentPopup.popupDialog("close");
+                        this.currentPopup.popupDialog('close');
                     }.bind(this)
-            });
+                });
             }
             var popupConfiguration = {
-                title: translate("feature.attributes"),
+                title: translate('feature.attributes'),
                 width: widget.featureEditDialogWidth
             };
 
             if (schema.popup) {
-                if (!schema.popup.buttons) {
-                    schema.popup.buttons = [];
-                }
+                schema.popup.buttons = schema.popup.buttons || [];
+
                 $.extend(popupConfiguration, schema.popup);
 
                 if (popupConfiguration.buttons && !schema._popupButtonsInitialized) {
@@ -1756,6 +1726,36 @@
                     schema._popupButtonsInitialized = true;
                 }
             }
+
+            return popupConfiguration;
+        },
+
+
+        /**
+         * Open edit feature dialog
+         *
+         * @param olFeature open layer feature
+         * @private
+         */
+        _openFeatureEditDialog: function (olFeature) {
+            var widget = this;
+            var schema = olFeature.schema;
+            var buttons = [];
+            var layer = olFeature.layer;
+            var map = layer.map;
+            var schemaPopupConfig = schema.popup ? schema.popup : {};
+            var isOpenLayerCloudPopup = schemaPopupConfig.type && schemaPopupConfig.type === 'openlayers-cloud';
+
+            if (widget.currentPopup) {
+                widget.currentPopup.popupDialog('close');
+                if (isOpenLayerCloudPopup && schema.olFeatureCloudPopup) {
+                    map.removePopup(schema.olFeatureCloudPopup);
+                    schema.olFeatureCloudPopup.destroy();
+                    schema.olFeatureCloudPopup = null;
+                }
+            }
+
+            var popupConfiguration = this._createPopupConfiguration(olFeature);
 
             var dialog = $("<div/>");
             olFeature.editDialog = dialog;
@@ -2019,6 +2019,21 @@
 
             dialog.data('feature', olFeature);
             dialog.data('digitizerWidget', widget);
+
+            var formItems = widget.currentSettings.formItems;
+
+            // If pop up isn't defined, generate inputs
+            if (!_.size(formItems)) {
+                formItems = [];
+                _.each(olFeature.data, function (value, key) {
+                    formItems.push({
+                        type: 'input',
+                        name: key,
+                        title: key
+                    })
+                })
+            }
+
             dialog.generateElements({children: formItems});
             dialog.popupDialog(popupConfiguration);
             schema.editDialog = dialog;
