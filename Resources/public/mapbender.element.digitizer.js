@@ -1735,7 +1735,7 @@
          * @private
          */
 
-        _processCurrentFormItemsWithDataManager : function() {
+        _processCurrentFormItemsWithDataManager : function(olFeature) {
             var widget = this;
 
             // dataManager access function
@@ -2017,7 +2017,7 @@
 
             var popupConfiguration = this._createPopupConfiguration(olFeature);
 
-            this._processCurrentFormItemsWithDataManager();
+            this._processCurrentFormItemsWithDataManager(olFeature);
 
             var dialog = $("<div/>");
             olFeature.editDialog = dialog;
