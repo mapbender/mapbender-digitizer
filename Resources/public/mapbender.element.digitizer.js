@@ -1315,11 +1315,13 @@
                     previous: widget.currentSettings
                 });
 
+                console.log(widget.currentSettings,"!!");
+
                 if (widget.currentSettings) {
-                    widget.deactivateFrame(widget.currentSettings);
+                    widget.currentSettings.deactivateSchema();
                 }
 
-                widget.activateFrame(schema);
+                schema.activateSchema();
 
                 table.off('mouseenter', 'mouseleave', 'click');
 
@@ -3182,7 +3184,8 @@
                 });
 
                 widget.options.__disabled = false;
-                widget.activateFrame(widget.currentSettings);
+                widget.currentSettings.activateSchema();
+
 
             })
 
@@ -3196,103 +3199,14 @@
             var always = function () {
                 widget.options.__disabled = true;
                 if (!widget.currentSettings.displayOnInactive) {
-                    widget.deactivateFrame(widget.currentSettings);
+                    widget.currentSettings.deactivateSchema();
                 }
             };
             always()
-            /*if (widget.options.confirmSaveOnDeactivate) {
-                widget._confirmSave(unsavedFeatures, always);
-            } else {
-                always();
-            } */
-        },
-        _confirmSave: function (unsavedFeatures, callback) {
-            var widget = this;
-            var numUnsaved = _.size(unsavedFeatures);
-            if (numUnsaved) {
-                var html = "<p>Sie haben " + ((numUnsaved > 1) ? "" + numUnsaved + " &Auml;nderungen" : "eine &Auml;nderung") + " vorgenommen und noch nicht gespeichert.</p>" + "<p>Wollen sie diese jetzt speichern oder verwerfen?</p>";
-
-                var confirmOptions = {
-                    okText: "Jetzt Speichern",
-                    cancelText: "Verwerfen",
-                    html: html,
-                    title: "Ungespeicherte Änderungen",
-                    onSuccess: function () {
-                        _.forEach(unsavedFeatures, function (feature) {
-                            widget.saveFeature(feature);
-                        });
-                        callback();
-                    },
-                    onCancel: function () {
-                        var layersToReset = {};
-                        _.forEach(unsavedFeatures, function (feature) {
-                            if (feature.isNew) {
-                                widget.removeFeature(feature);
-                            } else if (feature.layer) {
-                                layersToReset[feature.layer.id] = feature.layer;
-                            }
-                        });
-                        if (_.size(layersToReset)) {
-                            _.forEach(layersToReset, function (layer) {
-                                // _getData will skip existing features, so we need
-                                // to clean up first before ...
-                                layer.removeAllFeatures();
-                            });
-                            // ... we reload (from server) and reinitialize all features
-                            widget._getData();
-                        }
-                        callback();
-                    }
-                };
-                Mapbender.confirmDialog(confirmOptions);
-            } else {
-                callback();
-            }
-        },
-
-        activateFrame: function (schema) {
-            var widget = this;
-            var frame = schema.frame;
-            var layer = schema.layer;
-
-            if (widget.options.__disabled) {
-                return;
-            }
-
-            widget.activeLayer = schema.layer;
-            widget.schemaName = schema.schemaName;
-            widget.currentSettings = schema;
-
-            widget.query('style/list', {schema: schema.schemaName}).done(function (r) {
-                schema.featureStyles = r.featureStyles;
-                widget.reloadFeatures(layer);
-                layer.setVisibility(true);
-                frame.css('display', 'block');
-                schema.selectControl.activate();
-            });
 
         },
 
-        deactivateFrame: function (schema) {
-            var widget = this;
-            var frame = schema.frame;
-            //var tableApi = schema.table.resultTable('getApi');
-            var layer = schema.layer;
 
-            frame.css('display', 'none');
-
-            if (!schema.displayPermanent) {
-                layer.setVisibility(false);
-            }
-
-            schema.selectControl.deactivate();
-
-            // https://trac.wheregroup.com/cp/issues/4548
-            if (widget.currentPopup) {
-                widget.currentPopup.popupDialog('close');
-            }
-
-        },
 
         editCancel : function(event, eventData) {
             var feature = eventData.feature();

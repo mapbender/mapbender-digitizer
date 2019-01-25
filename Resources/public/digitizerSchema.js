@@ -127,6 +127,53 @@ Scheme = OpenLayers.Class({
     },
 
 
+    activateSchema: function () {
+        var schema = this;
+        var widget = this.widget;
+        var frame = schema.frame;
+        var layer = schema.layer;
+
+        if (widget.options.__disabled) {
+            return;
+        }
+
+        widget.activeLayer = schema.layer;
+        widget.schemaName = schema.schemaName;
+        widget.currentSettings = schema;
+
+        widget.query('style/list', {schema: schema.schemaName}).done(function (r) {
+            schema.featureStyles = r.featureStyles;
+            widget.reloadFeatures(layer);
+            layer.setVisibility(true);
+            frame.css('display', 'block');
+            schema.selectControl.activate();
+        });
+
+    },
+
+    deactivateSchema: function () {
+        var schema = this;
+        var widget = this.widget;
+        var frame = schema.frame;
+        //var tableApi = schema.table.resultTable('getApi');
+        var layer = schema.layer;
+
+        frame.css('display', 'none');
+
+        if (!schema.displayPermanent) {
+            layer.setVisibility(false);
+        }
+
+        schema.selectControl.deactivate();
+
+        // https://trac.wheregroup.com/cp/issues/4548
+        if (widget.currentPopup) {
+            widget.currentPopup.popupDialog('close');
+        }
+
+    },
+
+
     CLASS_NAME: "Mapbender.Digitizer.Schema"
 
 
