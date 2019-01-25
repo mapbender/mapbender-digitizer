@@ -363,6 +363,7 @@
          * @private
          */
         _create: function () {
+
             var widget = this.widget = this;
             var element = widget.element;
 
@@ -581,60 +582,6 @@
             if (!schema.showExtendSearchSwitch) {
                 $(".onlyExtent", frame).css('display', 'none');
             }
-        },
-
-
-        _addSelectControl: function(layer,schema) {
-            var widget = this;
-            var map = widget.map;
-            var table = schema.table;
-
-            var selectControl = new OpenLayers.Control.SelectFeature(layer, {
-                hover: true,
-
-                clickFeature: function (feature) {
-                    var features = feature.cluster ? feature.cluster : [feature];
-
-                    if (_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
-                        return;
-                    }
-
-                    feature.selected = !feature.selected;
-
-                    var selectionManager = table.resultTable("getSelection");
-
-                    if (feature.selected) {
-                        selectionManager.add(feature);
-                    } else {
-                        selectionManager.remove(feature);
-                    }
-
-                    widget._highlightSchemaFeature(schema, feature, true);
-
-                    if (schema.allowEditData) {
-                        widget._openFeatureEditDialog(features[0]);
-                    }
-                },
-                overFeature: function (feature) {
-                    widget._highlightSchemaFeature(schema, feature, true);
-                },
-                outFeature: function (feature) {
-                    widget._highlightSchemaFeature(schema, feature, false);
-                }
-            });
-
-            // Workaround to move map by touch vector features
-            if (typeof(selectControl.handlers) != "undefined") { // OL 2.7
-                selectControl.handlers.feature.stopDown = false;
-            }
-            // else if (typeof(selectFeatureControl.handler) != "undefined") { // OL < 2.7
-            //     selectControl.handler.stopDown = false;
-            //     selectControl.handler.stopUp = false;
-            // }
-
-            schema.selectControl = selectControl;
-            selectControl.deactivate();
-            map.addControl(selectControl);
         },
 
         _createMapContextMenu: function() {
@@ -1313,7 +1260,7 @@
                 option.data("schemaSettings", schema);
                 selector.append(option);
 
-                widget._addSelectControl(layer,schema);
+                schema._addSelectControl(layer);
             });
         },
 
@@ -1334,6 +1281,14 @@
             } else {
                 titleElement.css('display', 'none');
             }
+
+            var newSchemes = {};
+            _.each(widget.options.schemes, function(el,index){
+                el.widget = widget;
+                newSchemes[index] = new Scheme(el);
+            });
+
+           widget.options.schemes = newSchemes;
 
 
             /**
@@ -2368,57 +2323,6 @@
          * @param {boolean} highlight
          * @private
          */
-        _highlightSchemaFeature: function (schema, feature, highlight) {
-            var widget = this;
-            var table = schema.table;
-            var tableWidget = table.data('visUiJsResultTable');
-            var isSketchFeature = !feature.cluster && feature._sketch && _.size(feature.data) == 0;
-            var features = feature.cluster ? feature.cluster : [feature];
-            var layer = feature.layer;
-            var domRow;
-
-            if (feature.renderIntent && feature.renderIntent == 'invisible') {
-                return;
-            }
-
-            if (isSketchFeature) {
-                return;
-            }
-
-            var styleId = feature.styleId ? feature.styleId : 'default';
-
-            if (feature.attributes && feature.attributes.label) {
-                layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
-            } else {
-
-                if (highlight) {
-                    layer.drawFeature(feature, 'select');
-                } else {
-                    if (feature.selected) {
-                        layer.drawFeature(feature, 'selected');
-                    } else {
-                        layer.drawFeature(feature, styleId);
-                    }
-                }
-            }
-
-            for (var k in features) {
-                var feature = features[k];
-                domRow = tableWidget.getDomRowByData(feature);
-                if (domRow && domRow.size()) {
-                    tableWidget.showByRow(domRow);
-
-                    if (highlight) {
-                        domRow.addClass('hover');
-                    } else {
-                        domRow.removeClass('hover');
-                    }
-                    // $('.selection input', domRow).prop("checked", feature.selected);
-
-                    break;
-                }
-            }
-        },
 
 
         /**
