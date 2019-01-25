@@ -2359,6 +2359,7 @@
             return initialFormData(feature);
         },
 
+
         /**
          * Highlight schema feature on the map and table view
          *
@@ -2418,6 +2419,7 @@
                 }
             }
         },
+
 
         /**
          * Highlight feature on the map
@@ -3415,7 +3417,7 @@
         refreshConnectedDigitizerFeatures : function(featureTypeName){
             var schema = {};
             $(".mb-element-digitizer").not(".mb-element-data-manager").each(function(index,element){
-                var digitzer = $(element).data("mapbenderMbDigitizer")
+                var digitzer = $(element).data("mapbenderMbDigitizer");
                 var schemes = digitzer.options.schemes;
                 _.each(schemes, function(schema, key){
                     if(key === featureTypeName){
