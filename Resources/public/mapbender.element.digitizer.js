@@ -458,23 +458,188 @@
                 schema: schemaName
             });
         },
-        _setup: function () {
-            var frames = [];
-            var widget = this;
-            var element = $(widget.element);
-            var titleElement = $("> div.title", element);
-            var selector = widget.selector = $("select.selector", element);
-            var options = widget.options;
-            var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
-            var hasOnlyOneScheme = _.size(options.schemes) === 1;
-            var currentSchemaName = getValueOrDefault(options, "schema");
 
-            if (hasOnlyOneScheme) {
-                titleElement.html(_.toArray(options.schemes)[0].label);
-                selector.css('display', 'none');
-            } else {
-                titleElement.css('display', 'none');
+        _createToolsetTranslations: function(schema) {
+
+            var toolSetTranslations = {
+                drawPoint: "Punkt setzen",
+                drawLine: "Linie zeichnen",
+                drawPolygon: "Polygon zeichnen",
+                drawRectangle: "Rechteck zeichen",
+                drawCircle: "Kreis zeichen",
+                drawEllipse: "Ellipse zeichen",
+                drawDonut: "Polygon mit Enklave zeichnen",
+                selectAndEditGeometry: "Objekt Position/Größe beabeiten",
+                moveGeometry: "Objekt bewegen",
+                selectGeometry: "Objekt selektieren",
+                removeSelected: "Selektierte objekte löschen",
+                removeAll: "Alle Objekte löschen"
+            };
+
+            // Merge subjects with available translations
+            if (schema.featureType && schema.featureType.geomType) {
+                var geomType = schema.featureType.geomType;
+                var translationPrefix = 'mb.digitizer.toolset.' + geomType + '.';
+
+                _.each(Mapbender.i18n, function (v, k) {
+                    if (k.indexOf(translationPrefix) === 0) {
+                        var shortKeyName = k.split(translationPrefix)[1];
+                        toolSetTranslations[shortKeyName] = v;
+                    }
+                });
             }
+
+            return toolSetTranslations;
+        },
+
+        _generateSearchForm: function(schema,frame) {
+            // If searching defined, then try to generate a form
+            if (schema.search) {
+                var searchForm;
+                if (schema.search.form) {
+
+                    var foreachItemTree = function (items, callback) {
+                        _.each(items, function (item) {
+                            callback(item);
+                            if (item.children && $.isArray(item.children)) {
+                                foreachItemTree(item.children, callback);
+                            }
+                        })
+                    };
+                    var elementUrl = widget.elementUrl;
+                    // $.fn.select2.defaults.set('amdBase', 'select2/');
+                    // $.fn.select2.defaults.set('amdLanguageBase', 'select2/dist/js/i18n/');
+
+                    foreachItemTree(schema.search.form, function (item) {
+
+                        if (item.type && item.type === 'select') {
+                            if (item.ajax) {
+
+                                // Hack to get display results as an HTML
+                                item.escapeMarkup = function (m) {
+                                    return m;
+                                };
+                                // Replace auto-complete results with required key word
+                                item.templateResult = function (d, selectDom, c) {
+                                    var html = d && d.text ? d.text : '';
+                                    if (d && d.id && d.text) {
+                                        // Highlight results
+                                        html = d.text.replace(new RegExp(ajax.lastTerm, "gmi"), '<span style="background-color: #fffb67;">\$&</span>');
+                                    }
+                                    return html;
+                                };
+                                var ajax = item.ajax;
+                                ajax.dataType = 'json';
+                                ajax.url = elementUrl + 'form/select';
+                                ajax.data = function (params) {
+                                    if (params && params.term) {
+                                        // Save last given term to get highlighted in templateResult
+                                        ajax.lastTerm = params.term;
+                                    }
+                                    return {
+                                        schema: schema.schemaName,
+                                        item: item,
+                                        form: searchForm.formData(),
+                                        params: params
+                                    };
+                                };
+
+                            }
+                        }
+                    });
+                    frame.generateElements({
+                        type: 'form',
+                        cssClass: 'search',
+                        children: schema.search.form
+                    });
+                }
+
+                searchForm = $('form.search', frame);
+
+                var onSubmitSearch = function (e) {
+                    schema.search.request = searchForm.formData();
+                    var xhr = widget._getData();
+                    if (xhr) {
+                        xhr.done(function () {
+                            var olMap = widget.getMap();
+                            olMap.zoomToExtent(layer.getDataExtent());
+
+                            if (schema.search.hasOwnProperty('zoomScale')) {
+                                olMap.zoomToScale(schema.search.zoomScale, true);
+                            }
+                        });
+                    }
+                    return false;
+                };
+
+                searchForm
+                    .on('submit', onSubmitSearch)
+                    .find(' :input')
+                    .on('change', onSubmitSearch);
+            }
+
+            if (!schema.showExtendSearchSwitch) {
+                $(".onlyExtent", frame).css('display', 'none');
+            }
+        },
+
+
+        _addSelectControl: function(layer,schema) {
+            var widget = this;
+            var map = widget.map;
+            var table = schema.table;
+
+            var selectControl = new OpenLayers.Control.SelectFeature(layer, {
+                hover: true,
+
+                clickFeature: function (feature) {
+                    var features = feature.cluster ? feature.cluster : [feature];
+
+                    if (_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
+                        return;
+                    }
+
+                    feature.selected = !feature.selected;
+
+                    var selectionManager = table.resultTable("getSelection");
+
+                    if (feature.selected) {
+                        selectionManager.add(feature);
+                    } else {
+                        selectionManager.remove(feature);
+                    }
+
+                    widget._highlightSchemaFeature(schema, feature, true);
+
+                    if (schema.allowEditData) {
+                        widget._openFeatureEditDialog(features[0]);
+                    }
+                },
+                overFeature: function (feature) {
+                    widget._highlightSchemaFeature(schema, feature, true);
+                },
+                outFeature: function (feature) {
+                    widget._highlightSchemaFeature(schema, feature, false);
+                }
+            });
+
+            // Workaround to move map by touch vector features
+            if (typeof(selectControl.handlers) != "undefined") { // OL 2.7
+                selectControl.handlers.feature.stopDown = false;
+            }
+            // else if (typeof(selectFeatureControl.handler) != "undefined") { // OL < 2.7
+            //     selectControl.handler.stopDown = false;
+            //     selectControl.handler.stopUp = false;
+            // }
+
+            schema.selectControl = selectControl;
+            selectControl.deactivate();
+            map.addControl(selectControl);
+        },
+
+        _createMapContextMenu: function() {
+            var widget = this;
+            var map = widget.map;
 
             function createSubMenu(olFeature) {
                 var layer = olFeature.layer;
@@ -531,9 +696,7 @@
                 };
             }
 
-            /**
-             * Set map context menu
-             */
+
             $(map.div).contextMenu({
                 selector: 'div',
                 events: {
@@ -561,7 +724,7 @@
 
                         _.each(features, function (feature) {
                             if (!feature.layer) {
-                                feature.layer = olFeature.layer;
+                                feature.layer = olFeature.layer; // TODO looks like bug
                             }
                             items[feature.fid] = createSubMenu(feature);
                         });
@@ -587,6 +750,12 @@
                     };
                 }
             });
+
+        },
+
+        _createElementContextMenu: function() {
+            var widget = this;
+            var element = $(widget.element);
 
             $(element).contextMenu({
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
@@ -660,6 +829,12 @@
                 }
             });
 
+        },
+
+        _createTableTranslations: function() {
+            var widget = this;
+            var options = widget.options;
+
             if (options.tableTranslation) {
                 translateObject(options.tableTranslation);
             } else {
@@ -673,6 +848,15 @@
                 };
                 //translateObject(options.tableTranslation);
             }
+        },
+
+        _buildSelectOptionsForAllSchemes: function() {
+            var widget = this;
+            var map = widget.map;
+            var options = widget.options;
+            var element = $(widget.element);
+            var selector = widget.selector;
+
 
             // build select options
             $.each(options.schemes, function (schemaName) {
@@ -691,6 +875,16 @@
                         className: 'fa fa-crosshairs',
                         onClick: function (olFeature, ui) {
                             widget.zoomToJsonFeature(olFeature);
+                        }
+                    });
+                }
+
+                if (schema.allowSave || true) {
+                    buttons.push({
+                        title: translate('feature.savesave'),
+                        className: 'save',
+                        onClick: function (olFeature, ui) {
+                            widget.saveFeature(olFeature);
                         }
                     });
                 }
@@ -874,6 +1068,7 @@
                         return true;
                     }
                 }), 'sTitle');
+
                 table.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
 
                 schema.schemaName = schemaName;
@@ -882,291 +1077,183 @@
                 if (schema.hasOwnProperty("toolset")) {
                     toolset = schema.toolset;
                 }
+                // remove removeSelected Control if !allowDelete
                 if (!schema.allowDelete) {
                     $.each(toolset, function (k, tool) {
                         if (tool.type == "removeSelected") {
                             toolset.splice(k, 1);
                         }
-                    })
-                }
-
-                var toolSetTranslations = {
-                    drawPoint: "Punkt setzen",
-                    drawLine: "Linie zeichnen",
-                    drawPolygon: "Polygon zeichnen",
-                    drawRectangle: "Rechteck zeichen",
-                    drawCircle: "Kreis zeichen",
-                    drawEllipse: "Ellipse zeichen",
-                    drawDonut: "Polygon mit Enklave zeichnen",
-                    selectAndEditGeometry: "Objekt Position/Größe beabeiten",
-                    moveGeometry: "Objekt bewegen",
-                    selectGeometry: "Objekt selektieren",
-                    removeSelected: "Selektierte objekte löschen",
-                    removeAll: "Alle Objekte löschen"
-                };
-
-                // Merge subjects with available translations
-                if (schema.featureType && schema.featureType.geomType) {
-                    var geomType = schema.featureType.geomType;
-                    var translationPrefix = 'mb.digitizer.toolset.' + geomType + '.';
-
-                    _.each(Mapbender.i18n, function (v, k) {
-                        if (k.indexOf(translationPrefix) === 0) {
-                            var shortKeyName = k.split(translationPrefix)[1];
-                            toolSetTranslations[shortKeyName] = v;
-                        }
                     });
                 }
 
+
+
                 frame.append($('<div/>').digitizingToolSet({
-                        children: toolset,
-                        layer: layer,
-                        translations: toolSetTranslations,
+                    children: toolset,
+                    layer: layer,
+                    translations: widget._createToolsetTranslations(schema),
 
-                        // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
-                        controlEvents: {
+                    // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
+                    controlEvents: {
 
-                            /**
-                             * This function allows the easy use of the olEvent onStart( called on drag start) with the yml configurration
-                             * e.G. to prevent the move or add additional data on move
-                             * */
-                            onStart: function (feature, px) {
+                        /**
+                         * This function allows the easy use of the olEvent onStart( called on drag start) with the yml configurration
+                         * e.G. to prevent the move or add additional data on move
+                         * */
+                        onStart: function (feature, px) {
 
-                                var control = this;
-                                var schema = feature.schema;
-                                var attributes = feature.attributes;
-                                var preventDefault = false;
-                                feature.oldGeom = {x:feature.geometry.x,y:feature.geometry.y};
-                                if (!schema.hooks || !schema.hooks.onStart) {
-                                    return;
-                                }
+                            var control = this;
+                            var schema = feature.schema;
+                            var attributes = feature.attributes;
+                            var preventDefault = false;
+                            feature.oldGeom = {x:feature.geometry.x,y:feature.geometry.y};
+                            if (!schema.hooks || !schema.hooks.onStart) {
+                                return;
+                            }
 
-                                try {
-                                    preventDefault = eval(schema.hooks.onStart);
-                                } catch (e) {
+                            try {
+                                preventDefault = eval(schema.hooks.onStart);
+                            } catch (e) {
 
-                                    $.notify(e);
-                                    return;
-                                }
-
-
-                                if (preventDefault) {
-                                    $.notify(translate('move.denied'));
-                                    control.cancel();
-
-                                }
-                            },
-
-                            /**
-                             * This function allows the easy use of the olEvent onModificationStart with the yml configurration
-                             * e.G. to prevent the modification or add additional data on modification
-                             * */
-                            onModificationStart: function event(feature) {
-
-                                var control = this;
-                                var schema = feature.schema;
-                                var attributes = feature.attributes;
-                                var preventDefault = false;
-
-                                if (!schema.hooks || !schema.hooks.onModificationStart) {
-                                    return;
-                                }
-
-                                try {
-                                    preventDefault = eval(schema.hooks.onModificationStart);
-                                } catch (e) {
-
-                                    $.notify(e);
-                                    return;
-                                }
-
-                                if (preventDefault) {
-                                    control.deactivate();
-                                    control.activate();
-
-                                    $.notify(translate('move.denied'));
-
-                                }
-
-                            },
-
-                            featureadded: function (event) {
-                                var olFeature = event.feature;
-                                var layer = event.object.layer;
-                                var schema = widget.findSchemaByLayer(layer);
-                                var digitizerToolSetElement = $(".digitizing-tool-set", frame);
-                                var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
-                                //
-                                //if(schema.isClustered){
-                                //    $.notify('Create new feature is by clusterring not posible');
-                                //    return false;
-                                //}
-
-                                olFeature.isNew = true;
-                                olFeature.attributes = olFeature.data = properties;
-                                olFeature.layer = layer;
-                                olFeature.schema = schema;
-
-                                //widget.reloadFeatures(layer);
-                                layer.redraw();
-
-                                digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
-
-                                widget.unsavedFeatures[olFeature.id] = olFeature;
-
-                                if (schema.openFormAfterEdit) {
-                                    widget._openFeatureEditDialog(olFeature);
-                                }
-
-                                //return true;
-                            },
-                            onModification: function (event) {
-                                var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
-                                widget.unsavedFeatures[event.id] = feature;
-                            }, // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
-                            onComplete: function (event) {
-                                var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
-                                widget.unsavedFeatures[event.id] = feature;
-                                if(!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen){
-
-                                    if(schema.popup.remoteData){
-                                        var bbox = feature.geometry.getBounds();
-                                        bbox.right = parseFloat(bbox.right+0.00001);
-                                        bbox.top = parseFloat(bbox.top+0.00001);
-                                        bbox= bbox.toBBOX();
-                                        var srid = map.getProjection().replace('EPSG:','');
-                                        var url = widget.elementUrl + "getFeatureInfo/";
-
-                                        $.ajax({url: url, data: {
-                                                bbox :bbox,
-                                                schema: schema.schemaName,
-                                                srid: srid
-                                            }}).done(function (response) {
-                                            _.each(response.dataSets, function (dataSet) {
-                                                var newData = JSON.parse(dataSet).features[0].properties;
+                                $.notify(e);
+                                return;
+                            }
 
 
-                                                Object.keys(feature.data)
-                                                $.extend(feature.data, newData);
+                            if (preventDefault) {
+                                $.notify(translate('move.denied'));
+                                control.cancel();
+
+                            }
+                        },
+
+                        /**
+                         * This function allows the easy use of the olEvent onModificationStart with the yml configurration
+                         * e.G. to prevent the modification or add additional data on modification
+                         * */
+                        onModificationStart: function event(feature) {
+
+                            var control = this;
+                            var schema = feature.schema;
+                            var attributes = feature.attributes;
+                            var preventDefault = false;
+
+                            if (!schema.hooks || !schema.hooks.onModificationStart) {
+                                return;
+                            }
+
+                            try {
+                                preventDefault = eval(schema.hooks.onModificationStart);
+                            } catch (e) {
+
+                                $.notify(e);
+                                return;
+                            }
+
+                            if (preventDefault) {
+                                control.deactivate();
+                                control.activate();
+
+                                $.notify(translate('move.denied'));
+
+                            }
+
+                        },
+
+                        featureadded: function (event) {
+                            var olFeature = event.feature;
+                            var layer = event.object.layer;
+                            var schema = widget.findSchemaByLayer(layer);
+                            var digitizerToolSetElement = $(".digitizing-tool-set", frame);
+                            var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
+                            //
+                            //if(schema.isClustered){
+                            //    $.notify('Create new feature is by clusterring not posible');
+                            //    return false;
+                            //}
+
+                            olFeature.isNew = true;
+                            olFeature.attributes = olFeature.data = properties;
+                            olFeature.layer = layer;
+                            olFeature.schema = schema;
+
+                            //widget.reloadFeatures(layer);
+                            layer.redraw();
+
+                            digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
+
+                            widget.unsavedFeatures[olFeature.id] = olFeature;
+
+                            if (schema.openFormAfterEdit) {
+                                widget._openFeatureEditDialog(olFeature);
+                            }
+
+                            //return true;
+                        },
+
+                        onModification: function (event) {
+                            var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                            widget.unsavedFeatures[event.id] = feature;
+                        }, // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
+
+                        onComplete: function (event) {
+                            var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                            widget.unsavedFeatures[event.id] = feature;
+                            if(!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen){
+
+                                if(schema.popup.remoteData){
+                                    var bbox = feature.geometry.getBounds();
+                                    bbox.right = parseFloat(bbox.right+0.00001);
+                                    bbox.top = parseFloat(bbox.top+0.00001);
+                                    bbox= bbox.toBBOX();
+                                    var srid = map.getProjection().replace('EPSG:','');
+                                    var url = widget.elementUrl + "getFeatureInfo/";
+
+                                    $.ajax({url: url, data: {
+                                            bbox :bbox,
+                                            schema: schema.schemaName,
+                                            srid: srid
+                                        }}).done(function (response) {
+                                        _.each(response.dataSets, function (dataSet) {
+                                            var newData = JSON.parse(dataSet).features[0].properties;
 
 
-                                            });
-                                            widget._openFeatureEditDialog(feature);
+                                            Object.keys(feature.data)
+                                            $.extend(feature.data, newData);
 
-                                        }).fail(function(){
-                                            $.notfiy("No remote data could be fetched");
-                                            widget._openFeatureEditDialog(feature);
+
                                         });
-
-                                    } else {
                                         widget._openFeatureEditDialog(feature);
-                                    }
+
+                                    }).fail(function(){
+                                        $.notfiy("No remote data could be fetched");
+                                        widget._openFeatureEditDialog(feature);
+                                    });
+
+                                } else {
+                                    widget._openFeatureEditDialog(feature);
                                 }
                             }
                         }
+                    }
                 }));
+
                 frame.generateElements({
                     children: [{
                         type: 'checkbox',
                         cssClass: 'onlyExtent',
                         title: translate('toolset.current-extent'),
-                        checked: schema.searchType == "currentExtent",
+                        checked: schema.searchType === "currentExtent",
                         change: function (e) {
                             schema.searchType = $(e.originalEvent.target).prop("checked") ? "currentExtent" : "all";
                             widget._getData();
                         }
                     }]
                 });
+
                 var toolSetView = $(".digitizing-tool-set", frame);
 
-                // If searching defined, then try to generate a form
-                if (schema.search) {
-                    var searchForm;
-                    if (schema.search.form) {
-
-                        var foreachItemTree = function (items, callback) {
-                            _.each(items, function (item) {
-                                callback(item);
-                                if (item.children && $.isArray(item.children)) {
-                                    foreachItemTree(item.children, callback);
-                                }
-                            })
-                        };
-                        var elementUrl = widget.elementUrl;
-                        // $.fn.select2.defaults.set('amdBase', 'select2/');
-                        // $.fn.select2.defaults.set('amdLanguageBase', 'select2/dist/js/i18n/');
-
-                        foreachItemTree(schema.search.form, function (item) {
-
-                            if (item.type && item.type === 'select') {
-                                if (item.ajax) {
-
-                                    // Hack to get display results as an HTML
-                                    item.escapeMarkup = function (m) {
-                                        return m;
-                                    };
-                                    // Replace auto-complete results with required key word
-                                    item.templateResult = function (d, selectDom, c) {
-                                        var html = d && d.text ? d.text : '';
-                                        if (d && d.id && d.text) {
-                                            // Highlight results
-                                            html = d.text.replace(new RegExp(ajax.lastTerm, "gmi"), '<span style="background-color: #fffb67;">\$&</span>');
-                                        }
-                                        return html;
-                                    };
-                                    var ajax = item.ajax;
-                                    ajax.dataType = 'json';
-                                    ajax.url = elementUrl + 'form/select';
-                                    ajax.data = function (params) {
-                                        if (params && params.term) {
-                                            // Save last given term to get highlighted in templateResult
-                                            ajax.lastTerm = params.term;
-                                        }
-                                        return {
-                                            schema: schema.schemaName,
-                                            item: item,
-                                            form: searchForm.formData(),
-                                            params: params
-                                        };
-                                    };
-
-                                }
-                            }
-                        });
-                        frame.generateElements({
-                            type: 'form',
-                            cssClass: 'search',
-                            children: schema.search.form
-                        });
-                    }
-
-                    searchForm = $('form.search', frame);
-
-                    var onSubmitSearch = function (e) {
-                        schema.search.request = searchForm.formData();
-                        var xhr = widget._getData();
-                        if (xhr) {
-                            xhr.done(function () {
-                                var olMap = widget.getMap();
-                                olMap.zoomToExtent(layer.getDataExtent());
-
-                                if (schema.search.hasOwnProperty('zoomScale')) {
-                                    olMap.zoomToScale(schema.search.zoomScale, true);
-                                }
-                            });
-                        }
-                        return false;
-                    };
-
-                    searchForm
-                        .on('submit', onSubmitSearch)
-                        .find(' :input')
-                        .on('change', onSubmitSearch);
-                }
-
-                if (!schema.showExtendSearchSwitch) {
-                    $(".onlyExtent", frame).css('display', 'none');
-                }
+                widget._generateSearchForm(schema,frame);
 
                 if (!schema.allowDigitize) {
 
@@ -1217,7 +1304,7 @@
 
                 frame.append(table);
 
-                frames.push(schema);
+                //frames.push(schema); // TODO not necessary
                 frame.css('display', 'none');
 
                 frame.data("schemaSettings", schema);
@@ -1226,89 +1313,41 @@
                 option.data("schemaSettings", schema);
                 selector.append(option);
 
-                var selectControl = new OpenLayers.Control.SelectFeature(layer, {
-                    hover: true,
-                    clickFeature: function (feature) {
-                        var features = feature.cluster ? feature.cluster : [feature];
-
-                        if (_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
-                            return;
-                        }
-
-                        feature.selected = !feature.selected;
-
-                        var selectionManager = table.resultTable("getSelection");
-
-                        if (feature.selected) {
-                            selectionManager.add(feature);
-                        } else {
-                            selectionManager.remove(feature);
-                        }
-
-                        widget._highlightSchemaFeature(schema, feature, true);
-
-                        if (schema.allowEditData) {
-                            widget._openFeatureEditDialog(features[0]);
-                        }
-                    },
-                    overFeature: function (feature) {
-                        widget._highlightSchemaFeature(schema, feature, true);
-                    },
-                    outFeature: function (feature) {
-                        widget._highlightSchemaFeature(schema, feature, false);
-                    }
-                });
-
-                // Workaround to move map by touch vector features
-                if (typeof(selectControl.handlers) != "undefined") { // OL 2.7
-                    selectControl.handlers.feature.stopDown = false;
-                } else if (typeof(selectFeatureControl.handler) != "undefined") { // OL < 2.7
-                    selectControl.handler.stopDown = false;
-                    selectControl.handler.stopUp = false;
-                }
-
-                schema.selectControl = selectControl;
-                selectControl.deactivate();
-                map.addControl(selectControl);
+                widget._addSelectControl(layer,schema);
             });
+        },
 
-            function deactivateFrame(schema) {
-                var frame = schema.frame;
-                //var tableApi = schema.table.resultTable('getApi');
-                var layer = schema.layer;
+        _setup: function () {
 
-                frame.css('display', 'none');
+            var widget = this;
+            var element = $(widget.element);
+            var titleElement = $("> div.title", element);
+            var selector = widget.selector = $("select.selector", element);
+            var options = widget.options;
+            var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
+            var hasOnlyOneScheme = _.size(options.schemes) === 1;
+            var currentSchemaName = getValueOrDefault(options, "schema");
 
-                if (!schema.displayPermanent) {
-                    layer.setVisibility(false);
-                }
-
-                schema.selectControl.deactivate();
-
-                // https://trac.wheregroup.com/cp/issues/4548
-                if (widget.currentPopup) {
-                    widget.currentPopup.popupDialog('close');
-                }
-
-                //layer.redraw();
-                //layer.removeAllFeatures();
-                //tableApi.clear();
+            if (hasOnlyOneScheme) {
+                titleElement.html(_.toArray(options.schemes)[0].label);
+                selector.css('display', 'none');
+            } else {
+                titleElement.css('display', 'none');
             }
 
-            function activateFrame(schema) {
 
-                var frame = schema.frame;
-                var layer = schema.layer;
+            /**
+             * Set map context menu
+             */
+            widget._createMapContextMenu();
 
-                widget.activeLayer = schema.layer;
-                widget.schemaName = schema.schemaName;
-                widget.currentSettings = schema;
-                layer.setVisibility(true);
-                //layer.redraw();
-                frame.css('display', 'block');
+            widget._createElementContextMenu();
 
-                schema.selectControl.activate();
-            }
+            widget._createTableTranslations();
+
+            widget._buildSelectOptionsForAllSchemes();
+
+
 
             function onSelectorChange() {
                 var option = selector.find(":selected");
