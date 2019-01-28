@@ -234,7 +234,7 @@
                 control.deactivate();
             }
 
-            this.activeControl = [];
+            this.activeControl = null;
         },
 
         /**
