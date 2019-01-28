@@ -9,6 +9,45 @@
     var translationReg = /^trans:\w+\.(\w|-|\.{1}\w+)+\w+$/;
 
 
+    /**
+     * Escape HTML chars
+     * @returns {string}
+     */
+    String.prototype.escapeHtml = function() {
+
+        return this.replace(/[\"&'\/<>]/g, function (a) {
+            return {
+                '"': '&quot;',
+                '&': '&amp;',
+                "'": '&#39;',
+                '/': '&#47;',
+                '<': '&lt;',
+                '>': '&gt;'
+            }[a];
+        });
+    };
+
+    OpenLayers.Layer.prototype.findFeatureByPropertyValue = function(propName, propValue) {
+        var layer = this;
+        for (var i = 0; i < layer.features.length; i++) {
+            if (layer.features[i][propName] === propValue) {
+                return layer.features[i];
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Translate digitizer keywords
+     * @param title
+     * @param withoutSuffix
+     * @returns {*}
+     */
+     Mapbender.digitizer_translate = function(title, withoutSuffix) {
+        return Mapbender.trans(withoutSuffix ? title : "mb.digitizer." + title);
+    };
+
+
 
     /**
      * Translate object
@@ -20,7 +59,7 @@
         for (var k in items) {
             var item = items[k];
             if (typeof item === "string" && item.match(translationReg)) {
-                items[k] = translate(item.split(':')[1], true);
+                items[k] = Mapbender.digitizer_translate(item.split(':')[1], true);
             } else if (typeof item === "object") {
                 translateObject(item);
             }
@@ -163,7 +202,7 @@
                 translateStructure(items[k]);
             } else {
                 if (typeof items[k] == "string" && items[k].match(translationReg)) {
-                    items[k] = translate(items[k].split(':')[1], true);
+                    items[k] = Mapbender.digitizer_translate(items[k].split(':')[1], true);
                 }
             }
         }
@@ -438,7 +477,7 @@
                 var schema = widget.findSchemaByLayer(layer);
                 var subItems = {
                     zoomTo: {
-                        name: translate('feature.zoomTo'),
+                        name: Mapbender.digitizer_translate('feature.zoomTo'),
                         action: function (key, options, parameters) {
                             widget.zoomToJsonFeature(parameters.olFeature);
                         }
@@ -447,7 +486,7 @@
 
                 if (schema.allowChangeVisibility) {
                     subItems['style'] = {
-                        name: translate('feature.visibility.change'),
+                        name: Mapbender.digitizer_translate('feature.visibility.change'),
                         action: function (key, options, parameters) {
                             widget.openChangeStyleDialog(olFeature);
                         }
@@ -456,7 +495,7 @@
 
                 if (schema.allowCustomerStyle) {
                     subItems['style'] = {
-                        name: translate('feature.style.change'),
+                        name: Mapbender.digitizer_translate('feature.style.change'),
                         action: function (key, options, parameters) {
                             widget.openChangeStyleDialog(olFeature);
                         }
@@ -465,7 +504,7 @@
 
                 if (schema.allowEditData) {
                     subItems['edit'] = {
-                        name: translate('feature.edit'),
+                        name: Mapbender.digitizer_translate('feature.edit'),
                         action: function (key, options, parameters) {
                             widget._openFeatureEditDialog(parameters.olFeature);
                         }
@@ -474,7 +513,7 @@
 
                 if (schema.allowDelete) {
                     subItems['remove'] = {
-                        name: translate('feature.remove.title'),
+                        name: Mapbender.digitizer_translate('feature.remove.title'),
                         action: function (key, options, parameters) {
                             widget.removeFeature(parameters.olFeature);
                         }
@@ -512,12 +551,8 @@
                         }
 
                         features = feature.cluster ? feature.cluster : [feature];
-                        //features = widget._getFeaturesFromEvent(e.clientX, e.clientY);
 
                         _.each(features, function (feature) {
-                            if (!feature.layer) {
-                                feature.layer = olFeature.layer; // TODO looks like bug
-                            }
                             items[feature.fid] = createSubMenu(feature);
                         });
                     }
@@ -582,14 +617,14 @@
                     var schema = widget.findFeatureSchema(olFeature);
                     var items = {};
 
-                    items['changeStyle'] = {name: translate('feature.style.change')};
-                    items['zoom'] = {name: translate('feature.zoomTo')};
+                    items['changeStyle'] = {name: Mapbender.digitizer_translate('feature.style.change')};
+                    items['zoom'] = {name: Mapbender.digitizer_translate('feature.zoomTo')};
                     if (schema.allowDelete) {
-                        items['removeFeature'] = {name: translate('feature.remove.title')};
+                        items['removeFeature'] = {name: Mapbender.digitizer_translate('feature.remove.title')};
                     }
 
                     if (schema.allowEditData) {
-                        items['edit'] = {name: translate('feature.edit')};
+                        items['edit'] = {name: Mapbender.digitizer_translate('feature.edit')};
                     }
 
                     return {
@@ -631,12 +666,12 @@
                 translateObject(options.tableTranslation);
             } else {
                 options.tableTranslation = {
-                    sSearch: translate("search.title") + ':',
-                    sEmptyTable: translate("search.table.empty"),
-                    sZeroRecords: translate("search.table.zerorecords"),
-                    sInfo: translate("search.table.info.status"),
-                    sInfoEmpty: translate("search.table.info.empty"),
-                    sInfoFiltered: translate("search.table.info.filtered")
+                    sSearch: Mapbender.digitizer_translate("search.title") + ':',
+                    sEmptyTable: Mapbender.digitizer_translate("search.table.empty"),
+                    sZeroRecords: Mapbender.digitizer_translate("search.table.zerorecords"),
+                    sInfo: Mapbender.digitizer_translate("search.table.info.status"),
+                    sInfoEmpty: Mapbender.digitizer_translate("search.table.info.empty"),
+                    sInfoFiltered: Mapbender.digitizer_translate("search.table.info.filtered")
                 };
                 //translateObject(options.tableTranslation);
             }
@@ -817,7 +852,7 @@
             });
 
             if (!allowCopy) {
-                $.notify(translate('feature.clone.on.error'));
+                $.notify(Mapbender.digitizer_translate('feature.clone.on.error'));
                 return;
             }
 
@@ -836,7 +871,7 @@
 
             return widget.saveFeature(newFeature).done(function (response) {
                 if (response.errors) {
-                    Mapbender.error(translate("feature.copy.error"));
+                    Mapbender.error(Mapbender.digitizer_translate("feature.copy.error"));
                     return;
                 }
 
@@ -964,7 +999,7 @@
 
                     this.feature = feature;
 
-                    $.notify(translate("feature.save.successfully"), 'info');
+                    $.notify(Mapbender.digitizer_translate("feature.save.successfully"), 'info');
 
                     widget._trigger("featuresaved", null, feature);
 
@@ -1006,7 +1041,7 @@
 
             if (schema.printable) {
                 var printButton = {
-                    text: translate('feature.print'),
+                    text: Mapbender.digitizer_translate('feature.print'),
                     click: function () {
                         var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
                         if (printWidget) {
@@ -1022,7 +1057,7 @@
             }
             if (schema.copy.enable) {
                 buttons.push({
-                    text: translate('feature.clone.title'),
+                    text: Mapbender.digitizer_translate('feature.clone.title'),
                     click: function (e) {
                         var dialog = $(this).closest('.ui-dialog-content');
                         var feature = dialog.data('feature');
@@ -1032,7 +1067,7 @@
             }
             if (schema.allowCustomerStyle) {
                 var styleButton = {
-                    text: translate('feature.style.change'),
+                    text: Mapbender.digitizer_translate('feature.style.change'),
                     click: function (e) {
                         var dialog = $(this).closest('.ui-dialog-content');
                         var feature = dialog.data('feature');
@@ -1043,7 +1078,7 @@
             }
             if (schema.allowEditData && schema.allowSave) {
                 var saveButton = {
-                    text: translate('feature.save.title'),
+                    text: Mapbender.digitizer_translate('feature.save.title'),
                     click: function () {
                         var dialog = $(this).closest('.ui-dialog-content');
                         var feature = dialog.data('feature');
@@ -1054,7 +1089,7 @@
             }
             if (schema.allowDelete) {
                 buttons.push({
-                    text: translate('feature.remove.title'),
+                    text: Mapbender.digitizer_translate('feature.remove.title'),
                     'class': 'critical',
                     click: function () {
                         var dialog = $(this).closest('.ui-dialog-content');
@@ -1066,14 +1101,14 @@
             }
             if (schema.allowCancelButton) {
                 buttons.push({
-                    text: translate('cancel'),
+                    text: Mapbender.digitizer_translate('cancel'),
                     click: function () {
                         this.currentPopup.popupDialog('close');
                     }.bind(this)
                 });
             }
             var popupConfiguration = {
-                title: translate('feature.attributes'),
+                title: Mapbender.digitizer_translate('feature.attributes'),
                 width: widget.featureEditDialogWidth
             };
 
@@ -1229,7 +1264,7 @@
                     var buttons = [];
 
                     buttons.push({
-                        title: translate('feature.edit'),
+                        title: Mapbender.digitizer_translate('feature.edit'),
                         className: 'edit',
                         onClick: onEditClick
                     });
@@ -1313,7 +1348,7 @@
                         cloneItem,
                         {
                             type: "button",
-                            title: translate('feature.edit'),
+                            title: Mapbender.digitizer_translate('feature.edit'),
                             cssClass: 'edit',
                             click: onEditClick
                         },
@@ -2037,14 +2072,14 @@
                 _removeFeatureFromUI()
             } else {
                 Mapbender.confirmDialog({
-                    html: translate("feature.remove.from.database"),
+                    html: Mapbender.digitizer_translate("feature.remove.from.database"),
                     onSuccess: function () {
                         widget.query('delete', {
                             schema: schema.schemaName,
                             feature: featureData
                         }).done(function (fid) {
                             _removeFeatureFromUI();
-                            $.notify(translate('feature.remove.successfully'), 'info');
+                            $.notify(Mapbender.digitizer_translate('feature.remove.successfully'), 'info');
                         });
                     }
                 });
@@ -2120,7 +2155,7 @@
         _onFeatureCollectionLoaded: function (featureCollection, schema, xhr) {
 
             if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
-                Mapbender.error(translate("features.loading.error"), featureCollection, xhr);
+                Mapbender.error(Mapbender.digitizer_translate("features.loading.error"), featureCollection, xhr);
                 return;
             }
 
@@ -2288,7 +2323,7 @@
             }
 
             var saveButton = {
-                text: translate("feature.save", false),
+                text: Mapbender.digitizer_translate("feature.save", false),
                 click: function () {
                     widget.saveForeignDataStoreItem(dataItem);
                 }
@@ -2297,7 +2332,7 @@
 
             buttons.push({
 
-                text: translate("feature.remove.title", false),
+                text: Mapbender.digitizer_translate("feature.remove.title", false),
                 class: 'critical',
                 click: function () {
 
@@ -2348,14 +2383,14 @@
                         tableApi.draw();
                         widget.currentPopup.currentPopup.popupDialog('close');
                         widget.currentPopup.currentPopup = null;
-                        $.notify(translate("feature.remove.successfully", false), 'info');
+                        $.notify(Mapbender.digitizer_translate("feature.remove.successfully", false), 'info');
 
                     })
                 }
             });
 
             buttons.push({
-                text: translate("cancel"),
+                text: Mapbender.digitizer_translate("cancel"),
                 click: function () {
                     widget.currentPopup.currentPopup.popupDialog('close');
                     widget.currentPopup.currentPopup = null;
@@ -2428,7 +2463,7 @@
              } */
             var popupConfig = _.extend({
 
-                title: translate("feature.attributes"),
+                title: Mapbender.digitizer_translate("feature.attributes"),
 
                 width: widget.featureEditDialogWidth,
             }, schema.popup);
@@ -2522,7 +2557,7 @@
                 widget.currentPopup.currentPopup.popupDialog('close');
                 widget.currentPopup.currentPopup = null;
                 $(dialog).enableForm();
-                $.notify(translate("feature.save.successfully", false), 'info');
+                $.notify(Mapbender.digitizer_translate("feature.save.successfully", false), 'info');
             });
 
         },
@@ -2558,7 +2593,7 @@
                 if (xhr.statusText === 'abort') {
                     return;
                 }
-                var errorMessage = translate('api.query.error-message');
+                var errorMessage = Mapbender.digitizer_translate('api.query.error-message');
                 var errorDom = $(xhr.responseText);
 
                 // https://stackoverflow.com/a/298758

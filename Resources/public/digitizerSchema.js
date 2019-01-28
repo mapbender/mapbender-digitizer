@@ -1,51 +1,32 @@
-
-/**
- * Escape HTML chars
- * @param text
- * @returns {string}
- */
-function escapeHtml(text) {
-    'use strict';
-    return text.replace(/[\"&'\/<>]/g, function (a) {
-        return {
-            '"': '&quot;',
-            '&': '&amp;',
-            "'": '&#39;',
-            '/': '&#47;',
-            '<': '&lt;',
-            '>': '&gt;'
-        }[a];
-    });
-}
-
-function findFeatureByPropertyValue(layer, propName, propValue) {
-    for (var i = 0; i < layer.features.length; i++) {
-        if (layer.features[i][propName] === propValue) {
-            return layer.features[i];
-        }
-    }
-    return null;
-}
-
-/**
- * Translate digitizer keywords
- * @param title
- * @param withoutSuffix
- * @returns {*}
- */
-function translate(title, withoutSuffix) {
-    return Mapbender.trans(withoutSuffix ? title : "mb.digitizer." + title);
-}
-
 Scheme = OpenLayers.Class({
 
+    id : null,
+    displayClass: '',
+    schemaName : '',
+    table: null,
     label: '',
+    layer: null,
+    frame: null,
     inlineSearch: true,
     maxResults: 500,
     displayPermanent: false,
-    schemaName : '',
     dataStore : null,
     dataStoreLink : {},
+    showExtendSearchSwitch: false,
+    allowLocate: false,
+    allowSave: true,
+    allowEditData: false,
+    copy: {},
+    allowCustomerStyle: false,
+    allowChangeVisibility: false,
+    allowPrintMetadata: false,
+    allowDelete: false,
+    showExtendSearchSwitch: false,
+    featureType: {},
+    events : null,
+    selectControl: null,
+    featureStyles : null,
+    search: null,
 
     initialize: function (options) {
         var schema = this;
@@ -375,19 +356,19 @@ Scheme = OpenLayers.Class({
             });
         }
 
-        if (schema.allowSave || true) {
-            buttons.push({
-                title: translate('feature.savesave'),
-                className: 'save',
-                onClick: function (olFeature, ui) {
-                    widget.saveFeature(olFeature);
-                }
-            });
-        }
+        // if (schema.allowSave || true) {
+        //     buttons.push({
+        //         title: Mapbender.digitizer_translate('feature.savesave'),
+        //         className: 'save',
+        //         onClick: function (olFeature, ui) {
+        //             widget.saveFeature(olFeature);
+        //         }
+        //     });
+        // }
 
         if (schema.allowEditData) {
             buttons.push({
-                title: translate('feature.edit'),
+                title: Mapbender.digitizer_translate('feature.edit'),
                 className: 'edit',
                 onClick: function (olFeature, ui) {
                     widget._openFeatureEditDialog(olFeature);
@@ -396,7 +377,7 @@ Scheme = OpenLayers.Class({
         }
         if (schema.copy.enable) {
             buttons.push({
-                title: translate('feature.clone.title'),
+                title: Mapbender.digitizer_translate('feature.clone.title'),
                 className: 'clone',
                 cssClass: ' fa fa-files-o',
                 onClick: function (olFeature, ui) {
@@ -406,7 +387,7 @@ Scheme = OpenLayers.Class({
         }
         if (schema.allowCustomerStyle) {
             buttons.push({
-                title: translate('feature.style.change'),
+                title: Mapbender.digitizer_translate('feature.style.change'),
                 className: 'style',
                 onClick: function (olFeature, ui) {
                     widget.openChangeStyleDialog(olFeature);
@@ -416,11 +397,11 @@ Scheme = OpenLayers.Class({
 
         if (schema.allowChangeVisibility) {
             buttons.push({
-                title: 'Objekt anzeigen/ausblenden', //translate('feature.visibility.change'),
+                title: 'Objekt anzeigen/ausblenden', //Mapbender.digitizer_translate('feature.visibility.change'),
                 className: 'visibility',
                 onClick: function (olFeature, ui, b, c) {
                     var layer = olFeature.layer;
-                    if (!olFeature.renderIntent || olFeature.renderIntent != 'invisible') {
+                    if (!olFeature.renderIntent || olFeature.renderIntent !== 'invisible') {
                         layer.drawFeature(olFeature, 'invisible');
                         ui.addClass("icon-invisibility");
                         ui.closest('tr').addClass('invisible-feature');
@@ -442,7 +423,7 @@ Scheme = OpenLayers.Class({
                 title: 'Sachdaten drucken',
                 className: 'printmetadata-inactive',
                 onClick: function (olFeature, ui, b, c) {
-                    if (!olFeature.printMetadata || olFeature.printMetadata == false) {
+                    if (!olFeature.printMetadata) {
                         olFeature.printMetadata = true;
                         ui.addClass("icon-printmetadata-active");
                         ui.removeClass("icon-printmetadata-inactive");
@@ -457,7 +438,7 @@ Scheme = OpenLayers.Class({
 
         if (schema.allowDelete) {
             buttons.push({
-                title: translate("feature.remove.title"),
+                title: Mapbender.digitizer_translate("feature.remove.title"),
                 className: 'remove',
                 cssClass: 'critical',
                 onClick: function (olFeature, ui) {
@@ -467,7 +448,7 @@ Scheme = OpenLayers.Class({
         }
         // if(true) {
         //     buttons.push({
-        //         title:     translate("feature.remove.title"),
+        //         title:     Mapbender.digitizer_translate("feature.remove.title"),
         //         className: 'remove',
         //         cssClass:  'critical',
         //         onClick:   function(olFeature, ui) {
@@ -515,7 +496,7 @@ Scheme = OpenLayers.Class({
                 fieldSettings.data = function (row, type, val, meta) {
                     var data = row.data[fieldName];
                     if (typeof (data) == 'string') {
-                        data = escapeHtml(data);
+                        data = data.escapeHtml();
                     }
                     return data;
                 };
@@ -560,7 +541,7 @@ Scheme = OpenLayers.Class({
                 return true;
             }
 
-            if (column.hasOwnProperty('searchable') && column.searchable == false) {
+            if (column.hasOwnProperty('searchable') && column.searchable === false) {
                 return true;
             }
         }), 'sTitle');
@@ -616,7 +597,7 @@ Scheme = OpenLayers.Class({
 
 
                     if (preventDefault) {
-                        $.notify(translate('move.denied'));
+                        $.notify(Mapbender.digitizer_translate('move.denied'));
                         control.cancel();
 
                     }
@@ -649,7 +630,7 @@ Scheme = OpenLayers.Class({
                         control.deactivate();
                         control.activate();
 
-                        $.notify(translate('move.denied'));
+                        $.notify(Mapbender.digitizer_translate('move.denied'));
 
                     }
 
@@ -687,12 +668,11 @@ Scheme = OpenLayers.Class({
                 },
 
                 onModification: function (event) {
-                    var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
-                    widget.unsavedFeatures[event.id] = feature;
+                    widget.unsavedFeatures[event.id] = event.layer.findFeatureByPropertyValue('id', event.id);
                 }, // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
 
                 onComplete: function (event) {
-                    var feature = findFeatureByPropertyValue(event.layer, 'id', event.id);
+                    var feature = event.layer.findFeatureByPropertyValue('id', event.id);
                     widget.unsavedFeatures[event.id] = feature;
                     if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
 
@@ -739,7 +719,7 @@ Scheme = OpenLayers.Class({
             children: [{
                 type: 'checkbox',
                 cssClass: 'onlyExtent',
-                title: translate('toolset.current-extent'),
+                title: Mapbender.digitizer_translate('toolset.current-extent'),
                 checked: schema.searchType === "currentExtent",
                 change: function (e) {
                     schema.searchType = $(e.originalEvent.target).prop("checked") ? "currentExtent" : "all";
