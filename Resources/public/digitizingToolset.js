@@ -43,9 +43,12 @@
             var mapElement = widget.getMapElement();
             var options = widget.options;
             var translations = options.translations;
-            widget.controls = DigitizingControlFactory(translations,mapElement,widget);
+            widget.controls = DigitizingControlFactory(translations);
             widget.element.addClass('digitizing-tool-set');
             widget.refresh();
+
+            $(this.element).on('click', '.-fn-tool-button', this.onToolButtonClick.bind(this));
+
         },
 
         /**
@@ -135,6 +138,7 @@
                 var type = item.type;
 
                 button.addClass(item.type);
+                button.addClass('-fn-tool-button');
                 button.data(item);
 
                 if(controls.hasOwnProperty(type)) {
@@ -151,7 +155,7 @@
                         button.addClass(controlDefinition.cssClass)
                     }
 
-                    button.on('click', controlDefinition.onClick);
+                    //button.on('click', controlDefinition.onClick);
 
                     if(controlDefinition.hasOwnProperty('control')) {
                         button.data('control', controlDefinition.control);
@@ -178,6 +182,62 @@
 
                 element.append(button);
             });
+        },
+
+        /**
+         * Activate selected tool
+         *
+         * @param e
+         */
+
+
+        onToolButtonClick: function (e) {
+            var $el = $(e.currentTarget);
+            var controls = $el.data('control');
+            var $mapElement = $(controls.map.div) || null;
+
+            if (this.toggleControls(controls)) {
+                $mapElement.css({cursor: $el.data('control-cursor') || 'crosshair'});
+            } else {
+                $mapElement.css({cursor: 'default'});
+            }
+        },
+
+        /**
+         * Toggle controls and return true if controls turned on
+         *
+         * @param controls
+         * @returns {boolean}
+         */
+        toggleControls: function(controls) {
+            var newState = this.activeControls !== controls;
+            this.deactivateCurrentControls();
+
+            if(newState) {
+                controls.activate();
+                // $.each(controls, function(key,control){
+                //     control.activate();
+                // });
+                this.activeControls = controls;
+            }
+            return newState;
+        },
+
+        /**
+         * Deactivate current OpenLayer controls
+         */
+        deactivateCurrentControls: function() {
+            $.each(this.activeControls || [], function(key, control){
+                if(control) {
+                    if(control instanceof OpenLayers.Control.SelectFeature) {
+                        control.unselectAll();
+                    }
+                    $(control.map.div).css({cursor: 'default'});
+                    control.deactivate();
+                }
+            });
+
+            this.activeControls = [];
         },
 
         /**
