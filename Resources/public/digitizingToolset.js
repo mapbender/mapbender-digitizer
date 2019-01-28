@@ -116,8 +116,6 @@
                         button.addClass(controlDefinition.cssClass)
                     }
 
-                    //button.on('click', controlDefinition.onClick);
-
                     if (controlDefinition.hasOwnProperty('control')) {
                         button.data('control', controlDefinition.control);
                         //widget._activeControls.push(controlDefinition.control);
@@ -169,16 +167,16 @@
         /**
          * Toggle controls and return true if controls turned on
          *
-         * @param controls
+         * @param control
          * @returns {boolean}
          */
-        toggleControl: function (controls) {
-            var newState = this.activeControl !== controls;
+        toggleControl: function (control) {
+            var newState = this.activeControl !== control;
             this.deactivateCurrentControl();
 
             if (newState) {
-                controls.activate();
-                this.activeControl = controls;
+                control.activate();
+                this.activeControl = control;
             }
             return newState;
         },
