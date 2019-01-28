@@ -29,7 +29,7 @@
                 removeAll: "Remove all geometries"
             }
         },
-        controls: null,
+        controlFactory: null,
         activeControl: null,
         currentController: null,
 
@@ -40,7 +40,7 @@
          */
         _create: function () {
             var widget = this;
-            widget.controls = DigitizingControlFactory(widget.getLayer());
+            widget.controlFactory = DigitizingControlFactory(widget.getLayer());
             widget.element.addClass('digitizing-tool-set');
             widget.refresh();
 
@@ -66,11 +66,6 @@
 
             widget.buildNavigation(children);
 
-            // // Init map controllers
-            // for (var k in widget._activeControls) {
-            //     map.addControl(widget._activeControls[k]);
-            // }
-
             widget._trigger('ready', null, this);
         },
 
@@ -78,7 +73,6 @@
             this._super(options);
             this.refresh();
         },
-
 
 
         /**
@@ -89,7 +83,7 @@
         buildNavigation: function (buttons) {
             var widget = this;
             var element = $(widget.element);
-            var controls = widget.controls;
+            var controlFactory = widget.controlFactory;
             var controlEvents = widget.options.controlEvents;
 
             $.each(buttons, function (i, item) {
@@ -104,41 +98,35 @@
                 button.addClass('-fn-tool-button');
                 button.data(item);
 
-                if (controls.hasOwnProperty(type)) {
-                    var controlDefinition = controls[type];
+                if (controlFactory.hasOwnProperty(type)) {
+                    var control = controlFactory[type];
 
-                    button.attr('title',widget.options.translations[type]);
+                    button.attr('title', widget.options.translations[type]);
 
                     // add icon css class
                     button.addClass("icon-" + type.replace(/([A-Z])+/g, '-$1').toLowerCase());
 
-                    if (controlDefinition.hasOwnProperty('cssClass')) {
-                        button.addClass(controlDefinition.cssClass)
-                    }
+                    button.data('control', control);
 
-                    if (controlDefinition.hasOwnProperty('control')) {
-                        button.data('control', controlDefinition.control);
-                        //widget._activeControls.push(controlDefinition.control);
+                    var drawControlEvents = control.events;
+                    drawControlEvents.register('activate', button, function (e) {
+                        widget._trigger('controlActivate', null, e);
+                        button.addClass('active');
+                    });
+                    drawControlEvents.register('deactivate', button, function (e) {
+                        widget._trigger('controlDeactivate', null, e);
+                        button.removeClass('active');
+                    });
 
-                        var drawControlEvents = controlDefinition.control.events;
-                        drawControlEvents.register('activate', button, function (e) {
-                            widget._trigger('controlActivate', null, e);
-                            button.addClass('active');
-                        });
-                        drawControlEvents.register('deactivate', button, function (e) {
-                            widget._trigger('controlDeactivate', null, e);
-                            button.removeClass('active');
-                        });
+                    // Map event handler to ol controls
+                    $.each(controlEvents, function (eventName, eventHandler) {
+                        control[eventName] = eventHandler;
 
-                        // Map event handler to ol controls
-                        $.each(controlEvents, function (eventName, eventHandler) {
-                            controlDefinition.control[eventName] = eventHandler;
+                        drawControlEvents.register(eventName, null, eventHandler);
+                    });
 
-                            drawControlEvents.register(eventName, null, eventHandler);
-                        });
+                    control.layer.map.addControl(control);
 
-                        controlDefinition.control.layer.map.addControl(controlDefinition.control);
-                    }
                 }
 
                 element.append(button);
@@ -205,8 +193,6 @@
         getLayer: function () {
             return this.options.layer;
         }
-
-
 
 
     });
