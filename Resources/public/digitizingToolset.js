@@ -40,10 +40,9 @@
          */
         _create: function() {
             var widget = this;
-            var mapElement = widget.getMapElement();
             var options = widget.options;
             var translations = options.translations;
-            widget.controls = DigitizingControlFactory(translations);
+            widget.controls = DigitizingControlFactory(translations,widget.getLayer());
             widget.element.addClass('digitizing-tool-set');
             widget.refresh();
 

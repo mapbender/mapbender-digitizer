@@ -1,6 +1,4 @@
-var DigitizingControlFactory = function (translations) {
-
-    var layer = widget.getLayer();
+var DigitizingControlFactory = function (translations,layer) {
 
     return {
         drawPoint: {
