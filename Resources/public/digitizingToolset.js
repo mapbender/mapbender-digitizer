@@ -226,7 +226,8 @@
          * Deactivate current OpenLayer controls
          */
         deactivateCurrentControls: function() {
-            $.each(this.activeControls || [], function(key, control){
+            var control = this.activeControls;
+            //$.each(this.activeControls || [], function(key, control){
                 if(control) {
                     if(control instanceof OpenLayers.Control.SelectFeature) {
                         control.unselectAll();
@@ -234,7 +235,7 @@
                     $(control.map.div).css({cursor: 'default'});
                     control.deactivate();
                 }
-            });
+            //});
 
             this.activeControls = [];
         },
