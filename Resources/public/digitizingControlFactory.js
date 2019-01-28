@@ -1,21 +1,17 @@
-var DigitizingControlFactory = function (translations,layer) {
+var DigitizingControlFactory = function (layer) {
 
     return {
         drawPoint: {
-            infoText: translations.drawPoint,
             control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point),
 
         },
         drawLine: {
-            infoText: translations.drawLine,
             control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Path)
         },
         drawPolygon: {
-            infoText: translations.drawPolygon,
             control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon)
         },
         drawRectangle: {
-            infoText: translations.drawRectangle,
             control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
                 handlerOptions: {
                     sides: 4,
@@ -24,7 +20,6 @@ var DigitizingControlFactory = function (translations,layer) {
             })
         },
         drawCircle: {
-            infoText: translations.drawCircle,
             control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
                 handlerOptions: {
                     sides: 40
@@ -32,7 +27,6 @@ var DigitizingControlFactory = function (translations,layer) {
             })
         },
         drawEllipse: {
-            infoText: translations.drawEllipse,
             control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
                 handlerOptions: {
                     sides: 40,
@@ -41,7 +35,6 @@ var DigitizingControlFactory = function (translations,layer) {
             })
         },
         drawDonut: {
-            infoText: translations.drawDonut,
             control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
                 handlerOptions: {
                     holeModifier: 'element'
@@ -49,11 +42,9 @@ var DigitizingControlFactory = function (translations,layer) {
             })
         },
         modifyFeature: {
-            infoText: translations.selectAndEditGeometry,
             control: new OpenLayers.Control.ModifyFeature(layer)
         },
         moveFeature: {
-            infoText: translations.moveGeometry,
             control: new OpenLayers.Control.DragFeature(layer, {
                 onStart: function (feature) {
                     feature.renderIntent = 'select';
@@ -66,7 +57,6 @@ var DigitizingControlFactory = function (translations,layer) {
             })
         },
         selectFeature: {
-            infoText: translations.selectGeometry,
             control: new OpenLayers.Control.SelectFeature(layer, {
                 clickout: true,
                 toggle: true,
@@ -78,12 +68,10 @@ var DigitizingControlFactory = function (translations,layer) {
             })
         },
         removeSelected: {
-            infoText: translations.removeSelected,
-            cssClass: 'critical',
+            cssClass: 'critical'
         },
         removeAll: {
-            infoText: translations.removeAll,
-            cssClass: 'critical',
+            cssClass: 'critical'
         }
     }
 };

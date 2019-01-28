@@ -22,9 +22,9 @@
                 drawCircle: "Draw circle",
                 drawEllipse: "Draw ellipse",
                 drawDonut: "Draw donut",
-                selectAndEditGeometry: "Select and edit geometry position/size",
-                moveGeometry: "Move geometry",
-                selectGeometry: "Select geometry",
+                modifyFeature: "Select and edit geometry position/size",
+                moveFeature: "Move geometry",
+                selectFeature: "Select geometry",
                 removeSelected: "Remove selected geometries",
                 removeAll: "Remove all geometries"
             }
@@ -40,9 +40,7 @@
          */
         _create: function () {
             var widget = this;
-            var options = widget.options;
-            var translations = options.translations;
-            widget.controls = DigitizingControlFactory(translations, widget.getLayer());
+            widget.controls = DigitizingControlFactory(widget.getLayer());
             widget.element.addClass('digitizing-tool-set');
             widget.refresh();
 
@@ -109,9 +107,7 @@
                 if (controls.hasOwnProperty(type)) {
                     var controlDefinition = controls[type];
 
-                    if (controlDefinition.hasOwnProperty('infoText')) {
-                        button.attr('title', controlDefinition.infoText)
-                    }
+                    button.attr('title',widget.options.translations[type]);
 
                     // add icon css class
                     button.addClass("icon-" + type.replace(/([A-Z])+/g, '-$1').toLowerCase());
