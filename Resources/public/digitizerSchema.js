@@ -42,7 +42,6 @@ Scheme = OpenLayers.Class({
     label: '',
     inlineSearch: true,
     maxResults: 500,
-    abc: 'd',
     displayPermanent: false,
     schemaName : '',
     dataStore : null,

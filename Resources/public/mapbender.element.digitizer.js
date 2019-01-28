@@ -705,8 +705,6 @@
                     previous: widget.currentSettings
                 });
 
-                console.log(widget.currentSettings,"!!");
-
                 if (widget.currentSettings) {
                     widget.currentSettings.deactivateSchema();
                 }
@@ -1695,7 +1693,6 @@
                 schema.xhr.abort();
             }
 
-            console.log(schema);
             schema.xhr = widget.query('select', request).done(function (featureCollection) {
                 widget._onFeatureCollectionLoaded(featureCollection, schema, this);
             });
