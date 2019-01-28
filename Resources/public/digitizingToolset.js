@@ -6,15 +6,15 @@
  *
  * @copyright 20.04.2015 by WhereGroup GmbH & Co. KG
  */
-(function($) {
+(function ($) {
 
     $.widget("mapbender.digitizingToolSet", {
 
-        options:           {
-            layer:    null,
+        options: {
+            layer: null,
             // Open layer control events
             controlEvents: [],
-            translations:{
+            translations: {
                 drawPoint: "Draw point",
                 drawLine: "Draw line",
                 drawPolygon: "Draw polygon",
@@ -29,8 +29,8 @@
                 removeAll: "Remove all geometries"
             }
         },
-        controls:          null,
-        _activeControls:   [],
+        controls: null,
+        activeControl: null,
         currentController: null,
 
         /**
@@ -38,11 +38,11 @@
          *
          * @private
          */
-        _create: function() {
+        _create: function () {
             var widget = this;
             var options = widget.options;
             var translations = options.translations;
-            widget.controls = DigitizingControlFactory(translations,widget.getLayer());
+            widget.controls = DigitizingControlFactory(translations, widget.getLayer());
             widget.element.addClass('digitizing-tool-set');
             widget.refresh();
 
@@ -53,7 +53,7 @@
         /**
          * Refresh widget
          */
-        refresh: function() {
+        refresh: function () {
             var widget = this;
             var element = $(widget.element);
             var children = widget.options.children;
@@ -68,15 +68,15 @@
 
             widget.buildNavigation(children);
 
-            // Init map controllers
-            for (var k in widget._activeControls) {
-                map.addControl(widget._activeControls[k]);
-            }
+            // // Init map controllers
+            // for (var k in widget._activeControls) {
+            //     map.addControl(widget._activeControls[k]);
+            // }
 
             widget._trigger('ready', null, this);
         },
 
-        _setOptions: function(options) {
+        _setOptions: function (options) {
             this._super(options);
             this.refresh();
         },
@@ -87,10 +87,10 @@
          * @param controller
          * @returns {boolean}
          */
-        toggleController: function(controller) {
+        toggleController: function (controller) {
             var widget = this;
             var setOn = widget.currentController != controller;
-            if(setOn) {
+            if (setOn) {
                 widget.setController(controller);
             } else {
                 widget.deactivateCurrentController();
@@ -103,14 +103,14 @@
          *
          * @param controller
          */
-        setController: function(controller) {
+        setController: function (controller) {
             var widget = this;
 
-            if(controller) {
+            if (controller) {
                 controller.activate();
             }
 
-            if(widget.currentController) {
+            if (widget.currentController) {
                 widget.deactivateCurrentController();
             }
 
@@ -122,15 +122,15 @@
          *
          * @param buttons
          */
-        buildNavigation: function(buttons) {
+        buildNavigation: function (buttons) {
             var widget = this;
             var element = $(widget.element);
             var controls = widget.controls;
             var controlEvents = widget.options.controlEvents;
 
-            $.each(buttons, function(i, item) {
+            $.each(buttons, function (i, item) {
                 //var item = this;
-                if(!item || !item.hasOwnProperty('type')){
+                if (!item || !item.hasOwnProperty('type')) {
                     return;
                 }
                 var button = $("<button class='button' type='button'/>");
@@ -140,42 +140,44 @@
                 button.addClass('-fn-tool-button');
                 button.data(item);
 
-                if(controls.hasOwnProperty(type)) {
+                if (controls.hasOwnProperty(type)) {
                     var controlDefinition = controls[type];
 
-                    if(controlDefinition.hasOwnProperty('infoText')){
-                        button.attr('title',controlDefinition.infoText)
+                    if (controlDefinition.hasOwnProperty('infoText')) {
+                        button.attr('title', controlDefinition.infoText)
                     }
 
                     // add icon css class
-                    button.addClass("icon-" + type.replace(/([A-Z])+/g,'-$1').toLowerCase());
+                    button.addClass("icon-" + type.replace(/([A-Z])+/g, '-$1').toLowerCase());
 
-                    if(controlDefinition.hasOwnProperty('cssClass')){
+                    if (controlDefinition.hasOwnProperty('cssClass')) {
                         button.addClass(controlDefinition.cssClass)
                     }
 
                     //button.on('click', controlDefinition.onClick);
 
-                    if(controlDefinition.hasOwnProperty('control')) {
+                    if (controlDefinition.hasOwnProperty('control')) {
                         button.data('control', controlDefinition.control);
-                        widget._activeControls.push(controlDefinition.control);
+                        //widget._activeControls.push(controlDefinition.control);
 
                         var drawControlEvents = controlDefinition.control.events;
-                        drawControlEvents.register('activate', button, function(e) {
+                        drawControlEvents.register('activate', button, function (e) {
                             widget._trigger('controlActivate', null, e);
                             button.addClass('active');
                         });
-                        drawControlEvents.register('deactivate', button, function(e) {
+                        drawControlEvents.register('deactivate', button, function (e) {
                             widget._trigger('controlDeactivate', null, e);
                             button.removeClass('active');
                         });
 
                         // Map event handler to ol controls
-                        $.each(controlEvents,function(eventName,eventHandler){
+                        $.each(controlEvents, function (eventName, eventHandler) {
                             controlDefinition.control[eventName] = eventHandler;
 
                             drawControlEvents.register(eventName, null, eventHandler);
                         });
+
+                        controlDefinition.control.layer.map.addControl(controlDefinition.control);
                     }
                 }
 
@@ -192,10 +194,10 @@
 
         onToolButtonClick: function (e) {
             var $el = $(e.currentTarget);
-            var controls = $el.data('control');
-            var $mapElement = $(controls.map.div) || null;
+            var control = $el.data('control');
+            var $mapElement = $(control.map.div) || null;
 
-            if (this.toggleControls(controls)) {
+            if (this.toggleControl(control)) {
                 $mapElement.css({cursor: $el.data('control-cursor') || 'crosshair'});
             } else {
                 $mapElement.css({cursor: 'default'});
@@ -208,16 +210,13 @@
          * @param controls
          * @returns {boolean}
          */
-        toggleControls: function(controls) {
-            var newState = this.activeControls !== controls;
-            this.deactivateCurrentControls();
+        toggleControl: function (controls) {
+            var newState = this.activeControl !== controls;
+            this.deactivateCurrentControl();
 
-            if(newState) {
+            if (newState) {
                 controls.activate();
-                // $.each(controls, function(key,control){
-                //     control.activate();
-                // });
-                this.activeControls = controls;
+                this.activeControl = controls;
             }
             return newState;
         },
@@ -225,19 +224,17 @@
         /**
          * Deactivate current OpenLayer controls
          */
-        deactivateCurrentControls: function() {
-            var control = this.activeControls;
-            //$.each(this.activeControls || [], function(key, control){
-                if(control) {
-                    if(control instanceof OpenLayers.Control.SelectFeature) {
-                        control.unselectAll();
-                    }
-                    $(control.map.div).css({cursor: 'default'});
-                    control.deactivate();
+        deactivateCurrentControl: function () {
+            var control = this.activeControl;
+            if (control) {
+                if (control instanceof OpenLayers.Control.SelectFeature) {
+                    control.unselectAll();
                 }
-            //});
+                $(control.map.div).css({cursor: 'default'});
+                control.deactivate();
+            }
 
-            this.activeControls = [];
+            this.activeControl = [];
         },
 
         /**
@@ -245,7 +242,7 @@
          *
          * @return OpenLayers.Map.OpenLayers.Class.initialize
          */
-        getLayer: function() {
+        getLayer: function () {
             return this.options.layer;
         },
 
@@ -254,29 +251,29 @@
          *
          * @return HTMLElement jquery HTML element
          */
-        getMapElement: function() {
+        getMapElement: function () {
             var layer = this.getLayer();
-            return layer?$(layer.map.div):null;
+            return layer ? $(layer.map.div) : null;
         },
 
         /**
          * Has layer?
          * @return {boolean}
          */
-        hasLayer: function(){
+        hasLayer: function () {
             return !!this.getLayer();
         },
 
         /**
          * Deactivate current OpenLayer controller
          */
-        deactivateCurrentController: function(){
+        deactivateCurrentController: function () {
             var widget = this;
             var mapElement = widget.getMapElement();
             var previousController = widget.currentController;
 
-            if(previousController) {
-                if(previousController instanceof OpenLayers.Control.SelectFeature) {
+            if (previousController) {
+                if (previousController instanceof OpenLayers.Control.SelectFeature) {
                     previousController.unselectAll();
                 }
 
