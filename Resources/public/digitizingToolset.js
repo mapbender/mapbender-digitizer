@@ -75,6 +75,43 @@
         },
 
 
+        _createPlainControlButton: function(item) {
+            var widget = this;
+
+            var button = $("<button class='button' type='button'/>");
+
+            button.addClass(item.type);
+            button.addClass('-fn-tool-button');
+            button.data(item);
+
+            button.attr('title', widget.options.translations[item.type]);
+            // add icon css class
+            button.addClass("icon-" + item.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
+
+            return button;
+        },
+
+        _registerControlEvents: function(control,button) {
+            var widget = this;
+            var controlEvents = widget.options.controlEvents;
+
+            var drawControlEvents = control.events;
+            drawControlEvents.register('activate', button, function (e) {
+                widget._trigger('controlActivate', null, e);
+                button.addClass('active');
+            });
+            drawControlEvents.register('deactivate', button, function (e) {
+                widget._trigger('controlDeactivate', null, e);
+                button.removeClass('active');
+            });
+
+            // Map event handler to ol controls
+            $.each(controlEvents, function (eventName, eventHandler) {
+                control[eventName] = eventHandler;
+                drawControlEvents.register(eventName, null, eventHandler);
+            });
+
+        },
         /**
          * Build Navigation
          *
@@ -84,49 +121,19 @@
             var widget = this;
             var element = $(widget.element);
             var controlFactory = widget.controlFactory;
-            var controlEvents = widget.options.controlEvents;
 
             $.each(buttons, function (i, item) {
                 //var item = this;
                 if (!item || !item.hasOwnProperty('type')) {
                     return;
                 }
-                var button = $("<button class='button' type='button'/>");
-                var type = item.type;
+                var button = widget._createPlainControlButton(item);
 
-                button.addClass(item.type);
-                button.addClass('-fn-tool-button');
-                button.data(item);
-
-                if (controlFactory.hasOwnProperty(type)) {
-                    var control = controlFactory[type];
-
-                    button.attr('title', widget.options.translations[type]);
-
-                    // add icon css class
-                    button.addClass("icon-" + type.replace(/([A-Z])+/g, '-$1').toLowerCase());
-
+                if (controlFactory.hasOwnProperty(item.type)) {
+                    var control = controlFactory[item.type];
                     button.data('control', control);
-
-                    var drawControlEvents = control.events;
-                    drawControlEvents.register('activate', button, function (e) {
-                        widget._trigger('controlActivate', null, e);
-                        button.addClass('active');
-                    });
-                    drawControlEvents.register('deactivate', button, function (e) {
-                        widget._trigger('controlDeactivate', null, e);
-                        button.removeClass('active');
-                    });
-
-                    // Map event handler to ol controls
-                    $.each(controlEvents, function (eventName, eventHandler) {
-                        control[eventName] = eventHandler;
-
-                        drawControlEvents.register(eventName, null, eventHandler);
-                    });
-
+                    widget._registerControlEvents(control,button);
                     control.layer.map.addControl(control);
-
                 }
 
                 element.append(button);
