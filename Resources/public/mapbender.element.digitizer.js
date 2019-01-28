@@ -2640,6 +2640,7 @@
 
 
         editCancel : function(event, eventData) {
+            var widget = this;
             var feature = eventData.feature();
             if (feature.hasOwnProperty('isNew') && eventData.schema.allowDeleteByCancelNewGeometry) {
                 this.removeFeature(feature);
@@ -2654,13 +2655,15 @@
                 feature.geometry.y =  feature.oldGeom.y;
 
 
-                if (feature.layer) {
-                    feature.layer.redraw();
-                    feature.layer.setVisibility(false);
+                var layer = feature.layer || widget.currentSettings.layer;
 
-                    feature.layer.setVisibility(true);
+                if (layer) {
+                    layer.redraw();
+                    layer.setVisibility(false);
+
+                    layer.setVisibility(true);
                 } else {
-                    console.warn("Reddrawing of Layer not possible - root cause should be detected");
+                    console.warn("Redrawing of Layer not possible");
                 }
 
             }

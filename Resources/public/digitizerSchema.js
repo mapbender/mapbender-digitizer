@@ -665,7 +665,7 @@ Scheme = OpenLayers.Class({
                     //widget.reloadFeatures(layer);
                     layer.redraw();
 
-                    digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
+                    digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");
 
                     widget.unsavedFeatures[olFeature.id] = olFeature;
 
