@@ -1010,7 +1010,7 @@
                                 //widget.reloadFeatures(layer);
                                 layer.redraw();
 
-                                digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
+                                digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");
 
                                 widget.unsavedFeatures[olFeature.id] = olFeature;
 
@@ -1381,7 +1381,7 @@
                 var previousSettings = sets.previous;
                 if (previousSettings) {
                     var digitizerToolSetElement = $("> div.digitizing-tool-set", previousSettings.frame);
-                    digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
+                    digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");
                 }
             });
             onSelectorChange();

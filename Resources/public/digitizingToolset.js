@@ -210,37 +210,8 @@
          */
         getLayer: function () {
             return this.options.layer;
-        },
-
-        /**
-         * Deactivate current OpenLayer controller
-         */
-        deactivateCurrentController: function () {
-            var widget = this;
-            var mapElement = widget.getMapElement();
-            var previousController = widget.currentController;
-
-            if (previousController) {
-                if (previousController instanceof OpenLayers.Control.SelectFeature) {
-                    previousController.unselectAll();
-                }
-
-                previousController.deactivate();
-                widget.currentController = null;
-            }
-
-            mapElement.css({cursor: 'default'});
-        },
-
-        /**
-         * Get map jQuery HTML element
-         *
-         * @return HTMLElement jquery HTML element
-         */
-        getMapElement: function () {
-            var layer = this.getLayer();
-            return layer ? $(layer.map.div) : null;
         }
+
 
 
 
