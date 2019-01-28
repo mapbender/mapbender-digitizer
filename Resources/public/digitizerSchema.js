@@ -46,6 +46,7 @@ Scheme = OpenLayers.Class({
     displayPermanent: false,
     schemaName : '',
     dataStore : null,
+    dataStoreLink : {},
 
     initialize: function (options) {
         var schema = this;

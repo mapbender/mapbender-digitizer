@@ -799,7 +799,7 @@
         /**
          * Copy feature
          *
-         * @param {OpenLayers.Feature} feature
+         * @param {OpenLayers.Feature.Vector} feature
          */
         copyFeature: function (feature) {
             var widget = this;
@@ -2545,7 +2545,6 @@
          * @version 0.2
          */
         query: function (uri, request) {
-            console.log(request,"!");
             var widget = this;
             return $.ajax({
                 url: widget.elementUrl + uri,
@@ -2626,9 +2625,9 @@
 
 
                 feature.layer.redraw();
-                feature.layer.setVisibility(false)
+                feature.layer.setVisibility(false);
 
-                feature.layer.setVisibility(true)
+                feature.layer.setVisibility(true);
 
             }
 
