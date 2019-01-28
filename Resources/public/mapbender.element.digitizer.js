@@ -2656,10 +2656,14 @@
                 feature.geometry.y =  feature.oldGeom.y;
 
 
-                feature.layer.redraw();
-                feature.layer.setVisibility(false);
+                if (feature.layer) {
+                    feature.layer.redraw();
+                    feature.layer.setVisibility(false);
 
-                feature.layer.setVisibility(true);
+                    feature.layer.setVisibility(true);
+                } else {
+                    console.warn("Reddrawing of Layer not possible - root cause should be detected");
+                }
 
             }
 
