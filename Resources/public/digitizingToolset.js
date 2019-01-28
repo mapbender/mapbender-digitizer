@@ -81,41 +81,7 @@
             this.refresh();
         },
 
-        /**
-         * Toggle controller and return true if controller turned on
-         *
-         * @param controller
-         * @returns {boolean}
-         */
-        toggleController: function (controller) {
-            var widget = this;
-            var setOn = widget.currentController != controller;
-            if (setOn) {
-                widget.setController(controller);
-            } else {
-                widget.deactivateCurrentController();
-            }
-            return setOn;
-        },
 
-        /**
-         * Switch between current and element controller.
-         *
-         * @param controller
-         */
-        setController: function (controller) {
-            var widget = this;
-
-            if (controller) {
-                controller.activate();
-            }
-
-            if (widget.currentController) {
-                widget.deactivateCurrentController();
-            }
-
-            widget.currentController = controller;
-        },
 
         /**
          * Build Navigation
@@ -244,45 +210,10 @@
          */
         getLayer: function () {
             return this.options.layer;
-        },
-
-        /**
-         * Get map jQuery HTML element
-         *
-         * @return HTMLElement jquery HTML element
-         */
-        getMapElement: function () {
-            var layer = this.getLayer();
-            return layer ? $(layer.map.div) : null;
-        },
-
-        /**
-         * Has layer?
-         * @return {boolean}
-         */
-        hasLayer: function () {
-            return !!this.getLayer();
-        },
-
-        /**
-         * Deactivate current OpenLayer controller
-         */
-        deactivateCurrentController: function () {
-            var widget = this;
-            var mapElement = widget.getMapElement();
-            var previousController = widget.currentController;
-
-            if (previousController) {
-                if (previousController instanceof OpenLayers.Control.SelectFeature) {
-                    previousController.unselectAll();
-                }
-
-                previousController.deactivate();
-                widget.currentController = null;
-            }
-
-            mapElement.css({cursor: 'default'});
         }
+
+
+
     });
 
 })(jQuery);
