@@ -680,8 +680,6 @@
         _buildSelectOptionsForAllSchemes: function() {
             var widget = this;
             var options = widget.options;
-
-
             $.each(options.schemes, function (schemaName) {
               this.schemaName = schemaName;
               this._buildSelectOptions();
@@ -800,7 +798,7 @@
                 var previousSettings = sets.previous;
                 if (previousSettings) {
                     var digitizerToolSetElement = $("> div.digitizing-tool-set", previousSettings.frame);
-                    digitizerToolSetElement.digitizingToolSet("deactivateCurrentController");
+                    digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");
                 }
             });
             onSelectorChange();

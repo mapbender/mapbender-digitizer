@@ -790,7 +790,6 @@ Scheme = OpenLayers.Class({
 
         frame.append(table);
 
-        //frames.push(schema); // TODO not necessary
         frame.css('display', 'none');
 
         frame.data("schemaSettings", schema);

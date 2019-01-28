@@ -47,6 +47,7 @@ class Digitizer extends BaseElement
                 '/components/select2/dist/js/i18n/de.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizingToolset.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizerSchema.js',
+                '@MapbenderDigitizerBundle/Resources/public/digitizingControlFactory.js',
                 '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
             ),

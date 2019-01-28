@@ -22,15 +22,15 @@
                 drawCircle: "Draw circle",
                 drawEllipse: "Draw ellipse",
                 drawDonut: "Draw donut",
-                selectAndEditGeometry: "Select and edit geometry position/size",
-                moveGeometry: "Move geometry",
-                selectGeometry: "Select geometry",
+                modifyFeature: "Select and edit geometry position/size",
+                moveFeature: "Move geometry",
+                selectFeature: "Select geometry",
                 removeSelected: "Remove selected geometries",
                 removeAll: "Remove all geometries"
             }
         },
-        controls: null,
-        _activeControls: [],
+        controlFactory: null,
+        activeControl: null,
         currentController: null,
 
         /**
@@ -40,183 +40,12 @@
          */
         _create: function () {
             var widget = this;
-            var mapElement = widget.getMapElement();
-            var layer = widget.getLayer();
-            var options = widget.options;
-            var translations = options.translations;
-
-            widget.controls = {
-                drawPoint: {
-                    infoText: translations.drawPoint,
-                    control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point),
-                    onClick: function (e) {
-                        var el = $(e.currentTarget);
-                        if (widget.toggleController(el.data('control'))) {
-                            mapElement.css({cursor: 'crosshair'});
-                        }
-                    }
-                },
-                drawLine: {
-                    infoText: translations.drawLine,
-                    onClick: function (e) {
-                        var el = $(e.currentTarget);
-                        if (widget.toggleController(el.data('control'))) {
-                            mapElement.css({cursor: 'crosshair'});
-                        }
-
-                    },
-                    control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Path)
-                },
-                drawPolygon: {
-                    infoText: translations.drawPolygon,
-                    onClick: function (e) {
-                        var el = $(e.currentTarget);
-                        if (widget.toggleController(el.data('control'))) {
-                            mapElement.css({cursor: 'crosshair'});
-                        } else {
-                            mapElement.css({cursor: 'default'});
-                        }
-
-                    },
-                    control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon)
-                },
-                drawRectangle: {
-                    infoText: translations.drawRectangle,
-                    onClick: function (e) {
-                        var el = $(e.currentTarget);
-                        if (widget.toggleController(el.data('control'))) {
-                            mapElement.css({cursor: 'crosshair'});
-                        } else {
-                            mapElement.css({cursor: 'default'});
-                        }
-
-                    },
-                    control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
-                        handlerOptions: {
-                            sides: 4,
-                            irregular: true
-                        }
-                    })
-                },
-                drawCircle: {
-                    infoText: translations.drawCircle,
-                    onClick: function (e) {
-                        var el = $(e.currentTarget);
-                        if (widget.toggleController(el.data('control'))) {
-                            mapElement.css({cursor: 'crosshair'});
-                        } else {
-                            mapElement.css({cursor: 'default'});
-                        }
-
-                    },
-                    control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
-                        handlerOptions: {
-                            sides: 40
-                        }
-                    })
-                },
-                drawEllipse: {
-                    infoText: translations.drawEllipse,
-                    onClick: function (e) {
-                        var el = $(e.currentTarget);
-                        if (widget.toggleController(el.data('control'))) {
-                            mapElement.css({cursor: 'crosshair'});
-                        } else {
-                            mapElement.css({cursor: 'default'});
-                        }
-
-                    },
-                    control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
-                        handlerOptions: {
-                            sides: 40,
-                            irregular: true
-                        }
-                    })
-                },
-                drawDonut: {
-                    infoText: translations.drawDonut,
-                    onClick: function (e) {
-                        var el = $(e.currentTarget);
-                        if (widget.toggleController(el.data('control'))) {
-                            mapElement.css({cursor: 'crosshair'});
-                        } else {
-                            mapElement.css({cursor: 'default'});
-                        }
-                    },
-                    control: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
-                        handlerOptions: {
-                            holeModifier: 'element'
-                        }
-                    })
-                },
-                modifyFeature: {
-                    infoText: translations.selectAndEditGeometry,
-                    onClick: function (e) {
-                        var el = $(e.currentTarget);
-                        if (widget.toggleController(el.data('control'))) {
-                            mapElement.css({cursor: 'crosshair'});
-                        } else {
-                            mapElement.css({cursor: 'default'});
-                        }
-
-                    },
-                    control: new OpenLayers.Control.ModifyFeature(layer)
-                },
-                moveFeature: {
-                    infoText: translations.moveGeometry,
-                    onClick: function (e) {
-                        var el = $(e.currentTarget);
-                        if (widget.toggleController(el.data('control'))) {
-                            mapElement.css({cursor: 'default'});
-                        }
-                        mapElement.css({cursor: 'default'});
-                    },
-                    control: new OpenLayers.Control.DragFeature(layer, {
-                        onStart: function (feature) {
-                            feature.renderIntent = 'select';
-                        },
-                        onComplete: function (feature) {
-                            feature.renderIntent = 'default';
-                            feature.layer.redraw();
-
-                        }
-                    })
-                },
-                selectFeature: {
-                    infoText: translations.selectGeometry,
-                    onClick: function (e) {
-                        var el = $(e.currentTarget);
-                        widget.toggleController(el.data('control'));
-                        mapElement.css({cursor: 'default'});
-
-                    },
-                    control: new OpenLayers.Control.SelectFeature(layer, {
-                        clickout: true,
-                        toggle: true,
-                        multiple: true,
-                        hover: false,
-                        box: true,
-                        toggleKey: "ctrlKey", // ctrl key removes from selection
-                        multipleKey: "shiftKey" // shift key adds to selection
-                    })
-                },
-                removeSelected: {
-                    infoText: translations.removeSelected,
-                    cssClass: 'critical',
-                    onClick: function () {
-                        layer.removeFeatures(layer.selectedFeatures);
-                    }
-                },
-                removeAll: {
-                    infoText: translations.removeAll,
-                    cssClass: 'critical',
-                    onClick: function () {
-                        layer.removeAllFeatures();
-                    }
-                }
-            };
+            widget.controlFactory = DigitizingControlFactory(widget.getLayer());
             widget.element.addClass('digitizing-tool-set');
             widget.refresh();
+
+            $(this.element).on('click', '.-fn-tool-button', this.onToolButtonClick.bind(this));
+
         },
 
         /**
@@ -237,11 +66,6 @@
 
             widget.buildNavigation(children);
 
-            // Init map controllers
-            for (var k in widget._activeControls) {
-                map.addControl(widget._activeControls[k]);
-            }
-
             widget._trigger('ready', null, this);
         },
 
@@ -250,42 +74,44 @@
             this.refresh();
         },
 
-        /**
-         * Toggle controller and return true if controller turned on
-         *
-         * @param controller
-         * @returns {boolean}
-         */
-        toggleController: function (controller) {
-            var widget = this;
-            var setOn = widget.currentController !== controller;
-            if (setOn) {
-                widget.setController(controller);
-            } else {
-                widget.deactivateCurrentController();
-            }
-            return setOn;
-        },
 
-        /**
-         * Switch between current and element controller.
-         *
-         * @param controller
-         */
-        setController: function (controller) {
+        _createPlainControlButton: function(item) {
             var widget = this;
 
-            if (controller) {
-                controller.activate();
-            }
+            var button = $("<button class='button' type='button'/>");
 
-            if (widget.currentController) {
-                widget.deactivateCurrentController();
-            }
+            button.addClass(item.type);
+            button.addClass('-fn-tool-button');
+            button.data(item);
 
-            widget.currentController = controller;
+            button.attr('title', widget.options.translations[item.type]);
+            // add icon css class
+            button.addClass("icon-" + item.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
+
+            return button;
         },
 
+        _registerControlEvents: function(control,button) {
+            var widget = this;
+            var controlEvents = widget.options.controlEvents;
+
+            var drawControlEvents = control.events;
+            drawControlEvents.register('activate', button, function (e) {
+                widget._trigger('controlActivate', null, e);
+                button.addClass('active');
+            });
+            drawControlEvents.register('deactivate', button, function (e) {
+                widget._trigger('controlDeactivate', null, e);
+                button.removeClass('active');
+            });
+
+            // Map event handler to ol controls
+            $.each(controlEvents, function (eventName, eventHandler) {
+                control[eventName] = eventHandler;
+                drawControlEvents.register(eventName, null, eventHandler);
+            });
+
+        },
         /**
          * Build Navigation
          *
@@ -294,61 +120,76 @@
         buildNavigation: function (buttons) {
             var widget = this;
             var element = $(widget.element);
-            var controls = widget.controls;
-            var controlEvents = widget.options.controlEvents;
+            var controlFactory = widget.controlFactory;
 
             $.each(buttons, function (i, item) {
                 //var item = this;
                 if (!item || !item.hasOwnProperty('type')) {
                     return;
                 }
-                var button = $("<button class='button' type='button'/>");
-                var type = item.type;
+                var button = widget._createPlainControlButton(item);
 
-                button.addClass(item.type);
-                button.data(item);
-
-                if (controls.hasOwnProperty(type)) {
-                    var controlDefinition = controls[type];
-
-                    if (controlDefinition.hasOwnProperty('infoText')) {
-                        button.attr('title', controlDefinition.infoText)
-                    }
-
-                    // add icon css class
-                    button.addClass("icon-" + type.replace(/([A-Z])+/g, '-$1').toLowerCase());
-
-                    if (controlDefinition.hasOwnProperty('cssClass')) {
-                        button.addClass(controlDefinition.cssClass)
-                    }
-
-                    button.on('click', controlDefinition.onClick);
-
-                    if (controlDefinition.hasOwnProperty('control')) {
-                        button.data('control', controlDefinition.control);
-                        widget._activeControls.push(controlDefinition.control);
-
-                        var drawControlEvents = controlDefinition.control.events;
-                        drawControlEvents.register('activate', button, function (e) {
-                            widget._trigger('controlActivate', null, e);
-                            button.addClass('active');
-                        });
-                        drawControlEvents.register('deactivate', button, function (e) {
-                            widget._trigger('controlDeactivate', null, e);
-                            button.removeClass('active');
-                        });
-
-                        // Map event handler to ol controls
-                        $.each(controlEvents, function (eventName, eventHandler) {
-                            controlDefinition.control[eventName] = eventHandler;
-
-                            drawControlEvents.register(eventName, null, eventHandler);
-                        });
-                    }
+                if (controlFactory.hasOwnProperty(item.type)) {
+                    var control = controlFactory[item.type];
+                    button.data('control', control);
+                    widget._registerControlEvents(control,button);
+                    control.layer.map.addControl(control);
                 }
 
                 element.append(button);
             });
+        },
+
+        /**
+         * Activate selected tool
+         *
+         * @param e
+         */
+
+
+        onToolButtonClick: function (e) {
+            var $el = $(e.currentTarget);
+            var control = $el.data('control');
+            var $mapElement = $(control.map.div) || null;
+
+            if (this.toggleControl(control)) {
+                $mapElement.css({cursor: $el.data('control-cursor') || 'crosshair'});
+            } else {
+                $mapElement.css({cursor: 'default'});
+            }
+        },
+
+        /**
+         * Toggle controls and return true if controls turned on
+         *
+         * @param control
+         * @returns {boolean}
+         */
+        toggleControl: function (control) {
+            var newState = this.activeControl !== control;
+            this.deactivateCurrentControl();
+
+            if (newState) {
+                control.activate();
+                this.activeControl = control;
+            }
+            return newState;
+        },
+
+        /**
+         * Deactivate current OpenLayer controls
+         */
+        deactivateCurrentControl: function () {
+            var control = this.activeControl;
+            if (control) {
+                if (control instanceof OpenLayers.Control.SelectFeature) {
+                    control.unselectAll();
+                }
+                $(control.map.div).css({cursor: 'default'});
+                control.deactivate();
+            }
+
+            this.activeControl = null;
         },
 
         /**
@@ -358,45 +199,9 @@
          */
         getLayer: function () {
             return this.options.layer;
-        },
-
-        /**
-         * Get map jQuery HTML element
-         *
-         * @return HTMLElement jquery HTML element
-         */
-        getMapElement: function () {
-            var layer = this.getLayer();
-            return layer ? $(layer.map.div) : null;
-        },
-
-        /**
-         * Has layer?
-         * @return {boolean}
-         */
-        hasLayer: function () {
-            return !!this.getLayer();
-        },
-
-        /**
-         * Deactivate current OpenLayer controller
-         */
-        deactivateCurrentController: function () {
-            var widget = this;
-            var mapElement = widget.getMapElement();
-            var previousController = widget.currentController;
-
-            if (previousController) {
-                if (previousController instanceof OpenLayers.Control.SelectFeature) {
-                    previousController.unselectAll();
-                }
-
-                previousController.deactivate();
-                widget.currentController = null;
-            }
-
-            mapElement.css({cursor: 'default'});
         }
+
+
     });
 
 })(jQuery);
