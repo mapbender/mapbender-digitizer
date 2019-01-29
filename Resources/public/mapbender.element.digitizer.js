@@ -844,6 +844,8 @@
          * @return {jQuery.jqXHR} ajax XHR
          */
         saveFeature: function (feature) {
+            console.log(feature,feature.style);
+
             if (feature.disabled) {
                 return;
             }
@@ -1867,7 +1869,7 @@
             var widget = this;
             var styles = schema.styles ? schema.styles : {};
             for (var k in widget.styles) {
-                styles[k] = new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style[k], styles[k] ? styles[k] : widget.styles[k]));
+                styles[k] = new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style[k], styles[k] || widget.styles[k]));
             }
             return new OpenLayers.StyleMap(styles, {extendDefault: true});
         },
@@ -1911,8 +1913,8 @@
             };
             var styleMap = new OpenLayers.StyleMap({
                 'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), styleContext),
-                'select': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] ? styles['select'] : widget.styles.select), styleContext), //,
-                'selected': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] ? styles['selected'] : widget.styles.selected), styleContext) //,
+                'select': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] || widget.styles.select), styleContext), //,
+                'selected': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] || widget.styles.selected), styleContext) //,
                 // 'invisible':
             }, {extendDefault: true});
 

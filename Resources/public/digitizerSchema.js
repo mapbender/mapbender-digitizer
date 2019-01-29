@@ -16,7 +16,6 @@ var Scheme = OpenLayers.Class({
     dataStoreLink: {},
     showExtendSearchSwitch: false,
     featureType: {},
-    openFormAfterEdit: true,
     zoomScaleDenominator: 500,
     useContextMenu: true,
     toolset: {},
@@ -79,6 +78,7 @@ var Scheme = OpenLayers.Class({
     hooks: null,
     lastRequest: null,
     xhr: null,
+    view: null,
 
     // Layer list names/ids to be refreshed after feature save complete
     refreshLayersAfterFeatureSave: [],
@@ -759,6 +759,7 @@ var Scheme = OpenLayers.Class({
                     //}
 
                     olFeature.isNew = true;
+
                     olFeature.attributes = olFeature.data = properties;
                     olFeature.layer = layer;
                     olFeature.schema = schema;
