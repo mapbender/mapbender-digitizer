@@ -7,7 +7,7 @@
      * @type {RegExp}
      */
     var translationReg = /^trans:\w+\.(\w|-|\.{1}\w+)+\w+$/;
-    q
+
     /**
      * Escape HTML chars
      * @returns {string}
