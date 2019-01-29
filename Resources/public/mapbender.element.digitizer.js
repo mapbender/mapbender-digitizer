@@ -7,8 +7,7 @@
      * @type {RegExp}
      */
     var translationReg = /^trans:\w+\.(\w|-|\.{1}\w+)+\w+$/;
-
-
+    q
     /**
      * Escape HTML chars
      * @returns {string}
@@ -844,7 +843,6 @@
          * @return {jQuery.jqXHR} ajax XHR
          */
         saveFeature: function (feature) {
-            console.log(feature,feature.style);
 
             if (feature.disabled) {
                 return;
