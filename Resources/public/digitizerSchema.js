@@ -38,6 +38,7 @@ var Scheme = OpenLayers.Class({
     search: null,
 
     initialize: function (options) {
+        /** @type {Scheme} */
         var schema = this;
         schema.displayClass = this.CLASS_NAME;
 
@@ -60,6 +61,7 @@ var Scheme = OpenLayers.Class({
      */
 
     _highlightSchemaFeature: function (feature, highlight) {
+        /** @type {Scheme} */
         var schema = this;
         var table = schema.table;
         var tableWidget = table.data('visUiJsResultTable');
@@ -155,6 +157,7 @@ var Scheme = OpenLayers.Class({
      */
 
     _addSelectControl: function (layer) {
+        /** @type {Scheme} */
         var schema = this;
         var widget = this.widget;
         var map = widget.map;
@@ -210,6 +213,7 @@ var Scheme = OpenLayers.Class({
 
 
     activateSchema: function () {
+        /** @type {Scheme} */
         var schema = this;
         var widget = this.widget;
         var frame = schema.frame;
@@ -234,6 +238,7 @@ var Scheme = OpenLayers.Class({
     },
 
     deactivateSchema: function () {
+        /** @type {Scheme} */
         var schema = this;
         var widget = this.widget;
         var frame = schema.frame;
@@ -257,6 +262,7 @@ var Scheme = OpenLayers.Class({
 
 
     _generateSearchForm: function (frame) {
+        /** @type {Scheme} */
         var schema = this;
         var widget = this.widget;
         var searchForm = $('form.search', frame);
@@ -351,7 +357,7 @@ var Scheme = OpenLayers.Class({
 
 
     _buildSelectOptions: function () {
-
+        /** @type {Scheme} */
         var schema = this;
         var schemaName = schema.schemaName;
         var widget = schema.widget;
@@ -391,6 +397,7 @@ var Scheme = OpenLayers.Class({
 
     _generateResultDataTable: function(frame) {
 
+        /** @type {Scheme} */
         var schema = this;
         var widget = schema.widget;
         var options = widget.options;
@@ -399,8 +406,9 @@ var Scheme = OpenLayers.Class({
 
         if (schema.allowLocate || true) {
             buttons.push({
-                title: 'Hineinzoomen',
-                className: 'fa fa-crosshairs',
+                title: Mapbender.digitizer_translate('feature.zoom'),
+                className: 'zoom',
+                cssClass: 'fa fa-crosshairs',
                 onClick: function (olFeature, ui) {
                     widget.zoomToJsonFeature(olFeature);
                 }
@@ -409,8 +417,9 @@ var Scheme = OpenLayers.Class({
 
         if (schema.allowSave || true) {
             buttons.push({
-                title: Mapbender.digitizer_translate('feature.savesave'),
-                className: 'fa fa-floppy-o',
+                title: Mapbender.digitizer_translate('feature.save'),
+                className: 'save',
+                cssClass: ' fa fa-floppy-o',
                 onClick: function (olFeature, ui) {
                     widget.saveFeature(olFeature);
                 }
@@ -497,20 +506,9 @@ var Scheme = OpenLayers.Class({
                 }
             });
         }
-        // if(true) {
-        //     buttons.push({
-        //         title:     Mapbender.digitizer_translate("feature.remove.title"),
-        //         className: 'remove',
-        //         cssClass:  'critical',
-        //         onClick:   function(olFeature, ui) {
-        //             widget.removeFeature(olFeature);
-        //         }
-        //     });
-        // }
 
 
         var columns = [];
-        //var newFeatureDefaultProperties = {};
 
         if (!schema.hasOwnProperty("tableFields")) {
 
@@ -538,7 +536,6 @@ var Scheme = OpenLayers.Class({
         }
 
         $.each(schema.tableFields, function (fieldName, fieldSettings) {
-            //newFeatureDefaultProperties[fieldName] = "";
             fieldSettings.title = fieldSettings.label;
             if (!fieldSettings.data) {
                 fieldSettings.data = function (row, type, val, meta) {
@@ -555,6 +552,7 @@ var Scheme = OpenLayers.Class({
             }
             columns.push(fieldSettings);
         });
+
 
         var resultTableSettings = {
             lengthChange: false,
@@ -602,6 +600,7 @@ var Scheme = OpenLayers.Class({
 
 
     _generateToolSetView: function(frame) {
+        /** @type {Scheme} */
         var schema = this;
         var widget = schema.widget;
         var layer = schema.layer;
@@ -850,6 +849,7 @@ var Scheme = OpenLayers.Class({
      * @returns {{}}
      */
     initialFormData: function (feature) {
+        /** @type {Scheme} */
         var schema = this;
         var formData = {};
 
