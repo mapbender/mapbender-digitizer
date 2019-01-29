@@ -937,7 +937,8 @@
 
                     dialog && dialog.enableForm();
                     feature.disabled = false;
-                    feature.oldGeom = false;
+                    //feature.oldGeom = false;
+                    feature.isDragged = false;
                     dialog && dialog.popupDialog('close');
 
                     this.feature = feature;
@@ -2598,12 +2599,11 @@
             if(eventData.origin === 'cancel-button'){
                 this.currentPopup.popupDialog('close');
             }
-            if(!feature.hasOwnProperty('isNew') && feature.hasOwnProperty("oldGeom")){
-
-
-                feature.geometry.x =  feature.oldGeom.x;
-                feature.geometry.y =  feature.oldGeom.y;
-
+            //if(!feature.hasOwnProperty('isNew') && feature.hasOwnProperty("oldGeom")){
+            if(!feature.isNew && feature.isDragged){
+                //
+                // feature.geometry.x =  feature.oldGeom.x;
+                // feature.geometry.y =  feature.oldGeom.y;
 
                 var layer = feature.layer || widget.currentSchema.layer;
 

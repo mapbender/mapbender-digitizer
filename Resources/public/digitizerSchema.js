@@ -694,7 +694,9 @@ var Scheme = OpenLayers.Class({
                     /**@type {Scheme} */
                     var schema = feature.schema;
                     var preventDefault = false;
-                    feature.oldGeom = {x: feature.geometry.x, y: feature.geometry.y};
+
+                    //feature.oldGeom = {x: feature.geometry.x, y: feature.geometry.y};
+                    feature.isDragged = true;
                     if (!schema.hooks || !schema.hooks.onStart) {
                         return;
                     }
