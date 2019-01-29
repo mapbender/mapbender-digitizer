@@ -259,9 +259,11 @@ var Scheme = OpenLayers.Class({
     _generateSearchForm: function (frame) {
         var schema = this;
         var widget = this.widget;
+        var searchForm = $('form.search', frame);
+
+
         // If searching defined, then try to generate a form
         if (schema.search) {
-            var searchForm;
             if (schema.search.form) {
 
                 var foreachItemTree = function (items, callback) {
@@ -320,8 +322,6 @@ var Scheme = OpenLayers.Class({
                 });
             }
 
-            searchForm = $('form.search', frame);
-
             var onSubmitSearch = function (e) {
                 schema.search.request = searchForm.formData();
                 var xhr = widget._getData();
@@ -373,7 +373,7 @@ var Scheme = OpenLayers.Class({
 
         frame.append('<div style="clear:both;"/>');
 
-        schema._generateResultDataTable(frame,option);
+        schema._generateResultDataTable(frame);
 
         frame.css('display', 'none');
 
