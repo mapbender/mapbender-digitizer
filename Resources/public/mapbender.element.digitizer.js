@@ -224,54 +224,7 @@
      * @copyright 20.04.2015 by WhereGroup GmbH & Co. KG
      */
     $.widget("mapbender.mbDigitizer", {
-        options: {
-            // Default option values
-            allowDigitize: true,
-            allowDelete: true,
-            allowSave: true,
-            allowEditData: true,
-            allowCustomerStyle: false,
-            allowChangeVisibility: false,
-            allowDeleteByCancelNewGeometry: false,
-            allowCancelButton: true,
-            allowLocate: false,
-            showVisibilityNavigation: false,
-            allowPrintMetadata: false,
-
-            // Copy data
-            copy: {
-                enable: false,
-                rules: [],
-                data: {},
-                style: {
-                    strokeWidth: 5,
-                    fillColor: "#f7ef7e",
-                    strokeColor: '#4250b5',
-                    fillOpacity: 0.7,
-                    graphicZIndex: 15
-                }
-            },
-
-            // Save data
-            save: {}, // pop a confirmation dialog when deactivating, to ask the user to save or discard
-            // current in-memory changes
-            confirmSaveOnDeactivate: true,
-            openFormAfterEdit: true,
-            maxResults: 5001,
-            pageLength: 10,
-            oneInstanceEdit: true,
-            searchType: "currentExtent",
-            inlineSearch: false,
-            useContextMenu: false,
-
-            // Layer list names/ids to be refreshed after feature save complete
-            refreshLayersAfterFeatureSave: [],
-
-            clustering: [{
-                scale: 5000000,
-                distance: 30
-            }]
-        }, // Default tool-sets
+       // Default tool-sets
         toolsets: {
             point: [
 

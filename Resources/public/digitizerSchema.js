@@ -6,6 +6,7 @@ var Scheme = OpenLayers.Class({
     table: null,
     label: '',
     layer: null,
+    widget: null,
     frame: null,
     inlineSearch: true,
     maxResults: 500,
@@ -13,22 +14,12 @@ var Scheme = OpenLayers.Class({
     dataStore: null,
     dataStoreLink: {},
     showExtendSearchSwitch: false,
-    allowLocate: false,
-    allowSave: true,
-    allowEditData: true,
-    copy: {},
-    allowCustomerStyle: false,
-    allowChangeVisibility: false,
-    allowPrintMetadata: false,
-    allowDelete: false,
-    showExtendSearchSwitch: false,
     featureType: {},
     openFormAfterEdit: true,
     zoomScaleDenominator: 500,
     useContextMenu: true,
     toolset: {},
     popup: {},
-    searchType: 'currentExtent',
     tableFields: {},
     style: {},
     formItems: {},
@@ -36,6 +27,53 @@ var Scheme = OpenLayers.Class({
     selectControl: null,
     featureStyles: null,
     search: null,
+    eventListeners: null,
+
+    allowDigitize: true,
+    allowDelete: true,
+    allowSave: true,
+    allowEditData: true,
+    allowCustomerStyle: false,
+    allowChangeVisibility: false,
+    allowDeleteByCancelNewGeometry: false,
+    allowCancelButton: true,
+    allowLocate: false,
+    showVisibilityNavigation: false,
+    allowPrintMetadata: false,
+
+    // Copy data
+    copy: {
+        enable: false,
+        rules: [],
+        data: {},
+        style: {
+            strokeWidth: 5,
+            fillColor: "#f7ef7e",
+            strokeColor: '#4250b5',
+            fillOpacity: 0.7,
+            graphicZIndex: 15
+        }
+    },
+
+    // Save data
+    save: {}, // pop a confirmation dialog when deactivating, to ask the user to save or discard
+    // current in-memory changes
+    confirmSaveOnDeactivate: true,
+    openFormAfterEdit: true,
+    maxResults: 5001,
+    pageLength: 10,
+    oneInstanceEdit: true,
+    searchType: "currentExtent",
+    inlineSearch: false,
+    useContextMenu: false,
+
+    // Layer list names/ids to be refreshed after feature save complete
+    refreshLayersAfterFeatureSave: [],
+
+    clustering: [{
+        scale: 5000000,
+        distance: 30
+    }],
 
     initialize: function (options) {
         /** @type {Scheme} */
@@ -261,99 +299,6 @@ var Scheme = OpenLayers.Class({
     },
 
 
-    _generateSearchForm: function (frame) {
-        /** @type {Scheme} */
-        var schema = this;
-        var widget = this.widget;
-        var searchForm = $('form.search', frame);
-
-
-        // If searching defined, then try to generate a form
-        if (schema.search) {
-            if (schema.search.form) {
-
-                var foreachItemTree = function (items, callback) {
-                    _.each(items, function (item) {
-                        callback(item);
-                        if (item.children && $.isArray(item.children)) {
-                            foreachItemTree(item.children, callback);
-                        }
-                    })
-                };
-                var elementUrl = widget.elementUrl;
-                // $.fn.select2.defaults.set('amdBase', 'select2/');
-                // $.fn.select2.defaults.set('amdLanguageBase', 'select2/dist/js/i18n/');
-
-                foreachItemTree(schema.search.form, function (item) {
-
-                    if (item.type && item.type === 'select') {
-                        if (item.ajax) {
-
-                            // Hack to get display results as an HTML
-                            item.escapeMarkup = function (m) {
-                                return m;
-                            };
-                            // Replace auto-complete results with required key word
-                            item.templateResult = function (d, selectDom, c) {
-                                var html = d && d.text ? d.text : '';
-                                if (d && d.id && d.text) {
-                                    // Highlight results
-                                    html = d.text.replace(new RegExp(ajax.lastTerm, "gmi"), '<span style="background-color: #fffb67;">\$&</span>');
-                                }
-                                return html;
-                            };
-                            var ajax = item.ajax;
-                            ajax.dataType = 'json';
-                            ajax.url = elementUrl + 'form/select';
-                            ajax.data = function (params) {
-                                if (params && params.term) {
-                                    // Save last given term to get highlighted in templateResult
-                                    ajax.lastTerm = params.term;
-                                }
-                                return {
-                                    schema: schema.schemaName,
-                                    item: item,
-                                    form: searchForm.formData(),
-                                    params: params
-                                };
-                            };
-
-                        }
-                    }
-                });
-                frame.generateElements({
-                    type: 'form',
-                    cssClass: 'search',
-                    children: schema.search.form
-                });
-            }
-
-            var onSubmitSearch = function (e) {
-                schema.search.request = searchForm.formData();
-                var xhr = widget._getData();
-                if (xhr) {
-                    xhr.done(function () {
-                        var olMap = widget.getMap();
-                        olMap.zoomToExtent(layer.getDataExtent());
-
-                        if (schema.search.hasOwnProperty('zoomScale')) {
-                            olMap.zoomToScale(schema.search.zoomScale, true);
-                        }
-                    });
-                }
-                return false;
-            };
-
-            searchForm
-                .on('submit', onSubmitSearch)
-                .find(' :input')
-                .on('change', onSubmitSearch);
-        }
-
-        if (!schema.showExtendSearchSwitch) {
-            $(".onlyExtent", frame).css('display', 'none');
-        }
-    },
 
 
     _buildSelectOptions: function () {
@@ -598,6 +543,99 @@ var Scheme = OpenLayers.Class({
         frame.append(table);
     },
 
+    _generateSearchForm: function (frame) {
+        /** @type {Scheme} */
+        var schema = this;
+        var widget = this.widget;
+        var searchForm = $('form.search', frame);
+
+
+        // If searching defined, then try to generate a form
+        if (schema.search) {
+            if (schema.search.form) {
+
+                var foreachItemTree = function (items, callback) {
+                    _.each(items, function (item) {
+                        callback(item);
+                        if (item.children && $.isArray(item.children)) {
+                            foreachItemTree(item.children, callback);
+                        }
+                    })
+                };
+                var elementUrl = widget.elementUrl;
+                // $.fn.select2.defaults.set('amdBase', 'select2/');
+                // $.fn.select2.defaults.set('amdLanguageBase', 'select2/dist/js/i18n/');
+
+                foreachItemTree(schema.search.form, function (item) {
+
+                    if (item.type && item.type === 'select') {
+                        if (item.ajax) {
+
+                            // Hack to get display results as an HTML
+                            item.escapeMarkup = function (m) {
+                                return m;
+                            };
+                            // Replace auto-complete results with required key word
+                            item.templateResult = function (d, selectDom, c) {
+                                var html = d && d.text ? d.text : '';
+                                if (d && d.id && d.text) {
+                                    // Highlight results
+                                    html = d.text.replace(new RegExp(ajax.lastTerm, "gmi"), '<span style="background-color: #fffb67;">\$&</span>');
+                                }
+                                return html;
+                            };
+                            var ajax = item.ajax;
+                            ajax.dataType = 'json';
+                            ajax.url = elementUrl + 'form/select';
+                            ajax.data = function (params) {
+                                if (params && params.term) {
+                                    // Save last given term to get highlighted in templateResult
+                                    ajax.lastTerm = params.term;
+                                }
+                                return {
+                                    schema: schema.schemaName,
+                                    item: item,
+                                    form: searchForm.formData(),
+                                    params: params
+                                };
+                            };
+
+                        }
+                    }
+                });
+                frame.generateElements({
+                    type: 'form',
+                    cssClass: 'search',
+                    children: schema.search.form
+                });
+            }
+
+            var onSubmitSearch = function (e) {
+                schema.search.request = searchForm.formData();
+                var xhr = widget._getData();
+                if (xhr) {
+                    xhr.done(function () {
+                        var olMap = widget.getMap();
+                        olMap.zoomToExtent(layer.getDataExtent());
+
+                        if (schema.search.hasOwnProperty('zoomScale')) {
+                            olMap.zoomToScale(schema.search.zoomScale, true);
+                        }
+                    });
+                }
+                return false;
+            };
+
+            searchForm
+                .on('submit', onSubmitSearch)
+                .find(' :input')
+                .on('change', onSubmitSearch);
+        }
+
+        if (!schema.showExtendSearchSwitch) {
+            $(".onlyExtent", frame).css('display', 'none');
+        }
+    },
 
     _generateToolSetView: function(frame) {
         /** @type {Scheme} */
