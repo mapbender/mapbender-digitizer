@@ -358,7 +358,6 @@ var Scheme = OpenLayers.Class({
         var options = widget.options;
         var element = $(widget.element);
         var selector = widget.selector;
-        var option = $("<option/>");
         var layer = schema.layer;
 
         // Merge settings with default values from options
@@ -381,16 +380,18 @@ var Scheme = OpenLayers.Class({
         frame.data("schemaSettings", schema);
 
         element.append(frame);
+
+        var option = $("<option/>");
+        option.val(schemaName).html(schema.label);
         option.data("schemaSettings", schema);
         selector.append(option);
 
         schema._addSelectControl(layer);
     },
 
-    _generateResultDataTable: function(frame,option) {
+    _generateResultDataTable: function(frame) {
 
         var schema = this;
-        var schemaName = schema.schemaName;
         var widget = schema.widget;
         var options = widget.options;
         var buttons = [];
@@ -507,7 +508,6 @@ var Scheme = OpenLayers.Class({
         //     });
         // }
 
-        option.val(schemaName).html(schema.label);
 
         var columns = [];
         //var newFeatureDefaultProperties = {};
