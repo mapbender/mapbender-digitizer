@@ -43,6 +43,13 @@ var Scheme = OpenLayers.Class({
     allowPrintMetadata: false,
     printable: false,
     dataItems: null,
+    isClustered: false,
+    clusterStrategy: null,
+    styles: {},
+    maxScale: null,
+    minScale: null,
+    group: null,
+    displayOnInactive: false,
 
     // Copy data
     copy: {
@@ -69,6 +76,9 @@ var Scheme = OpenLayers.Class({
     searchType: "currentExtent",
     inlineSearch: false,
     useContextMenu: false,
+    hooks: null,
+    lastRequest: null,
+    xhr: null,
 
     // Layer list names/ids to be refreshed after feature save complete
     refreshLayersAfterFeatureSave: [],
@@ -266,7 +276,7 @@ var Scheme = OpenLayers.Class({
 
         widget.activeLayer = schema.layer;
         widget.schemaName = schema.schemaName;
-        widget.currentSettings = schema;
+        widget.currentSchema = schema;
 
         widget.query('style/list', {schema: schema.schemaName}).done(function (r) {
             schema.featureStyles = r.featureStyles;
@@ -679,8 +689,8 @@ var Scheme = OpenLayers.Class({
                 onStart: function (feature, px) {
 
                     var control = this;
+                    /**@type {Scheme} */
                     var schema = feature.schema;
-                    var attributes = feature.attributes;
                     var preventDefault = false;
                     feature.oldGeom = {x: feature.geometry.x, y: feature.geometry.y};
                     if (!schema.hooks || !schema.hooks.onStart) {

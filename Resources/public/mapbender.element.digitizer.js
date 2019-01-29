@@ -241,7 +241,7 @@
             ]
         },
         map: null,
-        currentSettings: null,
+        currentSchema: null,
         featureEditDialogWidth: "423px",
         unsavedFeatures: {},
 
@@ -345,7 +345,7 @@
                 .featureStyleEditor(styleOptions)
                 .bind('featurestyleeditorsubmit', function (e, context) {
                     var styleData = styleEditor.formData();
-                    var schemaName = widget.currentSettings.schemaName;
+                    var schemaName = widget.currentSchema.schemaName;
                     styleEditor.disableForm();
                     widget._applyStyle(styleData, olFeature);
                     if (olFeature.fid) {
@@ -467,13 +467,13 @@
                 selector: 'div',
                 events: {
                     show: function (options) {
-                        var schema = widget.currentSettings;
+                        var schema = widget.currentSchema;
                         return schema.useContextMenu;
                     }
                 },
                 build: function (trigger, e) {
                     var items = {};
-                    var schema = widget.currentSettings;
+                    var schema = widget.currentSchema;
                     var feature = schema.layer.getFeatureFromEvent(e);
                     var features;
 
@@ -676,11 +676,11 @@
 
                 widget._trigger("beforeChangeDigitizing", null, {
                     next: schema,
-                    previous: widget.currentSettings
+                    previous: widget.currentSchema
                 });
 
-                if (widget.currentSettings) {
-                    widget.currentSettings.deactivateSchema();
+                if (widget.currentSchema) {
+                    widget.currentSchema.deactivateSchema();
                 }
 
                 schema.activateSchema();
@@ -1117,7 +1117,7 @@
                 });
             }
 
-            DataUtil.eachItem(widget.currentSettings.formItems, function (item) {
+            DataUtil.eachItem(widget.currentSchema.formItems, function (item) {
 
                 if (item.type === "resultTable" && item.editable && !item.isProcessed) {
                     var onCreateClick;
@@ -1384,7 +1384,7 @@
             olFeature.editDialog = dialog;
 
             if (!schema.elementsTranslated) {
-                translateStructure(widget.currentSettings.formItems);
+                translateStructure(widget.currentSchema.formItems);
                 schema.elementsTranslated = true;
             }
 
@@ -1393,7 +1393,7 @@
             dialog.data('feature', olFeature);
             dialog.data('digitizerWidget', widget);
 
-            var formItems = widget.currentSettings.formItems;
+            var formItems = widget.currentSchema.formItems;
 
             // If pop up isn't defined, generate inputs
             if (!_.size(formItems)) {
@@ -1466,7 +1466,7 @@
 
                         } else {
                             data.item = item;
-                            data = [data];
+                            //data = [data];
                         }
 
                         var tableApi = $(table).resultTable('getApi');
@@ -1577,7 +1577,7 @@
         _getData: function (schema) {
 
             var widget = this;
-            schema = schema || widget.currentSettings;
+            schema = schema || widget.currentSchema;
 
             var map = widget.map;
             var projection = map.getProjectionObject();
@@ -1593,25 +1593,25 @@
                 request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
             }
 
-            switch (schema.searchType) {
-                case  "currentExtent":
-                    if (schema.hasOwnProperty("lastBbox")) {
-                        var bbox = extent.toGeometry().getBounds();
-                        var lastBbox = schema.lastBbox;
-
-                        var topDiff = bbox.top - lastBbox.top;
-                        var leftDiff = bbox.left - lastBbox.left;
-                        var rightDiff = bbox.right - lastBbox.right;
-                        var bottomDiff = bbox.bottom - lastBbox.bottom;
-
-                        var sidesChanged = {
-                            left: leftDiff < 0,
-                            bottom: bottomDiff < 0,
-                            right: rightDiff > 0,
-                            top: topDiff > 0
-                        };
-                    }
-            }
+            // switch (schema.searchType) {
+            //     case  "currentExtent":
+            //         if (schema.hasOwnProperty("lastBbox")) {
+            //             var bbox = extent.toGeometry().getBounds();
+            //             var lastBbox = schema.lastBbox;
+            //
+            //             var topDiff = bbox.top - lastBbox.top;
+            //             var leftDiff = bbox.left - lastBbox.left;
+            //             var rightDiff = bbox.right - lastBbox.right;
+            //             var bottomDiff = bbox.bottom - lastBbox.bottom;
+            //
+            //             // var sidesChanged = {
+            //             //     left: leftDiff < 0,
+            //             //     bottom: bottomDiff < 0,
+            //             //     right: rightDiff > 0,
+            //             //     top: topDiff > 0
+            //             // };
+            //         }
+            // }
 
             // Only if search is defined
             if (schema.search) {
@@ -1694,22 +1694,23 @@
          */
         _highlightFeature: function (feature, highlight) {
 
-            if (!feature || (feature && !feature.layer)) {
-                return;
-            }
-
-            if (feature.renderIntent && feature.renderIntent == 'invisible') {
-                return;
-            }
-
             var layer = feature.layer;
-            var isFeatureVisible = _.contains(feature.layer.features, feature);
+
+            if (!feature || !layer) {
+                return;
+            }
+
+            if (feature.renderIntent && feature.renderIntent === 'invisible') {
+                return;
+            }
+
+            var isFeatureVisible = _.contains(layer.features, feature);
             var features = [];
 
             if (isFeatureVisible) {
                 features.push(feature);
             } else {
-                _.each(feature.layer.features, function (_feature) {
+                _.each(layer.features, function (_feature) {
                     if (_feature.cluster && _.contains(_feature.cluster, feature)) {
                         features.push(_feature);
                         return false;
@@ -1748,7 +1749,7 @@
         /**
          * Zoom to JSON feature
          *
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
+         * @param {(OpenLayers.Feature.Vector)} feature
          */
         zoomToJsonFeature: function (feature) {
 
@@ -1758,9 +1759,10 @@
 
             var widget = this;
             var olMap = widget.getMap();
-            var schema = feature.schema ? feature.schema : widget.findFeatureSchema(feature);
+            var schema = feature.schema || widget.findFeatureSchema(feature);
+            var geometry = feature.geometry;
 
-            olMap.zoomToExtent(feature.geometry.getBounds());
+            olMap.zoomToExtent(geometry.getBounds());
             if (schema.hasOwnProperty('zoomScaleDenominator')) {
                 olMap.zoomToScale(schema.zoomScaleDenominator, true);
             }
@@ -1799,7 +1801,6 @@
             var widget = this;
             var options = widget.options;
             var scale = Math.round(widget.map.getScale());
-            var map = widget.map;
             var clusterSettings;
             var closestClusterSettings;
 
@@ -2100,7 +2101,7 @@
 
             var widget = this;
             var geoJsonReader = new OpenLayers.Format.GeoJSON();
-            var currentExtentOnly = schema.searchType == "currentExtent";
+            var currentExtentOnly = schema.searchType === "currentExtent";
             var layer = schema.layer;
             var map = layer.map;
             var extent = map.getExtent();
@@ -2120,7 +2121,7 @@
 
             var _features = _.union(newUniqueFeatures, visibleFeatures);
 
-            if (schema.group && schema.group == "all") {
+            if (schema.group && schema.group === "all") {
                 _features = geoJsonReader.read({
                     type: "FeatureCollection",
                     features: featureCollection.features
@@ -2223,7 +2224,7 @@
 
             // Post handling
             var nodes = tableApi.rows(function (idx, data, row) {
-                var isInvisible = data.renderIntent == 'invisible';
+                var isInvisible = data.renderIntent === 'invisible';
                 if (isInvisible) {
                     var $row = $(row);
                     var visibilityButton = $row.find('.button.icon-visibility');
@@ -2342,12 +2343,12 @@
             });
 
             /*   if(!schema.elementsTranslated) {
-             translateStructure(widget.currentSettings.formItems);
+             translateStructure(widget.currentSchema.formItems);
              schema.elementsTranslated = true;
              } */
 
-            DataUtil.eachItem(widget.currentSettings.formItems, function (item) {
-                if (item.type == "file") {
+            DataUtil.eachItem(widget.currentSchema.formItems, function (item) {
+                if (item.type === "file") {
                     item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + dataItem.fid + "&field=" + item.name;
                     if (item.hasOwnProperty("name") && dataItem.data.hasOwnProperty(item.name) && dataItem.data[item.name]) {
                         item.dbSrc = dataItem.data[item.name];
@@ -2364,7 +2365,7 @@
 
                 }
 
-                if (item.type == 'image') {
+                if (item.type === 'image') {
 
                     if (!item.origSrc) {
                         item.origSrc = item.src;
@@ -2559,7 +2560,7 @@
                 });
 
                 widget.options.__disabled = false;
-                widget.currentSettings.activateSchema();
+                widget.currentSchema.activateSchema();
 
 
             })
@@ -2569,12 +2570,11 @@
         deactivate: function () {
             var widget = this;
             // clear unsaved features to prevent multiple confirmation popups
-            var unsavedFeatures = widget.unsavedFeatures;
             widget.unsavedFeatures = {};
             var always = function () {
                 widget.options.__disabled = true;
-                if (!widget.currentSettings.displayOnInactive) {
-                    widget.currentSettings.deactivateSchema();
+                if (!widget.currentSchema.displayOnInactive) {
+                    widget.currentSchema.deactivateSchema();
                 }
             };
             always()
@@ -2604,7 +2604,7 @@
                 feature.geometry.y =  feature.oldGeom.y;
 
 
-                var layer = feature.layer || widget.currentSettings.layer;
+                var layer = feature.layer || widget.currentSchema.layer;
 
                 if (layer) {
                     layer.redraw();
