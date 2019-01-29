@@ -164,7 +164,7 @@
     function translateStructure(items) {
         var isArray = items instanceof Array;
         for (var k in items) {
-            if (isArray || k == "children") {
+            if (isArray || k === "children") {
                 translateStructure(items[k]);
             } else {
                 if (typeof items[k] == "string" && items[k].match(translationReg)) {
@@ -2625,7 +2625,6 @@
          */
 
         refreshConnectedDigitizerFeatures : function(featureTypeName){
-            var schema = {};
             $(".mb-element-digitizer").not(".mb-element-data-manager").each(function(index,element){
                 var digitzer = $(element).data("mapbenderMbDigitizer");
                 var schemes = digitzer.options.schemes;
