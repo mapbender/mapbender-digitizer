@@ -112,12 +112,13 @@ var Scheme = OpenLayers.Class({
      */
 
     _highlightSchemaFeature: function (feature, highlight) {
+
         /** @type {Scheme} */
         var schema = this;
         var table = schema.table;
         var tableWidget = table.data('visUiJsResultTable');
         var isSketchFeature = !feature.cluster && feature._sketch && _.size(feature.data) === 0;
-        var features = feature.cluster ? feature.cluster : [feature];
+        var features = feature.cluster || [feature];
         var layer = feature.layer;
         var domRow;
 
@@ -523,17 +524,18 @@ var Scheme = OpenLayers.Class({
             selectable: false,
             autoWidth: false,
             columns: columns,
-            buttons: buttons
+            buttons: buttons,
+            oLanguage: options.tableTranslation || null
 
         };
 
-        if (_.size(buttons)) {
-            resultTableSettings.buttons = buttons;
-        }
+        // if (_.size(buttons)) {
+        //     resultTableSettings.buttons = buttons;
+        // }
 
-        if (options.tableTranslation) {
-            resultTableSettings.oLanguage = options.tableTranslation;
-        }
+        // if (options.tableTranslation) {
+        //     resultTableSettings.oLanguage = options.tableTranslation;
+        // }
 
         if (schema.view && schema.view.settings) {
             _.extend(resultTableSettings, schema.view.settings);
@@ -758,13 +760,13 @@ var Scheme = OpenLayers.Class({
                     //    return false;
                     //}
 
+
                     olFeature.isNew = true;
 
                     olFeature.attributes = olFeature.data = properties;
                     olFeature.layer = layer;
                     olFeature.schema = schema;
 
-                    //widget.reloadFeatures(layer);
                     layer.redraw();
 
                     digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");

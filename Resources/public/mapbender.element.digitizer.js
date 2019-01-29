@@ -1913,9 +1913,8 @@
             };
             var styleMap = new OpenLayers.StyleMap({
                 'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), styleContext),
-                'select': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] || widget.styles.select), styleContext), //,
-                'selected': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] || widget.styles.selected), styleContext) //,
-                // 'invisible':
+                'select': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] || widget.styles.select), styleContext),
+                'selected': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] || widget.styles.selected), styleContext),
             }, {extendDefault: true});
 
             styleMap.styles.invisible = new OpenLayers.Style({
