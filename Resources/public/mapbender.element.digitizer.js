@@ -400,6 +400,7 @@
 
         /**
          * Open change style dialog
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
          * @returns {*}
          */
         openChangeStyleDialog: function (olFeature) {
@@ -407,12 +408,11 @@
             var layer = olFeature.layer;
             var styleMap = layer.options.styleMap;
             var styles = styleMap.styles;
-            var defaultStyleData = olFeature.style ? olFeature.style : _.extend({}, styles["default"].defaultStyle);
+            var defaultStyleData = olFeature.style || _.extend({}, styles["default"].defaultStyle);
 
             if (olFeature.styleId) {
                 _.extend(defaultStyleData, styles[olFeature.styleId].defaultStyle);
             }
-
             var styleOptions = {
                 data: defaultStyleData,
                 commonTab: false
@@ -445,6 +445,13 @@
                 });
             return styleEditor;
         },
+
+        /**
+         *
+         * @param styleData
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
+         * @private
+         */
         _applyStyle: function (styleData, olFeature) {
             var style = new OpenLayers.Style(styleData);
             var styleMap = olFeature.layer.options.styleMap;
@@ -457,6 +464,15 @@
                 delete styleMap.styles[oldStyleId];
             }
         },
+        /**
+         *
+         * @param schemaName
+         * @param styleData
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
+         * @returns {*|xhr}
+         * @private
+         */
+
         _saveStyle: function (schemaName, styleData, olFeature) {
             return this.query('style/save', {
                 style: styleData,
@@ -830,7 +846,7 @@
         /**
          * Copy feature
          *
-         * @param {OpenLayers.Feature.Vector} feature
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
          */
         copyFeature: function (feature) {
             var widget = this;
@@ -897,7 +913,7 @@
         /**
          * On save button click
          *
-         * @param {OpenLayers.Feature} feature OpenLayers feature
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature OpenLayers feature
          * @private
          * @return {jQuery.jqXHR} ajax XHR
          */
@@ -1027,7 +1043,7 @@
 
         /**
          *
-         * @param olFeature
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
          * @private
          */
 
@@ -1149,9 +1165,9 @@
 
         /**
          *
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
          * @private
          */
-
         _processCurrentFormItemsWithDataManager : function(olFeature) {
             var widget = this;
 
@@ -1412,7 +1428,7 @@
         /**
          * Open edit feature dialog
          *
-         * @param olFeature open layer feature
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature open layer feature
          * @private
          */
         _openFeatureEditDialog: function (olFeature) {
@@ -1625,8 +1641,11 @@
         /**
          * Analyse changed bounding box geometrie and load features as FeatureCollection.
          *
+         * @param {Scheme} schema
+         * @returns {*}
          * @private
          */
+
         _getData: function (schema) {
 
             var widget = this;
@@ -1739,19 +1758,9 @@
 
 
         /**
-         * Highlight schema feature on the map and table view
-         *
-         * @param {object} schema
-         * @param {OpenLayers.Feature} feature
-         * @param {boolean} highlight
-         * @private
-         */
-
-
-        /**
          * Highlight feature on the map
          *
-         * @param {OpenLayers.Feature} feature
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
          * @param {boolean} highlight
          * @private
          */
@@ -1811,7 +1820,7 @@
         /**
          * Zoom to JSON feature
          *
-         * @param {OpenLayers.Feature} feature
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
          */
         zoomToJsonFeature: function (feature) {
 
@@ -1832,7 +1841,7 @@
         /**
          * Open feature edit dialog
          *
-         * @param {OpenLayers.Feature} feature
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
          */
         exportGeoJson: function (feature) {
             var widget = this;
@@ -1937,7 +1946,7 @@
         /**
          * Find olFeature schema by olFeature data
          *
-         * @param olFeature
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
          * @returns {*}
          */
         findFeatureSchema: function (olFeature) {
@@ -1949,7 +1958,7 @@
         /**
          * Create vector feature layer
          *
-         * @param schema
+         * @param {Scheme} schema
          * @returns {OpenLayers.Layer.Vector}
          */
         createSchemaFeatureLayer: function (schema) {
@@ -2039,7 +2048,7 @@
          *
          * @version 0.2
          * @returns {*}
-         * @param  {OpenLayers.Feature} olFeature
+         * @param  {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
          */
         removeFeature: function (olFeature) {
             var widget = this;
@@ -2144,8 +2153,8 @@
         /**
          * Handle feature collection by ajax response.
          *
-         * @param featureCollection FeatureCollection
-         * @param schema
+         * @param {FeatureCollection} featureCollection
+         * @param {Scheme} schema
          * @param xhr ajax request object
          * @private
          * @version 0.2
@@ -2226,7 +2235,8 @@
          * Reload or replace features from the layer and feature table
          * - Fix OpenLayer bug by clustered features.
          *
-         * @param layer
+         * @param {(OpenLayers.Layer | OpenLayers.Layer.Vector)} layer
+         * @param _features
          * @version 0.2
          */
         reloadFeatures: function (layer, _features) {
@@ -2301,7 +2311,7 @@
          *
          * @param dataItem
          * @param formItems
-         * @param Schema schema
+         * @param {Schema} schema
          * @param ref
          * @returns {*|jQuery|HTMLElement}
          * @private
@@ -2479,6 +2489,12 @@
             return dialog;
         },
 
+        /**
+         *
+         * @param dataItem
+         * @returns {boolean}
+         */
+
         saveForeignDataStoreItem: function (dataItem) {
 
             var widget = this;
@@ -2638,6 +2654,11 @@
         },
 
 
+        /**
+         *
+         * @param event
+         * @param eventData
+         */
 
         editCancel : function(event, eventData) {
             var widget = this;
@@ -2670,6 +2691,11 @@
 
         },
 
+        /**
+         *
+         * @param featureTypeName
+         */
+
         refreshConnectedDigitizerFeatures : function(featureTypeName){
             var schema = {};
             $(".mb-element-digitizer").not(".mb-element-data-manager").each(function(index,element){
@@ -2692,7 +2718,7 @@
         /**
          * Download file by feature and his attribute name
          *
-         * @param {OpenLayers.Feature} feature OpenLayers
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature OpenLayers
          * @param {String} attributeName
          */
         download: function (feature, attributeName) {

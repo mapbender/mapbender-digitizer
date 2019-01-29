@@ -1,4 +1,4 @@
-Scheme = OpenLayers.Class({
+var Scheme = OpenLayers.Class({
 
     id : null,
     displayClass: '',
@@ -52,6 +52,13 @@ Scheme = OpenLayers.Class({
         }
     },
 
+    /**
+     *
+     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
+     * @param {boolean} highlight
+     * @private
+     */
+
     _highlightSchemaFeature: function (feature, highlight) {
         var schema = this;
         var table = schema.table;
@@ -69,7 +76,7 @@ Scheme = OpenLayers.Class({
             return;
         }
 
-        var styleId = feature.styleId ? feature.styleId : 'default';
+        var styleId = feature.styleId || 'default';
 
         if (feature.attributes && feature.attributes.label) {
             layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
@@ -141,6 +148,11 @@ Scheme = OpenLayers.Class({
     },
 
 
+    /**
+     *
+     * @param {(OpenLayers.Layer | OpenLayers.Layer.Vector)}layer
+     * @private
+     */
 
     _addSelectControl: function (layer) {
         var schema = this;
