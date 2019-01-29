@@ -3,6 +3,7 @@ var Scheme = OpenLayers.Class({
     id: null,
     displayClass: '',
     schemaName: '',
+    featureTypeName : '',
     table: null,
     label: '',
     layer: null,
@@ -40,6 +41,8 @@ var Scheme = OpenLayers.Class({
     allowLocate: false,
     showVisibilityNavigation: false,
     allowPrintMetadata: false,
+    printable: false,
+    dataItems: null,
 
     // Copy data
     copy: {

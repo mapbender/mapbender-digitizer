@@ -105,7 +105,7 @@
          * @see http://osgeo-org.1560.x6.nabble.com/layer-WMS-don-t-redraw-td5086852.html
          * @see http://dev.openlayers.org/apidocs/files/OpenLayers/Layer-js.html#OpenLayers.Layer.redraw
          * @see https://gis.stackexchange.com/questions/36741/how-to-update-a-vector-layer-with-wfs-protocol-after-updating-the-filter
-         * @param {OpenLayers.Layer} layer
+         * @param {(OpenLayers.Layer | OpenLayers.Layer.Vector)} layer
          * @return {OpenLayers.Layer}
          */
         layerManager.refreshLayer = function (layer) {
@@ -775,6 +775,7 @@
          */
         copyFeature: function (feature) {
             var widget = this;
+            /**@type {Scheme} */
             var schema = feature.schema;
             var layer = schema.layer;
             var newFeature = feature.clone();
@@ -896,15 +897,16 @@
                     }
 
                     var hasFeatureAfterSave = response.features.length > 0;
+                    var layer = schema.layer;
+
                     delete widget.unsavedFeatures[feature.id];
 
                     if (!hasFeatureAfterSave) {
-                        widget.reloadFeatures(schema.layer, _.without(schema.layer.features, feature));
+                        widget.reloadFeatures(layer, _.without(layer.features, feature));
                         dialog && dialog.popupDialog('close');
                         return;
                     }
 
-                    var layer = schema.layer;
                     var dbFeature = response.features[0];
                     feature.fid = dbFeature.id;
                     feature.state = null;
@@ -923,7 +925,7 @@
                         newFeature[key] = feature[key];
                     });
 
-                    widget.reloadFeatures(schema.layer, _.union(_.without(layer.features, feature), [newFeature]));
+                    widget.reloadFeatures(layer, _.union(_.without(layer.features, feature), [newFeature]));
                     feature = newFeature;
 
                     tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
@@ -976,6 +978,7 @@
 
             var widget = this;
             var buttons = [];
+            /**@type {Scheme} */
             var schema = olFeature.schema;
 
             if (schema.printable) {
@@ -2648,6 +2651,7 @@
          */
         download: function (feature, attributeName) {
             var widget = this;
+            /**@type {Scheme} */
             var schema = feature.schema;
             var attributes = feature.attributes;
             var tableName = schema.featureType.table;
