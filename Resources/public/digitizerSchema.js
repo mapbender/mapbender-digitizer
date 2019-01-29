@@ -354,20 +354,49 @@ var Scheme = OpenLayers.Class({
 
         var schema = this;
         var schemaName = schema.schemaName;
-        var widget = this.widget;
+        var widget = schema.widget;
         var options = widget.options;
-        var map = widget.map;
         var element = $(widget.element);
         var selector = widget.selector;
         var option = $("<option/>");
-        var layer = schema.layer = widget.createSchemaFeatureLayer(schema);
-        var buttons = [];
-        //schema.clusterStrategy = layer.strategies[0];
+        var layer = schema.layer;
 
         // Merge settings with default values from options
         _.defaults(schema, _.omit(options, ['schemes', 'target', 'create', 'jsSrc', 'disabled']));
 
-        if (schema.allowLocate) {
+        schema.schemaName = schemaName;
+
+        var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
+
+        schema._generateToolSetView(frame);
+
+        schema._generateSearchForm(frame);
+
+        frame.append('<div style="clear:both;"/>');
+
+        schema._generateResultDataTable(frame,option);
+
+        frame.css('display', 'none');
+
+        frame.data("schemaSettings", schema);
+
+        element.append(frame);
+        option.data("schemaSettings", schema);
+        selector.append(option);
+
+        schema._addSelectControl(layer);
+    },
+
+    _generateResultDataTable: function(frame,option) {
+
+        var schema = this;
+        var schemaName = schema.schemaName;
+        var widget = schema.widget;
+        var options = widget.options;
+        var buttons = [];
+
+
+        if (schema.allowLocate || true) {
             buttons.push({
                 title: 'Hineinzoomen',
                 className: 'fa fa-crosshairs',
@@ -377,15 +406,15 @@ var Scheme = OpenLayers.Class({
             });
         }
 
-        // if (schema.allowSave || true) {
-        //     buttons.push({
-        //         title: Mapbender.digitizer_translate('feature.savesave'),
-        //         className: 'save',
-        //         onClick: function (olFeature, ui) {
-        //             widget.saveFeature(olFeature);
-        //         }
-        //     });
-        // }
+        if (schema.allowSave || true) {
+            buttons.push({
+                title: Mapbender.digitizer_translate('feature.savesave'),
+                className: 'fa fa-floppy-o',
+                onClick: function (olFeature, ui) {
+                    widget.saveFeature(olFeature);
+                }
+            });
+        }
 
         if (schema.allowEditData) {
             buttons.push({
@@ -479,11 +508,9 @@ var Scheme = OpenLayers.Class({
         // }
 
         option.val(schemaName).html(schema.label);
-        map.addLayer(layer);
 
-        var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
         var columns = [];
-        var newFeatureDefaultProperties = {};
+        //var newFeatureDefaultProperties = {};
 
         if (!schema.hasOwnProperty("tableFields")) {
 
@@ -511,7 +538,7 @@ var Scheme = OpenLayers.Class({
         }
 
         $.each(schema.tableFields, function (fieldName, fieldSettings) {
-            newFeatureDefaultProperties[fieldName] = "";
+            //newFeatureDefaultProperties[fieldName] = "";
             fieldSettings.title = fieldSettings.label;
             if (!fieldSettings.data) {
                 fieldSettings.data = function (row, type, val, meta) {
@@ -569,7 +596,20 @@ var Scheme = OpenLayers.Class({
 
         table.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
 
-        schema.schemaName = schemaName;
+
+        frame.append(table);
+    },
+
+
+    _generateToolSetView: function(frame) {
+        var schema = this;
+        var widget = schema.widget;
+        var layer = schema.layer;
+        var newFeatureDefaultProperties = {};
+
+        $.each(schema.tableFields, function (fieldName, fieldSettings) {
+            newFeatureDefaultProperties[fieldName] = "";
+        });
 
         var toolset = widget.toolsets[schema.featureType.geomType];
         if (schema.hasOwnProperty("toolset")) {
@@ -583,7 +623,6 @@ var Scheme = OpenLayers.Class({
                 }
             });
         }
-
 
         frame.append($('<div/>').digitizingToolSet({
             children: toolset,
@@ -751,8 +790,6 @@ var Scheme = OpenLayers.Class({
 
         var toolSetView = $(".digitizing-tool-set", frame);
 
-        schema._generateSearchForm(frame);
-
         if (!schema.allowDigitize) {
 
             toolSetView.css('display', 'none');
@@ -798,19 +835,7 @@ var Scheme = OpenLayers.Class({
             });
         }
 
-        frame.append('<div style="clear:both;"/>');
 
-        frame.append(table);
-
-        frame.css('display', 'none');
-
-        frame.data("schemaSettings", schema);
-
-        element.append(frame);
-        option.data("schemaSettings", schema);
-        selector.append(option);
-
-        schema._addSelectControl(layer);
     },
 
     /**

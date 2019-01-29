@@ -661,10 +661,16 @@
 
         _buildSelectOptionsForAllSchemes: function() {
             var widget = this;
+            var map = widget.map;
+
             var options = widget.options;
             $.each(options.schemes, function (schemaName) {
-              this.schemaName = schemaName;
-              this._buildSelectOptions();
+               var schema = this;
+               var layer = schema.layer = widget.createSchemaFeatureLayer(schema);
+               map.addLayer(layer);
+
+               schema.schemaName = schemaName;
+               schema._buildSelectOptions();
             })
 
         },
