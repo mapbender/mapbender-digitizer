@@ -352,7 +352,7 @@ var Scheme = OpenLayers.Class({
         var buttons = [];
 
 
-        if (schema.allowLocate || true) {
+        if (schema.allowLocate) {
             buttons.push({
                 title: Mapbender.digitizer_translate('feature.zoom'),
                 className: 'zoom',
@@ -363,16 +363,16 @@ var Scheme = OpenLayers.Class({
             });
         }
 
-        if (schema.allowSave || true) {
-            buttons.push({
-                title: Mapbender.digitizer_translate('feature.save'),
-                className: 'save',
-                cssClass: ' fa fa-floppy-o',
-                onClick: function (olFeature, ui) {
-                    widget.saveFeature(olFeature);
-                }
-            });
-        }
+        // if (schema.allowSave) {
+        //     buttons.push({
+        //         title: Mapbender.digitizer_translate('feature.save'),
+        //         className: 'save',
+        //         cssClass: ' fa fa-floppy-o',
+        //         onClick: function (olFeature, ui) {
+        //             widget.saveFeature(olFeature);
+        //         }
+        //     });
+        // }
 
         if (schema.allowEditData) {
             buttons.push({
