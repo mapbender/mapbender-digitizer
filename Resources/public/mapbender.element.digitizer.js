@@ -152,41 +152,7 @@
 
 
 
-    /**
-     * "Fake" form data for a feature that hasn't gone through attribute
-     * editing, for saving. This is used when we save a feature that has only
-     * been moved / dragged. The popup dialog with the form is not initialized
-     * in these cases.
-     * Assigned values are copied from the feature's data, if it was already
-     * stored in the db, empty otherwise.
-     *
-     * @param feature
-     * @returns {{}}
-     */
-    function initialFormData(feature) {
-        var formData = {};
-        var extractFormData;
-        extractFormData = function (definition) {
-            _.forEach(definition, function (item) {
-                if (_.isArray(item)) {
-                    // recurse into lists
-                    extractFormData(item);
-                } else if (item.name) {
-                    var currentValue = (feature.data || {})[item.name];
-                    // keep empty string, but replace undefined => null
-                    if (typeof(currentValue) === 'undefined') {
-                        currentValue = null;
-                    }
-                    formData[item.name] = currentValue;
-                } else if (item.children) {
-                    // recurse into child property (should be a list)
-                    extractFormData(item.children);
-                }
-            });
-        };
-        extractFormData(feature.schema.formItems);
-        return formData;
-    }
+
 
     /**
      * Check and replace values recursive if they should be translated.
@@ -928,7 +894,7 @@
             var table = schema.table;
             var tableWidget = table.data('visUiJsResultTable');
             var tableApi = table.resultTable('getApi');
-            var formData = dialog && dialog.formData() || initialFormData(feature);
+            var formData = dialog && dialog.formData() || schema.initialFormData(feature);
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
             var request = {
@@ -1752,9 +1718,9 @@
             return schema.xhr;
         },
 
-        _initialFormData: function (feature) {
-            return initialFormData(feature);
-        },
+        // _initialFormData: function (feature) {
+        //     return initialFormData(feature);
+        // },
 
 
         /**
@@ -2243,7 +2209,7 @@
             var widget = this;
             var schema = widget.findSchemaByLayer(layer);
             var tableApi = schema.table.resultTable('getApi');
-            var features = _features ? _features : layer.features;
+            var features = _features || layer.features;
 
             if (features.length && features[0].cluster) {
                 features = _.flatten(_.pluck(layer.features, "cluster"));
@@ -2311,7 +2277,7 @@
          *
          * @param dataItem
          * @param formItems
-         * @param {Schema} schema
+         * @param {Scheme} schema
          * @param ref
          * @returns {*|jQuery|HTMLElement}
          * @private

@@ -1,8 +1,8 @@
 var Scheme = OpenLayers.Class({
 
-    id : null,
+    id: null,
     displayClass: '',
-    schemaName : '',
+    schemaName: '',
     table: null,
     label: '',
     layer: null,
@@ -10,8 +10,8 @@ var Scheme = OpenLayers.Class({
     inlineSearch: true,
     maxResults: 500,
     displayPermanent: false,
-    dataStore : null,
-    dataStoreLink : {},
+    dataStore: null,
+    dataStoreLink: {},
     showExtendSearchSwitch: false,
     allowLocate: false,
     allowSave: true,
@@ -32,9 +32,9 @@ var Scheme = OpenLayers.Class({
     tableFields: {},
     style: {},
     formItems: {},
-    events : null,
+    events: null,
     selectControl: null,
-    featureStyles : null,
+    featureStyles: null,
     search: null,
 
     initialize: function (options) {
@@ -112,7 +112,7 @@ var Scheme = OpenLayers.Class({
     },
 
 
-    _createToolsetTranslations: function() {
+    _createToolsetTranslations: function () {
 
         var schema = this;
 
@@ -813,6 +813,43 @@ var Scheme = OpenLayers.Class({
         schema._addSelectControl(layer);
     },
 
+    /**
+     * "Fake" form data for a feature that hasn't gone through attribute
+     * editing, for saving. This is used when we save a feature that has only
+     * been moved / dragged. The popup dialog with the form is not initialized
+     * in these cases.
+     * Assigned values are copied from the feature's data, if it was already
+     * stored in the db, empty otherwise.
+     *
+     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
+     * @returns {{}}
+     */
+    initialFormData: function (feature) {
+        var schema = this;
+        var formData = {};
+
+        var extractFormData = function (definition) {
+            _.forEach(definition, function (item) {
+                if (_.isArray(item)) {
+                    // recurse into lists
+                    extractFormData(item);
+                } else if (item.name) {
+                    var currentValue = (feature.data || {})[item.name];
+                    // keep empty string, but replace undefined => null
+                    if (typeof (currentValue) === 'undefined') {
+                        currentValue = null;
+                    }
+                    formData[item.name] = currentValue;
+                } else if (item.children) {
+                    // recurse into child property (should be a list)
+                    extractFormData(item.children);
+                }
+            });
+        };
+
+        extractFormData(schema.formItems);
+        return formData;
+    },
 
     CLASS_NAME: "Mapbender.Digitizer.Schema"
 
