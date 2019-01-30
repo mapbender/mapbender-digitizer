@@ -474,7 +474,7 @@
                             return items;
                         }
 
-                        features = feature.cluster ? feature.cluster : [feature];
+                        features = feature.cluster || [feature];
 
                         _.each(features, function (feature) {
                             items[feature.fid] = createSubMenu(feature);
@@ -1333,7 +1333,7 @@
                         }
                     }
 
-                    var src = item.dbSrc ? item.dbSrc : item.origSrc;
+                    var src = item.dbSrc || item.origSrc;
                     if (!item.hasOwnProperty('relative') && !item.relative) {
                         item.src = src;
                     } else {
@@ -1709,7 +1709,7 @@
                 });
             }
             _.each(features, function (feature) {
-                var styleId = feature.styleId ? feature.styleId : 'default';
+                var styleId = feature.styleId || 'default';
                 if (feature.attributes && feature.attributes.label) {
                     layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
                 } else {
@@ -1856,7 +1856,7 @@
          */
         getSchemaStyleMap: function (schema) {
             var widget = this;
-            var styles = schema.styles ? schema.styles : {};
+            var styles = schema.styles || {};
             for (var k in widget.styles) {
                 styles[k] = new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style[k], styles[k] || widget.styles[k]));
             }
@@ -1883,7 +1883,7 @@
          */
         createSchemaFeatureLayer: function (schema) {
             var widget = this;
-            var styles = schema.styles ? schema.styles : {};
+            var styles = schema.styles || {};
             var isClustered = schema.isClustered = schema.hasOwnProperty('clustering');
             var strategies = [];
             var styleContext = {

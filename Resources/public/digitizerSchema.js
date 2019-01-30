@@ -247,7 +247,7 @@ var Scheme = OpenLayers.Class({
             hover: true,
 
             clickFeature: function (feature) {
-                var features = feature.cluster ? feature.cluster : [feature];
+                var features = feature.cluster || [feature];
 
                 if (_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true})) {
                     return;
@@ -620,7 +620,7 @@ var Scheme = OpenLayers.Class({
                             };
                             // Replace auto-complete results with required key word
                             item.templateResult = function (d, selectDom, c) {
-                                var html = d && d.text ? d.text : '';
+                                var html = d && (d.text || '');
                                 if (d && d.id && d.text) {
                                     // Highlight results
                                     html = d.text.replace(new RegExp(ajax.lastTerm, "gmi"), '<span style="background-color: #fffb67;">\$&</span>');
@@ -823,7 +823,7 @@ var Scheme = OpenLayers.Class({
                             var visibilityButton = $row.find('.button.icon-visibility');
                             visibilityButton.removeClass('icon-invisibility');
                             $row.removeClass('invisible-feature');
-                            var styleId = feature.styleId ? feature.styleId : 'default';
+                            var styleId = feature.styleId || 'default';
                             feature.layer.drawFeature(feature, styleId);
                         });
                     }
