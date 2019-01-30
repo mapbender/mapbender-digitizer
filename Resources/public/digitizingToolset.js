@@ -12,8 +12,6 @@
 
         options: {
             layer: null,
-            // Open layer control events
-            controlEvents: [],
             translations: {
                 drawPoint: "Draw point",
                 drawLine: "Draw line",
@@ -27,11 +25,11 @@
                 selectFeature: "Select geometry",
                 removeSelected: "Remove selected geometries",
                 removeAll: "Remove all geometries"
-            }
+            },
+            openFeatureEditDialog: function() { console.warn("this method should be overwritten"); }
         },
         controlFactory: null,
         activeControl: null,
-        currentController: null,
 
         /**
          * Init controls
@@ -40,7 +38,11 @@
          */
         _create: function () {
             var toolSet = this;
-            toolSet.controlFactory = DigitizingControlFactory(toolSet.getLayer());
+            toolSet.controlFactory = DigitizingControlFactory(toolSet.getLayer(), function() {
+                toolSet.deactivateCurrentControl();
+            },toolSet.options.openFeatureEditDialog
+
+            );
             toolSet.element.addClass('digitizing-tool-set');
             toolSet.refresh();
 

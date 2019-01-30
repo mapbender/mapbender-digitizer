@@ -238,7 +238,7 @@ var Scheme = OpenLayers.Class({
                 schema._highlightSchemaFeature(feature, true);
 
                 if (schema.allowEditData) {
-                    widget._openFeatureEditDialog(features[0]);
+                    widget._openFeatureEditDialog(features[0],schema);
                 }
             },
             overFeature: function (feature) {
@@ -390,7 +390,7 @@ var Scheme = OpenLayers.Class({
                 title: Mapbender.digitizer_translate('feature.edit'),
                 className: 'edit',
                 onClick: function (olFeature, ui) {
-                    widget._openFeatureEditDialog(olFeature);
+                    widget._openFeatureEditDialog(olFeature,schema);
                 }
             });
         }
@@ -663,8 +663,6 @@ var Scheme = OpenLayers.Class({
             newFeatureDefaultProperties[fieldName] = "";
         });
 
-        console.log(newFeatureDefaultProperties,"nFDP");
-
         var toolset = widget.toolsets[schema.featureType.geomType];
         if (schema.hasOwnProperty("toolset")) {
             toolset = schema.toolset;
@@ -682,17 +680,11 @@ var Scheme = OpenLayers.Class({
             children: toolset,
             layer: layer,
             translations: schema._createToolsetTranslations(),
+            openFeatureEditDialog: function(feature) {
 
-            // http://dev.openlayers.org/docs/files/OpenLayers/Control-js.html#OpenLayers.Control.events
-            controlEvents: {
-
-
-
-
-
-
-
-
+                if (schema.openFormAfterEdit) {
+                    widget._openFeatureEditDialog(feature,schema);
+                }
             }
         }));
 

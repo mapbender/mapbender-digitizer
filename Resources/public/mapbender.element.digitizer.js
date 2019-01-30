@@ -291,7 +291,7 @@
              * Reload schema layers after feature was modified or removed
              */
             element.bind('mbdigitizerfeaturesaved mbdigitizerfeatureremove', function (event, feature) {
-                var schema = feature.schema;
+                var schema = widget.currentSchema;
                 var refreshLayerNames = schema.refreshLayersAfterFeatureSave;
 
                 if (_.size(refreshLayerNames)) {
@@ -430,7 +430,7 @@
                     subItems['edit'] = {
                         name: Mapbender.digitizer_translate('feature.edit'),
                         action: function (key, options, parameters) {
-                            widget._openFeatureEditDialog(parameters.olFeature);
+                            widget._openFeatureEditDialog(parameters.olFeature,schema);
                         }
                     }
                 }
@@ -563,7 +563,7 @@
                                     break;
 
                                 case 'edit':
-                                    widget._openFeatureEditDialog(olFeature);
+                                    widget._openFeatureEditDialog(olFeature,schema);
                                     break;
 
                                 case 'exportGeoJson':
@@ -699,7 +699,7 @@
                     widget._highlightFeature(feature);
 
                     if (isOpenLayerCloudPopup) {
-                        widget._openFeatureEditDialog(feature);
+                        widget._openFeatureEditDialog(feature,schema);
                     } else {
                         widget.zoomToJsonFeature(feature);
                     }
@@ -765,7 +765,7 @@
         copyFeature: function (feature) {
             var widget = this;
             /**@type {Scheme} */
-            var schema = feature.schema;
+            var schema = this.currentSchema;
             var layer = schema.layer;
             var newFeature = feature.clone();
             var config = schema.copy;
@@ -795,7 +795,6 @@
             });
 
             newFeature.data = newFeature.properties = newFeature.attributes = newAttributes;
-            newFeature.schema = schema;
             delete newFeature.fid;
 
             return widget.saveFeature(newFeature).done(function (response) {
@@ -820,7 +819,7 @@
                         return eval(successHandler + ";");
                     }(feature);
                 } else {
-                    widget._openFeatureEditDialog(feature);
+                    widget._openFeatureEditDialog(feature,schema);
                 }
             });
         },
@@ -839,7 +838,7 @@
             }
 
             var widget = this;
-            var schema = feature.schema;
+            var schema = widget.currentSchema;
             var dialog = feature.editDialog;
             var table = schema.table;
             var tableWidget = table.data('visUiJsResultTable');
@@ -936,7 +935,7 @@
                     widget._trigger("featuresaved", null, feature);
 
 
-                    var config = feature.schema;
+                    var config = widget.currentSchema;
                     if (config.hasOwnProperty("mailManager") && Mapbender.hasOwnProperty("MailManager")) {
                         try {
                             Mapbender.MailManager[config.mailManager](feature);
@@ -970,7 +969,7 @@
             var widget = this;
             var buttons = [];
             /**@type {Scheme} */
-            var schema = olFeature.schema;
+            var schema = widget.currentSchema;
 
             if (schema.printable) {
                 var printButton = {
@@ -980,7 +979,7 @@
                         if (printWidget) {
                             var dialog = $(this).closest('.ui-dialog-content');
                             var feature = dialog.data('feature');
-                            printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
+                            printWidget.printDigitizerFeature(schema.featureTypeName || schema.schemaName, feature.fid);
                         } else {
                             $.notify('Druck Element ist nicht verfügbar!');
                         }
@@ -1350,12 +1349,11 @@
          * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature open layer feature
          * @private
          */
-        _openFeatureEditDialog: function (olFeature) {
+        _openFeatureEditDialog: function (olFeature,schema) {
             var widget = this;
-            var schema = olFeature.schema;
             var layer = olFeature.layer;
             var map = layer.map;
-            var schemaPopupConfig = schema.popup ? schema.popup : {};
+            var schemaPopupConfig = schema.popup || {};
             var isOpenLayerCloudPopup = schemaPopupConfig.type && schemaPopupConfig.type === 'openlayers-cloud';
 
             if (widget.currentPopup) {
@@ -1750,7 +1748,7 @@
 
             var widget = this;
             var olMap = widget.getMap();
-            var schema = feature.schema || widget.findFeatureSchema(feature);
+            var schema = widget.currentSchema || widget.findFeatureSchema(feature);
             var geometry = feature.geometry;
 
             olMap.zoomToExtent(geometry.getBounds());
@@ -2176,7 +2174,6 @@
             // Add layer to feature
             _.each(features, function (feature) {
                 feature.layer = layer;
-                feature.schema = schema;
 
                 if (feature.attributes && feature.attributes.label) {
                     feature.styleId = "labelText";
@@ -2640,7 +2637,7 @@
         download: function (feature, attributeName) {
             var widget = this;
             /**@type {Scheme} */
-            var schema = feature.schema;
+            var schema = widget.currentSchema;
             var attributes = feature.attributes;
             var tableName = schema.featureType.table;
             var relativeWebPath = Mapbender.configuration.application.urls.asset;

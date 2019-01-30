@@ -1,10 +1,12 @@
-OpenLayers.Control.DrawFeature.prototype.featureAdded = function(feature) {
+var createFeatureAddedMethod = function(deactivateCurrentControl,openEditDialog) {
 
 
-        console.log("featureAdded",feature);
+    return function (feature) {
+
+        console.log("featureAdded", feature);
         var layer = feature.layer;
-        var schema = widget.findSchemaByLayer(layer);
-        var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
+        //var schema = widget.findSchemaByLayer(layer);
+        // var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
         //
         //if(schema.isClustered){
         //    $.notify('Create new feature is by clusterring not posible');
@@ -14,37 +16,47 @@ OpenLayers.Control.DrawFeature.prototype.featureAdded = function(feature) {
 
         feature.isNew = true;
 
-        feature.attributes = feature.data = properties;
+        // feature.attributes = feature.data = properties;
 
-        feature.schema = schema;
+        //feature.schema = schema;
 
         layer.redraw();
 
-        var digitizerToolSetElement = $(".digitizing-tool-set", frame);
-        digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");
+        deactivateCurrentControl();
+        openEditDialog(feature);
 
         //widget.unsavedFeatures[feature.id] = feature;
 
-        if (schema.openFormAfterEdit) {
-            widget._openFeatureEditDialog(feature);
-        }
+
+        console.log("finsih");
 
         //return true;
 
 
+    }
+
 };
 
 
-var DigitizingControlFactory = function (layer) {
+var DigitizingControlFactory = function (layer,deactivateCurrentControl,openEditDialog) {
+
+    var featureAdded = createFeatureAddedMethod(deactivateCurrentControl,openEditDialog);
 
     return {
-        drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point),
+        drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point,{
+            featureAdded : featureAdded
+        }),
 
-        drawLine: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Path),
+        drawLine: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Path,{
+            featureAdded : featureAdded
+        }),
 
-        drawPolygon: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon),
+        drawPolygon: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
+            featureAdded : featureAdded
+        }),
 
         drawRectangle: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
+            featureAdded : featureAdded,
             handlerOptions: {
                 sides: 4,
                 irregular: true
@@ -52,12 +64,14 @@ var DigitizingControlFactory = function (layer) {
         }),
 
         drawCircle: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
+            featureAdded : featureAdded,
             handlerOptions: {
                 sides: 40
             }
         }),
 
         drawEllipse: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
+            featureAdded : featureAdded,
             handlerOptions: {
                 sides: 40,
                 irregular: true
@@ -65,6 +79,7 @@ var DigitizingControlFactory = function (layer) {
         }),
 
         drawDonut: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
+            featureAdded : featureAdded,
             handlerOptions: {
                 holeModifier: 'element'
             }
