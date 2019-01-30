@@ -26,16 +26,6 @@
         });
     };
 
-    OpenLayers.Layer.prototype.findFeatureByPropertyValue = function(propName, propValue) {
-        var layer = this;
-        for (var i = 0; i < layer.features.length; i++) {
-            if (layer.features[i][propName] === propValue) {
-                return layer.features[i];
-            }
-        }
-        return null;
-    };
-
     /**
      * Translate digitizer keywords
      * @param title

@@ -78,11 +78,10 @@ var DigitizingControlFactory = function (layer) {
              * e.G. to prevent the modification or add additional data on modification
              * */
 
-            onModificationStart: function event(feature) {
+            onModificationStart: function (feature) {
                 console.log("onModificationStart");
                 var control = this;
                 var schema = feature.schema;
-                var attributes = feature.attributes;
                 var preventDefault = false;
 
                 if (!schema.hooks || !schema.hooks.onModificationStart) {
@@ -107,9 +106,8 @@ var DigitizingControlFactory = function (layer) {
 
             },
 
-            onModification: function (event) {
-                console.log("onModification");
-                widget.unsavedFeatures[event.id] = event.layer.findFeatureByPropertyValue('id', event.id);
+            onModification: function (feature) {
+                widget.unsavedFeatures[feature.id] = feature;
             }, // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
         }),
 
@@ -149,9 +147,8 @@ var DigitizingControlFactory = function (layer) {
                 }
             },
 
-            onComplete: function (event) {
+            onComplete: function (feature) {
                 console.log("onComplete");
-                var feature = event.layer.findFeatureByPropertyValue('id', event.id);
                 widget.unsavedFeatures[event.id] = feature;
                 if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
 
