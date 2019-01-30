@@ -1,46 +1,33 @@
-var createFeatureAddedMethod = function(deactivateCurrentControl,openEditDialog) {
+var createFeatureAddedMethod = function(deactivateCurrentControl,openEditDialog, defaultAttributes) {
 
 
-    return function (feature) {
-
-        console.log("featureAdded", feature);
-        var layer = feature.layer;
-        //var schema = widget.findSchemaByLayer(layer);
-        // var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
-        //
-        //if(schema.isClustered){
-        //    $.notify('Create new feature is by clusterring not posible');
-        //    return false;
-        //}
-
+    /**
+     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
+     */
+    var func = function (feature) {
 
         feature.isNew = true;
 
-        // feature.attributes = feature.data = properties;
+        _.each(defaultAttributes, function(prop) {
+            feature.attributes[prop] = "";
+        });
 
-        //feature.schema = schema;
-
-        layer.redraw();
+        feature.layer.redraw();
 
         deactivateCurrentControl();
         openEditDialog(feature);
 
-        //widget.unsavedFeatures[feature.id] = feature;
+        console.log("featureAdded", feature);
+    };
 
-
-        console.log("finsih");
-
-        //return true;
-
-
-    }
+    return func;
 
 };
 
 
-var DigitizingControlFactory = function (layer,deactivateCurrentControl,openEditDialog) {
+var DigitizingControlFactory = function (layer,deactivateCurrentControl,openEditDialog,defaultAttributes) {
 
-    var featureAdded = createFeatureAddedMethod(deactivateCurrentControl,openEditDialog);
+    var featureAdded = createFeatureAddedMethod(deactivateCurrentControl,openEditDialog,defaultAttributes);
 
     return {
         drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point,{

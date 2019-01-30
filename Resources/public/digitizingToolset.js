@@ -26,6 +26,7 @@
                 removeSelected: "Remove selected geometries",
                 removeAll: "Remove all geometries"
             },
+            defaultAttributes: [],
             openFeatureEditDialog: function() { console.warn("this method should be overwritten"); }
         },
         controlFactory: null,
@@ -40,7 +41,9 @@
             var toolSet = this;
             toolSet.controlFactory = DigitizingControlFactory(toolSet.getLayer(), function() {
                 toolSet.deactivateCurrentControl();
-            },toolSet.options.openFeatureEditDialog
+            },
+                toolSet.options.openFeatureEditDialog,
+                toolSet.options.defaultAttributes
 
             );
             toolSet.element.addClass('digitizing-tool-set');

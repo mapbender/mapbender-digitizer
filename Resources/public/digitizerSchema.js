@@ -657,10 +657,10 @@ var Scheme = OpenLayers.Class({
         var schema = this;
         var widget = schema.widget;
         var layer = schema.layer;
-        var newFeatureDefaultProperties = {};
+        var newFeatureDefaultProperties = [];
 
-        $.each(schema.tableFields, function (fieldName, fieldSettings) {
-            newFeatureDefaultProperties[fieldName] = "";
+        $.each(schema.tableFields, function (fieldName) {
+            newFeatureDefaultProperties.push(fieldName);
         });
 
         var toolset = widget.toolsets[schema.featureType.geomType];
@@ -685,7 +685,8 @@ var Scheme = OpenLayers.Class({
                 if (schema.openFormAfterEdit) {
                     widget._openFeatureEditDialog(feature,schema);
                 }
-            }
+            },
+            defaultAttributes : _.clone(newFeatureDefaultProperties)
         }));
 
         frame.generateElements({
