@@ -758,7 +758,7 @@ var Scheme = OpenLayers.Class({
                                 widget._openFeatureEditDialog(feature,schema);
 
                             }).fail(function () {
-                                $.notfiy("No remote data could be fetched");
+                                $.notify("No remote data could be fetched");
                                 widget._openFeatureEditDialog(feature,schema);
                             });
 
