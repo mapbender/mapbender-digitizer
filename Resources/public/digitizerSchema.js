@@ -19,7 +19,9 @@ var Scheme = OpenLayers.Class({
     zoomScaleDenominator: 500,
     useContextMenu: true,
     toolset: {},
-    popup: {},
+    popup: {
+        remoteData: false
+    },
     tableFields: {},
     style: {},
     formItems: {},
@@ -721,6 +723,45 @@ var Scheme = OpenLayers.Class({
 
                     return !!schema.evaluatedHooks.onStart;
 
+                },
+                extendFeatureDataWhenNoPopupOpen: function(feature) {
+                    if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
+
+                        if (schema.popup.remoteData) {
+                            var bbox = feature.geometry.getBounds();
+                            bbox.right = parseFloat(bbox.right + 0.00001);
+                            bbox.top = parseFloat(bbox.top + 0.00001);
+                            bbox = bbox.toBBOX();
+                            var srid = map.getProjection().replace('EPSG:', '');
+                            var url = widget.elementUrl + "getFeatureInfo/";
+
+                            $.ajax({
+                                url: url, data: {
+                                    bbox: bbox,
+                                    schema: schema.schemaName,
+                                    srid: srid
+                                }
+                            }).done(function (response) {
+                                _.each(response.dataSets, function (dataSet) {
+                                    var newData = JSON.parse(dataSet).features[0].properties;
+
+
+                                    Object.keys(feature.data);
+                                    $.extend(feature.data, newData);
+
+
+                                });
+                                widget._openFeatureEditDialog(feature,schema);
+
+                            }).fail(function () {
+                                $.notfiy("No remote data could be fetched");
+                                widget._openFeatureEditDialog(feature,schema);
+                            });
+
+                        } else {
+                            widget._openFeatureEditDialog(feature,schema);
+                        }
+                    }
                 }
             }
 

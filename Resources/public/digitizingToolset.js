@@ -30,7 +30,8 @@
                 openFeatureEditDialog: function (feature) { console.warn("this method shoud be overwritten"); },
                 getDefaultAttributes: function() { console.warn("this method shoud be overwritten"); return []; },
                 preventModification: function () { console.warn("this method shoud be overwritten"); return false;},
-                preventMove: function () { console.warn("this method shoud be overwritten"); return false; }
+                preventMove: function () { console.warn("this method shoud be overwritten"); return false; },
+                extendFeatureDataWhenNoPopupOpen: function() {}
             },
             defaultAttributes: [],
             openFeatureEditDialog: function() { console.warn("this method should be overwritten"); }

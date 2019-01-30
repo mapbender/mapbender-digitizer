@@ -1347,6 +1347,7 @@
          * Open edit feature dialog
          *
          * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature open layer feature
+         * @param {Scheme} schema
          * @private
          */
         _openFeatureEditDialog: function (olFeature,schema) {
