@@ -1088,6 +1088,7 @@
          */
         _processCurrentFormItemsWithDataManager : function(olFeature) {
             var widget = this;
+            var schema = widget.currentSchema;
 
             // dataManager access function
             // TODO: maybe it would be better to create public methods on dataManager to do this

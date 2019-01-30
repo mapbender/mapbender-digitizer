@@ -15,7 +15,11 @@ var Scheme = OpenLayers.Class({
     dataStore: null,
     dataStoreLink: {},
     showExtendSearchSwitch: false,
-    featureType: {},
+    featureType: {
+        geomType: null,
+        table: null,
+        files: null
+    },
     zoomScaleDenominator: 500,
     useContextMenu: true,
     toolset: {},
@@ -732,7 +736,7 @@ var Scheme = OpenLayers.Class({
                             bbox.right = parseFloat(bbox.right + 0.00001);
                             bbox.top = parseFloat(bbox.top + 0.00001);
                             bbox = bbox.toBBOX();
-                            var srid = map.getProjection().replace('EPSG:', '');
+                            var srid = widget.map.getProjection().replace('EPSG:', '');
                             var url = widget.elementUrl + "getFeatureInfo/";
 
                             $.ajax({
