@@ -93,7 +93,6 @@
 
         _registerControlEvents: function(control,button) {
             var widget = this;
-            var controlEvents = widget.options.controlEvents;
 
             var drawControlEvents = control.events;
             drawControlEvents.register('activate', button, function (e) {
@@ -105,11 +104,14 @@
                 button.removeClass('active');
             });
 
-            // Map event handler to ol controls
-            $.each(controlEvents, function (eventName, eventHandler) {
-                control[eventName] = eventHandler;
-                drawControlEvents.register(eventName, null, eventHandler);
-            });
+            var controlEvents = widget.options.controlEvents;
+            //Map event handler to ol controls
+            // $.each(controlEvents, function (eventName, eventHandler) {
+            //     control[eventName] = eventHandler;
+            //     // featureadded is event, onStart and onComplete are Methods
+            //     drawControlEvents.register(eventName, null, eventHandler);
+            //     console.log(eventName+" registered for ",control);
+            // });
 
         },
         /**
