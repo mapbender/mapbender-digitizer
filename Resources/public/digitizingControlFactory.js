@@ -6,7 +6,7 @@ var createFeatureAddedMethod = function(deactivateCurrentControl,openEditDialog,
      */
     var func = function (feature) {
 
-        feature.isNew = true;
+        feature.isNew = true; // replace by state == insert
 
         _.each(defaultAttributes, function(prop) {
             feature.attributes[prop] = "";
@@ -18,6 +18,7 @@ var createFeatureAddedMethod = function(deactivateCurrentControl,openEditDialog,
         openEditDialog(feature);
 
         console.log("featureAdded", feature);
+
     };
 
     return func;
@@ -25,9 +26,9 @@ var createFeatureAddedMethod = function(deactivateCurrentControl,openEditDialog,
 };
 
 
-var DigitizingControlFactory = function (layer,deactivateCurrentControl,openEditDialog,defaultAttributes) {
+var DigitizingControlFactory = function (layer,deactivateCurrentControl,openEditDialog,defaultAttributes,preventModification) {
 
-    var featureAdded = createFeatureAddedMethod(deactivateCurrentControl,openEditDialog,defaultAttributes);
+    var featureAdded = createFeatureAddedMethod(deactivateCurrentControl,openEditDialog,defaultAttributes,preventModification);
 
     return {
         drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point,{
@@ -81,33 +82,18 @@ var DigitizingControlFactory = function (layer,deactivateCurrentControl,openEdit
 
             onModificationStart: function (feature) {
                 console.log("onModificationStart");
-                var control = this;
-                var schema = feature.schema;
-                var preventDefault = false;
 
-                if (!schema.hooks || !schema.hooks.onModificationStart) {
-                    return;
-                }
-
-                try {
-                    preventDefault = eval(schema.hooks.onModificationStart);
-                } catch (e) {
-
-                    $.notify(e);
-                    return;
-                }
-
-                if (preventDefault) {
-                    control.deactivate();
-                    control.activate();
-
+                if (preventModification()) {
+                    this.deactivate();
+                    this.activate();
                     $.notify(Mapbender.digitizer_translate('move.denied'));
-
                 }
+
 
             },
 
             onModification: function (feature) {
+                console.log("onModification",feature);
                 //widget.unsavedFeatures[feature.id] = feature;
             } // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
         }),

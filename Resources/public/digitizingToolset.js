@@ -43,7 +43,8 @@
                 toolSet.deactivateCurrentControl();
             },
                 toolSet.options.openFeatureEditDialog,
-                toolSet.options.defaultAttributes
+                toolSet.options.defaultAttributes,
+                toolSet.options.preventModification
 
             );
             toolSet.element.addClass('digitizing-tool-set');

@@ -75,7 +75,11 @@ var Scheme = OpenLayers.Class({
     searchType: "currentExtent",
     inlineSearch: false,
     useContextMenu: false,
-    hooks: null,
+    hooks: {
+        onModificationStart: null
+    },
+    evaluatedHooks: {},
+
     lastRequest: null,
     xhr: null,
     view: null,
@@ -102,6 +106,23 @@ var Scheme = OpenLayers.Class({
         if (schema.id == null) {
             schema.id = OpenLayers.Util.createUniqueID(schema.CLASS_NAME + "_");
         }
+
+        schema._initialzeHooks();
+    },
+
+    _initialzeHooks: function() {
+        var schema = this;
+        _.each(schema.hooks,function(value,name) {
+            if (!value) {
+                return false;
+            }
+
+            try {
+                schema.evaluatedHooks[name] = eval(value);
+            } catch (e) {
+                $.notify(e);
+            }
+        });
     },
 
     /**
@@ -686,7 +707,13 @@ var Scheme = OpenLayers.Class({
                     widget._openFeatureEditDialog(feature,schema);
                 }
             },
-            defaultAttributes : _.clone(newFeatureDefaultProperties)
+            defaultAttributes: _.clone(newFeatureDefaultProperties),
+            preventModification: function() {
+
+                return !!schema.evaluatedHooks.onModificationStart;
+
+            }
+
         }));
 
         frame.generateElements({
