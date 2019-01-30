@@ -39,34 +39,29 @@
          * @private
          */
         _create: function () {
-            var widget = this;
-            widget.controlFactory = DigitizingControlFactory(widget.getLayer());
-            widget.element.addClass('digitizing-tool-set');
-            widget.refresh();
+            var toolSet = this;
+            toolSet.controlFactory = DigitizingControlFactory(toolSet.getLayer());
+            toolSet.element.addClass('digitizing-tool-set');
+            toolSet.refresh();
 
             $(this.element).on('click', '.-fn-tool-button', this.onToolButtonClick.bind(this));
 
         },
 
         /**
-         * Refresh widget
+         * Refresh toolSet
          */
         refresh: function () {
-            var widget = this;
-            var element = $(widget.element);
-            var children = widget.options.children;
-            var layer = widget.getLayer();
-            var map = layer.map;
-
-            // clean controllers
-            //widget.cleanUp();
+            var toolSet = this;
+            var element = $(toolSet.element);
+            var children = toolSet.options.children;
 
             // clean navigation
             element.empty();
 
-            widget.buildNavigation(children);
+            toolSet.buildNavigation(children);
 
-            widget._trigger('ready', null, this);
+            toolSet._trigger('ready', null, this);
         },
 
         _setOptions: function (options) {
@@ -76,7 +71,7 @@
 
 
         _createPlainControlButton: function(item) {
-            var widget = this;
+            var toolSet = this;
 
             var button = $("<button class='button' type='button'/>");
 
@@ -84,7 +79,7 @@
             button.addClass('-fn-tool-button');
             button.data(item);
 
-            button.attr('title', widget.options.translations[item.type]);
+            button.attr('title', toolSet.options.translations[item.type]);
             // add icon css class
             button.addClass("icon-" + item.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
 
@@ -92,19 +87,19 @@
         },
 
         _registerControlEvents: function(control,button) {
-            var widget = this;
+            var toolSet = this;
 
             var drawControlEvents = control.events;
             drawControlEvents.register('activate', button, function (e) {
-                widget._trigger('controlActivate', null, e);
+                toolSet._trigger('controlActivate', null, e);
                 button.addClass('active');
             });
             drawControlEvents.register('deactivate', button, function (e) {
-                widget._trigger('controlDeactivate', null, e);
+                toolSet._trigger('controlDeactivate', null, e);
                 button.removeClass('active');
             });
 
-            var controlEvents = widget.options.controlEvents;
+            //var controlEvents = toolSet.options.controlEvents;
             //Map event handler to ol controls
             // $.each(controlEvents, function (eventName, eventHandler) {
             //     control[eventName] = eventHandler;
@@ -120,21 +115,21 @@
          * @param buttons
          */
         buildNavigation: function (buttons) {
-            var widget = this;
-            var element = $(widget.element);
-            var controlFactory = widget.controlFactory;
+            var toolSet = this;
+            var element = $(toolSet.element);
+            var controlFactory = toolSet.controlFactory;
 
             $.each(buttons, function (i, item) {
                 //var item = this;
                 if (!item || !item.hasOwnProperty('type')) {
                     return;
                 }
-                var button = widget._createPlainControlButton(item);
+                var button = toolSet._createPlainControlButton(item);
 
                 if (controlFactory.hasOwnProperty(item.type)) {
                     var control = controlFactory[item.type];
                     button.data('control', control);
-                    widget._registerControlEvents(control,button);
+                    toolSet._registerControlEvents(control,button);
                     control.layer.map.addControl(control);
                 }
 

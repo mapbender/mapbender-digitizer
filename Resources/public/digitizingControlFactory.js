@@ -2,10 +2,8 @@ OpenLayers.Control.DrawFeature.prototype.featureAdded = function(feature) {
 
 
         console.log("featureAdded",feature);
-        console.trace();
         var layer = feature.layer;
         var schema = widget.findSchemaByLayer(layer);
-        var digitizerToolSetElement = $(".digitizing-tool-set", frame);
         var properties = $.extend({}, newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
         //
         //if(schema.isClustered){
@@ -22,6 +20,7 @@ OpenLayers.Control.DrawFeature.prototype.featureAdded = function(feature) {
 
         layer.redraw();
 
+        var digitizerToolSetElement = $(".digitizing-tool-set", frame);
         digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");
 
         //widget.unsavedFeatures[feature.id] = feature;
