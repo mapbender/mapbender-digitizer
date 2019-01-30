@@ -829,7 +829,7 @@
          *
          * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature OpenLayers feature
          * @private
-         * @return {jQuery.jqXHR} ajax XHR
+         * @return {(jQuery.jqXHR | void)} ajax XHR
          */
         saveFeature: function (feature) {
 
@@ -926,10 +926,10 @@
                     feature.disabled = false;
                     //feature.oldGeom = false;
                     feature.isDragged = false;
-                    console.log(feature,"!");
+
                     dialog && dialog.popupDialog('close');
 
-                    this.feature = feature;
+                    //this.feature = feature;
 
                     $.notify(Mapbender.digitizer_translate("feature.save.successfully"), 'info');
 
@@ -1368,7 +1368,7 @@
                 }
             }
 
-            var popupConfiguration = this._createPopupConfiguration(olFeature);
+            var popupConfiguration = widget._createPopupConfiguration(olFeature);
 
             this._processCurrentFormItemsWithDataManager(olFeature);
 
@@ -1680,7 +1680,7 @@
         /**
          * Highlight feature on the map
          *
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
+         * @param {(OpenLayers.Feature.Vector)} feature
          * @param {boolean} highlight
          * @private
          */

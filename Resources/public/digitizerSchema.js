@@ -56,7 +56,10 @@ var Scheme = OpenLayers.Class({
     group: null,
     displayOnInactive: false,
     refreshFeaturesAfterSave: [],
+    elementsTranslated: false,
+    olFeatureCloudPopup: null,
 
+    editDialog: null,
     // Copy data
     copy: {
         enable: false,
