@@ -26,6 +26,12 @@
                 removeSelected: "Remove selected geometries",
                 removeAll: "Remove all geometries"
             },
+            controlEvents: {
+                openFeatureEditDialog: function (feature) { console.warn("this method shoud be overwritten"); },
+                getDefaultAttributes: function() { console.warn("this method shoud be overwritten"); return []; },
+                preventModification: function () { console.warn("this method shoud be overwritten"); return false;},
+                preventMove: function () { console.warn("this method shoud be overwritten"); return false; }
+            },
             defaultAttributes: [],
             openFeatureEditDialog: function() { console.warn("this method should be overwritten"); }
         },
@@ -39,14 +45,10 @@
          */
         _create: function () {
             var toolSet = this;
-            toolSet.controlFactory = DigitizingControlFactory(toolSet.getLayer(), function() {
+            toolSet.options.controlEvents.deactivateCurrentControl = function() {
                 toolSet.deactivateCurrentControl();
-            },
-                toolSet.options.openFeatureEditDialog,
-                toolSet.options.defaultAttributes,
-                toolSet.options.preventModification
-
-            );
+            };
+            toolSet.controlFactory = DigitizingControlFactory(toolSet.getLayer(),toolSet.options.controlEvents);
             toolSet.element.addClass('digitizing-tool-set');
             toolSet.refresh();
 

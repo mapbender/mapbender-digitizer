@@ -1,4 +1,4 @@
-var createFeatureAddedMethod = function(deactivateCurrentControl,openEditDialog, defaultAttributes) {
+var createFeatureAddedMethod = function(controlEvents) {
 
 
     /**
@@ -8,14 +8,14 @@ var createFeatureAddedMethod = function(deactivateCurrentControl,openEditDialog,
 
         feature.isNew = true; // replace by state == insert
 
-        _.each(defaultAttributes, function(prop) {
+        _.each(controlEvents.getDefaultAttributes(), function(prop) {
             feature.attributes[prop] = "";
         });
 
         feature.layer.redraw();
 
-        deactivateCurrentControl();
-        openEditDialog(feature);
+        controlEvents.deactivateCurrentControl();
+        controlEvents.openFeatureEditDialog(feature);
 
         console.log("featureAdded", feature);
 
@@ -26,9 +26,13 @@ var createFeatureAddedMethod = function(deactivateCurrentControl,openEditDialog,
 };
 
 
-var DigitizingControlFactory = function (layer,deactivateCurrentControl,openEditDialog,defaultAttributes,preventModification) {
+var DigitizingControlFactory = function (layer,controlEvents) {
 
-    var featureAdded = createFeatureAddedMethod(deactivateCurrentControl,openEditDialog,defaultAttributes,preventModification);
+    var featureAdded = createFeatureAddedMethod({
+        deactivateCurrentControl: controlEvents.deactivateCurrentControl,
+        openFeatureEditDialog: controlEvents.openFeatureEditDialog,
+        getDefaultAttributes: controlEvents.getDefaultAttributes
+    });
 
     return {
         drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point,{
@@ -83,7 +87,7 @@ var DigitizingControlFactory = function (layer,deactivateCurrentControl,openEdit
             onModificationStart: function (feature) {
                 console.log("onModificationStart");
 
-                if (preventModification()) {
+                if (controlEvents.preventModification()) {
                     this.deactivate();
                     this.activate();
                     $.notify(Mapbender.digitizer_translate('move.denied'));
@@ -107,31 +111,12 @@ var DigitizingControlFactory = function (layer,deactivateCurrentControl,openEdit
             onStart: function (feature, px) {
                 console.log("onStart");
 
-                var control = this;
-                /**@type {Scheme} */
-                var schema = feature.schema;
-                var preventDefault = false;
-
-                //feature.oldGeom = {x: feature.geometry.x, y: feature.geometry.y};
-                feature.isDragged = true;
-                if (!schema.hooks || !schema.hooks.onStart) {
-                    return;
-                }
-
-                try {
-                    preventDefault = eval(schema.hooks.onStart);
-                } catch (e) {
-
-                    $.notify(e);
-                    return;
-                }
-
-
-                if (preventDefault) {
+                if (controlEvents.preventMove()) {
+                    this.cancel();
                     $.notify(Mapbender.digitizer_translate('move.denied'));
-                    control.cancel();
-
                 }
+
+                feature.isDragged = true;
             },
 
             onComplete: function (feature) {

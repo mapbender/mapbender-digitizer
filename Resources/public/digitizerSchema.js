@@ -76,7 +76,8 @@ var Scheme = OpenLayers.Class({
     inlineSearch: false,
     useContextMenu: false,
     hooks: {
-        onModificationStart: null
+        onModificationStart: null,
+        onStart: null,
     },
     evaluatedHooks: {},
 
@@ -701,17 +702,26 @@ var Scheme = OpenLayers.Class({
             children: toolset,
             layer: layer,
             translations: schema._createToolsetTranslations(),
-            openFeatureEditDialog: function(feature) {
+            controlEvents: {
+                openFeatureEditDialog: function (feature) {
 
-                if (schema.openFormAfterEdit) {
-                    widget._openFeatureEditDialog(feature,schema);
+                    if (schema.openFormAfterEdit) {
+                        widget._openFeatureEditDialog(feature, schema);
+                    }
+                },
+                getDefaultAttributes: function() {
+                    return _.clone(newFeatureDefaultProperties)
+                },
+                preventModification: function () {
+
+                    return !!schema.evaluatedHooks.onModificationStart;
+
+                },
+                preventMove: function () {
+
+                    return !!schema.evaluatedHooks.onStart;
+
                 }
-            },
-            defaultAttributes: _.clone(newFeatureDefaultProperties),
-            preventModification: function() {
-
-                return !!schema.evaluatedHooks.onModificationStart;
-
             }
 
         }));
