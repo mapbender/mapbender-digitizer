@@ -24,7 +24,7 @@ OpenLayers.Control.DrawFeature.prototype.featureAdded = function(feature) {
 
         digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");
 
-        widget.unsavedFeatures[feature.id] = feature;
+        //widget.unsavedFeatures[feature.id] = feature;
 
         if (schema.openFormAfterEdit) {
             widget._openFeatureEditDialog(feature);
@@ -107,8 +107,8 @@ var DigitizingControlFactory = function (layer) {
             },
 
             onModification: function (feature) {
-                widget.unsavedFeatures[feature.id] = feature;
-            }, // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
+                //widget.unsavedFeatures[feature.id] = feature;
+            } // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
         }),
 
         moveFeature: new OpenLayers.Control.DragFeature(layer, {
@@ -149,7 +149,7 @@ var DigitizingControlFactory = function (layer) {
 
             onComplete: function (feature) {
                 console.log("onComplete");
-                widget.unsavedFeatures[event.id] = feature;
+                //widget.unsavedFeatures[event.id] = feature;
                 if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
 
                     if (schema.popup.remoteData) {
@@ -171,7 +171,7 @@ var DigitizingControlFactory = function (layer) {
                                 var newData = JSON.parse(dataSet).features[0].properties;
 
 
-                                Object.keys(feature.data)
+                                Object.keys(feature.data);
                                 $.extend(feature.data, newData);
 
 

@@ -889,7 +889,7 @@
                     var hasFeatureAfterSave = response.features.length > 0;
                     var layer = schema.layer;
 
-                    delete widget.unsavedFeatures[feature.id];
+                    //delete widget.unsavedFeatures[feature.id];
 
                     if (!hasFeatureAfterSave) {
                         widget.reloadFeatures(layer, _.without(layer.features, feature));
@@ -2560,7 +2560,7 @@
         deactivate: function () {
             var widget = this;
             // clear unsaved features to prevent multiple confirmation popups
-            widget.unsavedFeatures = {};
+            //widget.unsavedFeatures = {};
             var always = function () {
                 widget.options.__disabled = true;
                 if (!widget.currentSchema.displayOnInactive) {
