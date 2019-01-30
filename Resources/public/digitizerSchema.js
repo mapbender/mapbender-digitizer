@@ -55,6 +55,7 @@ var Scheme = OpenLayers.Class({
     minScale: null,
     group: null,
     displayOnInactive: false,
+    refreshFeaturesAfterSave: [],
 
     // Copy data
     copy: {

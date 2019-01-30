@@ -119,6 +119,7 @@ var DigitizingControlFactory = function (layer,controlEvents) {
                 }
 
                 feature.isDragged = true;
+                console.log("true");
             },
             /**
              *

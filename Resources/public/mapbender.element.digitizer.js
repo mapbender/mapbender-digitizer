@@ -910,7 +910,7 @@
                     var newFeatures = geoJsonReader.read(response);
                     var newFeature = _.first(newFeatures);
 
-                    _.each(['fid', 'disabled', 'state', 'data', 'layer', 'schema', 'isNew', 'renderIntent', 'styleId'], function (key) {
+                    _.each(['fid', 'disabled', 'state', 'data', 'layer', /* 'schema', */ 'isNew', 'renderIntent', 'styleId'], function (key) {
                         newFeature[key] = feature[key];
                     });
 
@@ -926,6 +926,7 @@
                     feature.disabled = false;
                     //feature.oldGeom = false;
                     feature.isDragged = false;
+                    console.log(feature,"!");
                     dialog && dialog.popupDialog('close');
 
                     this.feature = feature;
