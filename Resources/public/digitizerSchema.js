@@ -259,8 +259,6 @@ var Scheme = OpenLayers.Class({
         }
 
 
-        console.log(schema.popup);
-
         schema._initialzeHooks();
     },
 
@@ -1024,17 +1022,11 @@ var Scheme = OpenLayers.Class({
     },
 
 
-    /**
-     * Create vector feature layer
-     *
-     * @returns {OpenLayers.Layer.Vector}
-     */
-    createSchemaFeatureLayer: function () {
+    _createFeatureLayerStyleMap: function() {
         var schema = this;
         var widget = schema.widget;
         var styles = schema.styles || {};
-        var isClustered = schema.isClustered = schema.hasOwnProperty('clustering');
-        var strategies = [];
+
         var styleContext = {
             context: {
                 webRootPath: Mapbender.configuration.application.urls.asset,
@@ -1049,10 +1041,14 @@ var Scheme = OpenLayers.Class({
                 }
             }
         };
+        var defaultStyle = styles.default ? $.extend({}, widget.styles.default, styles.default) : widget.styles.default;
+        var selectStyle =  styles.select || widget.styles.select;
+        var selectedStyle = styles.selected || widget.styles.selected;
+
         var styleMap = new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), styleContext),
-            'select': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] || widget.styles.select), styleContext),
-            'selected': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] || widget.styles.selected), styleContext),
+            'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.default, defaultStyle), styleContext),
+            'select': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.select, selectStyle), styleContext),
+            'selected': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.selected, selectedStyle), styleContext)
         }, {extendDefault: true});
 
         styleMap.styles.invisible = new OpenLayers.Style({
@@ -1087,13 +1083,34 @@ var Scheme = OpenLayers.Class({
             styleMap.styles.copy = new OpenLayers.Style(copyStyleData);
         }
 
+        return styleMap;
+
+    },
+
+    /**
+     * Create vector feature layer
+     *
+     * @returns {OpenLayers.Layer.Vector}
+     */
+    createSchemaFeatureLayer: function () {
+
+        var schema = this;
+        var widget = schema.widget;
+        var isClustered = schema.isClustered = schema.hasOwnProperty('clustering');
+        var strategies = [];
+
+        var styleMap = schema._createFeatureLayerStyleMap();
+
+
         if (isClustered) {
             var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
             strategies.push(clusterStrategy);
             schema.clusterStrategy = clusterStrategy;
         }
+
         var layer = new OpenLayers.Layer.Vector(schema.label, {
             styleMap: styleMap,
+            name: schema.label,
             visibility: false,
             rendererOptions: {zIndexing: true},
             strategies: strategies
@@ -1107,7 +1124,6 @@ var Scheme = OpenLayers.Class({
             layer.options.minScale = schema.minScale;
         }
 
-        layer.name = schema.label;
         schema.layer = layer;
         widget.map.addLayer(layer);
     },
