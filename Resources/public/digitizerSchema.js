@@ -1,9 +1,37 @@
+var PopupConfiguration = OpenLayers.Class({
+
+    id: null,
+    displayClass: '',
+
+    title: Mapbender.DigitizerTranslator.translate('feature.attributes'),
+    width:  "423px",
+    remoteData: false,
+    type: null,
+    buttons: [],
+
+    initialize: function (options) {
+        /** @type {PopupConfiguration} */
+        var schema = this;
+        schema.displayClass = this.CLASS_NAME;
+
+        OpenLayers.Util.extend(schema, options);
+
+        if (schema.id == null) {
+            schema.id = OpenLayers.Util.createUniqueID(schema.CLASS_NAME + "_");
+        }
+
+    },
+
+    CLASS_NAME: "Mapbender.Digitizer.Schema.PopupConfiguration"
+
+});
+
 var Scheme = OpenLayers.Class({
 
     id: null,
     displayClass: '',
     schemaName: '',
-    featureTypeName : '',
+    featureTypeName: '',
     table: null,
     label: '',
     layer: null,
@@ -23,9 +51,7 @@ var Scheme = OpenLayers.Class({
     zoomScaleDenominator: 500,
     useContextMenu: true,
     toolset: {},
-    popup: {
-        remoteData: false
-    },
+    popup: null,
     tableFields: {},
     style: {},
     formItems: {},
@@ -110,6 +136,8 @@ var Scheme = OpenLayers.Class({
 
         OpenLayers.Util.extend(schema, options);
 
+        schema.popup = new PopupConfiguration(options.popup);
+
         schema.events = new OpenLayers.Events(schema);
         if (schema.eventListeners instanceof Object) {
             schema.events.on(schema.eventListeners);
@@ -119,11 +147,12 @@ var Scheme = OpenLayers.Class({
         }
 
         schema._initialzeHooks();
+        schema._createPopupConfiguration();
     },
 
-    _initialzeHooks: function() {
+    _initialzeHooks: function () {
         var schema = this;
-        _.each(schema.hooks,function(value,name) {
+        _.each(schema.hooks, function (value, name) {
             if (!value) {
                 return false;
             }
@@ -135,6 +164,120 @@ var Scheme = OpenLayers.Class({
             }
         });
     },
+
+
+    /**
+     *
+     * @private
+     */
+
+    _createPopupConfiguration: function () {
+
+        /**@type {Scheme} */
+        var schema = this;
+        var widget = schema.widget;
+        var buttons = [];
+
+        console.log(schema.popup,"$$");
+
+        if (schema.printable) {
+            var printButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.print'),
+                click: function () {
+                    var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
+                    if (printWidget) {
+                        var dialog = $(this).closest('.ui-dialog-content');
+                        var feature = dialog.data('feature');
+                        printWidget.printDigitizerFeature(schema.featureTypeName || schema.schemaName, feature.fid);
+                    } else {
+                        $.notify('Druck Element ist nicht verfügbar!');
+                    }
+                }
+            };
+            buttons.push(printButton);
+        }
+        if (schema.copy.enable) {
+            buttons.push({
+                text: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
+                click: function (e) {
+                    var dialog = $(this).closest('.ui-dialog-content');
+                    var feature = dialog.data('feature');
+                    widget.copyFeature(olFeature); // TODO possibly a bug?
+                }
+            });
+        }
+        if (schema.allowCustomerStyle) {
+            var styleButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.style.change'),
+                click: function (e) {
+                    var dialog = $(this).closest('.ui-dialog-content');
+                    var feature = dialog.data('feature');
+                    widget.openChangeStyleDialog(feature);
+                }
+            };
+            buttons.push(styleButton);
+        }
+        if (schema.allowEditData && schema.allowSave) {
+            var saveButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.save.title'),
+                click: function () {
+                    var dialog = $(this).closest('.ui-dialog-content');
+                    var feature = dialog.data('feature');
+                    widget.saveFeature(feature);
+                }
+            };
+            buttons.push(saveButton);
+        }
+        if (schema.allowDelete) {
+            buttons.push({
+                text: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                'class': 'critical',
+                click: function () {
+                    var dialog = $(this).closest('.ui-dialog-content');
+                    var feature = dialog.data('feature');
+                    widget.removeFeature(feature);
+                    widget.currentPopup.popupDialog('close');
+                }
+            });
+        }
+        if (schema.allowCancelButton) {
+            buttons.push({
+                text: Mapbender.DigitizerTranslator.translate('cancel'),
+                click: function () {
+                    this.currentPopup.popupDialog('close');
+                }.bind(this)
+            });
+        }
+
+
+
+        // Initialize custom button events
+        _.each(schema.popup.buttons, function (button) {
+            if (button.click) {
+                var eventHandlerCode = button.click;
+                button.click = function (e) {
+                    var _widget = widget;
+                    var el = $(this);
+                    var form = $(this).closest(".ui-dialog-content");
+                    var feature = form.data('feature');
+                    var data = feature.data;
+
+                    eval(eventHandlerCode);
+
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+
+        // Merge default and custom buttons
+        _.each(buttons, function (button) {
+            schema.popup.buttons.push(button);
+        });
+
+
+    },
+
 
     /**
      *
@@ -270,7 +413,7 @@ var Scheme = OpenLayers.Class({
                 schema._highlightSchemaFeature(feature, true);
 
                 if (schema.allowEditData) {
-                    widget._openFeatureEditDialog(features[0],schema);
+                    widget._openFeatureEditDialog(features[0], schema);
                 }
             },
             overFeature: function (feature) {
@@ -345,8 +488,6 @@ var Scheme = OpenLayers.Class({
     },
 
 
-
-
     _buildSelectOptions: function () {
         /** @type {Scheme} */
         var schema = this;
@@ -386,7 +527,7 @@ var Scheme = OpenLayers.Class({
         schema._addSelectControl(layer);
     },
 
-    _generateResultDataTable: function(frame) {
+    _generateResultDataTable: function (frame) {
 
         /** @type {Scheme} */
         var schema = this;
@@ -422,7 +563,7 @@ var Scheme = OpenLayers.Class({
                 title: Mapbender.DigitizerTranslator.translate('feature.edit'),
                 className: 'edit',
                 onClick: function (olFeature, ui) {
-                    widget._openFeatureEditDialog(olFeature,schema);
+                    widget._openFeatureEditDialog(olFeature, schema);
                 }
             });
         }
@@ -684,7 +825,7 @@ var Scheme = OpenLayers.Class({
         }
     },
 
-    _generateToolSetView: function(frame) {
+    _generateToolSetView: function (frame) {
         /** @type {Scheme} */
         var schema = this;
         var widget = schema.widget;
@@ -719,7 +860,7 @@ var Scheme = OpenLayers.Class({
                         widget._openFeatureEditDialog(feature, schema);
                     }
                 },
-                getDefaultAttributes: function() {
+                getDefaultAttributes: function () {
                     return _.clone(newFeatureDefaultProperties)
                 },
                 preventModification: function () {
@@ -732,7 +873,7 @@ var Scheme = OpenLayers.Class({
                     return !!schema.evaluatedHooks.onStart;
 
                 },
-                extendFeatureDataWhenNoPopupOpen: function(feature) {
+                extendFeatureDataWhenNoPopupOpen: function (feature) {
                     if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
 
                         if (schema.popup.remoteData) {
@@ -759,15 +900,15 @@ var Scheme = OpenLayers.Class({
 
 
                                 });
-                                widget._openFeatureEditDialog(feature,schema);
+                                widget._openFeatureEditDialog(feature, schema);
 
                             }).fail(function () {
                                 $.notify("No remote data could be fetched");
-                                widget._openFeatureEditDialog(feature,schema);
+                                widget._openFeatureEditDialog(feature, schema);
                             });
 
                         } else {
-                            widget._openFeatureEditDialog(feature,schema);
+                            widget._openFeatureEditDialog(feature, schema);
                         }
                     }
                 }

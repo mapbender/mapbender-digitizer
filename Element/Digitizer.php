@@ -45,12 +45,12 @@ class Digitizer extends BaseElement
                 '/components/jquery-context-menu/jquery-context-menu-built.js',
                 '/components/select2/select2-built.js',
                 '/components/select2/dist/js/i18n/de.js',
+                '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizingToolset.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizerSchema.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizingControlFactory.js',
                 '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.layermanager.js',
-                '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
             ),
             'css'   => array(
                 '/components/select2/select2-built.css',

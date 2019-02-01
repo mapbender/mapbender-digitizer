@@ -1,3 +1,52 @@
+Mapbender.DigitizerTranslator = {
+
+    /**
+     * Regular Expression to get checked if string should be translated
+     *
+     * @type {RegExp}
+     */
+    translationReg: /^trans:\w+\.(\w|-|\.{1}\w+)+\w+$/,
+
+    translate: function (title, withoutSuffix) {
+        return Mapbender.trans(withoutSuffix ? title : "mb.digitizer." + title);
+    },
+
+    translateObject: function (items) {
+        for (var k in items) {
+            var item = items[k];
+            if (typeof item === "string" && item.match(this.translationReg)) {
+                items[k] = Mapbender.DigitizerTranslator.translate(item.split(':')[1], true);
+            } else if (typeof item === "object") {
+                this.translateObject(item);
+            }
+        }
+        return item;
+    },
+
+
+    /**
+     * Check and replace values recursive if they should be translated.
+     * For checking used "translationReg" variable
+     *
+     *
+     * @param items
+     */
+    translateStructure: function (items) {
+        var isArray = items instanceof Array;
+        for (var k in items) {
+            if (isArray || k === "children") {
+                this.translateStructure(items[k]);
+            } else {
+                if (typeof items[k] == "string" && items[k].match(this.translationReg)) {
+                    items[k] = Mapbender.DigitizerTranslator.translate(items[k].split(':')[1], true);
+                }
+            }
+        }
+    }
+
+
+};
+
 (function ($) {
     "use strict";
 
@@ -26,55 +75,6 @@
      * @param withoutSuffix
      * @returns {*}
      */
-
-    Mapbender.DigitizerTranslator = {
-
-        /**
-         * Regular Expression to get checked if string should be translated
-         *
-         * @type {RegExp}
-         */
-        translationReg : /^trans:\w+\.(\w|-|\.{1}\w+)+\w+$/,
-
-        translate: function (title, withoutSuffix) {
-            return Mapbender.trans(withoutSuffix ? title : "mb.digitizer." + title);
-        },
-
-        translateObject: function (items) {
-            for (var k in items) {
-                var item = items[k];
-                if (typeof item === "string" && item.match(this.translationReg)) {
-                    items[k] = Mapbender.DigitizerTranslator.translate(item.split(':')[1], true);
-                } else if (typeof item === "object") {
-                    this.translateObject(item);
-                }
-            }
-            return item;
-        },
-
-
-        /**
-         * Check and replace values recursive if they should be translated.
-         * For checking used "translationReg" variable
-         *
-         *
-         * @param items
-         */
-        translateStructure: function (items) {
-            var isArray = items instanceof Array;
-            for (var k in items) {
-                if (isArray || k === "children") {
-                    this.translateStructure(items[k]);
-                } else {
-                    if (typeof items[k] == "string" && items[k].match(this.translationReg)) {
-                        items[k] = Mapbender.DigitizerTranslator.translate(items[k].split(':')[1], true);
-                    }
-                }
-            }
-        }
-
-
-    };
 
 
 
@@ -532,8 +532,8 @@
             var widget = this;
             var newSchemes = {};
             _.each(widget.options.schemes, function (el, index) {
-                el.widget = widget;
                 newSchemes[index] = new Scheme(el);
+                newSchemes[index].widget = widget;
             });
 
             return newSchemes;
@@ -875,128 +875,6 @@
             }
         },
 
-        /**
-         *
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-         * @private
-         */
-
-        _createPopupConfiguration: function (olFeature) {
-
-            var widget = this;
-            var buttons = [];
-            /**@type {Scheme} */
-            var schema = widget.currentSchema;
-
-            if (schema.printable) {
-                var printButton = {
-                    text: Mapbender.DigitizerTranslator.translate('feature.print'),
-                    click: function () {
-                        var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-                        if (printWidget) {
-                            var dialog = $(this).closest('.ui-dialog-content');
-                            var feature = dialog.data('feature');
-                            printWidget.printDigitizerFeature(schema.featureTypeName || schema.schemaName, feature.fid);
-                        } else {
-                            $.notify('Druck Element ist nicht verfügbar!');
-                        }
-                    }
-                };
-                buttons.push(printButton);
-            }
-            if (schema.copy.enable) {
-                buttons.push({
-                    text: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
-                    click: function (e) {
-                        var dialog = $(this).closest('.ui-dialog-content');
-                        var feature = dialog.data('feature');
-                        widget.copyFeature(olFeature); // TODO possibly a bug?
-                    }
-                });
-            }
-            if (schema.allowCustomerStyle) {
-                var styleButton = {
-                    text: Mapbender.DigitizerTranslator.translate('feature.style.change'),
-                    click: function (e) {
-                        var dialog = $(this).closest('.ui-dialog-content');
-                        var feature = dialog.data('feature');
-                        widget.openChangeStyleDialog(feature);
-                    }
-                };
-                buttons.push(styleButton);
-            }
-            if (schema.allowEditData && schema.allowSave) {
-                var saveButton = {
-                    text: Mapbender.DigitizerTranslator.translate('feature.save.title'),
-                    click: function () {
-                        var dialog = $(this).closest('.ui-dialog-content');
-                        var feature = dialog.data('feature');
-                        widget.saveFeature(feature);
-                    }
-                };
-                buttons.push(saveButton);
-            }
-            if (schema.allowDelete) {
-                buttons.push({
-                    text: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
-                    'class': 'critical',
-                    click: function () {
-                        var dialog = $(this).closest('.ui-dialog-content');
-                        var feature = dialog.data('feature');
-                        widget.removeFeature(feature);
-                        widget.currentPopup.popupDialog('close');
-                    }
-                });
-            }
-            if (schema.allowCancelButton) {
-                buttons.push({
-                    text: Mapbender.DigitizerTranslator.translate('cancel'),
-                    click: function () {
-                        this.currentPopup.popupDialog('close');
-                    }.bind(this)
-                });
-            }
-            var popupConfiguration = {
-                title: Mapbender.DigitizerTranslator.translate('feature.attributes'),
-                width: widget.featureEditDialogWidth
-            };
-
-            if (schema.popup) {
-                schema.popup.buttons = schema.popup.buttons || [];
-
-                $.extend(popupConfiguration, schema.popup);
-
-                if (popupConfiguration.buttons && !schema._popupButtonsInitialized) {
-                    // Initialize custom button events
-                    _.each(popupConfiguration.buttons, function (button) {
-                        if (button.click) {
-                            var eventHandlerCode = button.click;
-                            button.click = function (e) {
-                                var _widget = widget;
-                                var el = $(this);
-                                var form = $(this).closest(".ui-dialog-content");
-                                var feature = form.data('feature');
-                                var data = feature.data;
-
-                                eval(eventHandlerCode);
-
-                                e.preventDefault();
-                                return false;
-                            }
-                        }
-                    });
-
-                    // Merge default and custom buttons
-                    _.each(buttons, function (button) {
-                        popupConfiguration.buttons.push(button);
-                    });
-
-                    schema._popupButtonsInitialized = true;
-                }
-            }
-
-            return popupConfiguration;
-        },
 
         /**
          *
@@ -1284,11 +1162,12 @@
                 }
             }
 
-            var popupConfiguration = widget._createPopupConfiguration(olFeature);
+            var popupConfiguration = schema.popup;
 
             this._processCurrentFormItemsWithDataManager(olFeature);
 
             var dialog = $("<div/>");
+
             olFeature.editDialog = dialog;
 
             if (!schema.elementsTranslated) {
@@ -1296,28 +1175,33 @@
                 schema.elementsTranslated = true;
             }
 
+            schema.editDialog = dialog;
+            widget.currentPopup = dialog;
+
 
             dialog.data('feature', olFeature);
             dialog.data('digitizerWidget', widget);
 
-            var formItems = widget.currentSchema.formItems;
+            dialog.generateElementsWithFormItems = function () {
+                var formItems = widget.currentSchema.formItems;
 
-            // If pop up isn't defined, generate inputs
-            if (!_.size(formItems)) {
-                formItems = [];
-                _.each(olFeature.data, function (value, key) {
-                    formItems.push({
-                        type: 'input',
-                        name: key,
-                        title: key
+                // If pop up isn't defined, generate inputs
+                if (!_.size(formItems)) {
+                    formItems = [];
+                    _.each(olFeature.data, function (value, key) {
+                        formItems.push({
+                            type: 'input',
+                            name: key,
+                            title: key
+                        })
                     })
-                })
-            }
+                }
 
-            dialog.generateElements({children: formItems});
+                dialog.generateElements({children: formItems});
+            }();
+
             dialog.popupDialog(popupConfiguration);
-            schema.editDialog = dialog;
-            widget.currentPopup = dialog;
+
             dialog.bind('edit-cancel', this.editCancel.bind(this));
             dialog.bind('popupdialogclose', function (event) {
                 dialog.trigger('edit-cancel', {
