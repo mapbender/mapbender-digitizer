@@ -397,7 +397,7 @@ var Scheme = OpenLayers.Class({
 
         if (schema.allowLocate) {
             buttons.push({
-                title: Mapbender.digitizer_translate('feature.zoom'),
+                title: Mapbender.DigitizerTranslator.translate('feature.zoom'),
                 className: 'zoom',
                 cssClass: 'fa fa-crosshairs',
                 onClick: function (olFeature, ui) {
@@ -408,7 +408,7 @@ var Scheme = OpenLayers.Class({
 
         // if (schema.allowSave) {
         //     buttons.push({
-        //         title: Mapbender.digitizer_translate('feature.save'),
+        //         title: Mapbender.DigitizerTranslator.translate('feature.save'),
         //         className: 'save',
         //         cssClass: ' fa fa-floppy-o',
         //         onClick: function (olFeature, ui) {
@@ -419,7 +419,7 @@ var Scheme = OpenLayers.Class({
 
         if (schema.allowEditData) {
             buttons.push({
-                title: Mapbender.digitizer_translate('feature.edit'),
+                title: Mapbender.DigitizerTranslator.translate('feature.edit'),
                 className: 'edit',
                 onClick: function (olFeature, ui) {
                     widget._openFeatureEditDialog(olFeature,schema);
@@ -428,7 +428,7 @@ var Scheme = OpenLayers.Class({
         }
         if (schema.copy.enable) {
             buttons.push({
-                title: Mapbender.digitizer_translate('feature.clone.title'),
+                title: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
                 className: 'clone',
                 cssClass: ' fa fa-files-o',
                 onClick: function (olFeature, ui) {
@@ -438,7 +438,7 @@ var Scheme = OpenLayers.Class({
         }
         if (schema.allowCustomerStyle) {
             buttons.push({
-                title: Mapbender.digitizer_translate('feature.style.change'),
+                title: Mapbender.DigitizerTranslator.translate('feature.style.change'),
                 className: 'style',
                 onClick: function (olFeature, ui) {
                     widget.openChangeStyleDialog(olFeature);
@@ -448,7 +448,7 @@ var Scheme = OpenLayers.Class({
 
         if (schema.allowChangeVisibility) {
             buttons.push({
-                title: 'Objekt anzeigen/ausblenden', //Mapbender.digitizer_translate('feature.visibility.change'),
+                title: 'Objekt anzeigen/ausblenden', //Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
                 className: 'visibility',
                 onClick: function (olFeature, ui, b, c) {
                     var layer = olFeature.layer;
@@ -489,7 +489,7 @@ var Scheme = OpenLayers.Class({
 
         if (schema.allowDelete) {
             buttons.push({
-                title: Mapbender.digitizer_translate("feature.remove.title"),
+                title: Mapbender.DigitizerTranslator.translate("feature.remove.title"),
                 className: 'remove',
                 cssClass: 'critical',
                 onClick: function (olFeature, ui) {
@@ -779,7 +779,7 @@ var Scheme = OpenLayers.Class({
             children: [{
                 type: 'checkbox',
                 cssClass: 'onlyExtent',
-                title: Mapbender.digitizer_translate('toolset.current-extent'),
+                title: Mapbender.DigitizerTranslator.translate('toolset.current-extent'),
                 checked: schema.searchType === "currentExtent",
                 change: function (e) {
                     schema.searchType = $(e.originalEvent.target).prop("checked") ? "currentExtent" : "all";

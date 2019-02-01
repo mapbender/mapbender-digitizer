@@ -90,7 +90,7 @@ var DigitizingControlFactory = function (layer,controlEvents) {
                 if (controlEvents.preventModification()) {
                     this.deactivate();
                     this.activate();
-                    $.notify(Mapbender.digitizer_translate('move.denied'));
+                    $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
                 }
 
 
@@ -115,7 +115,7 @@ var DigitizingControlFactory = function (layer,controlEvents) {
 
                 if (controlEvents.preventMove()) {
                     this.cancel();
-                    $.notify(Mapbender.digitizer_translate('move.denied'));
+                    $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
                 }
 
                 feature.isDragged = true;
