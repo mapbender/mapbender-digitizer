@@ -270,7 +270,7 @@ var Scheme = OpenLayers.Class({
             buttons.push({
                 text: Mapbender.DigitizerTranslator.translate('cancel'),
                 click: function () {
-                    this.currentPopup.popupDialog('close');
+                    widget.currentPopup.popupDialog('close');
                 }.bind(this)
             });
         }
