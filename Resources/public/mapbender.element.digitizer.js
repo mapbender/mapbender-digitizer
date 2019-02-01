@@ -71,73 +71,6 @@
         return o;
     }
 
-    Mapbender.layerManager = new function () {
-        var layerManager = this;
-        /**
-         * @define {OpenLayers.Map}
-         */
-        var olMap;
-
-        /**
-         * Set map object to handle with
-         *
-         * @param {OpenLayers.Map} map
-         */
-        layerManager.setMap = function (map) {
-            olMap = map;
-            return layerManager;
-        };
-
-        /**
-         * Refresh layer. Only if visible.
-         *
-         * @see http://osgeo-org.1560.x6.nabble.com/layer-WMS-don-t-redraw-td5086852.html
-         * @see http://dev.openlayers.org/apidocs/files/OpenLayers/Layer-js.html#OpenLayers.Layer.redraw
-         * @see https://gis.stackexchange.com/questions/36741/how-to-update-a-vector-layer-with-wfs-protocol-after-updating-the-filter
-         * @param {(OpenLayers.Layer | OpenLayers.Layer.Vector)} layer
-         * @return {OpenLayers.Layer}
-         */
-        layerManager.refreshLayer = function (layer) {
-            if (!layer.getVisibility()) {
-                return layer;
-            }
-
-            layer.setVisibility(false);
-            layer.setVisibility(true);
-
-            if (layer.redraw) {
-                layer.redraw(true);
-            }
-
-            if (layer.refresh) {
-                layer.refresh({force: true});
-            }
-            return layer;
-        };
-
-        /**
-         * Get layers by layer instance ID
-         *
-         * @param {number|string} _layerInstanceId
-         * @return {Array<OpenLayers.Layer>}
-         */
-        layerManager.getLayersByInstanceId = function (_layerInstanceId) {
-            var layers = [];
-            _.each(Mapbender.configuration.layersets, function (layerSet) {
-                _.each(layerSet, function (layerCollection) {
-                    _.each(layerCollection, function (layerInstanceInfo) {
-                        var layerInstanceId = layerInstanceInfo.origId;
-                        var layerId = layerInstanceInfo.ollid;
-                        if (layerInstanceId == _layerInstanceId) {
-                            var items = _.where(olMap.layers, {id: layerId});
-                            layers = layers.concat(items);
-                        }
-                    });
-                })
-            });
-            return layers;
-        }
-    };
 
 
 
@@ -174,7 +107,7 @@
      * @returns {*}
      */
     Mapbender.confirmDialog = function (options) {
-        var dialog = $("<div class='confirm-dialog'>" + (options.hasOwnProperty('html') ? options.html : "") + "</div>").popupDialog({
+        var dialog = $("<div class='confirm-dialog'>" + (options.html || "") + "</div>").popupDialog({
             title: options.hasOwnProperty('title') ? options.title : "",
             maximizable: false,
             dblclick: false,
@@ -232,7 +165,7 @@
         map: null,
         currentSchema: null,
         featureEditDialogWidth: "423px",
-        unsavedFeatures: {},
+        //unsavedFeatures: {},
 
         /**
          * Default styles merged by schema styles if defined
@@ -617,47 +550,21 @@
 
         },
 
-        _setup: function () {
-
+        _createSchemes: function() {
             var widget = this;
-            var element = $(widget.element);
-            var titleElement = $("> div.title", element);
-            var selector = widget.selector = $("select.selector", element);
-            var options = widget.options;
-            var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
-            var hasOnlyOneScheme = _.size(options.schemes) === 1;
-            var currentSchemaName = getValueOrDefault(options, "schema");
-
-            if (hasOnlyOneScheme) {
-                titleElement.html(_.toArray(options.schemes)[0].label);
-                selector.css('display', 'none');
-            } else {
-                titleElement.css('display', 'none');
-            }
-
             var newSchemes = {};
             _.each(widget.options.schemes, function(el,index){
                 el.widget = widget;
                 newSchemes[index] = new Scheme(el);
             });
 
-           widget.options.schemes = newSchemes;
+            return newSchemes;
+        },
 
+        _createOnSelectorChangeCallback: function(selector) {
+            var widget = this;
 
-            /**
-             * Set map context menu
-             */
-            widget._createMapContextMenu();
-
-            widget._createElementContextMenu();
-
-            widget._createTableTranslations();
-
-            widget._buildSelectOptionsForAllSchemes();
-
-
-
-            function onSelectorChange() {
+            return function () {
                 var option = selector.find(":selected");
                 var schema = option.data("schemaSettings");
                 var table = schema.table;
@@ -708,10 +615,42 @@
                 widget._getData();
             }
 
-            if (currentSchemaName !== undefined) {
-                selector.val(currentSchemaName);
+        },
+
+        _setup: function () {
+
+            var widget = this;
+            var element = $(widget.element);
+            var titleElement = $("> div.title", element);
+            var selector = widget.selector = $("select.selector", element);
+            var options = widget.options;
+            var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
+            var hasOnlyOneScheme = _.size(options.schemes) === 1;
+
+            if (hasOnlyOneScheme) {
+                titleElement.html(_.toArray(options.schemes)[0].label);
+                selector.css('display', 'none');
+            } else {
+                titleElement.css('display', 'none');
             }
 
+            widget.options.schemes = widget._createSchemes();
+
+            widget._createMapContextMenu();
+
+            widget._createElementContextMenu();
+
+            widget._createTableTranslations();
+
+            widget._buildSelectOptionsForAllSchemes();
+
+
+            var defaultSchemaName = getValueOrDefault(options, "schema");
+            if (defaultSchemaName !== undefined) {
+                selector.val(defaultSchemaName);
+            }
+
+            var onSelectorChange = widget._createOnSelectorChangeCallback(selector);
             selector.on('change', onSelectorChange);
 
             map.events.register("moveend", this, function () {
@@ -734,14 +673,14 @@
             onSelectorChange();
 
             // Check position and react by
-            var containerInfo = new MapbenderContainerInfo(widget, {
-                onactive: function () {
-                    widget.activate();
-                },
-                oninactive: function () {
-                    widget.deactivate();
-                }
-            });
+            // var containerInfo = new MapbenderContainerInfo(widget, {
+            //     onactive: function () {
+            //         widget.activate();
+            //     },
+            //     oninactive: function () {
+            //         widget.deactivate();
+            //     }
+            // });
 
             widget.updateClusterStrategies();
 
