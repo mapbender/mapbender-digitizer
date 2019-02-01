@@ -1023,6 +1023,95 @@ var Scheme = OpenLayers.Class({
         return formData;
     },
 
+
+    /**
+     * Create vector feature layer
+     *
+     * @returns {OpenLayers.Layer.Vector}
+     */
+    createSchemaFeatureLayer: function () {
+        var schema = this;
+        var widget = schema.widget;
+        var styles = schema.styles || {};
+        var isClustered = schema.isClustered = schema.hasOwnProperty('clustering');
+        var strategies = [];
+        var styleContext = {
+            context: {
+                webRootPath: Mapbender.configuration.application.urls.asset,
+                feature: function (feature) {
+                    return feature;
+                },
+                label: function (feature) {
+                    if (feature.attributes.hasOwnProperty("label")) {
+                        return feature.attributes.label;
+                    }
+                    return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
+                }
+            }
+        };
+        var styleMap = new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["default"], styles['default'] ? $.extend({}, widget.styles.default, styles['default']) : widget.styles.default), styleContext),
+            'select': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["select"], styles['select'] || widget.styles.select), styleContext),
+            'selected': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style["selected"], styles['selected'] || widget.styles.selected), styleContext),
+        }, {extendDefault: true});
+
+        styleMap.styles.invisible = new OpenLayers.Style({
+            strokeWidth: 1,
+            fillColor: "#F7F79A",
+            strokeColor: '#6fb536',
+            display: 'none'
+        });
+        styleMap.styles.labelText = new OpenLayers.Style({
+            strokeWidth: 0,
+            fillColor: '#cccccc',
+            fillOpacity: 0,
+            strokeColor: '#5e1a2b',
+            strokeOpacity: 0,
+            pointRadius: 15,
+            label: '${label}',
+            fontSize: 15
+        });
+        styleMap.styles.labelTextHover = new OpenLayers.Style({
+            strokeWidth: 0,
+            fillColor: '#cccccc',
+            strokeColor: '#2340d3',
+            fillOpacity: 1,
+            pointRadius: 15,
+            label: '${label}',
+            fontSize: 15
+        });
+
+        var copyStyleData = schema.copy && schema.copy.style;
+
+        if (copyStyleData) {
+            styleMap.styles.copy = new OpenLayers.Style(copyStyleData);
+        }
+
+        if (isClustered) {
+            var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
+            strategies.push(clusterStrategy);
+            schema.clusterStrategy = clusterStrategy;
+        }
+        var layer = new OpenLayers.Layer.Vector(schema.label, {
+            styleMap: styleMap,
+            visibility: false,
+            rendererOptions: {zIndexing: true},
+            strategies: strategies
+        });
+
+        if (schema.maxScale) {
+            layer.options.maxScale = schema.maxScale;
+        }
+
+        if (schema.minScale) {
+            layer.options.minScale = schema.minScale;
+        }
+
+        layer.name = schema.label;
+        schema.layer = layer;
+        widget.map.addLayer(layer);
+    },
+
     CLASS_NAME: "Mapbender.Digitizer.Schema"
 
 
