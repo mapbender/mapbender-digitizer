@@ -1603,11 +1603,11 @@
          */
         _highlightFeature: function (feature, highlight) {
 
-            var layer = feature.layer;
 
-            if (!feature || !layer) {
+            if (!feature || !feature.layer) {
                 return;
             }
+            var layer = feature.layer;
 
             if (feature.renderIntent && feature.renderIntent === 'invisible') {
                 return;
