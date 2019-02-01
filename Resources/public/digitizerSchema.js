@@ -166,19 +166,45 @@ var Scheme = OpenLayers.Class({
     },
 
 
+
+
+    _augmentPopupConfigurationButtons: function() {
+        var schema = this;
+        var widget = schema.widget;
+
+        // Initialize custom button events
+        _.each(schema.popup.buttons, function (button) {
+            if (button.click) {
+                var eventHandlerCode = button.click;
+                button.click = function (e) {
+                    var _widget = widget;
+                    var el = $(this);
+                    var form = $(this).closest(".ui-dialog-content");
+                    var feature = form.data('feature');
+                    var data = feature.data;
+
+                    eval(eventHandlerCode);
+
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+    },
     /**
      *
      * @private
      */
+
 
     _createPopupConfiguration: function () {
 
         /**@type {Scheme} */
         var schema = this;
         var widget = schema.widget;
-        var buttons = [];
+        var buttons = schema.popup.buttons;
 
-        console.log(schema.popup,"$$");
+        this._augmentPopupConfigurationButtons();
 
         if (schema.printable) {
             var printButton = {
@@ -248,33 +274,6 @@ var Scheme = OpenLayers.Class({
                 }.bind(this)
             });
         }
-
-
-
-        // Initialize custom button events
-        _.each(schema.popup.buttons, function (button) {
-            if (button.click) {
-                var eventHandlerCode = button.click;
-                button.click = function (e) {
-                    var _widget = widget;
-                    var el = $(this);
-                    var form = $(this).closest(".ui-dialog-content");
-                    var feature = form.data('feature');
-                    var data = feature.data;
-
-                    eval(eventHandlerCode);
-
-                    e.preventDefault();
-                    return false;
-                }
-            }
-        });
-
-        // Merge default and custom buttons
-        _.each(buttons, function (button) {
-            schema.popup.buttons.push(button);
-        });
-
 
     },
 
