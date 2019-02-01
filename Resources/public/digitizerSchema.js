@@ -12,6 +12,7 @@ var PopupConfiguration = OpenLayers.Class({
     initialize: function (options) {
         /** @type {PopupConfiguration} */
         var popupConfiguration = this;
+        popupConfiguration.buttons = []; // Important, otherwise buttons is in the prototype only
         popupConfiguration.displayClass = this.CLASS_NAME;
 
         OpenLayers.Util.extend(popupConfiguration, options);
@@ -52,6 +53,7 @@ var PopupConfiguration = OpenLayers.Class({
 
 
     createPopupConfiguration: function (popupConfigSchema) {
+
         var popupConfiguration = this;
 
         var buttons = popupConfiguration.buttons;
@@ -236,6 +238,7 @@ var Scheme = OpenLayers.Class({
         scale: 5000000,
         distance: 30
     }],
+    digitizingToolset : null,
 
     initialize: function (options) {
         /** @type {Scheme} */
@@ -254,6 +257,9 @@ var Scheme = OpenLayers.Class({
         if (schema.id == null) {
             schema.id = OpenLayers.Util.createUniqueID(schema.CLASS_NAME + "_");
         }
+
+
+        console.log(schema.popup);
 
         schema._initialzeHooks();
     },
@@ -844,7 +850,7 @@ var Scheme = OpenLayers.Class({
             });
         }
 
-        frame.append($('<div/>').digitizingToolSet({
+        var digitizingToolSetElement = $('<div/>').digitizingToolSet({
             children: toolset,
             layer: layer,
             translations: schema._createToolsetTranslations(),
@@ -909,7 +915,11 @@ var Scheme = OpenLayers.Class({
                 }
             }
 
-        }));
+        });
+
+        frame.append(digitizingToolSetElement);
+
+        schema.digitizingToolset = digitizingToolSetElement.data("digitizingToolSet");
 
         frame.generateElements({
             children: [{

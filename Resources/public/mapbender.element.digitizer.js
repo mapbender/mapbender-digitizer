@@ -536,11 +536,12 @@ Mapbender.DigitizerTranslator = {
                 newSchemes[index].widget = widget;
             });
 
-            return newSchemes;
+            widget.options.schemes =  newSchemes;
         },
 
-        _createOnSelectorChangeCallback: function (selector) {
+        _createOnSelectorChangeCallback: function () {
             var widget = this;
+            var selector = widget.selector;
 
             return function () {
                 var option = selector.find(":selected");
@@ -595,39 +596,24 @@ Mapbender.DigitizerTranslator = {
 
         },
 
-        _setup: function () {
-
+        _initializeSelector: function() {
             var widget = this;
-            var element = $(widget.element);
-            var titleElement = $("> div.title", element);
-            var selector = widget.selector = $("select.selector", element);
             var options = widget.options;
-            var map = widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
-            var hasOnlyOneScheme = _.size(options.schemes) === 1;
+            var selector = widget.selector;
 
-            if (hasOnlyOneScheme) {
-                titleElement.html(_.toArray(options.schemes)[0].label);
-                selector.css('display', 'none');
-            } else {
-                titleElement.css('display', 'none');
-            }
-
-            widget.options.schemes = widget._createSchemes();
-
-            widget._createMapContextMenu();
-
-            widget._createElementContextMenu();
-
-            widget._createTableTranslations();
-
-            widget._buildSelectOptionsForAllSchemes();
-
-            if (options.schema !== undefined) {
+            if (options.schema) {
                 selector.val(options.schema);
             }
 
-            var onSelectorChange = widget._createOnSelectorChangeCallback(selector);
+            var onSelectorChange = widget._createOnSelectorChangeCallback();
             selector.on('change', onSelectorChange);
+            onSelectorChange();
+
+        },
+
+        _initializeMapEvents: function() {
+            var widget = this;
+            var map = widget.map;
 
             map.events.register("moveend", this, function () {
                 widget._getData();
@@ -637,16 +623,52 @@ Mapbender.DigitizerTranslator = {
                 widget.updateClusterStrategies();
             });
             map.resetLayersZIndex();
+        },
+
+        _setup: function () {
+
+            var widget = this;
+            var element = $(widget.element);
+            var titleElement = $("> div.title", element);
+            var selector = widget.selector = $("select.selector", element);
+            var options = widget.options;
+
+            widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
+
+            var hasOnlyOneScheme = _.size(options.schemes) === 1;
+
+            if (hasOnlyOneScheme) {
+                titleElement.html(_.toArray(options.schemes)[0].label);
+                selector.css('display', 'none');
+            } else {
+                titleElement.css('display', 'none');
+            }
+
+            widget._createSchemes();
+
+            widget._createMapContextMenu();
+
+            widget._createElementContextMenu();
+
+            widget._createTableTranslations();
+
+            widget._buildSelectOptionsForAllSchemes();
+
+            widget._initializeSelector();
+
+            widget._initializeMapEvents();
+
             widget._trigger('ready');
 
             element.bind("mbdigitizerbeforechangedigitizing", function (e, sets) {
-                var previousSettings = sets.previous;
-                if (previousSettings) {
-                    var digitizerToolSetElement = $("> div.digitizing-tool-set", previousSettings.frame);
-                    digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");
+                /**@type {Scheme} */
+                var previousSchema = sets.previous;
+                if (previousSchema) {
+                    previousSchema.digitizingToolset.deactivateCurrentControl();
+                    // var digitizerToolSetElement = $("> div.digitizing-tool-set", previousSchema.frame);
+                    // digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");
                 }
             });
-            onSelectorChange();
 
             // Check position and react by
             // var containerInfo = new MapbenderContainerInfo(widget, {
@@ -1150,8 +1172,9 @@ Mapbender.DigitizerTranslator = {
             var widget = this;
             var layer = olFeature.layer;
             var map = layer.map;
-            var schemaPopupConfig = schema.popup || {};
-            var isOpenLayerCloudPopup = schemaPopupConfig.type && schemaPopupConfig.type === 'openlayers-cloud';
+            var popupConfiguration = schema.popup;
+
+            var isOpenLayerCloudPopup = popupConfiguration.type && popupConfiguration.type === 'openlayers-cloud';
 
             if (widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
@@ -1162,7 +1185,6 @@ Mapbender.DigitizerTranslator = {
                 }
             }
 
-            var popupConfiguration = schema.popup;
 
             this._processCurrentFormItemsWithDataManager(olFeature);
 

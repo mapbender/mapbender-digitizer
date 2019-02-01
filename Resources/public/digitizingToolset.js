@@ -31,10 +31,9 @@
                 getDefaultAttributes: function() { console.warn("this method shoud be overwritten"); return []; },
                 preventModification: function () { console.warn("this method shoud be overwritten"); return false;},
                 preventMove: function () { console.warn("this method shoud be overwritten"); return false; },
-                extendFeatureDataWhenNoPopupOpen: function() {}
+                extendFeatureDataWhenNoPopupOpen: function() { console.warn("this method shoud be overwritten"); return false; }
             },
-            defaultAttributes: [],
-            openFeatureEditDialog: function() { console.warn("this method should be overwritten"); }
+            defaultAttributes: []
         },
         controlFactory: null,
         activeControl: null,
@@ -54,6 +53,8 @@
             toolSet.refresh();
 
             $(this.element).on('click', '.-fn-tool-button', this.onToolButtonClick.bind(this));
+
+            $(this.element).data("digitizingToolSet",this);
 
         },
 
