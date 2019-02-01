@@ -78,23 +78,6 @@
 
 
 
-
-    function getValueOrDefault(o, s, d) {
-        s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
-        s = s.replace(/^\./, '');           // strip a leading dot
-        var a = s.split('.');
-        for (var i = 0, n = a.length; i < n; i++) {
-            var k = a[i];
-            if (k in o) {
-                o = o[k];
-            } else {
-                return d;
-            }
-        }
-        return o;
-    }
-
-
     /**
      * Example:
      *     Mapbender.confirmDialog({html: "Feature löschen?", title: "Bitte bestätigen!", onSuccess:function(){
@@ -639,10 +622,8 @@
 
             widget._buildSelectOptionsForAllSchemes();
 
-
-            var defaultSchemaName = getValueOrDefault(options, "schema");
-            if (defaultSchemaName !== undefined) {
-                selector.val(defaultSchemaName);
+            if (options.schema !== undefined) {
+                selector.val(options.schema);
             }
 
             var onSelectorChange = widget._createOnSelectorChangeCallback(selector);
@@ -703,7 +684,7 @@
             var layer = schema.layer;
             var newFeature = feature.clone();
             var config = schema.copy;
-            var defaultAttributes = getValueOrDefault(config, "data", {});
+            var defaultAttributes = config.data || {};
             var allowCopy = true;
 
             _.each(schema.copy.rules, function (ruleCode) {
@@ -747,7 +728,8 @@
 
                 widget._trigger("copyfeature", null, feature);
 
-                var successHandler = getValueOrDefault(config, "on.success");
+                var successHandler = config.on && config.on.success;
+
                 if (successHandler) {
                     var r = function (feature) {
                         return eval(successHandler + ";");
@@ -880,7 +862,7 @@
                     }
 
 
-                    var successHandler = getValueOrDefault(schema, "save.on.success");
+                    var successHandler = schema.save && schema.save.on && schema.save.on.success;
                     if (successHandler) {
                         eval(successHandler);
                     }
@@ -1868,7 +1850,7 @@
                 fontSize: 15
             });
 
-            var copyStyleData = getValueOrDefault(schema, 'copy.style', null);
+            var copyStyleData = schema.copy && schema.copy.style;
 
             if (copyStyleData) {
                 styleMap.styles.copy = new OpenLayers.Style(copyStyleData);
