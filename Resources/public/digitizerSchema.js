@@ -1,141 +1,3 @@
-var PopupConfiguration = OpenLayers.Class({
-
-    id: null,
-    displayClass: '',
-
-    title: Mapbender.DigitizerTranslator.translate('feature.attributes'),
-    width:  "423px",
-    remoteData: false,
-    type: null,
-    buttons: null,
-
-    initialize: function (options) {
-        /** @type {PopupConfiguration} */
-        var popupConfiguration = this;
-        popupConfiguration.buttons = []; // Important, otherwise buttons is in the prototype only
-        popupConfiguration.displayClass = this.CLASS_NAME;
-
-        OpenLayers.Util.extend(popupConfiguration, options);
-
-        if (popupConfiguration.id == null) {
-            popupConfiguration.id = OpenLayers.Util.createUniqueID(popupConfiguration.CLASS_NAME + "_");
-        }
-
-    },
-
-    _augmentPopupConfigurationButtons: function(popupConfigSchema) {
-        var popupConfiguration = this;
-        var widget = popupConfigSchema.widget;
-
-        // Initialize custom button events
-        _.each(popupConfiguration.buttons, function (button) {
-            if (button.click) {
-                var eventHandlerCode = button.click;
-                button.click = function (e) {
-                    var _widget = widget;
-                    var el = $(this);
-                    var form = $(this).closest(".ui-dialog-content");
-                    var feature = form.data('feature');
-                    var data = feature.data;
-
-                    eval(eventHandlerCode);
-
-                    e.preventDefault();
-                    return false;
-                }
-            }
-        });
-    },
-    /**
-     * @param {Scheme} popupConfigSchema
-     * @private
-     */
-
-
-    createPopupConfiguration: function (popupConfigSchema) {
-
-        var popupConfiguration = this;
-
-        var buttons = popupConfiguration.buttons;
-
-        this._augmentPopupConfigurationButtons(popupConfigSchema);
-
-        if (popupConfigSchema.printable) {
-            var printButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.print'),
-                click: function () {
-                    var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-                    if (printWidget) {
-                        var dialog = $(this).closest('.ui-dialog-content');
-                        var feature = dialog.data('feature');
-                        printWidget.printDigitizerFeature(popupConfigSchema.featureTypeName || popupConfigSchema.schemaName, feature.fid);
-                    } else {
-                        $.notify('Druck Element ist nicht verfügbar!');
-                    }
-                }
-            };
-            buttons.push(printButton);
-        }
-        if (popupConfigSchema.copy.enable) {
-            buttons.push({
-                text: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
-                click: function (e) {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    widget.copyFeature(olFeature); // TODO possibly a bug?
-                }
-            });
-        }
-        if (popupConfigSchema.allowCustomerStyle) {
-            var styleButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.style.change'),
-                click: function (e) {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    widget.openChangeStyleDialog(feature);
-                }
-            };
-            buttons.push(styleButton);
-        }
-        if (popupConfigSchema.allowEditData && popupConfigSchema.allowSave) {
-            var saveButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.save.title'),
-                click: function () {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    widget.saveFeature(feature);
-                }
-            };
-            buttons.push(saveButton);
-        }
-        if (popupConfigSchema.allowDelete) {
-            buttons.push({
-                text: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
-                'class': 'critical',
-                click: function () {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    widget.removeFeature(feature);
-                    widget.currentPopup.popupDialog('close');
-                }
-            });
-        }
-        if (popupConfigSchema.allowCancelButton) {
-            buttons.push({
-                text: Mapbender.DigitizerTranslator.translate('cancel'),
-                click: function () {
-                    widget.currentPopup.popupDialog('close');
-                }.bind(this)
-            });
-        }
-
-    },
-
-
-    CLASS_NAME: "Mapbender.Digitizer.Schema.PopupConfiguration"
-
-});
-
 var Scheme = OpenLayers.Class({
 
     id: null,
@@ -247,8 +109,10 @@ var Scheme = OpenLayers.Class({
 
         OpenLayers.Util.extend(schema, options);
 
-        schema.popup = new PopupConfiguration(options.popup);
-        schema.popup.createPopupConfiguration(schema);
+        if (schema.popup) {
+            schema.popup.buttons = schema.popup.buttons || [];
+            schema.createPopupConfiguration();
+        }
 
         schema.events = new OpenLayers.Events(schema);
         if (schema.eventListeners instanceof Object) {
@@ -338,6 +202,118 @@ var Scheme = OpenLayers.Class({
             }
         }
     },
+
+
+    _augmentPopupConfigurationButtons: function() {
+        var schema = this;
+        var widget = schema.widget;
+        var popupConfiguration = schema.popup;
+
+        // Initialize custom button events
+        _.each(popupConfiguration.buttons, function (button) {
+            if (button.click) {
+                var eventHandlerCode = button.click;
+                button.click = function (e) {
+                    var _widget = widget;
+                    var el = $(this);
+                    var form = $(this).closest(".ui-dialog-content");
+                    var feature = form.data('feature');
+                    var data = feature.data;
+
+                    eval(eventHandlerCode);
+
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+    },
+    /**
+     * @private
+     */
+
+
+    createPopupConfiguration: function () {
+
+        var schema = this;
+        var widget = schema.widget;
+        var popupConfiguration = schema.popup;
+
+        var buttons = popupConfiguration.buttons;
+
+        this._augmentPopupConfigurationButtons();
+
+        if (schema.printable) {
+            var printButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.print'),
+                click: function () {
+                    var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
+                    if (printWidget) {
+                        var dialog = $(this).closest('.ui-dialog-content');
+                        var feature = dialog.data('feature');
+                        printWidget.printDigitizerFeature(schema.featureTypeName || schema.schemaName, feature.fid);
+                    } else {
+                        $.notify('Druck Element ist nicht verfügbar!');
+                    }
+                }
+            };
+            buttons.push(printButton);
+        }
+        if (schema.copy.enable) {
+            buttons.push({
+                text: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
+                click: function (e) {
+                    var dialog = $(this).closest('.ui-dialog-content');
+                    var feature = dialog.data('feature');
+                    widget.copyFeature(olFeature); // TODO possibly a bug?
+                }
+            });
+        }
+        if (schema.allowCustomerStyle) {
+            var styleButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.style.change'),
+                click: function (e) {
+                    var dialog = $(this).closest('.ui-dialog-content');
+                    var feature = dialog.data('feature');
+                    widget.openChangeStyleDialog(feature);
+                }
+            };
+            buttons.push(styleButton);
+        }
+        if (schema.allowEditData && schema.allowSave) {
+            var saveButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.save.title'),
+                click: function () {
+                    var dialog = $(this).closest('.ui-dialog-content');
+                    var feature = dialog.data('feature');
+                    widget.saveFeature(feature);
+                }
+            };
+            buttons.push(saveButton);
+        }
+        if (schema.allowDelete) {
+            buttons.push({
+                text: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                'class': 'critical',
+                click: function () {
+                    var dialog = $(this).closest('.ui-dialog-content');
+                    var feature = dialog.data('feature');
+                    widget.removeFeature(feature);
+                    widget.currentPopup.popupDialog('close');
+                }
+            });
+        }
+        if (schema.allowCancelButton) {
+            buttons.push({
+                text: Mapbender.DigitizerTranslator.translate('cancel'),
+                click: function () {
+                    widget.currentPopup.popupDialog('close');
+                }.bind(this)
+            });
+        }
+
+    },
+
 
 
     _createToolsetTranslations: function () {
