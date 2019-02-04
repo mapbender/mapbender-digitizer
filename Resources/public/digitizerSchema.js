@@ -236,7 +236,6 @@ var Scheme = OpenLayers.Class({
     createPopupConfiguration: function () {
 
         var schema = this;
-        var widget = schema.widget;
         var popupConfiguration = schema.popup;
 
         var buttons = popupConfiguration.buttons;
@@ -265,7 +264,7 @@ var Scheme = OpenLayers.Class({
                 click: function (e) {
                     var dialog = $(this).closest('.ui-dialog-content');
                     var feature = dialog.data('feature');
-                    widget.copyFeature(olFeature); // TODO possibly a bug?
+                    schema.widget.copyFeature(olFeature); // TODO possibly a bug?
                 }
             });
         }
@@ -286,7 +285,7 @@ var Scheme = OpenLayers.Class({
                 click: function () {
                     var dialog = $(this).closest('.ui-dialog-content');
                     var feature = dialog.data('feature');
-                    widget.saveFeature(feature);
+                    schema.widget.saveFeature(feature);
                 }
             };
             buttons.push(saveButton);
@@ -298,8 +297,8 @@ var Scheme = OpenLayers.Class({
                 click: function () {
                     var dialog = $(this).closest('.ui-dialog-content');
                     var feature = dialog.data('feature');
-                    widget.removeFeature(feature);
-                    widget.currentPopup.popupDialog('close');
+                    schema.widget.removeFeature(feature);
+                    schema.widget.currentPopup.popupDialog('close');
                 }
             });
         }
@@ -307,7 +306,7 @@ var Scheme = OpenLayers.Class({
             buttons.push({
                 text: Mapbender.DigitizerTranslator.translate('cancel'),
                 click: function () {
-                    widget.currentPopup.popupDialog('close');
+                    schema.widget.currentPopup.popupDialog('close');
                 }.bind(this)
             });
         }

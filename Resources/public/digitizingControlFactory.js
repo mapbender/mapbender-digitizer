@@ -17,8 +17,6 @@ var createFeatureAddedMethod = function(controlEvents) {
         controlEvents.deactivateCurrentControl();
         controlEvents.openFeatureEditDialog(feature);
 
-        console.log("featureAdded", feature);
-
     };
 
     return func;
