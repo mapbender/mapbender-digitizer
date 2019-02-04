@@ -633,15 +633,12 @@ Mapbender.DigitizerTranslator = {
             map.resetLayersZIndex();
         },
 
-        _setup: function () {
-
+        _initializeSelectorOrTitleElement: function() {
             var widget = this;
+            var options = widget.options;
             var element = $(widget.element);
             var titleElement = $("> div.title", element);
-            var selector = widget.selector = $("select.selector", element);
-            var options = widget.options;
 
-            widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
 
             var hasOnlyOneScheme = _.size(options.schemes) === 1;
 
@@ -651,6 +648,18 @@ Mapbender.DigitizerTranslator = {
             } else {
                 titleElement.css('display', 'none');
             }
+        },
+
+        _setup: function () {
+
+            var widget = this;
+            var element = $(widget.element);
+            var selector = widget.selector = $("select.selector", element);
+            var options = widget.options;
+
+            widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
+
+            widget._initializeSelectorOrTitleElement();
 
             widget._createSchemes();
 
@@ -673,34 +682,14 @@ Mapbender.DigitizerTranslator = {
                 var previousSchema = sets.previous;
                 if (previousSchema) {
                     previousSchema.digitizingToolset.deactivateCurrentControl();
-                    // var digitizerToolSetElement = $("> div.digitizing-tool-set", previousSchema.frame);
-                    // digitizerToolSetElement.digitizingToolSet("deactivateCurrentControl");
                 }
             });
 
-            // Check position and react by
-            // var containerInfo = new MapbenderContainerInfo(widget, {
-            //     onactive: function () {
-            //         widget.activate();
-            //     },
-            //     oninactive: function () {
-            //         widget.deactivate();
-            //     }
-            // });
 
             widget.updateClusterStrategies();
 
         },
 
-        /**
-         * Evalute handler code
-         * @param handlerCode
-         * @param context
-         * @private
-         */
-        _evaluateHandler: function (handlerCode, context) {
-
-        },
 
         /**
          * Copy feature
@@ -837,7 +826,7 @@ Mapbender.DigitizerTranslator = {
                     //delete widget.unsavedFeatures[feature.id];
 
                     if (!hasFeatureAfterSave) {
-                        widget.reloadFeatures(layer, _.without(layer.features, feature));
+                        schema.reloadFeatures(_.without(layer.features, feature));
                         dialog && dialog.popupDialog('close');
                         return;
                     }
@@ -860,7 +849,7 @@ Mapbender.DigitizerTranslator = {
                         newFeature[key] = feature[key];
                     });
 
-                    widget.reloadFeatures(layer, _.union(_.without(layer.features, feature), [newFeature]));
+                    schema.reloadFeatures( _.union(_.without(layer.features, feature), [newFeature]));
                     feature = newFeature;
 
                     tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
@@ -1471,7 +1460,7 @@ Mapbender.DigitizerTranslator = {
                     if (_.size(errors)) {
                         // console.log("Search mandatory rules isn't complete", errors);
                         // Remove all features
-                        widget.reloadFeatures(schema.layer, []);
+                        schema.reloadFeatures( []);
                         schema.lastRequest = null;
                         return;
                     }
@@ -1488,7 +1477,7 @@ Mapbender.DigitizerTranslator = {
             // If schema search activated, then only
             if (schema.search && !isExtentOnly) {
                 // Remove all features
-                widget.reloadFeatures(schema.layer, []);
+                schema.reloadFeatures([]);
             }
 
             // Abort previous request
@@ -1660,11 +1649,11 @@ Mapbender.DigitizerTranslator = {
                     if (clusterSettings.hasOwnProperty('disable') && clusterSettings.disable) {
                         schema.clusterStrategy.distance = -1;
                         var features = schema.layer.features;
-                        widget.reloadFeatures(schema.layer, []);
+                        schema.reloadFeatures([]);
                         schema.clusterStrategy.deactivate();
                         //schema.layer.redraw();
                         schema.isClustered = false;
-                        widget.reloadFeatures(schema.layer, features);
+                        schema.reloadFeatures(features);
 
                     } else {
                         schema.clusterStrategy.activate();
@@ -1731,7 +1720,7 @@ Mapbender.DigitizerTranslator = {
             function _removeFeatureFromUI() {
                 //var clonedFeature = jQuery.extend(true, {}, olFeature);
                 var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
-                widget.reloadFeatures(layer, _.without(existingFeatures, olFeature));
+                schema.reloadFeatures( _.without(existingFeatures, olFeature));
 
                 /** @deprecated */
                 widget._trigger('featureRemoved', null, {
@@ -1894,82 +1883,9 @@ Mapbender.DigitizerTranslator = {
                 }
             });
 
-            widget.reloadFeatures(layer, _.union(features, polygones, lineStrings, points));
+            schema.reloadFeatures( _.union(features, polygones, lineStrings, points));
         },
 
-        /**
-         * Reload or replace features from the layer and feature table
-         * - Fix OpenLayer bug by clustered features.
-         *
-         * @param {(OpenLayers.Layer | OpenLayers.Layer.Vector)} layer
-         * @param _features
-         * @version 0.2
-         */
-        reloadFeatures: function (layer, _features) {
-            var widget = this;
-            var schema = widget.findSchemaByLayer(layer);
-            var tableApi = schema.table.resultTable('getApi');
-            var features = _features || layer.features;
-
-            if (features.length && features[0].cluster) {
-                features = _.flatten(_.pluck(layer.features, "cluster"));
-            }
-
-            var featuresWithoutDrawElements = _.difference(features, _.where(features, {_sketch: true}));
-
-            layer.removeAllFeatures();
-            layer.addFeatures(features);
-
-            // Add layer to feature
-            _.each(features, function (feature) {
-                feature.layer = layer;
-
-                if (feature.attributes && feature.attributes.label) {
-                    feature.styleId = "labelText";
-                    widget._highlightFeature(feature);
-                    return;
-                }
-
-                if (schema.featureStyles && schema.featureStyles[feature.fid]) {
-                    if (!feature.styleId) {
-                        var styleData = schema.featureStyles[feature.fid];
-                        var styleMap = layer.options.styleMap;
-                        var styles = styleMap.styles;
-                        var styleId = styleData.id;
-                        var style = new OpenLayers.Style(styleData, {uid: styleId});
-                        // style.id = styleId;
-                        styles[styleId] = style;
-                        feature.styleId = styleId;
-                        widget._highlightFeature(feature);
-                    }
-                }
-
-            });
-
-            layer.redraw();
-
-            tableApi.clear();
-            tableApi.rows.add(featuresWithoutDrawElements);
-            tableApi.draw();
-
-            if (widget.options.__disabled) {
-                widget.deactivate();
-            }
-
-            // var tbody = $(tableApi.body());
-
-            // Post handling
-            var nodes = tableApi.rows(function (idx, data, row) {
-                var isInvisible = data.renderIntent === 'invisible';
-                if (isInvisible) {
-                    var $row = $(row);
-                    var visibilityButton = $row.find('.button.icon-visibility');
-                    visibilityButton.addClass('icon-invisibility');
-                    $row.addClass('invisible-feature');
-                }
-                return true;
-            });
-        },
 
 
         /**
