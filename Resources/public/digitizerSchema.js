@@ -137,38 +137,21 @@ Scheme.prototype = {
         },
 
 
-        /**
-         *
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
-         * @param {boolean} highlight
-         * @private
-         */
-
-        _highlightSchemaFeature: function (feature, highlight) {
-
-            /** @type {Scheme} */
+        getTableWidget: function() {
             var schema = this;
             var table = schema.table;
-            var tableWidget = table.data('visUiJsResultTable');
-            var isSketchFeature = !feature.cluster && feature._sketch && _.size(feature.data) === 0;
-            var features = feature.cluster || [feature];
+            return table.data('visUiJsResultTable');
+        },
+
+
+        redrawFeature: function(feature,highlight) {
             var layer = feature.layer;
-            var domRow;
-
-            if (feature.renderIntent && feature.renderIntent === 'invisible') {
-                return;
-            }
-
-            if (isSketchFeature) {
-                return;
-            }
 
             var styleId = feature.styleId || 'default';
 
             if (feature.attributes && feature.attributes.label) {
                 layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
             } else {
-
                 if (highlight) {
                     layer.drawFeature(feature, 'select');
                 } else {
@@ -179,6 +162,14 @@ Scheme.prototype = {
                     }
                 }
             }
+
+        },
+
+        hoverInResultTable: function(feature,highlight) {
+
+            var features = feature.cluster || [feature];
+            var tableWidget = this.getTableWidget();
+            var domRow;
 
             for (var k in features) {
                 var feature = features[k];
@@ -196,6 +187,32 @@ Scheme.prototype = {
                     break;
                 }
             }
+        },
+        /**
+         *
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
+         * @param {boolean} highlight
+         * @private
+         */
+
+        _highlightSchemaFeature: function (feature, highlight) {
+
+
+            var isSketchFeature = !feature.cluster && feature._sketch && _.size(feature.data) === 0;
+
+
+            if (feature.renderIntent && feature.renderIntent === 'invisible') {
+                return;
+            }
+
+            if (isSketchFeature) {
+                return;
+            }
+
+           this.redrawFeature(feature,highlight);
+           this.hoverInResultTable(feature,highlight);
+
+
         },
 
 
