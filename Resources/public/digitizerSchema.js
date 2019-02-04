@@ -15,6 +15,9 @@ var Scheme = function (rawScheme, widget) {
 
     schema.widget = widget;
 
+    schema.toolset = widget.toolsets[schema.featureType.geomType];
+
+
     // TODO this has to be carefully checked for prototype propertys, since it fills the `undefined` properties, so it may not work at all
     _.defaults(schema, schema.widget._getNonBlackListedOptions());
 
@@ -32,7 +35,6 @@ Scheme.prototype = {
     layer: null,
     widget: null,
     frame: null,
-    inlineSearch: true,
     maxResults: 500,
     displayPermanent: false,
     dataStore: null,
@@ -593,6 +595,10 @@ Scheme.prototype = {
 
         schema._generateToolSetView();
 
+        if (!schema.showExtendSearchSwitch) {
+            $(".onlyExtent", frame).css('display', 'none');
+        }
+
         schema._generateSearchForm();
 
         frame.append('<div style="clear:both;"/>');
@@ -928,9 +934,6 @@ Scheme.prototype = {
                 .on('change', onSubmitSearch);
         }
 
-        if (!schema.showExtendSearchSwitch) {
-            $(".onlyExtent", frame).css('display', 'none');
-        }
     },
 
     triggerModifiedState: function (feature, control, on) {
@@ -963,10 +966,7 @@ Scheme.prototype = {
             newFeatureDefaultProperties.push(fieldName);
         });
 
-        var toolset = widget.toolsets[schema.featureType.geomType];
-        if (schema.hasOwnProperty("toolset")) {
-            toolset = schema.toolset;
-        }
+        var toolset = schema.toolset;
         // remove removeSelected Control if !allowDelete
         if (!schema.allowDelete) {
             $.each(toolset, function (k, tool) {

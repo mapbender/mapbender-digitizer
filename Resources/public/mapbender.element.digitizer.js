@@ -126,21 +126,10 @@ Mapbender.DigitizerTranslator = {
      * @copyright 20.04.2015 by WhereGroup GmbH & Co. KG
      */
     $.widget("mapbender.mbDigitizer", {
-        // Default tool-sets
         toolsets: {
-            point: [
-
-                {type: 'drawPoint'}, //{type: 'modifyFeature'},
-                {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}
-                //{type: 'removeAll'}
-            ],
-            line: [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}
-                //{type: 'removeAll'}
-            ],
-            polygon: [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}
-
-                //{type: 'removeAll'}
-            ]
+            point: [ {type: 'drawPoint'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
+            line: [ {type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'} ],
+            polygon: [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'} ]
         },
         /**
          * @type {OpenLayers.Map}
