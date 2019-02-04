@@ -142,6 +142,9 @@ Mapbender.DigitizerTranslator = {
                 //{type: 'removeAll'}
             ]
         },
+        /**
+         * @type {OpenLayers.Map}
+         */
         map: null,
         currentSchema: null,
         featureEditDialogWidth: "423px",
@@ -520,18 +523,25 @@ Mapbender.DigitizerTranslator = {
                 var schema = this;
                 schema.createSchemaFeatureLayer();
 
-                schema.schemaName = schemaName;
-                schema._buildSelectOptions();
+                schema._setSchemaName(schemaName);
+                schema._createToolbar();
+                schema._addSelectControl();
+
             })
 
+        },
+
+        _getNonBlackListedOptions: function() {
+            var widget = this;
+            var blacklist = ['schemes', 'target', 'create', 'jsSrc', 'disabled'];
+            return _.omit(widget.options, blacklist);
         },
 
         _createSchemes: function () {
             var widget = this;
             var newSchemes = {};
-            _.each(widget.options.schemes, function (el, index) {
-                newSchemes[index] = new Scheme(el);
-                newSchemes[index].widget = widget;
+            _.each(widget.options.schemes, function (rawScheme, index) {
+                newSchemes[index] = new Scheme(rawScheme,widget);
             });
 
             widget.options.schemes =  newSchemes;

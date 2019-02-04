@@ -1,9 +1,9 @@
 
-var Scheme = function(options) {
+var Scheme = function(rawScheme,widget) {
     /** @type {Scheme} */
     var schema = this;
 
-   schema = $.extend(schema, options);
+   schema = $.extend(schema, rawScheme);
 
     if (schema.popup) {
         schema.popup.buttons = schema.popup.buttons || [];
@@ -13,6 +13,12 @@ var Scheme = function(options) {
     schema._initialzeHooks();
 
     schema.triggerModifiedState = Scheme.prototype.triggerModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
+
+    schema.widget = widget;
+
+    // TODO this has to be carefully checked for prototype propertys, since it fills the `undefined` properties, so it may not work at all
+    _.defaults(schema, schema.widget._getNonBlackListedOptions());
+
 
 
 };
@@ -369,9 +375,10 @@ Scheme.prototype = {
          * @private
          */
 
-        _addSelectControl: function (layer) {
+        _addSelectControl: function () {
             /** @type {Scheme} */
             var schema = this;
+            var layer = schema.layer;
             var widget = this.widget;
             var map = widget.map;
             var table = schema.table;
@@ -411,14 +418,7 @@ Scheme.prototype = {
             });
 
             // Workaround to move map by touch vector features
-            if (typeof (selectControl.handlers) != "undefined") { // OL 2.7
-                selectControl.handlers.feature.stopDown = false;
-            }
-            // else if (typeof(selectFeatureControl.handler) != "undefined") { // OL < 2.7
-            //     selectControl.handler.stopDown = false;
-            //     selectControl.handler.stopUp = false;
-            // }
-
+            selectControl.handlers && selectControl.handlers.feature && (selectControl.handlers.feature.stopDown = false);
             schema.selectControl = selectControl;
             selectControl.deactivate();
             map.addControl(selectControl);
@@ -473,21 +473,22 @@ Scheme.prototype = {
 
         },
 
+        _setSchemaName: function(name) {
+            var schema = this;
+            schema.schemaName = name;
 
-        _buildSelectOptions: function () {
+        },
+
+        _createToolbar: function () {
             /** @type {Scheme} */
             var schema = this;
             var schemaName = schema.schemaName;
             var widget = schema.widget;
-            var options = widget.options;
             var element = $(widget.element);
             var selector = widget.selector;
-            var layer = schema.layer;
 
             // Merge settings with default values from options
-            _.defaults(schema, _.omit(options, ['schemes', 'target', 'create', 'jsSrc', 'disabled']));
 
-            schema.schemaName = schemaName;
 
             var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
 
@@ -510,7 +511,6 @@ Scheme.prototype = {
             option.data("schemaSettings", schema);
             selector.append(option);
 
-            schema._addSelectControl(layer);
         },
 
 
