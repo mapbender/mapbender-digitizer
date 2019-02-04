@@ -769,13 +769,13 @@ Mapbender.DigitizerTranslator = {
          */
         saveFeature: function (feature) {
 
-            if (feature.disabled) {
+            if (feature.disabled) { // Feature is temporarily disabled
                 return;
             }
 
             var widget = this;
             var schema = widget.currentSchema;
-            var dialog = feature.editDialog;
+            var dialog = schema.editDialog;
             var table = schema.table;
             var tableWidget = table.data('visUiJsResultTable');
             var tableApi = table.resultTable('getApi');
@@ -1187,8 +1187,6 @@ Mapbender.DigitizerTranslator = {
             this._processCurrentFormItemsWithDataManager(olFeature);
 
             var dialog = $("<div/>");
-
-            olFeature.editDialog = dialog;
 
             if (!schema.elementsTranslated) {
                 Mapbender.DigitizerTranslator.translateStructure(widget.currentSchema.formItems);

@@ -7,7 +7,7 @@ var PopupConfiguration = OpenLayers.Class({
     width:  "423px",
     remoteData: false,
     type: null,
-    buttons: [],
+    buttons: null,
 
     initialize: function (options) {
         /** @type {PopupConfiguration} */
