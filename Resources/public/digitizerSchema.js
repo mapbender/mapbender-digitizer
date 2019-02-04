@@ -433,70 +433,43 @@ Scheme.prototype = {
     },
 
     /**
-     * Reload or replace features from the layer and feature table
-     * - Fix OpenLayer bug by clustered features.
+     * Set feature style
      *
-     * @param {(OpenLayers.Layer | OpenLayers.Layer.Vector)} layer
-     * @param _features
-     * @version 0.2
+     * @param feature
+     * @private
      */
-    reloadFeatures: function (_features) {
+    _setFeatureStyle: function (feature) {
         var schema = this;
-        var widget = schema.widget;
         var layer = schema.layer;
-        var schema = widget.findSchemaByLayer(layer);
-        var tableApi = schema.table.resultTable('getApi');
-        var features = _features || layer.features;
 
-        if (features.length && features[0].cluster) {
-            features = _.flatten(_.pluck(layer.features, "cluster"));
+        if (feature.attributes && feature.attributes.label) {
+            feature.styleId = "labelText";
         }
 
-        var featuresWithoutDrawElements = _.difference(features, _.where(features, {_sketch: true}));
+        if(schema.featureStyles && schema.featureStyles[feature.fid]) {
+            if(!feature.styleId){
+                var styleData = schema.featureStyles[feature.fid],
+                    styleMap = layer.options.styleMap,
+                    styles = styleMap.styles,
+                    styleId = styleData.id,
+                    style = new OpenLayers.Style(styleData, {uid: styleId});
 
-        layer.removeAllFeatures();
-        layer.addFeatures(features);
-
-        // Add layer to feature
-        _.each(features, function (feature) {
-            feature.layer = layer;
-
-            if (feature.attributes && feature.attributes.label) {
-                feature.styleId = "labelText";
-                widget._highlightFeature(feature);
-                return;
+                styles[styleId] = style;
+                feature.styleId = styleId;
             }
+        }
+    },
 
-            if (schema.featureStyles && schema.featureStyles[feature.fid]) {
-                if (!feature.styleId) {
-                    var styleData = schema.featureStyles[feature.fid];
-                    var styleMap = layer.options.styleMap;
-                    var styles = styleMap.styles;
-                    var styleId = styleData.id;
-                    var style = new OpenLayers.Style(styleData, {uid: styleId});
-                    // style.id = styleId;
-                    styles[styleId] = style;
-                    feature.styleId = styleId;
-                    widget._highlightFeature(feature);
-                }
-            }
-
-        });
-
-        layer.redraw();
+    _redrawResultTableFeatures: function(features) {
+        var schema = this;
+        var tableApi = schema.table.resultTable('getApi');
 
         tableApi.clear();
+        var featuresWithoutDrawElements = _.difference(features, _.where(features, {_sketch: true}));
         tableApi.rows.add(featuresWithoutDrawElements);
         tableApi.draw();
 
-        if (widget.options.__disabled) {
-            widget.deactivate();
-        }
-
-        // var tbody = $(tableApi.body());
-
-        // Post handling
-        var nodes = tableApi.rows(function (idx, data, row) {
+        tableApi.rows(function (idx, data, row) {
             var isInvisible = data.renderIntent === 'invisible';
             if (isInvisible) {
                 var $row = $(row);
@@ -506,6 +479,47 @@ Scheme.prototype = {
             }
             return true;
         });
+
+    },
+    /**
+     * Reload or replace features from the layer and feature table
+     * - Fix OpenLayer bug by clustered features.
+     *
+     * @param _features
+     * @version 0.2
+     */
+    reloadFeatures: function (_features) {
+        var schema = this;
+        var widget = schema.widget;
+        var layer = schema.layer;
+        var schema = widget.findSchemaByLayer(layer);
+        var features = _features || layer.features;
+
+        if (features.length && features[0].cluster) {
+            features = _.flatten(_.pluck(layer.features, "cluster"));
+        }
+
+
+        layer.removeAllFeatures();
+        layer.addFeatures(features);
+
+        _.each(features, function (feature) {
+            feature.layer = layer;
+            schema._setFeatureStyle(feature);
+
+        });
+
+        layer.redraw();
+
+        schema._redrawResultTableFeatures(features);
+
+        if (widget.options.__disabled) {
+            widget.deactivate();
+        }
+
+        // var tbody = $(tableApi.body());
+
+        // Post handling
     },
 
     _setFeatureStyles: function(featureStyles) {
