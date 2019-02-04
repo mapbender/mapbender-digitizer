@@ -501,12 +501,11 @@ var Scheme = OpenLayers.Class({
         schema._addSelectControl(layer);
     },
 
-    _generateResultDataTable: function (frame) {
 
+    _generateResultDataTableButtons: function() {
         /** @type {Scheme} */
         var schema = this;
         var widget = schema.widget;
-        var options = widget.options;
         var buttons = [];
 
 
@@ -525,7 +524,7 @@ var Scheme = OpenLayers.Class({
         //     buttons.push({
         //         title: Mapbender.DigitizerTranslator.translate('feature.save'),
         //         className: 'save',
-        //         cssClass: ' fa fa-floppy-o',
+        //         cssClass: ' fa fa-floppy-o passive',
         //         onClick: function (olFeature, ui) {
         //             widget.saveFeature(olFeature);
         //         }
@@ -613,6 +612,14 @@ var Scheme = OpenLayers.Class({
             });
         }
 
+        return buttons;
+
+
+    },
+
+    _generateResultDataTableColumns: function() {
+        /** @type {Scheme} */
+        var schema = this;
 
         var columns = [];
 
@@ -659,6 +666,16 @@ var Scheme = OpenLayers.Class({
             columns.push(fieldSettings);
         });
 
+        return columns;
+
+    },
+
+
+    _generateResultDataTable: function (frame) {
+        /** @type {Scheme} */
+        var schema = this;
+        var widget = schema.widget;
+        var options = widget.options;
 
         var resultTableSettings = {
             lengthChange: false,
@@ -670,8 +687,8 @@ var Scheme = OpenLayers.Class({
             paging: true,
             selectable: false,
             autoWidth: false,
-            columns: columns,
-            buttons: buttons,
+            columns: schema._generateResultDataTableColumns(),
+            buttons: schema._generateResultDataTableButtons(),
             oLanguage: options.tableTranslation || null
 
         };
