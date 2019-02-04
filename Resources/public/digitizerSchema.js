@@ -20,8 +20,7 @@ var Scheme = function(options) {
 
 Scheme.prototype = {
 
-        id: null,
-        displayClass: '',
+
         schemaName: '',
         featureTypeName: '',
         table: null,
@@ -121,32 +120,6 @@ Scheme.prototype = {
             distance: 30
         }],
         digitizingToolset : null,
-
-        initialize: function (options) {
-            /** @type {Scheme} */
-            var schema = this;
-            schema.displayClass = this.CLASS_NAME;
-
-            OpenLayers.Util.extend(schema, options);
-
-            if (schema.popup) {
-                schema.popup.buttons = schema.popup.buttons || [];
-                schema.createPopupConfiguration();
-            }
-
-            schema.events = new OpenLayers.Events(schema);
-            if (schema.eventListeners instanceof Object) {
-                schema.events.on(schema.eventListeners);
-            }
-            if (schema.id == null) {
-                schema.id = OpenLayers.Util.createUniqueID(schema.CLASS_NAME + "_");
-            }
-
-
-            schema._initialzeHooks();
-
-            schema.triggerModifiedState = Scheme.prototype.triggerModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
-        },
 
         _initialzeHooks: function () {
             var schema = this;
