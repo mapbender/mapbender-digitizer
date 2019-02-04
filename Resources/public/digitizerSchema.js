@@ -124,6 +124,8 @@ var Scheme = OpenLayers.Class({
 
 
         schema._initialzeHooks();
+
+        schema.triggerModifiedState = Scheme.prototype.triggerModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
     },
 
     _initialzeHooks: function () {
@@ -508,7 +510,6 @@ var Scheme = OpenLayers.Class({
         var widget = schema.widget;
         var buttons = [];
 
-
         if (schema.allowLocate) {
             buttons.push({
                 title: Mapbender.DigitizerTranslator.translate('feature.zoom'),
@@ -520,16 +521,16 @@ var Scheme = OpenLayers.Class({
             });
         }
 
-        // if (schema.allowSave) {
-        //     buttons.push({
-        //         title: Mapbender.DigitizerTranslator.translate('feature.save'),
-        //         className: 'save',
-        //         cssClass: ' fa fa-floppy-o passive',
-        //         onClick: function (olFeature, ui) {
-        //             widget.saveFeature(olFeature);
-        //         }
-        //     });
-        // }
+        if (schema.allowEditData && schema.allowSave) {
+            buttons.push({
+                title: Mapbender.DigitizerTranslator.translate('feature.save'),
+                className: 'save',
+                cssClass: ' fa fa-floppy-o disabled',
+                onClick: function (olFeature, ui) {
+                    widget.saveFeature(olFeature);
+                }
+            });
+        }
 
         if (schema.allowEditData) {
             buttons.push({
@@ -705,7 +706,8 @@ var Scheme = OpenLayers.Class({
             _.extend(resultTableSettings, schema.view.settings);
         }
 
-        var table = schema.table = $("<div/>").resultTable(resultTableSettings);
+        var div = $("<div/>");
+        var table = schema.table = div.resultTable(resultTableSettings);
         var searchableColumnTitles = _.pluck(_.reject(resultTableSettings.columns, function (column) {
             if (!column.sTitle) {
                 return true;
@@ -816,6 +818,24 @@ var Scheme = OpenLayers.Class({
         }
     },
 
+    triggerModifiedState: function(feature,control,on) {
+        var schema = this;
+
+        var table = schema.table;
+        var tableWidget = table.data('visUiJsResultTable');
+
+        var row = tableWidget.getDomRowByData(feature);
+
+        if (on) {
+            row.find('.button.save').removeClass("disabled").addClass('active');
+        } else {
+            row.find('.button.save').removeClass("active").addClass('disabled');
+        }
+
+        control && control.deactivate();
+
+    },
+
     _generateToolSetView: function (frame) {
         /** @type {Scheme} */
         var schema = this;
@@ -902,7 +922,10 @@ var Scheme = OpenLayers.Class({
                             widget._openFeatureEditDialog(feature, schema);
                         }
                     }
-                }
+                },
+
+
+                triggerModifiedState: schema.triggerModifiedState
             }
 
         });

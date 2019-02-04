@@ -31,7 +31,8 @@
                 getDefaultAttributes: function() { console.warn("this method shoud be overwritten"); return []; },
                 preventModification: function () { console.warn("this method shoud be overwritten"); return false;},
                 preventMove: function () { console.warn("this method shoud be overwritten"); return false; },
-                extendFeatureDataWhenNoPopupOpen: function() { console.warn("this method shoud be overwritten"); return false; }
+                extendFeatureDataWhenNoPopupOpen: function() { console.warn("this method shoud be overwritten"); return false; },
+                triggerModifiedState: function(feature,control, on) {console.warn("this method shoud be overwritten"); return false;}
             },
             defaultAttributes: []
         },

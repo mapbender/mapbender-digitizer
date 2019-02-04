@@ -29,7 +29,8 @@ var DigitizingControlFactory = function (layer,controlEvents) {
     var featureAdded = createFeatureAddedMethod({
         deactivateCurrentControl: controlEvents.deactivateCurrentControl,
         openFeatureEditDialog: controlEvents.openFeatureEditDialog,
-        getDefaultAttributes: controlEvents.getDefaultAttributes
+        getDefaultAttributes: controlEvents.getDefaultAttributes,
+        triggerModifiedState: controlEvents.triggerModifiedState
     });
 
     return {
@@ -69,10 +70,16 @@ var DigitizingControlFactory = function (layer,controlEvents) {
         }),
 
         drawDonut: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
-            featureAdded : featureAdded,
+            featureAdded : featureAdded.bind(this),
             handlerOptions: {
-                holeModifier: 'element'
-            }
+                holeModifier: 'element',
+                finalizeInteriorRing : function(event) {
+                    var fir =  OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
+                    controlEvents.triggerModifiedState(this.polygon,this.control,true);
+                    return fir;
+                }
+            },
+
         }),
 
         modifyFeature: new OpenLayers.Control.ModifyFeature(layer,{
@@ -95,6 +102,8 @@ var DigitizingControlFactory = function (layer,controlEvents) {
             },
 
             onModification: function (feature) {
+
+                controlEvents.triggerModifiedState(feature,this,true);
                 console.log("onModification",feature);
                 //widget.unsavedFeatures[feature.id] = feature;
             } // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
@@ -125,6 +134,7 @@ var DigitizingControlFactory = function (layer,controlEvents) {
              */
 
             onComplete: function (feature) {
+                controlEvents.triggerModifiedState(feature,this,true);
                 console.log("onComplete");
                 //widget.unsavedFeatures[event.id] = feature;
                 controlEvents.extendFeatureDataWhenNoPopupOpen(feature);

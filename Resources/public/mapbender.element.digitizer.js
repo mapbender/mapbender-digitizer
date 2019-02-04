@@ -863,6 +863,8 @@ Mapbender.DigitizerTranslator = {
                     //feature.oldGeom = false;
                     feature.isDragged = false;
 
+                    schema.triggerModifiedState(feature,false);
+
                     dialog && dialog.popupDialog('close');
 
                     //this.feature = feature;
