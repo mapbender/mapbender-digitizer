@@ -274,7 +274,7 @@ var Scheme = OpenLayers.Class({
                 click: function (e) {
                     var dialog = $(this).closest('.ui-dialog-content');
                     var feature = dialog.data('feature');
-                    widget.openChangeStyleDialog(feature);
+                    schema.widget.openChangeStyleDialog(feature);
                 }
             };
             buttons.push(styleButton);
