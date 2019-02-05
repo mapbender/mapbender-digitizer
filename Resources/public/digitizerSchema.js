@@ -206,12 +206,12 @@ Scheme.prototype = {
         }
 
 
-        this._processCurrentFormItemsWithDataManager(olFeature);
+        widget._processCurrentFormItemsWithDataManager(olFeature);
 
         var dialog = $("<div/>");
 
         if (!schema.elementsTranslated) {
-            Mapbender.DigitizerTranslator.translateStructure(widget.currentSchema.formItems);
+            Mapbender.DigitizerTranslator.translateStructure(schema.formItems);
             schema.elementsTranslated = true;
         }
 
@@ -223,7 +223,7 @@ Scheme.prototype = {
         //dialog.data('digitizerWidget', widget); // TODO uncommented because purpose unknown
 
         dialog.generateElementsWithFormItems = function () {
-            var formItems = widget.currentSchema.formItems;
+            var formItems = schema.formItems;
 
             // If pop up isn't defined, generate inputs
             if (!_.size(formItems)) {
@@ -242,16 +242,15 @@ Scheme.prototype = {
 
         dialog.popupDialog(popupConfiguration);
 
-        dialog.bind('edit-cancel', this.editCancel.bind(this));
+        dialog.bind('edit-cancel', schema.editCancel.bind(schema));
+
         dialog.bind('popupdialogclose', function (event) {
+            console.log("close dialog");
             dialog.trigger('edit-cancel', {
                 'origin': 'close-button',
-                'feature': function () {
-                    return dialog.data('feature')
-                }.bind(this),
-                'schema': schema
+                'feature': dialog.data('feature')
             });
-        }.bind(this));
+        });
 
 
         if (popupConfiguration.modal) {
@@ -358,6 +357,26 @@ Scheme.prototype = {
 
         return dialog;
 
+    },
+
+
+    /**
+     *
+     * @param event
+     * @param eventData
+     */
+
+    editCancel: function (event, eventData) {
+        var schema = this;
+        var widget = schema.widget;
+        var feature = eventData.feature;
+
+        if (feature.hasOwnProperty('isNew') && schema.allowDeleteByCancelNewGeometry) {
+            schema.removeFeature(feature);
+        }
+        if (eventData.origin === 'cancel-button') {
+            widget.currentPopup.popupDialog('close');
+        }
     },
 
     hoverInResultTable: function (feature, highlight) {

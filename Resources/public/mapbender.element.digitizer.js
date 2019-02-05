@@ -1672,41 +1672,7 @@
         },
 
 
-        /**
-         *
-         * @param event
-         * @param eventData
-         */
 
-        editCancel: function (event, eventData) {
-            var widget = this;
-            var feature = eventData.feature();
-            if (feature.hasOwnProperty('isNew') && eventData.schema.allowDeleteByCancelNewGeometry) {
-                widget.currentSchema.removeFeature(feature);
-            }
-            if (eventData.origin === 'cancel-button') {
-                this.currentPopup.popupDialog('close');
-            }
-            //if(!feature.hasOwnProperty('isNew') && feature.hasOwnProperty("oldGeom")){
-            if (!feature.isNew && feature.isDragged) {
-                //
-                // feature.geometry.x =  feature.oldGeom.x;
-                // feature.geometry.y =  feature.oldGeom.y;
-
-                var layer = feature.layer || widget.currentSchema.layer;
-
-                if (layer) {
-                    layer.redraw();
-                    layer.setVisibility(false);
-
-                    layer.setVisibility(true);
-                } else {
-                    console.warn("Redrawing of Layer not possible");
-                }
-
-            }
-
-        },
 
         /**
          *
