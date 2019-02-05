@@ -1,11 +1,3 @@
-/**
- * Digitizing tool set
- *
- * @author Andriy Oblivantsev <eslider@gmail.com>
- * @author Stefan Winkelmann <stefan.winkelmann@wheregroup.com>
- *
- * @copyright 20.04.2015 by WhereGroup GmbH & Co. KG
- */
 (function ($) {
 
     $.widget("mapbender.digitizingToolSet", {
@@ -26,14 +18,32 @@
                 removeSelected: "Remove selected geometries",
                 removeAll: "Remove all geometries"
             },
-            controlEvents: {
-                openFeatureEditDialog: function (feature) { console.warn("this method shoud be overwritten"); },
-                getDefaultAttributes: function() { console.warn("this method shoud be overwritten"); return []; },
-                preventModification: function () { console.warn("this method shoud be overwritten"); return false;},
-                preventMove: function () { console.warn("this method shoud be overwritten"); return false; },
-                extendFeatureDataWhenNoPopupOpen: function() { console.warn("this method shoud be overwritten"); return false; },
-                triggerModifiedState: function(feature,control, on) {console.warn("this method shoud be overwritten"); return false;}
+            injectedMethods: {
+                openFeatureEditDialog: function (feature) {
+                    console.warn("this method shoud be overwritten");
+                },
+                getDefaultAttributes: function () {
+                    console.warn("this method shoud be overwritten");
+                    return [];
+                },
+                preventModification: function () {
+                    console.warn("this method shoud be overwritten");
+                    return false;
+                },
+                preventMove: function () {
+                    console.warn("this method shoud be overwritten");
+                    return false;
+                },
+                extendFeatureDataWhenNoPopupOpen: function () {
+                    console.warn("this method shoud be overwritten");
+                    return false;
+                },
+                triggerModifiedState: function (feature, control, on) {
+                    console.warn("this method shoud be overwritten");
+                    return false;
+                }
             },
+            controlEvents: {},
             defaultAttributes: []
         },
         controlFactory: null,
@@ -46,16 +56,16 @@
          */
         _create: function () {
             var toolSet = this;
-            toolSet.options.controlEvents.deactivateCurrentControl = function() {
+            toolSet.options.injectedMethods.deactivateCurrentControl = function () {
                 toolSet.deactivateCurrentControl();
             };
-            toolSet.controlFactory = DigitizingControlFactory(toolSet.getLayer(),toolSet.options.controlEvents);
+            toolSet.controlFactory = DigitizingControlFactory(toolSet.getLayer(), toolSet.options.injectedMethods,toolSet.options.controlEvents);
             toolSet.element.addClass('digitizing-tool-set');
             toolSet.refresh();
 
             $(this.element).on('click', '.-fn-tool-button', this.onToolButtonClick.bind(this));
 
-            $(this.element).data("digitizingToolSet",this);
+            $(this.element).data("digitizingToolSet", this);
 
         },
 
@@ -65,12 +75,11 @@
         refresh: function () {
             var toolSet = this;
             var element = $(toolSet.element);
-            var children = toolSet.options.children;
 
             // clean navigation
             element.empty();
 
-            toolSet.buildNavigation(children);
+            toolSet.buildNavigation();
 
             toolSet._trigger('ready', null, this);
         },
@@ -81,7 +90,7 @@
         },
 
 
-        _createPlainControlButton: function(item) {
+        _createPlainControlButton: function (item) {
             var toolSet = this;
 
             var button = $("<button class='button' type='button'/>");
@@ -97,53 +106,28 @@
             return button;
         },
 
-        _registerControlEvents: function(control,button) {
-            var toolSet = this;
-
-            var drawControlEvents = control.events;
-            drawControlEvents.register('activate', button, function (e) {
-                toolSet._trigger('controlActivate', null, e);
-                button.addClass('active');
-            });
-            drawControlEvents.register('deactivate', button, function (e) {
-                toolSet._trigger('controlDeactivate', null, e);
-                button.removeClass('active');
-            });
-
-            //var controlEvents = toolSet.options.controlEvents;
-            //Map event handler to ol controls
-            // $.each(controlEvents, function (eventName, eventHandler) {
-            //     control[eventName] = eventHandler;
-            //     // featureadded is event, onStart and onComplete are Methods
-            //     drawControlEvents.register(eventName, null, eventHandler);
-            //     console.log(eventName+" registered for ",control);
-            // });
-
-        },
         /**
          * Build Navigation
          *
-         * @param buttons
          */
-        buildNavigation: function (buttons) {
+        buildNavigation: function () {
             var toolSet = this;
             var element = $(toolSet.element);
             var controlFactory = toolSet.controlFactory;
+            var buttons = toolSet.options.buttons;
 
-            $.each(buttons, function (i, item) {
-                //var item = this;
-                if (!item || !item.hasOwnProperty('type')) {
+            $.each(buttons, function (i, rawButton) {
+
+                var button = toolSet._createPlainControlButton(rawButton);
+
+                var control = controlFactory[rawButton.type];
+                if (!control) {
+                    console.warn("control "+rawButton.type+" not found");
                     return;
                 }
-                var button = toolSet._createPlainControlButton(item);
+                button.data('control', control);
 
-                if (controlFactory.hasOwnProperty(item.type)) {
-                    var control = controlFactory[item.type];
-                    button.data('control', control);
-                    toolSet._registerControlEvents(control,button);
-                    control.layer.map.addControl(control);
-                }
-
+                control.layer.map.addControl(control);
                 element.append(button);
             });
         },

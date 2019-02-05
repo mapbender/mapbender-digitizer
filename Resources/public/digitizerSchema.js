@@ -17,6 +17,15 @@ var Scheme = function (rawScheme, widget) {
 
     schema.toolset = widget.toolsets[schema.featureType.geomType];
 
+    // remove removeSelected Control if !allowDelete
+    if (!schema.allowDelete) {
+        $.each(schema.toolset, function (k, tool) {
+            if (tool.type === "removeSelected") {
+                schema.toolset.splice(k, 1);
+            }
+        });
+    }
+
 
     // TODO this has to be carefully checked for prototype propertys, since it fills the `undefined` properties, so it may not work at all
     _.defaults(schema, schema.widget._getNonBlackListedOptions());
@@ -967,20 +976,13 @@ Scheme.prototype = {
         });
 
         var toolset = schema.toolset;
-        // remove removeSelected Control if !allowDelete
-        if (!schema.allowDelete) {
-            $.each(toolset, function (k, tool) {
-                if (tool.type === "removeSelected") {
-                    toolset.splice(k, 1);
-                }
-            });
-        }
 
         var digitizingToolSetElement = $('<div/>').digitizingToolSet({
-            children: toolset,
+            buttons: toolset,
             layer: layer,
             translations: schema._createToolsetTranslations(),
-            controlEvents: {
+            injectedMethods: {
+
                 openFeatureEditDialog: function (feature) {
 
                     if (schema.openFormAfterEdit) {
@@ -1042,6 +1044,19 @@ Scheme.prototype = {
 
 
                 triggerModifiedState: schema.triggerModifiedState
+            },
+
+            controlEvents:  {
+                activate: function(event) {
+
+                    console.log(event,"active");
+
+                },
+
+                deactivate: function(event) {
+
+                    console.log(event,"deactive");
+                },
             }
 
         });
@@ -1063,7 +1078,9 @@ Scheme.prototype = {
             }]
         });
 
+
         var toolSetView = $(".digitizing-tool-set", frame);
+
 
         if (!schema.allowDigitize) {
 

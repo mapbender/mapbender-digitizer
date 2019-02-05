@@ -1,4 +1,4 @@
-var createFeatureAddedMethod = function(controlEvents) {
+var createFeatureAddedMethod = function(injectedMethods) {
 
 
     /**
@@ -8,14 +8,14 @@ var createFeatureAddedMethod = function(controlEvents) {
 
         feature.isNew = true; // replace by state == insert
 
-        _.each(controlEvents.getDefaultAttributes(), function(prop) {
+        _.each(injectedMethods.getDefaultAttributes(), function(prop) {
             feature.attributes[prop] = "";
         });
 
         feature.layer.redraw();
 
-        controlEvents.deactivateCurrentControl();
-        controlEvents.openFeatureEditDialog(feature);
+        injectedMethods.deactivateCurrentControl();
+        injectedMethods.openFeatureEditDialog(feature);
 
     };
 
@@ -24,16 +24,16 @@ var createFeatureAddedMethod = function(controlEvents) {
 };
 
 
-var DigitizingControlFactory = function (layer,controlEvents) {
+var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
     var featureAdded = createFeatureAddedMethod({
-        deactivateCurrentControl: controlEvents.deactivateCurrentControl,
-        openFeatureEditDialog: controlEvents.openFeatureEditDialog,
-        getDefaultAttributes: controlEvents.getDefaultAttributes,
-        triggerModifiedState: controlEvents.triggerModifiedState
+        deactivateCurrentControl: injectedMethods.deactivateCurrentControl,
+        openFeatureEditDialog: injectedMethods.openFeatureEditDialog,
+        getDefaultAttributes: injectedMethods.getDefaultAttributes,
+        triggerModifiedState: injectedMethods.triggerModifiedState
     });
 
-    return {
+    var controls =  {
         drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point,{
             featureAdded : featureAdded
         }),
@@ -75,7 +75,7 @@ var DigitizingControlFactory = function (layer,controlEvents) {
                 holeModifier: 'element',
                 finalizeInteriorRing : function(event) {
                     var fir =  OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
-                    controlEvents.triggerModifiedState(this.polygon,this.control,true);
+                    injectedMethods.triggerModifiedState(this.polygon,this.control,true);
                     return fir;
                 }
             },
@@ -92,7 +92,7 @@ var DigitizingControlFactory = function (layer,controlEvents) {
             onModificationStart: function (feature) {
                 console.log("onModificationStart");
 
-                if (controlEvents.preventModification()) {
+                if (injectedMethods.preventModification()) {
                     this.deactivate();
                     this.activate();
                     $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
@@ -103,7 +103,7 @@ var DigitizingControlFactory = function (layer,controlEvents) {
 
             onModification: function (feature) {
 
-                controlEvents.triggerModifiedState(feature,this,true);
+                injectedMethods.triggerModifiedState(feature,this,true);
                 console.log("onModification",feature);
                 //widget.unsavedFeatures[feature.id] = feature;
             } // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
@@ -120,7 +120,7 @@ var DigitizingControlFactory = function (layer,controlEvents) {
             onStart: function (feature, px) {
                 console.log("onStart");
 
-                if (controlEvents.preventMove()) {
+                if (injectedMethods.preventMove()) {
                     this.cancel();
                     $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
                 }
@@ -134,10 +134,10 @@ var DigitizingControlFactory = function (layer,controlEvents) {
              */
 
             onComplete: function (feature) {
-                controlEvents.triggerModifiedState(feature,this,true);
+                injectedMethods.triggerModifiedState(feature,this,true);
                 console.log("onComplete");
                 //widget.unsavedFeatures[event.id] = feature;
-                controlEvents.extendFeatureDataWhenNoPopupOpen(feature);
+                injectedMethods.extendFeatureDataWhenNoPopupOpen(feature);
 
             }
         }),
@@ -157,5 +157,15 @@ var DigitizingControlFactory = function (layer,controlEvents) {
         // removeAll: {
         //     cssClass: 'critical'
         // }
-    }
+    };
+
+    _.each(controls,function(control) {
+
+        _.each(controlEvents,function(event,eventName){
+            control.events.register(eventName,null,event);
+        });
+
+    });
+
+    return controls;
 };
