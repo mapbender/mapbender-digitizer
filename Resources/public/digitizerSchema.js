@@ -183,7 +183,7 @@ Scheme.prototype = {
     /**
      * Open edit feature dialog
      *
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature open layer feature
+     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
      * @private
      */
     _openFeatureEditDialog: function (olFeature) {
@@ -220,7 +220,7 @@ Scheme.prototype = {
 
 
         dialog.data('feature', olFeature);
-        dialog.data('digitizerWidget', widget);
+        //dialog.data('digitizerWidget', widget); // TODO uncommented because purpose unknown
 
         dialog.generateElementsWithFormItems = function () {
             var formItems = widget.currentSchema.formItems;

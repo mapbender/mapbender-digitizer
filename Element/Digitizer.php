@@ -51,6 +51,7 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/digitizingControlFactory.js',
                 '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.layermanager.js',
+                '@MapbenderDigitizerBundle/Resources/public/mapbender.confirmDialog.js',
             ),
             'css'   => array(
                 '/components/select2/select2-built.css',
