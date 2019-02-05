@@ -333,7 +333,7 @@ Mapbender.DigitizerTranslator = {
                     subItems['edit'] = {
                         name: Mapbender.DigitizerTranslator.translate('feature.edit'),
                         action: function (key, options, parameters) {
-                            widget._openFeatureEditDialog(parameters.olFeature, schema);
+                            schema._openFeatureEditDialog(parameters.olFeature);
                         }
                     }
                 }
@@ -466,7 +466,7 @@ Mapbender.DigitizerTranslator = {
                                     break;
 
                                 case 'edit':
-                                    widget._openFeatureEditDialog(olFeature, schema);
+                                    schema._openFeatureEditDialog(olFeature);
                                     break;
 
                                 case 'exportGeoJson':
@@ -582,7 +582,7 @@ Mapbender.DigitizerTranslator = {
                     widget._highlightFeature(feature);
 
                     if (isOpenLayerCloudPopup) {
-                        widget._openFeatureEditDialog(feature, schema);
+                        schema._openFeatureEditDialog(feature);
                     } else {
                         widget.zoomToJsonFeature(feature);
                     }
@@ -743,7 +743,7 @@ Mapbender.DigitizerTranslator = {
                         return eval(successHandler + ";");
                     }(feature);
                 } else {
-                    widget._openFeatureEditDialog(feature, schema);
+                    schema._openFeatureEditDialog(feature);
                 }
             });
         },
@@ -1149,184 +1149,7 @@ Mapbender.DigitizerTranslator = {
         },
 
 
-        /**
-         * Open edit feature dialog
-         *
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature open layer feature
-         * @param {Scheme} schema
-         * @private
-         */
-        _openFeatureEditDialog: function (olFeature, schema) {
-            var widget = this;
-            var layer = olFeature.layer;
-            var map = layer.map;
-            var popupConfiguration = schema.popup;
 
-            var isOpenLayerCloudPopup = popupConfiguration.type && popupConfiguration.type === 'openlayers-cloud';
-
-            if (widget.currentPopup) {
-                widget.currentPopup.popupDialog('close');
-                if (isOpenLayerCloudPopup && schema.olFeatureCloudPopup) {
-                    map.removePopup(schema.olFeatureCloudPopup);
-                    schema.olFeatureCloudPopup.destroy();
-                    schema.olFeatureCloudPopup = null;
-                }
-            }
-
-
-            this._processCurrentFormItemsWithDataManager(olFeature);
-
-            var dialog = $("<div/>");
-
-            if (!schema.elementsTranslated) {
-                Mapbender.DigitizerTranslator.translateStructure(widget.currentSchema.formItems);
-                schema.elementsTranslated = true;
-            }
-
-            schema.editDialog = dialog;
-            widget.currentPopup = dialog;
-
-
-            dialog.data('feature', olFeature);
-            dialog.data('digitizerWidget', widget);
-
-            dialog.generateElementsWithFormItems = function () {
-                var formItems = widget.currentSchema.formItems;
-
-                // If pop up isn't defined, generate inputs
-                if (!_.size(formItems)) {
-                    formItems = [];
-                    _.each(olFeature.data, function (value, key) {
-                        formItems.push({
-                            type: 'input',
-                            name: key,
-                            title: key
-                        })
-                    })
-                }
-
-                dialog.generateElements({children: formItems});
-            }();
-
-            dialog.popupDialog(popupConfiguration);
-
-            dialog.bind('edit-cancel', this.editCancel.bind(this));
-            dialog.bind('popupdialogclose', function (event) {
-                dialog.trigger('edit-cancel', {
-                    'origin': 'close-button',
-                    'feature': function () {
-                        return dialog.data('feature')
-                    }.bind(this),
-                    'schema': schema
-                });
-            }.bind(this));
-
-
-            if (popupConfiguration.modal) {
-                dialog.bind('popupdialogclose', function () {
-                    widget.currentPopup = null;
-                });
-            }
-
-
-            if (isOpenLayerCloudPopup) {
-                // Hide original popup but not kill it.
-                dialog.closest('.ui-dialog').css({
-                    'margin-left': '-100000px'
-                }).hide(0);
-            }
-
-            var tables = dialog.find(".mapbender-element-result-table");
-            _.each(tables, function (table, index) {
-
-                var item = $(table).data('item');
-                $(table).data('olFeature', olFeature);
-                if (item.editable) {
-                    item.columns.pop();
-                }
-
-                var dataStoreLinkName = item.dataStoreLink.name;
-                if (dataStoreLinkName) {
-                    var requestData = {
-                        dataStoreLinkName: dataStoreLinkName,
-                        fid: olFeature.fid,
-                        fieldName: item.dataStoreLink.fieldName
-                    };
-
-                    widget.query('dataStore/get', requestData).done(function (data) {
-                        if (Object.prototype.toString.call(data) === '[object Array]') {
-
-                            var dataItems = [];
-                            _.each(data, function (el, i) {
-                                el.attributes.item = item;
-                                dataItems.push(el.attributes)
-
-                            });
-
-                        } else {
-                            data.item = item;
-                            //data = [data];
-                        }
-
-                        var tableApi = $(table).resultTable('getApi');
-                        tableApi.clear();
-                        tableApi.rows.add(dataItems);
-                        tableApi.draw();
-
-                    });
-                }
-
-            });
-
-            setTimeout(function () {
-
-                if (popupConfiguration.remoteData && olFeature.isNew) {
-
-
-                    var bbox = dialog.data("feature").geometry.getBounds();
-                    bbox.right = parseFloat(bbox.right + 0.00001);
-                    bbox.top = parseFloat(bbox.top + 0.00001);
-                    bbox = bbox.toBBOX();
-                    var srid = map.getProjection().replace('EPSG:', '');
-                    var url = widget.elementUrl + "getFeatureInfo/";
-
-                    $.ajax({
-                        url: url, data: {
-                            bbox: bbox,
-                            schema: schema.schemaName,
-                            srid: srid
-                        }
-                    }).success(function (response) {
-                        _.each(response.dataSets, function (dataSet) {
-                            var newData = JSON.parse(dataSet).features[0].properties
-                            $.extend(olFeature.data, newData);
-
-
-                        });
-                        dialog.formData(olFeature.data);
-
-                    });
-
-
-                } else {
-                    dialog.formData(olFeature.data);
-                }
-
-
-                if (isOpenLayerCloudPopup) {
-                    /**
-                     * @var {OpenLayers.Popup.FramedCloud}
-                     */
-                    var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(olFeature.geometry.toShortString()), null, dialog.html(), null, true);
-                    schema.olFeatureCloudPopup = olPopup;
-                    map.addPopup(olPopup);
-                }
-
-            }, 21);
-
-            return dialog;
-
-        },
 
         /**
          * Query intersect by bounding box
