@@ -127,53 +127,7 @@
             });
         },
 
-        /**
-         * Open change style dialog
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-         * @returns {*}
-         */
-        openChangeStyleDialog: function (olFeature) {
-            var widget = this;
-            var layer = olFeature.layer;
-            var styleMap = layer.options.styleMap;
-            var styles = styleMap.styles;
-            var defaultStyleData = olFeature.style || _.extend({}, styles["default"].defaultStyle);
 
-            if (olFeature.styleId) {
-                _.extend(defaultStyleData, styles[olFeature.styleId].defaultStyle);
-            }
-            var styleOptions = {
-                data: defaultStyleData,
-                commonTab: false
-            };
-
-            if (olFeature.geometry.CLASS_NAME === "OpenLayers.Geometry.LineString") {
-                styleOptions.fillTab = false;
-            }
-
-            var styleEditor = $("<div/>")
-                .featureStyleEditor(styleOptions)
-                .bind('featurestyleeditorsubmit', function (e, context) {
-                    var styleData = styleEditor.formData();
-                    var schemaName = widget.currentSchema.schemaName;
-                    styleEditor.disableForm();
-                    widget._applyStyle(styleData, olFeature);
-                    if (olFeature.fid) {
-                        widget._saveStyle(schemaName, styleData, olFeature)
-                            .done(function (response) {
-                                widget._applyStyle(response.style, olFeature);
-                                styleEditor.enableForm();
-                            });
-                    } else {
-                        // defer style saving until the feature itself is saved, and has an id to associate with
-                        var styleDataCopy = $.extend({}, styleData);
-                        olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
-                    }
-                    widget._applyStyle(styleData, olFeature);
-                    styleEditor.featureStyleEditor("close");
-                });
-            return styleEditor;
-        },
 
         /**
          *
@@ -231,7 +185,7 @@
                     subItems['style'] = {
                         name: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
                         action: function (key, options, parameters) {
-                            widget.openChangeStyleDialog(olFeature);
+                            schema.openChangeStyleDialog(olFeature);
                         }
                     };
                 }
@@ -240,7 +194,7 @@
                     subItems['style'] = {
                         name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
                         action: function (key, options, parameters) {
-                            widget.openChangeStyleDialog(olFeature);
+                            schema.openChangeStyleDialog(olFeature);
                         }
                     };
                 }
@@ -390,7 +344,7 @@
                                     break;
 
                                 case 'changeStyle':
-                                    widget.openChangeStyleDialog(olFeature);
+                                    schema.openChangeStyleDialog(olFeature);
                                     break;
                             }
                         },
