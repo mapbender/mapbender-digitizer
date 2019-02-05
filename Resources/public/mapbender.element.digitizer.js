@@ -111,7 +111,9 @@
             /**
              * Reload schema layers after feature was modified or removed
              */
-            element.bind('mbdigitizerfeaturesaved mbdigitizerfeatureremove', function (event, feature) {
+            element.bind('mbdigitizer'+'featuresaved'+' '+'mbdigitizer'+'featureremove', function (event, feature) {
+
+                console.log(feature,"!"); console.trace();
                 var schema = widget.currentSchema;
                 var refreshLayerNames = schema.refreshLayersAfterFeatureSave;
 
