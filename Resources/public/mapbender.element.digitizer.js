@@ -212,7 +212,7 @@
                     subItems['remove'] = {
                         name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
                         action: function (key, options, parameters) {
-                            widget.removeFeature(parameters.olFeature);
+                            schema.removeFeature(parameters.olFeature);
                         }
                     }
                 }
@@ -328,7 +328,7 @@
                         callback: function (key, options) {
                             switch (key) {
                                 case 'removeFeature':
-                                    widget.removeFeature(olFeature);
+                                    schema.removeFeature(olFeature);
                                     break;
 
                                 case 'zoom':
@@ -1055,7 +1055,7 @@
             }
             return widget.query('select', _request).done(function (featureCollection) {
                 var schema = widget.options.schemes[_request["schema"]];
-                widget._onFeatureCollectionLoaded(featureCollection, schema, this);
+                schema._onFeatureCollectionLoaded(featureCollection, this);
             });
 
         },
@@ -1263,57 +1263,7 @@
 
 
 
-        /**
-         * Remove OL feature
-         *
-         * @version 0.2
-         * @returns {*}
-         * @param  {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-         */
-        removeFeature: function (olFeature) {
-            var widget = this;
-            var schema = widget.findFeatureSchema(olFeature);
-            var isNew = olFeature.hasOwnProperty('isNew');
-            var layer = olFeature.layer;
-            var featureData = olFeature.attributes;
 
-            if (!schema) {
-                $.notify("Feature remove failed.", "error");
-                return;
-            }
-
-            function _removeFeatureFromUI() {
-                //var clonedFeature = jQuery.extend(true, {}, olFeature);
-                var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
-                schema.reloadFeatures( _.without(existingFeatures, olFeature));
-
-                /** @deprecated */
-                widget._trigger('featureRemoved', null, {
-                    schema: schema,
-                    feature: featureData
-                });
-                widget._trigger('featureremove', null, olFeature);
-            }
-
-            if (isNew) {
-                _removeFeatureFromUI()
-            } else {
-                Mapbender.confirmDialog({
-                    html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
-                    onSuccess: function () {
-                        widget.query('delete', {
-                            schema: schema.schemaName,
-                            feature: featureData
-                        }).done(function (fid) {
-                            _removeFeatureFromUI();
-                            $.notify(Mapbender.DigitizerTranslator.translate('feature.remove.successfully'), 'info');
-                        });
-                    }
-                });
-            }
-
-            return olFeature;
-        },
 
         /**
          * Get OL feature by X:Y coordinates.
@@ -1370,86 +1320,7 @@
             return features;
         },
 
-        /**
-         * Handle feature collection by ajax response.
-         *
-         * @param {FeatureCollection} featureCollection
-         * @param {Scheme} schema
-         * @param xhr ajax request object
-         * @private
-         * @version 0.2
-         */
-        _onFeatureCollectionLoaded: function (featureCollection, schema, xhr) {
 
-            if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
-                Mapbender.error(Mapbender.DigitizerTranslator.translate("features.loading.error"), featureCollection, xhr);
-                return;
-            }
-
-            if (featureCollection.features && featureCollection.features.length == schema.maxResults) {
-                Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
-            }
-
-            var widget = this;
-            var geoJsonReader = new OpenLayers.Format.GeoJSON();
-            var currentExtentOnly = schema.searchType === "currentExtent";
-            var layer = schema.layer;
-            var map = layer.map;
-            var extent = map.getExtent();
-            var bbox = extent.toGeometry().getBounds();
-            var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
-            var visibleFeatures = currentExtentOnly ? _.filter(existingFeatures, function (olFeature) {
-                return olFeature && (olFeature.hasOwnProperty('isNew') || olFeature.geometry.getBounds().intersectsBounds(bbox));
-            }) : existingFeatures;
-            var visibleFeatureIds = _.pluck(visibleFeatures, "fid");
-            var filteredNewFeatures = _.filter(featureCollection.features, function (feature) {
-                return !_.contains(visibleFeatureIds, feature.id);
-            });
-            var newUniqueFeatures = geoJsonReader.read({
-                type: "FeatureCollection",
-                features: filteredNewFeatures
-            });
-
-            var _features = _.union(newUniqueFeatures, visibleFeatures);
-
-            if (schema.group && schema.group === "all") {
-                _features = geoJsonReader.read({
-                    type: "FeatureCollection",
-                    features: featureCollection.features
-                });
-            }
-
-            var features = [];
-            var polygones = [];
-            var lineStrings = [];
-            var points = [];
-
-            _.each(_features, function (feature) {
-                if (!feature.geometry) {
-                    return;
-                }
-                switch (feature.geometry.CLASS_NAME) {
-                    case  "OpenLayers.Geometry.Polygon":
-                        polygones.push(feature);
-                        break;
-                    case  "OpenLayers.Geometry.LineString":
-                        lineStrings.push(feature);
-                        break;
-                    case  "OpenLayers.Geometry.Point":
-                        points.push(feature);
-                        // if(feature.attributes.label) {
-                        //     feature.style = new OpenLayers.Style({
-                        //         'label': '${label}'
-                        //     });
-                        // }
-                        break;
-                    default:
-                        features.push(feature);
-                }
-            });
-
-            schema.reloadFeatures( _.union(features, polygones, lineStrings, points));
-        },
 
 
 
@@ -1809,7 +1680,7 @@
             var widget = this;
             var feature = eventData.feature();
             if (feature.hasOwnProperty('isNew') && eventData.schema.allowDeleteByCancelNewGeometry) {
-                this.removeFeature(feature);
+                widget.currentSchema.removeFeature(feature);
             }
             if (eventData.origin === 'cancel-button') {
                 this.currentPopup.popupDialog('close');
