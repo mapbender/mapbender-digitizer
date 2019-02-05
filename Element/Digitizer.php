@@ -52,6 +52,7 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.layermanager.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.confirmDialog.js',
+                '@MapbenderDigitizerBundle/Resources/public/mapbender.digitizer-translator.js',
             ),
             'css'   => array(
                 '/components/select2/select2-built.css',
