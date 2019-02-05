@@ -458,7 +458,7 @@
                     }
                 });
 
-                widget._getData();
+                schema._getData();
             }
 
         },
@@ -483,10 +483,10 @@
             var map = widget.map;
 
             map.events.register("moveend", this, function () {
-                widget._getData();
+                widget.currentSchema._getData();
             });
             map.events.register("zoomend", this, function (e) {
-                widget._getData();
+                widget.currentSchema._getData();
                 widget.updateClusterStrategies();
             });
             map.resetLayersZIndex();
@@ -1060,123 +1060,6 @@
 
         },
 
-        /**
-         * Analyse changed bounding box geometrie and load features as FeatureCollection.
-         *
-         * @param {Scheme} schema
-         * @returns {*}
-         * @private
-         */
-
-        _getData: function (schema) {
-
-            var widget = this;
-            schema = schema || widget.currentSchema;
-
-            var map = widget.map;
-            var projection = map.getProjectionObject();
-            var extent = map.getExtent();
-            var request = {
-                srid: projection.proj.srsProjNumber,
-                maxResults: schema.maxResults,
-                schema: schema.schemaName
-            };
-            var isExtentOnly = schema.searchType === "currentExtent";
-
-            if (isExtentOnly) {
-                request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
-            }
-
-            // switch (schema.searchType) {
-            //     case  "currentExtent":
-            //         if (schema.hasOwnProperty("lastBbox")) {
-            //             var bbox = extent.toGeometry().getBounds();
-            //             var lastBbox = schema.lastBbox;
-            //
-            //             var topDiff = bbox.top - lastBbox.top;
-            //             var leftDiff = bbox.left - lastBbox.left;
-            //             var rightDiff = bbox.right - lastBbox.right;
-            //             var bottomDiff = bbox.bottom - lastBbox.bottom;
-            //
-            //             // var sidesChanged = {
-            //             //     left: leftDiff < 0,
-            //             //     bottom: bottomDiff < 0,
-            //             //     right: rightDiff > 0,
-            //             //     top: topDiff > 0
-            //             // };
-            //         }
-            // }
-
-            // Only if search is defined
-            if (schema.search) {
-
-                // No user inputs - no search :)
-                if (!schema.search.request) {
-                    return;
-                }
-
-                // Aggregate request with search form values
-                if (schema.search.request) {
-                    request.search = schema.search.request;
-                }
-
-                // Check mandatory settings
-                if (schema.search.mandatory) {
-
-                    var mandatory = schema.search.mandatory;
-                    var req = schema.search.request;
-                    var errors = [];
-                    _.each(mandatory, function (expression, key) {
-                        if (!req[key]) {
-                            errors.push(key);
-                            return;
-                        }
-                        var reg = new RegExp(expression, "mg");
-                        if (!(req[key]).toString().match(reg)) {
-                            errors.push(key);
-                            return;
-                        }
-                    });
-
-                    // Input fields are note
-                    if (_.size(errors)) {
-                        // console.log("Search mandatory rules isn't complete", errors);
-                        // Remove all features
-                        schema.reloadFeatures( []);
-                        schema.lastRequest = null;
-                        return;
-                    }
-                }
-            }
-
-            // Prevent send same request
-            if (!isExtentOnly // only if search isn't for current extent
-                && schema.lastRequest && schema.lastRequest === JSON.stringify(request)) {
-                return;
-            }
-            schema.lastRequest = JSON.stringify(request);
-
-            // If schema search activated, then only
-            if (schema.search && !isExtentOnly) {
-                // Remove all features
-                schema.reloadFeatures([]);
-            }
-
-            // Abort previous request
-            if (schema.xhr) {
-                schema.xhr.abort();
-            }
-
-            schema.xhr = widget.query('select', request).done(function (featureCollection) {
-                widget._onFeatureCollectionLoaded(featureCollection, schema, this);
-            });
-
-            return schema.xhr;
-        },
-
-        // _initialFormData: function (feature) {
-        //     return initialFormData(feature);
-        // },
 
 
         /**
@@ -1958,14 +1841,14 @@
          */
 
         refreshConnectedDigitizerFeatures: function (featureTypeName) {
+            var widget = this;
             $(".mb-element-digitizer").not(".mb-element-data-manager").each(function (index, element) {
-                var digitzer = $(element).data("mapbenderMbDigitizer");
-                var schemes = digitzer.options.schemes;
+                var schemes = widget.options.schemes;
                 _.each(schemes, function (schema, key) {
                     if (key === featureTypeName) {
 
                         if (schema.layer) {
-                            digitzer._getData(schema);
+                            schema._getData();
                         }
                         return true;
                     }
