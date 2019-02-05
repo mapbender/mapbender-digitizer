@@ -159,11 +159,13 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         // }
     };
 
-    _.each(controls,function(control) {
+    _.each(controls,function(control,index) {
 
         _.each(controlEvents,function(event,eventName){
             control.events.register(eventName,null,event);
         });
+
+        control.name = index;
 
     });
 

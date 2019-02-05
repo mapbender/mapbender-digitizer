@@ -44,10 +44,13 @@
                 }
             },
             controlEvents: {},
+
             defaultAttributes: []
         },
         controlFactory: null,
         activeControl: null,
+
+        $buttons: {},
 
         /**
          * Init controls
@@ -59,14 +62,49 @@
             toolSet.options.injectedMethods.deactivateCurrentControl = function () {
                 toolSet.deactivateCurrentControl();
             };
-            toolSet.controlFactory = DigitizingControlFactory(toolSet.getLayer(), toolSet.options.injectedMethods,toolSet.options.controlEvents);
+
+            toolSet.controlFactory = DigitizingControlFactory(toolSet.options.layer, toolSet.options.injectedMethods,toolSet.createControlEvents());
             toolSet.element.addClass('digitizing-tool-set');
             toolSet.refresh();
 
-            $(this.element).on('click', '.-fn-tool-button', this.onToolButtonClick.bind(this));
+            $(this.element).on('click', '.-fn-tool-button', function (e) {
+
+                var $el = $(e.currentTarget);
+                var control = $el.data('control');
+                var $mapElement = $(control.map.div) || null;
+
+                if (toolSet.toggleControl(control)) {
+                    $mapElement.css({cursor: $el.data('control-cursor') || 'crosshair'});
+                } else {
+                    $mapElement.css({cursor: 'default'});
+                }
+            });
 
             $(this.element).data("digitizingToolSet", this);
 
+        },
+
+
+        createControlEvents: function () {
+            var toolSet = this;
+            var controlEvents = {
+
+                activate: function(event) {
+                    var $button = toolSet.$buttons[this.name];
+                    //toolSet._trigger('controlActivate', null, event); // TODO uncommented because purpose unknown
+                    $button.addClass('active');
+                },
+
+                deactivate: function(event) {
+                    var $button = toolSet.$buttons[this.name];
+                    //toolSet._trigger('controlDeactivate', null, event); // TODO uncommented because purpose unknown
+                    $button.removeClass('active');
+
+                }
+            },
+
+            controlEvents = _.defaults(toolSet.options.controlEvents,controlEvents);
+            return controlEvents;
         },
 
         /**
@@ -75,42 +113,41 @@
         refresh: function () {
             var toolSet = this;
             var element = $(toolSet.element);
-
-            // clean navigation
             element.empty();
-
-            toolSet.buildNavigation();
-
-            toolSet._trigger('ready', null, this);
+            toolSet.createToolbar();
+            //toolSet._trigger('ready', null, this); // TODO uncommented because purpose unknown
         },
 
-        _setOptions: function (options) {
-            this._super(options);
-            this.refresh();
-        },
+        // TODO uncommented because purpose unknown
+        // _setOptions: function (options) {
+        //
+        //     console.log("set Options");
+        //     this._super(options);
+        //     this.refresh();
+        // },
 
 
         _createPlainControlButton: function (item) {
             var toolSet = this;
 
-            var button = $("<button class='button' type='button'/>");
+            var $button = $("<button class='button' type='button'/>");
 
-            button.addClass(item.type);
-            button.addClass('-fn-tool-button');
-            button.data(item);
+            $button.addClass(item.type);
+            $button.addClass('-fn-tool-button');
+            $button.data(item);
 
-            button.attr('title', toolSet.options.translations[item.type]);
+            $button.attr('title', toolSet.options.translations[item.type]);
             // add icon css class
-            button.addClass("icon-" + item.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
+            $button.addClass("icon-" + item.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
 
-            return button;
+            return $button;
         },
 
         /**
          * Build Navigation
          *
          */
-        buildNavigation: function () {
+        createToolbar: function () {
             var toolSet = this;
             var element = $(toolSet.element);
             var controlFactory = toolSet.controlFactory;
@@ -118,38 +155,24 @@
 
             $.each(buttons, function (i, rawButton) {
 
-                var button = toolSet._createPlainControlButton(rawButton);
+                var $button = toolSet._createPlainControlButton(rawButton);
+                var type = rawButton.type;
 
-                var control = controlFactory[rawButton.type];
+                var control = controlFactory[type];
                 if (!control) {
-                    console.warn("control "+rawButton.type+" not found");
+                    console.warn("control "+type+" not found");
                     return;
                 }
-                button.data('control', control);
+                $button.data('control', control);
+                toolSet.$buttons[type] = $button;
 
                 control.layer.map.addControl(control);
-                element.append(button);
+                element.append($button);
             });
         },
 
-        /**
-         * Activate selected tool
-         *
-         * @param e
-         */
 
 
-        onToolButtonClick: function (e) {
-            var $el = $(e.currentTarget);
-            var control = $el.data('control');
-            var $mapElement = $(control.map.div) || null;
-
-            if (this.toggleControl(control)) {
-                $mapElement.css({cursor: $el.data('control-cursor') || 'crosshair'});
-            } else {
-                $mapElement.css({cursor: 'default'});
-            }
-        },
 
         /**
          * Toggle controls and return true if controls turned on
@@ -182,16 +205,8 @@
             }
 
             this.activeControl = null;
-        },
-
-        /**
-         * Get OpenLayer Layer
-         *
-         * @return OpenLayers.Map.OpenLayers.Class.initialize
-         */
-        getLayer: function () {
-            return this.options.layer;
         }
+
 
 
     });

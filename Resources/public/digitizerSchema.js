@@ -1044,20 +1044,8 @@ Scheme.prototype = {
 
 
                 triggerModifiedState: schema.triggerModifiedState
-            },
-
-            controlEvents:  {
-                activate: function(event) {
-
-                    console.log(event,"active");
-
-                },
-
-                deactivate: function(event) {
-
-                    console.log(event,"deactive");
-                },
             }
+
 
         });
 
