@@ -722,58 +722,6 @@
 
 
         /**
-         * Highlight feature on the map
-         *
-         * @param {(OpenLayers.Feature.Vector)} feature
-         * @param {boolean} highlight
-         * @private
-         */
-        _highlightFeature: function (feature, highlight) {
-
-
-            if (!feature || !feature.layer) {
-                return;
-            }
-            var layer = feature.layer;
-
-            if (feature.renderIntent && feature.renderIntent === 'invisible') {
-                return;
-            }
-
-            var isFeatureVisible = _.contains(layer.features, feature);
-            var features = [];
-
-            if (isFeatureVisible) {
-                features.push(feature);
-            } else {
-                _.each(layer.features, function (_feature) {
-                    if (_feature.cluster && _.contains(_feature.cluster, feature)) {
-                        features.push(_feature);
-                        return false;
-                    }
-                });
-            }
-            _.each(features, function (feature) {
-                var styleId = feature.styleId || 'default';
-                if (feature.attributes && feature.attributes.label) {
-                    layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
-                } else {
-                    if (highlight) {
-                        layer.drawFeature(feature, 'select');
-                    } else {
-                        if (feature.selected) {
-                            layer.drawFeature(feature, 'selected');
-                        } else {
-                            layer.drawFeature(feature, styleId);
-                        }
-                    }
-                }
-            });
-
-            // layer.renderer.textRoot = layer.renderer.vectorRoot;
-        },
-
-        /**
          * Get target OpenLayers map object
          *
          * @returns  {OpenLayers.Map}
