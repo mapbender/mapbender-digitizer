@@ -35,7 +35,6 @@ var Scheme = function (rawScheme, widget) {
         });
     }
 
-
     // TODO this has to be carefully checked for prototype propertys, since it fills the `undefined` properties, so it may not work at all
     _.defaults(schema, schema.widget._getNonBlackListedOptions());
 
@@ -158,6 +157,22 @@ Scheme.prototype = {
                 $.notify(e);
             }
         });
+    },
+
+
+    _refreshMapAfterFeatureSave: function() {
+        var schema = this;
+        var refreshLayerNames = schema.refreshLayersAfterFeatureSave;
+
+        if (_.size(refreshLayerNames)) {
+            Mapbender.layerManager.setMap(schema.layer.map);
+            _.each(refreshLayerNames, function (layerInstanceId) {
+                var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
+                _.each(layers, function (layer) {
+                    Mapbender.layerManager.refreshLayer(layer);
+                });
+            });
+        }
     },
 
 
@@ -1755,12 +1770,7 @@ Scheme.prototype = {
             var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
             schema.reloadFeatures(_.without(existingFeatures, olFeature));
 
-            /** @deprecated */
-            widget._trigger('featureRemoved', null, {
-                schema: schema,
-                feature: featureData
-            });
-            widget._trigger('featureremove', null, olFeature);
+            schema._refreshMapAfterFeatureSave();
         }
 
         if (isNew) {
@@ -1834,8 +1844,6 @@ Scheme.prototype = {
             var feature = request.feature;
 
             layer.drawFeature(feature, 'copy');
-
-            widget._trigger("copyfeature", null, feature);
 
             var successHandler = config.on && config.on.success;
 
@@ -1960,7 +1968,6 @@ Scheme.prototype = {
 
                 $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
 
-                widget._trigger("featuresaved", null, feature);
 
 
                 var config = widget.currentSchema;
@@ -1972,11 +1979,12 @@ Scheme.prototype = {
                     }
                 }
 
-
                 var successHandler = schema.save && schema.save.on && schema.save.on.success;
                 if (successHandler) {
                     eval(successHandler);
                 }
+                schema._refreshMapAfterFeatureSave();
+
                 if (schema.refreshFeaturesAfterSave) {
                     _.each(schema.refreshFeaturesAfterSave, function (el, index) {
                         widget.refreshConnectedDigitizerFeatures(el);
