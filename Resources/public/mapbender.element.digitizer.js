@@ -107,13 +107,12 @@
 
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
-
             /**
              * Reload schema layers after feature was modified or removed
              */
-            element.bind('mbdigitizer'+'featuresaved'+' '+'mbdigitizer'+'featureremove', function (event, feature) {
+            var bindingIdentifiers = widget._getBindingEventIdentifiers(['featuresaved','featureremove']);
+            element.bind(bindingIdentifiers, function (event, feature) {
 
-                console.log(feature,"!"); console.trace();
                 var schema = widget.currentSchema;
                 var refreshLayerNames = schema.refreshLayersAfterFeatureSave;
 
@@ -129,6 +128,15 @@
             });
         },
 
+
+        _getBindingEventIdentifiers: function(identifiers) {
+
+            var prefix = "mbdigitizer";
+            var prefixed = identifiers.map(function(eventID) { return prefix+eventID });
+
+            return prefixed.join(" ");
+
+        },
 
 
         /**
@@ -488,7 +496,7 @@
 
             widget._trigger('ready');
 
-            element.bind("mbdigitizerbeforechangedigitizing", function (e, sets) {
+            element.bind(widget._getBindingEventIdentifiers(["beforechangedigitizing"]), function (e, sets) {
                 /**@type {Scheme} */
                 var previousSchema = sets.previous;
                 if (previousSchema) {
@@ -1411,7 +1419,7 @@
                     widget.currentSchema.deactivateSchema();
                 }
             };
-            always()
+            always();
 
         },
 
