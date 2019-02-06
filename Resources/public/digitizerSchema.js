@@ -750,7 +750,6 @@ Scheme.prototype = {
         }
 
         widget.activeLayer = schema.layer;
-        widget.schemaName = schema.schemaName;
         widget.currentSchema = schema;
 
         widget.query('style/list', {schema: schema.schemaName}).done(function (data) {

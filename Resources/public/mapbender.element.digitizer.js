@@ -695,7 +695,7 @@
 
                             var dataStoreId = item.dataStore.id;
                             widget.query("datastore/get", {
-                                schema: widget.schemaName,
+                                schema: widget.currentSchema.schemaName,
                                 id: dataStoreId,
                                 dataItemId: dataItemId
                             }).done(function (data) {
@@ -899,7 +899,7 @@
         exportGeoJson: function (feature) {
             var widget = this;
             widget.query('export', {
-                schema: widget.schemaName,
+                schema: widget.currentSchema.schemaName,
                 feature: feature,
                 format: 'GeoJSON'
             }).done(function (response) {
