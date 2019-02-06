@@ -534,6 +534,14 @@
 
             widget._initializeSelector();
 
+            var containerInfo = new MapbenderContainerInfo(widget, {
+                onactive: function () {
+                    widget.activate();
+                },
+                oninactive: function () {
+                    widget.deactivate();
+                }
+            });
             widget._initializeMapEvents();
 
             widget._trigger('ready');
