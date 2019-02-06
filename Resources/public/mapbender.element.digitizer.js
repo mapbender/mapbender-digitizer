@@ -108,44 +108,6 @@
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
 
-            widget._registerReloadEvents();
-        },
-
-
-        _registerReloadEvents: function() {
-            var widget = this;
-            var element = widget.element;
-
-            /**
-             * Reload schema layers after feature was modified or removed
-             */
-            // var bindingIdentifiers = widget._getBindingEventIdentifiers(['featuresaved','featureremove']);
-            // element.bind(bindingIdentifiers, function (event, feature) {
-            //
-            //     console.log(element,event,feature,"!!");
-            //     var schema = widget.currentSchema;
-            //     var refreshLayerNames = schema.refreshLayersAfterFeatureSave;
-            //
-            //     if (_.size(refreshLayerNames)) {
-            //         Mapbender.layerManager.setMap(schema.layer.map);
-            //         _.each(refreshLayerNames, function (layerInstanceId) {
-            //             var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
-            //             _.each(layers, function (layer) {
-            //                 Mapbender.layerManager.refreshLayer(layer);
-            //             });
-            //         });
-            //     }
-            // });
-        },
-
-
-        _getBindingEventIdentifiers: function(identifiers) {
-
-            var prefix = "mbdigitizer";
-            var prefixed = identifiers.map(function(eventID) { return prefix+eventID });
-
-            return prefixed.join(" ");
-
         },
 
 
@@ -427,15 +389,6 @@
             widget._initializeMapEvents();
 
             widget._trigger('ready');
-
-            // element.bind(widget._getBindingEventIdentifiers(["beforechangedigitizing"]), function (e, sets) {
-            //     /**@type {Scheme} */
-            //     var previousSchema = sets.previous;
-            //     if (previousSchema) {
-            //         previousSchema.digitizingToolset.deactivateCurrentControl();
-            //     }
-            // });
-
 
             widget.updateClusterStrategies();
 
