@@ -1,5 +1,3 @@
-
-
 (function ($) {
     "use strict";
 
@@ -30,9 +28,6 @@
      */
 
 
-
-
-
     /**
      * Digitizing tool set
      *
@@ -43,9 +38,9 @@
      */
     $.widget("mapbender.mbDigitizer", {
         toolsets: {
-            point: [ {type: 'drawPoint'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
-            line: [ {type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'} ],
-            polygon: [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'} ]
+            point: [{type: 'drawPoint'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
+            line: [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
+            polygon: [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}]
         },
         /**
          * @type {OpenLayers.Map}
@@ -286,7 +281,7 @@
         },
 
 
-        _getNonBlackListedOptions: function() {
+        _getNonBlackListedOptions: function () {
             var widget = this;
             var blacklist = ['schemes', 'target', 'create', 'jsSrc', 'disabled'];
             return _.omit(widget.options, blacklist);
@@ -297,10 +292,10 @@
             var newSchemes = {};
             _.each(widget.options.schemes, function (rawScheme, schemaName) {
                 rawScheme.schemaName = schemaName;
-                newSchemes[schemaName] = new Scheme(rawScheme,widget);
+                newSchemes[schemaName] = new Scheme(rawScheme, widget);
             });
 
-            widget.options.schemes =  newSchemes;
+            widget.options.schemes = newSchemes;
         },
 
         _createOnSelectorChangeCallback: function () {
@@ -319,7 +314,7 @@
 
         },
 
-        _initializeSelector: function() {
+        _initializeSelector: function () {
             var widget = this;
             var options = widget.options;
             var selector = widget.selector;
@@ -334,7 +329,7 @@
 
         },
 
-        _initializeMapEvents: function() {
+        _initializeMapEvents: function () {
             var widget = this;
             var map = widget.map;
 
@@ -348,7 +343,7 @@
             map.resetLayersZIndex();
         },
 
-        _initializeSelectorOrTitleElement: function() {
+        _initializeSelectorOrTitleElement: function () {
             var widget = this;
             var options = widget.options;
             var element = $(widget.element);
@@ -396,7 +391,7 @@
 
 
         // TODO Kanonen->Spatzen: refactoring
-        _initializeActivationContainer: function() {
+        _initializeActivationContainer: function () {
             var widget = this;
 
             var containerInfo = new MapbenderContainerInfo(widget, {
@@ -411,8 +406,6 @@
             return containerInfo;
 
         },
-
-
 
 
         /**
@@ -678,8 +671,6 @@
         },
 
 
-
-
         /**
          * Query intersect by bounding box
          *
@@ -720,7 +711,6 @@
         },
 
 
-
         /**
          * Get target OpenLayers map object
          *
@@ -729,7 +719,6 @@
         getMap: function () {
             return this.map;
         },
-
 
 
         /**
@@ -746,15 +735,6 @@
             }).done(function (response) {
 
             })
-        },
-
-        /**
-         * Find schema definition by open layer object
-         *
-         * @param layer
-         */
-        findSchemaByLayer: function (layer) {
-            return _.find(this.options.schemes, {layer: layer});
         },
 
         /**
@@ -822,21 +802,6 @@
         },
 
         /**
-         * Get schema style map
-         *
-         * @param schema
-         * @returns {OpenLayers.StyleMap}
-         */
-        getSchemaStyleMap: function (schema) {
-            var widget = this;
-            var styles = schema.styles || {};
-            for (var k in widget.styles) {
-                styles[k] = new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style[k], styles[k] || widget.styles[k]));
-            }
-            return new OpenLayers.StyleMap(styles, {extendDefault: true});
-        },
-
-        /**
          * Find olFeature schema by olFeature data
          *
          * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
@@ -847,9 +812,6 @@
             var options = widget.options;
             return _.find(options.schemes, {layer: olFeature.layer});
         },
-
-
-
 
 
         /**
@@ -906,9 +868,6 @@
             //map.resetLayersZIndex();
             return features;
         },
-
-
-
 
 
         /**
@@ -1244,19 +1203,11 @@
 
         deactivate: function () {
             var widget = this;
-            // clear unsaved features to prevent multiple confirmation popups
-            //widget.unsavedFeatures = {};
-            var always = function () {
-                widget.options.__disabled = true;
-                if (!widget.currentSchema.displayOnInactive) {
-                    widget.currentSchema.deactivateSchema();
-                }
-            };
-            always();
-
+            widget.options.__disabled = true;
+            if (!widget.currentSchema.displayOnInactive) {
+                widget.currentSchema.deactivateSchema();
+            }
         },
-
-
 
 
         /**
@@ -1276,8 +1227,8 @@
                         }
                         return true;
                     }
-                }.bind(this))
-            }.bind(this))
+                })
+            })
 
 
         },

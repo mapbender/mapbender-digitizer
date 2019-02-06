@@ -746,7 +746,6 @@ Scheme.prototype = {
         var schema = this;
         var widget = schema.widget;
         var layer = schema.layer;
-        var schema = widget.findSchemaByLayer(layer);
         var features = _features || layer.features;
 
         if (features.length && features[0].cluster) {
