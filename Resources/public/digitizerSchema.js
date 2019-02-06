@@ -17,6 +17,15 @@ var Scheme = function (rawScheme, widget) {
 
     schema.toolset = widget.toolsets[schema.featureType.geomType];
 
+    schema.createSchemaFeatureLayer();
+
+    schema._createToolbar();
+
+    schema._addSelectControl();
+
+    schema.initializeResultTableEvents();
+
+
     // remove removeSelected Control if !allowDelete
     if (!schema.allowDelete) {
         $.each(schema.toolset, function (k, tool) {
@@ -151,6 +160,26 @@ Scheme.prototype = {
         });
     },
 
+
+    _getTableTranslations: function () {
+        var schema = this;
+        var tableTranslation = schema.tableTranslation;
+
+        if (tableTranslation) {
+            tableTranslation = Mapbender.DigitizerTranslator.translateObject(tableTranslation);
+        } else {
+            tableTranslation = {
+                sSearch: Mapbender.DigitizerTranslator.translate("search.title") + ':',
+                sEmptyTable: Mapbender.DigitizerTranslator.translate("search.table.empty"),
+                sZeroRecords: Mapbender.DigitizerTranslator.translate("search.table.zerorecords"),
+                sInfo: Mapbender.DigitizerTranslator.translate("search.table.info.status"),
+                sInfoEmpty: Mapbender.DigitizerTranslator.translate("search.table.info.empty"),
+                sInfoFiltered: Mapbender.DigitizerTranslator.translate("search.table.info.filtered")
+            };
+        }
+
+        return tableTranslation;
+    },
 
     getTableWidget: function () {
         var schema = this;
@@ -739,6 +768,8 @@ Scheme.prototype = {
     },
 
     activateSchema: function () {
+
+        console.log("active Schema");
         /** @type {Scheme} */
         var schema = this;
         var widget = this.widget;
@@ -1000,10 +1031,10 @@ Scheme.prototype = {
 
 
     _generateResultDataTable: function () {
+
         /** @type {Scheme} */
         var schema = this;
         var widget = schema.widget;
-        var options = widget.options;
         var frame = schema.frame;
 
         var resultTableSettings = {
@@ -1018,22 +1049,16 @@ Scheme.prototype = {
             autoWidth: false,
             columns: schema._generateResultDataTableColumns(),
             buttons: schema._generateResultDataTableButtons(),
-            oLanguage: options.tableTranslation || null
+            oLanguage: schema._getTableTranslations()
 
         };
 
-        // if (_.size(buttons)) {
-        //     resultTableSettings.buttons = buttons;
-        // }
-
-        // if (options.tableTranslation) {
-        //     resultTableSettings.oLanguage = options.tableTranslation;
-        // }
 
         if (schema.view && schema.view.settings) {
             _.extend(resultTableSettings, schema.view.settings);
         }
 
+        console.log(resultTableSettings,"§§");
         var div = $("<div/>");
         var table = schema.table = div.resultTable(resultTableSettings);
         var searchableColumnTitles = _.pluck(_.reject(resultTableSettings.columns, function (column) {
@@ -2040,7 +2065,7 @@ Scheme.prototype = {
     },
 
 
-    _zoomOrOpenDialog: function() {
+    _zoomOrOpenDialog: function(feature) {
         var schema = this;
 
         var isOpenLayerCloudPopup = schema.popup && schema.popup.type && schema.popup.type === 'openlayers-cloud';
@@ -2050,6 +2075,42 @@ Scheme.prototype = {
         } else {
             schema.zoomToJsonFeature(feature);
         }
+    },
+
+    initializeResultTableEvents: function() {
+        var schema = this;
+        var widget = schema.widget;
+
+        var table = schema.table;
+        var tableApi = table.resultTable('getApi');
+
+        table.off('mouseenter', 'mouseleave', 'click');
+
+        table.delegate("tbody > tr", 'mouseenter', function () {
+            var tr = this;
+            var row = tableApi.row(tr);
+            widget._highlightFeature(row.data(), true);
+        });
+
+        table.delegate("tbody > tr", 'mouseleave', function () {
+            var tr = this;
+            var row = tableApi.row(tr);
+            widget._highlightFeature(row.data(), false);
+        });
+
+        table.delegate("tbody > tr", 'click', function () {
+            var tr = this;
+            var row = tableApi.row(tr);
+            var feature = row.data();
+
+            feature.selected = $('.selection input', tr).is(':checked');
+            widget._highlightFeature(feature);
+
+            schema._zoomOrOpenDialog(feature);
+
+        });
+
+
     }
 
 };

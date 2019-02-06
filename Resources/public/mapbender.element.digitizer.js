@@ -313,40 +313,6 @@
 
         },
 
-        _createTableTranslations: function () {
-            var widget = this;
-            var options = widget.options;
-
-            if (options.tableTranslation) {
-                Mapbender.DigitizerTranslator.translateObject(options.tableTranslation);
-            } else {
-                options.tableTranslation = {
-                    sSearch: Mapbender.DigitizerTranslator.translate("search.title") + ':',
-                    sEmptyTable: Mapbender.DigitizerTranslator.translate("search.table.empty"),
-                    sZeroRecords: Mapbender.DigitizerTranslator.translate("search.table.zerorecords"),
-                    sInfo: Mapbender.DigitizerTranslator.translate("search.table.info.status"),
-                    sInfoEmpty: Mapbender.DigitizerTranslator.translate("search.table.info.empty"),
-                    sInfoFiltered: Mapbender.DigitizerTranslator.translate("search.table.info.filtered")
-                };
-                //translateObject(options.tableTranslation);
-            }
-        },
-
-        _buildSelectOptionsForAllSchemes: function () {
-            var widget = this;
-
-            var options = widget.options;
-            $.each(options.schemes, function (schemaName) {
-                var schema = this;
-                schema.createSchemaFeatureLayer();
-
-                schema._setSchemaName(schemaName);
-                schema._createToolbar();
-                schema._addSelectControl();
-
-            })
-
-        },
 
         _getNonBlackListedOptions: function() {
             var widget = this;
@@ -357,8 +323,9 @@
         _createSchemes: function () {
             var widget = this;
             var newSchemes = {};
-            _.each(widget.options.schemes, function (rawScheme, index) {
-                newSchemes[index] = new Scheme(rawScheme,widget);
+            _.each(widget.options.schemes, function (rawScheme, schemaName) {
+                rawScheme.schemaName = schemaName;
+                newSchemes[schemaName] = new Scheme(rawScheme,widget);
             });
 
             widget.options.schemes =  newSchemes;
@@ -371,44 +338,10 @@
             return function () {
                 var option = selector.find(":selected");
                 var newSchema = option.data("schemaSettings");
-                var table = newSchema.table;
-                var tableApi = table.resultTable('getApi');
-
-                // widget._trigger("beforeChangeDigitizing", null, {
-                //     next: schema,
-                //     previous: widget.currentSchema
-                // });
 
                 widget.currentSchema && widget.currentSchema.deactivateSchema();
 
                 newSchema.activateSchema();
-
-                table.off('mouseenter', 'mouseleave', 'click');
-
-                table.delegate("tbody > tr", 'mouseenter', function () {
-                    var tr = this;
-                    var row = tableApi.row(tr);
-                    widget._highlightFeature(row.data(), true);
-                });
-
-                table.delegate("tbody > tr", 'mouseleave', function () {
-                    var tr = this;
-                    var row = tableApi.row(tr);
-                    widget._highlightFeature(row.data(), false);
-                });
-
-                table.delegate("tbody > tr", 'click', function () {
-                    var tr = this;
-                    var row = tableApi.row(tr);
-                    var feature = row.data();
-
-                    feature.selected = $('.selection input', tr).is(':checked');
-                    widget._highlightFeature(feature);
-
-                    newSchema._zoomOrOpenDialog();
-
-                });
-
                 newSchema._getData();
             }
 
@@ -476,10 +409,6 @@
             widget._createMapContextMenu();
 
             widget._createElementContextMenu();
-
-            widget._createTableTranslations();
-
-            widget._buildSelectOptionsForAllSchemes();
 
             widget._initializeSelector();
 
