@@ -1963,9 +1963,7 @@ Scheme.prototype = {
 
 
     createContextMenuSubMenu: function (olFeature) {
-        var layer = olFeature.layer;
         var schema = this;
-        var widget = this.widget;
         var subItems = {
             zoomTo: {
                 name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
