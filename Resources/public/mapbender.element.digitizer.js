@@ -171,63 +171,8 @@
             var widget = this;
             var map = widget.map;
 
-            function createSubMenu(olFeature) {
-                var layer = olFeature.layer;
-                var schema = widget.findSchemaByLayer(layer);
-                var subItems = {
-                    zoomTo: {
-                        name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
-                        action: function (key, options, parameters) {
-                            widget.zoomToJsonFeature(parameters.olFeature);
-                        }
-                    }
-                };
 
-                if (schema.allowChangeVisibility) {
-                    subItems['style'] = {
-                        name: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
-                        action: function (key, options, parameters) {
-                            schema.openChangeStyleDialog(olFeature);
-                        }
-                    };
-                }
-
-                if (schema.allowCustomerStyle) {
-                    subItems['style'] = {
-                        name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
-                        action: function (key, options, parameters) {
-                            schema.openChangeStyleDialog(olFeature);
-                        }
-                    };
-                }
-
-                if (schema.allowEditData) {
-                    subItems['edit'] = {
-                        name: Mapbender.DigitizerTranslator.translate('feature.edit'),
-                        action: function (key, options, parameters) {
-                            schema._openFeatureEditDialog(parameters.olFeature);
-                        }
-                    }
-                }
-
-                if (schema.allowDelete) {
-                    subItems['remove'] = {
-                        name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
-                        action: function (key, options, parameters) {
-                            schema.removeFeature(parameters.olFeature);
-                        }
-                    }
-                }
-
-                return {
-                    name: "Feature #" + olFeature.fid,
-                    olFeature: olFeature,
-                    items: subItems
-                };
-            }
-
-
-            $(map.div).contextMenu({
+            var options = {
                 selector: 'div',
                 events: {
                     show: function (options) {
@@ -252,7 +197,7 @@
                         features = feature.cluster || [feature];
 
                         _.each(features, function (feature) {
-                            items[feature.fid] = createSubMenu(feature);
+                            items[feature.fid] = schema.createContextMenuSubMenu(feature);
                         });
                     }
 
@@ -275,7 +220,9 @@
                         }
                     };
                 }
-            });
+            };
+
+            $(map.div).contextMenu(options);
 
         },
 
@@ -301,6 +248,7 @@
                     }
                 },
                 build: function ($trigger, e) {
+
                     var tr = $($trigger);
                     var resultTable = tr.closest('.mapbender-element-result-table');
                     var api = resultTable.resultTable('getApi');
@@ -334,7 +282,7 @@
                                     break;
 
                                 case 'zoom':
-                                    widget.zoomToJsonFeature(olFeature);
+                                    schema.zoomToJsonFeature(olFeature);
                                     break;
 
                                 case 'edit':
@@ -456,7 +404,7 @@
                     if (isOpenLayerCloudPopup) {
                         schema._openFeatureEditDialog(feature);
                     } else {
-                        widget.zoomToJsonFeature(feature);
+                        schema.zoomToJsonFeature(feature);
                     }
                 });
 
@@ -941,27 +889,7 @@
             return this.map;
         },
 
-        /**
-         * Zoom to JSON feature
-         *
-         * @param {(OpenLayers.Feature.Vector)} feature
-         */
-        zoomToJsonFeature: function (feature) {
 
-            if (!feature) {
-                return
-            }
-
-            var widget = this;
-            var olMap = widget.getMap();
-            var schema = widget.currentSchema || widget.findFeatureSchema(feature);
-            var geometry = feature.geometry;
-
-            olMap.zoomToExtent(geometry.getBounds());
-            if (schema.hasOwnProperty('zoomScaleDenominator')) {
-                olMap.zoomToScale(schema.zoomScaleDenominator, true);
-            }
-        },
 
         /**
          * Open feature edit dialog

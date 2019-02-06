@@ -656,8 +656,8 @@ Scheme.prototype = {
             feature.styleId = "labelText";
         }
 
-        if(schema.featureStyles && schema.featureStyles[feature.fid]) {
-            if(!feature.styleId){
+        if (schema.featureStyles && schema.featureStyles[feature.fid]) {
+            if (!feature.styleId) {
                 var styleData = schema.featureStyles[feature.fid],
                     styleMap = layer.options.styleMap,
                     styles = styleMap.styles,
@@ -670,7 +670,7 @@ Scheme.prototype = {
         }
     },
 
-    _redrawResultTableFeatures: function(features) {
+    _redrawResultTableFeatures: function (features) {
         var schema = this;
         var tableApi = schema.table.resultTable('getApi');
 
@@ -732,7 +732,7 @@ Scheme.prototype = {
         // Post handling
     },
 
-    _setFeatureStyles: function(featureStyles) {
+    _setFeatureStyles: function (featureStyles) {
         var schema = this;
         schema.featureStyles = featureStyles;
 
@@ -819,7 +819,7 @@ Scheme.prototype = {
 
     },
 
-    _addSpecificOptionToSchemeSelector: function() {
+    _addSpecificOptionToSchemeSelector: function () {
         var schema = this;
         var widget = schema.widget;
         var selector = widget.selector;
@@ -843,7 +843,7 @@ Scheme.prototype = {
                 className: 'zoom',
                 cssClass: 'fa fa-crosshairs',
                 onClick: function (olFeature, ui) {
-                    widget.zoomToJsonFeature(olFeature);
+                    schema.zoomToJsonFeature(olFeature);
                 }
             });
         }
@@ -1490,24 +1490,24 @@ Scheme.prototype = {
         }
 
         var styleEditor = $("<div/>").featureStyleEditor(styleOptions).bind('featurestyleeditorsubmit', function (e, context) {
-                var styleData = styleEditor.formData();
-                var schemaName = schema.schemaName;
-                styleEditor.disableForm();
-                widget._applyStyle(styleData, olFeature);
-                if (olFeature.fid) {
-                    widget._saveStyle(schemaName, styleData, olFeature)
-                        .done(function (response) {
-                            widget._applyStyle(response.style, olFeature);
-                            styleEditor.enableForm();
-                        });
-                } else {
-                    // defer style saving until the feature itself is saved, and has an id to associate with
-                    var styleDataCopy = $.extend({}, styleData);
-                    olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
-                }
-                widget._applyStyle(styleData, olFeature);
-                styleEditor.featureStyleEditor("close");
-            });
+            var styleData = styleEditor.formData();
+            var schemaName = schema.schemaName;
+            styleEditor.disableForm();
+            widget._applyStyle(styleData, olFeature);
+            if (olFeature.fid) {
+                widget._saveStyle(schemaName, styleData, olFeature)
+                    .done(function (response) {
+                        widget._applyStyle(response.style, olFeature);
+                        styleEditor.enableForm();
+                    });
+            } else {
+                // defer style saving until the feature itself is saved, and has an id to associate with
+                var styleDataCopy = $.extend({}, styleData);
+                olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
+            }
+            widget._applyStyle(styleData, olFeature);
+            styleEditor.featureStyleEditor("close");
+        });
         return styleEditor;
     },
 
@@ -1593,7 +1593,7 @@ Scheme.prototype = {
                 if (_.size(errors)) {
                     // console.log("Search mandatory rules isn't complete", errors);
                     // Remove all features
-                    schema.reloadFeatures( []);
+                    schema.reloadFeatures([]);
                     schema.lastRequest = null;
                     return;
                 }
@@ -1705,7 +1705,7 @@ Scheme.prototype = {
             }
         });
 
-        schema.reloadFeatures( _.union(features, polygones, lineStrings, points));
+        schema.reloadFeatures(_.union(features, polygones, lineStrings, points));
     },
 
 
@@ -1728,7 +1728,7 @@ Scheme.prototype = {
         function _removeFeatureFromUI() {
             //var clonedFeature = jQuery.extend(true, {}, olFeature);
             var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
-            schema.reloadFeatures( _.without(existingFeatures, olFeature));
+            schema.reloadFeatures(_.without(existingFeatures, olFeature));
 
             /** @deprecated */
             widget._trigger('featureRemoved', null, {
@@ -1914,7 +1914,7 @@ Scheme.prototype = {
                     newFeature[key] = feature[key];
                 });
 
-                schema.reloadFeatures( _.union(_.without(layer.features, feature), [newFeature]));
+                schema.reloadFeatures(_.union(_.without(layer.features, feature), [newFeature]));
                 feature = newFeature;
 
                 tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
@@ -1927,7 +1927,7 @@ Scheme.prototype = {
                 //feature.oldGeom = false;
                 feature.isDragged = false;
 
-                schema.triggerModifiedState(feature,false);
+                schema.triggerModifiedState(feature, false);
 
                 dialog && dialog.popupDialog('close');
 
@@ -1962,6 +1962,84 @@ Scheme.prototype = {
     },
 
 
+    createContextMenuSubMenu: function (olFeature) {
+        var layer = olFeature.layer;
+        var schema = this;
+        var widget = this.widget;
+        var subItems = {
+            zoomTo: {
+                name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
+                action: function (key, options, parameters) {
+                    schema.zoomToJsonFeature(parameters.olFeature);
+                }
+            }
+        };
+
+        if (schema.allowChangeVisibility) {
+            subItems['style'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
+                action: function (key, options, parameters) {
+                    schema.openChangeStyleDialog(olFeature);
+                }
+            };
+        }
+
+        if (schema.allowCustomerStyle) {
+            subItems['style'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
+                action: function (key, options, parameters) {
+                    schema.openChangeStyleDialog(olFeature);
+                }
+            };
+        }
+
+        if (schema.allowEditData) {
+            subItems['edit'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.edit'),
+                action: function (key, options, parameters) {
+                    schema._openFeatureEditDialog(parameters.olFeature);
+                }
+            }
+        }
+
+        if (schema.allowDelete) {
+            subItems['remove'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                action: function (key, options, parameters) {
+                    schema.removeFeature(parameters.olFeature);
+                }
+            }
+        }
+
+        return {
+            name: "Feature #" + olFeature.fid,
+            olFeature: olFeature,
+            items: subItems
+        };
+    },
+
+
+    /**
+     * Zoom to JSON feature
+     *
+     * @param {(OpenLayers.Feature.Vector)} feature
+     */
+    zoomToJsonFeature: function (feature) {
+        var schema = this;
+        var widget = schema.widget;
+
+        if (!feature) {
+            return
+        }
+
+        var olMap = widget.getMap();
+        var geometry = feature.geometry;
+
+        olMap.zoomToExtent(geometry.getBounds());
+        if (schema.hasOwnProperty('zoomScaleDenominator')) {
+            olMap.zoomToScale(schema.zoomScaleDenominator, true);
+        }
+    },
 
 
 };
