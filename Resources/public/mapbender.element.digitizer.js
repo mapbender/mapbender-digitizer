@@ -534,14 +534,8 @@
 
             widget._initializeSelector();
 
-            var containerInfo = new MapbenderContainerInfo(widget, {
-                onactive: function () {
-                    widget.activate();
-                },
-                oninactive: function () {
-                    widget.deactivate();
-                }
-            });
+            widget._initializeActivationContainer();
+
             widget._initializeMapEvents();
 
             widget._trigger('ready');
@@ -556,6 +550,24 @@
 
 
             widget.updateClusterStrategies();
+
+        },
+
+
+        // TODO Kanonen->Spatzen: refactoring
+        _initializeActivationContainer: function() {
+            var widget = this;
+
+            var containerInfo = new MapbenderContainerInfo(widget, {
+                onactive: function () {
+                    widget.activate();
+                },
+                oninactive: function () {
+                    widget.deactivate();
+                }
+            });
+
+            return containerInfo;
 
         },
 
