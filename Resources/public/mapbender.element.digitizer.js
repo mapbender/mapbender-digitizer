@@ -370,20 +370,18 @@
 
             return function () {
                 var option = selector.find(":selected");
-                var schema = option.data("schemaSettings");
-                var table = schema.table;
+                var newSchema = option.data("schemaSettings");
+                var table = newSchema.table;
                 var tableApi = table.resultTable('getApi');
 
-                widget._trigger("beforeChangeDigitizing", null, {
-                    next: schema,
-                    previous: widget.currentSchema
-                });
+                // widget._trigger("beforeChangeDigitizing", null, {
+                //     next: schema,
+                //     previous: widget.currentSchema
+                // });
 
-                if (widget.currentSchema) {
-                    widget.currentSchema.deactivateSchema();
-                }
+                widget.currentSchema && widget.currentSchema.deactivateSchema();
 
-                schema.activateSchema();
+                newSchema.activateSchema();
 
                 table.off('mouseenter', 'mouseleave', 'click');
 
@@ -403,20 +401,15 @@
                     var tr = this;
                     var row = tableApi.row(tr);
                     var feature = row.data();
-                    var isOpenLayerCloudPopup = schema.popup && schema.popup.type && schema.popup.type === 'openlayers-cloud';
 
                     feature.selected = $('.selection input', tr).is(':checked');
-
                     widget._highlightFeature(feature);
 
-                    if (isOpenLayerCloudPopup) {
-                        schema._openFeatureEditDialog(feature);
-                    } else {
-                        schema.zoomToJsonFeature(feature);
-                    }
+                    newSchema._zoomOrOpenDialog();
+
                 });
 
-                schema._getData();
+                newSchema._getData();
             }
 
         },
@@ -496,13 +489,13 @@
 
             widget._trigger('ready');
 
-            element.bind(widget._getBindingEventIdentifiers(["beforechangedigitizing"]), function (e, sets) {
-                /**@type {Scheme} */
-                var previousSchema = sets.previous;
-                if (previousSchema) {
-                    previousSchema.digitizingToolset.deactivateCurrentControl();
-                }
-            });
+            // element.bind(widget._getBindingEventIdentifiers(["beforechangedigitizing"]), function (e, sets) {
+            //     /**@type {Scheme} */
+            //     var previousSchema = sets.previous;
+            //     if (previousSchema) {
+            //         previousSchema.digitizingToolset.deactivateCurrentControl();
+            //     }
+            // });
 
 
             widget.updateClusterStrategies();

@@ -781,6 +781,7 @@ Scheme.prototype = {
         if (widget.currentPopup) {
             widget.currentPopup.popupDialog('close');
         }
+        schema.digitizingToolset.deactivateCurrentControl();
 
     },
 
@@ -2038,5 +2039,17 @@ Scheme.prototype = {
         }
     },
 
+
+    _zoomOrOpenDialog: function() {
+        var schema = this;
+
+        var isOpenLayerCloudPopup = schema.popup && schema.popup.type && schema.popup.type === 'openlayers-cloud';
+
+        if (isOpenLayerCloudPopup) {
+            schema._openFeatureEditDialog(feature);
+        } else {
+            schema.zoomToJsonFeature(feature);
+        }
+    }
 
 };
