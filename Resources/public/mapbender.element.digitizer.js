@@ -1219,15 +1219,7 @@
             var widget = this;
             $(".mb-element-digitizer").not(".mb-element-data-manager").each(function (index, element) {
                 var schemes = widget.options.schemes;
-                _.each(schemes, function (schema, key) {
-                    if (key === featureTypeName) {
-
-                        if (schema.layer) {
-                            schema._getData();
-                        }
-                        return true;
-                    }
-                })
+                schemes[featureTypeName] && schemes[featureTypeName].layer && schemes[featureTypeName].layer._getData();
             })
 
 
