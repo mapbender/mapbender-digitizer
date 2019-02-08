@@ -250,7 +250,7 @@ Scheme.prototype = {
         }
 
 
-        widget._processCurrentFormItemsWithDataManager(olFeature);
+        (new DataManagerUtils(widget)).processCurrentFormItemsWithDataManager(olFeature);
 
         var dialog = $("<div/>");
 
