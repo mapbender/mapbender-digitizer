@@ -538,7 +538,26 @@
             } else {
                 widget.element.remove();
             }
-        }
+        },
+
+        /**
+         *
+         * @param styleData
+         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
+         * @private
+         */
+        applyStyle: function (styleData, olFeature) {
+            var style = new OpenLayers.Style(styleData);
+            var styleMap = olFeature.layer.options.styleMap;
+            var styleId = styleData.id || Mapbender.Util.UUID();
+            var oldStyleId = olFeature.styleId || null;
+            styleMap.styles[styleId] = style;
+            olFeature.styleId = styleId;
+            olFeature.layer.drawFeature(olFeature, styleId);
+            if (oldStyleId && oldStyleId != styleId) {
+                delete styleMap.styles[oldStyleId];
+            }
+        },
     });
 
 })(jQuery);

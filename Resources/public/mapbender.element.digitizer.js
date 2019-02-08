@@ -108,24 +108,6 @@
 
         /**
          *
-         * @param styleData
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-         * @private
-         */
-        _applyStyle: function (styleData, olFeature) {
-            var style = new OpenLayers.Style(styleData);
-            var styleMap = olFeature.layer.options.styleMap;
-            var styleId = styleData.id || Mapbender.Util.UUID();
-            var oldStyleId = olFeature.styleId || null;
-            styleMap.styles[styleId] = style;
-            olFeature.styleId = styleId;
-            olFeature.layer.drawFeature(olFeature, styleId);
-            if (oldStyleId && oldStyleId != styleId) {
-                delete styleMap.styles[oldStyleId];
-            }
-        },
-        /**
-         *
          * @param schemaName
          * @param styleData
          * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
@@ -491,7 +473,7 @@
                 clusterSettings = null;
 
                 if (!schema.clustering) {
-                    return
+                    return;
                 }
 
                 $.each(schema.clustering, function (y, _clusterSettings) {
@@ -563,59 +545,51 @@
          * @returns {Array}
          * @private
          */
-        _getFeaturesFromEvent: function (x, y) {
-            var features = [], targets = [], layers = [];
-            var layer, target, feature, i, len;
-            var map = this.map;
+        // _getFeaturesFromEvent: function (x, y) {
+        //     var features = [], targets = [], layers = [];
+        //     var layer, target, feature, i, len;
+        //     var map = this.map;
+        //
+        //     //map.resetLayersZIndex();
+        //
+        //     // go through all layers looking for targets
+        //     for (i = map.layers.length - 1; i >= 0; --i) {
+        //         layer = map.layers[i];
+        //         if (layer.div.style.display !== "none") {
+        //             if (layer === this.activeLayer) {
+        //                 target = document.elementFromPoint(x, y);
+        //                 while (target && target._featureId) {
+        //                     feature = layer.getFeatureById(target._featureId);
+        //                     if (feature) {
+        //                         features.push(feature);
+        //                         target.style.visibility = 'hidden';
+        //                         targets.push(target);
+        //                         target = document.elementFromPoint(x, y);
+        //                     } else {
+        //                         target = false;
+        //                     }
+        //                 }
+        //             }
+        //             layers.push(layer);
+        //             layer.div.style.display = "none";
+        //         }
+        //     }
+        //
+        //     // restore feature visibility
+        //     for (i = 0, len = targets.length; i < len; ++i) {
+        //         targets[i].style.display = "";
+        //         targets[i].style.visibility = 'visible';
+        //     }
+        //
+        //     // restore layer visibility
+        //     for (i = layers.length - 1; i >= 0; --i) {
+        //         layers[i].div.style.display = "block";
+        //     }
+        //
+        //     //map.resetLayersZIndex();
+        //     return features;
+        // },
 
-            //map.resetLayersZIndex();
-
-            // go through all layers looking for targets
-            for (i = map.layers.length - 1; i >= 0; --i) {
-                layer = map.layers[i];
-                if (layer.div.style.display !== "none") {
-                    if (layer === this.activeLayer) {
-                        target = document.elementFromPoint(x, y);
-                        while (target && target._featureId) {
-                            feature = layer.getFeatureById(target._featureId);
-                            if (feature) {
-                                features.push(feature);
-                                target.style.visibility = 'hidden';
-                                targets.push(target);
-                                target = document.elementFromPoint(x, y);
-                            } else {
-                                target = false;
-                            }
-                        }
-                    }
-                    layers.push(layer);
-                    layer.div.style.display = "none";
-                }
-            }
-
-            // restore feature visibility
-            for (i = 0, len = targets.length; i < len; ++i) {
-                targets[i].style.display = "";
-                targets[i].style.visibility = 'visible';
-            }
-
-            // restore layer visibility
-            for (i = layers.length - 1; i >= 0; --i) {
-                layers[i].div.style.display = "block";
-            }
-
-            //map.resetLayersZIndex();
-            return features;
-        },
-
-
-
-
-        save: function (dataItem) {
-            debugger;
-            //dataItem.uniqueId
-
-        },
 
         /**
          * Digitizer API connection query
@@ -703,16 +677,16 @@
          * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature OpenLayers
          * @param {String} attributeName
          */
-        download: function (feature, attributeName) {
-            var widget = this;
-            /**@type {Scheme} */
-            var schema = widget.currentSchema;
-            var attributes = feature.attributes;
-            var tableName = schema.featureType.table;
-            var relativeWebPath = Mapbender.configuration.application.urls.asset;
-            window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
-
-        }
+        // download: function (feature, attributeName) {
+        //     var widget = this;
+        //     /**@type {Scheme} */
+        //     var schema = widget.currentSchema;
+        //     var attributes = feature.attributes;
+        //     var tableName = schema.featureType.table;
+        //     var relativeWebPath = Mapbender.configuration.application.urls.asset;
+        //     window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
+        //
+        // }
     });
 
 })(jQuery);

@@ -1532,11 +1532,11 @@ Scheme.prototype = {
             var styleData = styleEditor.formData();
             var schemaName = schema.schemaName;
             styleEditor.disableForm();
-            widget._applyStyle(styleData, olFeature);
+            styleEditor._applyStyle(styleData, olFeature);
             if (olFeature.fid) {
                 widget._saveStyle(schemaName, styleData, olFeature)
                     .done(function (response) {
-                        widget._applyStyle(response.style, olFeature);
+                        styleEditor._applyStyle(response.style, olFeature);
                         styleEditor.enableForm();
                     });
             } else {
