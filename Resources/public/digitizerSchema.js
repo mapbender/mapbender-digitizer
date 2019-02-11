@@ -289,7 +289,6 @@ Scheme.prototype = {
         dialog.bind('edit-cancel', schema.editCancel.bind(schema));
 
         dialog.bind('popupdialogclose', function (event) {
-            console.log("close dialog");
             dialog.trigger('edit-cancel', {
                 'origin': 'close-button',
                 'feature': dialog.data('feature')
@@ -783,7 +782,6 @@ Scheme.prototype = {
 
     activateSchema: function () {
 
-        console.log("active Schema");
         /** @type {Scheme} */
         var schema = this;
         var widget = this.widget;
@@ -1289,7 +1287,7 @@ Scheme.prototype = {
 
         frame.append(digitizingToolSetElement);
 
-        schema.digitizingToolset = digitizingToolSetElement.data("digitizingToolSet");
+        schema.digitizingToolset = digitizingToolSetElement.digitizingToolSet("instance");
 
         frame.generateElements({
             children: [{

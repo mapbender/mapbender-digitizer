@@ -80,7 +80,6 @@
                 }
             });
 
-            $(this.element).data("digitizingToolSet", this);
 
         },
 
