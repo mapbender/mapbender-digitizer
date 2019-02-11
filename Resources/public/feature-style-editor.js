@@ -549,16 +549,26 @@
          */
         applyStyle: function (styleData, olFeature) {
             var style = new OpenLayers.Style(styleData);
-            var styleMap = olFeature.layer.options.styleMap;
             var styleId = styleData.id || Mapbender.Util.UUID();
-            var oldStyleId = olFeature.styleId || null;
-            styleMap.styles[styleId] = style;
+            this._deleteOldStyleFromStyleMap(olFeature,styleId);
+            this._addNewStyleToStyleMap(olFeature,styleId,style);
             olFeature.styleId = styleId;
             olFeature.layer.drawFeature(olFeature, styleId);
-            if (oldStyleId && oldStyleId != styleId) {
-                delete styleMap.styles[oldStyleId];
+
+        },
+
+        _deleteOldStyleFromStyleMap: function(olFeature,newStyleId) {
+            var styleMap = olFeature.layer.options.styleMap;
+            if (olFeature.styleId && olFeature.styleId != newStyleId) {
+                delete styleMap.styles[olFeature.styleId];
             }
         },
+
+        _addNewStyleToStyleMap: function(olFeature,newStyleId,style) {
+            var styleMap = olFeature.layer.options.styleMap;
+            styleMap.styles[newStyleId] = style;
+
+        }
     });
 
 })(jQuery);
