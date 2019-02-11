@@ -88,75 +88,75 @@
                     }]
                 }]
             };
-            var backGroundTab = {
-                title:    "Hintegrund",
-                type:     "form",
-                children: [{
-                    type:     'fieldSet',
-                    children: [{
-                        title:         "Breite",
-                        infoText:      "Die Breite der Hintergrund-Breite.  Wenn nicht angegeben, wird die graphicWidth verwendet.",
-                        type:          "input",
-                        name:          "backgroundWidth",
-                        mandatoryText: "Bitte nur Zahlen verwenden",
-                        css:           {width: '50%'}
-
-                    }, {
-                        title:         "Höhe",
-                        infoText:      "Die Breite der Hintergrund-Höhe.  Wenn nicht angegeben, wird die graphicHeight verwendet.",
-                        type:          "input",
-                        name:          "backgroundHeight",
-                        mandatoryText: "Bitte nur Zahlen verwenden",
-                        css:           {width: '50%'}
-                    }]
-                }, {
-                    type:     'fieldSet',
-                    children: [{
-                        title: "X-Offset", // infoText:  "The x offset (in pixels) for the background graphic.",
-                        name:  "backgroundXOffset",
-                        type:  "slider",
-                        range: "max",
-                        min:   0,
-                        max:   100,
-                        value: 0,
-                        step:  1,
-                        css:   {
-                            width: '33%'
-                        }
-                    }, {
-                        title: "Y-Offset",
-                        type:  "slider",
-                        name:  "backgroundYOffset",
-                        range: "max",
-                        min:   0,
-                        max:   100,
-                        value: 0,
-                        step:  1,
-                        css:   {
-                            width: '33%'
-                        }
-                    }, {
-                        title: "Z-Index",
-                        type:  "slider",
-                        name:  "backgroundGraphicZIndex", // infoText:  "The integer z-index value to use in rendering the background graphic.",
-                        range: "max",
-                        min:   0,
-                        max:   100,
-                        value: 0,
-                        step:  1,
-                        css:   {
-                            width: '34%'
-                        }
-                    }]
-                }, {
-                    title:       "Bild URL",
-                    infoText:    "Url to a graphic to be used as the background under an externalGraphic.",
-                    type:        "input",
-                    name:        "backgroundGraphic",
-                    value:       "",
-                    placeholder: "URL"
-                }]
-            };
+            // var backGroundTab = {
+            //     title:    "Hintegrund",
+            //     type:     "form",
+            //     children: [{
+            //         type:     'fieldSet',
+            //         children: [{
+            //             title:         "Breite",
+            //             infoText:      "Die Breite der Hintergrund-Breite.  Wenn nicht angegeben, wird die graphicWidth verwendet.",
+            //             type:          "input",
+            //             name:          "backgroundWidth",
+            //             mandatoryText: "Bitte nur Zahlen verwenden",
+            //             css:           {width: '50%'}
+            //
+            //         }, {
+            //             title:         "Höhe",
+            //             infoText:      "Die Breite der Hintergrund-Höhe.  Wenn nicht angegeben, wird die graphicHeight verwendet.",
+            //             type:          "input",
+            //             name:          "backgroundHeight",
+            //             mandatoryText: "Bitte nur Zahlen verwenden",
+            //             css:           {width: '50%'}
+            //         }]
+            //     }, {
+            //         type:     'fieldSet',
+            //         children: [{
+            //             title: "X-Offset", // infoText:  "The x offset (in pixels) for the background graphic.",
+            //             name:  "backgroundXOffset",
+            //             type:  "slider",
+            //             range: "max",
+            //             min:   0,
+            //             max:   100,
+            //             value: 0,
+            //             step:  1,
+            //             css:   {
+            //                 width: '33%'
+            //             }
+            //         }, {
+            //             title: "Y-Offset",
+            //             type:  "slider",
+            //             name:  "backgroundYOffset",
+            //             range: "max",
+            //             min:   0,
+            //             max:   100,
+            //             value: 0,
+            //             step:  1,
+            //             css:   {
+            //                 width: '33%'
+            //             }
+            //         }, {
+            //             title: "Z-Index",
+            //             type:  "slider",
+            //             name:  "backgroundGraphicZIndex", // infoText:  "The integer z-index value to use in rendering the background graphic.",
+            //             range: "max",
+            //             min:   0,
+            //             max:   100,
+            //             value: 0,
+            //             step:  1,
+            //             css:   {
+            //                 width: '34%'
+            //             }
+            //         }]
+            //     }, {
+            //         title:       "Bild URL",
+            //         infoText:    "Url to a graphic to be used as the background under an externalGraphic.",
+            //         type:        "input",
+            //         name:        "backgroundGraphic",
+            //         value:       "",
+            //         placeholder: "URL"
+            //     }]
+            // };
             var strokeTab = {
                 title:    "Rand",
                 type:     "form",
@@ -237,78 +237,78 @@
                     value:   '1'
                 }]
             };
-            var imageTab = {
-                title:    "Bild",
-                type:     "form",
-                children: [{
-                    title:    "Name",
-                    type:     "input",
-                    name:     "graphicName",
-                    infoText: "Named graphic to use when rendering points.  Supported values include “circle” (default), “square”, “star”, “x”, “cross”, “triangle”."
-                }, {
-                    type:     'fieldSet',
-                    children: [{
-                        title:         "Breite",
-                        type:          "input",
-                        name:          "graphicWidth",
-                        mandatoryText: "Bitte nur Zahlen verwenden",
-                        css:           {width: '50%'}
-                    }, {
-                        title:         "Höhe",
-                        type:          "input",
-                        name:          "graphicHeight",
-                        mandatoryText: "Bitte nur Zahlen verwenden",
-                        css:           {width: '50%'}
-                    }]
-                }, {
-                    type:     'fieldSet',
-                    children: [{
-                        title:         "X-Offset",
-                        name:          "graphicXOffset",
-                        type:          "slider",
-                        mandatoryText: "Bitte nur Zahlen verwenden",
-                        range:         "max",
-                        min:           0,
-                        max:           100,
-                        value:         0,
-                        step:          1,
-                        css:           {
-                            width: '33%'
-                        }
-                    }, {
-                        title:         "Y-Offset",
-                        type:          "slider",
-                        name:          "graphicYOffset",
-                        mandatoryText: "Bitte nur Zahlen verwenden",
-                        range:         "max",
-                        min:           0,
-                        max:           100,
-                        value:         0,
-                        step:          1,
-                        css:           {
-                            width: '33%'
-                        }
-                    }, {
-                        title: "Deckkraft",
-                        name:  "graphicOpacity",
-                        type:  "slider",
-                        range: "max",
-                        min:   0,
-                        max:   1,
-                        value: 1,
-                        step:  0.01,
-                        css:   {
-                            width: '34%'
-                        }
-                    }]
-                }, {
-                    title:       "URL",
-                    type:        "input",
-                    name:        "graphicUrl",
-                    value:       "",
-                    placeholder: "URL"
-                }]
-            };
+            // var imageTab = {
+            //     title:    "Bild",
+            //     type:     "form",
+            //     children: [{
+            //         title:    "Name",
+            //         type:     "input",
+            //         name:     "graphicName",
+            //         infoText: "Named graphic to use when rendering points.  Supported values include “circle” (default), “square”, “star”, “x”, “cross”, “triangle”."
+            //     }, {
+            //         type:     'fieldSet',
+            //         children: [{
+            //             title:         "Breite",
+            //             type:          "input",
+            //             name:          "graphicWidth",
+            //             mandatoryText: "Bitte nur Zahlen verwenden",
+            //             css:           {width: '50%'}
+            //         }, {
+            //             title:         "Höhe",
+            //             type:          "input",
+            //             name:          "graphicHeight",
+            //             mandatoryText: "Bitte nur Zahlen verwenden",
+            //             css:           {width: '50%'}
+            //         }]
+            //     }, {
+            //         type:     'fieldSet',
+            //         children: [{
+            //             title:         "X-Offset",
+            //             name:          "graphicXOffset",
+            //             type:          "slider",
+            //             mandatoryText: "Bitte nur Zahlen verwenden",
+            //             range:         "max",
+            //             min:           0,
+            //             max:           100,
+            //             value:         0,
+            //             step:          1,
+            //             css:           {
+            //                 width: '33%'
+            //             }
+            //         }, {
+            //             title:         "Y-Offset",
+            //             type:          "slider",
+            //             name:          "graphicYOffset",
+            //             mandatoryText: "Bitte nur Zahlen verwenden",
+            //             range:         "max",
+            //             min:           0,
+            //             max:           100,
+            //             value:         0,
+            //             step:          1,
+            //             css:           {
+            //                 width: '33%'
+            //             }
+            //         }, {
+            //             title: "Deckkraft",
+            //             name:  "graphicOpacity",
+            //             type:  "slider",
+            //             range: "max",
+            //             min:   0,
+            //             max:   1,
+            //             value: 1,
+            //             step:  0.01,
+            //             css:   {
+            //                 width: '34%'
+            //             }
+            //         }]
+            //     }, {
+            //         title:       "URL",
+            //         type:        "input",
+            //         name:        "graphicUrl",
+            //         value:       "",
+            //         placeholder: "URL"
+            //     }]
+            // };
             var labelTab = {
 
                 title:    'Beschriftung',
@@ -416,55 +416,55 @@
                     }]
 
             };
-            var miscTab = {
-                title:    "Verschiedenes",
-                type:     "form",
-                children: [{
-                    title:   "Zeigersymbol",
-                    name:    "cursor",
-                    type:    "select",
-                    options: {
-                        auto:        'Automatisch',
-                        'default':   'Vorgabe',
-                        crosshair:   'Kreuz',
-                        pointer:     'Hand',
-                        move:        'Verschieben',
-                        // 'n-resize':  'n-resize',
-                        // 'ne-resize': 'ne-resize',
-                        // 'e-resize':  'e-resize',
-                        // 'se-resize': 'se-resize',
-                        // 's-resize':  's-resize',
-                        // 'sw-resize': 'sw-resize',
-                        // 'w-resize':  'w-resize',
-                        // 'nw-resize': 'nw-resize',
-                        text:        'Textauswahl',
-                        wait:        'Warten',
-                        help:        'Hilfe'
-                    },
-                    value:   "pointer"
-                }, {
-                    title:     "Rotation (°)",
-                    name:      "rotation",
-                    type:      "slider",
-                    mandatory: "/^\\d+$/",
-                    range:     "max",
-                    min:       0,
-                    max:       360,
-                    value:     0,
-                    step:      1
-                }, {
-                    title:   "Anzeige",
-                    name:    "display",
-                    type:    "select",
-                    options: {
-                        inline:         "inline",
-                        "inline-block": "inline-block",
-                        block:          "block",
-                        none:           "none"
-                    },
-                    value:   "block"
-                }]
-            };
+            // var miscTab = {
+            //     title:    "Verschiedenes",
+            //     type:     "form",
+            //     children: [{
+            //         title:   "Zeigersymbol",
+            //         name:    "cursor",
+            //         type:    "select",
+            //         options: {
+            //             auto:        'Automatisch',
+            //             'default':   'Vorgabe',
+            //             crosshair:   'Kreuz',
+            //             pointer:     'Hand',
+            //             move:        'Verschieben',
+            //             // 'n-resize':  'n-resize',
+            //             // 'ne-resize': 'ne-resize',
+            //             // 'e-resize':  'e-resize',
+            //             // 'se-resize': 'se-resize',
+            //             // 's-resize':  's-resize',
+            //             // 'sw-resize': 'sw-resize',
+            //             // 'w-resize':  'w-resize',
+            //             // 'nw-resize': 'nw-resize',
+            //             text:        'Textauswahl',
+            //             wait:        'Warten',
+            //             help:        'Hilfe'
+            //         },
+            //         value:   "pointer"
+            //     }, {
+            //         title:     "Rotation (°)",
+            //         name:      "rotation",
+            //         type:      "slider",
+            //         mandatory: "/^\\d+$/",
+            //         range:     "max",
+            //         min:       0,
+            //         max:       360,
+            //         value:     0,
+            //         step:      1
+            //     }, {
+            //         title:   "Anzeige",
+            //         name:    "display",
+            //         type:    "select",
+            //         options: {
+            //             inline:         "inline",
+            //             "inline-block": "inline-block",
+            //             block:          "block",
+            //             none:           "none"
+            //         },
+            //         value:   "block"
+            //     }]
+            // };
 
             var tabs = [];
 

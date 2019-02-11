@@ -1531,14 +1531,17 @@ Scheme.prototype = {
         var instance = styleEditor.featureStyleEditor("instance");
 
         instance.submit = function() {
+            var featureStyleEditor = this;
             var styleData = styleEditor.formData();
             var schemaName = schema.schemaName;
             styleEditor.disableForm();
-            instance.applyStyle(styleData, olFeature);
+            featureStyleEditor.applyStyle(styleData, olFeature);
             if (olFeature.fid) {
+
+                console.log("save");
                 widget._saveStyle(schemaName, styleData, olFeature)
                     .done(function (response) {
-                        instance.applyStyle(response.style, olFeature);
+                        featureStyleEditor.applyStyle(response.style, olFeature);
                         styleEditor.enableForm();
                     });
             } else {
@@ -1546,7 +1549,6 @@ Scheme.prototype = {
                 var styleDataCopy = $.extend({}, styleData);
                 olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
             }
-            instance.applyStyle(styleData, olFeature);
             styleEditor.featureStyleEditor("close");
 
         };
