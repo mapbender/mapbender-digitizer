@@ -327,7 +327,7 @@ Scheme.prototype = {
                     fieldName: item.dataStoreLink.fieldName
                 };
 
-                widget.query('dataStore/get', requestData).done(function (data) {
+                QueryEngine.query('dataStore/get', requestData).done(function (data) {
                     if (Object.prototype.toString.call(data) === '[object Array]') {
 
                         var dataItems = [];
@@ -795,7 +795,7 @@ Scheme.prototype = {
         widget.activeLayer = schema.layer;
         widget.currentSchema = schema;
 
-        widget.query('style/list', {schema: schema.schemaName}).done(function (data) {
+        QueryEngine.query('style/list', {schema: schema.schemaName}).done(function (data) {
             schema._setFeatureStyles(data.featureStyles);
             schema.reloadFeatures();
             layer.setVisibility(true);
@@ -1527,28 +1527,9 @@ Scheme.prototype = {
         }
 
         var styleEditor = new FeatureStyleEditor(styleOptions);
+        styleEditor.setFeature(olFeature);
 
-        styleEditor.submit = function() {
-            var featureStyleEditor = this;
-            var styleEditor = featureStyleEditor.getElement();
-            var styleData = styleEditor.formData();
-            var schemaName = schema.schemaName;
-            styleEditor.disableForm();
-            featureStyleEditor.applyStyle(styleData, olFeature);
-            if (olFeature.fid) {
-                widget._saveStyle(schemaName, styleData, olFeature)
-                    .done(function (response) {
-                        featureStyleEditor.applyStyle(response.style, olFeature);
-                        styleEditor.enableForm();
-                    });
-            } else {
-                // defer style saving until the feature itself is saved, and has an id to associate with
-                var styleDataCopy = $.extend({}, styleData);
-                olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
-            }
-            featureStyleEditor.close();
 
-        };
 
 
     },
@@ -1660,7 +1641,7 @@ Scheme.prototype = {
             schema.xhr.abort();
         }
 
-        schema.xhr = widget.query('select', request).done(function (featureCollection) {
+        schema.xhr = QueryEngine.query('select', request).done(function (featureCollection) {
             schema._onFeatureCollectionLoaded(featureCollection, this);
         });
 
@@ -1781,7 +1762,7 @@ Scheme.prototype = {
             Mapbender.confirmDialog({
                 html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
                 onSuccess: function () {
-                    widget.query('delete', {
+                    QueryEngine.query('delete', {
                         schema: schema.schemaName,
                         feature: featureData
                     }).done(function (fid) {
@@ -1901,7 +1882,7 @@ Scheme.prototype = {
             feature.disabled = true;
             dialog && dialog.disableForm();
 
-            return widget.query('save', {
+            return QueryEngine.query('save', {
 
                 schema: schema.schemaName,
                 feature: request

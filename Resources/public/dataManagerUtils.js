@@ -180,7 +180,7 @@ DataManagerUtils.prototype = {
                         var selectRef = $(this).siblings().find('select');
 
                         var dataStoreId = item.dataStore.id;
-                        widget.query("datastore/get", {
+                        QueryEngine.query("datastore/get", {
                             schema: widget.currentSchema.schemaName,
                             id: dataStoreId,
                             dataItemId: dataItemId
@@ -308,7 +308,7 @@ DataManagerUtils.prototype = {
             click: function () {
 
                 var uniqueIdKey = schema.dataStore.uniqueId;
-                widget.query('datastore/remove', {
+                QueryEngine.query('datastore/remove', {
                     schema: dataItem.item.dataStoreLink.name,
                     dataItemId: dataItem[uniqueIdKey],
                     dataStoreLinkFieldName: schema.dataStoreLink.fieldName,
@@ -487,7 +487,7 @@ DataManagerUtils.prototype = {
 
         $(dialog).disableForm();
 
-        widget.query('datastore/save', {
+        QueryEngine.query('datastore/save', {
             schema: dataItem.item.dataStoreLink.name,
             dataItem: formData,
             dataItemId: dataItem[uniqueIdKey],

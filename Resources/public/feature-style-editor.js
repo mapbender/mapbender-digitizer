@@ -516,6 +516,11 @@ var FeatureStyleEditor = function(options) {
 FeatureStyleEditor.prototype = {
 
 
+    setFeature: function(feature) {
+        this.feature = feature;
+    },
+
+
     /**
      *
      * @private
@@ -525,34 +530,80 @@ FeatureStyleEditor.prototype = {
             element.popupDialog("close");
     },
 
+    submit: function() {
+        var featureStyleEditor = this;
+        var olFeature = featureStyleEditor.feature;
+        var styleEditor = featureStyleEditor.getElement();
+        var styleData = styleEditor.formData();
+        styleEditor.disableForm();
+        olFeature.applyStyle(styleData);
+        if (olFeature.fid) {
+            featureStyleEditor._saveStyle(featureStyleEditor.schemaName, styleData, olFeature)
+                .done(function (response) {
+                    olFeature.applyStyle(response.style);
+                    styleEditor.enableForm();
+                });
+        } else {
+            // defer style saving until the feature itself is saved, and has an id to associate with
+            var styleDataCopy = $.extend({}, styleData);
+            olFeature.saveStyleDataCallback = $.proxy(featureStyleEditor._saveStyle, featureStyleEditor, featureStyleEditor.schemaName, styleDataCopy);
+        }
+        featureStyleEditor.close();
+
+    },
+
+    /**
+     *
+     * @param schemaName
+     * @param styleData
+     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
+     * @returns {*|xhr}
+     * @private
+     */
+
+    _saveStyle: function (schemaName, styleData, olFeature) {
+        return QueryEngine.query('style/save', {
+            style: styleData,
+            featureId: olFeature.fid,
+            schema: schemaName
+        });
+    },
+
     /**
      *
      * @param styleData
      * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
      * @private
      */
-    applyStyle: function (styleData, olFeature) {
-        var style = new OpenLayers.Style(styleData);
-        var styleId = styleData.id || Mapbender.Util.UUID();
-        this._deleteOldStyleFromStyleMap(olFeature,styleId);
-        this._addNewStyleToStyleMap(olFeature,styleId,style);
-        olFeature.styleId = styleId;
-        console.log(olFeature,styleId,olFeature.layer.options.styleMap.styles[styleId],"!");
-        olFeature.layer.drawFeature(olFeature, styleId);
 
-    },
 
-    _deleteOldStyleFromStyleMap: function(olFeature,newStyleId) {
-        var styleMap = olFeature.layer.options.styleMap;
-        if (olFeature.styleId && olFeature.styleId != newStyleId) {
-            delete styleMap.styles[olFeature.styleId];
-        }
-    },
 
-    _addNewStyleToStyleMap: function(olFeature,newStyleId,style) {
-        var styleMap = olFeature.layer.options.styleMap;
-        styleMap.styles[newStyleId] = style;
 
+};
+
+OpenLayers.Feature.prototype.applyStyle = function (styleData) {
+    var olFeature = this;
+    var style = new OpenLayers.Style(styleData);
+    var styleId = styleData.id || Mapbender.Util.UUID();
+    olFeature._deleteOldStyleFromStyleMap(styleId);
+    olFeature._addNewStyleToStyleMap(styleId,style);
+    olFeature.styleId = styleId;
+    console.log(olFeature,styleId,olFeature.layer.options.styleMap.styles[styleId],"!");
+    olFeature.layer.drawFeature(olFeature, styleId);
+
+};
+
+OpenLayers.Feature.prototype._deleteOldStyleFromStyleMap = function(newStyleId) {
+    var olFeature = this;
+    var styleMap = olFeature.layer.options.styleMap;
+    if (olFeature.styleId && olFeature.styleId !== newStyleId) {
+        delete styleMap.styles[olFeature.styleId];
     }
+};
+
+OpenLayers.Feature.prototype._addNewStyleToStyleMap = function(newStyleId,style) {
+    var olFeature = this;
+    var styleMap = olFeature.layer.options.styleMap;
+    styleMap.styles[newStyleId] = style;
 
 };

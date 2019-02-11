@@ -96,32 +96,18 @@
             var widget = this.widget = this;
             var element = widget.element;
 
+            QueryEngine.setId(element.attr("id"));
+
             if (!Mapbender.checkTarget("mbDigitizer", widget.options.target)) {
                 return;
             }
 
-            widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
 
         },
 
 
-        /**
-         *
-         * @param schemaName
-         * @param styleData
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-         * @returns {*|xhr}
-         * @private
-         */
 
-        _saveStyle: function (schemaName, styleData, olFeature) {
-            return this.query('style/save', {
-                style: styleData,
-                featureId: olFeature.fid,
-                schema: schemaName
-            });
-        },
 
 
         _createMapContextMenu: function () {
@@ -449,7 +435,7 @@
          */
         exportGeoJson: function (feature) {
             var widget = this;
-            widget.query('export', {
+            QueryEngine.query('export', {
                 schema: widget.currentSchema.schemaName,
                 feature: feature,
                 format: 'GeoJSON'
@@ -591,50 +577,10 @@
         // },
 
 
-        /**
-         * Digitizer API connection query
-         *
-         * @param uri suffix
-         * @param request query
-         * @return xhr jQuery XHR object
-         * @version 0.2
-         */
-        query: function (uri, request) {
-            var widget = this;
-            return $.ajax({
-                url: widget.elementUrl + uri,
-                type: 'POST',
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                data: JSON.stringify(request)
-            }).fail(function (xhr) {
-                // this happens on logout: error callback with status code 200 'ok'
-                if (xhr.status === 200 && xhr.getResponseHeader("Content-Type").toLowerCase().indexOf("text/html") >= 0) {
-                    window.location.reload();
-                }
-            }).fail(function (xhr) {
-                if (xhr.statusText === 'abort') {
-                    return;
-                }
-                var errorMessage = Mapbender.DigitizerTranslator.translate('api.query.error-message');
-                var errorDom = $(xhr.responseText);
-
-                // https://stackoverflow.com/a/298758
-                var exceptionTextNodes = $('.sf-reset .text-exception h1', errorDom).contents().filter(function () {
-                    return this.nodeType === (Node && Node.TEXT_NODE || 3) && ((this.nodeValue || '').trim());
-                });
-                if (exceptionTextNodes && exceptionTextNodes.length) {
-                    errorMessage = [errorMessage, exceptionTextNodes[0].nodeValue.trim()].join("\n");
-                }
-                $.notify(errorMessage, {
-                    autoHide: false
-                });
-            });
-        },
 
         activate: function () {
             var widget = this;
-            widget.query('getConfiguration').done(function (response) {
+            QueryEngine.query('getConfiguration').done(function (response) {
                 _.each(response.schemes, function (schema, schemaName) {
                     widget.options.schemes[schemaName].formItems = response.schemes[schemaName].formItems
                 });
