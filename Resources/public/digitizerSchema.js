@@ -1528,15 +1528,19 @@ Scheme.prototype = {
             styleOptions.fillTab = false;
         }
 
-        var styleEditor = $("<div/>").featureStyleEditor(styleOptions).bind('featurestyleeditorsubmit', function (e, context) {
+        var styleEditor = $("<div/>").featureStyleEditor(styleOptions);
+
+        var instance = styleEditor.featureStyleEditor("instance");
+
+        instance.submit = function() {
             var styleData = styleEditor.formData();
             var schemaName = schema.schemaName;
             styleEditor.disableForm();
-            styleEditor._applyStyle(styleData, olFeature);
+            instance.applyStyle(styleData, olFeature);
             if (olFeature.fid) {
                 widget._saveStyle(schemaName, styleData, olFeature)
                     .done(function (response) {
-                        styleEditor._applyStyle(response.style, olFeature);
+                        instance.applyStyle(response.style, olFeature);
                         styleEditor.enableForm();
                     });
             } else {
@@ -1544,9 +1548,12 @@ Scheme.prototype = {
                 var styleDataCopy = $.extend({}, styleData);
                 olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
             }
-            widget._applyStyle(styleData, olFeature);
+            instance.applyStyle(styleData, olFeature);
             styleEditor.featureStyleEditor("close");
-        });
+
+        };
+
+
         return styleEditor;
     },
 

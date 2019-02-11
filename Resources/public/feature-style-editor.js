@@ -515,10 +515,11 @@
                     text:  "Speichern",
                     click: function(e) {
                         var form = $(e.currentTarget).closest(".ui-dialog");
-                        widget._trigger('submit', null, {
-                            form:   form,
-                            widget: widget
-                        });
+                        widget.submit();
+                        // widget._trigger('submit', null, {
+                        //     form:   form,
+                        //     widget: widget
+                        // });
                     }
                 }]
             });
