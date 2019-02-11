@@ -1526,19 +1526,16 @@ Scheme.prototype = {
             styleOptions.fillTab = false;
         }
 
-        var styleEditor = $("<div/>").featureStyleEditor(styleOptions);
+        var styleEditor = new FeatureStyleEditor(styleOptions);
 
-        var instance = styleEditor.featureStyleEditor("instance");
-
-        instance.submit = function() {
+        styleEditor.submit = function() {
             var featureStyleEditor = this;
+            var styleEditor = featureStyleEditor.getElement();
             var styleData = styleEditor.formData();
             var schemaName = schema.schemaName;
             styleEditor.disableForm();
             featureStyleEditor.applyStyle(styleData, olFeature);
             if (olFeature.fid) {
-
-                console.log("save");
                 widget._saveStyle(schemaName, styleData, olFeature)
                     .done(function (response) {
                         featureStyleEditor.applyStyle(response.style, olFeature);
@@ -1549,12 +1546,11 @@ Scheme.prototype = {
                 var styleDataCopy = $.extend({}, styleData);
                 olFeature.saveStyleDataCallback = $.proxy(widget._saveStyle, widget, schemaName, styleDataCopy);
             }
-            styleEditor.featureStyleEditor("close");
+            featureStyleEditor.close();
 
         };
 
 
-        return styleEditor;
     },
 
     /**
