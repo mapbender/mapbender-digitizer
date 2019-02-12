@@ -1508,7 +1508,6 @@ Scheme.prototype = {
      */
     openChangeStyleDialog: function (olFeature) {
         var schema = this;
-        var widget = schema.widget;
         var layer = olFeature.layer;
         var styleMap = layer.options.styleMap;
         var styles = styleMap.styles;

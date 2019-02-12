@@ -4,18 +4,18 @@ var FeatureStyleEditor = function(options) {
     var editor = this;
 
     var defaultOptions = {
-        asPopup:      true,
-            data:         {
-            'id':         null,
-                'borderSize': 1
+        asPopup:    true,
+            data:   {
+                'id':   null,
+                'borderSize':   1
         },
         customColors: {
             '#777777': '#777777',
-                '#337ab7': '#337ab7',
-                '#5cb85c': '#5cb85c',
-                '#5bc0de': '#5bc0de',
-                '#f0ad4e': '#f0ad4e',
-                '#d9534f': '#d9534f'
+            '#337ab7': '#337ab7',
+            '#5cb85c': '#5cb85c',
+            '#5bc0de': '#5bc0de',
+            '#f0ad4e': '#f0ad4e',
+            '#d9534f': '#d9534f'
         },
         commonTab:    true,
             fillTab: true
