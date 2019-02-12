@@ -79,11 +79,11 @@ Scheme.prototype = {
     allowDelete: true,
     allowSave: true,
     allowEditData: true,
-    allowCustomerStyle: false,
-    allowChangeVisibility: false,
+    allowCustomerStyle: true,
+    allowChangeVisibility: true,
     allowDeleteByCancelNewGeometry: false,
     allowCancelButton: true,
-    allowLocate: false,
+    allowLocate: true,
     showVisibilityNavigation: false,
     allowPrintMetadata: false,
     printable: false,
@@ -670,14 +670,9 @@ Scheme.prototype = {
         tableApi.rows.add(featuresWithoutDrawElements);
         tableApi.draw();
 
-        tableApi.rows(function (idx, data, row) {
-            var isInvisible = data.renderIntent === 'invisible';
-            if (isInvisible) {
-                var $row = $(row);
-                var visibilityButton = $row.find('.button.icon-visibility');
-                visibilityButton.addClass('icon-invisibility');
-                $row.addClass('invisible-feature');
-            }
+        tableApi.rows(function (idx, feature, row) {
+            var on = feature.renderIntent === 'invisible';
+            schema.toggleFeatureVisibility(feature,on);
             return true;
         });
 
@@ -790,14 +785,21 @@ Scheme.prototype = {
     },
 
 
-
-    triggerModifiedState: function (feature, control, on) {
+    _getTableRowByFeature: function(feature) {
         var schema = this;
 
         var table = schema.table;
         var tableWidget = table.data('visUiJsResultTable');
 
         var row = tableWidget.getDomRowByData(feature);
+
+        return row;
+    },
+
+    triggerModifiedState: function (feature, control, on) {
+        var schema = this;
+
+        var row = schema._getTableRowByFeature(feature);
 
         if (on) {
             row.find('.button.save').removeClass("disabled").addClass('active');
@@ -1599,5 +1601,33 @@ Scheme.prototype = {
         });
 
     },
+
+    _toggleVisibility: function(on) {
+        var schema = this;
+        schema.layer.features.forEach(function(feature) {
+            schema.toggleFeatureVisibility(feature,on);
+
+        });
+
+    },
+
+    toggleFeatureVisibility: function(feature,on) {
+        var schema = this;
+
+        feature.redraw(on ? false : 'invisible');
+        feature.renderIntent = on ? "default" : "invisible";
+
+        var row = schema._getTableRowByFeature(feature);
+
+        var ui = row.find('.button.visibility');
+
+        if (on) {
+            ui.removeClass("icon-invisibility");
+            ui.closest('tr').removeClass('invisible-feature');
+        } else {
+            ui.addClass("icon-invisibility");
+            ui.closest('tr').addClass('invisible-feature');
+        }
+    }
 
 };

@@ -3,6 +3,13 @@ var Sidebar = function(schema) {
     this.schema = schema;
     this.frame  = $("<div/>").addClass('frame');
 
+    this.frame.append('<div class="general-digitizer-buttons right">\n' +
+        '            <button class="btn button -fn-hide-all" ><span class="fa fa-eye-slash"></span></button>\n' +
+        '            <button class="btn button -fn-reveal-all" ><span class="fa fa-eye"></span></button>\n' +
+        '            <button class="btn button save-all-features" ><span class="fa fa-floppy-o"></span></button>\n' +
+        '            </div>\n'+
+        '<div class="clear"></div>');
+
     this._addSpecificOptionToSchemeSelector();
 
     this._generateToolSetView();
@@ -16,6 +23,8 @@ var Sidebar = function(schema) {
     this.frame.append('<div style="clear:both;"/>');
 
     this._generateResultDataTable();
+
+    this._setupToolSetEvents();
 
     this.frame.hide();
 };
@@ -96,16 +105,9 @@ Sidebar.prototype = {
             buttons.push({
                 title: 'Objekt anzeigen/ausblenden', //Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
                 className: 'visibility',
-                onClick: function (olFeature, ui, b, c) {
-                    if (!olFeature.renderIntent || olFeature.renderIntent !== 'invisible') {
-                        olFeature.redraw( 'invisible');
-                        ui.addClass("icon-invisibility");
-                        ui.closest('tr').addClass('invisible-feature');
-                    } else {
-                        olFeature.redraw();
-                        ui.removeClass("icon-invisibility");
-                        ui.closest('tr').removeClass('invisible-feature');
-                    }
+                onClick: function (olFeature) {
+                    var on = olFeature.renderIntent === 'invisible';
+                    schema.toggleFeatureVisibility(olFeature,on);
                 }
             });
         }
@@ -524,6 +526,26 @@ Sidebar.prototype = {
 
 
     },
+
+
+    _setupToolSetEvents: function() {
+        var $el = $(this.frame);
+        var schema = this.schema;
+
+
+        $el.on('click', '.button.-fn-hide-all', function() {
+            schema._toggleVisibility(false);
+        });
+        $el.on('click', '.button.-fn-reveal-all', function() {
+            schema._toggleVisibility(true);
+        });
+        $el.on('click', '.button.save-all-features', function() {
+            var unsavedFeatures = schema.layer.features.filter(function(feature) { return feature.isNew || feature.isChanged });
+            _.forEach(unsavedFeatures, function(feature) {
+                schema.saveFeature(feature);
+            });
+        });
+    }
 
 
 };
