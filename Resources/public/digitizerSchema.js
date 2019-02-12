@@ -203,26 +203,7 @@ Scheme.prototype = {
     },
 
 
-    redrawFeature: function (feature, highlight) {
-        var layer = feature.layer;
 
-        var styleId = feature.styleId || 'default';
-
-        if (feature.attributes && feature.attributes.label) {
-            layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
-        } else {
-            if (highlight) {
-                layer.drawFeature(feature, 'select');
-            } else {
-                if (feature.selected) {
-                    layer.drawFeature(feature, 'selected');
-                } else {
-                    layer.drawFeature(feature, styleId);
-                }
-            }
-        }
-
-    },
 
     /**
      * Open edit feature dialog
@@ -466,7 +447,7 @@ Scheme.prototype = {
             return;
         }
 
-        this.redrawFeature(feature, highlight);
+        feature.redraw(highlight);
         this.hoverInResultTable(feature, highlight);
 
 
@@ -936,17 +917,12 @@ Scheme.prototype = {
                 title: 'Objekt anzeigen/ausblenden', //Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
                 className: 'visibility',
                 onClick: function (olFeature, ui, b, c) {
-                    var layer = olFeature.layer;
                     if (!olFeature.renderIntent || olFeature.renderIntent !== 'invisible') {
-                        layer.drawFeature(olFeature, 'invisible');
+                        olFeature.redraw( 'invisible');
                         ui.addClass("icon-invisibility");
                         ui.closest('tr').addClass('invisible-feature');
                     } else {
-                        if (olFeature.styleId) {
-                            layer.drawFeature(olFeature, olFeature.styleId);
-                        } else {
-                            layer.drawFeature(olFeature, 'default');
-                        }
+                        olFeature.redraw();
                         ui.removeClass("icon-invisibility");
                         ui.closest('tr').removeClass('invisible-feature');
                     }
@@ -1070,7 +1046,6 @@ Scheme.prototype = {
             _.extend(resultTableSettings, schema.view.settings);
         }
 
-        console.log(resultTableSettings,"§§");
         var div = $("<div/>");
         var table = schema.table = div.resultTable(resultTableSettings);
         var searchableColumnTitles = _.pluck(_.reject(resultTableSettings.columns, function (column) {
@@ -1329,7 +1304,7 @@ Scheme.prototype = {
                             var visibilityButton = $row.find('.button.icon-visibility');
                             visibilityButton.addClass('icon-invisibility');
                             $row.addClass('invisible-feature');
-                            feature.layer.drawFeature(feature, 'invisible');
+                            feature.redraw( 'invisible');
                         });
                     }
                 }, {
@@ -1344,7 +1319,7 @@ Scheme.prototype = {
                             visibilityButton.removeClass('icon-invisibility');
                             $row.removeClass('invisible-feature');
                             var styleId = feature.styleId || 'default';
-                            feature.layer.drawFeature(feature, styleId);
+                            feature.redraw(styleId);
                         });
                     }
                 }]
@@ -1416,11 +1391,13 @@ Scheme.prototype = {
         var defaultStyle = styles.default ? $.extend({}, widget.styles.default, styles.default) : widget.styles.default;
         var selectStyle = styles.select || widget.styles.select;
         var selectedStyle = styles.selected || widget.styles.selected;
+        var unsavedStyle = styles.unsaved || widget.styles.unsaved;
 
         var styleMap = new OpenLayers.StyleMap({
             'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.default, defaultStyle), styleContext),
             'select': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.select, selectStyle), styleContext),
-            'selected': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.selected, selectedStyle), styleContext)
+            'selected': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.selected, selectedStyle), styleContext),
+            'unsaved' : new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.default, unsavedStyle), styleContext),
         }, {extendDefault: true});
 
         styleMap.styles.invisible = new OpenLayers.Style({
@@ -1511,7 +1488,7 @@ Scheme.prototype = {
         var layer = olFeature.layer;
         var styleMap = layer.options.styleMap;
         var styles = styleMap.styles;
-        var defaultStyleData = olFeature.style || _.extend({}, styles["default"].defaultStyle);
+        var defaultStyleData = olFeature.style || _.extend({}, styles.default.defaultStyle);
 
         if (olFeature.styleId) {
             _.extend(defaultStyleData, styles[olFeature.styleId].defaultStyle);
@@ -1825,7 +1802,7 @@ Scheme.prototype = {
             var request = this;
             var feature = request.feature;
 
-            layer.drawFeature(feature, 'copy');
+            feature.redraw('copy');
 
             var successHandler = config.on && config.on.success;
 
@@ -1935,18 +1912,16 @@ Scheme.prototype = {
                 tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
                 tableApi.draw();
 
-                delete feature.isNew;
+                feature.isNew = false;
+                feature.isChanged = false;
 
                 dialog && dialog.enableForm();
                 feature.disabled = false;
-                //feature.oldGeom = false;
-                feature.isDragged = false;
+
 
                 schema.triggerModifiedState(feature, false);
 
                 dialog && dialog.popupDialog('close');
-
-                //this.feature = feature;
 
                 $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
 
@@ -2139,23 +2114,9 @@ Scheme.prototype = {
             });
         }
         _.each(features, function (feature) {
-            var styleId = feature.styleId || 'default';
-            if (feature.attributes && feature.attributes.label) {
-                layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
-            } else {
-                if (highlight) {
-                    layer.drawFeature(feature, 'select');
-                } else {
-                    if (feature.selected) {
-                        layer.drawFeature(feature, 'selected');
-                    } else {
-                        layer.drawFeature(feature, styleId);
-                    }
-                }
-            }
+            feature.redraw(highlight);
         });
 
-        // layer.renderer.textRoot = layer.renderer.vectorRoot;
     },
 
 };

@@ -17,6 +17,7 @@ var createFeatureAddedMethod = function(injectedMethods) {
         injectedMethods.deactivateCurrentControl();
         injectedMethods.openFeatureEditDialog(feature);
 
+        feature.redraw();
     };
 
     return func;
@@ -104,6 +105,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             onModification: function (feature) {
 
                 injectedMethods.triggerModifiedState(feature,this,true);
+                feature.isChanged = true;
                 console.log("onModification",feature);
                 //widget.unsavedFeatures[feature.id] = feature;
             } // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
@@ -125,7 +127,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                     $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
                 }
 
-                feature.isDragged = true;
+                feature.isChanged = true;
                 console.log("true");
             },
             /**

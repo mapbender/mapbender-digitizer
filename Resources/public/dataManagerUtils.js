@@ -14,9 +14,6 @@ DataManagerUtils.prototype = {
         var widget = this.widget;
         var schema = widget.currentSchema;
 
-        console.log(":-)");
-        console.log(DataUtil);
-
         // dataManager access function
         // TODO: maybe it would be better to create public methods on dataManager to do this
         function withSchema(dataManager, schemaName, callback) {

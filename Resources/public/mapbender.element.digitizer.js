@@ -81,7 +81,13 @@
                 strokeColor: '#4250b5',
                 fillOpacity: 0.7,
                 graphicZIndex: 15
-            }
+            },
+            'unsaved': {
+                strokeWidth: 3,
+                fillColor:   "#FFD14F",
+                strokeColor: '#F5663C',
+                fillOpacity: 0.5
+            },
 
         },
         /**
