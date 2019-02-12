@@ -711,17 +711,8 @@ Scheme.prototype = {
         if (widget.options.__disabled) {
             widget.deactivate();
         }
-
-        // var tbody = $(tableApi.body());
-
-        // Post handling
     },
 
-    _setFeatureStyles: function (featureStyles) {
-        var schema = this;
-        schema.featureStyles = featureStyles;
-
-    },
 
     activateSchema: function () {
 
@@ -739,7 +730,7 @@ Scheme.prototype = {
         widget.currentSchema = schema;
 
         QueryEngine.query('style/list', {schema: schema.schemaName}).done(function (data) {
-            schema._setFeatureStyles(data.featureStyles);
+            schema.featureStyles = data.featureStyles;
             schema.reloadFeatures();
             layer.setVisibility(true);
             frame.show();
@@ -996,7 +987,6 @@ Scheme.prototype = {
     /**
      * Analyse changed bounding box geometrie and load features as FeatureCollection.
      *
-     * @param {Scheme} schema
      * @returns {*}
      * @private
      */
