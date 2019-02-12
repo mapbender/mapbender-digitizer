@@ -747,7 +747,7 @@ Scheme.prototype = {
             schema._setFeatureStyles(data.featureStyles);
             schema.reloadFeatures();
             layer.setVisibility(true);
-            frame.css('display', 'block');
+            frame.show();
             schema.selectControl.activate();
         });
 
@@ -760,7 +760,7 @@ Scheme.prototype = {
         var frame = schema.frame;
         var layer = schema.layer;
 
-        frame.css('display', 'none');
+        frame.hide();
 
         if (!schema.displayPermanent) {
             layer.setVisibility(false);

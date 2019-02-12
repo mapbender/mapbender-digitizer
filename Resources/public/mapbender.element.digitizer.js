@@ -328,9 +328,9 @@
 
             if (hasOnlyOneScheme) {
                 titleElement.html(_.toArray(options.schemes)[0].label);
-                selector.css('display', 'none');
+                selector.hide();
             } else {
-                titleElement.css('display', 'none');
+                titleElement.hide();
             }
         },
 

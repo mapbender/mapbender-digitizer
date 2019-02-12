@@ -7,8 +7,8 @@ var Sidebar = function(schema) {
 
     this._generateToolSetView();
 
-    if (!this.showExtendSearchSwitch) {
-        $(".onlyExtent", this.frame).css('display', 'none');
+    if (!this.schema.showExtendSearchSwitch) {
+        $(".onlyExtent", this.frame).hide();
     }
 
     this._generateSearchForm();
@@ -17,7 +17,7 @@ var Sidebar = function(schema) {
 
     this._generateResultDataTable();
 
-    this.frame.css('display', 'none');
+    this.frame.hide();
 };
 
 
@@ -474,13 +474,12 @@ Sidebar.prototype = {
             }]
         });
 
-
         var toolSetView = $(".digitizing-tool-set", frame);
 
 
         if (!schema.allowDigitize) {
 
-            toolSetView.css('display', 'none');
+            toolSetView.hide();
             toolSetView = $("<div class='digitizing-tool-sets'/>");
             toolSetView.insertBefore(frame.find('.onlyExtent'));
 
