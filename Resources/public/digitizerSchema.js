@@ -564,40 +564,7 @@ Scheme.prototype = {
     },
 
 
-    _createToolsetTranslations: function () {
 
-        var schema = this;
-
-        var toolSetTranslations = {
-            drawPoint: "Punkt setzen",
-            drawLine: "Linie zeichnen",
-            drawPolygon: "Polygon zeichnen",
-            drawRectangle: "Rechteck zeichen",
-            drawCircle: "Kreis zeichen",
-            drawEllipse: "Ellipse zeichen",
-            drawDonut: "Polygon mit Enklave zeichnen",
-            selectAndEditGeometry: "Objekt Position/Größe beabeiten",
-            moveGeometry: "Objekt bewegen",
-            selectGeometry: "Objekt selektieren",
-            removeSelected: "Selektierte objekte löschen",
-            removeAll: "Alle Objekte löschen"
-        };
-
-        // Merge subjects with available translations
-        if (schema.featureType && schema.featureType.geomType) {
-            var geomType = schema.featureType.geomType;
-            var translationPrefix = 'mb.digitizer.toolset.' + geomType + '.';
-
-            _.each(Mapbender.i18n, function (v, k) {
-                if (k.indexOf(translationPrefix) === 0) {
-                    var shortKeyName = k.split(translationPrefix)[1];
-                    toolSetTranslations[shortKeyName] = v;
-                }
-            });
-        }
-
-        return toolSetTranslations;
-    },
 
 
     _mapHasActiveControlThatBlocksSelectControl: function () {
@@ -806,12 +773,6 @@ Scheme.prototype = {
             widget.currentPopup.popupDialog('close');
         }
         schema.digitizingToolset.deactivateCurrentControl();
-
-    },
-
-    _setSchemaName: function (name) {
-        var schema = this;
-        schema.schemaName = name;
 
     },
 
