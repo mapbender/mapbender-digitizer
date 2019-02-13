@@ -6,7 +6,7 @@ var createFeatureAddedMethod = function(injectedMethods) {
      */
     var func = function (feature) {
 
-        feature.isNew = true; // replace by state == insert
+        feature.isNew = true;
 
         _.each(injectedMethods.getDefaultAttributes(), function(prop) {
             feature.attributes[prop] = "";
@@ -14,6 +14,7 @@ var createFeatureAddedMethod = function(injectedMethods) {
 
         feature.layer.redraw();
 
+        injectedMethods.triggerModifiedState(feature);
         injectedMethods.deactivateCurrentControl();
         injectedMethods.openFeatureEditDialog(feature);
 
@@ -31,7 +32,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         deactivateCurrentControl: injectedMethods.deactivateCurrentControl,
         openFeatureEditDialog: injectedMethods.openFeatureEditDialog,
         getDefaultAttributes: injectedMethods.getDefaultAttributes,
-        triggerModifiedState: injectedMethods.triggerModifiedState
+        triggerModifiedState: injectedMethods.triggerModifiedState,
     });
 
     var controls =  {

@@ -84,7 +84,7 @@ Scheme.prototype = {
     allowDeleteByCancelNewGeometry: false,
     allowCancelButton: true,
     allowLocate: true,
-    showVisibilityNavigation: false,
+    showVisibilityNavigation: true,
     allowPrintMetadata: false,
     printable: false,
     dataItems: null,
@@ -671,8 +671,8 @@ Scheme.prototype = {
         tableApi.draw();
 
         tableApi.rows(function (idx, feature, row) {
-            var on = feature.renderIntent === 'invisible';
-            schema.toggleFeatureVisibility(feature,on);
+            var invisible = feature.renderIntent === 'invisible';
+            schema.toggleFeatureVisibility(feature,!invisible);
             return true;
         });
 
@@ -796,6 +796,10 @@ Scheme.prototype = {
             row.find('.button.save').removeClass("disabled").addClass('active');
         } else {
             row.find('.button.save').removeClass("active").addClass('disabled');
+        }
+
+        if (on) {
+            $(schema.frame).find(".save-all-features").addClass("active");
         }
 
         control && control.deactivate();
@@ -1302,6 +1306,8 @@ Scheme.prototype = {
             return;
         }
 
+        console.log("saveFeature");
+
         var schema = this;
         var widget = schema.widget;
         var dialog = schema.editDialog;
@@ -1326,6 +1332,10 @@ Scheme.prototype = {
 
         var errorInputs = $(".has-error", dialog);
         var hasErrors = errorInputs.size() > 0;
+
+        if (hasErrors) {
+            console.warn("Feature has error and can not be saved",feature);
+        }
 
         if (!hasErrors) {
             feature.disabled = true;
@@ -1415,6 +1425,10 @@ Scheme.prototype = {
                 }
                 schema._refreshMapAfterFeatureSave();
 
+                if (schema._getUnsavedFeatures().length === 0) {
+                    $(schema.frame).find(".save-all-features").removeClass("active");
+                }
+
                 if (schema.refreshFeaturesAfterSave) {
                     _.each(schema.refreshFeaturesAfterSave, function (el, index) {
                         widget.refreshConnectedDigitizerFeatures(el);
@@ -1422,6 +1436,11 @@ Scheme.prototype = {
                 }
             });
         }
+    },
+
+    _getUnsavedFeatures: function () {
+        var schema = this;
+        return schema.layer.features.filter(function(feature) { return feature.isNew || feature.isChanged });
     },
 
 

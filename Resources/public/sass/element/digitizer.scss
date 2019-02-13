@@ -225,3 +225,11 @@ $selectColor: #F7F79A;
 .invisible-feature {
   opacity: 0.7;
 }
+
+.save-all-features {
+  opacity: 0.7;
+}
+
+.save-all-features.active {
+  opacity: 1;
+}

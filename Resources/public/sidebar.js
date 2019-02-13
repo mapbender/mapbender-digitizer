@@ -3,12 +3,6 @@ var Sidebar = function(schema) {
     this.schema = schema;
     this.frame  = $("<div/>").addClass('frame');
 
-    this.frame.append('<div class="general-digitizer-buttons right">\n' +
-        '            <button class="btn button -fn-hide-all" ><span class="fa fa-eye-slash"></span></button>\n' +
-        '            <button class="btn button -fn-reveal-all" ><span class="fa fa-eye"></span></button>\n' +
-        '            <button class="btn button save-all-features" ><span class="fa fa-floppy-o"></span></button>\n' +
-        '            </div>\n'+
-        '<div class="clear"></div>');
 
     this._addSpecificOptionToSchemeSelector();
 
@@ -23,8 +17,6 @@ var Sidebar = function(schema) {
     this.frame.append('<div style="clear:both;"/>');
 
     this._generateResultDataTable();
-
-    this._setupToolSetEvents();
 
     this.frame.hide();
 };
@@ -487,65 +479,55 @@ Sidebar.prototype = {
 
         }
 
+        var corporateFeatureControlButtons = [];
         if (schema.showVisibilityNavigation) {
-            toolSetView.generateElements({
-                type: 'fieldSet',
-                cssClass: 'right',
-                children: [{
-                    type: 'button',
-                    cssClass: 'fa fa-eye-slash',
-                    title: 'Alle ausblenden',
-                    click: function (e) {
-                        var tableApi = table.resultTable('getApi');
-                        tableApi.rows(function (idx, feature, row) {
-                            var $row = $(row);
-                            var visibilityButton = $row.find('.button.icon-visibility');
-                            visibilityButton.addClass('icon-invisibility');
-                            $row.addClass('invisible-feature');
-                            feature.redraw( 'invisible');
-                        });
-                    }
-                }, {
-                    type: 'button',
-                    title: 'Alle einblenden',
-                    cssClass: 'fa fa-eye',
-                    click: function (e) {
-                        var tableApi = table.resultTable('getApi');
-                        tableApi.rows(function (idx, feature, row) {
-                            var $row = $(row);
-                            var visibilityButton = $row.find('.button.icon-visibility');
-                            visibilityButton.removeClass('icon-invisibility');
-                            $row.removeClass('invisible-feature');
-                            var styleId = feature.styleId || 'default';
-                            feature.redraw(styleId);
-                        });
-                    }
-                }]
+            corporateFeatureControlButtons.push({
+                type: 'button',
+                title: '',
+                cssClass: 'fa fa-eye-slash',
+                click: function (e) {
+                    schema._toggleVisibility(false);
+                }
+            });
+            corporateFeatureControlButtons.push({
+                type: 'button',
+                title: '',
+                cssClass: 'fa fa-eye',
+                click: function (e) {
+                    schema._toggleVisibility(true);
+                }
+            });
+        }
+        if (schema.allowSaveAll || true) {
+            corporateFeatureControlButtons.push({
+                type: 'button',
+                title: '',
+                cssClass: 'save-all-features fa fa-floppy-o', // TODO class attribute should be availabe in vis.ui.generateElements
+                disabled : true,
+                click: function (e) {
+                    var unsavedFeatures = schema._getUnsavedFeatures();
+                    _.forEach(unsavedFeatures, function(feature) {
+                        schema.saveFeature(feature);
+                    });
+
+                }
             });
         }
 
 
-    },
-
-
-    _setupToolSetEvents: function() {
-        var $el = $(this.frame);
-        var schema = this.schema;
-
-
-        $el.on('click', '.button.-fn-hide-all', function() {
-            schema._toggleVisibility(false);
+        toolSetView.generateElements({
+            type: 'fieldSet',
+            cssClass: 'right',
+            //css: {marginTop: "0px"},
+            children: corporateFeatureControlButtons
         });
-        $el.on('click', '.button.-fn-reveal-all', function() {
-            schema._toggleVisibility(true);
-        });
-        $el.on('click', '.button.save-all-features', function() {
-            var unsavedFeatures = schema.layer.features.filter(function(feature) { return feature.isNew || feature.isChanged });
-            _.forEach(unsavedFeatures, function(feature) {
-                schema.saveFeature(feature);
-            });
-        });
+
+
+
     }
 
 
+
+
 };
+
