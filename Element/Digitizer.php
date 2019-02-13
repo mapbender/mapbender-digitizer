@@ -56,6 +56,7 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/dataManagerUtils.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.digitizer-translator.js',
                 '@MapbenderDigitizerBundle/Resources/public/queryEngine.js',
+                '@MapbenderDigitizerBundle/Resources/public/openlayers.extension.js',
 
             ),
             'css'   => array(
