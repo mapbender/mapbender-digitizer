@@ -233,3 +233,34 @@ $selectColor: #F7F79A;
 .save-all-features.active {
   opacity: 1;
 }
+
+.digitizing-tool-set, .general-digitizer-buttons {
+  margin-top: 2px;
+
+  > button {
+
+    &:first-child{
+      margin-left: 0px;
+    }
+    width: 26px;
+    margin-left: -1px;
+    padding: 3px 4px;
+    &.active,
+    &.active:focus {
+      background-color: $buttonFirstActiveColor;
+    }
+    &:before {
+      display: inline-block;
+      font-size: 17px;
+      padding-top: 2px;
+    }
+  }
+
+  > input[type="checkbox"] {
+    margin-left: 0px;
+  }
+
+  > label input[type="checkbox"] {
+    margin-left: 0px;
+  }
+}

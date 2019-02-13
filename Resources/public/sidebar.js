@@ -8,10 +8,6 @@ var Sidebar = function(schema) {
 
     this._generateToolSetView();
 
-    if (!this.schema.showExtendSearchSwitch) {
-        $(".onlyExtent", this.frame).hide();
-    }
-
     this._generateSearchForm();
 
     this.frame.append('<div style="clear:both;"/>');
@@ -333,6 +329,7 @@ Sidebar.prototype = {
 
         var schema = this.schema;
 
+        // TODO in translator auslagern
         var toolSetTranslations = {
             drawPoint: "Punkt setzen",
             drawLine: "Linie zeichnen",
@@ -364,21 +361,42 @@ Sidebar.prototype = {
         return toolSetTranslations;
     },
 
-    _generateToolSetView: function () {
-        /** @type {Scheme} */
-        var schema = this.schema;
-        var widget = schema.widget;
-        var layer = schema.layer;
-        var frame = this.frame;
-        var newFeatureDefaultProperties = [];
+    _getDefaultProperties: function() {
+        var schema = this;
 
+        var newFeatureDefaultProperties = [];
         $.each(schema.tableFields, function (fieldName) {
             newFeatureDefaultProperties.push(fieldName);
         });
+        return newFeatureDefaultProperties;
+    },
+
+    _generateToolSetView: function () {
+        /** @type {Scheme} */
+        var schema = this.schema;
+        var frame = this.frame;
+
+
+
+        this._appendDigitizingToolset();
+
+
+
+
+        this._appendGeneralDigitizerButtons();
+
+    },
+
+    _appendDigitizingToolset: function() {
+        var schema = this.schema;
+        var frame = this.frame;
+        var widget = schema.widget;
+        var layer = schema.layer;
+
 
         var toolset = schema.toolset;
 
-        var digitizingToolSetElement = $('<div/>').digitizingToolSet({
+        var $digitizingToolSetElement = $('<div/>').digitizingToolSet({
             buttons: toolset,
             layer: layer,
             translations: this._createToolsetTranslations(),
@@ -391,7 +409,7 @@ Sidebar.prototype = {
                     }
                 },
                 getDefaultAttributes: function () {
-                    return _.clone(newFeatureDefaultProperties)
+                    return this._getDefaultProperties();
                 },
                 preventModification: function () {
 
@@ -451,81 +469,91 @@ Sidebar.prototype = {
 
         });
 
-        frame.append(digitizingToolSetElement);
 
-        schema.digitizingToolset = digitizingToolSetElement.digitizingToolSet("instance");
+        $digitizingToolSetElement.addClass("left");
 
-        frame.generateElements({
-            children: [{
-                type: 'checkbox',
-                cssClass: 'onlyExtent',
-                title: Mapbender.DigitizerTranslator.translate('toolset.current-extent'),
-                checked: schema.searchType === "currentExtent",
-                change: function (e) {
-                    schema.searchType = $(e.originalEvent.target).prop("checked") ? "currentExtent" : "all";
-                    schema._getData();
-                }
-            }]
-        });
-
-        var toolSetView = $(".digitizing-tool-set", frame);
-
-
-        if (!schema.allowDigitize) {
-
-            toolSetView.hide();
-            toolSetView = $("<div class='digitizing-tool-sets'/>");
-            toolSetView.insertBefore(frame.find('.onlyExtent'));
-
+        if (schema.allowDigitize) {
+            frame.append($digitizingToolSetElement);
         }
+
+
+        schema.digitizingToolset = $digitizingToolSetElement.digitizingToolSet("instance");
+
+    },
+
+
+    _appendGeneralDigitizerButtons: function() {
+        var schema = this.schema;
+        var frame = this.frame;
 
         var corporateFeatureControlButtons = [];
         if (schema.showVisibilityNavigation) {
-            corporateFeatureControlButtons.push({
-                type: 'button',
-                title: '',
-                cssClass: 'fa fa-eye-slash',
-                click: function (e) {
-                    schema._toggleVisibility(false);
-                }
+
+            var $button = $("<button class='button' type='button'/>");
+            $button.addClass("fa fa-eye-slash");
+            $button.attr("title",Mapbender.DigitizerTranslator.translate('toolset.hideAll'));
+            $button.click(function() {
+                schema._toggleVisibility(false);
             });
-            corporateFeatureControlButtons.push({
-                type: 'button',
-                title: '',
-                cssClass: 'fa fa-eye',
-                click: function (e) {
-                    schema._toggleVisibility(true);
-                }
+            corporateFeatureControlButtons.push($button);
+
+            var $button = $("<button class='button' type='button'/>");
+            $button.addClass("fa fa-eye");
+            $button.attr("title",Mapbender.DigitizerTranslator.translate('toolset.showAll'));
+            $button.click(function() {
+                schema._toggleVisibility(true);
             });
+            corporateFeatureControlButtons.push($button);
         }
         if (schema.allowSaveAll || true) {
-            corporateFeatureControlButtons.push({
-                type: 'button',
-                title: '',
-                cssClass: 'save-all-features fa fa-floppy-o', // TODO class attribute should be availabe in vis.ui.generateElements
-                disabled : true,
-                click: function (e) {
-                    var unsavedFeatures = schema._getUnsavedFeatures();
-                    _.forEach(unsavedFeatures, function(feature) {
-                        schema.saveFeature(feature);
-                    });
 
-                }
+            var $button = $("<button class='button' type='button'/>");
+            $button.addClass("fa fa-floppy-o");
+            $button.attr("title",Mapbender.DigitizerTranslator.translate('toolset.saveAll'));
+            $button.addClass("save-all-features");
+            $button.click(function() {
+                var unsavedFeatures = schema._getUnsavedFeatures();
+                _.forEach(unsavedFeatures, function(feature) {
+                    schema.saveFeature(feature);
+                });
             });
+            corporateFeatureControlButtons.push($button);
+
         }
 
 
-        toolSetView.generateElements({
-            type: 'fieldSet',
-            cssClass: 'right',
-            //css: {marginTop: "0px"},
-            children: corporateFeatureControlButtons
+        var generalDigitizerControl = $("<div/>");
+        generalDigitizerControl.addClass("general-digitizer-buttons");
+        generalDigitizerControl.addClass("right");
+
+        $.each(corporateFeatureControlButtons, function(i,button) {
+            generalDigitizerControl.append(button);
+
         });
 
+        frame.append(generalDigitizerControl);
 
-
+        if (schema.showExtendSearchSwitch) {
+            var $checkbox = $("<input type='checkbox' />");
+            var title = Mapbender.DigitizerTranslator.translate('toolset.current-extent');
+            $checkbox.attr('title',title);
+            if (schema.searchType === "currentExtent") {
+                $checkbox.attr("checked","checked");
+            }
+            $checkbox.change(function (e) {
+                schema.searchType = $(e.originalEvent.target).prop("checked") ? "currentExtent" : "all";
+                schema._getData();
+            });
+            frame.append("<div style='clear:both'>");
+            var $div = $("<div/>");
+            $div.addClass("form-group checkbox onlyExtent");
+            var $label = $("<label/>")
+            $label.append($checkbox);
+            $label.append(title);
+            $div.append($label);
+            frame.append($div);
+        }
     }
-
 
 
 
