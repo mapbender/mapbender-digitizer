@@ -878,7 +878,8 @@ Scheme.prototype = {
                  }
                  labels.forEach(function (rawLabel) {
                      var label = rawLabel+"-"+scheme.featureType.geomType;
-                     var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
+                     var styleOL = OpenLayers.Feature.Vector.style[rawLabel] || OpenLayers.Feature.Vector.style['default'];
+
                      styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, scheme.styles[rawLabel] || widget.styles[rawLabel]), styleContext);
                  });
             });
@@ -893,7 +894,6 @@ Scheme.prototype = {
 
         var styleMap = new OpenLayers.StyleMap(styleMapObject,{extendDefault: true});
 
-        console.log(styleMapObject);
         return styleMap;
 
     },
