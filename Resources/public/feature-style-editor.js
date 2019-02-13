@@ -569,13 +569,6 @@ FeatureStyleEditor.prototype = {
         });
     },
 
-    /**
-     *
-     * @param styleData
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-     * @private
-     */
-
 
 
 

@@ -84,10 +84,39 @@
             },
             'unsaved': {
                 strokeWidth: 3,
-                fillColor:   "#FFD14F",
+                fillColor: "#FFD14F",
                 strokeColor: '#F5663C',
                 fillOpacity: 0.5
             },
+
+            'invisible': {
+                strokeWidth: 1,
+                fillColor: "#F7F79A",
+                strokeColor: '#6fb536',
+                display: 'none'
+            },
+
+            'labelText': {
+                strokeWidth: 0,
+                fillColor: '#cccccc',
+                fillOpacity: 0,
+                strokeColor: '#5e1a2b',
+                strokeOpacity: 0,
+                pointRadius: 15,
+                label: '${label}',
+                fontSize: 15
+            },
+            'labelTextHover': {
+                strokeWidth: 0,
+                fillColor: '#cccccc',
+                strokeColor: '#2340d3',
+                fillOpacity: 1,
+                pointRadius: 15,
+                label: '${label}',
+                fontSize: 15
+            },
+            'copy': {},
+
 
         },
         /**
@@ -111,9 +140,6 @@
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
 
         },
-
-
-
 
 
         _createMapContextMenu: function () {
@@ -266,10 +292,12 @@
             var newSchemes = {};
             _.each(widget.options.schemes, function (rawScheme, schemaName) {
                 rawScheme.schemaName = schemaName;
+                console.log(rawScheme);
                 newSchemes[schemaName] = new Scheme(rawScheme, widget);
             });
 
-            widget.options.schemes = newSchemes;
+            //newSchemes['all'] = new Scheme({ label: 'all geometries', schemaName: 'all' },widget);
+            widget.options.schemes = newSchemes;;
         },
 
         _createOnSelectorChangeCallback: function () {
@@ -338,8 +366,9 @@
 
             var widget = this;
             var element = $(widget.element);
-            var selector = widget.selector = $("select.selector", element);
             var options = widget.options;
+
+            widget.selector = $("select.selector", element);
 
             widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
 
@@ -380,8 +409,6 @@
             return containerInfo;
 
         },
-
-
 
 
         /**
@@ -581,7 +608,6 @@
         //     //map.resetLayersZIndex();
         //     return features;
         // },
-
 
 
         activate: function () {

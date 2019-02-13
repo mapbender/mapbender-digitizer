@@ -866,49 +866,32 @@ Scheme.prototype = {
                 }
             }
         };
-        var defaultStyle = styles.default ? $.extend({}, widget.styles.default, styles.default) : widget.styles.default;
-        var selectStyle = styles.select || widget.styles.select;
-        var selectedStyle = styles.selected || widget.styles.selected;
-        var unsavedStyle = styles.unsaved || widget.styles.unsaved;
 
-        var styleMap = new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.default, defaultStyle), styleContext),
-            'select': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.select, selectStyle), styleContext),
-            'selected': new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.selected, selectedStyle), styleContext),
-            'unsaved' : new OpenLayers.Style($.extend({}, OpenLayers.Feature.Vector.style.default, unsavedStyle), styleContext),
-        }, {extendDefault: true});
+        var labels = ['default','select', 'selected', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
 
-        styleMap.styles.invisible = new OpenLayers.Style({
-            strokeWidth: 1,
-            fillColor: "#F7F79A",
-            strokeColor: '#6fb536',
-            display: 'none'
-        });
-        styleMap.styles.labelText = new OpenLayers.Style({
-            strokeWidth: 0,
-            fillColor: '#cccccc',
-            fillOpacity: 0,
-            strokeColor: '#5e1a2b',
-            strokeOpacity: 0,
-            pointRadius: 15,
-            label: '${label}',
-            fontSize: 15
-        });
-        styleMap.styles.labelTextHover = new OpenLayers.Style({
-            strokeWidth: 0,
-            fillColor: '#cccccc',
-            strokeColor: '#2340d3',
-            fillOpacity: 1,
-            pointRadius: 15,
-            label: '${label}',
-            fontSize: 15
-        });
+        var styleMapObject = {};
+        if (schema.schemaName === 'all') {
 
-        var copyStyleData = schema.copy && schema.copy.style;
+             _.each(widget.options.schemes, function (scheme, schemaName) {
+                 if (schemaName == 'all'){
+                     return;
+                 }
+                 labels.forEach(function (rawLabel) {
+                     var label = rawLabel+"-"+schemaName;
+                     var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
+                     styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, scheme.styles[rawLabel] || widget.styles[rawLabel]), styleContext);
+                 });
+            });
 
-        if (copyStyleData) {
-            styleMap.styles.copy = new OpenLayers.Style(copyStyleData);
+        } else {
+
+            labels.forEach(function (label) {
+                var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
+                styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, styles[label] || widget.styles[label]), styleContext);
+            });
         }
+
+        var styleMap = new OpenLayers.StyleMap(styleMapObject,{extendDefault: true});
 
         return styleMap;
 

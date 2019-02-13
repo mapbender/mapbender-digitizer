@@ -89,6 +89,11 @@ class Digitizer extends BaseElement
         return $this->container->getParameter('featureTypes');
     }
 
+    private function getComprehensiveScheme() {
+
+        return array("featureType" => array(), "label" => "all geometries");
+
+    }
     /**
      * Prepare form items for each scheme definition
      * Optional: get featureType by name from global context.
@@ -104,7 +109,9 @@ class Digitizer extends BaseElement
         $configuration['fileUri'] = $this->container->getParameter('mapbender.uploads_dir') . "/" . FeatureType::UPLOAD_DIR_NAME;
         $featureTypes = null;
 
+
         if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
+            $configuration["schemes"]["all"] = $this->getComprehensiveScheme();
             foreach ($configuration['schemes'] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
                     if ($featureTypes === null) {
@@ -320,15 +327,27 @@ class Digitizer extends BaseElement
             $request["where"] = implode(' ', $whereConditions);
         }
 
-        $featureCollection = $featureType->search(
-            array_merge(
-                array(
-                    'returnType' => 'FeatureCollection',
-                    'maxResults' => $this->maxResults
-                ),
-                $request
-            )
-        );
+        if ($schemaName == 'all') {
+            $request["schema"] = "poi";
+            $poi = $this->selectAction($request);
+            $request["schema"] = "line";
+            $line = $this->selectAction($request);
+            $request["schema"] = "polygon";
+            $polygon = $this->selectAction($request);
+            $featureCollection = array("type" => "FeatureCollection",
+                "features" => array_merge($poi["features"],$line["features"],$polygon["features"]));
+        } else {
+
+            $featureCollection = $featureType->search(
+                array_merge(
+                    array(
+                        'returnType' => 'FeatureCollection',
+                        'maxResults' => $this->maxResults
+                    ),
+                    $request
+                )
+            );
+        }
 
         //if(count($featureCollection["features"]) ==  $this->maxResults){
         //    $featureCollection["info"] = "Limit erreicht";
