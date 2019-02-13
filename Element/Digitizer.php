@@ -91,7 +91,7 @@ class Digitizer extends BaseElement
 
     private function getComprehensiveScheme() {
 
-        return array("featureType" => array(), "label" => "all geometries");
+        return array("featureType" => array("geomType" => "all"), "label" => "all geometries");
 
     }
     /**

@@ -40,7 +40,8 @@
         toolsets: {
             point: [{type: 'drawPoint'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
             line: [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
-            polygon: [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}]
+            polygon: [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
+            all: [{type: 'drawPoint'},{type: 'drawLine'},{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}]
         },
         /**
          * @type {OpenLayers.Map}
@@ -612,16 +613,18 @@
 
         activate: function () {
             var widget = this;
-            QueryEngine.query('getConfiguration').done(function (response) {
-                _.each(response.schemes, function (schema, schemaName) {
-                    widget.options.schemes[schemaName].formItems = response.schemes[schemaName].formItems
-                });
-
-                widget.options.__disabled = false;
-                widget.currentSchema.activateSchema();
-
-
-            })
+            // QueryEngine.query('getConfiguration').done(function (response) {
+            //     // TODO why are formItems reloaded when Scheme is activated?
+            //     // _.each(response.schemes, function (schema, schemaName) {
+            //     //     widget.options.schemes[schemaName].formItems = response.schemes[schemaName].formItems
+            //     // });
+            //
+            //
+            //
+            //
+            // })
+            widget.options.__disabled = false;
+            widget.currentSchema.activateSchema();
 
         },
 

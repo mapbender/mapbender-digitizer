@@ -65,10 +65,10 @@ Scheme.prototype = {
     zoomScaleDenominator: 500,
     useContextMenu: true,
     toolset: {},
-    popup: null,
+    popup: {},
     tableFields: {},
     style: {},
-    formItems: {},
+    formItems: [],
     events: null,
     selectControl: null,
     featureStyles: null,
@@ -873,11 +873,11 @@ Scheme.prototype = {
         if (schema.schemaName === 'all') {
 
              _.each(widget.options.schemes, function (scheme, schemaName) {
-                 if (schemaName == 'all'){
+                 if (schemaName === 'all'){
                      return;
                  }
                  labels.forEach(function (rawLabel) {
-                     var label = rawLabel+"-"+schemaName;
+                     var label = rawLabel+"-"+scheme.featureType.geomType;
                      var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
                      styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, scheme.styles[rawLabel] || widget.styles[rawLabel]), styleContext);
                  });
@@ -893,6 +893,7 @@ Scheme.prototype = {
 
         var styleMap = new OpenLayers.StyleMap(styleMapObject,{extendDefault: true});
 
+        console.log(styleMapObject);
         return styleMap;
 
     },
@@ -938,7 +939,7 @@ Scheme.prototype = {
                    case 'OpenLayers.Geometry.LineString' :
                        return 'line';
                    case 'OpenLayers.Geometry.Point' :
-                       return 'poi';
+                       return 'point';
                }
 
                console.warn("feature has no geometry with associated scheme",feature);

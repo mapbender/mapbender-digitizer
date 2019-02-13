@@ -425,7 +425,7 @@ Sidebar.prototype = {
                     // TODO inspect this!
                     if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
 
-                        if (schema.popup.remoteData) {
+                        if (schema && schema.popup.remoteData) {
                             var bbox = feature.geometry.getBounds();
                             bbox.right = parseFloat(bbox.right + 0.00001);
                             bbox.top = parseFloat(bbox.top + 0.00001);
