@@ -926,6 +926,33 @@ Scheme.prototype = {
             strategies: strategies
         });
 
+        if (schema.schemaName === "all") {
+
+            var drawFeature = OpenLayers.Layer.Vector.prototype.drawFeature;
+
+            var getSchemeNameByFeature = function(className) {
+
+               switch(className) {
+                   case 'OpenLayers.Geometry.Polygon' :
+                       return 'polygon';
+                   case 'OpenLayers.Geometry.LineString' :
+                       return 'line';
+                   case 'OpenLayers.Geometry.Point' :
+                       return 'poi';
+               }
+
+               console.warn("feature has no geometry with associated scheme",feature);
+               return 'null';
+            };
+
+            layer.drawFeature = function (feature, styleId) {
+                styleId = (styleId || 'default') + "-" + getSchemeNameByFeature(feature.geometry.CLASS_NAME);
+                return drawFeature.apply(this, [feature, styleId]);
+            };
+        }
+
+
+
         if (schema.maxScale) {
             layer.options.maxScale = schema.maxScale;
         }

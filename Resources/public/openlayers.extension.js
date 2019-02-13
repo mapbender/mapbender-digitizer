@@ -24,14 +24,6 @@ OpenLayers.Feature.prototype._addNewStyleToStyleMap = function(newStyleId,style)
 
 };
 
-var original = OpenLayers.Layer.Vector.prototype.drawFeature;
-
-OpenLayers.Layer.Vector.prototype.drawFeature = function(feature,styleId) {
-    styleId = (styleId || 'default')+"-poi";
-    console.log(feature.layer.styleMap);
-    return original.apply(this,[feature,styleId]);
-};
-
 OpenLayers.Feature.prototype.redraw = function(highlightOrStyle) {
     var feature = this;
     var layer = feature.layer;
