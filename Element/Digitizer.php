@@ -332,14 +332,19 @@ class Digitizer extends BaseElement
         }
 
         if ($schemaName == 'all') {
-            $request["schema"] = "poi";
-            $poi = $this->selectAction($request);
-            $request["schema"] = "line";
-            $line = $this->selectAction($request);
-            $request["schema"] = "polygon";
-            $polygon = $this->selectAction($request);
-            $featureCollection = array("type" => "FeatureCollection",
-                "features" => array_merge($poi["features"],$line["features"],$polygon["features"]));
+            $config = $this->getConfiguration();
+            $schemes = $config["schemes"];
+            $features = array();
+            foreach($schemes as $schemaName => $scheme) {
+                if ($schemaName == 'all') {
+                    continue;
+                }
+                $request["schema"] = $schemaName;
+                $featureCollection = $this->selectAction($request);
+                $features = array_merge($features,$featureCollection["features"]);
+
+            }
+            $featureCollection = array("type" => "FeatureCollection",  "features" => $features);
         } else {
 
             $featureCollection = $featureType->search(
