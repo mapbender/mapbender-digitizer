@@ -289,12 +289,12 @@
         _createSchemes: function () {
             var widget = this;
             var newSchemes = {};
+            newSchemes['all'] = new AllScheme({ label: 'all geometries', schemaName: 'all' },widget);
             _.each(widget.options.schemes, function (rawScheme, schemaName) {
                 rawScheme.schemaName = schemaName;
                 newSchemes[schemaName] = new Scheme(rawScheme, widget);
             });
 
-            newSchemes['all'] = new AllScheme({ label: 'all geometries', schemaName: 'all' },widget);
             widget.options.schemes = newSchemes;
         },
 
