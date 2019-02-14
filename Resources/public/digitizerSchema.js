@@ -38,10 +38,6 @@ var Scheme = function (rawScheme, widget) {
     // TODO this has to be carefully checked for prototype propertys, since it fills the `undefined` properties, so it may not work at all
     _.defaults(schema, schema.widget._getNonBlackListedOptions());
 
-
-    console.log(schema.formItems);
-
-
 };
 
 
@@ -55,6 +51,9 @@ Scheme.prototype = {
     layer: null,
     widget: null,
     frame: null,
+
+    allowSaveAll: true,
+    markUnsavedFeatures: false,
     maxResults: 500,
     displayPermanent: false,
     dataStore: null,
@@ -891,6 +890,10 @@ Scheme.prototype = {
             var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
             styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, schema.styles[label] || widget.styles[label]), styleContext);
         });
+
+        if (!schema.markUnsavedFeatures) {
+            styleMapObject.unsaved = styleMapObject.default;
+        }
         return new OpenLayers.StyleMap(styleMapObject, {extendDefault: true});
 
     },
@@ -917,7 +920,9 @@ Scheme.prototype = {
         // TODO maybe place this somewhere in a more public scope
         var labels = ['default', 'select', 'selected', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
 
-        return this._createStyleMap(labels, styleContext);
+        var styleMap = this._createStyleMap(labels, styleContext);
+
+        return styleMap;
 
     },
 

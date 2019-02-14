@@ -160,8 +160,6 @@ Sidebar.prototype = {
             columns.push(fieldSettings);
         });
 
-        console.log(schema.tableFields,columns,schema.schemaName);
-
         return columns;
 
     },
@@ -466,7 +464,7 @@ Sidebar.prototype = {
             });
             corporateFeatureControlButtons.push($button);
         }
-        if (schema.allowSaveAll || true) {
+        if (schema.allowSaveAll) {
 
             var $button = $("<button class='button' type='button'/>");
             $button.addClass("fa fa-floppy-o");

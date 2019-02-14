@@ -42,6 +42,12 @@ AllScheme.prototype._createStyleMap = function (labels, styleContext) {
 
             styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, scheme.styles[rawLabel] || widget.styles[rawLabel]), styleContext);
         });
+
+        if (!schema.markUnsavedFeatures) {
+            styleMapObject["unsaved-"+scheme.featureType.geomType] = styleMapObject["default-"+scheme.featureType.geomType];
+        }
+
+
     });
     return new OpenLayers.StyleMap(styleMapObject, {extendDefault: true});
 };
@@ -72,7 +78,7 @@ AllScheme.prototype.getFormItems = function(feature) {
 
 
 AllScheme.prototype.getSchemaName = function(feature) {
-    var schema = this;;
+    var schema = this;
     var widget = schema.widget;
     return widget.getSchemaByOLFeature(feature).schemaName;
 };

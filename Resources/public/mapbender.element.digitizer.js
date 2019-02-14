@@ -48,7 +48,6 @@
         map: null,
         currentSchema: null,
         featureEditDialogWidth: "423px",
-        //unsavedFeatures: {},
 
         /**
          * Default styles merged by schema styles if defined

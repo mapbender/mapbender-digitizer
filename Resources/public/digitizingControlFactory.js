@@ -108,8 +108,8 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                 injectedMethods.triggerModifiedState(feature,this,true);
                 feature.isChanged = true;
                 console.log("onModification",feature);
-                //widget.unsavedFeatures[feature.id] = feature;
-            } // http://dev.openlayers.org/docs/files/OpenLayers/Control/DragFeature-js.html
+
+            }
         }),
 
         moveFeature: new OpenLayers.Control.DragFeature(layer, {
@@ -139,7 +139,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             onComplete: function (feature) {
                 injectedMethods.triggerModifiedState(feature,this,true);
                 console.log("onComplete");
-                //widget.unsavedFeatures[event.id] = feature;
                 injectedMethods.extendFeatureDataWhenNoPopupOpen(feature);
 
             }

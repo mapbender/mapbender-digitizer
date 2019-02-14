@@ -1,6 +1,7 @@
 Hinzugefügte Properties:
 
 allowSaveAll - Speicherbutton für Alle Features
+markUnsavedFeatures - ungespeicherte Features haben speziellen Style
 
 Weiteres zut un:
 - Konsistente Linie für Methodennamen, hinsichtlich des _ als Präfix
