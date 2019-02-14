@@ -3,7 +3,7 @@ Hinzugefügte Properties:
 allowSaveAll - Speicherbutton für Alle Features
 markUnsavedFeatures - ungespeicherte Features haben speziellen Style
 
-Weiteres zut un:
+Weiteres zu tun:
 - Konsistente Linie für Methodennamen, hinsichtlich des _ als Präfix
 - Markiere JQuery Variablen mit $ Präfix
 - Die current Variablen in Widget currentSchema und currentPopup sind schlechter Stil und gehören weg
@@ -15,3 +15,4 @@ Weiteres zut un:
 - Kollision der Control- und General Buttons im Sidebar verhindern
 - Bug beheben bei alles speichern nach donut
 - Bug beheben: dragging bei donut zeichnen
+- Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen

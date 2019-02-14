@@ -50,8 +50,6 @@
         controlFactory: null,
         activeControl: null,
 
-        $buttons: {},
-
         /**
          * Init controls
          *
@@ -59,6 +57,8 @@
          */
         _create: function () {
             var toolSet = this;
+            toolSet.$buttons = {};
+
             toolSet.options.injectedMethods.deactivateCurrentControl = function () {
                 toolSet.deactivateCurrentControl();
             };
@@ -79,6 +79,7 @@
                     $mapElement.css({cursor: 'default'});
                 }
             });
+
 
 
         },
@@ -130,6 +131,8 @@
             var toolSet = this;
 
             var $button = $("<button class='button' type='button'/>");
+
+            console.log($button);
 
             $button.addClass(item.type);
             $button.addClass('-fn-tool-button');

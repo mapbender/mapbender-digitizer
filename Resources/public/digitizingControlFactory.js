@@ -129,7 +129,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                 }
 
                 feature.isChanged = true;
-                console.log("true");
             },
             /**
              *
