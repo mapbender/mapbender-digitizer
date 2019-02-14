@@ -12,3 +12,4 @@ Weiteres zut un:
 - Helper Klasse/Datei für Feldlose Methoden anlegen, evtl. auch mehrere
 - Zellengröße limitieren in ResultTable
 - Kollision der Control- und General Buttons im Sidebar verhindern
+- Property für das kennzeichnen von ungespeicherten Features

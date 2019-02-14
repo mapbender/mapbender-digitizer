@@ -812,12 +812,9 @@ Scheme.prototype = {
 
     _getTableRowByFeature: function (feature) {
         var schema = this;
-
         var table = schema.table;
         var tableWidget = table.data('visUiJsResultTable');
-
         var row = tableWidget.getDomRowByData(feature);
-
         return row;
     },
 
@@ -825,6 +822,9 @@ Scheme.prototype = {
         var schema = this;
 
         var row = schema._getTableRowByFeature(feature);
+        if (!row) {
+            return; // In case of non-saved feature
+        }
 
         if (on) {
             row.find('.button.save').removeClass("disabled").addClass('active');
@@ -1656,6 +1656,16 @@ Scheme.prototype = {
             ui.addClass("icon-invisibility");
             ui.closest('tr').addClass('invisible-feature');
         }
-    }
+    },
+
+    _getDefaultProperties: function() {
+        var schema = this;
+
+        var newFeatureDefaultProperties = [];
+        $.each(schema.tableFields, function (fieldName) {
+            newFeatureDefaultProperties.push(fieldName);
+        });
+        return newFeatureDefaultProperties;
+    },
 
 };

@@ -212,6 +212,7 @@ Sidebar.prototype = {
         frame.append(table);
     },
 
+    //TODO methode ist zu lang
     _generateSearchForm: function () {
         /** @type {Scheme} */
         var schema = this.schema;
@@ -340,30 +341,11 @@ Sidebar.prototype = {
         return toolSetTranslations;
     },
 
-    _getDefaultProperties: function() {
-        var schema = this;
-
-        var newFeatureDefaultProperties = [];
-        $.each(schema.tableFields, function (fieldName) {
-            newFeatureDefaultProperties.push(fieldName);
-        });
-        return newFeatureDefaultProperties;
-    },
 
     _generateToolSetView: function () {
-        /** @type {Scheme} */
-        var schema = this.schema;
-        var frame = this.frame;
-
-
 
         this._appendDigitizingToolset();
-
-
-
-
         this._appendGeneralDigitizerButtons();
-
     },
 
     _appendDigitizingToolset: function() {
@@ -388,7 +370,7 @@ Sidebar.prototype = {
                     }
                 },
                 getDefaultAttributes: function () {
-                    return this._getDefaultProperties();
+                    return schema._getDefaultProperties();
                 },
                 preventModification: function () {
 
