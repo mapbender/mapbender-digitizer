@@ -48,6 +48,7 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizingToolset.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizerSchema.js',
+                '@MapbenderDigitizerBundle/Resources/public/digitizerSchemaAll.js',
                 '@MapbenderDigitizerBundle/Resources/public/sidebar.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizingControlFactory.js',
                 '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
@@ -94,11 +95,7 @@ class Digitizer extends BaseElement
         return array("featureType" => array("geomType" => "all"), "label" => "all geometries",
 
             "tableFields" => array( "gid" => array( "label" => "Nr")),
-            "formItems" => array(array("children" => array(
-
-            array("type" => "label", "title" => "welcome"),
-            array("type" => "input", "title" => "Name", "name" => "name", "mandatory" => true),
-        ))));
+           );
 
     }
     /**

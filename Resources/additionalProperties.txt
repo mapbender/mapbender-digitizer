@@ -1,1 +1,0 @@
-allowSaveAll - Speicherbutton für Alle Features

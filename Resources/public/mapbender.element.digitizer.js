@@ -293,12 +293,48 @@
             var newSchemes = {};
             _.each(widget.options.schemes, function (rawScheme, schemaName) {
                 rawScheme.schemaName = schemaName;
-                console.log(rawScheme);
-                newSchemes[schemaName] = new Scheme(rawScheme, widget);
+                // TODO it might be better to create the whole scheme for the comprehensive layer in the client
+                if (schemaName === "all") {
+                    newSchemes[schemaName] = new AllScheme(rawScheme,widget);
+                } else {
+                    newSchemes[schemaName] = new Scheme(rawScheme, widget);
+                }
+
             });
 
-            //newSchemes['all'] = new Scheme({ label: 'all geometries', schemaName: 'all' },widget);
-            widget.options.schemes = newSchemes;;
+            //newSchemes['all'] = new AllScheme({ label: 'all geometries', schemaName: 'all' },widget);
+            widget.options.schemes = newSchemes;
+        },
+
+
+        getGeometryNameByFeatureClass: function (className) {
+
+            switch (className) {
+                case 'OpenLayers.Geometry.Polygon' :
+                    return 'polygon';
+                case 'OpenLayers.Geometry.LineString' :
+                    return 'line';
+                case 'OpenLayers.Geometry.Point' :
+                    return 'point';
+            }
+
+            console.warn("feature has no geometry with associated scheme", feature);
+            return null;
+        },
+        // TODO this must be adjusted when adding
+        getSchemaByOLFeature: function(feature) {
+            var widget = this;
+            var geometryName = widget.getGeometryNameByFeatureClass(feature.geometry.CLASS_NAME);
+            var schema = null;
+            _.each(widget.options.schemes,function(scheme) {
+                  if (scheme.featureType.geomType === geometryName) {
+                      schema = scheme;
+                  }
+            });
+            if (!schema) {
+                console.warn("No Scheme found for feature", feature);
+            }
+            return schema;
         },
 
         _createOnSelectorChangeCallback: function () {

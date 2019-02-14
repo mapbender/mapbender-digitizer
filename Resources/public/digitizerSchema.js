@@ -160,7 +160,7 @@ Scheme.prototype = {
     },
 
 
-    _refreshMapAfterFeatureSave: function() {
+    _refreshMapAfterFeatureSave: function () {
         var schema = this;
         var refreshLayerNames = schema.refreshLayersAfterFeatureSave;
 
@@ -203,7 +203,28 @@ Scheme.prototype = {
     },
 
 
+    getDefaultFormItems: function () {
 
+        var formItems = [];
+        _.each(feature.data, function (value, key) {
+            formItems.push({
+                type: 'input',
+                name: key,
+                title: key
+            })
+        });
+
+        return formItems;
+    },
+
+    /**
+     * @Overwrite
+     */
+    getFormItems: function (feature) {
+        var schema = this;
+        var formItems = (schema.formItems && schema.formItems.length > 0) ? schema.formItems : schema.getDefaultFormItems(feature);
+        return formItems;
+    },
 
     /**
      * Open edit feature dialog
@@ -211,6 +232,7 @@ Scheme.prototype = {
      * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
      * @private
      */
+    //TODO this method is still to big - extract associated commands in methods
     _openFeatureEditDialog: function (olFeature) {
 
         var schema = this;
@@ -219,6 +241,7 @@ Scheme.prototype = {
         var map = layer.map;
         var popupConfiguration = schema.popup;
 
+        //TODO find out what this is for
         var isOpenLayerCloudPopup = popupConfiguration.type && popupConfiguration.type === 'openlayers-cloud';
 
         if (widget.currentPopup) {
@@ -233,52 +256,41 @@ Scheme.prototype = {
 
         (new DataManagerUtils(widget)).processCurrentFormItemsWithDataManager(olFeature);
 
-        var dialog = $("<div/>");
+        var $dialog = $("<div/>");
 
         if (!schema.elementsTranslated) {
             Mapbender.DigitizerTranslator.translateStructure(schema.formItems);
             schema.elementsTranslated = true;
         }
 
-        schema.editDialog = dialog;
-        widget.currentPopup = dialog;
+        schema.editDialog = $dialog;
+        widget.currentPopup = $dialog;
 
 
-        dialog.data('feature', olFeature);
+        $dialog.data('feature', olFeature);
         //dialog.data('digitizerWidget', widget); // TODO uncommented because purpose unknown
 
-        dialog.generateElementsWithFormItems = function () {
-            var formItems = schema.formItems;
+        $dialog.generateElementsWithFormItems = function (feature) {
+            var formItems = schema.getFormItems(feature);
 
-            // If pop up isn't defined, generate inputs
-            if (!_.size(formItems)) {
-                formItems = [];
-                _.each(olFeature.data, function (value, key) {
-                    formItems.push({
-                        type: 'input',
-                        name: key,
-                        title: key
-                    })
-                })
-            }
 
-            dialog.generateElements({children: formItems});
-        }();
+            $dialog.generateElements({children: formItems});
+        }(olFeature);
 
-        dialog.popupDialog(popupConfiguration);
+        $dialog.popupDialog(popupConfiguration);
 
-        dialog.bind('edit-cancel', schema.editCancel.bind(schema));
+        $dialog.bind('edit-cancel', schema.editCancel.bind(schema));
 
-        dialog.bind('popupdialogclose', function (event) {
-            dialog.trigger('edit-cancel', {
+        $dialog.bind('popupdialogclose', function (event) {
+            $dialog.trigger('edit-cancel', {
                 'origin': 'close-button',
-                'feature': dialog.data('feature')
+                'feature': $dialog.data('feature')
             });
         });
 
 
         if (popupConfiguration.modal) {
-            dialog.bind('popupdialogclose', function () {
+            $dialog.bind('popupdialogclose', function () {
                 widget.currentPopup = null;
             });
         }
@@ -286,12 +298,12 @@ Scheme.prototype = {
 
         if (isOpenLayerCloudPopup) {
             // Hide original popup but not kill it.
-            dialog.closest('.ui-dialog').css({
+            $dialog.closest('.ui-dialog').css({
                 'margin-left': '-100000px'
             }).hide(0);
         }
 
-        var tables = dialog.find(".mapbender-element-result-table");
+        var tables = $dialog.find(".mapbender-element-result-table");
         _.each(tables, function (table, index) {
 
             var item = $(table).data('item');
@@ -309,7 +321,7 @@ Scheme.prototype = {
                 };
 
                 QueryEngine.query('dataStore/get', requestData).done(function (data) {
-                    if (Object.prototype.toString.call(data) === '[object Array]') {
+                    if (Array.isArray(data)) {
 
                         var dataItems = [];
                         _.each(data, function (el, i) {
@@ -338,7 +350,7 @@ Scheme.prototype = {
             if (popupConfiguration.remoteData && olFeature.isNew) {
 
 
-                var bbox = dialog.data("feature").geometry.getBounds();
+                var bbox = $dialog.data("feature").geometry.getBounds();
                 bbox.right = parseFloat(bbox.right + 0.00001);
                 bbox.top = parseFloat(bbox.top + 0.00001);
                 bbox = bbox.toBBOX();
@@ -358,13 +370,13 @@ Scheme.prototype = {
 
 
                     });
-                    dialog.formData(olFeature.data);
+                    $dialog.formData(olFeature.data);
 
                 });
 
 
             } else {
-                dialog.formData(olFeature.data);
+                $dialog.formData(olFeature.data);
             }
 
 
@@ -372,14 +384,14 @@ Scheme.prototype = {
                 /**
                  * @var {OpenLayers.Popup.FramedCloud}
                  */
-                var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(olFeature.geometry.toShortString()), null, dialog.html(), null, true);
+                var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(olFeature.geometry.toShortString()), null, $dialog.html(), null, true);
                 schema.olFeatureCloudPopup = olPopup;
                 map.addPopup(olPopup);
             }
 
         }, 21);
 
-        return dialog;
+        return $dialog;
 
     },
 
@@ -564,9 +576,6 @@ Scheme.prototype = {
     },
 
 
-
-
-
     _mapHasActiveControlThatBlocksSelectControl: function () {
         var schema = this;
         var widget = schema.widget;
@@ -672,7 +681,7 @@ Scheme.prototype = {
 
         tableApi.rows(function (idx, feature, row) {
             var invisible = feature.renderIntent === 'invisible';
-            schema.toggleFeatureVisibility(feature,!invisible);
+            schema.toggleFeatureVisibility(feature, !invisible);
             return true;
         });
 
@@ -762,7 +771,7 @@ Scheme.prototype = {
 
     },
 
-    _createFrame : function () {
+    _createFrame: function () {
         /** @type {Scheme} */
         var schema = this;
         var widget = schema.widget;
@@ -776,7 +785,7 @@ Scheme.prototype = {
     },
 
 
-    _getTableRowByFeature: function(feature) {
+    _getTableRowByFeature: function (feature) {
         var schema = this;
 
         var table = schema.table;
@@ -819,6 +828,7 @@ Scheme.prototype = {
      * @returns {{}}
      */
     initialFormData: function (feature) {
+        console.warn("Fake form data for feature", feature);
         /** @type {Scheme} */
         var schema = this;
         var formData = {};
@@ -847,11 +857,23 @@ Scheme.prototype = {
     },
 
 
-    _createFeatureLayerStyleMap: function () {
+    _createStyleMap: function (labels, styleContext) {
         var schema = this;
         var widget = schema.widget;
-        var styles = schema.styles || {};
+        var styleMapObject = {};
 
+        labels.forEach(function (label) {
+            var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
+            styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, schema.styles[label] || widget.styles[label]), styleContext);
+        });
+        return new OpenLayers.StyleMap(styleMapObject, {extendDefault: true});
+
+    },
+
+
+    _createFeatureLayerStyleMap: function () {
+
+        // TODO find out what this is for
         var styleContext = {
             context: {
                 webRootPath: Mapbender.configuration.application.urls.asset,
@@ -867,34 +889,15 @@ Scheme.prototype = {
             }
         };
 
-        var labels = ['default','select', 'selected', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
+        // TODO maybe place this somewhere in a more public scope
+        var labels = ['default', 'select', 'selected', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
 
-        var styleMapObject = {};
-        if (schema.schemaName === 'all') {
+        return this._createStyleMap(labels, styleContext);
 
-             _.each(widget.options.schemes, function (scheme, schemaName) {
-                 if (schemaName === 'all'){
-                     return;
-                 }
-                 labels.forEach(function (rawLabel) {
-                     var label = rawLabel+"-"+scheme.featureType.geomType;
-                     var styleOL = OpenLayers.Feature.Vector.style[rawLabel] || OpenLayers.Feature.Vector.style['default'];
+    },
 
-                     styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, scheme.styles[rawLabel] || widget.styles[rawLabel]), styleContext);
-                 });
-            });
-
-        } else {
-
-            labels.forEach(function (label) {
-                var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
-                styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, styles[label] || widget.styles[label]), styleContext);
-            });
-        }
-
-        var styleMap = new OpenLayers.StyleMap(styleMapObject,{extendDefault: true});
-
-        return styleMap;
+    // DO Nothing: This methdod is overwritten
+    redesignLayerFunctions: function () {
 
     },
 
@@ -927,43 +930,18 @@ Scheme.prototype = {
             strategies: strategies
         });
 
-        if (schema.schemaName === "all") {
-
-            var drawFeature = OpenLayers.Layer.Vector.prototype.drawFeature;
-
-            var getSchemeNameByFeature = function(className) {
-
-               switch(className) {
-                   case 'OpenLayers.Geometry.Polygon' :
-                       return 'polygon';
-                   case 'OpenLayers.Geometry.LineString' :
-                       return 'line';
-                   case 'OpenLayers.Geometry.Point' :
-                       return 'point';
-               }
-
-               console.warn("feature has no geometry with associated scheme",feature);
-               return 'null';
-            };
-
-            layer.drawFeature = function (feature, styleId) {
-                styleId = (styleId || 'default') + "-" + getSchemeNameByFeature(feature.geometry.CLASS_NAME);
-                return drawFeature.apply(this, [feature, styleId]);
-            };
-        }
-
-
-
         if (schema.maxScale) {
             layer.options.maxScale = schema.maxScale;
         }
-
         if (schema.minScale) {
             layer.options.minScale = schema.minScale;
         }
-
         schema.layer = layer;
-        widget.map.addLayer(layer);
+
+        this.redesignLayerFunctions();
+
+        widget.map.addLayer(schema.layer);
+
     },
 
 
@@ -993,8 +971,6 @@ Scheme.prototype = {
 
         var styleEditor = new FeatureStyleEditor(styleOptions);
         styleEditor.setFeature(olFeature);
-
-
 
 
     },
@@ -1156,6 +1132,8 @@ Scheme.prototype = {
 
         var _features = _.union(newUniqueFeatures, visibleFeatures);
 
+
+        // TODO find out what this is for
         if (schema.group && schema.group === "all") {
             _features = geoJsonReader.read({
                 type: "FeatureCollection",
@@ -1304,6 +1282,12 @@ Scheme.prototype = {
         });
     },
 
+
+    getSchemaName: function() {
+        var schema = this;
+        return schema.schemaName;
+    },
+
     /**
      * On save button click
      *
@@ -1345,7 +1329,7 @@ Scheme.prototype = {
         var hasErrors = errorInputs.size() > 0;
 
         if (hasErrors) {
-            console.warn("Feature has error and can not be saved",feature);
+            console.warn("Feature has error and can not be saved", feature);
         }
 
         if (!hasErrors) {
@@ -1354,7 +1338,7 @@ Scheme.prototype = {
 
             return QueryEngine.query('save', {
 
-                schema: schema.schemaName,
+                schema: schema.getSchemaName(feature),
                 feature: request
             }).done(function (response) {
                 if (response.hasOwnProperty('errors')) {
@@ -1420,7 +1404,6 @@ Scheme.prototype = {
                 $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
 
 
-
                 var config = widget.currentSchema;
                 if (config.hasOwnProperty("mailManager") && Mapbender.hasOwnProperty("MailManager")) {
                     try {
@@ -1451,7 +1434,9 @@ Scheme.prototype = {
 
     _getUnsavedFeatures: function () {
         var schema = this;
-        return schema.layer.features.filter(function(feature) { return feature.isNew || feature.isChanged });
+        return schema.layer.features.filter(function (feature) {
+            return feature.isNew || feature.isChanged
+        });
     },
 
 
@@ -1533,7 +1518,7 @@ Scheme.prototype = {
     },
 
 
-    _zoomOrOpenDialog: function(feature) {
+    _zoomOrOpenDialog: function (feature) {
         var schema = this;
 
         var isOpenLayerCloudPopup = schema.popup && schema.popup.type && schema.popup.type === 'openlayers-cloud';
@@ -1545,7 +1530,7 @@ Scheme.prototype = {
         }
     },
 
-    initializeResultTableEvents: function() {
+    initializeResultTableEvents: function () {
         var schema = this;
         var widget = schema.widget;
 
@@ -1580,8 +1565,6 @@ Scheme.prototype = {
 
 
     },
-
-
 
 
     /**
@@ -1622,16 +1605,16 @@ Scheme.prototype = {
 
     },
 
-    _toggleVisibility: function(on) {
+    _toggleVisibility: function (on) {
         var schema = this;
-        schema.layer.features.forEach(function(feature) {
-            schema.toggleFeatureVisibility(feature,on);
+        schema.layer.features.forEach(function (feature) {
+            schema.toggleFeatureVisibility(feature, on);
 
         });
 
     },
 
-    toggleFeatureVisibility: function(feature,on) {
+    toggleFeatureVisibility: function (feature, on) {
         var schema = this;
 
         feature.redraw(on ? false : 'invisible');

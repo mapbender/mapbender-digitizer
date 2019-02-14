@@ -1,0 +1,9 @@
+Hinzugefügte Properties:
+
+allowSaveAll - Speicherbutton für Alle Features
+
+Weiteres zut un:
+- Konsistente Linie für Methodennamen, hinsichtlich des _ als Präfix
+- Markiere JQuery Variablen mit $ Präfix
+- Die current Variablen in Widget currentSchema und currentPopup sind schlechter Stil und gehören weg
+- Es muss entschieden werden, ob die properties für das all-layer im Server oder JS definiert werden sollen
