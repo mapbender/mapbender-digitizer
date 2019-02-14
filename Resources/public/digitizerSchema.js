@@ -6,7 +6,7 @@ var Scheme = function (rawScheme, widget) {
 
     if (schema.popup) {
         schema.popup.buttons = schema.popup.buttons || [];
-        schema.createPopupConfiguration();
+        schema.createFeatureEditDialogConfiguration();
     }
 
     schema.formItems = Mapbender.DigitizerTranslator.translateStructure(schema.formItems);
@@ -263,10 +263,10 @@ Scheme.prototype = {
         var widget = schema.widget;
         var layer = olFeature.layer;
         var map = layer.map;
-        var popupConfiguration = schema.popup;
+        var configuration = schema.popup;
 
         //TODO find out what this is for
-        var isOpenLayerCloudPopup = popupConfiguration.type && popupConfiguration.type === 'openlayers-cloud';
+        var isOpenLayerCloudPopup = configuration.type && configuration.type === 'openlayers-cloud';
 
         if (widget.currentPopup) {
             widget.currentPopup.popupDialog('close');
@@ -296,7 +296,7 @@ Scheme.prototype = {
         var formItems = schema.getFormItems(olFeature);
         $dialog.generateElements({children: formItems});
 
-        $dialog.popupDialog(popupConfiguration);
+        $dialog.popupDialog(configuration);
 
 
 
@@ -314,15 +314,15 @@ Scheme.prototype = {
     doFeatureEditDialogBindings: function(olFeature,$dialog) {
         var schema = this;
         var widget = schema.widget;
-        var popupConfiguration = schema.popup;
-        var isOpenLayerCloudPopup = popupConfiguration.type && popupConfiguration.type === 'openlayers-cloud';
+        var configuration = schema.popup;
+        var isOpenLayerCloudPopup = configuration.type && configuration.type === 'openlayers-cloud';
 
 
         $dialog.bind('popupdialogclose', function () {
             if (olFeature.isNew && schema.allowDeleteByCancelNewGeometry) {
                 schema.removeFeature(olFeature);
             }
-            if (popupConfiguration.modal) {
+            if (configuration.modal) {
                 widget.currentPopup = null;
             }
         });
@@ -386,13 +386,13 @@ Scheme.prototype = {
         var widget = schema.widget;
         var layer = schema.layer;
         var map = layer.map;
-        var popupConfiguration = schema.popup;
-        var isOpenLayerCloudPopup = popupConfiguration.type && popupConfiguration.type === 'openlayers-cloud';
+        var configuration = schema.popup;
+        var isOpenLayerCloudPopup = configuration.type && configuration.type === 'openlayers-cloud';
 
 
         setTimeout(function () {
 
-            if (popupConfiguration.remoteData && olFeature.isNew) {
+            if (configuration.remoteData && olFeature.isNew) {
 
 
                 var bbox = $dialog.data("feature").geometry.getBounds();
@@ -489,13 +489,13 @@ Scheme.prototype = {
     },
 
 
-    _augmentPopupConfigurationButtons: function () {
+    _augmentFeatureEditDialogButtonsWithConfigurationButtons: function () {
         var schema = this;
         var widget = schema.widget;
-        var popupConfiguration = schema.popup;
+        var configuration = schema.popup;
 
         // Initialize custom button events
-        _.each(popupConfiguration.buttons, function (button) {
+        _.each(configuration.buttons, function (button) {
             if (button.click) {
                 var eventHandlerCode = button.click;
                 button.click = function (e) {
@@ -518,14 +518,14 @@ Scheme.prototype = {
      */
 
 
-    createPopupConfiguration: function () {
+    createFeatureEditDialogConfigurationButtons: function () {
 
         var schema = this;
-        var popupConfiguration = schema.popup;
+        var configuration = schema.popup;
 
-        var buttons = popupConfiguration.buttons;
+        var buttons = configuration.buttons;
 
-        this._augmentPopupConfigurationButtons();
+        this._augmentFeatureEditDialogButtonsWithConfigurationButtons();
 
         if (schema.printable) {
             var printButton = {
@@ -1326,7 +1326,7 @@ Scheme.prototype = {
      * @private
      * @return {(jQuery.jqXHR | void)} ajax XHR
      */
-    saveFeature: function (feature) {
+    saveFeature: function (feature,formData) {
 
         if (feature.disabled) { // Feature is temporarily disabled
             return;
