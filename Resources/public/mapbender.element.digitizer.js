@@ -293,16 +293,10 @@
             var newSchemes = {};
             _.each(widget.options.schemes, function (rawScheme, schemaName) {
                 rawScheme.schemaName = schemaName;
-                // TODO it might be better to create the whole scheme for the comprehensive layer in the client
-                if (schemaName === "all") {
-                    newSchemes[schemaName] = new AllScheme(rawScheme,widget);
-                } else {
-                    newSchemes[schemaName] = new Scheme(rawScheme, widget);
-                }
-
+                newSchemes[schemaName] = new Scheme(rawScheme, widget);
             });
 
-            //newSchemes['all'] = new AllScheme({ label: 'all geometries', schemaName: 'all' },widget);
+            newSchemes['all'] = new AllScheme({ label: 'all geometries', schemaName: 'all' },widget);
             widget.options.schemes = newSchemes;
         },
 

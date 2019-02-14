@@ -90,14 +90,6 @@ class Digitizer extends BaseElement
         return $this->container->getParameter('featureTypes');
     }
 
-    private function getComprehensiveScheme() {
-
-        return array("featureType" => array("geomType" => "all"), "label" => "all geometries",
-
-            "tableFields" => array( "gid" => array( "label" => "Nr")),
-           );
-
-    }
     /**
      * Prepare form items for each scheme definition
      * Optional: get featureType by name from global context.
@@ -115,7 +107,6 @@ class Digitizer extends BaseElement
 
 
         if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
-            $configuration["schemes"]["all"] = $this->getComprehensiveScheme();
             foreach ($configuration['schemes'] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
                     if ($featureTypes === null) {
@@ -183,6 +174,9 @@ class Digitizer extends BaseElement
      */
     protected function getFeatureTypeBySchemaName($name)
     {
+        if ($name=='all') {
+            return null;
+        }
         $schema = $this->getSchemaByName($name);
 
         if (is_array($schema['featureType'])) {
@@ -659,6 +653,9 @@ class Digitizer extends BaseElement
      */
     protected function getSchemaByName($name)
     {
+        if ($name == 'all') {
+            return null;
+        }
         $configuration = $this->getConfiguration(false);
         $schemas       = $configuration["schemes"];
 
