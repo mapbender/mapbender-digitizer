@@ -15,3 +15,5 @@ Weiteres zu tun:
 - Kollision der Control- und General Buttons im Sidebar verhindern
 - Bug beheben: dragging bei donut zeichnen
 - Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen
+- In All geometries verschwindet unsaved feature markierung nicht
+- DataMangerUtils refactorn

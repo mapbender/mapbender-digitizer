@@ -71,7 +71,7 @@ Scheme.prototype = {
     toolset: {},
     popup: {},
     style: {},
-    formItems: [],
+    formItems: null,
     events: null,
     selectControl: null,
     featureStyles: null,
@@ -278,7 +278,11 @@ Scheme.prototype = {
         }
 
 
-        (new DataManagerUtils(widget)).processCurrentFormItemsWithDataManager(olFeature);
+        // TODO comprehensive schema throws Exception because no formItems
+        try {
+            var dataManagerUtils = new DataManagerUtils(widget);
+            dataManagerUtils.processCurrentFormItemsWithDataManager(olFeature, schema);
+        } catch(e) { console.warn(e); }
 
         var $dialog = $("<div/>");
 
@@ -294,21 +298,34 @@ Scheme.prototype = {
 
         $dialog.popupDialog(popupConfiguration);
 
-        $dialog.bind('edit-cancel', schema.editCancel.bind(schema));
-
-        $dialog.bind('popupdialogclose', function (event) {
-            $dialog.trigger('edit-cancel', {
-                'origin': 'close-button',
-                'feature': $dialog.data('feature')
-            });
-        });
 
 
-        if (popupConfiguration.modal) {
-            $dialog.bind('popupdialogclose', function () {
+
+        this.doFeatureEditDialogBindings(olFeature,$dialog);
+
+        this.retrieveFeatureTableDataFromDataStore(olFeature,$dialog);
+        this.addFeatureDataToEditDialog(olFeature,$dialog);
+
+
+        return $dialog;
+
+    },
+
+    doFeatureEditDialogBindings: function(olFeature,$dialog) {
+        var schema = this;
+        var widget = schema.widget;
+        var popupConfiguration = schema.popup;
+        var isOpenLayerCloudPopup = popupConfiguration.type && popupConfiguration.type === 'openlayers-cloud';
+
+
+        $dialog.bind('popupdialogclose', function () {
+            if (olFeature.isNew && schema.allowDeleteByCancelNewGeometry) {
+                schema.removeFeature(olFeature);
+            }
+            if (popupConfiguration.modal) {
                 widget.currentPopup = null;
-            });
-        }
+            }
+        });
 
 
         if (isOpenLayerCloudPopup) {
@@ -317,11 +334,13 @@ Scheme.prototype = {
                 'margin-left': '-100000px'
             }).hide(0);
         }
+    },
 
 
-
+    retrieveFeatureTableDataFromDataStore: function(olFeature,$dialog) {
         var tables = $dialog.find(".mapbender-element-result-table");
-        _.each(tables, function (table, index) {
+
+        _.each(tables, function (table) {
 
             var item = $(table).data('item');
             $(table).data('olFeature', olFeature);
@@ -349,7 +368,6 @@ Scheme.prototype = {
 
                     } else {
                         data.item = item;
-                        //data = [data];
                     }
 
                     var tableApi = $(table).resultTable('getApi');
@@ -361,6 +379,16 @@ Scheme.prototype = {
             }
 
         });
+    },
+
+    addFeatureDataToEditDialog: function(olFeature,$dialog) {
+        var schema = this;
+        var widget = schema.widget;
+        var layer = schema.layer;
+        var map = layer.map;
+        var popupConfiguration = schema.popup;
+        var isOpenLayerCloudPopup = popupConfiguration.type && popupConfiguration.type === 'openlayers-cloud';
+
 
         setTimeout(function () {
 
@@ -407,30 +435,8 @@ Scheme.prototype = {
             }
 
         }, 21);
-
-        return $dialog;
-
     },
 
-
-    /**
-     *
-     * @param event
-     * @param eventData
-     */
-
-    editCancel: function (event, eventData) {
-        var schema = this;
-        var widget = schema.widget;
-        var feature = eventData.feature;
-
-        if (feature.hasOwnProperty('isNew') && schema.allowDeleteByCancelNewGeometry) {
-            schema.removeFeature(feature);
-        }
-        if (eventData.origin === 'cancel-button') {
-            widget.currentPopup.popupDialog('close');
-        }
-    },
 
     hoverInResultTable: function (feature, highlight) {
 
