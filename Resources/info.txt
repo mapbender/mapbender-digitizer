@@ -17,3 +17,4 @@ Weiteres zu tun:
 - Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen
 - In All geometries verschwindet unsaved feature markierung nicht
 - DataMangerUtils refactorn
+- Properties in Scheme aussortieren und sortieren

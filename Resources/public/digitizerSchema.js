@@ -4,11 +4,6 @@ var Scheme = function (rawScheme, widget) {
 
     schema = $.extend(schema, rawScheme);
 
-    if (schema.popup) {
-        schema.popup.buttons = schema.popup.buttons || [];
-        schema.createFeatureEditDialogConfiguration();
-    }
-
     schema.formItems = Mapbender.DigitizerTranslator.translateStructure(schema.formItems);
 
     schema._initializeHooks();
@@ -26,6 +21,8 @@ var Scheme = function (rawScheme, widget) {
     schema._addSelectControl();
 
     schema.initializeResultTableEvents();
+
+    schema.featureEditDialogFactory = new FeatureEditDialogFactory(schema.popup,schema);
 
 
     // remove removeSelected Control if !allowDelete
@@ -53,6 +50,7 @@ Scheme.prototype = {
     layer: null,
     widget: null,
     frame: null,
+    featureEditDialogFactory: null,
 
     allowSaveAll: true,
     markUnsavedFeatures: true,
@@ -284,158 +282,10 @@ Scheme.prototype = {
             dataManagerUtils.processCurrentFormItemsWithDataManager(olFeature, schema);
         } catch(e) { console.warn(e); }
 
-        var $dialog = $("<div/>");
-
-
-        widget.currentPopup = $dialog;
-
-
-        $dialog.data('feature', olFeature);
-        //dialog.data('digitizerWidget', widget); // TODO uncommented because purpose unknown
-
-        var formItems = schema.getFormItems(olFeature);
-        $dialog.generateElements({children: formItems});
-
-        $dialog.popupDialog(configuration);
-
-
-
-
-        this.doFeatureEditDialogBindings(olFeature,$dialog);
-
-        this.retrieveFeatureTableDataFromDataStore(olFeature,$dialog);
-        this.addFeatureDataToEditDialog(olFeature,$dialog);
-
-
-        return $dialog;
+        schema.featureEditDialogFactory.createFeatureEditDialog(olFeature);
 
     },
 
-    doFeatureEditDialogBindings: function(olFeature,$dialog) {
-        var schema = this;
-        var widget = schema.widget;
-        var configuration = schema.popup;
-        var isOpenLayerCloudPopup = configuration.type && configuration.type === 'openlayers-cloud';
-
-
-        $dialog.bind('popupdialogclose', function () {
-            if (olFeature.isNew && schema.allowDeleteByCancelNewGeometry) {
-                schema.removeFeature(olFeature);
-            }
-            if (configuration.modal) {
-                widget.currentPopup = null;
-            }
-        });
-
-
-        if (isOpenLayerCloudPopup) {
-            // Hide original popup but not kill it.
-            $dialog.closest('.ui-dialog').css({
-                'margin-left': '-100000px'
-            }).hide(0);
-        }
-    },
-
-
-    retrieveFeatureTableDataFromDataStore: function(olFeature,$dialog) {
-        var tables = $dialog.find(".mapbender-element-result-table");
-
-        _.each(tables, function (table) {
-
-            var item = $(table).data('item');
-            $(table).data('olFeature', olFeature);
-            if (item.editable) {
-                item.columns.pop();
-            }
-
-            var dataStoreLinkName = item.dataStoreLink.name;
-            if (dataStoreLinkName) {
-                var requestData = {
-                    dataStoreLinkName: dataStoreLinkName,
-                    fid: olFeature.fid,
-                    fieldName: item.dataStoreLink.fieldName
-                };
-
-                QueryEngine.query('dataStore/get', requestData).done(function (data) {
-                    if (Array.isArray(data)) {
-
-                        var dataItems = [];
-                        _.each(data, function (el, i) {
-                            el.attributes.item = item;
-                            dataItems.push(el.attributes)
-
-                        });
-
-                    } else {
-                        data.item = item;
-                    }
-
-                    var tableApi = $(table).resultTable('getApi');
-                    tableApi.clear();
-                    tableApi.rows.add(dataItems);
-                    tableApi.draw();
-
-                });
-            }
-
-        });
-    },
-
-    addFeatureDataToEditDialog: function(olFeature,$dialog) {
-        var schema = this;
-        var widget = schema.widget;
-        var layer = schema.layer;
-        var map = layer.map;
-        var configuration = schema.popup;
-        var isOpenLayerCloudPopup = configuration.type && configuration.type === 'openlayers-cloud';
-
-
-        setTimeout(function () {
-
-            if (configuration.remoteData && olFeature.isNew) {
-
-
-                var bbox = $dialog.data("feature").geometry.getBounds();
-                bbox.right = parseFloat(bbox.right + 0.00001);
-                bbox.top = parseFloat(bbox.top + 0.00001);
-                bbox = bbox.toBBOX();
-                var srid = map.getProjection().replace('EPSG:', '');
-                var url = widget.elementUrl + "getFeatureInfo/";
-
-                $.ajax({
-                    url: url, data: {
-                        bbox: bbox,
-                        schema: schema.schemaName,
-                        srid: srid
-                    }
-                }).success(function (response) {
-                    _.each(response.dataSets, function (dataSet) {
-                        var newData = JSON.parse(dataSet).features[0].properties
-                        $.extend(olFeature.data, newData);
-
-
-                    });
-                    $dialog.formData(olFeature.data);
-
-                });
-
-
-            } else {
-                $dialog.formData(olFeature.data);
-            }
-
-
-            if (isOpenLayerCloudPopup) {
-                /**
-                 * @var {OpenLayers.Popup.FramedCloud}
-                 */
-                var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(olFeature.geometry.toShortString()), null, $dialog.html(), null, true);
-                schema.olFeatureCloudPopup = olPopup;
-                map.addPopup(olPopup);
-            }
-
-        }, 21);
-    },
 
 
     hoverInResultTable: function (feature, highlight) {
@@ -488,115 +338,6 @@ Scheme.prototype = {
 
     },
 
-
-    _augmentFeatureEditDialogButtonsWithConfigurationButtons: function () {
-        var schema = this;
-        var widget = schema.widget;
-        var configuration = schema.popup;
-
-        // Initialize custom button events
-        _.each(configuration.buttons, function (button) {
-            if (button.click) {
-                var eventHandlerCode = button.click;
-                button.click = function (e) {
-                    var _widget = widget;
-                    var el = $(this);
-                    var form = $(this).closest(".ui-dialog-content");
-                    var feature = form.data('feature');
-                    var data = feature.data;
-
-                    eval(eventHandlerCode);
-
-                    e.preventDefault();
-                    return false;
-                }
-            }
-        });
-    },
-    /**
-     * @private
-     */
-
-
-    createFeatureEditDialogConfigurationButtons: function () {
-
-        var schema = this;
-        var configuration = schema.popup;
-
-        var buttons = configuration.buttons;
-
-        this._augmentFeatureEditDialogButtonsWithConfigurationButtons();
-
-        if (schema.printable) {
-            var printButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.print'),
-                click: function () {
-                    var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-                    if (printWidget) {
-                        var dialog = $(this).closest('.ui-dialog-content');
-                        var feature = dialog.data('feature');
-                        printWidget.printDigitizerFeature(schema.featureTypeName || schema.schemaName, feature.fid);
-                    } else {
-                        $.notify('Druck Element ist nicht verfügbar!');
-                    }
-                }
-            };
-            buttons.push(printButton);
-        }
-        if (schema.copy.enable) {
-            buttons.push({
-                text: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
-                click: function (e) {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    schema.copyFeature(olFeature); // TODO possibly a bug?
-                }
-            });
-        }
-        if (schema.allowCustomerStyle) {
-            var styleButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.style.change'),
-                click: function (e) {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    schema.openChangeStyleDialog(feature);
-                }
-            };
-            buttons.push(styleButton);
-        }
-        if (schema.allowEditData && schema.allowSave) {
-            var saveButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.save.title'),
-                click: function () {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    schema.saveFeature(feature);
-                }
-            };
-            buttons.push(saveButton);
-        }
-        if (schema.allowDelete) {
-            buttons.push({
-                text: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
-                'class': 'critical',
-                click: function () {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    schema.removeFeature(feature);
-                    schema.widget.currentPopup.popupDialog('close');
-                }
-            });
-        }
-        if (schema.allowCancelButton) {
-            buttons.push({
-                text: Mapbender.DigitizerTranslator.translate('cancel'),
-                click: function () {
-                    schema.widget.currentPopup.popupDialog('close');
-                }.bind(this)
-            });
-        }
-
-    },
 
 
     _mapHasActiveControlThatBlocksSelectControl: function () {
