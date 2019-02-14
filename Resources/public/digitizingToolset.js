@@ -132,8 +132,6 @@
 
             var $button = $("<button class='button' type='button'/>");
 
-            console.log($button);
-
             $button.addClass(item.type);
             $button.addClass('-fn-tool-button');
             $button.data(item);

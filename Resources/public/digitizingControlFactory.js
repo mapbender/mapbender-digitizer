@@ -6,8 +6,6 @@ var createFeatureAddedMethod = function(injectedMethods) {
      */
     var func = function (feature) {
 
-        feature.isNew = true;
-
         _.each(injectedMethods.getDefaultAttributes(), function(prop) {
             feature.attributes[prop] = "";
         });
@@ -28,12 +26,7 @@ var createFeatureAddedMethod = function(injectedMethods) {
 
 var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
-    var featureAdded = createFeatureAddedMethod({
-        deactivateCurrentControl: injectedMethods.deactivateCurrentControl,
-        openFeatureEditDialog: injectedMethods.openFeatureEditDialog,
-        getDefaultAttributes: injectedMethods.getDefaultAttributes,
-        triggerModifiedState: injectedMethods.triggerModifiedState,
-    });
+    var featureAdded = createFeatureAddedMethod(injectedMethods);
 
     var controls =  {
         drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point,{
@@ -106,7 +99,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             onModification: function (feature) {
 
                 injectedMethods.triggerModifiedState(feature,this,true);
-                feature.isChanged = true;
                 console.log("onModification",feature);
 
             }
@@ -128,7 +120,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                     $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
                 }
 
-                feature.isChanged = true;
             },
             /**
              *

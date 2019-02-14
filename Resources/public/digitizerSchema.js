@@ -53,7 +53,7 @@ Scheme.prototype = {
     frame: null,
 
     allowSaveAll: true,
-    markUnsavedFeatures: false,
+    markUnsavedFeatures: true,
     maxResults: 500,
     displayPermanent: false,
     dataStore: null,
@@ -822,8 +822,10 @@ Scheme.prototype = {
 
         var row = schema._getTableRowByFeature(feature);
         if (!row) {
+            feature.isNew = true;
             return; // In case of non-saved feature
         }
+        feature.isChanged = true;
 
         if (on) {
             row.find('.button.save').removeClass("disabled").addClass('active');

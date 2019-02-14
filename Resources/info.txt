@@ -13,6 +13,5 @@ Weiteres zu tun:
 - Helper Klasse/Datei für Feldlose Methoden anlegen, evtl. auch mehrere
 - Zellengröße limitieren in ResultTable
 - Kollision der Control- und General Buttons im Sidebar verhindern
-- Bug beheben bei alles speichern nach donut
 - Bug beheben: dragging bei donut zeichnen
 - Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen
