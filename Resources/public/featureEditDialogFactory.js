@@ -1,4 +1,4 @@
-var FeatureEditDialogFactory = function(configuration, schema) {
+var FeatureEditDialogFactory = function (configuration, schema) {
 
     this.schema = schema;
 
@@ -8,19 +8,18 @@ var FeatureEditDialogFactory = function(configuration, schema) {
     this._createFeatureEditDialogConfigurationButtons();
 
 
-
 };
 
 
 FeatureEditDialogFactory.prototype = {
 
 
-     createFeatureEditDialog: function(feature) {
-         var factory = this;
+    createFeatureEditDialog: function (feature) {
+        var factory = this;
 
-         return new FeatureEditDialog(feature,factory.configuration,factory.schema);
+        return new FeatureEditDialog(feature, factory.configuration, factory.schema);
 
-     },
+    },
 
     _augmentFeatureEditDialogButtonsWithConfigurationButtons: function () {
         var factory = this;
@@ -133,42 +132,64 @@ FeatureEditDialogFactory.prototype = {
 
 };
 
-var FeatureEditDialog = function(feature,configuration,schema) {
+var FeatureEditDialog = function (feature, configuration, schema) {
 
-        var dialog = this;
-        var widget = schema.widget;
+    var dialog = this;
+    var widget = schema.widget;
+    var $popup = dialog.$popup = $("<div/>");
 
-        var $popup = dialog.$popup = $("<div/>");
-
-        dialog.feature = feature;
-        dialog.schema = schema;
-        dialog.configuration = configuration;
-
-
-        widget.currentPopup = $popup;
+    dialog.feature = feature;
+    dialog.schema = schema;
+    dialog.configuration = configuration;
 
 
-        $popup.data('feature', feature);
+    if (widget.currentPopup) {
+        widget.currentPopup.popupDialog('close');
+        if (dialog.isOpenLayerCloudPopup() && schema.olFeatureCloudPopup) {
+            map.removePopup(schema.olFeatureCloudPopup);
+            schema.olFeatureCloudPopup.destroy();
+            schema.olFeatureCloudPopup = null;
+        }
+    }
 
-        var formItems = schema.getFormItems(feature);
-        $popup.generateElements({children: formItems});
 
-        $popup.popupDialog(configuration);
+    // TODO comprehensive schema throws Exception because no formItems
+    try {
+        var dataManagerUtils = new DataManagerUtils(widget);
+        dataManagerUtils.processCurrentFormItemsWithDataManager(feature, schema);
+    } catch (e) {
+        console.warn(e);
+    }
 
 
+    widget.currentPopup = $popup;
 
 
-        dialog.doFeatureEditDialogBindings(feature,$popup);
+    $popup.data('feature', feature);
 
-        dialog.retrieveFeatureTableDataFromDataStore(feature,$popup);
-        dialog.addFeatureDataToEditDialog(feature,$popup);
+    var formItems = schema.getFormItems(feature);
+    $popup.generateElements({children: formItems});
+
+    $popup.popupDialog(configuration);
+
+
+    dialog.doFeatureEditDialogBindings(feature, $popup);
+
+    dialog.retrieveFeatureTableDataFromDataStore(feature, $popup);
+    dialog.addFeatureDataToEditDialog(feature, $popup);
 
 
 };
 
-FeatureEditDialog.prototype =  {
+FeatureEditDialog.prototype = {
 
-    doFeatureEditDialogBindings: function() {
+    isOpenLayerCloudPopup: function () {
+        var dialog = this;
+
+        return dialog.configuration.type && dialog.configuration.type === 'openlayers-cloud';
+    },
+
+    doFeatureEditDialogBindings: function () {
         var dialog = this;
         var $popup = dialog.$popup;
         var feature = dialog.feature;
@@ -200,7 +221,7 @@ FeatureEditDialog.prototype =  {
     },
 
 
-    retrieveFeatureTableDataFromDataStore: function() {
+    retrieveFeatureTableDataFromDataStore: function () {
         var dialog = this;
         var $popup = dialog.$popup;
         var feature = dialog.feature;
@@ -248,7 +269,7 @@ FeatureEditDialog.prototype =  {
         });
     },
 
-    addFeatureDataToEditDialog: function() {
+    addFeatureDataToEditDialog: function () {
         var dialog = this;
         var $popup = dialog.$popup;
         var feature = dialog.feature;

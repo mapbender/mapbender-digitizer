@@ -257,31 +257,6 @@ Scheme.prototype = {
     //TODO this method is still to big - extract associated commands in methods
     _openFeatureEditDialog: function (olFeature) {
 
-        var schema = this;
-        var widget = schema.widget;
-        var layer = olFeature.layer;
-        var map = layer.map;
-        var configuration = schema.popup;
-
-        //TODO find out what this is for
-        var isOpenLayerCloudPopup = configuration.type && configuration.type === 'openlayers-cloud';
-
-        if (widget.currentPopup) {
-            widget.currentPopup.popupDialog('close');
-            if (isOpenLayerCloudPopup && schema.olFeatureCloudPopup) {
-                map.removePopup(schema.olFeatureCloudPopup);
-                schema.olFeatureCloudPopup.destroy();
-                schema.olFeatureCloudPopup = null;
-            }
-        }
-
-
-        // TODO comprehensive schema throws Exception because no formItems
-        try {
-            var dataManagerUtils = new DataManagerUtils(widget);
-            dataManagerUtils.processCurrentFormItemsWithDataManager(olFeature, schema);
-        } catch(e) { console.warn(e); }
-
         schema.featureEditDialogFactory.createFeatureEditDialog(olFeature);
 
     },
