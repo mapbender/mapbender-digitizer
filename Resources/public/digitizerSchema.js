@@ -9,6 +9,8 @@ var Scheme = function (rawScheme, widget) {
         schema.createPopupConfiguration();
     }
 
+    schema.formItems = Mapbender.DigitizerTranslator.translateStructure(schema.formItems);
+
     schema._initializeHooks();
 
     schema.triggerModifiedState = Scheme.prototype.triggerModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
@@ -97,10 +99,8 @@ Scheme.prototype = {
     group: null,
     displayOnInactive: false,
     refreshFeaturesAfterSave: [],
-    elementsTranslated: false,
     olFeatureCloudPopup: null,
 
-    editDialog: null,
     // Copy data
     copy: {
         enable: false,
@@ -282,24 +282,15 @@ Scheme.prototype = {
 
         var $dialog = $("<div/>");
 
-        if (!schema.elementsTranslated) {
-            Mapbender.DigitizerTranslator.translateStructure(schema.formItems);
-            schema.elementsTranslated = true;
-        }
 
-        schema.editDialog = $dialog;
         widget.currentPopup = $dialog;
 
 
         $dialog.data('feature', olFeature);
         //dialog.data('digitizerWidget', widget); // TODO uncommented because purpose unknown
 
-        $dialog.generateElementsWithFormItems = function (feature) {
-            var formItems = schema.getFormItems(feature);
-
-
-            $dialog.generateElements({children: formItems});
-        }(olFeature);
+        var formItems = schema.getFormItems(olFeature);
+        $dialog.generateElements({children: formItems});
 
         $dialog.popupDialog(popupConfiguration);
 
@@ -326,6 +317,8 @@ Scheme.prototype = {
                 'margin-left': '-100000px'
             }).hide(0);
         }
+
+
 
         var tables = $dialog.find(".mapbender-element-result-table");
         _.each(tables, function (table, index) {
@@ -1390,8 +1383,6 @@ Scheme.prototype = {
                 var hasFeatureAfterSave = response.features.length > 0;
                 var layer = schema.layer;
 
-                //delete widget.unsavedFeatures[feature.id];
-
                 if (!hasFeatureAfterSave) {
                     schema.reloadFeatures(_.without(layer.features, feature));
                     dialog && dialog.popupDialog('close');
@@ -1460,6 +1451,7 @@ Scheme.prototype = {
                         widget.refreshConnectedDigitizerFeatures(el);
                     })
                 }
+
             });
         }
     },

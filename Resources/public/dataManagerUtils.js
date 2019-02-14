@@ -373,11 +373,6 @@ DataManagerUtils.prototype = {
             }, 1);
         });
 
-        /*   if(!schema.elementsTranslated) {
-         translateStructure(widget.currentSchema.formItems);
-         schema.elementsTranslated = true;
-         } */
-
         DataUtil.eachItem(widget.currentSchema.formItems, function (item) {
             if (item.type === "file") {
                 item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + dataItem.fid + "&field=" + item.name;
