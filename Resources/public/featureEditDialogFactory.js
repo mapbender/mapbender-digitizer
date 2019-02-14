@@ -3,7 +3,8 @@ var FeatureEditDialogFactory = function (configuration, schema) {
     this.schema = schema;
 
     this.configuration = _.clone(configuration);
-    this.configuration.buttons = this.configuration.buttons || [];
+    this.configuration.realButtons = {};
+    this._augmentFeatureEditDialogButtonsWithCustomButtons();
 
     this._createFeatureEditDialogConfigurationButtons();
 
@@ -17,31 +18,35 @@ FeatureEditDialogFactory.prototype = {
     createFeatureEditDialog: function (feature) {
         var factory = this;
 
-        return new FeatureEditDialog(feature, factory.configuration, factory.schema);
+        return new FeatureEditDialog(feature, _.clone(factory.configuration), factory.schema);
 
     },
 
-    _augmentFeatureEditDialogButtonsWithConfigurationButtons: function () {
+    _augmentFeatureEditDialogButtonsWithCustomButtons: function () {
         var factory = this;
         var configuration = factory.configuration;
         var schema = factory.schema;
         var widget = schema.widget;
 
+        var i = 0;
+
         // Initialize custom button events
         _.each(configuration.buttons, function (button) {
             if (button.click) {
                 var eventHandlerCode = button.click;
-                button.click = function (e) {
-                    var _widget = widget;
-                    var el = $(this);
-                    var form = $(this).closest(".ui-dialog-content");
-                    var feature = form.data('feature');
-                    var data = feature.data;
+                configuration.realButtons[i++] = {
+                    click : function (e) {
+                        var _widget = widget;
+                        var el = $(this);
+                        var form = $(this).closest(".ui-dialog-content");
+                        var feature = form.data('feature');
+                        var data = feature.data;
 
-                    eval(eventHandlerCode);
+                        eval(eventHandlerCode);
 
-                    e.preventDefault();
-                    return false;
+                        e.preventDefault();
+                        return false;
+                    }
                 }
             }
         });
@@ -53,81 +58,41 @@ FeatureEditDialogFactory.prototype = {
         var factory = this;
         var configuration = factory.configuration;
         var schema = factory.schema;
-
-        var buttons = configuration.buttons;
-
-        this._augmentFeatureEditDialogButtonsWithConfigurationButtons();
+        var buttons = configuration.realButtons;
 
         if (schema.printable) {
-            var printButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.print'),
-                click: function () {
-                    var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-                    if (printWidget) {
-                        var dialog = $(this).closest('.ui-dialog-content');
-                        var feature = dialog.data('feature');
-                        printWidget.printDigitizerFeature(schema.featureTypeName || schema.schemaName, feature.fid);
-                    } else {
-                        $.notify('Druck Element ist nicht verfügbar!');
-                    }
-                }
+            buttons.printButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.print')
             };
-            buttons.push(printButton);
         }
         if (schema.copy.enable) {
-            buttons.push({
-                text: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
-                click: function (e) {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    schema.copyFeature(olFeature); // TODO possibly a bug?
-                }
-            });
+            buttons.copyButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.clone.title')
+            };
         }
         if (schema.allowCustomerStyle) {
-            var styleButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.style.change'),
-                click: function (e) {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    schema.openChangeStyleDialog(feature);
-                }
+            buttons.styleButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.style.change')
             };
-            buttons.push(styleButton);
         }
         if (schema.allowEditData && schema.allowSave) {
-            var saveButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.save.title'),
-                click: function () {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    schema.saveFeature(feature);
-                }
+            buttons.saveButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.save.title')
             };
-            buttons.push(saveButton);
         }
         if (schema.allowDelete) {
-            buttons.push({
+            buttons.deleteButton = {
                 text: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
                 'class': 'critical',
-                click: function () {
-                    var dialog = $(this).closest('.ui-dialog-content');
-                    var feature = dialog.data('feature');
-                    schema.removeFeature(feature);
-                    schema.widget.currentPopup.popupDialog('close');
-                }
-            });
+            };
         }
         if (schema.allowCancelButton) {
-            buttons.push({
-                text: Mapbender.DigitizerTranslator.translate('cancel'),
-                click: function () {
-                    schema.widget.currentPopup.popupDialog('close');
-                }.bind(this)
-            });
+            buttons.cancelButton = {
+                text: Mapbender.DigitizerTranslator.translate('cancel')
+            };
         }
 
-    },
+    }
 
 
 };
@@ -142,6 +107,7 @@ var FeatureEditDialog = function (feature, configuration, schema) {
     dialog.schema = schema;
     dialog.configuration = configuration;
 
+    dialog.addClickHandlerToButtons();
 
     if (widget.currentPopup) {
         widget.currentPopup.popupDialog('close');
@@ -182,6 +148,58 @@ var FeatureEditDialog = function (feature, configuration, schema) {
 };
 
 FeatureEditDialog.prototype = {
+
+    addClickHandlerToButtons: function() {
+
+        var dialog = this;
+        var schema = dialog.schema;
+        var feature = dialog.feature;
+        var buttons = dialog.configuration.realButtons;
+
+        if (buttons.printButton) {
+            buttons.printButton.click = function() {
+                var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
+                if (printWidget) {
+                    // TODO check if featureTypeName necessary
+                    printWidget.printDigitizerFeature(schema.featureTypeName || schema.schemaName, feature.fid);
+                } else {
+                    $.notify('Druck Element ist nicht verfügbar!'); // TODO translatable
+                }
+            }
+        }
+        if (buttons.copyButton) {
+            buttons.copyButton.click = function() {
+                schema.copyFeature(feature);
+            }
+        }
+        if (buttons.saveButton) {
+            buttons.saveButton.click = function () {
+                schema.saveFeature(dialog.feature, function () {
+                    return dialog.$popup.formData();
+                });
+            };
+        }
+        if (buttons.styleButton) {
+            buttons.styleButton.click = function() {
+                schema.openChangeStyleDialog(feature);
+            }
+        }
+        if (buttons.deleteButton) {
+            buttons.deleteButton.click = function() {
+                schema.removeFeature(feature);
+                dialog.$popup.popupDialog('close');
+            }
+        }
+        if (buttons.cancelButton) {
+            buttons.cancelButton.click = function() {
+                dialog.$popup.popupDialog('close');
+            }
+
+        }
+
+        dialog.configuration.buttons = Object.values(buttons);
+
+    },
 
     isOpenLayerCloudPopup: function () {
         var dialog = this;

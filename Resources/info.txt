@@ -18,3 +18,4 @@ Weiteres zu tun:
 - In All geometries verschwindet unsaved feature markierung nicht
 - DataMangerUtils refactorn
 - Properties in Scheme aussortieren und sortieren
+- Auf die Hooks Rücksicht nehmen - am besten vorhandene Konfigurationen begutachten

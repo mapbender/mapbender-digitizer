@@ -254,8 +254,9 @@ Scheme.prototype = {
      * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
      * @private
      */
-    //TODO this method is still to big - extract associated commands in methods
+
     _openFeatureEditDialog: function (olFeature) {
+        var schema = this;
 
         schema.featureEditDialogFactory.createFeatureEditDialog(olFeature);
 
@@ -1039,10 +1040,11 @@ Scheme.prototype = {
      * On save button click
      *
      * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature OpenLayers feature
+     * @param {Function} getFormData
      * @private
      * @return {(jQuery.jqXHR | void)} ajax XHR
      */
-    saveFeature: function (feature,formData) {
+    saveFeature: function (feature,getFormData) {
 
         if (feature.disabled) { // Feature is temporarily disabled
             return;
@@ -1056,9 +1058,14 @@ Scheme.prototype = {
         var table = schema.table;
         var tableWidget = table.data('visUiJsResultTable');
         var tableApi = table.resultTable('getApi');
-        var formData = dialog && dialog.formData() || schema.initialFormData(feature);
         var wkt = new OpenLayers.Format.WKT().write(feature);
         var srid = widget.map.getProjectionObject().proj.srsProjNumber;
+        var formData;
+        if (getFormData) {
+            formData = getFormData();
+        } else {
+            schema.initialFormData(feature);
+        }
         var request = {
             properties: formData,
             geometry: wkt,
