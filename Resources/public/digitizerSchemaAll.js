@@ -6,6 +6,26 @@ var AllScheme = function () {
 
 AllScheme.prototype = Object.create(Scheme.prototype);
 
+AllScheme.prototype = $.extend({},AllScheme.prototype,{
+
+    showExtendSearchSwitch: true,
+    openFormAfterEdit: true,
+    allowEditData: true,
+    allowDelete: true,
+    allowPrintMetadata: true,
+    allowDigitize: true,
+    displayPermanent: false,
+    displayOnSelect: true,
+    inlineSearch: true,
+    allowCustomerStyle: true,
+    useContextMenu: true,
+    schemaName: 'all',
+    featureType: 'all',
+    toolset: [{type: 'drawPoint'},{type: 'drawLine'},{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
+    zoomDependentVisibility: [{max: 10000}],
+    confirmSaveOnDeactivate: true
+});
+
 
 AllScheme.prototype._createStyleMap = function (labels, styleContext) {
     var schema = this;
@@ -56,5 +76,4 @@ AllScheme.prototype.getSchemaName = function(feature) {
     var widget = schema.widget;
     return widget.getSchemaByOLFeature(feature).schemaName;
 };
-
 

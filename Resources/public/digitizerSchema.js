@@ -15,7 +15,7 @@ var Scheme = function (rawScheme, widget) {
 
     schema.widget = widget;
 
-    schema.toolset = widget.toolsets[schema.featureType.geomType];
+    schema.toolset = schema.toolset || widget.toolsets[schema.featureType.geomType];
 
     schema.createSchemaFeatureLayer();
 
@@ -37,6 +37,9 @@ var Scheme = function (rawScheme, widget) {
 
     // TODO this has to be carefully checked for prototype propertys, since it fills the `undefined` properties, so it may not work at all
     _.defaults(schema, schema.widget._getNonBlackListedOptions());
+
+
+    console.log(schema.formItems);
 
 
 };
@@ -66,7 +69,6 @@ Scheme.prototype = {
     useContextMenu: true,
     toolset: {},
     popup: {},
-    tableFields: {},
     style: {},
     formItems: [],
     events: null,
@@ -144,6 +146,18 @@ Scheme.prototype = {
     }],
     digitizingToolset: null,
 
+    tableFields : {
+        gid: { // TODO make sure this fields name is either always gid or find a more generic solution
+            label: 'Nr.',
+            width: "20%",
+        },
+        name: {
+            label: 'Name',
+            width: "80%",
+        },
+
+    },
+
     _initializeHooks: function () {
         var schema = this;
         _.each(schema.hooks, function (value, name) {
@@ -173,6 +187,17 @@ Scheme.prototype = {
                 });
             });
         }
+    },
+
+    _createResultTableDataFunction: function(columnId) {
+
+        return function (row, type, val, meta) {
+            var data = row.data[columnId];
+            if (typeof (data) == 'string') {
+                data = data.escapeHtml();
+            }
+            return data;
+        };
     },
 
 

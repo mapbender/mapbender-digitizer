@@ -140,33 +140,10 @@ Sidebar.prototype = {
 
         var columns = [];
 
-        if (!schema.hasOwnProperty("tableFields")) {
-
-            schema.tableFields = {
-                id: {
-                    label: '',
-                    data: function (row, type, val, meta) {
-                        var table = $('<table/>');
-                        _.each(row.data, function (value, key) {
-                            var tableRow = $('<tr/>');
-                            var keyCell = $('<td style="font-weight: bold; padding-right: 5px"/>');
-                            var valueCell = $('<td/>');
-
-                            keyCell.text(key + ':');
-                            valueCell.text(value);
-                            tableRow.append(keyCell).append(valueCell);
-                            table.append(tableRow);
-
-                        });
-                        return table.prop('outerHTML');
-                    }
-                }
-            };
-
-        }
 
         $.each(schema.tableFields, function (fieldName, fieldSettings) {
             fieldSettings.title = fieldSettings.label;
+            fieldSettings.data = fieldSettings.data || schema._createResultTableDataFunction(fieldName);
             if (!fieldSettings.data) {
                 fieldSettings.data = function (row, type, val, meta) {
                     var data = row.data[fieldName];
@@ -182,6 +159,8 @@ Sidebar.prototype = {
             }
             columns.push(fieldSettings);
         });
+
+        console.log(schema.tableFields,columns,schema.schemaName);
 
         return columns;
 
@@ -215,8 +194,8 @@ Sidebar.prototype = {
             _.extend(resultTableSettings, schema.view.settings);
         }
 
-        var div = $("<div/>");
-        var table = schema.table = div.resultTable(resultTableSettings);
+        var $div = $("<div/>");
+        var table = schema.table = $div.resultTable(resultTableSettings);
         var searchableColumnTitles = _.pluck(_.reject(resultTableSettings.columns, function (column) {
             if (!column.sTitle) {
                 return true;

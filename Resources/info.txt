@@ -7,3 +7,8 @@ Weiteres zut un:
 - Markiere JQuery Variablen mit $ Präfix
 - Die current Variablen in Widget currentSchema und currentPopup sind schlechter Stil und gehören weg
 - Es muss entschieden werden, ob die properties für das all-layer im Server oder JS definiert werden sollen
+- Die Schnittstelle von .table u.s.w. vereinheitlichen
+- Translations auslagern / vereinheitlichen
+- Helper Klasse/Datei für Feldlose Methoden anlegen, evtl. auch mehrere
+- Zellengröße limitieren in ResultTable
+- Kollision der Control- und General Buttons im Sidebar verhindern
