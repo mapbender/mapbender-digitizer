@@ -22,6 +22,9 @@ var Scheme = function (rawScheme, widget) {
 
     schema.initializeResultTableEvents();
 
+    schema.mapContextMenu = new MapContextMenu(schema);
+    schema.elementContextMenu = new ElementContextMenu(schema);
+
     schema.featureEditDialogFactory = new FeatureEditDialogFactory(schema.popup,schema);
 
 
@@ -51,6 +54,8 @@ Scheme.prototype = {
     widget: null,
     frame: null,
     featureEditDialogFactory: null,
+    mapContextMenu: null,
+    elementContextMenu: null,
 
     allowSaveAll: true,
     markUnsavedFeatures: true,
@@ -123,7 +128,6 @@ Scheme.prototype = {
     oneInstanceEdit: true,
     searchType: "currentExtent",
     inlineSearch: false,
-    useContextMenu: false,
     hooks: {
         onModificationStart: null,
         onStart: null,
@@ -175,171 +179,15 @@ Scheme.prototype = {
         var schema = this;
         var widget = schema.widget;
 
-        widget.allowUseMapContextMenu = schema.allowUseContextMenu.bind(schema);
-        widget.buildMapContextMenu = schema.buildMapContextMenu.bind(schema);
+        widget.allowUseMapContextMenu = schema.mapContextMenu.allowUseContextMenu;
+        widget.buildMapContextMenu = schema.mapContextMenu.buildContextMenu;
 
-        widget.allowUseElementContextMenu = schema.allowUseContextMenu.bind(schema);
-        widget.buildElementContextMenu = schema.buildElementContextMenu.bind(schema);
+        widget.allowUseElementContextMenu = schema.elementContextMenu.allowUseContextMenu;
+        widget.buildElementContextMenu = schema.elementContextMenu.buildContextMenu;
 
     },
 
-    allowUseContextMenu: function() {
-        var schema = this;
-        return schema.useContextMenu;
-    },
 
-    buildMapContextMenu: function (trigger, e) {
-        var schema = this;
-        var items = {};
-        var feature = schema.layer.getFeatureFromEvent(e);
-        var features;
-
-        if (!feature) {
-            items['no-items'] = {name: "Nothing selected!"}
-        } else {
-            if (feature._sketch) {
-                return items;
-            }
-            features = feature.cluster || [feature];
-            _.each(features, function (feature) {
-                items[feature.fid] = schema.createMapContextMenuSubMenu(feature);
-            });
-        }
-
-        return {
-            items: items,
-            callback: function (key, options) {
-                options.items[key].action();
-                var $selectedElement = options.$selected;
-                if (!$selectedElement || !feature) {
-                    return;
-                }
-
-                var id = feature.fid; //$selectedElement.parent().closest('.context-menu-item').data('contextMenuKey');
-                var parameters = options.items[id];
-                if (!parameters) {
-                    return;
-                }
-
-                if (parameters.items[key].action) {
-                    parameters.items[key].action(key, options, parameters);
-                }
-            }
-        }
-    },
-
-
-    createMapContextMenuSubMenu: function (olFeature) {
-        var schema = this;
-        var subItems = {
-            zoomTo: {
-                name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
-                action: function (key, options, parameters) {
-                    schema.zoomToJsonFeature(parameters.olFeature);
-                }
-            }
-        };
-
-        if (schema.allowChangeVisibility) {
-            subItems['style'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
-                action: function (key, options, parameters) {
-                    schema.openChangeStyleDialog(olFeature);
-                }
-            };
-        }
-
-        if (schema.allowCustomerStyle) {
-            subItems['style'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
-                action: function (key, options, parameters) {
-                    schema.openChangeStyleDialog(olFeature);
-                }
-            };
-        }
-
-        if (schema.allowEditData) {
-            subItems['edit'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.edit'),
-                action: function (key, options, parameters) {
-                    schema._openFeatureEditDialog(parameters.olFeature);
-                }
-            }
-        }
-
-        if (schema.allowDelete) {
-            subItems['remove'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
-                action: function (key, options, parameters) {
-                    schema.removeFeature(parameters.olFeature);
-                }
-            }
-        }
-
-        return {
-            name: "Feature #" + olFeature.fid,
-            olFeature: olFeature,
-            items: subItems
-        };
-    },
-
-
-    buildElementContextMenu: function (trigger, e) {
-        var schema = this;
-        var table = schema.table;
-        var api = table.resultTable('getApi');
-        var olFeature = api.row($(trigger)).data();
-
-        if (!olFeature) {
-            return {
-                callback: function (key, options) {
-                }
-            };
-        }
-
-        var items = {};
-
-        if (schema.allowCustomerStyle) {
-            items['changeStyle'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
-                action: function() { schema.openChangeStyleDialog(olFeature); }
-            };
-        }
-
-        items['zoom'] = {
-            name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
-            action: function() {  schema.zoomToJsonFeature(olFeature); }
-        };
-
-        if (schema.allowDelete) {
-            items['removeFeature'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
-                action: function() { schema.removeFeature(olFeature); }
-            };
-        }
-
-        if (schema.allowEditData) {
-            items['edit'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.edit'),
-                action: function() { schema._openFeatureEditDialog(olFeature); }
-            };
-        }
-
-        // if (schema['anything']) {
-        //     items['exportToGeoJson'] = {
-        //         name: '-',
-        //         action: function() {widget.exportGeoJson(olFeature); }
-        //     }
-        // }
-
-
-        return {
-            callback: function (key, options) {
-                options.items[key].action();
-            },
-            items: items
-        };
-    },
 
 
     _refreshMapAfterFeatureSave: function () {

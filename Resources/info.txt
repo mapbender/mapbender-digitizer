@@ -23,3 +23,4 @@ Weiteres zu tun:
 - Kopieren testen
 - Kontext-Menü Funktionen irgendwie in Schema auslagern
 - Default Style in Style Widget richtig anzeigen
+- Gewählter Druck Button im ResultTable verliert Farbe wenn über die jeweilige Reihe gehovert wird
