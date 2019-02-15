@@ -1,6 +1,8 @@
 (function ($) {
     "use strict";
 
+    $.fn.dataTable.ext.errMode = 'throw';
+
 
     /**
      * Escape HTML chars

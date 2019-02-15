@@ -38,7 +38,7 @@
                     console.warn("this method shoud be overwritten");
                     return false;
                 },
-                triggerModifiedState: function (feature, control, on) {
+                setModifiedState: function (feature, control, on) {
                     console.warn("this method shoud be overwritten");
                     return false;
                 }

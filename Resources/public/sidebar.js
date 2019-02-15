@@ -422,7 +422,7 @@ Sidebar.prototype = {
                 },
 
 
-                triggerModifiedState: schema.triggerModifiedState
+                setModifiedState: schema.setModifiedState
             }
 
 

@@ -8,7 +8,7 @@ var Scheme = function (rawScheme, widget) {
 
     schema._initializeHooks();
 
-    schema.triggerModifiedState = Scheme.prototype.triggerModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
+    schema.setModifiedState = Scheme.prototype.setModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
 
     schema.widget = widget;
 
@@ -22,7 +22,7 @@ var Scheme = function (rawScheme, widget) {
 
     schema.initializeResultTableEvents();
 
-    schema.layer.getClusteredFeatures = function() {
+    schema.layer.getClusteredFeatures = function () {
         return _.flatten(_.pluck(this.features, "cluster"));
     };
 
@@ -560,7 +560,7 @@ Scheme.prototype = {
         return row;
     },
 
-    triggerModifiedState: function (feature, control, on) {
+    setModifiedState: function (feature, control) {
         var schema = this;
 
         var row = schema._getTableRowByFeature(feature);
@@ -570,21 +570,27 @@ Scheme.prototype = {
         }
         feature.isChanged = true;
 
-        if (on) {
-            row.find('.button.save').removeClass("disabled").addClass('active');
-        } else {
-            row.find('.button.save').removeClass("active").addClass('disabled');
-        }
+        row.find('.button.save').removeClass("disabled").addClass('active');
 
-        if (on) {
-            $(schema.frame).find(".save-all-features").addClass("active");
-        } else {
-            if (schema._getUnsavedFeatures().length === 0) {
-                $(schema.frame).find(".save-all-features").removeClass("active");
-            }
-        }
+        $(schema.frame).find(".save-all-features").addClass("active");
 
         control && control.deactivate();
+
+    },
+
+
+    unsetModifiedState: function (feature) {
+        var schema = this;
+
+        var row = schema._getTableRowByFeature(feature);
+
+        console.log(row,feature);
+
+        row.find('.button.save').removeClass("active").addClass('disabled');
+
+        if (schema._getUnsavedFeatures().length === 0) {
+            $(schema.frame).find(".save-all-features").removeClass("active");
+        }
 
     },
 
@@ -898,7 +904,7 @@ Scheme.prototype = {
         var bbox = extent.toGeometry().getBounds();
         var existingFeatures = schema.isClustered ? layer.getClusteredFeatures() : layer.features;
         var visibleFeatures = currentExtentOnly ? _.filter(existingFeatures, function (olFeature) {
-            return olFeature && (olFeature.hasOwnProperty('isNew') || olFeature.geometry.getBounds().intersectsBounds(bbox));
+            return olFeature && (olFeature.isNew || olFeature.geometry.getBounds().intersectsBounds(bbox));
         }) : existingFeatures;
         var visibleFeatureIds = _.pluck(visibleFeatures, "fid");
         var filteredNewFeatures = _.filter(featureCollection.features, function (feature) {
@@ -963,15 +969,6 @@ Scheme.prototype = {
         schema._refreshOtherLayersAfterFeatureSave();
     },
 
-
-    _replaceFeatureInUI: function (oldFeature,newFeature) {
-        var schema = this;
-
-        console.assert(oldFeature.fid === newFeature.fid, "ID from Old Feature and New Feature must be identical");
-        schema.layer.addFeatures([newFeature]);
-        schema._removeFeatureFromUI(oldFeature);
-
-    },
 
     /**
      * Remove OL feature
@@ -1101,9 +1098,8 @@ Scheme.prototype = {
         var newFeatures = geoJsonReader.read(response);
         var newFeature = _.first(newFeatures);
 
-        console.assert(feature.state === null, "State of OL Feature is NULL");
 
-
+        newFeature.fid = feature.fid;
         newFeature.data = feature.data;
         newFeature.layer = feature.layer;
         newFeature.renderIntent = feature.renderIntent;
@@ -1159,20 +1155,26 @@ Scheme.prototype = {
                 return;
             }
 
+            if (!feature.isNew) {
+                schema.unsetModifiedState(feature);
+            }
+
+
             var newFeature = schema._createNewFeatureWithDBFeature(feature, response);
 
-            if(newFeature==null) {
+            newFeature.isNew = false;
+
+            if (newFeature == null) {
                 console.warn("Creation of new Feature failed");
                 return;
             }
 
-            schema._replaceFeatureInUI(feature,newFeature);
+            schema._removeFeatureFromUI(feature);
 
+            schema.layer.addFeatures([newFeature]);
 
 
             schema._refreshFeatureRowInDataTable(newFeature);
-
-            schema.triggerModifiedState(newFeature, false);
 
             $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
 
@@ -1190,14 +1192,13 @@ Scheme.prototype = {
             schema._refreshConnectedDigitizerFeatures();
 
 
-
         });
 
         return promise;
 
     },
 
-    _refreshFeatureRowInDataTable: function(feature) {
+    _refreshFeatureRowInDataTable: function (feature) {
         var schema = this;
         var table = schema.table;
         var tableWidget = table.data('visUiJsResultTable');
@@ -1207,7 +1208,7 @@ Scheme.prototype = {
         tableApi.draw();
     },
 
-    _refreshConnectedDigitizerFeatures: function() {
+    _refreshConnectedDigitizerFeatures: function () {
         var schema = this;
 
         if (schema.refreshFeaturesAfterSave) {
@@ -1217,7 +1218,7 @@ Scheme.prototype = {
         }
     },
 
-    _tryMailManager: function(feature) {
+    _tryMailManager: function (feature) {
         var schema = this;
         if (schema.mailManager && Mapbender.hasOwnProperty("MailManager")) {
             try {

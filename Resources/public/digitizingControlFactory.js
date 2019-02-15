@@ -12,7 +12,7 @@ var createFeatureAddedMethod = function(injectedMethods) {
 
         feature.layer.redraw();
 
-        injectedMethods.triggerModifiedState(feature);
+        injectedMethods.setModifiedState(feature,this);
         injectedMethods.deactivateCurrentControl();
         injectedMethods.openFeatureEditDialog(feature);
 
@@ -70,7 +70,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                 holeModifier: 'element',
                 finalizeInteriorRing : function(event) {
                     var fir =  OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
-                    injectedMethods.triggerModifiedState(this.polygon,this.control,true);
+                    injectedMethods.setModifiedState(this.polygon,this.control);
                     return fir;
                 }
             },
@@ -98,7 +98,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
             onModification: function (feature) {
 
-                injectedMethods.triggerModifiedState(feature,this,true);
+                injectedMethods.setModifiedState(feature,this);
                 console.log("onModification",feature);
 
             }
@@ -127,7 +127,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
              */
 
             onComplete: function (feature) {
-                injectedMethods.triggerModifiedState(feature,this,true);
+                injectedMethods.setModifiedState(feature,this);
                 console.log("onComplete");
                 injectedMethods.extendFeatureDataWhenNoPopupOpen(feature);
 
