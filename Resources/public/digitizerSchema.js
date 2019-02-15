@@ -113,6 +113,7 @@ Scheme.prototype = {
     refreshFeaturesAfterSave: [],
     olFeatureCloudPopup: null,
     mailManager: null,
+    tableTranslation: null,
 
     // Copy data
     copy: {
@@ -222,27 +223,6 @@ Scheme.prototype = {
             }
             return data;
         };
-    },
-
-
-    _getTableTranslations: function () {
-        var schema = this;
-        var tableTranslation = schema.tableTranslation;
-
-        if (tableTranslation) {
-            tableTranslation = Mapbender.DigitizerTranslator.translateObject(tableTranslation);
-        } else {
-            tableTranslation = {
-                sSearch: Mapbender.DigitizerTranslator.translate("search.title") + ':',
-                sEmptyTable: Mapbender.DigitizerTranslator.translate("search.table.empty"),
-                sZeroRecords: Mapbender.DigitizerTranslator.translate("search.table.zerorecords"),
-                sInfo: Mapbender.DigitizerTranslator.translate("search.table.info.status"),
-                sInfoEmpty: Mapbender.DigitizerTranslator.translate("search.table.info.empty"),
-                sInfoFiltered: Mapbender.DigitizerTranslator.translate("search.table.info.filtered")
-            };
-        }
-
-        return tableTranslation;
     },
 
     getTableWidget: function () {

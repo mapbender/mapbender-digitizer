@@ -46,6 +46,15 @@
             }
 
             return items;
+        },
+
+        tableTranslations: {
+            sSearch: Mapbender.DigitizerTranslator.translate("search.title") + ':',
+            sEmptyTable: Mapbender.DigitizerTranslator.translate("search.table.empty"),
+            sZeroRecords: Mapbender.DigitizerTranslator.translate("search.table.zerorecords"),
+            sInfo: Mapbender.DigitizerTranslator.translate("search.table.info.status"),
+            sInfoEmpty: Mapbender.DigitizerTranslator.translate("search.table.info.empty"),
+            sInfoFiltered: Mapbender.DigitizerTranslator.translate("search.table.info.filtered")
         }
 
 

@@ -176,6 +176,8 @@ Sidebar.prototype = {
         var schema = this.schema;
         var frame =  this.frame;
 
+        var tableTranslation = schema.tableTranslation ? Mapbender.DigitizerTranslator.translateObject(schema.tableTranslation) : Mapbender.DigitizerTranslator.tableTranslations;
+
         var resultTableSettings = {
             lengthChange: false,
             pageLength: schema.pageLength,
@@ -188,7 +190,7 @@ Sidebar.prototype = {
             autoWidth: false,
             columns: this._generateResultDataTableColumns(),
             buttons: this._generateResultDataTableButtons(),
-            oLanguage: schema._getTableTranslations()
+            oLanguage: tableTranslation
 
         };
 

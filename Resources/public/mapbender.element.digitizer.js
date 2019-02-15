@@ -22,22 +22,7 @@
         });
     };
 
-    /**
-     * Translate digitizer keywords
-     * @param title
-     * @param withoutSuffix
-     * @returns {*}
-     */
 
-
-    /**
-     * Digitizing tool set
-     *
-     * @author Andriy Oblivantsev <eslider@gmail.com>
-     * @author Stefan Winkelmann <stefan.winkelmann@wheregroup.com>
-     *
-     * @copyright 20.04.2015 by WhereGroup GmbH & Co. KG
-     */
     $.widget("mapbender.mbDigitizer", {
         toolsets: {
             point: [{type: 'drawPoint'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
@@ -115,9 +100,7 @@
                 pointRadius: 15,
                 label: '${label}',
                 fontSize: 15
-            },
-            'copy': {},
-
+            }
 
         },
         /**
