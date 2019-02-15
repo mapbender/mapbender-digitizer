@@ -11,15 +11,15 @@ Refactoring - Renaming:
 Refactoring - Code sortieren:
 - Die current Variablen in Widget currentSchema und currentPopup sind schlechter Stil und gehören weg : currentSchema durch abgespeckte Version ersetzen, die Methoden beinhaltet, da kommen die contextMenu Methoden auch rein
 - Die Schnittstelle von .table u.s.w. vereinheitlichen
-- Translations auslagern / vereinheitlichen
 - Helper Klasse/Datei für Feldlose Methoden anlegen, evtl. auch mehrere
 - Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen
-- DataMangerUtils refactorn
+- DataManagerUtils refactorn
 - Properties in Scheme aussortieren und sortieren
 - Auf die Hooks Rücksicht nehmen - am besten vorhandene Konfigurationen begutachten
 - Herausfinden, warum features 'data' und 'properties' hat und gegebenenfalls eins wegwerfen
 - Navigation auf Buttons über JQuery einschränken
 - Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
+- Konstanten für Style Namen
 
 
 
@@ -42,6 +42,7 @@ Legacy Bugs
 Optische Bugs:
 - Zellengröße limitieren in ResultTable
 - Kollision der Control- und General Buttons im Sidebar verhindern
+- Zu viele Buttons in Feature Edit Dialog machen Layout kaputt
 
 
 
@@ -50,6 +51,8 @@ Gemacht:
 - In All geometries verschwindet unsaved feature markierung nicht
 - Kontext-Menü Funktionen irgendwie in Schema auslagern
 - Es muss entschieden werden, ob die properties für das all-layer im Server oder JS definiert werden sollen
+- Translations auslagern / vereinheitlichen
+
 
 
 Von alleine verschwunden:

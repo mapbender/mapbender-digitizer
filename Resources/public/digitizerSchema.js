@@ -66,6 +66,9 @@ Scheme.prototype = {
     mapContextMenu: null,
     elementContextMenu: null,
 
+
+
+
     allowSaveAll: true,
     markUnsavedFeatures: true,
     maxResults: 500,
@@ -88,8 +91,6 @@ Scheme.prototype = {
     selectControl: null,
     featureStyles: null,
     search: null,
-    eventListeners: null,
-
     allowDigitize: true,
     allowDelete: true,
     allowSave: true,
@@ -110,14 +111,12 @@ Scheme.prototype = {
     minScale: null,
     group: null,
     displayOnInactive: false,
-    refreshFeaturesAfterSave: [],
+    refreshFeaturesAfterSave: false,
     olFeatureCloudPopup: null,
     mailManager: null,
     tableTranslation: null,
-
-    // Copy data
     copy: {
-        enable: false,
+        enable: true,
         rules: [],
         data: {},
         style: {
@@ -564,8 +563,6 @@ Scheme.prototype = {
 
         var row = schema._getTableRowByFeature(feature);
 
-        console.log(row, feature);
-
         row.find('.button.save').removeClass("active").addClass('disabled');
 
         if (schema._getUnsavedFeatures().length === 0) {
@@ -991,13 +988,9 @@ Scheme.prototype = {
      */
     copyFeature: function (feature) {
         var schema = this;
-        var widget = schema.widget;
-        /**@type {Scheme} */
-        var layer = schema.layer;
         var newFeature = feature.clone();
         var config = schema.copy;
         var defaultAttributes = config.data || {};
-        var allowCopy = true;
 
         _.each(schema.copy.rules, function (ruleCode) {
             var f = feature;
@@ -1007,44 +1000,25 @@ Scheme.prototype = {
             }
         });
 
-        if (!allowCopy) {
-            $.notify(Mapbender.DigitizerTranslator.translate('feature.clone.on.error'));
-            return;
-        }
+        var newAttributes = _.extend({}, defaultAttributes);
 
-        var newAttributes = {};
-        _.extend(newAttributes, defaultAttributes);
         _.each(feature.attributes, function (v, k) {
-            if (v === '' || v === null) {
-                return;
+            if (v !== '' && v !== null) {
+                newAttributes[k] = v;
             }
-            newAttributes[k] = v;
+
         });
 
-        newFeature.data = newFeature.properties = newFeature.attributes = newAttributes;
+        newFeature.data = newAttributes;
+        newFeature.isNew = true;
+        newFeature.layer = feature.layer;
+
         delete newFeature.fid;
 
-        return schema.saveFeature(newFeature).done(function (response) {
-            if (response.errors) {
-                Mapbender.error(Mapbender.DigitizerTranslator.translate("feature.copy.error"));
-                return;
-            }
+        newFeature.redraw('copy');
 
-            var request = this;
-            var feature = request.feature;
+        schema._openFeatureEditDialog(newFeature);
 
-            feature.redraw('copy');
-
-            var successHandler = config.on && config.on.success;
-
-            if (successHandler) {
-                var r = function (feature) {
-                    return eval(successHandler + ";");
-                }(feature);
-            } else {
-                schema._openFeatureEditDialog(feature);
-            }
-        });
     },
 
 
