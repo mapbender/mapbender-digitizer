@@ -40,7 +40,7 @@
                     this.translateStructure(items[k]);
                 } else {
                     if (typeof items[k] == "string" && items[k].match(this.translationReg)) {
-                        items[k] = Mapbender.DigitizerTranslator.translate(items[k].split(':')[1], true);
+                        items[k] = this.translate(items[k].split(':')[1], true);
                     }
                 }
             }
@@ -48,14 +48,50 @@
             return items;
         },
 
-        tableTranslations: {
-            sSearch: Mapbender.DigitizerTranslator.translate("search.title") + ':',
-            sEmptyTable: Mapbender.DigitizerTranslator.translate("search.table.empty"),
-            sZeroRecords: Mapbender.DigitizerTranslator.translate("search.table.zerorecords"),
-            sInfo: Mapbender.DigitizerTranslator.translate("search.table.info.status"),
-            sInfoEmpty: Mapbender.DigitizerTranslator.translate("search.table.info.empty"),
-            sInfoFiltered: Mapbender.DigitizerTranslator.translate("search.table.info.filtered")
-        }
+        tableTranslations: function() {
+            return {
+                sSearch: this.translate("search.title") + ':',
+                sEmptyTable: this.translate("search.table.empty"),
+                sZeroRecords: this.translate("search.table.zerorecords"),
+                sInfo: this.translate("search.table.info.status"),
+                sInfoEmpty: this.translate("search.table.info.empty"),
+                sInfoFiltered: this.translate("search.table.info.filtered")
+            }
+        },
+
+
+        toolsetTranslations: function (geomType) {
+
+
+            var toolSetTranslations = {
+                drawPoint: "Punkt setzen",
+                drawLine: "Linie zeichnen",
+                drawPolygon: "Polygon zeichnen",
+                drawRectangle: "Rechteck zeichen",
+                drawCircle: "Kreis zeichen",
+                drawEllipse: "Ellipse zeichen",
+                drawDonut: "Polygon mit Enklave zeichnen",
+                selectAndEditGeometry: "Objekt Position/Größe beabeiten",
+                moveGeometry: "Objekt bewegen",
+                selectGeometry: "Objekt selektieren",
+                removeSelected: "Selektierte objekte löschen",
+                removeAll: "Alle Objekte löschen"
+            };
+
+
+            //var toolSetTranslations =  {};
+
+            var translationPrefix = 'mb.digitizer.toolset.' + geomType + '.';
+
+            _.each(Mapbender.i18n, function (v, k) {
+                if (k.indexOf(translationPrefix) === 0) {
+                    var shortKeyName = k.split(translationPrefix)[1];
+                    toolSetTranslations[shortKeyName] = v;
+                }
+            });
+
+            return toolSetTranslations;
+        },
 
 
     };

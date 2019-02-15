@@ -91,7 +91,7 @@ Sidebar.prototype = {
 
         if (schema.allowChangeVisibility) {
             buttons.push({
-                title: 'Objekt anzeigen/ausblenden', //Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
+                title: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
                 className: 'visibility',
                 onClick: function (olFeature) {
                     var on = olFeature.renderIntent === 'invisible';
@@ -176,7 +176,7 @@ Sidebar.prototype = {
         var schema = this.schema;
         var frame =  this.frame;
 
-        var tableTranslation = schema.tableTranslation ? Mapbender.DigitizerTranslator.translateObject(schema.tableTranslation) : Mapbender.DigitizerTranslator.tableTranslations;
+        var tableTranslation = schema.tableTranslation ? Mapbender.DigitizerTranslator.translateObject(schema.tableTranslation) : Mapbender.DigitizerTranslator.tableTranslations();
 
         var resultTableSettings = {
             lengthChange: false,
@@ -310,42 +310,6 @@ Sidebar.prototype = {
 
     },
 
-    _createToolsetTranslations: function () {
-
-        var schema = this.schema;
-
-        // TODO in translator auslagern
-        var toolSetTranslations = {
-            drawPoint: "Punkt setzen",
-            drawLine: "Linie zeichnen",
-            drawPolygon: "Polygon zeichnen",
-            drawRectangle: "Rechteck zeichen",
-            drawCircle: "Kreis zeichen",
-            drawEllipse: "Ellipse zeichen",
-            drawDonut: "Polygon mit Enklave zeichnen",
-            selectAndEditGeometry: "Objekt Position/Größe beabeiten",
-            moveGeometry: "Objekt bewegen",
-            selectGeometry: "Objekt selektieren",
-            removeSelected: "Selektierte objekte löschen",
-            removeAll: "Alle Objekte löschen"
-        };
-
-        // Merge subjects with available translations
-        if (schema.featureType && schema.featureType.geomType) {
-            var geomType = schema.featureType.geomType;
-            var translationPrefix = 'mb.digitizer.toolset.' + geomType + '.';
-
-            _.each(Mapbender.i18n, function (v, k) {
-                if (k.indexOf(translationPrefix) === 0) {
-                    var shortKeyName = k.split(translationPrefix)[1];
-                    toolSetTranslations[shortKeyName] = v;
-                }
-            });
-        }
-
-        return toolSetTranslations;
-    },
-
 
     _generateToolSetView: function () {
 
@@ -365,7 +329,7 @@ Sidebar.prototype = {
         var $digitizingToolSetElement = $('<div/>').digitizingToolSet({
             buttons: toolset,
             layer: layer,
-            translations: this._createToolsetTranslations(),
+            translations: Mapbender.DigitizerTranslator.toolsetTranslations(schema.featureType && schema.featureType.geomType),
             injectedMethods: {
 
                 openFeatureEditDialog: function (feature) {
