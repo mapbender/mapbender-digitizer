@@ -1,7 +1,7 @@
 Hinzugefügte Properties:
 
--allowSaveAll - Speicherbutton für Alle Features
--markUnsavedFeatures - ungespeicherte Features haben speziellen Style
+- allowSaveAll - Speicherbutton für Alle Features
+- markUnsavedFeatures - ungespeicherte Features haben speziellen Style
 
 
 Refactoring - Renaming:
@@ -9,7 +9,7 @@ Refactoring - Renaming:
 - Markiere JQuery Variablen mit $ Präfix
 
 Refactoring - Code sortieren:
-- Die current Variablen in Widget currentSchema und currentPopup sind schlechter Stil und gehören weg
+- Die current Variablen in Widget currentSchema und currentPopup sind schlechter Stil und gehören weg : currentSchema durch abgespeckte Version ersetzen, die Methoden beinhaltet, da kommen die contextMenu Methoden auch rein
 - Die Schnittstelle von .table u.s.w. vereinheitlichen
 - Translations auslagern / vereinheitlichen
 - Helper Klasse/Datei für Feldlose Methoden anlegen, evtl. auch mehrere
@@ -30,12 +30,13 @@ Testing:
 
 
 
-Logische Bugs:
-- In All geometries verschwindet unsaved feature markierung nicht
+Selbstgemachte Bugs:
+
+
+Legacy Bugs
 - Bug beheben: dragging bei donut zeichnen
 - Herausfinden, wann Geometrie "selected"-Eigenschaft verliert und das korrigieren
 - Default Style in Style Widget richtig anzeigen
-
 
 
 Optische Bugs:
@@ -46,6 +47,7 @@ Optische Bugs:
 
 
 Gemacht:
+- In All geometries verschwindet unsaved feature markierung nicht
 - Kontext-Menü Funktionen irgendwie in Schema auslagern
 - Es muss entschieden werden, ob die properties für das all-layer im Server oder JS definiert werden sollen
 
