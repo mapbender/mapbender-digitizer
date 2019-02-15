@@ -22,3 +22,4 @@ Weiteres zu tun:
 - Herausfinden, wann Geometrie "selected"-Eigenschaft verliert und das korrigieren
 - Kopieren testen
 - Kontext-Menü Funktionen irgendwie in Schema auslagern
+- Default Style in Style Widget richtig anzeigen

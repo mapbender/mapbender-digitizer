@@ -175,8 +175,11 @@ Scheme.prototype = {
         var schema = this;
         var widget = schema.widget;
 
-        widget.allowUseContextMenu = schema.allowUseContextMenu.bind(schema);
-        widget.buildContextMenu = schema.buildContextMenu.bind(schema);
+        widget.allowUseMapContextMenu = schema.allowUseContextMenu.bind(schema);
+        widget.buildMapContextMenu = schema.buildMapContextMenu.bind(schema);
+
+        widget.allowUseElementContextMenu = schema.allowUseContextMenu.bind(schema);
+        widget.buildElementContextMenu = schema.buildElementContextMenu.bind(schema);
 
     },
 
@@ -185,7 +188,7 @@ Scheme.prototype = {
         return schema.useContextMenu;
     },
 
-    buildContextMenu: function (trigger, e) {
+    buildMapContextMenu: function (trigger, e) {
         var schema = this;
         var items = {};
         var feature = schema.layer.getFeatureFromEvent(e);
@@ -194,26 +197,23 @@ Scheme.prototype = {
         if (!feature) {
             items['no-items'] = {name: "Nothing selected!"}
         } else {
-
             if (feature._sketch) {
                 return items;
             }
-
             features = feature.cluster || [feature];
-
             _.each(features, function (feature) {
-                items[feature.fid] = schema.createContextMenuSubMenu(feature);
+                items[feature.fid] = schema.createMapContextMenuSubMenu(feature);
             });
         }
 
         return {
             items: items,
             callback: function (key, options) {
+                options.items[key].action();
                 var $selectedElement = options.$selected;
                 if (!$selectedElement || !feature) {
-                    return
+                    return;
                 }
-
 
                 var id = feature.fid; //$selectedElement.parent().closest('.context-menu-item').data('contextMenuKey');
                 var parameters = options.items[id];
@@ -222,7 +222,6 @@ Scheme.prototype = {
                 }
 
                 if (parameters.items[key].action) {
-                    console.log(parameters.items[key].action);
                     parameters.items[key].action(key, options, parameters);
                 }
             }
@@ -230,7 +229,7 @@ Scheme.prototype = {
     },
 
 
-    createContextMenuSubMenu: function (olFeature) {
+    createMapContextMenuSubMenu: function (olFeature) {
         var schema = this;
         var subItems = {
             zoomTo: {
@@ -281,6 +280,64 @@ Scheme.prototype = {
             name: "Feature #" + olFeature.fid,
             olFeature: olFeature,
             items: subItems
+        };
+    },
+
+
+    buildElementContextMenu: function (trigger, e) {
+        var schema = this;
+        var table = schema.table;
+        var api = table.resultTable('getApi');
+        var olFeature = api.row($(trigger)).data();
+
+        if (!olFeature) {
+            return {
+                callback: function (key, options) {
+                }
+            };
+        }
+
+        var items = {};
+
+        if (schema.allowCustomerStyle) {
+            items['changeStyle'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
+                action: function() { schema.openChangeStyleDialog(olFeature); }
+            };
+        }
+
+        items['zoom'] = {
+            name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
+            action: function() {  schema.zoomToJsonFeature(olFeature); }
+        };
+
+        if (schema.allowDelete) {
+            items['removeFeature'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                action: function() { schema.removeFeature(olFeature); }
+            };
+        }
+
+        if (schema.allowEditData) {
+            items['edit'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.edit'),
+                action: function() { schema._openFeatureEditDialog(olFeature); }
+            };
+        }
+
+        // if (schema['anything']) {
+        //     items['exportToGeoJson'] = {
+        //         name: '-',
+        //         action: function() {widget.exportGeoJson(olFeature); }
+        //     }
+        // }
+
+
+        return {
+            callback: function (key, options) {
+                options.items[key].action();
+            },
+            items: items
         };
     },
 

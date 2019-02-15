@@ -140,12 +140,12 @@
 
         },
 
-        buildContextMenu: function() {
-          console.warn("xyz");
+        buildMapContextMenu: function() {
+          console.warn("This method should be overwritten");
         },
 
-        allowUseContextMenu: function() {
-          console.warn("abc");
+        allowUseMapContextMenu: function() {
+          console.warn("This method should be overwritten");
         },
 
         _createMapContextMenu: function () {
@@ -157,11 +157,11 @@
                 selector: 'div',
                 events: {
                     show: function (options) {
-                       return widget.allowUseContextMenu(options);
+                       return widget.allowUseMapContextMenu(options);
                     }
                 },
                 build: function(trigger,e) {
-                    return widget.buildContextMenu(trigger,e);
+                    return widget.buildMapContextMenu(trigger,e);
                 }
             };
 
@@ -169,82 +169,31 @@
 
         },
 
+        buildElementContextMenu: function(trigger,e) {
+
+        },
+
+        allowUseElementContextMenu: function(options) {
+            console.warn("This method should be overwritten");
+        },
+
         _createElementContextMenu: function () {
             var widget = this;
             var element = $(widget.element);
 
-            $(element).contextMenu({
+            var options = {
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
                 events: {
                     show: function (options) {
-                        var tr = $(options.$trigger);
-                        var resultTable = tr.closest('.mapbender-element-result-table');
-                        var api = resultTable.resultTable('getApi');
-                        var olFeature = api.row(tr).data();
-
-                        if (!olFeature) {
-                            return false;
-                        }
-
-                        var schema = widget.findFeatureSchema(olFeature);
-                        return schema.useContextMenu;
+                        return widget.allowUseElementContextMenu(options);
                     }
                 },
-                build: function ($trigger, e) {
-
-                    var tr = $($trigger);
-                    var resultTable = tr.closest('.mapbender-element-result-table');
-                    var api = resultTable.resultTable('getApi');
-                    var olFeature = api.row(tr).data();
-
-                    if (!olFeature) {
-                        return {
-                            callback: function (key, options) {
-                            }
-                        };
-                    }
-
-                    var schema = widget.findFeatureSchema(olFeature);
-                    var items = {};
-
-                    items['changeStyle'] = {name: Mapbender.DigitizerTranslator.translate('feature.style.change')};
-                    items['zoom'] = {name: Mapbender.DigitizerTranslator.translate('feature.zoomTo')};
-                    if (schema.allowDelete) {
-                        items['removeFeature'] = {name: Mapbender.DigitizerTranslator.translate('feature.remove.title')};
-                    }
-
-                    if (schema.allowEditData) {
-                        items['edit'] = {name: Mapbender.DigitizerTranslator.translate('feature.edit')};
-                    }
-
-                    return {
-                        callback: function (key, options) {
-                            switch (key) {
-                                case 'removeFeature':
-                                    schema.removeFeature(olFeature);
-                                    break;
-
-                                case 'zoom':
-                                    schema.zoomToJsonFeature(olFeature);
-                                    break;
-
-                                case 'edit':
-                                    schema._openFeatureEditDialog(olFeature);
-                                    break;
-
-                                case 'exportGeoJson':
-                                    widget.exportGeoJson(olFeature);
-                                    break;
-
-                                case 'changeStyle':
-                                    schema.openChangeStyleDialog(olFeature);
-                                    break;
-                            }
-                        },
-                        items: items
-                    };
+                build: function (trigger, e) {
+                    return widget.buildElementContextMenu(trigger,e);
                 }
-            });
+            };
+
+            $(element).contextMenu(options);
 
         },
 
