@@ -170,6 +170,7 @@
         },
 
         buildElementContextMenu: function(trigger,e) {
+            console.warn("This method should be overwritten");
 
         },
 
@@ -182,6 +183,9 @@
             var element = $(widget.element);
 
             var options = {
+                position: function(opt, x, y){
+                    opt.$menu.css({top: y, left: x+10});
+                },
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
                 events: {
                     show: function (options) {
