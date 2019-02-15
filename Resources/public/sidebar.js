@@ -193,7 +193,7 @@ Sidebar.prototype = {
         }
 
         var $div = $("<div/>");
-        var table = schema.table = $div.resultTable(resultTableSettings);
+        var $table = schema.table = $div.resultTable(resultTableSettings);
         var searchableColumnTitles = _.pluck(_.reject(resultTableSettings.columns, function (column) {
             if (!column.sTitle) {
                 return true;
@@ -204,10 +204,10 @@ Sidebar.prototype = {
             }
         }), 'sTitle');
 
-        table.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
+        $table.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
 
 
-        frame.append(table);
+        frame.append($table);
     },
 
     //TODO methode ist zu lang

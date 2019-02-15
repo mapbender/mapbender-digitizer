@@ -19,3 +19,6 @@ Weiteres zu tun:
 - DataMangerUtils refactorn
 - Properties in Scheme aussortieren und sortieren
 - Auf die Hooks Rücksicht nehmen - am besten vorhandene Konfigurationen begutachten
+- Herausfinden, wann Geometrie "selected"-Eigenschaft verliert und das korrigieren
+- Kopieren testen
+- Kontext-Menü Funktionen irgendwie in Schema auslagern

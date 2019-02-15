@@ -171,6 +171,120 @@ Scheme.prototype = {
     },
 
 
+    activateContextMenu: function() {
+        var schema = this;
+        var widget = schema.widget;
+
+        widget.allowUseContextMenu = schema.allowUseContextMenu.bind(schema);
+        widget.buildContextMenu = schema.buildContextMenu.bind(schema);
+
+    },
+
+    allowUseContextMenu: function() {
+        var schema = this;
+        return schema.useContextMenu;
+    },
+
+    buildContextMenu: function (trigger, e) {
+        var schema = this;
+        var items = {};
+        var feature = schema.layer.getFeatureFromEvent(e);
+        var features;
+
+        if (!feature) {
+            items['no-items'] = {name: "Nothing selected!"}
+        } else {
+
+            if (feature._sketch) {
+                return items;
+            }
+
+            features = feature.cluster || [feature];
+
+            _.each(features, function (feature) {
+                items[feature.fid] = schema.createContextMenuSubMenu(feature);
+            });
+        }
+
+        return {
+            items: items,
+            callback: function (key, options) {
+                var $selectedElement = options.$selected;
+                if (!$selectedElement || !feature) {
+                    return
+                }
+
+
+                var id = feature.fid; //$selectedElement.parent().closest('.context-menu-item').data('contextMenuKey');
+                var parameters = options.items[id];
+                if (!parameters) {
+                    return;
+                }
+
+                if (parameters.items[key].action) {
+                    console.log(parameters.items[key].action);
+                    parameters.items[key].action(key, options, parameters);
+                }
+            }
+        }
+    },
+
+
+    createContextMenuSubMenu: function (olFeature) {
+        var schema = this;
+        var subItems = {
+            zoomTo: {
+                name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
+                action: function (key, options, parameters) {
+                    schema.zoomToJsonFeature(parameters.olFeature);
+                }
+            }
+        };
+
+        if (schema.allowChangeVisibility) {
+            subItems['style'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
+                action: function (key, options, parameters) {
+                    schema.openChangeStyleDialog(olFeature);
+                }
+            };
+        }
+
+        if (schema.allowCustomerStyle) {
+            subItems['style'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
+                action: function (key, options, parameters) {
+                    schema.openChangeStyleDialog(olFeature);
+                }
+            };
+        }
+
+        if (schema.allowEditData) {
+            subItems['edit'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.edit'),
+                action: function (key, options, parameters) {
+                    schema._openFeatureEditDialog(parameters.olFeature);
+                }
+            }
+        }
+
+        if (schema.allowDelete) {
+            subItems['remove'] = {
+                name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                action: function (key, options, parameters) {
+                    schema.removeFeature(parameters.olFeature);
+                }
+            }
+        }
+
+        return {
+            name: "Feature #" + olFeature.fid,
+            olFeature: olFeature,
+            items: subItems
+        };
+    },
+
+
     _refreshMapAfterFeatureSave: function () {
         var schema = this;
         var refreshLayerNames = schema.refreshLayersAfterFeatureSave;
@@ -220,8 +334,8 @@ Scheme.prototype = {
 
     getTableWidget: function () {
         var schema = this;
-        var table = schema.table;
-        return table.data('visUiJsResultTable');
+        var $table = schema.table;
+        return $table.data('visUiJsResultTable');
     },
 
 
@@ -477,6 +591,8 @@ Scheme.prototype = {
 
         widget.activeLayer = schema.layer;
         widget.currentSchema = schema;
+
+        schema.activateContextMenu();
 
         QueryEngine.query('style/list', {schema: schema.schemaName}).done(function (data) {
             schema.featureStyles = data.featureStyles;
@@ -1193,59 +1309,7 @@ Scheme.prototype = {
     },
 
 
-    createContextMenuSubMenu: function (olFeature) {
-        var schema = this;
-        var subItems = {
-            zoomTo: {
-                name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
-                action: function (key, options, parameters) {
-                    schema.zoomToJsonFeature(parameters.olFeature);
-                }
-            }
-        };
 
-        if (schema.allowChangeVisibility) {
-            subItems['style'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
-                action: function (key, options, parameters) {
-                    schema.openChangeStyleDialog(olFeature);
-                }
-            };
-        }
-
-        if (schema.allowCustomerStyle) {
-            subItems['style'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
-                action: function (key, options, parameters) {
-                    schema.openChangeStyleDialog(olFeature);
-                }
-            };
-        }
-
-        if (schema.allowEditData) {
-            subItems['edit'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.edit'),
-                action: function (key, options, parameters) {
-                    schema._openFeatureEditDialog(parameters.olFeature);
-                }
-            }
-        }
-
-        if (schema.allowDelete) {
-            subItems['remove'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
-                action: function (key, options, parameters) {
-                    schema.removeFeature(parameters.olFeature);
-                }
-            }
-        }
-
-        return {
-            name: "Feature #" + olFeature.fid,
-            olFeature: olFeature,
-            items: subItems
-        };
-    },
 
 
     /**

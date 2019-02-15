@@ -140,6 +140,13 @@
 
         },
 
+        buildContextMenu: function() {
+          console.warn("xyz");
+        },
+
+        allowUseContextMenu: function() {
+          console.warn("abc");
+        },
 
         _createMapContextMenu: function () {
             var widget = this;
@@ -150,49 +157,11 @@
                 selector: 'div',
                 events: {
                     show: function (options) {
-                        var schema = widget.currentSchema;
-                        return schema.useContextMenu;
+                       return widget.allowUseContextMenu(options);
                     }
                 },
-                build: function (trigger, e) {
-                    var items = {};
-                    var schema = widget.currentSchema;
-                    var feature = schema.layer.getFeatureFromEvent(e);
-                    var features;
-
-                    if (!feature) {
-                        items['no-items'] = {name: "Nothing selected!"}
-                    } else {
-
-                        if (feature._sketch) {
-                            return items;
-                        }
-
-                        features = feature.cluster || [feature];
-
-                        _.each(features, function (feature) {
-                            items[feature.fid] = schema.createContextMenuSubMenu(feature);
-                        });
-                    }
-
-                    return {
-                        items: items,
-                        callback: function (key, options) {
-                            var selectedElement = options.$selected;
-                            if (!selectedElement) {
-                                return
-                            }
-                            var parameters = options.items[selectedElement.parent().closest('.context-menu-item').data('contextMenuKey')];
-
-                            if (!parameters) {
-                                return;
-                            }
-
-                            if (parameters.items[key].action) {
-                                parameters.items[key].action(key, options, parameters);
-                            }
-                        }
-                    };
+                build: function(trigger,e) {
+                    return widget.buildContextMenu(trigger,e);
                 }
             };
 
@@ -680,22 +649,6 @@
 
         },
 
-        /**
-         * Download file by feature and his attribute name
-         *
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature OpenLayers
-         * @param {String} attributeName
-         */
-        // download: function (feature, attributeName) {
-        //     var widget = this;
-        //     /**@type {Scheme} */
-        //     var schema = widget.currentSchema;
-        //     var attributes = feature.attributes;
-        //     var tableName = schema.featureType.table;
-        //     var relativeWebPath = Mapbender.configuration.application.urls.asset;
-        //     window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
-        //
-        // }
     });
 
 })(jQuery);
