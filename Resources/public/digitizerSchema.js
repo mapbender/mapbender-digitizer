@@ -584,7 +584,7 @@ Scheme.prototype = {
 
         var row = schema._getTableRowByFeature(feature);
 
-        console.log(row,feature);
+        console.log(row, feature);
 
         row.find('.button.save').removeClass("active").addClass('disabled');
 
@@ -1073,8 +1073,8 @@ Scheme.prototype = {
         return schema.schemaName;
     },
 
-    getSchemaByFeature: function() {
-       return schema;
+    getSchemaByFeature: function () {
+        return schema;
     },
 
 
@@ -1388,5 +1388,56 @@ Scheme.prototype = {
         });
         return newFeatureDefaultProperties;
     },
+
+
+    _getRemoteData: function (feature) {
+        var schema = this;
+        var widget = schema.widget;
+        var map = widget.map;
+        var bbox = feature.geometry.getBounds();
+        bbox.right = parseFloat(bbox.right + 0.00001);
+        bbox.top = parseFloat(bbox.top + 0.00001);
+        bbox = bbox.toBBOX();
+        var srid = map.getProjection().replace('EPSG:', '');
+        var url = widget.elementUrl + "getFeatureInfo/";
+
+        return $.get(url, {
+            bbox: bbox,
+            schema: schema.schemaName,
+            srid: srid
+        }).done(function (response) {
+            schema._processRemoteData(response, feature);
+        }).fail(function (response) {
+            if (!feature.isNew) {
+                schema._openFeatureEditDialog(feature);
+            }
+            Mapbender.error(Mapbender.trans("mb.digitizer.remoteData.error"));
+
+        });
+
+
+    },
+
+    _processRemoteData: function (response, feature) {
+        var schema = this;
+        if (response.error) {
+            Mapbender.error(Mapbender.trans('mb.digitizer.remoteData.error'));
+            console.log(response.error);
+        }
+
+        _.each(response.dataSets, function (dataSet) {
+            var newData = JSON.parse(dataSet).features[0].properties;
+            Object.keys(feature.data);
+            $.extend(feature.data, newData);
+        });
+
+        if (!feature.isNew) {
+            schema._openFeatureEditDialog(feature);
+        } else {
+            schema.widget.currentPopup.formData(feature.data);
+        }
+
+
+    }
 
 };

@@ -142,12 +142,12 @@
 
         },
 
-        buildMapContextMenu: function() {
-          console.warn("This method should be overwritten");
+        buildMapContextMenu: function () {
+            console.warn("This method should be overwritten");
         },
 
-        allowUseMapContextMenu: function() {
-          console.warn("This method should be overwritten");
+        allowUseMapContextMenu: function () {
+            console.warn("This method should be overwritten");
         },
 
         _createMapContextMenu: function () {
@@ -159,11 +159,11 @@
                 selector: 'div',
                 events: {
                     show: function (options) {
-                       return widget.allowUseMapContextMenu(options);
+                        return widget.allowUseMapContextMenu(options);
                     }
                 },
-                build: function(trigger,e) {
-                    return widget.buildMapContextMenu(trigger,e);
+                build: function (trigger, e) {
+                    return widget.buildMapContextMenu(trigger, e);
                 }
             };
 
@@ -171,12 +171,12 @@
 
         },
 
-        buildElementContextMenu: function(trigger,e) {
+        buildElementContextMenu: function (trigger, e) {
             console.warn("This method should be overwritten");
 
         },
 
-        allowUseElementContextMenu: function(options) {
+        allowUseElementContextMenu: function (options) {
             console.warn("This method should be overwritten");
         },
 
@@ -185,8 +185,8 @@
             var element = $(widget.element);
 
             var options = {
-                position: function(opt, x, y){
-                    opt.$menu.css({top: y, left: x+10});
+                position: function (opt, x, y) {
+                    opt.$menu.css({top: y, left: x + 10});
                 },
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
                 events: {
@@ -195,7 +195,7 @@
                     }
                 },
                 build: function (trigger, e) {
-                    return widget.buildElementContextMenu(trigger,e);
+                    return widget.buildElementContextMenu(trigger, e);
                 }
             };
 
@@ -213,7 +213,7 @@
         _createSchemes: function () {
             var widget = this;
             var newSchemes = {};
-            newSchemes['all'] = new AllScheme({ label: 'all geometries', schemaName: 'all' },widget);
+            newSchemes['all'] = new AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
             _.each(widget.options.schemes, function (rawScheme, schemaName) {
                 rawScheme.schemaName = schemaName;
                 newSchemes[schemaName] = new Scheme(rawScheme, widget);
@@ -238,14 +238,14 @@
             return null;
         },
         // TODO this must be adjusted when adding
-        getSchemaByOLFeature: function(feature) {
+        getSchemaByOLFeature: function (feature) {
             var widget = this;
             var geometryName = widget.getGeometryNameByFeatureClass(feature.geometry.CLASS_NAME);
             var schema = null;
-            _.each(widget.options.schemes,function(scheme) {
-                  if (scheme.featureType.geomType === geometryName) {
-                      schema = scheme;
-                  }
+            _.each(widget.options.schemes, function (scheme) {
+                if (scheme.featureType.geomType === geometryName) {
+                    schema = scheme;
+                }
             });
             if (!schema) {
                 console.warn("No Scheme found for feature", feature);
@@ -364,7 +364,6 @@
         },
 
 
-
         /**
          * Open feature edit dialog
          *
@@ -446,7 +445,6 @@
         },
 
 
-
         activate: function () {
             var widget = this;
             widget.options.__disabled = false;
@@ -477,6 +475,7 @@
 
 
         },
+
 
     });
 
