@@ -420,6 +420,8 @@ Scheme.prototype = {
 
         tableApi.clear();
         var featuresWithoutDrawElements = _.difference(features, _.where(features, {_sketch: true}));
+        console.log(featuresWithoutDrawElements,"$$$!");
+
         tableApi.rows.add(featuresWithoutDrawElements);
         tableApi.draw();
 
@@ -464,6 +466,19 @@ Scheme.prototype = {
         if (widget.options.__disabled) {
             widget.deactivate();
         }
+
+        var table = schema.table;
+        var tableApi = table.resultTable('getApi');
+        var nodes = tableApi.rows(function (idx, data, row) {
+            var isInvisible = data.renderIntent === 'invisible';
+            if (isInvisible) {
+                var $row = $(row);
+                var visibilityButton = $row.find('.button.icon-visibility');
+                visibilityButton.addClass('icon-invisibility');
+                $row.addClass('invisible-feature');
+            }
+            return true;
+        });
     },
 
 
@@ -1057,8 +1072,9 @@ Scheme.prototype = {
         var newFeature = _.first(newFeatures);
 
 
-        newFeature.fid = feature.fid;
+        newFeature.fid = newFeature.fid || feature.fid;
         newFeature.data = feature.data;
+        newFeature.attributes = newFeature.data;
         newFeature.layer = feature.layer;
         newFeature.renderIntent = feature.renderIntent;
         newFeature.styleId = feature.styleId;
@@ -1117,7 +1133,6 @@ Scheme.prototype = {
                 schema.unsetModifiedState(feature);
             }
 
-
             var newFeature = schema._createNewFeatureWithDBFeature(feature, response);
 
             newFeature.isNew = false;
@@ -1127,9 +1142,21 @@ Scheme.prototype = {
                 return;
             }
 
-            schema._removeFeatureFromUI(feature);
+            console.log(newFeature,feature,"!");
+            schema.reloadFeatures(_.union(_.without(schema.layer.features, feature), [newFeature]));
 
-            schema.layer.addFeatures([newFeature]);
+            // schema._removeFeatureFromUI(feature);
+            //
+            // schema.layer.removeFeatures([feature]);
+            //
+            // console.log(newFeature,newFeature.fid);
+            //
+            //
+            // schema.layer.addFeatures([newFeature]);
+            //
+            // console.log(newFeature,newFeature.fid);
+            //
+            // schema.reloadFeatures();
 
 
             schema._refreshFeatureRowInDataTable(newFeature);
