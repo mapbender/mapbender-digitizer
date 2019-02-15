@@ -1,26 +1,49 @@
 Hinzugefügte Properties:
 
-allowSaveAll - Speicherbutton für Alle Features
-markUnsavedFeatures - ungespeicherte Features haben speziellen Style
+-allowSaveAll - Speicherbutton für Alle Features
+-markUnsavedFeatures - ungespeicherte Features haben speziellen Style
 
-Weiteres zu tun:
+
+Refactoring - Renaming:
 - Konsistente Linie für Methodennamen, hinsichtlich des _ als Präfix
 - Markiere JQuery Variablen mit $ Präfix
+
+Refactoring - Code sortieren:
 - Die current Variablen in Widget currentSchema und currentPopup sind schlechter Stil und gehören weg
-- Es muss entschieden werden, ob die properties für das all-layer im Server oder JS definiert werden sollen
 - Die Schnittstelle von .table u.s.w. vereinheitlichen
 - Translations auslagern / vereinheitlichen
 - Helper Klasse/Datei für Feldlose Methoden anlegen, evtl. auch mehrere
-- Zellengröße limitieren in ResultTable
-- Kollision der Control- und General Buttons im Sidebar verhindern
-- Bug beheben: dragging bei donut zeichnen
 - Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen
-- In All geometries verschwindet unsaved feature markierung nicht
 - DataMangerUtils refactorn
 - Properties in Scheme aussortieren und sortieren
 - Auf die Hooks Rücksicht nehmen - am besten vorhandene Konfigurationen begutachten
-- Herausfinden, wann Geometrie "selected"-Eigenschaft verliert und das korrigieren
+
+
+
+Testing:
 - Kopieren testen
-- Kontext-Menü Funktionen irgendwie in Schema auslagern
+
+
+
+Logische Bugs:
+- In All geometries verschwindet unsaved feature markierung nicht
+- Bug beheben: dragging bei donut zeichnen
+- Herausfinden, wann Geometrie "selected"-Eigenschaft verliert und das korrigieren
 - Default Style in Style Widget richtig anzeigen
+
+
+
+Optische Bugs:
+- Zellengröße limitieren in ResultTable
+- Kollision der Control- und General Buttons im Sidebar verhindern
+
+
+
+
+Gemacht:
+- Kontext-Menü Funktionen irgendwie in Schema auslagern
+- Es muss entschieden werden, ob die properties für das all-layer im Server oder JS definiert werden sollen
+
+
+Von alleine verschwunden:
 - Gewählter Druck Button im ResultTable verliert Farbe wenn über die jeweilige Reihe gehovert wird
