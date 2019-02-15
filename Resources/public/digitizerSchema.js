@@ -1230,7 +1230,7 @@ Scheme.prototype = {
             return
         }
 
-        var olMap = widget.getMap();
+        var olMap = widget.map;
         var geometry = feature.geometry;
 
         olMap.zoomToExtent(geometry.getBounds());

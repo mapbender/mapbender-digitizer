@@ -284,7 +284,7 @@ Sidebar.prototype = {
                 var xhr = schema._getData();
                 if (xhr) {
                     xhr.done(function () {
-                        var olMap = widget.getMap();
+                        var olMap = widget.map;
                         olMap.zoomToExtent(layer.getDataExtent());
 
                         if (schema.search.hasOwnProperty('zoomScale')) {

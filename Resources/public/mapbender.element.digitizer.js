@@ -358,55 +358,6 @@
         },
 
 
-        /**
-         * Query intersect by bounding box
-         *
-         * @param request Request for ajax
-         * @param bbox Bounding box or some object, which has toGeometry() method.
-         * @param debug Drag
-         *
-         * @returns ajax XHR object
-         *
-         * @private
-         *
-         */
-        // _queryIntersect: function (request, bbox, debug) {
-        //     var widget = this;
-        //     var geometry = bbox.toGeometry();
-        //     var _request = $.extend(true, {intersectGeometry: geometry.toString()}, request);
-        //
-        //     if (debug) {
-        //         if (!widget._boundLayer) {
-        //             widget._boundLayer = new OpenLayers.Layer.Vector("bboxGeometry");
-        //             widget.map.addLayer(widget._boundLayer);
-        //         }
-        //
-        //         var feature = new OpenLayers.Feature.Vector(geometry);
-        //         widget._boundLayer.addFeatures([feature], null, {
-        //             strokeColor: "#ff3300",
-        //             strokeOpacity: 0,
-        //             strokeWidth: 0,
-        //             fillColor: "#FF9966",
-        //             fillOpacity: 0.1
-        //         });
-        //     }
-        //     return widget.query('select', _request).done(function (featureCollection) {
-        //         var schema = widget.options.schemes[_request["schema"]];
-        //         schema._onFeatureCollectionLoaded(featureCollection, this);
-        //     });
-        //
-        // },
-
-
-        /**
-         * Get target OpenLayers map object
-         *
-         * @returns  {OpenLayers.Map}
-         */
-        getMap: function () {
-            return this.map;
-        },
-
 
         /**
          * Open feature edit dialog
@@ -488,87 +439,10 @@
             });
         },
 
-        /**
-         * Find olFeature schema by olFeature data
-         *
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-         * @returns {*}
-         */
-        findFeatureSchema: function (olFeature) {
-            var widget = this;
-            var options = widget.options;
-            return _.find(options.schemes, {layer: olFeature.layer});
-        },
-
-
-        /**
-         * Get OL feature by X:Y coordinates.
-         *
-         * Dirty but works.
-         *
-         * @param x
-         * @param y
-         * @returns {Array}
-         * @private
-         */
-        // _getFeaturesFromEvent: function (x, y) {
-        //     var features = [], targets = [], layers = [];
-        //     var layer, target, feature, i, len;
-        //     var map = this.map;
-        //
-        //     //map.resetLayersZIndex();
-        //
-        //     // go through all layers looking for targets
-        //     for (i = map.layers.length - 1; i >= 0; --i) {
-        //         layer = map.layers[i];
-        //         if (layer.div.style.display !== "none") {
-        //             if (layer === this.activeLayer) {
-        //                 target = document.elementFromPoint(x, y);
-        //                 while (target && target._featureId) {
-        //                     feature = layer.getFeatureById(target._featureId);
-        //                     if (feature) {
-        //                         features.push(feature);
-        //                         target.style.visibility = 'hidden';
-        //                         targets.push(target);
-        //                         target = document.elementFromPoint(x, y);
-        //                     } else {
-        //                         target = false;
-        //                     }
-        //                 }
-        //             }
-        //             layers.push(layer);
-        //             layer.div.style.display = "none";
-        //         }
-        //     }
-        //
-        //     // restore feature visibility
-        //     for (i = 0, len = targets.length; i < len; ++i) {
-        //         targets[i].style.display = "";
-        //         targets[i].style.visibility = 'visible';
-        //     }
-        //
-        //     // restore layer visibility
-        //     for (i = layers.length - 1; i >= 0; --i) {
-        //         layers[i].div.style.display = "block";
-        //     }
-        //
-        //     //map.resetLayersZIndex();
-        //     return features;
-        // },
 
 
         activate: function () {
             var widget = this;
-            // QueryEngine.query('getConfiguration').done(function (response) {
-            //     // TODO why are formItems reloaded when Scheme is activated?
-            //     // _.each(response.schemes, function (schema, schemaName) {
-            //     //     widget.options.schemes[schemaName].formItems = response.schemes[schemaName].formItems
-            //     // });
-            //
-            //
-            //
-            //
-            // })
             widget.options.__disabled = false;
             widget.currentSchema.activateSchema();
 
