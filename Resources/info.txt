@@ -26,6 +26,7 @@ Refactoring - Code sortieren:
 Testing:
 - Kopieren testen
 - Testen, was mit dem Formdata passiert wenn saveFeature außerhalb des FeatureEdit Dialogs aufgerufen wird
+- Überprüfen, wie im Bahn Digitizer "alles" Layer sich die einzelnen Features hinsichtlich ihrer allow Properties im Resulttable verhalten
 
 
 

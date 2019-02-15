@@ -1073,6 +1073,10 @@ Scheme.prototype = {
         return schema.schemaName;
     },
 
+    getSchemaByFeature: function() {
+       return schema;
+    },
+
 
     _createNewFeatureWithDBFeature: function (feature, response) {
         var schema = this;

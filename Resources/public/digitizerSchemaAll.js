@@ -77,9 +77,16 @@ AllScheme.prototype.getFormItems = function(feature) {
 };
 
 
+// TODO merge this methods
 AllScheme.prototype.getSchemaName = function(feature) {
     var schema = this;
     var widget = schema.widget;
     return widget.getSchemaByOLFeature(feature).schemaName;
 };
 
+AllScheme.prototype.getSchemaByFeature = function(feature) {
+    var schema = this;
+    var widget = schema.widget;
+
+    return widget.getSchemaByOLFeature(feature);
+};

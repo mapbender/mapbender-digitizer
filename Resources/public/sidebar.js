@@ -119,12 +119,17 @@ Sidebar.prototype = {
         }
 
         if (schema.allowDelete) {
+
             buttons.push({
                 title: Mapbender.DigitizerTranslator.translate("feature.remove.title"),
                 className: 'remove',
                 cssClass: 'critical',
                 onClick: function (olFeature, ui) {
-                    schema.removeFeature(olFeature);
+                    if (schema.getSchemaByFeature(olFeature).allowDelete) {
+                        schema.removeFeature(olFeature);
+                    } else {
+                        $.notify("Deletion is not allowed");
+                    }
                 }
             });
         }
