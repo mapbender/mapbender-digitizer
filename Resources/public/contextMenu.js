@@ -173,7 +173,7 @@ ElementContextMenu.prototype.buildContextMenu = function (trigger, e) {
     // if (schema['anything']) {
     //     items['exportToGeoJson'] = {
     //         name: '-',
-    //         action: function() {widget.exportGeoJson(olFeature); }
+    //         action: function() {schema.exportGeoJson(olFeature); }
     //     }
     // }
 

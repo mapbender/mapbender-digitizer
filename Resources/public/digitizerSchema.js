@@ -1438,6 +1438,22 @@ Scheme.prototype = {
         }
 
 
+    },
+
+    /**
+     * Open feature edit dialog
+     *
+     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
+     */
+    exportGeoJson: function (feature) {
+        var schema = this;
+        QueryEngine.query('export', {
+            schema: schema.getSchemaName(feature),
+            feature: feature,
+            format: 'GeoJSON'
+        }).done(function (response) {
+
+        });
     }
 
 };

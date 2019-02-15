@@ -364,21 +364,7 @@
         },
 
 
-        /**
-         * Open feature edit dialog
-         *
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
-         */
-        exportGeoJson: function (feature) {
-            var widget = this;
-            QueryEngine.query('export', {
-                schema: widget.currentSchema.schemaName,
-                feature: feature,
-                format: 'GeoJSON'
-            }).done(function (response) {
 
-            })
-        },
 
         /**
          * Update cluster strategies

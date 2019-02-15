@@ -389,7 +389,7 @@ Sidebar.prototype = {
                     // TODO inspect this!
                     if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
 
-                        if (schema && schema.popup.remoteData) {
+                        if (schema.popup && schema.popup.remoteData) {
                             schema._getRemoteData(feature);
                         } else {
                             schema._openFeatureEditDialog(feature);
