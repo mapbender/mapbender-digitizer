@@ -573,23 +573,24 @@ class Digitizer extends BaseElement
         $srid = $request['srid'];
         $dataSets = [];
         $remoteData = $this->getSchemaByName($schemaName)["popup"]["remoteData"];
-
+        $responseArray = ['dataSets' => []];
         foreach ($remoteData as $url){
             $url = str_replace("{bbox}", $bbox, $url);
             $url = str_replace("{BBOX}", $bbox, $url);
             $url = str_replace("{srid}", $srid, $url);
             $url = str_replace("{SRID}", $srid, $url);
             try {
+
                 $dataSets[]  = file_get_contents($url);
             } catch (\Exception $e) { //Todo Throw correct e in debug.
-
-                throw new \Exception('Can not recieve data form FeatureInfo request');
+                $this->container->get('logger')->error('Digitizer WMS GetFeatureInfo: '. $e->getMessage());
+                $responseArray['error']  = $e->getMessage();
             }
 
         }
 
-
-        return array('dataSets' => $dataSets);
+        $responseArray['dataSets'] = $dataSets;
+        return $responseArray;
     }
 
     /**

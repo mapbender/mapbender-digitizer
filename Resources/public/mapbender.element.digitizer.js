@@ -1030,34 +1030,7 @@
                                 if(!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen){
 
                                     if(schema.popup.remoteData){
-                                        var bbox = feature.geometry.getBounds();
-                                        bbox.right = parseFloat(bbox.right+0.00001);
-                                        bbox.top = parseFloat(bbox.top+0.00001);
-                                        bbox= bbox.toBBOX();
-                                        var srid = map.getProjection().replace('EPSG:','');
-                                        var url = widget.elementUrl + "getFeatureInfo/";
-
-                                        $.ajax({url: url, data: {
-                                                bbox :bbox,
-                                                schema: schema.schemaName,
-                                                srid: srid
-                                            }}).done(function (response) {
-                                            _.each(response.dataSets, function (dataSet) {
-                                                var newData = JSON.parse(dataSet).features[0].properties;
-
-
-                                                Object.keys(feature.data)
-                                                $.extend(feature.data, newData);
-
-
-                                            });
-                                            widget._openFeatureEditDialog(feature);
-
-                                        }).fail(function(){
-                                            $.notfiy("No remote data could be fetched");
-                                            widget._openFeatureEditDialog(feature);
-                                        });
-
+                                        widget._getRemoteData.call(widget,feature, schema);
                                     } else {
                                         widget._openFeatureEditDialog(feature);
                                     }
@@ -2121,31 +2094,7 @@
             setTimeout(function () {
 
                 if (popupConfiguration.remoteData && olFeature.isNew) {
-
-
-                    var bbox = dialog.data("feature").geometry.getBounds();
-                    bbox.right = parseFloat(bbox.right+0.00001);
-                    bbox.top = parseFloat(bbox.top+0.00001);
-                    bbox= bbox.toBBOX();
-                    var srid = map.getProjection().replace('EPSG:','');
-                    var url = widget.elementUrl + "getFeatureInfo/";
-
-                    $.ajax({url: url, data: {
-                            bbox :bbox,
-                            schema: schema.schemaName,
-                            srid: srid
-                        }}).success(function (response) {
-                        _.each(response.dataSets, function (dataSet) {
-                            var newData = JSON.parse(dataSet).features[0].properties
-                            $.extend(olFeature.data, newData);
-
-
-                        });
-                        dialog.formData(olFeature.data);
-
-                    });
-
-
+                    widget._getRemoteData.call(widget,olFeature, schema);
                 } else {
                     dialog.formData(olFeature.data);
                 }
@@ -3109,7 +3058,7 @@
             var isNew = dataItem[uniqueIdKey] === null;
             var formData = dialog.formData();
             var schema = dialog.data('schema');
-            debugger;
+
             if (!isNew) {
 
                 formData[uniqueIdKey] = dataItem[uniqueIdKey];
@@ -3406,7 +3355,61 @@
             var relativeWebPath = Mapbender.configuration.application.urls.asset;
             window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
 
+        },
+
+        _getRemoteData : function (feature,schema){
+            var map = this.getMap();
+            var bbox = feature.geometry.getBounds();
+            bbox.right = parseFloat(bbox.right+0.00001);
+            bbox.top = parseFloat(bbox.top+0.00001);
+            bbox = bbox.toBBOX();
+            var srid = map.getProjection().replace('EPSG:','');
+            var url = this.elementUrl + "getFeatureInfo/";
+
+            return $.get(url,{
+                    bbox :bbox,
+                    schema: schema.schemaName,
+                    srid: srid
+                })
+                .done(function (response) {
+                    this._processRemoteData(response, feature);
+
+                }.bind(this))
+                .fail(function(response){
+                    if(!feature.isNew){
+                        this._openFeatureEditDialog(feature);
+                    }
+                    Mapender.error(Mapbender.trans("mb.digitizer.remoteData.error"));
+
+                })
+            ;
+
+
+
+        },
+
+        _processRemoteData : function (response, feature) {
+            if(response.error){
+                Mapbender.error(Mapbender.trans('mb.digitizer.remoteData.error'));
+                console.log(response.error);
+            }
+
+            _.each(response.dataSets, function (dataSet) {
+                var newData = JSON.parse(dataSet).features[0].properties;
+                Object.keys(feature.data)
+                $.extend(feature.data, newData);
+            });
+
+            if(!feature.isNew){
+                this._openFeatureEditDialog(feature);
+            } else {
+                this.currentPopup.formData(feature.data);
+            }
+
+
+
         }
+
     });
 
 })(jQuery);
