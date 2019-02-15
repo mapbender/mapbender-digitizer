@@ -22,10 +22,14 @@ var Scheme = function (rawScheme, widget) {
 
     schema.initializeResultTableEvents();
 
+    schema.layer.getClusteredFeatures = function() {
+        return _.flatten(_.pluck(this.features, "cluster"));
+    };
+
     schema.mapContextMenu = new MapContextMenu(schema);
     schema.elementContextMenu = new ElementContextMenu(schema);
 
-    schema.featureEditDialogFactory = new FeatureEditDialogFactory(schema.popup,schema);
+    schema.featureEditDialogFactory = new FeatureEditDialogFactory(schema.popup, schema);
 
 
     // remove removeSelected Control if !allowDelete
@@ -35,6 +39,11 @@ var Scheme = function (rawScheme, widget) {
                 schema.toolset.splice(k, 1);
             }
         });
+    }
+
+    // use layerManager
+    if (schema.refreshLayersAfterFeatureSave) {
+        Mapbender.layerManager.setMap(schema.layer.map);
     }
 
     // TODO this has to be carefully checked for prototype propertys, since it fills the `undefined` properties, so it may not work at all
@@ -103,6 +112,7 @@ Scheme.prototype = {
     displayOnInactive: false,
     refreshFeaturesAfterSave: [],
     olFeatureCloudPopup: null,
+    mailManager: null,
 
     // Copy data
     copy: {
@@ -147,7 +157,7 @@ Scheme.prototype = {
     }],
     digitizingToolset: null,
 
-    tableFields : {
+    tableFields: {
         gid: { // TODO make sure this fields name is either always gid or find a more generic solution
             label: 'Nr.',
             width: "20%",
@@ -175,7 +185,7 @@ Scheme.prototype = {
     },
 
 
-    activateContextMenu: function() {
+    activateContextMenu: function () {
         var schema = this;
         var widget = schema.widget;
 
@@ -188,24 +198,22 @@ Scheme.prototype = {
     },
 
 
-
-
-    _refreshMapAfterFeatureSave: function () {
+    _refreshOtherLayersAfterFeatureSave: function () {
         var schema = this;
-        var refreshLayerNames = schema.refreshLayersAfterFeatureSave;
 
-        if (_.size(refreshLayerNames)) {
-            Mapbender.layerManager.setMap(schema.layer.map);
-            _.each(refreshLayerNames, function (layerInstanceId) {
+        if (schema.refreshLayersAfterFeatureSave) {
+
+            _.each(schema.refreshLayersAfterFeatureSave, function (layerInstanceId) {
                 var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
                 _.each(layers, function (layer) {
                     Mapbender.layerManager.refreshLayer(layer);
                 });
             });
         }
+
     },
 
-    _createResultTableDataFunction: function(columnId) {
+    _createResultTableDataFunction: function (columnId) {
 
         return function (row, type, val, meta) {
             var data = row.data[columnId];
@@ -282,7 +290,6 @@ Scheme.prototype = {
     },
 
 
-
     hoverInResultTable: function (feature, highlight) {
 
         var features = feature.cluster || [feature];
@@ -332,7 +339,6 @@ Scheme.prototype = {
 
 
     },
-
 
 
     _mapHasActiveControlThatBlocksSelectControl: function () {
@@ -459,7 +465,7 @@ Scheme.prototype = {
         var features = _features || layer.features;
 
         if (features.length && features[0].cluster) {
-            features = _.flatten(_.pluck(layer.features, "cluster"));
+            features = layer.getClusteredFeatures();
         }
 
 
@@ -572,6 +578,10 @@ Scheme.prototype = {
 
         if (on) {
             $(schema.frame).find(".save-all-features").addClass("active");
+        } else {
+            if (schema._getUnsavedFeatures().length === 0) {
+                $(schema.frame).find(".save-all-features").removeClass("active");
+            }
         }
 
         control && control.deactivate();
@@ -886,7 +896,7 @@ Scheme.prototype = {
         var map = layer.map;
         var extent = map.getExtent();
         var bbox = extent.toGeometry().getBounds();
-        var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
+        var existingFeatures = schema.isClustered ? layer.getClusteredFeatures() : layer.features;
         var visibleFeatures = currentExtentOnly ? _.filter(existingFeatures, function (olFeature) {
             return olFeature && (olFeature.hasOwnProperty('isNew') || olFeature.geometry.getBounds().intersectsBounds(bbox));
         }) : existingFeatures;
@@ -943,6 +953,26 @@ Scheme.prototype = {
     },
 
 
+    _removeFeatureFromUI: function (olFeature) {
+        var schema = this;
+        var layer = schema.layer;
+
+        var existingFeatures = schema.isClustered ? layer.getClusteredFeatures() : layer.features;
+        schema.reloadFeatures(_.without(existingFeatures, olFeature));
+
+        schema._refreshOtherLayersAfterFeatureSave();
+    },
+
+
+    _replaceFeatureInUI: function (oldFeature,newFeature) {
+        var schema = this;
+
+        console.assert(oldFeature.fid === newFeature.fid, "ID from Old Feature and New Feature must be identical");
+        schema.layer.addFeatures([newFeature]);
+        schema._removeFeatureFromUI(oldFeature);
+
+    },
+
     /**
      * Remove OL feature
      *
@@ -952,32 +982,21 @@ Scheme.prototype = {
      */
     removeFeature: function (olFeature) {
         var schema = this;
-        var widget = schema.widget;
 
-        var isNew = olFeature.hasOwnProperty('isNew');
-        var layer = olFeature.layer;
         var featureData = olFeature.attributes;
 
 
-        function _removeFeatureFromUI() {
-            //var clonedFeature = jQuery.extend(true, {}, olFeature);
-            var existingFeatures = schema.isClustered ? _.flatten(_.pluck(layer.features, "cluster")) : layer.features;
-            schema.reloadFeatures(_.without(existingFeatures, olFeature));
-
-            schema._refreshMapAfterFeatureSave();
-        }
-
-        if (isNew) {
-            _removeFeatureFromUI()
+        if (olFeature.isNew) {
+            schema._removeFeatureFromUI(olFeature);
         } else {
             Mapbender.confirmDialog({
                 html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
                 onSuccess: function () {
                     QueryEngine.query('delete', {
-                        schema: schema.schemaName,
+                        schema: schema.getSchemaName(olFeature),
                         feature: featureData
                     }).done(function (fid) {
-                        _removeFeatureFromUI();
+                        schema._removeFeatureFromUI(olFeature);
                         $.notify(Mapbender.DigitizerTranslator.translate('feature.remove.successfully'), 'info');
                     });
                 }
@@ -1052,157 +1071,160 @@ Scheme.prototype = {
     },
 
 
-    getSchemaName: function() {
+    getSchemaName: function () {
         var schema = this;
         return schema.schemaName;
+    },
+
+
+    _createNewFeatureWithDBFeature: function (feature, response) {
+        var schema = this;
+
+        var features = response.features;
+
+        if (features.length === 0) {
+            console.warn("No Feature returned from DB Operation");
+            schema._removeFeatureFromUI(feature);
+            return null;
+        } else if (features.length > 1) {
+            console.warn("More than 1 Feature returned from DB Operation");
+        }
+
+
+        if (feature.saveStyleDataCallback) {
+            feature.saveStyleDataCallback(feature);
+            feature.saveStyleDataCallback = null;
+        }
+
+        var geoJsonReader = new OpenLayers.Format.GeoJSON();
+
+        var newFeatures = geoJsonReader.read(response);
+        var newFeature = _.first(newFeatures);
+
+        console.assert(feature.state === null, "State of OL Feature is NULL");
+
+
+        newFeature.data = feature.data;
+        newFeature.layer = feature.layer;
+        newFeature.renderIntent = feature.renderIntent;
+        newFeature.styleId = feature.styleId;
+
+        return newFeature;
+
     },
 
     /**
      * On save button click
      *
      * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature OpenLayers feature
-     * @param {Function} getFormData
+     * @param formData
      * @private
      * @return {(jQuery.jqXHR | void)} ajax XHR
      */
-    saveFeature: function (feature,getFormData) {
+    saveFeature: function (feature, formData) {
+        var schema = this;
+        var widget = schema.widget;
+        var table = schema.table;
+        var tableApi = table.resultTable('getApi');
+        var wkt = new OpenLayers.Format.WKT().write(feature);
+        var srid = widget.map.getProjectionObject().proj.srsProjNumber;
+
 
         if (feature.disabled) { // Feature is temporarily disabled
             return;
         }
 
-        console.log("saveFeature");
+        feature.disabled = true;
 
-        var schema = this;
-        var widget = schema.widget;
-        var dialog = schema.editDialog;
-        var table = schema.table;
-        var tableWidget = table.data('visUiJsResultTable');
-        var tableApi = table.resultTable('getApi');
-        var wkt = new OpenLayers.Format.WKT().write(feature);
-        var srid = widget.map.getProjectionObject().proj.srsProjNumber;
-        var formData;
-        if (getFormData) {
-            formData = getFormData();
-        } else {
-            schema.initialFormData(feature);
-        }
+        formData = formData || schema.initialFormData(feature);
+
         var request = {
+            id: feature.isNew ? null : feature.fid,
             properties: formData,
             geometry: wkt,
             srid: srid,
             type: "Feature"
         };
 
+        // TODO check this
         tableApi.draw({"paging": "page"});
 
-        if (!feature.isNew && feature.fid) {
-            request.id = feature.fid;
+        var promise = QueryEngine.query('save', {
+
+            schema: schema.getSchemaName(feature),
+            feature: request
+        }).done(function (response) {
+
+            if (response.hasOwnProperty('errors')) {
+                return;
+            }
+
+            var newFeature = schema._createNewFeatureWithDBFeature(feature, response);
+
+            if(newFeature==null) {
+                console.warn("Creation of new Feature failed");
+                return;
+            }
+
+            schema._replaceFeatureInUI(feature,newFeature);
+
+
+
+            schema._refreshFeatureRowInDataTable(newFeature);
+
+            schema.triggerModifiedState(newFeature, false);
+
+            $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
+
+
+            schema._tryMailManager(newFeature);
+
+
+            var successHandler = schema.save && schema.save.on && schema.save.on.success;
+            if (successHandler) {
+                eval(successHandler);
+            }
+
+            schema._refreshOtherLayersAfterFeatureSave();
+
+            schema._refreshConnectedDigitizerFeatures();
+
+
+
+        });
+
+        return promise;
+
+    },
+
+    _refreshFeatureRowInDataTable: function(feature) {
+        var schema = this;
+        var table = schema.table;
+        var tableWidget = table.data('visUiJsResultTable');
+        var tableApi = table.resultTable('getApi');
+
+        tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
+        tableApi.draw();
+    },
+
+    _refreshConnectedDigitizerFeatures: function() {
+        var schema = this;
+
+        if (schema.refreshFeaturesAfterSave) {
+            _.each(schema.refreshFeaturesAfterSave, function (el, index) {
+                widget.refreshConnectedDigitizerFeatures(el);
+            })
         }
+    },
 
-        var errorInputs = $(".has-error", dialog);
-        var hasErrors = errorInputs.size() > 0;
-
-        if (hasErrors) {
-            console.warn("Feature has error and can not be saved", feature);
-        }
-
-        if (!hasErrors) {
-            feature.disabled = true;
-            dialog && dialog.disableForm();
-
-            return QueryEngine.query('save', {
-
-                schema: schema.getSchemaName(feature),
-                feature: request
-            }).done(function (response) {
-                if (response.hasOwnProperty('errors')) {
-                    dialog && dialog.enableForm();
-                    feature.disabled = false;
-                    $.each(response.errors, function (i, error) {
-                        $.notify(error.message, {
-                            title: 'API Error',
-                            autoHide: false,
-                            className: 'error'
-                        });
-                        console.error(error.message);
-                    });
-                    return;
-                }
-
-                var hasFeatureAfterSave = response.features.length > 0;
-                var layer = schema.layer;
-
-                if (!hasFeatureAfterSave) {
-                    schema.reloadFeatures(_.without(layer.features, feature));
-                    dialog && dialog.popupDialog('close');
-                    return;
-                }
-
-                var dbFeature = response.features[0];
-                feature.fid = dbFeature.id;
-                feature.state = null;
-                if (feature.saveStyleDataCallback) {
-                    // console.log("Late-saving style for feature", feature);
-                    feature.saveStyleDataCallback(feature);
-                    delete feature["saveStyleDataCallback"];
-                }
-                $.extend(feature.data, dbFeature.properties);
-
-                var geoJsonReader = new OpenLayers.Format.GeoJSON();
-                var newFeatures = geoJsonReader.read(response);
-                var newFeature = _.first(newFeatures);
-
-                _.each(['fid', 'disabled', 'state', 'data', 'layer', /* 'schema', */ 'isNew', 'renderIntent', 'styleId'], function (key) {
-                    newFeature[key] = feature[key];
-                });
-
-                schema.reloadFeatures(_.union(_.without(layer.features, feature), [newFeature]));
-                feature = newFeature;
-
-                tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
-                tableApi.draw();
-
-                feature.isNew = false;
-                feature.isChanged = false;
-
-                dialog && dialog.enableForm();
-                feature.disabled = false;
-
-
-                schema.triggerModifiedState(feature, false);
-
-                dialog && dialog.popupDialog('close');
-
-                $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
-
-
-                var config = widget.currentSchema;
-                if (config.hasOwnProperty("mailManager") && Mapbender.hasOwnProperty("MailManager")) {
-                    try {
-                        Mapbender.MailManager[config.mailManager](feature);
-                    } catch (e) {
-                        console.warn('The function' + config.mailManager + " is not supported by the Mapbender Mail Manager Extension");
-                    }
-                }
-
-                var successHandler = schema.save && schema.save.on && schema.save.on.success;
-                if (successHandler) {
-                    eval(successHandler);
-                }
-                schema._refreshMapAfterFeatureSave();
-
-                if (schema._getUnsavedFeatures().length === 0) {
-                    $(schema.frame).find(".save-all-features").removeClass("active");
-                }
-
-                if (schema.refreshFeaturesAfterSave) {
-                    _.each(schema.refreshFeaturesAfterSave, function (el, index) {
-                        widget.refreshConnectedDigitizerFeatures(el);
-                    })
-                }
-
-            });
+    _tryMailManager: function(feature) {
+        var schema = this;
+        if (schema.mailManager && Mapbender.hasOwnProperty("MailManager")) {
+            try {
+                Mapbender.MailManager[schema.mailManager](feature);
+            } catch (e) {
+                console.warn('The function' + schema.mailManager + " is not supported by the Mapbender Mail Manager Extension");
+            }
         }
     },
 
@@ -1212,9 +1234,6 @@ Scheme.prototype = {
             return feature.isNew || feature.isChanged
         });
     },
-
-
-
 
 
     /**
@@ -1355,7 +1374,7 @@ Scheme.prototype = {
         }
     },
 
-    _getDefaultProperties: function() {
+    _getDefaultProperties: function () {
         var schema = this;
 
         var newFeatureDefaultProperties = [];

@@ -111,7 +111,7 @@ var FeatureEditDialog = function (feature, configuration, schema) {
 
     if (widget.currentPopup) {
         widget.currentPopup.popupDialog('close');
-        if (dialog.isOpenLayerCloudPopup() && schema.olFeatureCloudPopup) {
+        if (dialog.isOpenLayersCloudPopup() && schema.olFeatureCloudPopup) {
             map.removePopup(schema.olFeatureCloudPopup);
             schema.olFeatureCloudPopup.destroy();
             schema.olFeatureCloudPopup = null;
@@ -174,8 +174,36 @@ FeatureEditDialog.prototype = {
         }
         if (buttons.saveButton) {
             buttons.saveButton.click = function () {
-                schema.saveFeature(dialog.feature, function () {
-                    return dialog.$popup.formData();
+
+
+                var formData = dialog.$popup.formData();
+
+                // TODO this is not nice. Find a better solution
+                var errorInputs = $(".has-error", dialog.$popup);
+                if (errorInputs.length > 0) {
+                    console.warn("Error",errorInputs);
+                    return;
+                }
+
+                dialog.$popup.disableForm();
+                schema.saveFeature(dialog.feature, formData).done(function(response) {
+                    if (response.hasOwnProperty('errors')) {
+                        dialog.feature.disabled = false;
+                        $.each(response.errors, function (i, error) {
+                            $.notify(error.message, {
+                                title: 'API Error',
+                                autoHide: false,
+                                className: 'error'
+                            });
+                            console.error(error.message);
+                        });
+                        dialog.$popup.enableForm();
+
+                        return;
+                    }
+
+                    dialog.$popup.popupDialog('close');
+
                 });
             };
         }
@@ -201,7 +229,7 @@ FeatureEditDialog.prototype = {
 
     },
 
-    isOpenLayerCloudPopup: function () {
+    isOpenLayersCloudPopup: function () {
         var dialog = this;
 
         return dialog.configuration.type && dialog.configuration.type === 'openlayers-cloud';
@@ -217,9 +245,6 @@ FeatureEditDialog.prototype = {
         var schema = this.schema;
         var widget = schema.widget;
 
-        var isOpenLayerCloudPopup = configuration.type && configuration.type === 'openlayers-cloud';
-
-
         $popup.bind('popupdialogclose', function () {
             if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
                 schema.removeFeature(feature);
@@ -230,7 +255,7 @@ FeatureEditDialog.prototype = {
         });
 
 
-        if (isOpenLayerCloudPopup) {
+        if (dialog.isOpenLayersCloudPopup()) {
             // Hide original popup but not kill it.
             $popup.closest('.ui-dialog').css({
                 'margin-left': '-100000px'
@@ -298,7 +323,6 @@ FeatureEditDialog.prototype = {
         var layer = schema.layer;
         var map = layer.map;
 
-        var isOpenLayerCloudPopup = configuration.type && configuration.type === 'openlayers-cloud';
 
 
         setTimeout(function () {
@@ -336,7 +360,7 @@ FeatureEditDialog.prototype = {
             }
 
 
-            if (isOpenLayerCloudPopup) {
+            if (dialog.isOpenLayersCloudPopup()) {
                 /**
                  * @var {OpenLayers.Popup.FramedCloud}
                  */

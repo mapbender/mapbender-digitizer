@@ -17,11 +17,15 @@ Refactoring - Code sortieren:
 - DataMangerUtils refactorn
 - Properties in Scheme aussortieren und sortieren
 - Auf die Hooks Rücksicht nehmen - am besten vorhandene Konfigurationen begutachten
+- Herausfinden, warum features 'data' und 'properties' hat und gegebenenfalls eins wegwerfen
+- Navigation auf Buttons über JQuery einschränken
+- Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
 
 
 
 Testing:
 - Kopieren testen
+- Testen, was mit dem Formdata passiert wenn saveFeature außerhalb des FeatureEdit Dialogs aufgerufen wird
 
 
 
