@@ -63,8 +63,13 @@ AllScheme.prototype.redesignLayerFunctions = function () {
 
 
     layer.drawFeature = function (feature, styleId) {
-        var newStyleId = (styleId || 'default') + "-" + widget.getGeometryNameByFeatureClass(feature.geometry.CLASS_NAME);
-        return drawFeature.apply(this, [feature, newStyleId]);
+        if (!styleId || styleId.length <= 20) { // simple way to detect if it is an individual style
+            var newStyleId = (styleId || 'default') + "-" + widget.getGeometryNameByFeatureClass(feature.geometry.CLASS_NAME);
+        } else {
+            newStyleId = styleId;
+        }
+        var ret = drawFeature.apply(this, [feature, newStyleId]);
+        return ret;
     };
 
 };
