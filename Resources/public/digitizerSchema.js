@@ -420,7 +420,6 @@ Scheme.prototype = {
 
         tableApi.clear();
         var featuresWithoutDrawElements = _.difference(features, _.where(features, {_sketch: true}));
-        console.log(featuresWithoutDrawElements,"$$$!");
 
         tableApi.rows.add(featuresWithoutDrawElements);
         tableApi.draw();
@@ -1073,8 +1072,7 @@ Scheme.prototype = {
 
 
         newFeature.fid = newFeature.fid || feature.fid;
-        newFeature.data = feature.data;
-        newFeature.attributes = newFeature.data;
+
         newFeature.layer = feature.layer;
         newFeature.renderIntent = feature.renderIntent;
         newFeature.styleId = feature.styleId;
@@ -1142,21 +1140,12 @@ Scheme.prototype = {
                 return;
             }
 
-            console.log(newFeature,feature,"!");
-            schema.reloadFeatures(_.union(_.without(schema.layer.features, feature), [newFeature]));
+            schema._removeFeatureFromUI(feature);
 
-            // schema._removeFeatureFromUI(feature);
-            //
-            // schema.layer.removeFeatures([feature]);
-            //
-            // console.log(newFeature,newFeature.fid);
-            //
-            //
-            // schema.layer.addFeatures([newFeature]);
-            //
-            // console.log(newFeature,newFeature.fid);
-            //
-            // schema.reloadFeatures();
+            schema.layer.removeFeatures([feature]);
+            schema.layer.addFeatures([newFeature]);
+
+            schema.reloadFeatures();
 
 
             schema._refreshFeatureRowInDataTable(newFeature);
