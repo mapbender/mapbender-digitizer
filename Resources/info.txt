@@ -16,10 +16,11 @@ Refactoring - Code sortieren:
 - DataManagerUtils refactorn
 - Properties in Scheme aussortieren und sortieren
 - Auf die Hooks Rücksicht nehmen - am besten vorhandene Konfigurationen begutachten
-- Herausfinden, warum features 'data' und 'properties' hat und gegebenenfalls eins wegwerfen
+- Herausfinden, warum Openlayers.Feature 'data', 'attributes' und 'properties' hat und gegebenenfalls eins wegwerfen
 - Navigation auf Buttons über JQuery einschränken
 - Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
 - Konstanten für Style Namen
+- FeatureEditDialogFactory abschaffen
 
 
 

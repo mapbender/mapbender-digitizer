@@ -1,113 +1,23 @@
-var FeatureEditDialogFactory = function (configuration, schema) {
-
-    this.schema = schema;
-
-    this.configuration = _.clone(configuration);
-    this.configuration.realButtons = {};
-    this._augmentFeatureEditDialogButtonsWithCustomButtons();
-
-    this._createFeatureEditDialogConfigurationButtons();
-
-
-};
-
-
-FeatureEditDialogFactory.prototype = {
-
-
-    createFeatureEditDialog: function (feature) {
-        var factory = this;
-
-        return new FeatureEditDialog(feature, _.clone(factory.configuration), factory.schema);
-
-    },
-
-    _augmentFeatureEditDialogButtonsWithCustomButtons: function () {
-        var factory = this;
-        var configuration = factory.configuration;
-        var schema = factory.schema;
-        var widget = schema.widget;
-
-        var i = 0;
-
-        // Initialize custom button events
-        _.each(configuration.buttons, function (button) {
-            if (button.click) {
-                var eventHandlerCode = button.click;
-                configuration.realButtons[i++] = {
-                    click : function (e) {
-                        var _widget = widget;
-                        var el = $(this);
-                        var form = $(this).closest(".ui-dialog-content");
-                        var feature = form.data('feature');
-                        var data = feature.data;
-
-                        eval(eventHandlerCode);
-
-                        e.preventDefault();
-                        return false;
-                    }
-                }
-            }
-        });
-    },
-
-
-    _createFeatureEditDialogConfigurationButtons: function () {
-
-        var factory = this;
-        var configuration = factory.configuration;
-        var schema = factory.schema;
-        var buttons = configuration.realButtons;
-
-        if (schema.printable) {
-            buttons.printButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.print')
-            };
-        }
-        if (schema.copy.enable) {
-            buttons.copyButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.clone.title')
-            };
-        }
-        if (schema.allowCustomerStyle) {
-            buttons.styleButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.style.change')
-            };
-        }
-        if (schema.allowEditData && schema.allowSave) {
-            buttons.saveButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.save.title')
-            };
-        }
-        if (schema.allowDelete) {
-            buttons.deleteButton = {
-                text: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
-                'class': 'critical',
-            };
-        }
-        if (schema.allowCancelButton) {
-            buttons.cancelButton = {
-                text: Mapbender.DigitizerTranslator.translate('cancel')
-            };
-        }
-
-    }
-
-
-};
-
 var FeatureEditDialog = function (feature, configuration, schema) {
 
     var dialog = this;
+    dialog.schema = schema;
+
     var widget = schema.widget;
     var $popup = dialog.$popup = $("<div/>");
 
+    dialog.configuration = _.clone(configuration);
+    dialog.configuration.realButtons = {};
+    dialog._augmentFeatureEditDialogButtonsWithCustomButtons();
+    dialog._createFeatureEditDialogConfigurationButtons();
+
+    console.log(dialog.configuration.realButtons);
+
     dialog.feature = feature;
-    dialog.schema = schema;
-    dialog.configuration = configuration;
 
     dialog.addClickHandlerToButtons();
+
+
 
     if (widget.currentPopup) {
         widget.currentPopup.popupDialog('close');
@@ -136,7 +46,8 @@ var FeatureEditDialog = function (feature, configuration, schema) {
     var formItems = schema.getFormItems(feature);
     $popup.generateElements({children: formItems});
 
-    $popup.popupDialog(configuration);
+
+    $popup.popupDialog(dialog.configuration);
 
 
     dialog.doFeatureEditDialogBindings(feature, $popup);
@@ -371,6 +282,82 @@ FeatureEditDialog.prototype = {
 
         }, 21);
     },
+
+
+
+
+    _augmentFeatureEditDialogButtonsWithCustomButtons: function () {
+        var dialog = this;
+        var configuration = dialog.configuration;
+        var schema = dialog.schema;
+        var widget = schema.widget;
+
+        var i = 0;
+
+        // Initialize custom button events
+        _.each(configuration.buttons, function (button) {
+            if (button.click) {
+                var eventHandlerCode = button.click;
+                configuration.realButtons[i++] = {
+                    click : function (e) {
+                        var _widget = widget;
+                        var el = $(this);
+                        var form = $(this).closest(".ui-dialog-content");
+                        var feature = form.data('feature');
+                        var data = feature.data;
+
+                        eval(eventHandlerCode);
+
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            }
+        });
+    },
+
+
+    _createFeatureEditDialogConfigurationButtons: function () {
+
+        var dialog = this;
+        var configuration = dialog.configuration;
+        var schema = dialog.schema;
+        var buttons = configuration.realButtons;
+
+        if (schema.printable) {
+            buttons.printButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.print')
+            };
+        }
+        if (schema.copy.enable) {
+            buttons.copyButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.clone.title')
+            };
+        }
+        if (schema.allowCustomerStyle) {
+            buttons.styleButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.style.change')
+            };
+        }
+        if (schema.allowEditData && schema.allowSave) {
+            buttons.saveButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.save.title')
+            };
+        }
+        if (schema.allowDelete) {
+            buttons.deleteButton = {
+                text: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                'class': 'critical',
+            };
+        }
+        if (schema.allowCancelButton) {
+            buttons.cancelButton = {
+                text: Mapbender.DigitizerTranslator.translate('cancel')
+            };
+        }
+
+    }
+
 
 
 };

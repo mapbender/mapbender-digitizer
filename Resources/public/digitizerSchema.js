@@ -29,8 +29,6 @@ var Scheme = function (rawScheme, widget) {
     schema.mapContextMenu = new MapContextMenu(schema);
     schema.elementContextMenu = new ElementContextMenu(schema);
 
-    schema.featureEditDialogFactory = new FeatureEditDialogFactory(schema.popup, schema);
-
 
     // remove removeSelected Control if !allowDelete
     if (!schema.allowDelete) {
@@ -62,7 +60,6 @@ Scheme.prototype = {
     layer: null,
     widget: null,
     frame: null,
-    featureEditDialogFactory: null,
     mapContextMenu: null,
     elementContextMenu: null,
 
@@ -264,7 +261,7 @@ Scheme.prototype = {
     _openFeatureEditDialog: function (olFeature) {
         var schema = this;
 
-        schema.featureEditDialogFactory.createFeatureEditDialog(olFeature);
+        var dialog = new FeatureEditDialog(olFeature,schema.popup,schema);
 
     },
 
