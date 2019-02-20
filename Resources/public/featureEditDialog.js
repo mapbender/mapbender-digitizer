@@ -11,8 +11,6 @@ var FeatureEditDialog = function (feature, configuration, schema) {
     dialog._augmentFeatureEditDialogButtonsWithCustomButtons();
     dialog._createFeatureEditDialogConfigurationButtons();
 
-    console.log(dialog.configuration.realButtons);
-
     dialog.feature = feature;
 
     dialog.addClickHandlerToButtons();

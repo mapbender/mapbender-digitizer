@@ -12,7 +12,7 @@ var Scheme = function (rawScheme, widget) {
 
     schema.widget = widget;
 
-    schema.toolset = schema.toolset || widget.toolsets[schema.featureType.geomType];
+    schema.toolset = schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : widget.toolsets[schema.featureType.geomType];
 
     schema.createSchemaFeatureLayer();
 
@@ -873,6 +873,8 @@ Scheme.prototype = {
      * @private
      * @version 0.2
      */
+
+    // TODO refactor this
     _onFeatureCollectionLoaded: function (featureCollection, xhr) {
         var schema = this;
 
@@ -1389,7 +1391,6 @@ Scheme.prototype = {
         var schema = this;
         if (response.error) {
             Mapbender.error(Mapbender.trans('mb.digitizer.remoteData.error'));
-            console.log(response.error);
         }
 
         _.each(response.dataSets, function (dataSet) {

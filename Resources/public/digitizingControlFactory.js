@@ -29,6 +29,11 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
     var featureAdded = createFeatureAddedMethod(injectedMethods);
 
     var controls =  {
+
+        drawText:  new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point,{
+            featureAdded : featureAdded
+        }),
+
         drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point,{
             featureAdded : featureAdded
         }),

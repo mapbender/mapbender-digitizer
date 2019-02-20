@@ -337,8 +337,11 @@ class Digitizer extends BaseElement
                 }
                 $request["schema"] = $schemaName;
                 $featureCollection = $this->selectAction($request);
-                $features = array_merge($features,$featureCollection["features"]);
+                foreach ($featureCollection["features"] as &$feature) {
 
+                    $feature["properties"]["geomType"] = $scheme["featureType"]["geomType"];
+                };
+                $features = array_merge($features,$featureCollection["features"]);
             }
             $featureCollection = array("type" => "FeatureCollection",  "features" => $features);
         } else {
@@ -467,6 +470,9 @@ class Digitizer extends BaseElement
                         'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
                 }
 
+            }
+            foreach($results as &$result) {
+                $result->setAttributes(array("geomType" => $schema["featureType"]["geomType"]));
             }
             $results = $featureType->toFeatureCollection($results);
         } catch (DBALException $e) {

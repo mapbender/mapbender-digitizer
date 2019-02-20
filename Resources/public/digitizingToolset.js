@@ -5,6 +5,7 @@
         options: {
             layer: null,
             translations: {
+                drawText : "Draw text",
                 drawPoint: "Draw point",
                 drawLine: "Draw line",
                 drawPolygon: "Draw polygon",
@@ -136,7 +137,7 @@
             $button.addClass('-fn-tool-button');
             $button.data(item);
 
-            $button.attr('title', toolSet.options.translations[item.type]);
+            $button.attr('title', toolSet.options.translations[item.type] || item.type);
             // add icon css class
             $button.addClass("icon-" + item.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
 

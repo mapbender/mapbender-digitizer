@@ -21,7 +21,7 @@ AllScheme.prototype = $.extend({},AllScheme.prototype,{
     useContextMenu: true,
     schemaName: 'all',
     featureType: 'all',
-    toolset: [{type: 'drawPoint'},{type: 'drawLine'},{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
+    toolset: [{type: 'drawPoint'},{type: 'drawText'},{type: 'drawLine'},{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
     zoomDependentVisibility: [{max: 10000}],
     confirmSaveOnDeactivate: true
 });
@@ -64,7 +64,7 @@ AllScheme.prototype.redesignLayerFunctions = function () {
 
     layer.drawFeature = function (feature, styleId) {
         if (!styleId || styleId.length <= 20) { // simple way to detect if it is an individual style
-            var newStyleId = (styleId || 'default') + "-" + widget.getGeometryNameByFeatureClass(feature.geometry.CLASS_NAME);
+            var newStyleId = (styleId || 'default') + "-" + widget.getGeometryNameByGeomType(feature.attributes.geomType);
         } else {
             newStyleId = styleId;
         }
@@ -77,7 +77,7 @@ AllScheme.prototype.redesignLayerFunctions = function () {
 AllScheme.prototype.getFormItems = function(feature) {
     var schema = this;
     var widget = schema.widget;
-    var featureSchema = widget.getSchemaByOLFeature(feature);
+    var featureSchema = widget.getSchemaByGeomType(feature.attributes.geomType);
     return featureSchema.getFormItems(feature);
 };
 
@@ -86,12 +86,12 @@ AllScheme.prototype.getFormItems = function(feature) {
 AllScheme.prototype.getSchemaName = function(feature) {
     var schema = this;
     var widget = schema.widget;
-    return widget.getSchemaByOLFeature(feature).schemaName;
+    return widget.getSchemaByGeomType(feature.attributes.geomType).schemaName;
 };
 
 AllScheme.prototype.getSchemaByFeature = function(feature) {
     var schema = this;
     var widget = schema.widget;
 
-    return widget.getSchemaByOLFeature(feature);
+    return widget.getSchemaByGeomType(feature.attributes.geomType);
 };

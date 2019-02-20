@@ -28,12 +28,14 @@
             point: [{type: 'drawPoint'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
             line: [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
             polygon: [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
+            label: [{type: 'drawText'}, {type: 'moveFeature'}]
         },
         /**
          * @type {OpenLayers.Map}
          */
         map: null,
         currentSchema: null,
+        // TODO this should not be here but in css file
         featureEditDialogWidth: "423px",
 
         /**
@@ -206,27 +208,16 @@
         },
 
 
-        getGeometryNameByFeatureClass: function (className) {
+        getGeometryNameByGeomType: function (geomType) {
 
-            switch (className) {
-                case 'OpenLayers.Geometry.Polygon' :
-                    return 'polygon';
-                case 'OpenLayers.Geometry.LineString' :
-                    return 'line';
-                case 'OpenLayers.Geometry.Point' :
-                    return 'point';
-            }
-
-            console.warn("feature has no geometry with associated scheme", feature);
-            return null;
+            return geomType;
         },
-        // TODO this must be adjusted when adding
-        getSchemaByOLFeature: function (feature) {
+
+        getSchemaByGeomType: function (geomtype) {
             var widget = this;
-            var geometryName = widget.getGeometryNameByFeatureClass(feature.geometry.CLASS_NAME);
             var schema = null;
             _.each(widget.options.schemes, function (scheme) {
-                if (scheme.featureType.geomType === geometryName) {
+                if (scheme.featureType.geomType === geomtype) {
                     schema = scheme;
                 }
             });
@@ -288,19 +279,22 @@
             var titleElement = $("> div.title", element);
 
 
-            var hasOnlyOneScheme = _.size(options.schemes) === 1;
-
-            if (hasOnlyOneScheme) {
-                titleElement.html(_.toArray(options.schemes)[0].label);
-                selector.hide();
-            } else {
+            // var hasOnlyOneScheme = _.size(options.schemes) === 1;
+            //
+            // if (hasOnlyOneScheme) {
+            //     titleElement.html(_.toArray(options.schemes)[0].label);
+            //     widget.selector.hide();
+            // } else {
                 titleElement.hide();
-            }
+            //}
         },
 
         _setup: function () {
 
             var widget = this;
+
+            Mapbender.Digitizer = this;
+
             var element = $(widget.element);
             var options = widget.options;
 
