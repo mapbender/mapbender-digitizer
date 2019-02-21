@@ -61,7 +61,7 @@
                 fillColor: "#f7ef7e",
                 strokeColor: '#4250b5',
                 fillOpacity: 0.7,
-                graphicZIndex: 15
+                graphicZIndex: 1000
             },
             'unsaved': {
                 strokeWidth: 3,
