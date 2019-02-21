@@ -26,6 +26,7 @@ Refactoring - Code sortieren:
 - Konstanten für Style Namen
 - Forbidden operations on server should NOT throw a 500
 - feature.attributes.geomType und schema.featureType.geomType- variablen anders benennen
+- bei der StyleMap wird nicht der geomType verwendet sondern irgendwas anderes. Ändern
 
 
 

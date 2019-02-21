@@ -1,6 +1,7 @@
 var FeatureStyleEditor = function(options) {
 
 
+    console.log(options);
     var editor = this;
 
     var defaultOptions = {

@@ -629,6 +629,11 @@ Scheme.prototype = {
         return formData;
     },
 
+    getStyleMapLabel: function(rawLabel) {
+        var schema = this;
+        return rawLabel + "-" + schema.featureType.geomType;
+
+    },
 
     _createStyleMap: function (labels, styleContext) {
         var schema = this;
@@ -734,7 +739,8 @@ Scheme.prototype = {
         var layer = olFeature.layer;
         var styleMap = layer.options.styleMap;
         var styles = styleMap.styles;
-        var defaultStyleData = olFeature.style || _.extend({}, styles.default.defaultStyle);
+        var defaultSchemeStyle = styles[olFeature.attributes.geomType+'-default'] || styles['default'];
+        var defaultStyleData = olFeature.style || _.extend({}, defaultSchemeStyle.defaultStyle);
 
         if (olFeature.styleId) {
             _.extend(defaultStyleData, styles[olFeature.styleId].defaultStyle);

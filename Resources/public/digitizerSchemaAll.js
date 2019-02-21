@@ -31,7 +31,6 @@ AllScheme.prototype = $.extend({},AllScheme.prototype,{
     confirmSaveOnDeactivate: true
 });
 
-
 AllScheme.prototype._createStyleMap = function (labels, styleContext) {
     var schema = this;
     var widget = schema.widget;
@@ -42,7 +41,7 @@ AllScheme.prototype._createStyleMap = function (labels, styleContext) {
             return;
         }
         labels.forEach(function (rawLabel) {
-            var label = rawLabel + "-" + scheme.featureType.geomType;
+            var label = scheme.getStyleMapLabel(rawLabel);
             var styleOL = OpenLayers.Feature.Vector.style[rawLabel] || OpenLayers.Feature.Vector.style['default'];
 
             styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, scheme.styles[rawLabel] || widget.styles[rawLabel]), styleContext);
