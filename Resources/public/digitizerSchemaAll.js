@@ -2,6 +2,11 @@ var AllScheme = function () {
 
     Scheme.apply(this, arguments);
 
+
+    this.featureType = {
+        geomType : 'all'
+    };
+
 };
 
 AllScheme.prototype = Object.create(Scheme.prototype);
@@ -53,6 +58,29 @@ AllScheme.prototype._createStyleMap = function (labels, styleContext) {
     return new OpenLayers.StyleMap(styleMapObject, {extendDefault: true});
 };
 
+AllScheme.prototype.createToolset = function() {
+    var schema = this;
+    var widget = schema.widget;
+    var toolset = [];
+    _.each(widget.schemes, function (scheme, schemaName) {
+        $.each(scheme.toolset, function(i,element) {
+
+            // Avoid duplicates, i.e. elements with same 'type' property
+            if (toolset.filter(function(t) { return t.type === element.type }).length === 0) {
+                toolset.push(element);
+            }
+
+        });
+
+    });
+
+    // TODO find better place for all possible controls in array
+    var config = ['drawPoint','drawLine','drawPolygon','drawRectangle','drawCircle','drawEllipse','drawDonut','drawText','modifyFeature','moveFeature','selectFeature','removeSelected'];
+
+    toolset = toolset.sort(function(a,b) { return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : -1; });
+
+    return toolset;
+};
 
 AllScheme.prototype.redesignLayerFunctions = function () {
 

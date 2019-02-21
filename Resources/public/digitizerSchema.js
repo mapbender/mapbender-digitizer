@@ -12,7 +12,7 @@ var Scheme = function (rawScheme, widget) {
 
     schema.widget = widget;
 
-    schema.toolset = schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : widget.toolsets[schema.featureType.geomType];
+    schema.toolset = schema.createToolset();
 
     schema.createSchemaFeatureLayer();
 
@@ -192,6 +192,12 @@ Scheme.prototype = {
         widget.allowUseElementContextMenu = schema.elementContextMenu.allowUseContextMenu;
         widget.buildElementContextMenu = schema.elementContextMenu.buildContextMenu;
 
+    },
+
+    createToolset: function() {
+        var schema = this;
+        var widget = schema.widget;
+        return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : widget.getDefaultToolsetByGeomType(schema.featureType.geomType);
     },
 
 

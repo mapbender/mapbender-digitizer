@@ -24,12 +24,7 @@
 
 
     $.widget("mapbender.mbDigitizer", {
-        toolsets: {
-            point: [{type: 'drawPoint'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
-            line: [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
-            polygon: [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
-            label: [{type: 'drawText'}, {type: 'moveFeature'}]
-        },
+
         schemes: {},
         map: null,
         currentSchema: null,
@@ -202,6 +197,25 @@
             });
 
             widget.schemes['all'] = new AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
+        },
+
+
+        getDefaultToolsetByGeomType: function(geomType) {
+
+            switch(geomType) {
+                case 'point':
+                    return [{type: 'drawPoint'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}];
+                case 'line':
+                    return [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}];
+                case 'polygon':
+                    return [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}];
+                case 'label' :
+                    return [{type: 'drawText'}, {type: 'moveFeature'}];
+
+            }
+
+            console.warn("No valid geom type",geomType)
+
         },
 
 

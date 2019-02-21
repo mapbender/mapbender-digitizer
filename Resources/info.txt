@@ -24,6 +24,7 @@ Refactoring - Code sortieren:
 - Navigation auf Buttons über JQuery einschränken
 - Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
 - Konstanten für Style Namen
+- Forbidden operations on server should NOT throw a 500
 
 
 
