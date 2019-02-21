@@ -8,6 +8,9 @@ Hinweise:
 - schema.featureType.geomType is mandatory
 -
 
+Ansprechen:
+- Hack beim Hintergrundbild des Color Pickers
+
 Refactoring - Renaming:
 - Konsistente Linie für Methodennamen, hinsichtlich des _ als Präfix
 - Markiere JQuery Variablen mit $ Präfix
