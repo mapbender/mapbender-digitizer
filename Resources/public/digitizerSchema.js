@@ -1038,6 +1038,11 @@ Scheme.prototype = {
         newFeature.isNew = true;
         newFeature.layer = feature.layer;
 
+        // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
+        newFeature.geometry.move(200, 200);
+        // TODO Name does not necessarily exist
+        newFeature.data.name = "Copy of "+feature.attributes.name;
+
         delete newFeature.fid;
 
         newFeature.redraw('copy');

@@ -48,7 +48,6 @@ Selbstgemachte Bugs:
 Legacy Bugs
 - Bug beheben: dragging bei donut zeichnen
 - Herausfinden, wann Geometrie "selected"-Eigenschaft verliert und das korrigieren
-- Default Style in Style Widget richtig anzeigen
 
 
 Optische Bugs:
@@ -65,6 +64,8 @@ Gemacht:
 - Es muss entschieden werden, ob die properties für das all-layer im Server oder JS definiert werden sollen
 - Translations auslagern / vereinheitlichen
 - Kopieren testen
+- Default Style in Style Widget richtig anzeigen
+
 
 
 
