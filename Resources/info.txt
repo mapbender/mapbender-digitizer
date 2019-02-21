@@ -4,6 +4,10 @@ Hinzugefügte Properties:
 - markUnsavedFeatures - ungespeicherte Features haben speziellen Style
 
 
+Hinweise:
+- schema.featureType.geomType is mandatory
+-
+
 Refactoring - Renaming:
 - Konsistente Linie für Methodennamen, hinsichtlich des _ als Präfix
 - Markiere JQuery Variablen mit $ Präfix
@@ -20,7 +24,6 @@ Refactoring - Code sortieren:
 - Navigation auf Buttons über JQuery einschränken
 - Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
 - Konstanten für Style Namen
-- FeatureEditDialogFactory abschaffen
 
 
 

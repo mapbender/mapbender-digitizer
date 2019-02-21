@@ -31,9 +31,6 @@
             label: [{type: 'drawText'}, {type: 'moveFeature'}]
         },
         schemes: {},
-        /**
-         * @type {OpenLayers.Map}
-         */
         map: null,
         currentSchema: null,
         // TODO this should not be here but in css file
@@ -248,6 +245,7 @@
             var options = widget.options;
             var selector = widget.selector;
 
+            // TODO is this really needed?
             if (options.schema) {
                 selector.val(options.schema);
             }

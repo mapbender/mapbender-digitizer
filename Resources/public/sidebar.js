@@ -29,7 +29,12 @@ Sidebar.prototype = {
         var option = $("<option/>");
         option.val(schema.schemaName).html(schema.label);
         option.data("schemaSettings", schema);
-        selector.append(option);
+        if (schema.schemaName === 'all') {
+            selector.prepend(option);
+            selector.val(schema.schemaName);
+        } else {
+            selector.append(option);
+        }
     },
 
 
