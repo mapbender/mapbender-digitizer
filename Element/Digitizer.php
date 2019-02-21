@@ -10,12 +10,16 @@ use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
+use Mapbender\DigitizerBundle\Component\DigitizerStyleManager;
 use Mapbender\DigitizerBundle\Entity\Condition;
-use Mapbender\DigitizerBundle\Entity\Style;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Mapbender\SearchBundle\Entity\Style;
+
+
+
 
 /**
  * Digitizer Mapbender3 element
@@ -30,6 +34,8 @@ class Digitizer extends BaseElement
 
     /** @var int Default maximal search results number */
     protected $maxResults = 2500;
+
+    protected $styleManager;
 
     /**
      * @inheritdoc
@@ -675,26 +681,26 @@ class Digitizer extends BaseElement
         return $schema;
     }
 
-    /**
-     * @param $request
-     * @return array
-     */
-    public function listStyleAction($request)
-    {
-        return array();
-    }
-
-    /**
-     * @param $request
-     * @return array
-     */
-    public function saveStyleAction($request)
-    {
-        $style = new Style($request['style']);
-        return array(
-            'style' => $style->toArray()
-        );
-    }
+//    /**
+//     * @param $request
+//     * @return array
+//     */
+//    public function listStyleAction($request)
+//    {
+//        return array();
+//    }
+//
+//    /**
+//     * @param $request
+//     * @return array
+//     */
+//    public function saveStyleAction($request)
+//    {
+//        $style = new Style($request['style']);
+//        return array(
+//            'style' => $style->toArray()
+//        );
+//    }
 
     /**
      * Get data store by settings or name
@@ -750,5 +756,175 @@ class Digitizer extends BaseElement
         /** @var DataStoreService $dataStoreService */
         $dataStoreService = $this->container->get('data.source');
         return $dataStoreService->get($id);
+    }
+
+
+    /**
+     * @inheritdoc
+     */
+    public function httpAction($action)
+    {
+
+        if ($action != "style/save" && $action != "style/list") {
+            return parent::httpAction($action);
+
+        }
+        $configuration   = $this->getConfiguration();
+//
+//        /** @var $request Request */
+          $request         = $this->container->get('request');
+//        $queryParams     = $request->query->all();
+//
+          $postData        = json_decode($request->getContent(), true);
+//
+        $schemas         = $configuration["schemes"];
+        $schemaName      = isset($postData["schema"])
+            ? $postData["schema"]
+            : $request->get("schema");
+//
+//        $defaultCriteria = [
+//            'returnType' => 'FeatureCollection',
+//            'maxResults' => 2500,
+//        ];
+//
+//        $featureType = null;
+//
+//        if (empty($schemaName)) {
+//            throw new Exception('For initialization there is no name of the declared scheme');
+//        }
+//
+        $schema = isset($schemas[$schemaName])
+            ? $schemas[$schemaName]
+            : null;
+//
+//        if (null === $schema && ($schemaName !== self::ALL_FEATURES_SCHEMA_NAME)) {
+//            throw new Exception("FeatureType settings are not correct");
+//        }
+//
+//        if (is_array($schema['featureType'])) {
+//            $featureType = new FeatureType($this->container, $schema['featureType']);
+//        }
+
+        $this->styleManager = new DigitizerStyleManager($this->container);
+
+        $results = array();
+
+        switch ($action) {
+//            case 'select':
+//                $results = $this->selectFeatures($request, $schemas, $queryParams, $defaultCriteria, $featureType);
+//                break;
+//
+//            case 'save':
+//                $results = $this->saveFeatures($request, $postData, $featureType, $schema, false);
+//                break;
+//
+//            case 'delete':
+//                $results = $this->deleteFeature($featureType, $postData);
+//                break;
+//
+//            case 'file-upload':
+//                $results = $this->fileUpload($request, $schemaName, $featureType);
+//                break;
+//
+//            case 'datastore/get':
+//                $results = $this->getDataStore($postData);
+//                break;
+//
+//            case 'datastore/save':
+//                $results = $this->saveDataStore($postData);
+//                break;
+//
+//            case 'datastore/remove':
+//                $this->removeDataStore($postData);
+//                break;
+
+            case 'style/save':
+                $results = $this->saveStyle($postData);
+                break;
+
+            case 'style/list':
+                $results = $this->listStyle($request, $schema);
+                break;
+
+            default:
+//                $results = array(
+//                    array('errors' => array(
+//                        array('message' => $action . " not defined!")
+//                    ))
+//                );
+        }
+
+        return new JsonResponse($results);
+    }
+
+    /**
+     * Save feature style
+     *
+     * @param $postData
+     * @return mixed
+     */
+    protected function saveStyle($postData)
+    {
+        $userId = $this->getCurrentUserId();
+        $parameters = array(
+            //'schemaName' => $postData['schema'],
+            'featureId'  => $postData['featureId'],
+            'userId'     => $userId,
+        );
+        $newStyle = $postData['style'];
+        $styleParameters = array_merge($newStyle, $parameters);
+
+        $style  = new Style($styleParameters);
+        $styleData = $this->styleManager->save($style, $userId)->toArray();
+        unset($styleData['userId']);
+        unset($styleData['name']);
+        unset($styleData['styleMaps']);
+        unset($styleData['title']);
+        $results['style']   = $styleData;
+
+        return $results;
+    }
+
+    /**
+     * Get styles list
+     *
+     * @param $request
+     * @param $schema
+     * @return mixed
+     */
+    protected function listStyle($request, $schema)
+    {
+        $this->requireMethod($request, 'POST');
+
+        $results['featureStyles'] = $this->styleManager->getSchemaStyles($schema, $this->getCurrentUserId());
+
+        return $results;
+    }
+
+    /**
+     * @param Request $request
+     * @param string[]|string $allowedMethods
+     * @throws BadRequestHttpException
+     *
+     */
+    protected static function requireMethod($request, $allowedMethods)
+    {
+        if (!is_array($allowedMethods)) {
+            $allowedMethods = explode(',', strtoupper($allowedMethods));
+        } else {
+            $allowedMethods = array_map('strtoupper', $allowedMethods);
+        }
+        $method = $request->getMethod();
+        if (!in_array($method, $allowedMethods)) {
+            throw new BadRequestHttpException("Unsupported method $method");
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getCurrentUserId()
+    {
+        return 1; //$this->getUser()->getId();
     }
 }
