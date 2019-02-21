@@ -30,6 +30,7 @@
             polygon: [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
             label: [{type: 'drawText'}, {type: 'moveFeature'}]
         },
+        schemes: {},
         /**
          * @type {OpenLayers.Map}
          */
@@ -197,14 +198,13 @@
 
         _createSchemes: function () {
             var widget = this;
-            var newSchemes = {};
-            newSchemes['all'] = new AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
-            _.each(widget.options.schemes, function (rawScheme, schemaName) {
+            var rawSchemes = widget.options.schemes;
+            _.each(rawSchemes, function (rawScheme, schemaName) {
                 rawScheme.schemaName = schemaName;
-                newSchemes[schemaName] = new Scheme(rawScheme, widget);
+                widget.schemes[schemaName] = new Scheme(rawScheme, widget);
             });
 
-            widget.options.schemes = newSchemes;
+            widget.schemes['all'] = new AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
         },
 
 
@@ -216,7 +216,7 @@
         getSchemaByGeomType: function (geomtype) {
             var widget = this;
             var schema = null;
-            _.each(widget.options.schemes, function (scheme) {
+            _.each(widget.schemes, function (scheme) {
                 if (scheme.featureType.geomType === geomtype) {
                     schema = scheme;
                 }
@@ -285,7 +285,7 @@
             //     titleElement.html(_.toArray(options.schemes)[0].label);
             //     widget.selector.hide();
             // } else {
-                titleElement.hide();
+            titleElement.hide();
             //}
         },
 
@@ -341,8 +341,6 @@
         },
 
 
-
-
         /**
          * Update cluster strategies
          */
@@ -354,7 +352,7 @@
             var clusterSettings;
             var closestClusterSettings;
 
-            $.each(options.schemes, function (i, schema) {
+            $.each(widget.schemes, function (i, schema) {
                 clusterSettings = null;
 
                 if (!schema.clustering) {
@@ -432,7 +430,7 @@
         refreshConnectedDigitizerFeatures: function (featureTypeName) {
             var widget = this;
             $(".mb-element-digitizer").not(".mb-element-data-manager").each(function (index, element) {
-                var schemes = widget.options.schemes;
+                var schemes = widget.schemes;
                 schemes[featureTypeName] && schemes[featureTypeName].layer && schemes[featureTypeName].layer._getData();
             })
 

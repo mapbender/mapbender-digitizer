@@ -32,7 +32,8 @@ AllScheme.prototype._createStyleMap = function (labels, styleContext) {
     var widget = schema.widget;
     var styleMapObject = {};
 
-    _.each(widget.options.schemes, function (scheme, schemaName) {
+    console.log(widget.schemes,"@@@");
+    _.each(widget.schemes, function (scheme, schemaName) {
         if (schemaName === schema.schemaName) {
             return;
         }
