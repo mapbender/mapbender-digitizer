@@ -68,9 +68,40 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         }),
 
         drawDonut: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
-            featureAdded : function() { console.log("donut should not be created") }, //createFeatureAddedMethod(injectedMethods, 'polygon'),
+            featureAdded : function() { console.warn("donut should not be created") },
             handlerOptions: {
                 holeModifier: 'element',
+                addPoint: function(pixel) {
+                    if(!this.drawingHole && this.evt && this.evt[this.holeModifier]) {
+                        var geometry = this.point.geometry;
+                        var features = this.control.layer.features;
+                        var candidate, polygon;
+                        // look for intersections, last drawn gets priority
+                        for (var i=features.length-1; i>=0; --i) {
+                            candidate = features[i].geometry;
+                            if ((candidate instanceof OpenLayers.Geometry.Polygon ||
+                                candidate instanceof OpenLayers.Geometry.MultiPolygon) &&
+                                candidate.intersects(geometry)) {
+                                polygon = features[i];
+                                this.control.layer.removeFeatures([polygon], {silent: true});
+                                this.control.layer.events.registerPriority(
+                                    "sketchcomplete", this, this.finalizeInteriorRing
+                                );
+                                this.control.layer.events.registerPriority(
+                                    "sketchmodified", this, this.enforceTopology
+                                );
+                                polygon.geometry.addComponent(this.line.geometry);
+                                this.polygon = polygon;
+                                this.drawingHole = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!this.drawingHole) {
+                        return;
+                    }
+                    OpenLayers.Handler.Path.prototype.addPoint.apply(this, arguments);
+                },
                 finalizeInteriorRing : function(event) {
                     var fir =  OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
                     injectedMethods.setModifiedState(this.polygon,this.control);
