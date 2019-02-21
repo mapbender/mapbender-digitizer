@@ -109,6 +109,25 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                 }
             },
 
+            activate: function() {
+                this.layer.map.controls.forEach(function(control) {
+                    if (control.dragPan) {
+                        control.dragPan.deactivate();
+                    }
+                });
+                OpenLayers.Control.DrawFeature.prototype.activate.apply(this,arguments);
+            },
+
+            deactivate: function() {
+                this.layer.map.controls.forEach(function(control) {
+                    if (control.dragPan) {
+                        control.dragPan.activate();
+                    }
+                });
+                OpenLayers.Control.DrawFeature.prototype.deactivate.apply(this,arguments);
+            }
+
+
         }),
 
         modifyFeature: new OpenLayers.Control.ModifyFeature(layer,{

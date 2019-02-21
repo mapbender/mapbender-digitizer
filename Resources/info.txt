@@ -6,7 +6,9 @@ Hinzugefügte Properties:
 
 Hinweise:
 - schema.featureType.geomType is mandatory
--
+
+Ideen:
+- Features nach vorne setzen (z-index)
 
 Ansprechen:
 - Hack beim Hintergrundbild des Color Pickers
@@ -43,6 +45,7 @@ Selbstgemachte Bugs:
 - hasOnlyOneTheme reparieren
 - Verhindern, dass Features am Anfang angezeigt werden, wenn kein Digitizer geöffnet ist.
 - Nach ändern des Styles wird style nicht sofort sichtbar, da feature selected ist
+- Save All Features wird nicht mehr automatisch deaktiviert
 
 
 Legacy Bugs
