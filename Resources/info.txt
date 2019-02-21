@@ -25,11 +25,11 @@ Refactoring - Code sortieren:
 - Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
 - Konstanten für Style Namen
 - Forbidden operations on server should NOT throw a 500
+- feature.attributes.geomType und schema.featureType.geomType- variablen anders benennen
 
 
 
 Testing:
-- Kopieren testen
 - Testen, was mit dem Formdata passiert wenn saveFeature außerhalb des FeatureEdit Dialogs aufgerufen wird
 - Überprüfen, wie im Bahn Digitizer "alles" Layer sich die einzelnen Features hinsichtlich ihrer allow Properties im Resulttable verhalten
 
@@ -58,6 +58,8 @@ Gemacht:
 - Kontext-Menü Funktionen irgendwie in Schema auslagern
 - Es muss entschieden werden, ob die properties für das all-layer im Server oder JS definiert werden sollen
 - Translations auslagern / vereinheitlichen
+- Kopieren testen
+
 
 
 

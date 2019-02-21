@@ -257,6 +257,7 @@ Scheme.prototype = {
         return formItems;
     },
 
+
     /**
      * Open edit feature dialog
      *
@@ -266,7 +267,6 @@ Scheme.prototype = {
 
     _openFeatureEditDialog: function (olFeature) {
         var schema = this;
-
         var dialog = new FeatureEditDialog(olFeature,schema.popup,schema);
 
     },

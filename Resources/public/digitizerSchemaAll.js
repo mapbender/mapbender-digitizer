@@ -37,7 +37,6 @@ AllScheme.prototype._createStyleMap = function (labels, styleContext) {
     var widget = schema.widget;
     var styleMapObject = {};
 
-    console.log(widget.schemes,"@@@");
     _.each(widget.schemes, function (scheme, schemaName) {
         if (schemaName === schema.schemaName) {
             return;
@@ -103,9 +102,11 @@ AllScheme.prototype.redesignLayerFunctions = function () {
 
 };
 
+
 AllScheme.prototype.getFormItems = function(feature) {
     var schema = this;
     var widget = schema.widget;
+    console.assert(!!feature.attributes.geomType, "geometry type of new Feature must be set");
     var featureSchema = widget.getSchemaByGeomType(feature.attributes.geomType);
     return featureSchema.getFormItems(feature);
 };

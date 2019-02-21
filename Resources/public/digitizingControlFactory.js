@@ -1,4 +1,4 @@
-var createFeatureAddedMethod = function(injectedMethods) {
+var createFeatureAddedMethod = function(injectedMethods, geomType) {
 
 
     /**
@@ -10,12 +10,12 @@ var createFeatureAddedMethod = function(injectedMethods) {
             feature.attributes[prop] = "";
         });
 
-        feature.layer.redraw();
+        feature.attributes.geomType = geomType;
+
 
         injectedMethods.setModifiedState(feature,this);
         injectedMethods.deactivateCurrentControl();
         injectedMethods.openFeatureEditDialog(feature);
-
         feature.redraw();
     };
 
@@ -26,28 +26,26 @@ var createFeatureAddedMethod = function(injectedMethods) {
 
 var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
-    var featureAdded = createFeatureAddedMethod(injectedMethods);
-
     var controls =  {
 
         drawText:  new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point,{
-            featureAdded : featureAdded
+            featureAdded :  createFeatureAddedMethod(injectedMethods, 'label'),
         }),
 
         drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point,{
-            featureAdded : featureAdded
+            featureAdded : createFeatureAddedMethod(injectedMethods, 'point'),
         }),
 
         drawLine: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Path,{
-            featureAdded : featureAdded
+            featureAdded : createFeatureAddedMethod(injectedMethods, 'line'),
         }),
 
         drawPolygon: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
-            featureAdded : featureAdded
+            featureAdded : createFeatureAddedMethod(injectedMethods, 'polygon'),
         }),
 
         drawRectangle: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
-            featureAdded : featureAdded,
+            featureAdded : createFeatureAddedMethod(injectedMethods, 'polygon'),
             handlerOptions: {
                 sides: 4,
                 irregular: true
@@ -55,14 +53,14 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         }),
 
         drawCircle: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
-            featureAdded : featureAdded,
+            featureAdded : createFeatureAddedMethod(injectedMethods, 'polygon'),
             handlerOptions: {
                 sides: 40
             }
         }),
 
         drawEllipse: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
-            featureAdded : featureAdded,
+            featureAdded : createFeatureAddedMethod(injectedMethods, 'polygon'),
             handlerOptions: {
                 sides: 40,
                 irregular: true
@@ -70,7 +68,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         }),
 
         drawDonut: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
-            featureAdded : featureAdded.bind(this),
+            featureAdded : function() { console.log("donut should not be created") }, //createFeatureAddedMethod(injectedMethods, 'polygon'),
             handlerOptions: {
                 holeModifier: 'element',
                 finalizeInteriorRing : function(event) {

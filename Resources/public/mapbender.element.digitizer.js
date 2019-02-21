@@ -233,7 +233,7 @@
                 }
             });
             if (!schema) {
-                console.warn("No Scheme found for feature", feature);
+                console.warn("No Scheme found for geomtype", geomtype);
             }
             return schema;
         },
