@@ -2,8 +2,6 @@
 namespace Mapbender\DigitizerBundle\Component;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Eslider\Driver\SqliteExtended;
-use Mapbender\SearchBundle\Entity\Style;
 
 /**
  * Class DigizerStyleManager

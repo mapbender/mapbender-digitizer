@@ -11,12 +11,13 @@ use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
 use Mapbender\DigitizerBundle\Component\DigitizerStyleManager;
+use Mapbender\DigitizerBundle\Component\Style;
 use Mapbender\DigitizerBundle\Entity\Condition;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Mapbender\SearchBundle\Entity\Style;
+
 
 
 

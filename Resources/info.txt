@@ -37,6 +37,8 @@ Testing:
 
 Selbstgemachte Bugs:
 - hasOnlyOneTheme reparieren
+- Verhindern, dass Features am Anfang angezeigt werden, wenn kein Digitizer geöffnet ist.
+- Nach ändern des Styles wird style nicht sofort sichtbar, da feature selected ist
 
 
 Legacy Bugs
