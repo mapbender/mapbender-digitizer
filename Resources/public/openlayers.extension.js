@@ -6,7 +6,6 @@ OpenLayers.Feature.prototype.applyStyle = function (styleData) {
     olFeature._addNewStyleToStyleMap(styleId,style);
     olFeature.styleId = styleId;
 
-    console.warn(styleId);
     olFeature.redraw(styleId);
 
 };

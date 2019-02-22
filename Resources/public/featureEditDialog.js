@@ -32,7 +32,7 @@ var FeatureEditDialog = function (feature, configuration, schema) {
         var dataManagerUtils = new DataManagerUtils(widget);
         dataManagerUtils.processCurrentFormItemsWithDataManager(feature, schema);
     } catch (e) {
-        console.warn(e);
+       // console.warn(e);
     }
 
 

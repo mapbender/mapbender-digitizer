@@ -735,16 +735,18 @@ Scheme.prototype = {
      * @returns {*}
      */
     openChangeStyleDialog: function (olFeature) {
+
         var schema = this;
         var layer = olFeature.layer;
         var styleMap = layer.options.styleMap;
         var styles = styleMap.styles;
-        var defaultSchemeStyle = styles[olFeature.attributes.geomType+'-default'] || styles['default'];
+        var defaultSchemeStyle = styles['default-'+olFeature.attributes.geomType] || styles['default'];
         var defaultStyleData = olFeature.style || _.extend({}, defaultSchemeStyle.defaultStyle);
 
         if (olFeature.styleId) {
             _.extend(defaultStyleData, styles[olFeature.styleId].defaultStyle);
         }
+
         var styleOptions = {
             data: defaultStyleData,
             commonTab: false

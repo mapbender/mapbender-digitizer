@@ -33,6 +33,8 @@ Refactoring - Code sortieren:
 - feature.attributes.geomType und schema.featureType.geomType- variablen anders benennen
 - bei der StyleMap wird nicht der geomType verwendet sondern irgendwas anderes. Ändern
 - Die Feature.redraw Methode mit generischem Parameter ist scheiße. Ändern
+- Die ganze Style Map Geschichte im AllScheme ist suboptimal. Neues Model ausdenken und anwenden.
+- olFeature.style  - gibt es die variable und macht die sinn
 
 
 
@@ -48,7 +50,6 @@ Selbstgemachte Bugs:
 - Nach ändern des Styles wird style nicht sofort sichtbar, da feature selected ist
 - Save All Features wird nicht mehr automatisch deaktiviert
 - Feature Style wird nicht sofort gesetzt, sondern erst später (gabs auch bei der Bahn schon)
-- Feature Style Fenster öffnet nicht mit aktuellem Style des Features sondern gelb
 - Nach Speichern von neuem Feature ist nur noch dieses im ResultTable
 
 
@@ -71,6 +72,7 @@ Gemacht:
 - Kopieren testen
 - Default Style in Style Widget richtig anzeigen
 - Herausfinden, wann Geometrie "selected"-Eigenschaft verliert und das korrigieren
+- Feature Style Fenster öffnet nicht mit aktuellem Style des Features sondern gelb
 
 
 Von alleine verschwunden:
