@@ -417,8 +417,6 @@
             var widget = this;
             widget.options.__disabled = false;
             widget.onSelectorChange(); // necessary to set currentSchema
-            widget.currentSchema.activateSchema();
-
         },
 
         deactivate: function () {
