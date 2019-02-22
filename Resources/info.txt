@@ -35,6 +35,7 @@ Refactoring - Code sortieren:
 - Die Feature.redraw Methode mit generischem Parameter ist scheiße. Ändern
 - Die ganze Style Map Geschichte im AllScheme ist suboptimal. Neues Model ausdenken und anwenden.
 - olFeature.style  - gibt es die variable und macht die sinn
+- Backend refactorn - da gibt es viel Bedarf, seit dem Einfügen von style. Der Bahn Approch ist wohl besser
 
 
 
@@ -50,6 +51,7 @@ Selbstgemachte Bugs:
 - Nach ändern des Styles wird style nicht sofort sichtbar, da feature selected ist
 - Save All Features wird nicht mehr automatisch deaktiviert
 - Feature Style wird nicht sofort gesetzt, sondern erst später (gabs auch bei der Bahn schon)
+- Individueller Feature style wird nur im all scheme gesetzt
 
 
 Legacy Bugs
