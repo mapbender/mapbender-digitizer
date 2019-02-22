@@ -539,6 +539,7 @@ FeatureStyleEditor.prototype = {
         if (olFeature.fid) {
             featureStyleEditor._saveStyle(featureStyleEditor.schemaName, styleData, olFeature)
                 .done(function (response) {
+                    console.log(response.style,olFeature.layer.styleMap.styles);
                     olFeature.applyStyle(response.style);
                     styleEditor.enableForm();
                 });

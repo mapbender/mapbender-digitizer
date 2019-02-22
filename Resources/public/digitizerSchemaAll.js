@@ -90,6 +90,7 @@ AllScheme.prototype.redesignLayerFunctions = function () {
 
 
     layer.drawFeature = function (feature, styleId) {
+        console.warn(feature,styleId,"§");
         if (!styleId || styleId.length <= 20) { // simple way to detect if it is an individual style
             var newStyleId = (styleId || 'default') + "-" + widget.getGeometryNameByGeomType(feature.attributes.geomType);
         } else {

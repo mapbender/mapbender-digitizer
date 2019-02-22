@@ -5,6 +5,8 @@ OpenLayers.Feature.prototype.applyStyle = function (styleData) {
     olFeature._deleteOldStyleFromStyleMap(styleId);
     olFeature._addNewStyleToStyleMap(styleId,style);
     olFeature.styleId = styleId;
+
+    console.warn(styleId);
     olFeature.redraw(styleId);
 
 };
@@ -28,7 +30,7 @@ OpenLayers.Feature.prototype.redraw = function(highlightOrStyle) {
     var feature = this;
     var layer = feature.layer;
 
-    if (typeof highlightOrStyle == "string") {
+    if (typeof highlightOrStyle == "string" || typeof highlightOrStyle == "number") {
         layer.drawFeature(feature,highlightOrStyle);
 
     } else {
