@@ -230,7 +230,7 @@ Scheme.prototype = {
     getTableWidget: function () {
         var schema = this;
         var $table = schema.table;
-        return $table.data('visUiJsResultTable');
+        return $table.resultTable('instance');
     },
 
 
@@ -554,7 +554,7 @@ Scheme.prototype = {
     _getTableRowByFeature: function (feature) {
         var schema = this;
         var table = schema.table;
-        var tableWidget = table.data('visUiJsResultTable');
+        var tableWidget = table.resultTable("instance");
         var row = tableWidget.getDomRowByData(feature);
         return row;
     },
@@ -1205,8 +1205,8 @@ Scheme.prototype = {
     _refreshFeatureRowInDataTable: function (feature) {
         var schema = this;
         var table = schema.table;
-        var tableWidget = table.data('visUiJsResultTable');
-        var tableApi = table.resultTable('getApi');
+        var tableWidget = table.resultTable('instance');
+        var tableApi = tableWidget.getApi();
 
         tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
         tableApi.draw();
