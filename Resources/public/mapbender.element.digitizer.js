@@ -258,7 +258,6 @@
                 widget.currentSchema && widget.currentSchema.deactivateSchema();
 
                 newSchema.activateSchema();
-                newSchema._getData();
             };
 
             selector.on('change', widget.onSelectorChange);

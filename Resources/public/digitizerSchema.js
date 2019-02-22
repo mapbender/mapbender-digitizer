@@ -510,6 +510,8 @@ Scheme.prototype = {
             layer.setVisibility(true);
             frame.show();
             schema.selectControl.activate();
+            schema._getData();
+
         });
 
     },
