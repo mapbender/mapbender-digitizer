@@ -505,7 +505,6 @@ Scheme.prototype = {
         QueryEngine.query('style/list', {schema: schema.schemaName}).done(function (data) {
             schema.featureStyles = data.featureStyles;
 
-            console.log(schema.featureStyles);
             schema.reloadFeatures();
             layer.setVisibility(true);
             frame.show();
