@@ -422,9 +422,8 @@ Scheme.prototype = {
         var tableApi = schema.table.resultTable('getApi');
 
         tableApi.clear();
-        var featuresWithoutDrawElements = _.difference(features, _.where(features, {_sketch: true}));
 
-        tableApi.rows.add(featuresWithoutDrawElements);
+        tableApi.rows.add(features.filter(function(feature) { return !feature.isNew }));
         tableApi.draw();
 
         tableApi.rows(function (idx, feature, row) {
