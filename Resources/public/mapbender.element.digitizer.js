@@ -196,7 +196,9 @@
                 widget.schemes[schemaName] = new Scheme(rawScheme, widget);
             });
 
-            widget.schemes['all'] = new AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
+            if (!widget.hasOnlyOneScheme) {
+                widget.schemes['all'] = new AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
+            }
         },
 
 
@@ -285,14 +287,14 @@
             var titleElement = $("> div.title", element);
 
 
-            // var hasOnlyOneScheme = _.size(options.schemes) === 1;
-            //
-            // if (hasOnlyOneScheme) {
-            //     titleElement.html(_.toArray(options.schemes)[0].label);
-            //     widget.selector.hide();
-            // } else {
-            titleElement.hide();
-            //}
+            widget.hasOnlyOneScheme = _.size(options.schemes) === 1;
+
+            if (widget.hasOnlyOneScheme) {
+                titleElement.html(_.toArray(options.schemes)[0].label);
+                widget.selector.hide();
+            } else {
+                titleElement.hide();
+            }
         },
 
         _setup: function () {

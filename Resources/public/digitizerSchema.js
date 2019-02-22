@@ -351,7 +351,6 @@ Scheme.prototype = {
             hover: true,
 
             clickFeature: function (feature) {
-                var features = feature.cluster || [feature];
 
 
                 if (schema._mapHasActiveControlThatBlocksSelectControl()) {
@@ -371,6 +370,7 @@ Scheme.prototype = {
                 schema._highlightSchemaFeature(feature, true);
 
                 if (schema.allowEditData) {
+                    var features = feature.cluster || [feature];
                     schema._openFeatureEditDialog(features[0]);
                 }
             },

@@ -47,8 +47,8 @@ Testing:
 
 Selbstgemachte Bugs:
 - hasOnlyOneTheme reparieren
-- Save All Features wird nicht mehr automatisch deaktiviert
-- Aktivierung des individuelen save Buttons im resultTable muss über tableAPI gesteuert werden
+- Aktivierung des individuellen save Buttons im resultTable verschwindet wieder
+- Unsaved Style verschwindet, wenn Features neu geladen werden (Refactoring Style)
 
 
 Legacy Bugs
@@ -76,6 +76,7 @@ Gemacht:
 - Nach ändern des Styles wird style nicht sofort sichtbar, da feature selected ist
 - Feature Style wird nicht sofort gesetzt, sondern erst später (gabs auch bei der Bahn schon)
 - Neu hinzugefügtes, ungespeichertes Feature aktiviert Allsave Button nicht
+- Save All Features wird nicht mehr automatisch deaktiviert
 
 
 
