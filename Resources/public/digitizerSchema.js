@@ -227,12 +227,6 @@ Scheme.prototype = {
         };
     },
 
-    getTableWidget: function () {
-        var schema = this;
-        var $table = schema.table;
-        return $table.resultTable('instance');
-    },
-
 
     getDefaultFormItems: function () {
 
@@ -273,16 +267,16 @@ Scheme.prototype = {
 
 
     hoverInResultTable: function (feature, highlight) {
+        var schema = this;
 
         var features = feature.cluster || [feature];
-        var tableWidget = this.getTableWidget();
         var domRow;
 
         for (var k in features) {
             var feature = features[k];
-            domRow = tableWidget.getDomRowByData(feature);
+            domRow = schema.resultTable.getDomRowByData(feature);
             if (domRow && domRow.size()) {
-                tableWidget.showByRow(domRow);
+                schema.resultTable.showByRow(domRow);
 
                 if (highlight) {
                     domRow.addClass('hover');
@@ -333,7 +327,7 @@ Scheme.prototype = {
 
     _getSelectionManager: function () {
         var schema = this;
-        return schema.table.resultTable("getSelection");
+        return schema.resultTable.getSelection();
     },
 
     /**
@@ -419,7 +413,7 @@ Scheme.prototype = {
 
     _redrawResultTableFeatures: function (features) {
         var schema = this;
-        var tableApi = schema.table.resultTable('getApi');
+        var tableApi = schema.resultTable.getApi();
 
         tableApi.clear();
 
@@ -468,8 +462,7 @@ Scheme.prototype = {
             widget.deactivate();
         }
 
-        var table = schema.table;
-        var tableApi = table.resultTable('getApi');
+        var tableApi = schema.resultTable.getApi();
         var nodes = tableApi.rows(function (idx, data, row) {
             var isInvisible = data.renderIntent === 'invisible';
             if (isInvisible) {
@@ -553,9 +546,7 @@ Scheme.prototype = {
 
     _getTableRowByFeature: function (feature) {
         var schema = this;
-        var table = schema.table;
-        var tableWidget = table.resultTable("instance");
-        var row = tableWidget.getDomRowByData(feature);
+        var row = schema.resultTable.getDomRowByData(feature);
         return row;
     },
 
@@ -1122,8 +1113,7 @@ Scheme.prototype = {
     saveFeature: function (feature, formData) {
         var schema = this;
         var widget = schema.widget;
-        var table = schema.table;
-        var tableApi = table.resultTable('getApi');
+        var tableApi = schema.resultTable.getApi();
         var wkt = new OpenLayers.Format.WKT().write(feature);
         var srid = widget.map.getProjectionObject().proj.srsProjNumber;
 
@@ -1204,11 +1194,9 @@ Scheme.prototype = {
 
     _refreshFeatureRowInDataTable: function (feature) {
         var schema = this;
-        var table = schema.table;
-        var tableWidget = table.resultTable('instance');
-        var tableApi = tableWidget.getApi();
+        var tableApi = schema.resultTable.getApi();
 
-        tableApi.row(tableWidget.getDomRowByData(feature)).invalidate();
+        tableApi.row(schema.resultTable.getDomRowByData(feature)).invalidate();
         tableApi.draw();
     },
 
@@ -1280,8 +1268,9 @@ Scheme.prototype = {
         var schema = this;
         var widget = schema.widget;
 
-        var table = schema.table;
-        var tableApi = table.resultTable('getApi');
+        var tableApi = schema.resultTable.getApi();
+
+        var table = $(schema.resultTable);
 
         table.off('mouseenter', 'mouseleave', 'click');
 

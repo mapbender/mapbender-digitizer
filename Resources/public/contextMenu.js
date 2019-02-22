@@ -131,8 +131,7 @@ ElementContextMenu.prototype.buildContextMenu = function (trigger, e) {
 
     var contextMenu = this;
     var schema = contextMenu.schema;
-    var table = schema.table;
-    var api = table.resultTable('getApi');
+    var api = schema.resultTable.getApi();
     var olFeature = api.row($(trigger)).data();
 
     if (!olFeature) {
