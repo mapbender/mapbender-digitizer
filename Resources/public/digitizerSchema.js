@@ -561,7 +561,9 @@ Scheme.prototype = {
     },
 
     setModifiedState: function (feature, control) {
+
         var schema = this;
+        $(schema.frame).find(".save-all-features").addClass("active");
 
         var row = schema._getTableRowByFeature(feature);
         if (!row) {
@@ -572,7 +574,6 @@ Scheme.prototype = {
 
         row.find('.button.save').removeClass("disabled").addClass('active');
 
-        $(schema.frame).find(".save-all-features").addClass("active");
 
         control && control.deactivate();
 
@@ -580,15 +581,23 @@ Scheme.prototype = {
 
 
     unsetModifiedState: function (feature) {
+
         var schema = this;
 
-        var row = schema._getTableRowByFeature(feature);
-
-        row.find('.button.save').removeClass("active").addClass('disabled');
+        feature.isChanged = false;
+        feature.isNew = false;
 
         if (schema._getUnsavedFeatures().length === 0) {
             $(schema.frame).find(".save-all-features").removeClass("active");
         }
+
+        var row = schema._getTableRowByFeature(feature);
+        if (!row) {
+            return; // in case of non-saved feature
+        }
+        row.find('.button.save').removeClass("active").addClass('disabled');
+
+
 
     },
 
@@ -1149,9 +1158,9 @@ Scheme.prototype = {
                 return;
             }
 
-            if (!feature.isNew) {
-                schema.unsetModifiedState(feature);
-            }
+
+            schema.unsetModifiedState(feature);
+
 
             var newFeature = schema._createNewFeatureWithDBFeature(feature, response);
 

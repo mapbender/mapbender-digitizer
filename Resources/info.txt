@@ -38,6 +38,7 @@ Refactoring - Code sortieren:
 
 
 
+
 Testing:
 - Testen, was mit dem Formdata passiert wenn saveFeature außerhalb des FeatureEdit Dialogs aufgerufen wird
 - Überprüfen, wie im Bahn Digitizer "alles" Layer sich die einzelnen Features hinsichtlich ihrer allow Properties im Resulttable verhalten
@@ -47,6 +48,7 @@ Testing:
 Selbstgemachte Bugs:
 - hasOnlyOneTheme reparieren
 - Save All Features wird nicht mehr automatisch deaktiviert
+- Aktivierung des individuelen save Buttons im resultTable muss über tableAPI gesteuert werden
 
 
 Legacy Bugs
@@ -73,6 +75,8 @@ Gemacht:
 - Verhindern, dass Features am Anfang angezeigt werden, wenn kein Digitizer geöffnet ist.
 - Nach ändern des Styles wird style nicht sofort sichtbar, da feature selected ist
 - Feature Style wird nicht sofort gesetzt, sondern erst später (gabs auch bei der Bahn schon)
+- Neu hinzugefügtes, ungespeichertes Feature aktiviert Allsave Button nicht
+
 
 
 
