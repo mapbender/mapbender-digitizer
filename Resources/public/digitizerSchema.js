@@ -461,7 +461,7 @@ Scheme.prototype = {
 
         });
 
-        layer.redraw();
+        //layer.redraw();
 
         schema._redrawResultTableFeatures(features);
 
