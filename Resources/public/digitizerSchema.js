@@ -55,7 +55,7 @@ Scheme.prototype = {
 
     schemaName: '',
     featureTypeName: '',
-    table: null,
+    resultTable: null,
     label: '',
     layer: null,
     widget: null,
@@ -269,6 +269,7 @@ Scheme.prototype = {
     hoverInResultTable: function (feature, highlight) {
         var schema = this;
 
+
         var features = feature.cluster || [feature];
         var domRow;
 
@@ -461,18 +462,6 @@ Scheme.prototype = {
         if (widget.options.__disabled) {
             widget.deactivate();
         }
-
-        var tableApi = schema.resultTable.getApi();
-        var nodes = tableApi.rows(function (idx, data, row) {
-            var isInvisible = data.renderIntent === 'invisible';
-            if (isInvisible) {
-                var $row = $(row);
-                var visibilityButton = $row.find('.button.icon-visibility');
-                visibilityButton.addClass('icon-invisibility');
-                $row.addClass('invisible-feature');
-            }
-            return true;
-        });
     },
 
 

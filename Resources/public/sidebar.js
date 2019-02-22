@@ -221,6 +221,7 @@ Sidebar.prototype = {
 
 
         frame.append($table);
+
     },
 
     //TODO methode ist zu lang

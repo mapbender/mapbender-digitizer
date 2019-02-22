@@ -19,7 +19,6 @@ Refactoring - Renaming:
 
 Refactoring - Code sortieren:
 - Die current Variablen in Widget currentSchema und currentPopup sind schlechter Stil und gehören weg : currentSchema durch abgespeckte Version ersetzen, die Methoden beinhaltet, da kommen die contextMenu Methoden auch rein
-- Die Schnittstelle von .table u.s.w. vereinheitlichen
 - Helper Klasse/Datei für Feldlose Methoden anlegen, evtl. auch mehrere
 - Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen
 - DataManagerUtils refactorn
@@ -77,6 +76,8 @@ Gemacht:
 - Feature Style wird nicht sofort gesetzt, sondern erst später (gabs auch bei der Bahn schon)
 - Neu hinzugefügtes, ungespeichertes Feature aktiviert Allsave Button nicht
 - Save All Features wird nicht mehr automatisch deaktiviert
+- Die Schnittstelle von .table u.s.w. vereinheitlichen
+
 
 
 
