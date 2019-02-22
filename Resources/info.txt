@@ -50,7 +50,6 @@ Selbstgemachte Bugs:
 - Nach ändern des Styles wird style nicht sofort sichtbar, da feature selected ist
 - Save All Features wird nicht mehr automatisch deaktiviert
 - Feature Style wird nicht sofort gesetzt, sondern erst später (gabs auch bei der Bahn schon)
-- Nach Speichern von neuem Feature ist nur noch dieses im ResultTable
 
 
 Legacy Bugs
@@ -77,3 +76,5 @@ Gemacht:
 
 Von alleine verschwunden:
 - Gewählter Druck Button im ResultTable verliert Farbe wenn über die jeweilige Reihe gehovert wird
+- Nach Speichern von neuem Feature ist nur noch dieses im ResultTable
+

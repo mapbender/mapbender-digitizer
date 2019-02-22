@@ -486,6 +486,7 @@ Scheme.prototype = {
 
     activateSchema: function () {
 
+        console.warn("achtivate Schema");
         /** @type {Scheme} */
         var schema = this;
         var widget = schema.widget;

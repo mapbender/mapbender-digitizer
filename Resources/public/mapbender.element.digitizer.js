@@ -238,11 +238,20 @@
             return schema;
         },
 
-        _createOnSelectorChangeCallback: function () {
+
+
+        _initializeSelector: function () {
             var widget = this;
+            var options = widget.options;
             var selector = widget.selector;
 
-            return function () {
+
+            // TODO is this really needed?
+            if (options.schema) {
+                selector.val(options.schema);
+            }
+
+            widget.onSelectorChange = function () {
                 var option = selector.find(":selected");
                 var newSchema = option.data("schemaSettings");
 
@@ -250,23 +259,9 @@
 
                 newSchema.activateSchema();
                 newSchema._getData();
-            }
+            };
 
-        },
-
-        _initializeSelector: function () {
-            var widget = this;
-            var options = widget.options;
-            var selector = widget.selector;
-
-            // TODO is this really needed?
-            if (options.schema) {
-                selector.val(options.schema);
-            }
-
-            var onSelectorChange = widget._createOnSelectorChangeCallback();
-            selector.on('change', onSelectorChange);
-            onSelectorChange();
+            selector.on('change', widget.onSelectorChange);
 
         },
 
@@ -421,6 +416,7 @@
         activate: function () {
             var widget = this;
             widget.options.__disabled = false;
+            widget.onSelectorChange(); // necessary to set currentSchema
             widget.currentSchema.activateSchema();
 
         },
@@ -428,7 +424,7 @@
         deactivate: function () {
             var widget = this;
             widget.options.__disabled = true;
-            if (!widget.currentSchema.displayOnInactive) {
+            if (widget.currentSchema && !widget.currentSchema.displayOnInactive) {
                 widget.currentSchema.deactivateSchema();
             }
         },
