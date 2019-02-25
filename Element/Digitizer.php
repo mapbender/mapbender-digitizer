@@ -60,7 +60,7 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/contextMenu.js',
                 '@MapbenderDigitizerBundle/Resources/public/featureEditDialog.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizingControlFactory.js',
-                '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
+                '@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.layermanager.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.confirmDialog.js',
                 '@MapbenderDigitizerBundle/Resources/public/dataManagerUtils.js',

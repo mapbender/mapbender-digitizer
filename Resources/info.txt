@@ -33,7 +33,6 @@ Refactoring - Code sortieren:
 - bei der StyleMap wird nicht der geomType verwendet sondern irgendwas anderes. Ändern
 - Die Feature.redraw Methode mit generischem Parameter ist scheiße. Ändern
 - Die ganze Style Map Geschichte im AllScheme ist suboptimal. Neues Model ausdenken und anwenden.
-- Backend refactorn - da gibt es viel Bedarf, seit dem Einfügen von style. Der Bahn Approch ist wohl besser
 
 
 
@@ -45,12 +44,11 @@ Testing:
 
 
 Selbstgemachte Bugs:
-- hasOnlyOneTheme reparieren
-- Aktivierung des individuellen save Buttons im resultTable verschwindet wieder
 - Unsaved Style verschwindet, wenn Features neu geladen werden (Refactoring Style)
 
 
-Legacy Bugs
+Legacy Bugs:
+-Donut mit "Trapez"-Form als ausgeschnittes Loch gilt im Rahmen von Postgres nicht mehr als valide geometrie und wird nicht geladen, wenn By CurrentExtent gesucht wird. Ansonsten schon.
 
 
 Optische Bugs:
@@ -77,6 +75,10 @@ Gemacht:
 - Die Schnittstelle von .table u.s.w. vereinheitlichen
 - Zu viele Buttons in Feature Edit Dialog machen Layout kaputt
 - Kollision der Control- und General Buttons im Sidebar verhindern
+- hasOnlyOneTheme reparieren
+- Aktivierung des individuellen save Buttons im resultTable verschwindet wieder
+- Backend refactorn - da gibt es viel Bedarf, seit dem Einfügen von style. Der Bahn Approch ist wohl besser
+
 
 
 
