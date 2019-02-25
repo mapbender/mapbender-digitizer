@@ -586,8 +586,28 @@ class Digitizer extends BaseElement
                 $this->container->get('logger')->error('Digitizer WMS GetFeatureInfo: '. $e->getMessage());
                 $responseArray['error']  = $e->getMessage();
             }
+            if(end($dataSets) === false && is_array($http_response_header)){
+                $head = array();
+                foreach( $http_response_header as $k=>$v )
+                {
+                    $t = explode( ':', $v, 2 );
+                    if( isset( $t[1] ) )
+                        $head[ trim($t[0]) ] = trim( $t[1] );
+                    else
+                    {
+                        $head[] = $v;
+                        if( preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#",$v, $out ) )
+                            $head['reponse_code'] = intval($out[1]);
+                    }
+                }
+                $responseArray['error']  = array('message' => "An error occured. Remote service {$url} responded with status code {$head[0]}.", 'responseHeader' => $head);
+            } elseif (end($dataSets) === false ) {
+                $responseArray['error']  = "Unkown error";
+            }
 
         }
+    
+       
 
         $responseArray['dataSets'] = $dataSets;
         return $responseArray;

@@ -3379,7 +3379,7 @@
                     if(!feature.isNew){
                         this._openFeatureEditDialog(feature);
                     }
-                    Mapender.error(Mapbender.trans("mb.digitizer.remoteData.error"));
+                    Mapbender.error(Mapbender.trans("mb.digitizer.remoteData.error"));
 
                 })
             ;
