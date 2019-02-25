@@ -92,25 +92,6 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * @param Request $request
-     * @param string[]|string $allowedMethods
-     * @throws BadRequestHttpException
-     *
-     */
-    protected static function requireMethod($request, $allowedMethods)
-    {
-        if (!is_array($allowedMethods)) {
-            $allowedMethods = explode(',', strtoupper($allowedMethods));
-        } else {
-            $allowedMethods = array_map('strtoupper', $allowedMethods);
-        }
-        $method = $request->getMethod();
-        if (!in_array($method, $allowedMethods)) {
-            throw new BadRequestHttpException("Unsupported method $method");
-        }
-    }
-
-    /**
      * @return mixed[]
      */
     protected function getFeatureTypeDeclarations()
@@ -135,34 +116,34 @@ class Digitizer extends BaseElement
 
 
         if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
-            foreach ($configuration["schemes"] as $key => &$scheme) {
+            foreach ($configuration['schemes'] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
+                    if ($featureTypes === null) {
+                        $featureTypes = $this->getFeatureTypeDeclarations();
+                    }
                     $featureTypeName           = $scheme['featureType'];
                     $scheme['featureType']     = $featureTypes[ $featureTypeName ];
                     $scheme['featureTypeName'] = $featureTypeName;
                 }
-                if (isset($scheme['formItems'])) {
-                    $preparedItems = $this->prepareItems($scheme['formItems']);
-                    /**
-                     * Strip 'breakLine' and 'text' type items, we do this via theme.js now
-                     * @todo: perform this stripping in entity so the values disappear from the backend
-                     */
-                    $scheme['formItems'] = array();
-                    foreach ($preparedItems as $preparedItem) {
-                        if (empty($preparedItem['type']) || !in_array($preparedItem['type'], array('breakLine', 'text'))) {
-                            $scheme['formItems'][] = $preparedItem;
-                        }
-                    }
+
+                if ($public) {
+                    $this->cleanFromInternConfiguration($scheme['featureType']);
                 }
-                /**
-                 * Also nuke `tableFields`, also controlled via theme.js
-                 * @todo: perform this stripping in entity so the values disappear from the backend
-                 */
-                unset($scheme['tableFields']);
-                $scheme['featureStyles'] = array();
+
+                if (isset($scheme['formItems'])) {
+                    $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
+                }
+
+                if (isset($scheme['search']) && isset($scheme['search']["form"])) {
+                    $scheme['search']["form"] = $this->prepareItems($scheme['search']["form"]);
+                }
             }
         }
         return $configuration;
+    }
+
+    public function getConfigurationAction(){
+        return $this->getConfiguration(true);
     }
 
     /**
@@ -193,204 +174,355 @@ class Digitizer extends BaseElement
         return $feature;
     }
 
-
     /**
-     * @inheritdoc
+     * Get schema by name
+     *
+     * @param string $name Feature type name
+     * @return FeatureType
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
      */
-    public function httpAction($action)
+    protected function getFeatureTypeBySchemaName($name)
     {
-        /** @var $request Request */
-        $configuration   = $this->getConfiguration();
-        $request         = $this->container->get('request');
-        $queryParams     = $request->query->all();
-        $postData        = json_decode($request->getContent(), true);
-        $schemas         = $configuration["schemes"];
-        $debugMode       = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
-        $schemaName      = isset($postData["schema"]) ? $postData["schema"] : $request->get("schema");
-        $defaultCriteria = array('returnType' => 'FeatureCollection',
-            'maxResults' => 2500);
-        if (empty($schemaName)) {
-            throw new Exception('For initialization there is no name of the declared scheme');
+        if ($name=='all') {
+            return null;
         }
-
-        if ($schemaName == 'all') {
-
-        }
-
-        $schema = $schemas[$schemaName];
+        $schema = $this->getSchemaByName($name);
 
         if (is_array($schema['featureType'])) {
             $featureType = new FeatureType($this->container, $schema['featureType']);
         } else {
-            throw new Exception("FeatureType settings not correct");
+            throw new Exception('Feature type schema settings not correct', 2);
         }
 
-        $results = array();
-
-        switch ($action) {
-            case 'select':
-                $results = $this->selectFeatures($request, $schemas, $queryParams, $defaultCriteria, $featureType);
-                break;
-
-            case 'save':
-                $results = $this->saveFeatures($request, $postData, $featureType, $schema, $debugMode);
-                break;
-
-            case 'delete':
-                $results = $this->deleteFeature($featureType, $postData);
-                break;
-
-            case 'file-upload':
-                $results = $this->fileUpload($request, $schemaName, $featureType);
-                break;
-
-            case 'datastore/get':
-                $dataStore = $this->getDataStoreById($postData['id']);
-                if (!$dataStore) {
-                    throw new NotFoundHttpException("No such datastore");
-                }
-                $entity = $dataStore->get($postData['dataItemId']);
-                if (!$entity) {
-                    throw new NotFoundHttpException("No such entity");
-                }
-                $results = $entity->toArray();
-                break;
-
-            case 'datastore/save':
-                $results = $this->saveDataStore($postData);
-                break;
-
-            case 'datastore/remove':
-                $this->removeDataStore($postData);
-                break;
-
-            default:
-                $results = array(
-                    array('errors' => array(
-                        array('message' => $action . " not defined!")
-                    ))
-                );
-        }
-
-        return new JsonResponse($results);
+        return $featureType;
     }
 
     /**
-     * Select features
+     * Eval code string
      *
-     * @param $request
-     * @param $schemas
-     * @param $queryParams
-     * @param $defaultCriteria
-     * @param FeatureType $featureType
-     * @return mixed
+     * Example:
+     *  self::evalString('Hello, $name', array('name' => 'John'))
+     *  returns 'Hello, John'
+     *
+     * @param string $code Code string.
+     * @param array  $args Variables this should be able by evaluating.
+     * @return string Returns evaluated result.
+     * @throws \Exception
      */
-    protected function selectFeatures($request, $schemas, $queryParams, $defaultCriteria, $featureType)
+    protected static function evalString($code, $args)
     {
-        $this->requireMethod($request, 'GET');
-        $results = $featureType->search(array_merge($defaultCriteria, $queryParams));
-        return $results;
+        foreach ($args as $key => &$value) {
+            ${$key} = &$value;
+        }
+
+        $_return = null;
+        if (eval("\$_return = \"" . str_replace('"', '\"', $code) . "\";") === false && ($errorDetails = error_get_last())) {
+            $lastError = end($errorDetails);
+            throw new \Exception($lastError["message"], $lastError["type"]);
+        }
+        return $_return;
     }
 
     /**
-     * Save features
+     * Get form item by name
+     *
+     * @param $items
+     * @param $name
+     */
+    public function getFormItemByName($items, $name)
+    {
+        foreach ($items as $item) {
+            if (isset($item['name']) && $item['name'] == $name) {
+                return $item;
+            }
+            if (isset($item['children']) && is_array($item['children'])) {
+                return $this->getFormItemByName($item['children'], $name);
+            }
+        }
+    }
+
+    /**
+     * Search form fields AJAX API
      *
      * @param $request
-     * @param $postData
-     * @param FeatureType $featureType
-     * @param $schema
-     * @param $debugMode
      * @return array
      */
-    protected function saveFeatures($request, $postData, $featureType, $schema, $debugMode)
+    public function selectFormAction($request)
     {
-        // save once
-        $this->requireMethod($request, 'POST');
-        if (isset($postData['feature'])) {
-            $postData['features'] = array($postData['feature']);
+        /** @var Connection $connection */
+        $itemDefinition = $request["item"];
+        $schemaName     = $request["schema"];
+        $formData       = $request["form"];
+        $params         = $request["params"];
+        $config         = $this->getConfiguration();
+        $schemaConfig   = $config['schemes'][ $schemaName ];
+        $searchConfig   = $schemaConfig["search"];
+        $searchForm     = $searchConfig["form"];
+        $item           = $this->getFormItemByName($searchForm, $itemDefinition["name"]);
+        $query          = isset($params["term"]) ? $params["term"] : '';
+        $ajaxSettings   = $item['ajax'];
+        $connection     = $this->container->get("doctrine.dbal." . $ajaxSettings['connection'] . "_connection");
+        $formData       = array_merge($formData, array($item["name"] => $query));
+        $sql            = self::evalString($ajaxSettings["sql"], $formData);
+        $rows           = $connection->fetchAll($sql);
+        $results        = array();
+
+        foreach ($rows as $row) {
+            $results[] = array(
+                'id'   => current($row),
+                'text' => end($row),
+            );
         }
 
-        // save once
-        if (isset($postData['style'])) {
-            $postData['features'] = array($postData['feature']);
+        return array('results' => $results);
+    }
+
+
+    /**
+     * Select/search features and return feature collection
+     *
+     * @param array $request
+     * @return array Feature collection
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
+     */
+    public function selectAction($request)
+    {
+        $schemaName  = $request["schema"];
+        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
+
+        if (isset($request["where"])) {
+            unset($request["where"]);
         }
 
-        $connection = $featureType->getDriver()->getConnection();
+        if (isset($request["search"])) {
+            $connection = $featureType->getConnection();
+            $schema = $this->getSchemaByName($schemaName);
+            $vars = $this->escapeValues($request["search"], $connection);
 
+            $whereConditions = array();
+            foreach ($schema['search']['conditions'] as $condition) {
+                $condition = new Condition($condition);
+                if ($condition->isSql()) {
+                    $whereConditions[] = $condition->getOperator();
+                    $whereConditions[] = '(' . static::evalString($condition->getCode(), $vars) . ')';
+                }
+
+                if ($condition->isSqlArray()) {
+                    $subConditions = array();
+                    $arrayVars     = $vars[ $condition->getKey() ];
+
+                    if (!is_array($arrayVars)) {
+                        continue;
+                    }
+
+                    foreach ($arrayVars as $value) {
+                        $subConditions[] = '(' .
+                            static::evalString(
+                                $condition->getCode(),
+                                array_merge($vars, array('value' => $value)))
+                            . ')';
+                    }
+                    $whereConditions[] = 'AND';
+                    $whereConditions[] = '(' . implode(' ' . $condition->getOperator() . ' ', $subConditions) . ')';
+                }
+            }
+
+            // Remove first operator
+            array_splice($whereConditions, 0, 1);
+
+            $request["where"] = implode(' ', $whereConditions);
+        }
+
+        if ($schemaName == 'all') {
+            $config = $this->getConfiguration();
+            $schemes = $config["schemes"];
+            $features = array();
+            foreach($schemes as $schemaName => $scheme) {
+                if ($schemaName == 'all') {
+                    continue;
+                }
+                $request["schema"] = $schemaName;
+                $featureCollection = $this->selectAction($request);
+                foreach ($featureCollection["features"] as &$feature) {
+
+                    $feature["properties"]["geomType"] = $scheme["featureType"]["geomType"];
+                };
+                $features = array_merge($features,$featureCollection["features"]);
+            }
+            $featureCollection = array("type" => "FeatureCollection",  "features" => $features);
+        } else {
+
+            $featureCollection = $featureType->search(
+                array_merge(
+                    array(
+                        'returnType' => 'FeatureCollection',
+                        'maxResults' => $this->maxResults
+                    ),
+                    $request
+                )
+            );
+        }
+
+        //if(count($featureCollection["features"]) ==  $this->maxResults){
+        //    $featureCollection["info"] = "Limit erreicht";
+        //}
+
+        return $featureCollection;
+    }
+
+    /**
+     * Remove feature
+     *
+     * @param $request
+     * @return array
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     */
+    public function deleteAction($request)
+    {
+        $schemaName = $request["schema"];
+        $schema     = $this->getSchemaByName($schemaName);
+
+        if ((isset($schema['allowDelete']) && !$schema['allowDelete']) || (isset($schema["allowEditData"]) && !$schema['allowEditData'])) {
+            throw new Exception('It is forbidden to delete objects', 2);
+        }
+
+        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
+
+        return array(
+            'result' => $featureType->remove($request['feature'])
+        );
+    }
+
+    /**
+     * Clone feature
+     *
+     * @param $request
+     * @return array
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     */
+    public function cloneFeature($request)
+    {
+        $schemaName = $request["schema"];
+        $schema      = $this->getSchemaByName($schemaName);
+        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
         $results = array();
+
+        if (isset($schema['allowDuplicate']) && !$schema['allowDuplicate']) {
+            throw new Exception('Clone feature is forbidden', 2);
+        }
+
+        $baseId  = $request['id'];
+        $feature = $featureType->getById($baseId);
+        $feature->setId(null);
+        $feature = $featureType->save($feature);
+
+        return array(
+            'baseId'  => $baseId,
+            'feature' => $feature,
+        );
+    }
+
+    /**
+     * Save feature by request data
+     *
+     * @param array $request
+     * @return array
+     */
+    public function saveAction($request)
+    {
+        $schemaName    = $request["schema"];
+        $configuration = $this->getConfiguration(false);
+        $schema        = $this->getSchemaByName($schemaName);
+        $featureType   = $this->getFeatureTypeBySchemaName($schemaName);
+        $connection    = $featureType->getDriver()->getConnection();
+        $results       = array();
+        $debugMode     = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
+
+        if (isset($schema["allowEditData"]) && !$schema["allowEditData"]) {
+            throw new Exception("It is forbidden to save objects", 2);
+        }
+
+        if (isset($schema["allowSave"]) && !$schema["allowSave"]) {
+            throw new Exception("It is forbidden to save objects", 2);
+        }
+
+        // save once
+        if (isset($request['feature'])) {
+            $request['features'] = array($request['feature']);
+        }
+
         try {
             // save collection
-            if (!empty($postData['features']) && is_array($postData['features'])) {
-                foreach ($postData['features'] as $feature) {
+            if (isset($request['features']) && is_array($request['features'])) {
+                foreach ($request['features'] as $feature) {
                     /**
                      * @var $feature Feature
                      */
                     $featureData = $this->prepareQueriedFeatureData($feature, $schema['formItems']);
 
                     foreach ($featureType->getFileInfo() as $fileConfig) {
-                        if (!isset($fileConfig['field']) || !isset($featureData["properties"][$fileConfig['field']])) {
+                        if (!isset($fileConfig['field']) || !isset($featureData["properties"][ $fileConfig['field'] ])) {
                             continue;
                         }
-                        $url                                             = $featureType->getFileUrl($fileConfig['field']);
-                        $requestUrl                                      = $featureData["properties"][$fileConfig['field']];
-                        $newUrl                                          = str_replace($url . "/", "", $requestUrl);
-                        $featureData["properties"][$fileConfig['field']] = $newUrl;
+                        $url                                               = $featureType->getFileUrl($fileConfig['field']);
+                        $requestUrl                                        = $featureData["properties"][ $fileConfig['field'] ];
+                        $newUrl                                            = str_replace($url . "/", "", $requestUrl);
+                        $featureData["properties"][ $fileConfig['field'] ] = $newUrl;
                     }
 
                     $feature = $featureType->save($featureData);
-
                     $results = array_merge($featureType->search(array(
                         'srid'  => $feature->getSrid(),
                         'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
                 }
+
+            }
+            foreach($results as &$result) {
+                $result->setAttributes(array("geomType" => $schema["featureType"]["geomType"]));
             }
             $results = $featureType->toFeatureCollection($results);
         } catch (DBALException $e) {
             $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
-                "For more information have a look at the webserver log file. \n Error code: " .$e->getCode();
+                "For more information have a look at the webserver log file. \n Error code: " . $e->getCode();
             $results = array('errors' => array(
                 array('message' => $message, 'code' => $e->getCode())
             ));
         }
 
         return $results;
+
     }
 
     /**
-     * Delete feature
+     * Upload file
      *
-     * @param FeatureType $featureType
-     * @param $postData
-     * @return mixed
-     */
-    protected function deleteFeature($featureType, $postData)
-    {
-        return $featureType->remove($postData['feature']);
-    }
-
-    /**
-     * File upload
-     *
-     * @param Request $request
-     * @param $schemaName
-     * @param FeatureType $featureType
+     * @param $request
      * @return array
      */
-    protected function fileUpload($request, $schemaName, $featureType)
+    public function uploadFileAction($request)
     {
-        $fieldName     = $request->get('field');
-        $urlParameters = array('schema' => $schemaName,
-            'fid'    => $request->get('fid'),
-            'field'  => $fieldName);
-        $serverUrl     = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
-        $uploadDir     = $featureType->getFilePath($fieldName);
-        $uploadUrl = $featureType->getFileUrl($fieldName) . "/";
+        $schemaName                 = $request["schema"];
+        $schema                     = $this->getSchemaByName($schemaName);
+
+        if (isset($schema['allowEditData']) && !$schema['allowEditData']) {
+            throw new Exception("It is forbidden to save objects", 2);
+        }
+
+        $featureType                = $this->getFeatureTypeBySchemaName($schemaName);
+        $fieldName                  = $request['field'];
+        $urlParameters              = array('schema' => $schemaName,
+                                            'fid'    => $request["fid"],
+                                            'field'  => $fieldName);
+        $serverUrl                  = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
+        $uploadDir                  = $featureType->getFilePath($fieldName);
+        $uploadUrl                  = $featureType->getFileUrl($fieldName) . "/";
         $urlParameters['uploadUrl'] = $uploadUrl;
-        $uploadHandler = new Uploader(array(
+        $uploadHandler              = new Uploader(array(
             'upload_dir'                   => $uploadDir . "/",
             'script_url'                   => $serverUrl,
             'upload_url'                   => $uploadUrl,
-            'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
+            'accept_file_types'            => '/\.(gif|jpe?g|png|pdf|zip)$/i',
             'print_response'               => false,
             'access_control_allow_methods' => array(
                 'OPTIONS',
@@ -399,64 +531,201 @@ class Digitizer extends BaseElement
                 'POST',
                 'PUT',
                 'PATCH',
+                //                        'DELETE'
             ),
         ));
 
-        return array_merge($uploadHandler->get_response(), $urlParameters);
+        return array_merge(
+            $uploadHandler->get_response(),
+            $urlParameters
+        );
     }
 
     /**
-     * Get Data Store
+     * Save data store item
      *
-     * @param $postData
-     * @return array|null
+     * @param $request
+     * @return array
      */
-    protected function getDataStore($postData)
+    public function saveDatastoreAction ($request)
     {
-        $id           = $postData['id'];
-        $dataItemId   = $postData['dataItemId'];
-        $dataStore    = $this->getDataStoreById($id);
-        $dataItem     = $dataStore->get($dataItemId);
-        $dataItemData = null;
-        if ($dataItem) {
-            $dataItemData = $dataItem->toArray();
+        $schema          = $request['schema'];
+        $dataStoreLinkFieldName          = $request['dataStoreLinkFieldName'];
+        $linkId  = $request['linkId'];
+        $dataItem    = $request['dataItem'];
+
+        $dataStore = $this->getDataStoreById($schema);
+        $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
+
+
+        //var_dump($dataItem);die;
+        $f = $dataStore->save($dataItem);
+        $a = $this->getDatastoreAction(array('dataStoreLinkName'=>$schema , 'fid' =>$linkId, 'fieldName'=>$dataStoreLinkFieldName ));
+        return array('processedItem' => $f, 'dataItems'  => $a);
+    }
+
+    /**
+     * @param $request
+     * @return mixed|null
+     */
+    public function getDatastoreAction($request)
+    {
+        if (!isset($request['dataStoreLinkName']) || !isset($request['fid']) || !isset($request['fieldName']) ) {
+            $results = array(
+                array('errors' => array(
+                    array('message' => "datastore/get: id or dataItemId not defined!")
+                ))
+            );
+            return $results;
+        }
+        $dataStoreLinkName           = $request['dataStoreLinkName'];
+        $dataItemId   = $request['fid'];
+        /** @var DataStore $dataStore */
+        $dataStore    = $this->getDataStore($dataStoreLinkName);
+        $fieldName = $request['fieldName'];
+        $criteria['where'] = $fieldName . ' = '  . $dataItemId;
+
+        $dataItem     = $dataStore->search($criteria);
+
+
+
+
+        return $dataItem;
+    }
+
+    /**
+     * Remove data store item
+     *
+     * @param $request
+     * @return bool|mixed|null
+     */
+    public function removeDatastoreAction($request)
+    {
+        $schema          = $request['schema'];
+        $dataStoreLinkFieldName          = $request['dataStoreLinkFieldName'];
+        $dataItemId  = $request['dataItemId'];
+        $linkId   = $request['linkId'];
+
+        $dataStore = $this->getDataStoreById($schema);
+
+        $f = $dataStore->remove($dataItemId);
+        $a = $this->getDatastoreAction(array('dataStoreLinkName'=>$schema , 'fid' =>$linkId, 'fieldName'=>$dataStoreLinkFieldName ));
+        return array('processedItem'=>$f,'dataItems' =>$a) ;
+    }
+
+    public function getFeatureInfoAction($request){
+        $bbox = $request['bbox'];
+        $schemaName = $request['schema'];
+        $srid = $request['srid'];
+        $dataSets = [];
+        $remoteData = $this->getSchemaByName($schemaName)["popup"]["remoteData"];
+
+        foreach ($remoteData as $url){
+            $url = str_replace("{bbox}", $bbox, $url);
+            $url = str_replace("{BBOX}", $bbox, $url);
+            $url = str_replace("{srid}", $srid, $url);
+            $url = str_replace("{SRID}", $srid, $url);
+            try {
+                $dataSets[]  = file_get_contents($url);
+            } catch (\Exception $e) { //Todo Throw correct e in debug.
+
+                throw new \Exception('Can not recieve data form FeatureInfo request');
+            }
+
         }
 
-        $results = $dataItemData;
 
-        return $results;
+        return array('dataSets' => $dataSets);
     }
 
     /**
-     * Save Data Store
+     * Clean feature type configuration for public use
      *
-     * @param $postData
+     * @param array $featureType
+     * @return array
+     */
+    protected function cleanFromInternConfiguration(array &$featureType)
+    {
+        foreach (array(
+                     'filter',
+                     'geomField',
+                     'connection',
+                     'uniqueId',
+                     'sql',
+                     'events'
+                 ) as $keyName) {
+            unset($featureType[ $keyName ]);
+        }
+        return $featureType;
+    }
+
+    /**
+     * Get schema by name
+     *
+     * @param $name
      * @return mixed
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
      */
-    protected function saveDataStore($postData)
+    protected function getSchemaByName($name)
     {
-        $id          = $postData['id'];
-        $dataItem    = $postData['dataItem'];
-        $dataStore   = $this->getDataStoreById($id);
-        $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
-        if (empty($postData['dataItem'][ $uniqueIdKey ])) {
-            unset($postData['dataItem'][ $uniqueIdKey ]);
+        if ($name == 'all') {
+            return null;
         }
-        return $dataStore->save($dataItem);
+        $configuration = $this->getConfiguration(false);
+        $schemas       = $configuration["schemes"];
+
+        if (!isset($schemas[ $name ])) {
+            throw new Exception("Feature type schema name '$name' isn't defined", 2);
+        }
+
+        $schema = $schemas[ $name ];
+        return $schema;
+    }
+
+
+    /**
+     * Get data store by settings or name
+     *
+     * @param $settings
+     * @return DataStore
+     * @internal param $ajaxSettings
+     */
+    public function getDataStore($settings)
+    {
+        if (is_array($settings)) {
+            $dataStore = new DataStore($settings);
+        } else {
+            $dataStore = $this->getDataStoreById($settings);
+        }
+        return $dataStore;
     }
 
     /**
-     * Remove Data Store
+     * Escape request variables.
+     * Deny SQL injections.
      *
-     * @param $postData
+     * @param array $vars
+     * @param Connection $connection
+     * @return array
      */
-    protected function removeDataStore($postData)
+    protected function escapeValues($vars, $connection)
     {
-        $id          = $postData['id'];
-        $dataStore   = $this->getDataStoreById($id);
-        $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
-        $dataItemId  = $postData['dataItem'][ $uniqueIdKey ];
-        $dataStore->remove($dataItemId);
+        $results = array();
+        foreach ($vars as $key => $value) {
+            $quotedValue = null;
+            if (is_numeric($value)) {
+                $quotedValue = intval($value);
+            } elseif (is_array($value)) {
+                $quotedValue = $this->escapeValues($value, $connection);
+            } else {
+                $quotedValue = $connection->quote($value);
+                if ($quotedValue[0] === '\'') {
+                    $quotedValue = preg_replace("/^\'|\'$/", null, $quotedValue);
+                }
+            }
+            $results[ $key ] = $quotedValue;
+        }
+        return $results;
     }
 
     /**
@@ -472,605 +741,15 @@ class Digitizer extends BaseElement
 
 
 
-
-//    /**
-//     * Eval code string
-//     *
-//     * Example:
-//     *  self::evalString('Hello, $name', array('name' => 'John'))
-//     *  returns 'Hello, John'
-//     *
-//     * @param string $code Code string.
-//     * @param array  $args Variables this should be able by evaluating.
-//     * @return string Returns evaluated result.
-//     * @throws \Exception
-//     */
-//    protected static function evalString($code, $args)
-//    {
-//        foreach ($args as $key => &$value) {
-//            ${$key} = &$value;
-//        }
-//
-//        $_return = null;
-//        if (eval("\$_return = \"" . str_replace('"', '\"', $code) . "\";") === false && ($errorDetails = error_get_last())) {
-//            $lastError = end($errorDetails);
-//            throw new \Exception($lastError["message"], $lastError["type"]);
-//        }
-//        return $_return;
-//    }
-//
-//    /**
-//     * Get form item by name
-//     *
-//     * @param $items
-//     * @param $name
-//     */
-//    public function getFormItemByName($items, $name)
-//    {
-//        foreach ($items as $item) {
-//            if (isset($item['name']) && $item['name'] == $name) {
-//                return $item;
-//            }
-//            if (isset($item['children']) && is_array($item['children'])) {
-//                return $this->getFormItemByName($item['children'], $name);
-//            }
-//        }
-//    }
-//
-//    /**
-//     * Search form fields AJAX API
-//     *
-//     * @param $request
-//     * @return array
-//     */
-//    public function selectFormAction($request)
-//    {
-//        /** @var Connection $connection */
-//        $itemDefinition = $request["item"];
-//        $schemaName     = $request["schema"];
-//        $formData       = $request["form"];
-//        $params         = $request["params"];
-//        $config         = $this->getConfiguration();
-//        $schemaConfig   = $config['schemes'][ $schemaName ];
-//        $searchConfig   = $schemaConfig["search"];
-//        $searchForm     = $searchConfig["form"];
-//        $item           = $this->getFormItemByName($searchForm, $itemDefinition["name"]);
-//        $query          = isset($params["term"]) ? $params["term"] : '';
-//        $ajaxSettings   = $item['ajax'];
-//        $connection     = $this->container->get("doctrine.dbal." . $ajaxSettings['connection'] . "_connection");
-//        $formData       = array_merge($formData, array($item["name"] => $query));
-//        $sql            = self::evalString($ajaxSettings["sql"], $formData);
-//        $rows           = $connection->fetchAll($sql);
-//        $results        = array();
-//
-//        foreach ($rows as $row) {
-//            $results[] = array(
-//                'id'   => current($row),
-//                'text' => end($row),
-//            );
-//        }
-//
-//        return array('results' => $results);
-//    }
-//
-//
-//    /**
-//     * Select/search features and return feature collection
-//     *
-//     * @param array $request
-//     * @return array Feature collection
-//     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-//     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
-//     */
-//    public function selectAction($request)
-//    {
-//        $schemaName  = $request["schema"];
-//        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
-//
-//        if (isset($request["where"])) {
-//            unset($request["where"]);
-//        }
-//
-//        if (isset($request["search"])) {
-//            $connection = $featureType->getConnection();
-//            $schema = $this->getSchemaByName($schemaName);
-//            $vars = $this->escapeValues($request["search"], $connection);
-//
-//            $whereConditions = array();
-//            foreach ($schema['search']['conditions'] as $condition) {
-//                $condition = new Condition($condition);
-//                if ($condition->isSql()) {
-//                    $whereConditions[] = $condition->getOperator();
-//                    $whereConditions[] = '(' . static::evalString($condition->getCode(), $vars) . ')';
-//                }
-//
-//                if ($condition->isSqlArray()) {
-//                    $subConditions = array();
-//                    $arrayVars     = $vars[ $condition->getKey() ];
-//
-//                    if (!is_array($arrayVars)) {
-//                        continue;
-//                    }
-//
-//                    foreach ($arrayVars as $value) {
-//                        $subConditions[] = '(' .
-//                            static::evalString(
-//                                $condition->getCode(),
-//                                array_merge($vars, array('value' => $value)))
-//                            . ')';
-//                    }
-//                    $whereConditions[] = 'AND';
-//                    $whereConditions[] = '(' . implode(' ' . $condition->getOperator() . ' ', $subConditions) . ')';
-//                }
-//            }
-//
-//            // Remove first operator
-//            array_splice($whereConditions, 0, 1);
-//
-//            $request["where"] = implode(' ', $whereConditions);
-//        }
-//
-//        if ($schemaName == 'all') {
-//            $config = $this->getConfiguration();
-//            $schemes = $config["schemes"];
-//            $features = array();
-//            foreach($schemes as $schemaName => $scheme) {
-//                if ($schemaName == 'all') {
-//                    continue;
-//                }
-//                $request["schema"] = $schemaName;
-//                $featureCollection = $this->selectAction($request);
-//                foreach ($featureCollection["features"] as &$feature) {
-//
-//                    $feature["properties"]["geomType"] = $scheme["featureType"]["geomType"];
-//                };
-//                $features = array_merge($features,$featureCollection["features"]);
-//            }
-//            $featureCollection = array("type" => "FeatureCollection",  "features" => $features);
-//        } else {
-//
-//            $featureCollection = $featureType->search(
-//                array_merge(
-//                    array(
-//                        'returnType' => 'FeatureCollection',
-//                        'maxResults' => $this->maxResults
-//                    ),
-//                    $request
-//                )
-//            );
-//        }
-//
-//        //if(count($featureCollection["features"]) ==  $this->maxResults){
-//        //    $featureCollection["info"] = "Limit erreicht";
-//        //}
-//
-//        return $featureCollection;
-//    }
-//
-//    /**
-//     * Remove feature
-//     *
-//     * @param $request
-//     * @return array
-//     * @throws \Symfony\Component\Config\Definition\Exception\Exception
-//     */
-//    public function deleteAction($request)
-//    {
-//        $schemaName = $request["schema"];
-//        $schema     = $this->getSchemaByName($schemaName);
-//
-//        if ((isset($schema['allowDelete']) && !$schema['allowDelete']) || (isset($schema["allowEditData"]) && !$schema['allowEditData'])) {
-//            throw new Exception('It is forbidden to delete objects', 2);
-//        }
-//
-//        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
-//
-//        return array(
-//            'result' => $featureType->remove($request['feature'])
-//        );
-//    }
-//
-//    /**
-//     * Clone feature
-//     *
-//     * @param $request
-//     * @return array
-//     * @throws \Symfony\Component\Config\Definition\Exception\Exception
-//     */
-//    public function cloneFeature($request)
-//    {
-//        $schemaName = $request["schema"];
-//        $schema      = $this->getSchemaByName($schemaName);
-//        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
-//        $results = array();
-//
-//        if (isset($schema['allowDuplicate']) && !$schema['allowDuplicate']) {
-//            throw new Exception('Clone feature is forbidden', 2);
-//        }
-//
-//        $baseId  = $request['id'];
-//        $feature = $featureType->getById($baseId);
-//        $feature->setId(null);
-//        $feature = $featureType->save($feature);
-//
-//        return array(
-//            'baseId'  => $baseId,
-//            'feature' => $feature,
-//        );
-//    }
-//
-//    /**
-//     * Save feature by request data
-//     *
-//     * @param array $request
-//     * @return array
-//     */
-//    public function saveAction($request)
-//    {
-//        $schemaName    = $request["schema"];
-//        $configuration = $this->getConfiguration(false);
-//        $schema        = $this->getSchemaByName($schemaName);
-//        $featureType   = $this->getFeatureTypeBySchemaName($schemaName);
-//        $connection    = $featureType->getDriver()->getConnection();
-//        $results       = array();
-//        $debugMode     = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
-//
-//        if (isset($schema["allowEditData"]) && !$schema["allowEditData"]) {
-//            throw new Exception("It is forbidden to save objects", 2);
-//        }
-//
-//        if (isset($schema["allowSave"]) && !$schema["allowSave"]) {
-//            throw new Exception("It is forbidden to save objects", 2);
-//        }
-//
-//        // save once
-//        if (isset($request['feature'])) {
-//            $request['features'] = array($request['feature']);
-//        }
-//
-//        try {
-//            // save collection
-//            if (isset($request['features']) && is_array($request['features'])) {
-//                foreach ($request['features'] as $feature) {
-//                    /**
-//                     * @var $feature Feature
-//                     */
-//                    $featureData = $this->prepareQueriedFeatureData($feature, $schema['formItems']);
-//
-//                    foreach ($featureType->getFileInfo() as $fileConfig) {
-//                        if (!isset($fileConfig['field']) || !isset($featureData["properties"][ $fileConfig['field'] ])) {
-//                            continue;
-//                        }
-//                        $url                                               = $featureType->getFileUrl($fileConfig['field']);
-//                        $requestUrl                                        = $featureData["properties"][ $fileConfig['field'] ];
-//                        $newUrl                                            = str_replace($url . "/", "", $requestUrl);
-//                        $featureData["properties"][ $fileConfig['field'] ] = $newUrl;
-//                    }
-//
-//                    $feature = $featureType->save($featureData);
-//                    $results = array_merge($featureType->search(array(
-//                        'srid'  => $feature->getSrid(),
-//                        'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
-//                }
-//
-//            }
-//            foreach($results as &$result) {
-//                $result->setAttributes(array("geomType" => $schema["featureType"]["geomType"]));
-//            }
-//            $results = $featureType->toFeatureCollection($results);
-//        } catch (DBALException $e) {
-//            $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
-//                "For more information have a look at the webserver log file. \n Error code: " . $e->getCode();
-//            $results = array('errors' => array(
-//                array('message' => $message, 'code' => $e->getCode())
-//            ));
-//        }
-//
-//        return $results;
-//
-//    }
-//
-//    /**
-//     * Upload file
-//     *
-//     * @param $request
-//     * @return array
-//     */
-//    public function uploadFileAction($request)
-//    {
-//        $schemaName                 = $request["schema"];
-//        $schema                     = $this->getSchemaByName($schemaName);
-//
-//        if (isset($schema['allowEditData']) && !$schema['allowEditData']) {
-//            throw new Exception("It is forbidden to save objects", 2);
-//        }
-//
-//        $featureType                = $this->getFeatureTypeBySchemaName($schemaName);
-//        $fieldName                  = $request['field'];
-//        $urlParameters              = array('schema' => $schemaName,
-//                                            'fid'    => $request["fid"],
-//                                            'field'  => $fieldName);
-//        $serverUrl                  = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
-//        $uploadDir                  = $featureType->getFilePath($fieldName);
-//        $uploadUrl                  = $featureType->getFileUrl($fieldName) . "/";
-//        $urlParameters['uploadUrl'] = $uploadUrl;
-//        $uploadHandler              = new Uploader(array(
-//            'upload_dir'                   => $uploadDir . "/",
-//            'script_url'                   => $serverUrl,
-//            'upload_url'                   => $uploadUrl,
-//            'accept_file_types'            => '/\.(gif|jpe?g|png|pdf|zip)$/i',
-//            'print_response'               => false,
-//            'access_control_allow_methods' => array(
-//                'OPTIONS',
-//                'HEAD',
-//                'GET',
-//                'POST',
-//                'PUT',
-//                'PATCH',
-//                //                        'DELETE'
-//            ),
-//        ));
-//
-//        return array_merge(
-//            $uploadHandler->get_response(),
-//            $urlParameters
-//        );
-//    }
-//
-//    /**
-//     * Save data store item
-//     *
-//     * @param $request
-//     * @return array
-//     */
-//    public function saveDatastoreAction ($request)
-//    {
-//        $schema          = $request['schema'];
-//        $dataStoreLinkFieldName          = $request['dataStoreLinkFieldName'];
-//        $linkId  = $request['linkId'];
-//        $dataItem    = $request['dataItem'];
-//
-//        $dataStore = $this->getDataStoreById($schema);
-//        $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
-//
-//
-//        //var_dump($dataItem);die;
-//        $f = $dataStore->save($dataItem);
-//        $a = $this->getDatastoreAction(array('dataStoreLinkName'=>$schema , 'fid' =>$linkId, 'fieldName'=>$dataStoreLinkFieldName ));
-//        return array('processedItem' => $f, 'dataItems'  => $a);
-//    }
-//
-//    /**
-//     * @param $request
-//     * @return mixed|null
-//     */
-//    public function getDatastoreAction($request)
-//    {
-//        if (!isset($request['dataStoreLinkName']) || !isset($request['fid']) || !isset($request['fieldName']) ) {
-//            $results = array(
-//                array('errors' => array(
-//                    array('message' => "datastore/get: id or dataItemId not defined!")
-//                ))
-//            );
-//            return $results;
-//        }
-//        $dataStoreLinkName           = $request['dataStoreLinkName'];
-//        $dataItemId   = $request['fid'];
-//        /** @var DataStore $dataStore */
-//        $dataStore    = $this->getDataStore($dataStoreLinkName);
-//        $fieldName = $request['fieldName'];
-//        $criteria['where'] = $fieldName . ' = '  . $dataItemId;
-//
-//        $dataItem     = $dataStore->search($criteria);
-//
-//
-//
-//
-//        return $dataItem;
-//    }
-//
-//    /**
-//     * Remove data store item
-//     *
-//     * @param $request
-//     * @return bool|mixed|null
-//     */
-//    public function removeDatastoreAction($request)
-//    {
-//        $schema          = $request['schema'];
-//        $dataStoreLinkFieldName          = $request['dataStoreLinkFieldName'];
-//        $dataItemId  = $request['dataItemId'];
-//        $linkId   = $request['linkId'];
-//
-//        $dataStore = $this->getDataStoreById($schema);
-//
-//        $f = $dataStore->remove($dataItemId);
-//        $a = $this->getDatastoreAction(array('dataStoreLinkName'=>$schema , 'fid' =>$linkId, 'fieldName'=>$dataStoreLinkFieldName ));
-//        return array('processedItem'=>$f,'dataItems' =>$a) ;
-//    }
-//
-//    public function getFeatureInfoAction($request){
-//        $bbox = $request['bbox'];
-//        $schemaName = $request['schema'];
-//        $srid = $request['srid'];
-//        $dataSets = [];
-//        $remoteData = $this->getSchemaByName($schemaName)["popup"]["remoteData"];
-//
-//        $responseArray = array('dataSets' => array());
-//        foreach ($remoteData as $url){
-//            $url = str_replace("{bbox}", $bbox, $url);
-//            $url = str_replace("{BBOX}", $bbox, $url);
-//            $url = str_replace("{srid}", $srid, $url);
-//            $url = str_replace("{SRID}", $srid, $url);
-//            try {
-//                $dataSets[]  = file_get_contents($url);
-//            } catch (\Exception $e) { //Todo Throw correct e in debug.
-//
-//                $this->container->get('logger')->error('Digitizer WMS GetFeatureInfo: '. $e->getMessage());
-//                $responseArray['error']  = $e->getMessage();
-//            }
-//
-//        }
-//
-//
-//        $responseArray['dataSets'] = $dataSets;
-//        return $responseArray;
-//    }
-//
-//    /**
-//     * Clean feature type configuration for public use
-//     *
-//     * @param array $featureType
-//     * @return array
-//     */
-//    protected function cleanFromInternConfiguration(array &$featureType)
-//    {
-//        foreach (array(
-//                     'filter',
-//                     'geomField',
-//                     'connection',
-//                     'uniqueId',
-//                     'sql',
-//                     'events'
-//                 ) as $keyName) {
-//            unset($featureType[ $keyName ]);
-//        }
-//        return $featureType;
-//    }
-//
-//    /**
-//     * Get schema by name
-//     *
-//     * @param $name
-//     * @return mixed
-//     * @throws \Symfony\Component\Config\Definition\Exception\Exception
-//     */
-//    protected function getSchemaByName($name)
-//    {
-//        if ($name == 'all') {
-//            return null;
-//        }
-//        $configuration = $this->getConfiguration(false);
-//        $schemas       = $configuration["schemes"];
-//
-//        if (!isset($schemas[ $name ])) {
-//            throw new Exception("Feature type schema name '$name' isn't defined", 2);
-//        }
-//
-//        $schema = $schemas[ $name ];
-//        return $schema;
-//    }
-
-//    /**
-//     * @param $request
-//     * @return array
-//     */
-//    public function listStyleAction($request)
-//    {
-//        return array();
-//    }
-//
-//    /**
-//     * @param $request
-//     * @return array
-//     */
-//    public function saveStyleAction($request)
-//    {
-//        $style = new Style($request['style']);
-//        return array(
-//            'style' => $style->toArray()
-//        );
-//    }
-//
-//    /**
-//     * Get data store by settings or name
-//     *
-//     * @param $settings
-//     * @return DataStore
-//     * @internal param $ajaxSettings
-//     */
-//    public function getDataStore($settings)
-//    {
-//        if (is_array($settings)) {
-//            $dataStore = new DataStore($settings);
-//        } else {
-//            $dataStore = $this->getDataStoreById($settings);
-//        }
-//        return $dataStore;
-//    }
-//
-//    /**
-//     * Escape request variables.
-//     * Deny SQL injections.
-//     *
-//     * @param array $vars
-//     * @param Connection $connection
-//     * @return array
-//     */
-//    protected function escapeValues($vars, $connection)
-//    {
-//        $results = array();
-//        foreach ($vars as $key => $value) {
-//            $quotedValue = null;
-//            if (is_numeric($value)) {
-//                $quotedValue = intval($value);
-//            } elseif (is_array($value)) {
-//                $quotedValue = $this->escapeValues($value, $connection);
-//            } else {
-//                $quotedValue = $connection->quote($value);
-//                if ($quotedValue[0] === '\'') {
-//                    $quotedValue = preg_replace("/^\'|\'$/", null, $quotedValue);
-//                }
-//            }
-//            $results[ $key ] = $quotedValue;
-//        }
-//        return $results;
-//    }
-//
-//    /**
-//     * @param string $id
-//     * @return DataStore
-//     */
-//    protected function getDataStoreById($id)
-//    {
-//        /** @var DataStoreService $dataStoreService */
-//        $dataStoreService = $this->container->get('data.source');
-//        return $dataStoreService->get($id);
-//    }
-//
-//
-//    /**
-//     * Get schema by name
-//     *
-//     * @param string $name Feature type name
-//     * @return FeatureType
-//     * @throws \Symfony\Component\Config\Definition\Exception\Exception
-//     */
-//    protected function getFeatureTypeBySchemaName($name)
-//    {
-//        if ($name=='all') {
-//            return null;
-//        }
-//        $schema = $this->getSchemaByName($name);
-//
-//        if (is_array($schema['featureType'])) {
-//            $featureType = new FeatureType($this->container, $schema['featureType']);
-//        } else {
-//            throw new Exception('Feature type schema settings not correct', 2);
-//        }
-//
-//        return $featureType;
-//    }
-
-
     /**
      * Save feature style
      *
      * @param $postData
      * @return mixed
      */
-    protected function saveStyle($postData)
+    protected function saveStyleAction($postData)
     {
+        $this->styleManager = new DigitizerStyleManager($this->container);
         $userId = $this->getCurrentUserId();
         $parameters = array(
             //'schemaName' => $postData['schema'],
@@ -1094,19 +773,36 @@ class Digitizer extends BaseElement
     /**
      * Get styles list
      *
-     * @param $request
-     * @param $schema
+     * @param $postData
      * @return mixed
      */
-    protected function listStyle($request, $schema)
+    protected function listStyleAction($postData)
     {
-        $this->requireMethod($request, 'POST');
 
-        $results['featureStyles'] = $this->styleManager->getSchemaStyles($schema, $this->getCurrentUserId());
+        $this->styleManager = new DigitizerStyleManager($this->container);
+        $results['featureStyles'] = $this->styleManager->getSchemaStyles($postData["schema"], $this->getCurrentUserId());
 
         return $results;
     }
 
+    /**
+     * @param Request $request
+     * @param string[]|string $allowedMethods
+     * @throws BadRequestHttpException
+     *
+     */
+    protected static function requireMethod($request, $allowedMethods)
+    {
+        if (!is_array($allowedMethods)) {
+            $allowedMethods = explode(',', strtoupper($allowedMethods));
+        } else {
+            $allowedMethods = array_map('strtoupper', $allowedMethods);
+        }
+        $method = $request->getMethod();
+        if (!in_array($method, $allowedMethods)) {
+            throw new BadRequestHttpException("Unsupported method $method");
+        }
+    }
 
     /**
      * @return mixed
