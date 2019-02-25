@@ -81,7 +81,9 @@ Scheme.prototype = {
     zoomScaleDenominator: 500,
     useContextMenu: true,
     toolset: {},
-    popup: {},
+    popup: {
+        remoteData : false,
+    },
     style: {},
     formItems: null,
     events: null,

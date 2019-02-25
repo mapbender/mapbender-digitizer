@@ -285,3 +285,10 @@ $selectColor: #F7F79A;
 .colorpicker-hue {
     background-image: url(components/bootstrap-colorpicker/img/bootstrap-colorpicker/hue.png) !important;
 }
+
+
+.ui-dialog-buttonset {
+    > button {
+        margin-top: 5px;
+    }
+}

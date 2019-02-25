@@ -357,8 +357,10 @@ Sidebar.prototype = {
 
                 },
                 extendFeatureDataWhenNoPopupOpen: function (feature) {
-                    // TODO inspect this!
-                    if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
+
+                    if (widget.currentPopup && widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
+
+                    } else {
 
                         if (schema.popup && schema.popup.remoteData) {
                             schema._getRemoteData(feature);
