@@ -271,11 +271,15 @@
             var map = widget.map;
 
             map.events.register("moveend", this, function () {
-                widget.currentSchema._getData();
+                if (widget.currentSchema) {
+                    widget.currentSchema._getData();
+                }
             });
             map.events.register("zoomend", this, function (e) {
-                widget.currentSchema._getData();
-                widget.updateClusterStrategies();
+                if (widget.currentSchema) {
+                    widget.currentSchema._getData();
+                    widget.updateClusterStrategies();
+                }
             });
             map.resetLayersZIndex();
         },
@@ -310,6 +314,8 @@
 
             widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
 
+            widget._initializeActivationContainer();
+
             widget._initializeSelectorOrTitleElement();
 
             widget._createSchemes();
@@ -319,8 +325,6 @@
             widget._createElementContextMenu();
 
             widget._initializeSelector();
-
-            widget._initializeActivationContainer();
 
             widget._initializeMapEvents();
 
@@ -353,63 +357,10 @@
          * Update cluster strategies
          */
         updateClusterStrategies: function () {
-
             var widget = this;
-            var options = widget.options;
-            var scale = Math.round(widget.map.getScale());
-            var clusterSettings;
-            var closestClusterSettings;
 
             $.each(widget.schemes, function (i, schema) {
-                clusterSettings = null;
-
-                if (!schema.clustering) {
-                    return;
-                }
-
-                $.each(schema.clustering, function (y, _clusterSettings) {
-                    if (_clusterSettings.scale == scale) {
-                        clusterSettings = _clusterSettings;
-                        return false;
-                    }
-
-                    if (_clusterSettings.scale < scale) {
-                        if (closestClusterSettings && _clusterSettings.scale > closestClusterSettings.scale) {
-                            closestClusterSettings = _clusterSettings;
-                        } else {
-                            if (!closestClusterSettings) {
-                                closestClusterSettings = _clusterSettings;
-                            }
-                        }
-                    }
-                });
-
-                if (!clusterSettings && closestClusterSettings) {
-                    clusterSettings = closestClusterSettings
-                }
-
-                if (clusterSettings) {
-
-                    if (clusterSettings.hasOwnProperty('disable') && clusterSettings.disable) {
-                        schema.clusterStrategy.distance = -1;
-                        var features = schema.layer.features;
-                        schema.reloadFeatures([]);
-                        schema.clusterStrategy.deactivate();
-                        //schema.layer.redraw();
-                        schema.isClustered = false;
-                        schema.reloadFeatures(features);
-
-                    } else {
-                        schema.clusterStrategy.activate();
-                        schema.isClustered = true;
-                    }
-                    if (clusterSettings.hasOwnProperty('distance')) {
-                        schema.clusterStrategy.distance = clusterSettings.distance;
-                    }
-
-                } else {
-                    //schema.clusterStrategy.deactivate();
-                }
+                schema.updateClusterStrategy();
             });
         },
 
