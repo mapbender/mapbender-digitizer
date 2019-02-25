@@ -1020,6 +1020,8 @@ Scheme.prototype = {
         var newFeature = feature.clone();
         var config = schema.copy;
         var defaultAttributes = config.data || {};
+        var allowCopy = true;
+
 
         _.each(schema.copy.rules, function (ruleCode) {
             var f = feature;
@@ -1028,6 +1030,11 @@ Scheme.prototype = {
                 return false;
             }
         });
+
+        if (!allowCopy) {
+            $.notify(translate('feature.clone.on.error'));
+            return;
+        }
 
         var newAttributes = _.extend({}, defaultAttributes);
 
