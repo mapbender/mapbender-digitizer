@@ -108,16 +108,14 @@ Sidebar.prototype = {
         if (schema.allowPrintMetadata) {
             buttons.push({
                 title: 'Sachdaten drucken',
-                className: 'printmetadata-inactive',
+                className: 'printmetadata',
                 onClick: function (olFeature, ui, b, c) {
                     if (!olFeature.printMetadata) {
                         olFeature.printMetadata = true;
-                        ui.addClass("icon-printmetadata-active");
-                        ui.removeClass("icon-printmetadata-inactive");
+                        ui.addClass("active");
                     } else {
                         olFeature.printMetadata = false;
-                        ui.removeClass("icon-printmetadata-active");
-                        ui.addClass("icon-printmetadata-inactive");
+                        ui.removeClass("active");
                     }
                 }
             });

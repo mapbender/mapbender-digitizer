@@ -424,6 +424,13 @@ Scheme.prototype = {
         tableApi.rows(function (idx, feature, row) {
             var invisible = feature.renderIntent === 'invisible';
             schema.toggleFeatureVisibility(feature, !invisible);
+            // TODO this is a bad solution. Disabledness etc. should be controlled by buttons themselves, which unfortunately is not possible on behalf of visui result table
+            if (feature.isChanged) {
+                $(row).find(".save").removeClass("disabled");
+            }
+            if (feature.printMetadata) {
+                $(row).find(".printmetadata").addClass("active");
+            }
             return true;
         });
 
@@ -467,7 +474,6 @@ Scheme.prototype = {
 
     activateSchema: function () {
 
-        console.warn("achtivate Schema");
         /** @type {Scheme} */
         var schema = this;
         var widget = schema.widget;

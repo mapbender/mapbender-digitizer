@@ -91,13 +91,13 @@ $selectColor: #F7F79A;
           content: "\f070";
         }
 
-        .icon-printmetadata-active:before{
+        .icon-printmetadata.active:before{
             font-family: FontAwesome;
             content: "\f02f";
             color: black;
         }
 
-        .icon-printmetadata-inactive:before{
+        .icon-printmetadata:before{
             font-family: FontAwesome;
             content: "\f02f";
             color: grey;
