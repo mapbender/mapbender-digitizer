@@ -55,8 +55,6 @@ Legacy Bugs
 
 Optische Bugs:
 - Zellengröße limitieren in ResultTable
-- Kollision der Control- und General Buttons im Sidebar verhindern
-- Zu viele Buttons in Feature Edit Dialog machen Layout kaputt
 
 
 
@@ -77,6 +75,9 @@ Gemacht:
 - Neu hinzugefügtes, ungespeichertes Feature aktiviert Allsave Button nicht
 - Save All Features wird nicht mehr automatisch deaktiviert
 - Die Schnittstelle von .table u.s.w. vereinheitlichen
+- Zu viele Buttons in Feature Edit Dialog machen Layout kaputt
+- Kollision der Control- und General Buttons im Sidebar verhindern
+
 
 
 
