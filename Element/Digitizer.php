@@ -574,19 +574,24 @@ class Digitizer extends BaseElement
         $dataSets = [];
         $remoteData = $this->getSchemaByName($schemaName)["popup"]["remoteData"];
         $responseArray = ['dataSets' => []];
+        $responseArray = ['errors' => []];
         foreach ($remoteData as $url){
             $url = str_replace("{bbox}", $bbox, $url);
             $url = str_replace("{BBOX}", $bbox, $url);
             $url = str_replace("{srid}", $srid, $url);
             $url = str_replace("{SRID}", $srid, $url);
             try {
-
-                $dataSets[]  = file_get_contents($url);
-            } catch (\Exception $e) { //Todo Throw correct e in debug.
+                $context = stream_context_create(array(
+                    'http' => array(
+                        'ignore_errors' => true
+                    )
+                ));
+                $response  = file_get_contents($url, false, $context);
+            } catch (\Exception $e) {
                 $this->container->get('logger')->error('Digitizer WMS GetFeatureInfo: '. $e->getMessage());
                 $responseArray['error']  = $e->getMessage();
             }
-            if(end($dataSets) === false && is_array($http_response_header)){
+            if(is_array($http_response_header)){
                 $head = array();
                 foreach( $http_response_header as $k=>$v )
                 {
@@ -600,9 +605,14 @@ class Digitizer extends BaseElement
                             $head['reponse_code'] = intval($out[1]);
                     }
                 }
-                $responseArray['error']  = array('message' => "An error occured. Remote service {$url} responded with status code {$head[0]}.", 'responseHeader' => $head);
-            } elseif (end($dataSets) === false ) {
-                $responseArray['error']  = "Unkown error";
+                if($head["reponse_code"] !== 200){
+                    $responseArray['error'][] = array('rsponse' => $response, 'code' => $head['reponse_code']);
+                } else {
+                    $dataSets[] = $response;
+                }
+                
+            } else  {
+                $responseArray['error'][]  = "Unkown error for url: {$url}";
             }
 
         }
