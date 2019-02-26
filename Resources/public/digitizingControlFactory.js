@@ -88,6 +88,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             featureAdded : function() { console.warn("donut should not be created") },
             handlerOptions: {
                 holeModifier: 'element',
+                // Allow control only to draw holes in polygon, not to draw polygons themselves.
                 addPoint: function(pixel) {
                     if(!this.drawingHole && this.evt && this.evt[this.holeModifier]) {
                         var geometry = this.point.geometry;
