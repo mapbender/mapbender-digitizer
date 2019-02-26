@@ -118,6 +118,8 @@
 
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
 
+
+
         },
 
         buildMapContextMenu: function () {

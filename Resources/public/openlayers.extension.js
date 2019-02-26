@@ -56,3 +56,6 @@ OpenLayers.Feature.prototype.redraw = function(highlightOrStyle) {
 OpenLayers.Feature.prototype.isNew = false;
 OpenLayers.Feature.prototype.isChanged = false;
 OpenLayers.Feature.prototype.disabled = false;
+
+
+

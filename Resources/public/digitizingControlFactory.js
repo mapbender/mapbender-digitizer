@@ -23,6 +23,19 @@ var createFeatureAddedMethod = function(injectedMethods, geomType) {
 
 };
 
+var finalizePolygonValidOnly = function(cancel) {
+    var wkt = this.polygon.geometry.toString();
+    var reader = new jsts.io.WKTReader();
+    var geom = reader.read(wkt);
+    if (!geom.isValid()) {
+        $.notify("Geometry not valid");
+        this.destroyFeature(cancel);
+        return;
+    }
+
+    return OpenLayers.Handler.Polygon.prototype.finalize.apply(this,arguments);
+};
+
 
 var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
@@ -42,9 +55,13 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
         drawPolygon: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
             featureAdded : createFeatureAddedMethod(injectedMethods, 'polygon'),
+            handlerOptions: {
+              finalize: finalizePolygonValidOnly,
+            }
         }),
 
-        drawRectangle: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
+
+    drawRectangle: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
             featureAdded : createFeatureAddedMethod(injectedMethods, 'polygon'),
             handlerOptions: {
                 sides: 4,
@@ -103,10 +120,12 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                     OpenLayers.Handler.Path.prototype.addPoint.apply(this, arguments);
                 },
                 finalizeInteriorRing : function(event) {
+
                     var fir =  OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
                     injectedMethods.setModifiedState(this.polygon,this.control);
                     return fir;
-                }
+                },
+                finalize: finalizePolygonValidOnly,
             },
 
             activate: function() {
