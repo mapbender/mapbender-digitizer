@@ -120,13 +120,15 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                     }
                     OpenLayers.Handler.Path.prototype.addPoint.apply(this, arguments);
                 },
+                finalize: finalizePolygonValidOnly,
                 finalizeInteriorRing : function(event) {
 
                     var fir =  OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
-                    injectedMethods.setModifiedState(this.polygon,this.control);
+                    var feature = this.polygon;
+                    injectedMethods.setModifiedState(feature,this.control);
+                    injectedMethods.openFeatureEditDialog(feature);
                     return fir;
                 },
-                finalize: finalizePolygonValidOnly,
             },
 
             activate: function() {
@@ -172,6 +174,8 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             onModification: function (feature) {
 
                 injectedMethods.setModifiedState(feature,this);
+                injectedMethods.openFeatureEditDialog(feature);
+
                 console.log("onModification",feature);
 
             }
