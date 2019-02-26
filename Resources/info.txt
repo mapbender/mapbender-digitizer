@@ -12,6 +12,7 @@ Ideen:
 
 Ansprechen:
 - Hack beim Hintergrundbild des Color Pickers
+- Die ganze Funktionalität des Features Sortieren beim Neuladen scheint überflüssig zu sein
 
 Refactoring - Renaming:
 - Konsistente Linie für Methodennamen, hinsichtlich des _ als Präfix

@@ -447,7 +447,6 @@ Scheme.prototype = {
      * @version 0.2
      */
     reloadFeatures: function (_features) {
-        console.log(_features,"@@@");
         var schema = this;
         var widget = schema.widget;
         var layer = schema.layer;
@@ -775,7 +774,6 @@ Scheme.prototype = {
      */
 
     _getData: function () {
-        console.log("getData");
 
         var schema = this;
         var widget = schema.widget;
@@ -793,26 +791,6 @@ Scheme.prototype = {
         if (isExtentOnly) {
             request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
         }
-
-        // switch (schema.searchType) {
-        //     case  "currentExtent":
-        //         if (schema.hasOwnProperty("lastBbox")) {
-        //             var bbox = extent.toGeometry().getBounds();
-        //             var lastBbox = schema.lastBbox;
-        //
-        //             var topDiff = bbox.top - lastBbox.top;
-        //             var leftDiff = bbox.left - lastBbox.left;
-        //             var rightDiff = bbox.right - lastBbox.right;
-        //             var bottomDiff = bbox.bottom - lastBbox.bottom;
-        //
-        //             // var sidesChanged = {
-        //             //     left: leftDiff < 0,
-        //             //     bottom: bottomDiff < 0,
-        //             //     right: rightDiff > 0,
-        //             //     top: topDiff > 0
-        //             // };
-        //         }
-        // }
 
         // Only if search is defined
         if (schema.search) {
@@ -885,42 +863,42 @@ Scheme.prototype = {
     //     return initialFormData(feature);
     // },
 
-
-    _mergeExistingFeaturesWithLoadedFeatures: function(featureCollection)  {
+    _getVisibleFeatures: function() {
         var schema = this;
         var layer = schema.layer;
         var map = layer.map;
         var extent = map.getExtent();
         var bbox = extent.toGeometry().getBounds();
         var currentExtentOnly = schema.searchType === "currentExtent";
-        var geoJsonReader = new OpenLayers.Format.GeoJSON();
-
 
         var existingFeatures = schema.isClustered ? layer.getClusteredFeatures() : layer.features;
-
 
         var visibleFeatures = currentExtentOnly ? _.filter(existingFeatures, function (olFeature) {
             return olFeature && (olFeature.isNew || olFeature.geometry.getBounds().intersectsBounds(bbox));
         }) : existingFeatures;
 
-        var visibleFeatureIds = _.pluck(visibleFeatures, "fid");
-        var filteredNewFeatures = _.filter(featureCollection.features, function (feature) {
-            return !_.contains(visibleFeatureIds, feature.id);
-        });
-        var newUniqueFeatures = geoJsonReader.read({
-            type: "FeatureCollection",
-            features: filteredNewFeatures
-        });
+       return visibleFeatures;
+    },
 
-        var groupIsAll = schema.group && schema.group === "all";
 
-        var originalFeatureCollection = geoJsonReader.read({
+    _mergeExistingFeaturesWithLoadedFeatures: function(featureCollection)  {
+        var schema = this;
+
+        var geoJsonReader = new OpenLayers.Format.GeoJSON();
+        var existingFeatures = schema._getVisibleFeatures();
+
+        var newFeatures = geoJsonReader.read({
             type: "FeatureCollection",
             features: featureCollection.features
         });
 
-        var features = groupIsAll ? originalFeatureCollection : _.union(newUniqueFeatures, visibleFeatures);
+        var newFeaturesFiltered = _.filter(newFeatures, function (nFeature) {
+            return !existingFeatures.some( function(oFeature) {
+                return nFeature.equals(oFeature);
+            });
+        });
 
+        var features = _.union(newFeaturesFiltered,existingFeatures);
         return features;
 
     },
