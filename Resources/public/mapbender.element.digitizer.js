@@ -221,10 +221,6 @@
         },
 
 
-        getGeometryNameByGeomType: function (geomType) {
-
-            return geomType;
-        },
 
         getSchemaByGeomType: function (geomtype) {
             var widget = this;

@@ -91,7 +91,7 @@ AllScheme.prototype.redesignLayerFunctions = function () {
 
     layer.drawFeature = function (feature, styleId) {
         if (!styleId || styleId.length <= 20) { // simple way to detect if it is an individual style
-            var newStyleId = (styleId || 'default') + "-" + widget.getGeometryNameByGeomType(feature.attributes.geomType);
+            var newStyleId = (styleId || 'default') + "-" +feature.attributes.geomType;
         } else {
             newStyleId = styleId;
         }
