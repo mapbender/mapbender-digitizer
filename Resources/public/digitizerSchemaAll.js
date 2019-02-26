@@ -41,7 +41,7 @@ AllScheme.prototype._createStyleMap = function (labels, styleContext) {
             return;
         }
         labels.forEach(function (rawLabel) {
-            var label = scheme.getStyleMapLabel(rawLabel);
+            var label = scheme.getStyleMapLabelForAllScheme(rawLabel);
             var styleOL = OpenLayers.Feature.Vector.style[rawLabel] || OpenLayers.Feature.Vector.style['default'];
 
             styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, scheme.styles[rawLabel] || widget.styles[rawLabel]), styleContext);
@@ -90,6 +90,7 @@ AllScheme.prototype.redesignLayerFunctions = function () {
 
 
     layer.drawFeature = function (feature, styleId) {
+        console.warn(feature,styleId);
         if (!styleId || styleId.length <= 20) { // simple way to detect if it is an individual style
             var newStyleId = (styleId || 'default') + "-" +feature.attributes.geomType;
         } else {

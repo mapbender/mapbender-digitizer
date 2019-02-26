@@ -458,13 +458,16 @@ Scheme.prototype = {
 
 
         layer.removeAllFeatures();
-        layer.addFeatures(features);
 
         _.each(features, function (feature) {
             feature.layer = layer;
             schema._setFeatureStyle(feature);
 
         });
+
+        layer.addFeatures(features);
+
+
 
         //layer.redraw();
 
@@ -633,7 +636,7 @@ Scheme.prototype = {
         return formData;
     },
 
-    getStyleMapLabel: function(rawLabel) {
+    getStyleMapLabelForAllScheme: function(rawLabel) {
         var schema = this;
         return rawLabel + "-" + schema.featureType.geomType;
 
