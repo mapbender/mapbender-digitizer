@@ -975,11 +975,13 @@ Scheme.prototype = {
      */
     copyFeature: function (feature) {
         var schema = this;
+        var layer = schema.layer;
         var newFeature = feature.clone();
         var config = schema.copy;
         var defaultAttributes = config.data || {};
         var allowCopy = true;
 
+        layer.addFeatures([newFeature]);
 
         _.each(schema.copy.rules, function (ruleCode) {
             var f = feature;
@@ -1013,6 +1015,7 @@ Scheme.prototype = {
         newFeature.data.name = "Copy of "+feature.attributes.name;
 
         delete newFeature.fid;
+        newFeature.style = null;
 
         newFeature.applyStyle('copy');
 

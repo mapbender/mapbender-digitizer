@@ -25,6 +25,7 @@ OpenLayers.Feature.prototype.redraw = function (highlight) {
 OpenLayers.Feature.prototype.applyStyle = function (style) {
     var feature = this;
     var layer = feature.layer;
+    console.log(style);
     layer.drawFeature(feature, style);
 
 };

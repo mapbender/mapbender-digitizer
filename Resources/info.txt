@@ -46,6 +46,8 @@ Testing:
 
 Selbstgemachte Bugs:
 - Unsaved Style verschwindet, wenn Features neu geladen werden (Refactoring Style)
+- Wiederholter klick auf control führt zu js bug
+- Kopiertes Feature und neues Feature bekommt nach Dragging wieder default Farbe
 
 
 Legacy Bugs:
