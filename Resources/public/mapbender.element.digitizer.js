@@ -270,12 +270,12 @@
 
             map.events.register("moveend", this, function () {
                 if (widget.currentSchema) {
-                    widget.currentSchema._getData();
+                    widget.currentSchema.getData();
                 }
             });
             map.events.register("zoomend", this, function (e) {
                 if (widget.currentSchema) {
-                    widget.currentSchema._getData();
+                    widget.currentSchema.getData();
                     widget.updateClusterStrategies();
                 }
             });
@@ -387,7 +387,7 @@
             var widget = this;
             $(".mb-element-digitizer").not(".mb-element-data-manager").each(function (index, element) {
                 var schemes = widget.schemes;
-                schemes[featureTypeName] && schemes[featureTypeName].layer && schemes[featureTypeName].layer._getData();
+                schemes[featureTypeName] && schemes[featureTypeName].layer && schemes[featureTypeName].layer.getData();
             })
 
 

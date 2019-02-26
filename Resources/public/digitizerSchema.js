@@ -394,23 +394,14 @@ Scheme.prototype = {
      */
     _setFeatureStyle: function (feature) {
         var schema = this;
-        var layer = schema.layer;
 
         if (feature.attributes && feature.attributes.label) {
             feature.styleId = "labelText";
         }
 
         if (schema.featureStyles && schema.featureStyles[feature.fid]) {
-            if (!feature.styleId) {
-                var styleData = schema.featureStyles[feature.fid],
-                    styleMap = layer.options.styleMap,
-                    styles = styleMap.styles,
-                    styleId = styleData.id,
-                    style = new OpenLayers.Style(styleData, {uid: styleId});
-
-                styles[styleId] = style;
-                feature.styleId = styleId;
-            }
+                var styleData = schema.featureStyles[feature.fid];
+                feature.style = styleData;
         }
     },
 
@@ -459,12 +450,6 @@ Scheme.prototype = {
 
         layer.removeAllFeatures();
 
-        _.each(features, function (feature) {
-            feature.layer = layer;
-            schema._setFeatureStyle(feature);
-
-        });
-
         layer.addFeatures(features);
 
 
@@ -503,7 +488,7 @@ Scheme.prototype = {
             layer.setVisibility(true);
             frame.show();
             schema.selectControl.activate();
-            schema._getData();
+            schema.getData();
 
         });
 
@@ -763,7 +748,7 @@ Scheme.prototype = {
             styleOptions.fillTab = false;
         }
 
-        var styleEditor = new FeatureStyleEditor(styleOptions);
+        var styleEditor = new FeatureStyleEditor(schema,styleOptions);
         styleEditor.setFeature(olFeature);
 
 
@@ -776,7 +761,7 @@ Scheme.prototype = {
      * @private
      */
 
-    _getData: function () {
+    getData: function () {
 
         var schema = this;
         var widget = schema.widget;
@@ -929,6 +914,11 @@ Scheme.prototype = {
 
         var features = schema._mergeExistingFeaturesWithLoadedFeatures(featureCollection);
 
+        _.each(features,function(feature) {
+
+            schema._setFeatureStyle(feature);
+        });
+
         schema.reloadFeatures(features);
     },
 
@@ -1024,7 +1014,7 @@ Scheme.prototype = {
 
         delete newFeature.fid;
 
-        newFeature.redraw('copy');
+        newFeature.applyStyle('copy');
 
         schema._openFeatureEditDialog(newFeature);
 
@@ -1326,8 +1316,13 @@ Scheme.prototype = {
     toggleFeatureVisibility: function (feature, on) {
         var schema = this;
 
-        feature.redraw(on ? false : 'invisible');
-        feature.renderIntent = on ? "default" : "invisible";
+        if (on) {
+            feature.redraw();
+            feature.renderIntent = "default";
+        } else {
+            feature.applyStyle('invisible');
+            feature.renderIntent = "invisible";
+        }
 
         var row = schema._getTableRowByFeature(feature);
 

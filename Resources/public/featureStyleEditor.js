@@ -1,6 +1,8 @@
-var FeatureStyleEditor = function(options) {
+var FeatureStyleEditor = function(schema,options) {
 
     var editor = this;
+
+    this.schema = schema;
 
     var defaultOptions = {
         asPopup:    true,
@@ -535,14 +537,12 @@ FeatureStyleEditor.prototype = {
         var styleEditor = featureStyleEditor.getElement();
         var styleData = styleEditor.formData();
         styleEditor.disableForm();
-        olFeature.applyStyle(styleData);
         if (olFeature.fid) {
-            featureStyleEditor._saveStyle(featureStyleEditor.schemaName, styleData, olFeature)
-                .done(function (response) {
-                    console.log(response.style,olFeature.layer.styleMap.styles);
-                    olFeature.applyStyle(response.style);
-                    styleEditor.enableForm();
-                });
+            featureStyleEditor._saveStyle(featureStyleEditor.schemaName, styleData, olFeature).done(function (response) {
+                olFeature.style = styleData;
+                olFeature.redraw();
+                styleEditor.enableForm();
+            });
         } else {
             // defer style saving until the feature itself is saved, and has an id to associate with
             var styleDataCopy = $.extend({}, styleData);

@@ -1,59 +1,35 @@
-OpenLayers.Feature.prototype.applyStyle = function (styleData) {
-    var olFeature = this;
-    var style = new OpenLayers.Style(styleData);
-    var styleId = styleData.id || Mapbender.Util.UUID();
-    olFeature._deleteOldStyleFromStyleMap(styleId);
-    olFeature._addNewStyleToStyleMap(styleId,style);
-    olFeature.styleId = styleId;
-
-    olFeature.redraw(styleId);
-
-};
-
-OpenLayers.Feature.prototype._deleteOldStyleFromStyleMap = function(newStyleId) {
-    var olFeature = this;
-    var styleMap = olFeature.layer.options.styleMap;
-    if (olFeature.styleId && olFeature.styleId !== newStyleId) {
-        delete styleMap.styles[olFeature.styleId];
-    }
-};
-
-OpenLayers.Feature.prototype._addNewStyleToStyleMap = function(newStyleId,style) {
-    var olFeature = this;
-    var styleMap = olFeature.layer.options.styleMap;
-    styleMap.styles[newStyleId] = style;
-
-};
-
-OpenLayers.Feature.prototype.redraw = function(highlightOrStyle) {
+OpenLayers.Feature.prototype.redraw = function (highlight) {
     var feature = this;
     var layer = feature.layer;
 
-    if (typeof highlightOrStyle == "string" || typeof highlightOrStyle == "number") {
-        layer.drawFeature(feature,highlightOrStyle);
 
+    var styleType = (feature.isNew || feature.isChanged) ? 'unsaved' : 'default';
+
+    if (feature.attributes && feature.attributes.label) {
+        layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
     } else {
-        var highlight = !!highlightOrStyle;
-        var styleId = (feature.isNew || feature.isChanged) ? 'unsaved' : feature.styleId || 'default';
-
-        if (feature.attributes && feature.attributes.label) {
-            layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
+        if (highlight) {
+            layer.drawFeature(feature, 'select');
         } else {
-            if (highlight) {
-                layer.drawFeature(feature, 'select');
+            if (feature.selected) {
+                layer.drawFeature(feature, 'selected');
             } else {
-                if (feature.selected) {
-                    layer.drawFeature(feature, 'selected');
-                } else {
-                    layer.drawFeature(feature, styleId);
-                }
+                layer.drawFeature(feature, feature.style ? null : styleType);
             }
         }
     }
 
+
 };
 
-OpenLayers.Feature.prototype.equals = function(feature) {
+OpenLayers.Feature.prototype.applyStyle = function (style) {
+    var feature = this;
+    var layer = feature.layer;
+    layer.drawFeature(feature, style);
+
+};
+
+OpenLayers.Feature.prototype.equals = function (feature) {
     return this.fid === feature.fid;
 };
 

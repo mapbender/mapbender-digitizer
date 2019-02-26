@@ -295,7 +295,7 @@ Sidebar.prototype = {
 
             var onSubmitSearch = function (e) {
                 schema.search.request = searchForm.formData();
-                var xhr = schema._getData();
+                var xhr = schema.getData();
                 if (xhr) {
                     xhr.done(function () {
                         var olMap = widget.map;
@@ -452,7 +452,7 @@ Sidebar.prototype = {
             }
             $checkbox.change(function (e) {
                 schema.searchType = $(e.originalEvent.target).prop("checked") ? "currentExtent" : "all";
-                schema._getData();
+                schema.getData();
             });
             frame.append("<div style='clear:both'>");
             var $div = $("<div/>");

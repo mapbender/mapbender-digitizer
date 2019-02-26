@@ -90,13 +90,10 @@ AllScheme.prototype.redesignLayerFunctions = function () {
 
 
     layer.drawFeature = function (feature, styleId) {
-        console.warn(feature,styleId);
-        if (!styleId || styleId.length <= 20) { // simple way to detect if it is an individual style
-            var newStyleId = (styleId || 'default') + "-" +feature.attributes.geomType;
-        } else {
-            newStyleId = styleId;
-        }
-        var ret = drawFeature.apply(this, [feature, newStyleId]);
+
+        var newStyleId = (styleId || 'default') + "-" +feature.attributes.geomType;
+
+        var ret = drawFeature.apply(this, [feature, feature.style ? null : newStyleId]);
         return ret;
     };
 
