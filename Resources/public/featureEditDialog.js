@@ -238,31 +238,7 @@ FeatureEditDialog.prototype = {
 
             if (configuration.remoteData && feature.isNew) {
 
-
-                var bbox = $popup.data("feature").geometry.getBounds();
-                bbox.right = parseFloat(bbox.right + 0.00001);
-                bbox.top = parseFloat(bbox.top + 0.00001);
-                bbox = bbox.toBBOX();
-                var srid = map.getProjection().replace('EPSG:', '');
-                var url = widget.elementUrl + "getFeatureInfo/";
-
-                $.ajax({
-                    url: url, data: {
-                        bbox: bbox,
-                        schema: schema.schemaName,
-                        srid: srid
-                    }
-                }).success(function (response) {
-                    _.each(response.dataSets, function (dataSet) {
-                        var newData = JSON.parse(dataSet).features[0].properties
-                        $.extend(feature.data, newData);
-
-
-                    });
-                    $popup.formData(feature.data);
-
-                });
-
+                schema._getRemoteData(feature);
 
             } else {
                 $popup.formData(feature.data);

@@ -49,6 +49,7 @@ Selbstgemachte Bugs:
 
 Legacy Bugs:
 - Ungespeicherte Features verschwinden bei Dragging
+- FeatureEdit Dialog wird nach Donut und Formveränderung nicht aufgerufen
 
 
 Optische Bugs:
