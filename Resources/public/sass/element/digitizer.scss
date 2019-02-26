@@ -215,7 +215,7 @@ $selectColor: #F7F79A;
   }
 
 
-  button.disabled  {
+  button:disabled  {
     opacity: 0.5;
   }
 }

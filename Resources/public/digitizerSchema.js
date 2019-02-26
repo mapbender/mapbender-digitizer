@@ -428,7 +428,7 @@ Scheme.prototype = {
             schema.toggleFeatureVisibility(feature, !invisible);
             // TODO this is a bad solution. Disabledness etc. should be controlled by buttons themselves, which unfortunately is not possible on behalf of visui result table
             if (feature.isChanged) {
-                $(row).find(".save").removeClass("disabled");
+                $(row).find(".save").removeAttr("disabled");
             }
             if (feature.printMetadata) {
                 $(row).find(".printmetadata").addClass("active");
@@ -561,7 +561,7 @@ Scheme.prototype = {
         }
         feature.isChanged = true;
 
-        row.find('.button.save').removeClass("disabled").addClass('active');
+        row.find('.button.save').removeAttr("disabled");
 
 
         control && control.deactivate();

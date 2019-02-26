@@ -58,7 +58,8 @@ Sidebar.prototype = {
             buttons.push({
                 title: Mapbender.DigitizerTranslator.translate('feature.save'),
                 className: 'save',
-                cssClass: ' fa fa-floppy-o disabled',
+                cssClass: ' fa fa-floppy-o',
+                disabled: true,
                 onClick: function (olFeature, ui) {
                     schema.saveFeature(olFeature);
                 }
@@ -205,6 +206,7 @@ Sidebar.prototype = {
         var $div = $("<div/>");
         var $table = $div.resultTable(resultTableSettings);
         schema.resultTable = $table.resultTable("instance");
+
         var searchableColumnTitles = _.pluck(_.reject(resultTableSettings.columns, function (column) {
             if (!column.sTitle) {
                 return true;
