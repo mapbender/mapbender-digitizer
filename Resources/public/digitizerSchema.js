@@ -420,7 +420,9 @@ Scheme.prototype = {
 
         tableApi.clear();
 
-        tableApi.rows.add(features.filter(function(feature) { return !feature.isNew }));
+        var featuresToRedraw = features.filter(function(feature) { return !feature.isNew });
+        //console.trace(featuresToRedraw,"$");
+        tableApi.rows.add(featuresToRedraw);
         tableApi.draw();
 
         tableApi.rows(function (idx, feature, row) {
@@ -445,6 +447,7 @@ Scheme.prototype = {
      * @version 0.2
      */
     reloadFeatures: function (_features) {
+        console.log(_features,"@@@");
         var schema = this;
         var widget = schema.widget;
         var layer = schema.layer;
@@ -772,6 +775,7 @@ Scheme.prototype = {
      */
 
     _getData: function () {
+        console.log("getData");
 
         var schema = this;
         var widget = schema.widget;
@@ -881,6 +885,45 @@ Scheme.prototype = {
     //     return initialFormData(feature);
     // },
 
+
+    _mergeExistingFeaturesWithLoadedFeatures: function(featureCollection)  {
+        var schema = this;
+        var layer = schema.layer;
+        var map = layer.map;
+        var extent = map.getExtent();
+        var bbox = extent.toGeometry().getBounds();
+        var currentExtentOnly = schema.searchType === "currentExtent";
+        var geoJsonReader = new OpenLayers.Format.GeoJSON();
+
+
+        var existingFeatures = schema.isClustered ? layer.getClusteredFeatures() : layer.features;
+
+
+        var visibleFeatures = currentExtentOnly ? _.filter(existingFeatures, function (olFeature) {
+            return olFeature && (olFeature.isNew || olFeature.geometry.getBounds().intersectsBounds(bbox));
+        }) : existingFeatures;
+
+        var visibleFeatureIds = _.pluck(visibleFeatures, "fid");
+        var filteredNewFeatures = _.filter(featureCollection.features, function (feature) {
+            return !_.contains(visibleFeatureIds, feature.id);
+        });
+        var newUniqueFeatures = geoJsonReader.read({
+            type: "FeatureCollection",
+            features: filteredNewFeatures
+        });
+
+        var groupIsAll = schema.group && schema.group === "all";
+
+        var originalFeatureCollection = geoJsonReader.read({
+            type: "FeatureCollection",
+            features: featureCollection.features
+        });
+
+        var features = groupIsAll ? originalFeatureCollection : _.union(newUniqueFeatures, visibleFeatures);
+
+        return features;
+
+    },
     /**
      * Handle feature collection by ajax response.
      *
@@ -899,69 +942,13 @@ Scheme.prototype = {
             return;
         }
 
-        if (featureCollection.features && featureCollection.features.length == schema.maxResults) {
+        if (featureCollection.features && featureCollection.features.length === parseInt(schema.maxResults)) {
             Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
         }
-        var geoJsonReader = new OpenLayers.Format.GeoJSON();
-        var currentExtentOnly = schema.searchType === "currentExtent";
-        var layer = schema.layer;
-        var map = layer.map;
-        var extent = map.getExtent();
-        var bbox = extent.toGeometry().getBounds();
-        var existingFeatures = schema.isClustered ? layer.getClusteredFeatures() : layer.features;
-        var visibleFeatures = currentExtentOnly ? _.filter(existingFeatures, function (olFeature) {
-            return olFeature && (olFeature.isNew || olFeature.geometry.getBounds().intersectsBounds(bbox));
-        }) : existingFeatures;
-        var visibleFeatureIds = _.pluck(visibleFeatures, "fid");
-        var filteredNewFeatures = _.filter(featureCollection.features, function (feature) {
-            return !_.contains(visibleFeatureIds, feature.id);
-        });
-        var newUniqueFeatures = geoJsonReader.read({
-            type: "FeatureCollection",
-            features: filteredNewFeatures
-        });
 
-        var _features = _.union(newUniqueFeatures, visibleFeatures);
+        var features = schema._mergeExistingFeaturesWithLoadedFeatures(featureCollection);
 
-
-        // TODO find out what this is for
-        if (schema.group && schema.group === "all") {
-            _features = geoJsonReader.read({
-                type: "FeatureCollection",
-                features: featureCollection.features
-            });
-        }
-
-        var features = [];
-        var polygones = [];
-        var lineStrings = [];
-        var points = [];
-
-        _.each(_features, function (feature) {
-            if (!feature.geometry) {
-                return;
-            }
-            switch (feature.geometry.CLASS_NAME) {
-                case  "OpenLayers.Geometry.Polygon":
-                    polygones.push(feature);
-                    break;
-                case  "OpenLayers.Geometry.LineString":
-                    lineStrings.push(feature);
-                    break;
-                case  "OpenLayers.Geometry.Point":
-                    points.push(feature);
-                    // if(feature.attributes.label) {
-                    //     feature.style = new OpenLayers.Style({
-                    //         'label': '${label}'
-                    //     });
-                    // }
-                    break;
-                default:
-                    features.push(feature);
-            }
-        });
-
-        schema.reloadFeatures(_.union(features, polygones, lineStrings, points));
+        schema.reloadFeatures(features);
     },
 
 
