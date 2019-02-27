@@ -3316,9 +3316,9 @@
 
 
                 feature.layer.redraw();
-                feature.layer.setVisibility(false)
+                feature.layer.setVisibility(false);
 
-                feature.layer.setVisibility(true)
+                feature.layer.setVisibility(true);
 
             }
 
