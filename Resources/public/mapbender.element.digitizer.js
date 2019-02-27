@@ -3353,8 +3353,13 @@
             var attributes = feature.attributes;
             var tableName = schema.featureType.table;
             var relativeWebPath = Mapbender.configuration.application.urls.asset;
-            window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
 
+            if (schema && schema.featureType && schema.featureType.files[0] && schema.featureType.files[0].hasOwnProperty('uri')) {
+                var uri = schema.featureType.files[0].uri;
+                window.open(uri + attributes[attributeName]);
+            } else {
+                window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
+            }
         },
 
         _getRemoteData : function (feature,schema){
