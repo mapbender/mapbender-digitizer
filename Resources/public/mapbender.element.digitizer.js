@@ -3308,7 +3308,7 @@
             if(eventData.origin === 'cancel-button'){
                 this.currentPopup.popupDialog('close');
             }
-            if(!feature.hasOwnProperty('isNew') && feature.hasOwnProperty("oldGeom")){
+            if(!feature.hasOwnProperty('isNew') && feature.hasOwnProperty('oldGeom') && feature.oldGeom){
 
 
                 feature.geometry.x =  feature.oldGeom.x;
