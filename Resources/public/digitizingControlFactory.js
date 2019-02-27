@@ -23,21 +23,6 @@ var createFeatureAddedMethod = function(injectedMethods, geomType) {
 
 };
 
-var finalizePolygonValidOnly = function(cancel) {
-
-    if (this.polygon) {
-        var wkt = this.polygon.geometry.toString();
-        var reader = new jsts.io.WKTReader();
-        var geom = reader.read(wkt);
-        if (!geom.isValid()) {
-            $.notify("Geometry not valid");
-            this.destroyFeature(cancel);
-            return;
-        }
-    }
-
-    return OpenLayers.Handler.Polygon.prototype.finalize.apply(this,arguments);
-};
 
 
 var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
@@ -59,7 +44,22 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         drawPolygon: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
             featureAdded : createFeatureAddedMethod(injectedMethods, 'polygon'),
             handlerOptions: {
-              finalize: finalizePolygonValidOnly,
+              finalize: function(cancel) {
+
+                  if (this.polygon) {
+                      var wkt = this.polygon.geometry.toString();
+                      var reader = new jsts.io.WKTReader();
+                      var geom = reader.read(wkt);
+                      if (!geom.isValid()) {
+                          $.notify("Geometry not valid");
+                          this.destroyFeature(cancel);
+                          this.control.deactivate();
+                          return;
+                      }
+                  }
+
+                  return OpenLayers.Handler.Polygon.prototype.finalize.apply(this,arguments);
+              },
             }
         }),
 
@@ -123,7 +123,22 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                     }
                     OpenLayers.Handler.Path.prototype.addPoint.apply(this, arguments);
                 },
-                finalize: finalizePolygonValidOnly,
+                finalize: function(cancel) {
+
+                    if (this.polygon) {
+                        var wkt = this.polygon.geometry.toString();
+                        var reader = new jsts.io.WKTReader();
+                        var geom = reader.read(wkt);
+                        if (!geom.isValid()) {
+                            $.notify("Geometry not valid");
+                            this.polygon.geometry.removeComponent(this.line.geometry);
+                            this.control.deactivate();
+                            return;
+                        }
+                    }
+
+                    return OpenLayers.Handler.Polygon.prototype.finalize.apply(this,arguments);
+                },
                 finalizeInteriorRing : function(event) {
 
                     var fir =  OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
@@ -236,6 +251,12 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         _.each(controlEvents,function(event,eventName){
             control.events.register(eventName,null,event);
         });
+
+        control.deactivate = function() {
+            $(control.map.div).css({cursor: 'default'});
+            OpenLayers.Control.prototype.deactivate.apply(this,arguments);
+
+        };
 
         control.name = index;
 

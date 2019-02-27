@@ -75,7 +75,7 @@
                 var $mapElement = $(control.map.div) || null;
 
                 if (toolSet.toggleControl(control)) {
-                    $mapElement.css({cursor: $el.data('control-cursor') || 'crosshair'});
+                    $mapElement.css({cursor: 'crosshair'});
                 } else {
                     $mapElement.css({cursor: 'default'});
                 }
@@ -201,7 +201,6 @@
                 if (control instanceof OpenLayers.Control.SelectFeature) {
                     control.unselectAll();
                 }
-                $(control.map.div).css({cursor: 'default'});
                 control.deactivate();
             }
 

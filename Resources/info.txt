@@ -5,7 +5,7 @@ Hinzugefügte Properties:
 
 
 Hinweise:
-- schema.featureType.geomType is mandatory
+- schema.featureType.geomType ist obligatorisch
 
 Ideen:
 - Features nach vorne setzen (z-index)
@@ -48,13 +48,12 @@ Testing:
 
 Selbstgemachte Bugs:
 - Unsaved Style verschwindet, wenn Features neu geladen werden (Refactoring Style)
-- Wiederholter klick auf control führt zu js bug
 - Kopiertes Feature und neues Feature bekommt nach Dragging wieder default Farbe
+- Nichtvalider Donut lässt gesamtes Polygon verschwinden
 
 
 Legacy Bugs:
 - Ungespeicherte Features verschwinden bei Dragging
-- FeatureEdit Dialog wird nach Donut und Formveränderung nicht aufgerufen
 
 
 Optische Bugs:
@@ -85,6 +84,9 @@ Gemacht:
 - Aktivierung des individuellen save Buttons im resultTable verschwindet wieder
 - Backend refactorn - da gibt es viel Bedarf, seit dem Einfügen von style. Der Bahn Approch ist wohl besser
 - Donut mit "Trapez"-Form als ausgeschnittes Loch gilt im Rahmen von Postgres nicht mehr als valide geometrie und wird nicht geladen, wenn By CurrentExtent gesucht wird. Ansonsten schon.
+- Wiederholter klick auf control führt zu js bug
+- FeatureEdit Dialog wird nach Donut und Formveränderung nicht aufgerufen
+
 
 
 
