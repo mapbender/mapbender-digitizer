@@ -34,6 +34,8 @@ Refactoring - Code sortieren:
 - bei der StyleMap wird nicht der geomType verwendet sondern irgendwas anderes. Ändern
 - Die Feature.redraw Methode mit generischem Parameter ist scheiße. Ändern
 - Die ganze Style Map Geschichte im AllScheme ist suboptimal. Neues Model ausdenken und anwenden.
+- Die Integration von vis-ui überschreibung weiter benutzen, zum abhängigen neuzeichnen von buttons
+- nach speichern von style, style in schema feature styles einbinden
 
 
 

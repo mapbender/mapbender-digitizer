@@ -24,13 +24,16 @@ var createFeatureAddedMethod = function(injectedMethods, geomType) {
 };
 
 var finalizePolygonValidOnly = function(cancel) {
-    var wkt = this.polygon.geometry.toString();
-    var reader = new jsts.io.WKTReader();
-    var geom = reader.read(wkt);
-    if (!geom.isValid()) {
-        $.notify("Geometry not valid");
-        this.destroyFeature(cancel);
-        return;
+
+    if (this.polygon) {
+        var wkt = this.polygon.geometry.toString();
+        var reader = new jsts.io.WKTReader();
+        var geom = reader.read(wkt);
+        if (!geom.isValid()) {
+            $.notify("Geometry not valid");
+            this.destroyFeature(cancel);
+            return;
+        }
     }
 
     return OpenLayers.Handler.Polygon.prototype.finalize.apply(this,arguments);
