@@ -252,9 +252,11 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             control.events.register(eventName,null,event);
         });
 
+        var prototype = Object.getPrototypeOf(control);
+
         control.deactivate = function() {
             $(control.map.div).css({cursor: 'default'});
-            OpenLayers.Control.prototype.deactivate.apply(this,arguments);
+            prototype.deactivate.apply(this,arguments);
 
         };
 
