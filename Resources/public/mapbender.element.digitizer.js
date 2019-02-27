@@ -1397,13 +1397,13 @@
             var defaultAttributes = getValueOrDefault(config, "data", {});
             var allowCopy = true;
 
-            _.each(schema.copy.rules, function (ruleCode) {
+            for (var i = 0; i < schema.copy.rules.length; i++) {
                 var f = feature;
-                eval('allowCopy = ' + ruleCode + ';');
-                if (!allowCopy) {
-                    return false;
+                eval('allowCopy = ' + schema.copy.rules[i] + ';');
+                if(!allowCopy) {
+                    break;
                 }
-            });
+            }
 
             if (!allowCopy) {
                 $.notify(translate('feature.clone.on.error'));
