@@ -1413,7 +1413,8 @@
             var newAttributes = {};
             _.extend(newAttributes, defaultAttributes);
             _.each(feature.attributes, function (v, k) {
-                // Ensure, if newAttributes already has own property k, its value may not be overwritten by the value of the looped feature.
+                // Last condition ensures, if newAttributes already has own property k, its value may not be overwritten
+                // by the value of the looped feature.
                 if (v === '' || v === null || newAttributes.hasOwnProperty(k)) {
                     return;
                 }
