@@ -16,7 +16,7 @@ var createFeatureAddedMethod = function(injectedMethods, geomType) {
         injectedMethods.setModifiedState(feature,this);
         injectedMethods.deactivateCurrentControl();
         injectedMethods.openFeatureEditDialog(feature);
-        feature.redraw();
+        feature.layer.drawFeature(feature);
     };
 
     return func;

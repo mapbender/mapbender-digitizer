@@ -719,7 +719,7 @@ Scheme.prototype = {
         };
 
         // TODO maybe place this somewhere in a more public scope
-        var labels = ['default', 'select', 'selected', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
+        var labels = ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
 
         var styleMap = this._createStyleMap(labels, styleContext);
 
@@ -1072,7 +1072,7 @@ Scheme.prototype = {
         delete newFeature.fid;
         newFeature.style = null;
 
-        newFeature.applyStyle('copy');
+        layer.drawFeature(newFeature,'copy');
 
         schema._openFeatureEditDialog(newFeature);
 
@@ -1372,12 +1372,13 @@ Scheme.prototype = {
 
     toggleFeatureVisibility: function (feature, on) {
         var schema = this;
+        var layer = schema.layer;
 
         if (on) {
-            feature.redraw();
+            layer.drawFeature(feature);
             feature.renderIntent = "default";
         } else {
-            feature.applyStyle('invisible');
+            layer.drawFeature(feature,'invisible');
             feature.renderIntent = "invisible";
         }
 

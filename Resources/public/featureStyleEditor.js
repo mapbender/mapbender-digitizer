@@ -540,7 +540,7 @@ FeatureStyleEditor.prototype = {
         if (olFeature.fid) {
             featureStyleEditor._saveStyle(featureStyleEditor.schemaName, styleData, olFeature).done(function (response) {
                 olFeature.style = styleData;
-                olFeature.redraw();
+                olFeature.layer.drawFeature(olFeature);
                 styleEditor.enableForm();
             });
         } else {
