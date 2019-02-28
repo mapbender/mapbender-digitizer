@@ -100,8 +100,8 @@ Sidebar.prototype = {
                 title: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
                 className: 'visibility',
                 onClick: function (olFeature) {
-                    var on = olFeature.renderIntent === 'invisible';
-                    schema.toggleFeatureVisibility(olFeature,on);
+                    console.log(olFeature.renderIntent);
+                    schema.toggleFeatureVisibility(olFeature);
                 }
             });
         }

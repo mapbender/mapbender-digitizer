@@ -473,8 +473,7 @@ Scheme.prototype = {
         tableApi.draw();
 
         tableApi.rows(function (idx, feature, row) {
-            var invisible = feature.renderIntent === 'invisible';
-            schema.toggleFeatureVisibility(feature, !invisible);
+
             // TODO this is a bad solution. Disabledness etc. should be controlled by buttons themselves, which unfortunately is not possible on behalf of visui result table
             if (feature.isChanged) {
                 $(row).find(".save").removeAttr("disabled");
@@ -1361,32 +1360,39 @@ Scheme.prototype = {
     //
     // },
 
-    _toggleVisibility: function (on) {
+    _toggleVisibility: function (visible) {
         var schema = this;
-        schema.layer.features.forEach(function (feature) {
-            schema.toggleFeatureVisibility(feature, on);
+        var layer = schema.layer;
+
+        layer.features.forEach(function (feature) {
+
+            feature.renderIntent = visible ? "default" : "invisible";
+            layer.drawFeature(feature);
+            schema.toggleVisibilityInResultTable(feature,visible);
+
 
         });
 
     },
 
-    toggleFeatureVisibility: function (feature, on) {
+    toggleFeatureVisibility: function (feature) {
         var schema = this;
         var layer = schema.layer;
+        var visible = feature.renderIntent === "invisible";
 
-        if (on) {
-            layer.drawFeature(feature);
-            feature.renderIntent = "default";
-        } else {
-            layer.drawFeature(feature,'invisible');
-            feature.renderIntent = "invisible";
-        }
+        feature.renderIntent = visible ? "default" : "invisible";
 
+        layer.drawFeature(feature);
+        schema.toggleVisibilityInResultTable(feature,visible);
+
+    },
+
+    toggleVisibilityInResultTable: function(feature,visible) {
+        var schema = this;
         var row = schema._getTableRowByFeature(feature);
-
         var ui = row.find('.button.visibility');
 
-        if (on) {
+        if (visible) {
             ui.removeClass("icon-invisibility");
             ui.closest('tr').removeClass('invisible-feature');
         } else {
