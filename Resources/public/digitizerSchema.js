@@ -14,6 +14,10 @@ var Scheme = function (rawScheme, widget) {
 
     schema.toolset = schema.createToolset();
 
+    schema.getStyleLabels().forEach(function(label) {
+        schema.styles[label] = _.isEmpty(schema.styles[label]) ? schema.widget.styles[label] : schema.styles[label];
+    });
+
     schema.createSchemaFeatureLayer();
 
     schema._createFrame();
@@ -21,10 +25,6 @@ var Scheme = function (rawScheme, widget) {
     schema._addSelectControl();
 
     schema.initializeResultTableEvents();
-
-    schema.getStyleLabels().forEach(function(label) {
-        schema[label] = schema[label] || schema.widget[label];
-    });
 
     schema.layer.getClusteredFeatures = function () {
         return _.flatten(_.pluck(this.features, "cluster"));
@@ -50,6 +50,9 @@ var Scheme = function (rawScheme, widget) {
 
     // TODO this has to be carefully checked for prototype propertys, since it fills the `undefined` properties, so it may not work at all
     _.defaults(schema, schema.widget._getNonBlackListedOptions());
+
+
+    schema.initializeStyleApplication();
 
 };
 
@@ -203,6 +206,29 @@ Scheme.prototype = {
 
     getStyleLabels: function() {
         return ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
+    },
+
+    initializeStyleApplication: function() {
+        var schema = this;
+
+        schema.layer.drawFeature = function(feature,style) {
+            if (style === undefined || style === 'default') {
+
+                style = 'default';
+
+                var individualStyle = schema.featureStyles[feature.fid];
+                style = individualStyle || style;
+
+                if (feature.isChanged || feature.isNew) {
+                    style = 'unsaved';
+                }
+
+                if (!feature.visible) {
+                    style = 'invisible';
+                }
+            }
+            return OpenLayers.Layer.Vector.prototype.drawFeature.apply(this,[feature,style]);
+        };
     },
 
     createToolset: function () {
@@ -448,24 +474,6 @@ Scheme.prototype = {
         widget.map.addControl(schema.selectControl);
     },
 
-    /**
-     * Set feature style
-     *
-     * @param feature
-     * @private
-     */
-    _setFeatureStyle: function (feature) {
-        var schema = this;
-
-        if (feature.attributes && feature.attributes.label) {
-            feature.styleId = "labelText";
-        }
-
-        if (schema.featureStyles && schema.featureStyles[feature.fid]) {
-            var styleData = schema.featureStyles[feature.fid];
-            feature.style = styleData;
-        }
-    },
 
     _redrawResultTableFeatures: function (features) {
         var schema = this;
@@ -726,11 +734,6 @@ Scheme.prototype = {
 
 
 
-    // DO Nothing: This methdod is overwritten
-    redesignLayerFunctions: function () {
-
-    },
-
     /**
      * Create vector feature layer
      *
@@ -767,8 +770,6 @@ Scheme.prototype = {
             layer.options.minScale = schema.minScale;
         }
         schema.layer = layer;
-
-        this.redesignLayerFunctions();
 
         widget.map.addLayer(schema.layer);
 
@@ -968,11 +969,6 @@ Scheme.prototype = {
 
         var features = schema._mergeExistingFeaturesWithLoadedFeatures(featureCollection);
 
-        _.each(features, function (feature) {
-
-            schema._setFeatureStyle(feature);
-        });
-
         schema.reloadFeatures(features);
     },
 
@@ -1116,7 +1112,6 @@ Scheme.prototype = {
         newFeature.fid = newFeature.fid || feature.fid;
 
         newFeature.layer = feature.layer;
-        newFeature.renderIntent = feature.renderIntent;
         newFeature.styleId = feature.styleId;
 
         return newFeature;
@@ -1366,9 +1361,9 @@ Scheme.prototype = {
 
         layer.features.forEach(function (feature) {
 
-            feature.renderIntent = visible ? "default" : "invisible";
+            feature.visible = visible;
             layer.drawFeature(feature);
-            schema.toggleVisibilityInResultTable(feature,visible);
+            schema.toggleVisibilityInResultTable(feature);
 
 
         });
@@ -1378,21 +1373,20 @@ Scheme.prototype = {
     toggleFeatureVisibility: function (feature) {
         var schema = this;
         var layer = schema.layer;
-        var visible = feature.renderIntent === "invisible";
 
-        feature.renderIntent = visible ? "default" : "invisible";
+        feature.visible = !feature.visible;
 
         layer.drawFeature(feature);
-        schema.toggleVisibilityInResultTable(feature,visible);
+        schema.toggleVisibilityInResultTable(feature);
 
     },
 
-    toggleVisibilityInResultTable: function(feature,visible) {
+    toggleVisibilityInResultTable: function(feature) {
         var schema = this;
         var row = schema._getTableRowByFeature(feature);
         var ui = row.find('.button.visibility');
 
-        if (visible) {
+        if (feature.visible) {
             ui.removeClass("icon-invisibility");
             ui.closest('tr').removeClass('invisible-feature');
         } else {

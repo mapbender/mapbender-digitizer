@@ -6,3 +6,4 @@ OpenLayers.Feature.prototype.equals = function (feature) {
 OpenLayers.Feature.prototype.isNew = false;
 OpenLayers.Feature.prototype.isChanged = false;
 OpenLayers.Feature.prototype.disabled = false;
+OpenLayers.Feature.prototype.visible = true;

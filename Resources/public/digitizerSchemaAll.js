@@ -26,7 +26,6 @@ AllScheme.prototype = $.extend({}, AllScheme.prototype, {
     useContextMenu: true,
     schemaName: 'all',
     featureType: 'all',
-    toolset: [{type: 'drawPoint'}, {type: 'drawText'}, {type: 'drawLine'}, {type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
     zoomDependentVisibility: [{max: 10000}],
     confirmSaveOnDeactivate: true
 });
@@ -83,10 +82,6 @@ AllScheme.prototype.createToolset = function () {
     return toolset;
 };
 
-AllScheme.prototype.redesignLayerFunctions = function () {
-
-
-};
 
 
 AllScheme.prototype.getFormItems = function (feature) {
