@@ -64,8 +64,6 @@ Scheme.prototype = {
     elementContextMenu: null,
 
 
-
-
     allowSaveAll: true,
     markUnsavedFeatures: true,
     maxResults: 500,
@@ -82,12 +80,11 @@ Scheme.prototype = {
     useContextMenu: true,
     toolset: {},
     popup: {
-        remoteData : false,
+        remoteData: false,
     },
     style: {},
     formItems: null,
     events: null,
-    selectControl: null,
     featureStyles: null,
     search: null,
     allowDigitize: true,
@@ -147,6 +144,10 @@ Scheme.prototype = {
     xhr: null,
     view: null,
 
+    selectControl: null,
+    highlightControl: null,
+
+
     // Layer list names/ids to be refreshed after feature save complete
     refreshLayersAfterFeatureSave: [],
 
@@ -196,7 +197,7 @@ Scheme.prototype = {
 
     },
 
-    createToolset: function() {
+    createToolset: function () {
         var schema = this;
         var widget = schema.widget;
         return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : widget.getDefaultToolsetByGeomType(schema.featureType.geomType);
@@ -263,7 +264,7 @@ Scheme.prototype = {
 
     _openFeatureEditDialog: function (olFeature) {
         var schema = this;
-        var dialog = new FeatureEditDialog(olFeature,schema.popup,schema);
+        var dialog = new FeatureEditDialog(olFeature, schema.popup, schema);
 
     },
 
@@ -271,53 +272,66 @@ Scheme.prototype = {
     hoverInResultTable: function (feature, highlight) {
         var schema = this;
 
+        var domRow = schema.resultTable.getDomRowByData(feature);
+        if (domRow && domRow.size()) {
+            schema.resultTable.showByRow(domRow);
 
-        var features = feature.cluster || [feature];
-        var domRow;
-
-        for (var k in features) {
-            var feature = features[k];
-            domRow = schema.resultTable.getDomRowByData(feature);
-            if (domRow && domRow.size()) {
-                schema.resultTable.showByRow(domRow);
-
-                if (highlight) {
-                    domRow.addClass('hover');
-                } else {
-                    domRow.removeClass('hover');
-                }
-                // $('.selection input', domRow).prop("checked", feature.selected);
-
-                break;
+            if (highlight) {
+                domRow.addClass('hover');
+            } else {
+                domRow.removeClass('hover');
             }
+
         }
+
+        // TODO redefine Code for Cluster
+
+        // var features = feature.cluster || [feature];
+        // var domRow;
+        //
+        // for (var k in features) {
+        //     var feature = features[k];
+        //     domRow = schema.resultTable.getDomRowByData(feature);
+        //     if (domRow && domRow.size()) {
+        //         schema.resultTable.showByRow(domRow);
+        //
+        //         if (highlight) {
+        //             domRow.addClass('hover');
+        //         } else {
+        //             domRow.removeClass('hover');
+        //         }
+        //         // $('.selection input', domRow).prop("checked", feature.selected);
+        //
+        //         break;
+        //     }
+        // }
     },
-    /**
-     *
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
-     * @param {boolean} highlight
-     * @private
-     */
-
-    _highlightSchemaFeature: function (feature, highlight) {
-
-
-        var isSketchFeature = !feature.cluster && feature._sketch && _.size(feature.data) === 0;
-
-
-        if (feature.renderIntent && feature.renderIntent === 'invisible') {
-            return;
-        }
-
-        if (isSketchFeature) {
-            return;
-        }
-
-        feature.redraw(highlight);
-        this.hoverInResultTable(feature, highlight);
-
-
-    },
+    // /**
+    //  *
+    //  * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
+    //  * @param {boolean} highlight
+    //  * @private
+    //  */
+    //
+    // _highlightSchemaFeature: function (feature, highlight) {
+    //
+    //
+    //     var isSketchFeature = !feature.cluster && feature._sketch && _.size(feature.data) === 0;
+    //
+    //
+    //     if (feature.renderIntent && feature.renderIntent === 'invisible') {
+    //         return;
+    //     }
+    //
+    //     if (isSketchFeature) {
+    //         return;
+    //     }
+    //
+    //     feature.redraw(highlight);
+    //     this.hoverInResultTable(feature, highlight);
+    //
+    //
+    // },
 
 
     _mapHasActiveControlThatBlocksSelectControl: function () {
@@ -344,46 +358,86 @@ Scheme.prototype = {
         var layer = schema.layer;
         var widget = schema.widget;
 
+
         var selectControl = new OpenLayers.Control.SelectFeature(layer, {
-            hover: true,
+            clickout: true,
+            toggle: true,
+            multiple: true,
+
+            openDialog: function (feature) {
+
+                if (schema.allowEditData) {
+                    // TODO refactor clustering
+                    //var features = feature.cluster || [feature];
+                    //schema._openFeatureEditDialog(features[0]);
+                    schema._openFeatureEditDialog(feature);
+                }
+            },
 
             clickFeature: function (feature) {
-
-
                 if (schema._mapHasActiveControlThatBlocksSelectControl()) {
                     return;
                 }
+                this.openDialog(feature);
+                return Object.getPrototypeOf(this).clickFeature.apply(this, arguments);
 
-                feature.selected = !feature.selected;
-
-                var selectionManager = schema._getSelectionManager();
-
-                if (feature.selected) {
-                    selectionManager.add(feature);
-                } else {
-                    selectionManager.remove(feature);
-                }
-
-                schema._highlightSchemaFeature(feature, true);
-
-                if (schema.allowEditData) {
-                    var features = feature.cluster || [feature];
-                    schema._openFeatureEditDialog(features[0]);
-                }
             },
-            overFeature: function (feature) {
-                schema._highlightSchemaFeature(feature, true);
+
+            // TODO Selection of Elements does not seem to be necessary
+
+            // onSelect: function (feature) {
+            //
+            //
+            //     var selectionManager = schema._getSelectionManager();
+            //     selectionManager.add(feature);
+            //
+            //     feature.renderIntent = "selected";
+            //     layer.drawFeature(feature, 'selected');
+            //
+            //     this.openDialog(feature);
+            // },
+            // onUnselect: function (feature) {
+            //     var selectionManager = schema._getSelectionManager();
+            //     selectionManager.remove(feature);
+            //
+            //     feature.renderIntent = "default";
+            //     layer.drawFeature(feature, "default");
+            //
+            //     this.openDialog(feature);
+            //
+            // }
+        });
+
+
+        var highlightControl = new OpenLayers.Control.SelectFeature(layer, {
+            hover: true,
+            highlightOnly: true,
+
+            overFeature: function(feature) {
+                this.highlight(feature);
+
             },
             outFeature: function (feature) {
-                schema._highlightSchemaFeature(feature, false);
+                this.unhighlight(feature);
+            },
+
+            highlight: function (feature) {
+                schema.hoverInResultTable(feature,true);
+                return Object.getPrototypeOf(this).highlight.apply(this, arguments);
+            },
+            unhighlight: function (feature) {
+                schema.hoverInResultTable(feature,false);
+                return Object.getPrototypeOf(this).unhighlight.apply(this, arguments);
             }
         });
 
         // Workaround to move map by touch vector features
         selectControl.handlers && selectControl.handlers.feature && (selectControl.handlers.feature.stopDown = false);
         schema.selectControl = selectControl;
-        selectControl.deactivate();
-        widget.map.addControl(selectControl);
+        schema.highlightControl = highlightControl;
+
+        widget.map.addControl(schema.highlightControl);
+        widget.map.addControl(schema.selectControl);
     },
 
     /**
@@ -400,8 +454,8 @@ Scheme.prototype = {
         }
 
         if (schema.featureStyles && schema.featureStyles[feature.fid]) {
-                var styleData = schema.featureStyles[feature.fid];
-                feature.style = styleData;
+            var styleData = schema.featureStyles[feature.fid];
+            feature.style = styleData;
         }
     },
 
@@ -411,7 +465,9 @@ Scheme.prototype = {
 
         tableApi.clear();
 
-        var featuresToRedraw = features.filter(function(feature) { return !feature.isNew });
+        var featuresToRedraw = features.filter(function (feature) {
+            return !feature.isNew
+        });
         //console.trace(featuresToRedraw,"$");
         tableApi.rows.add(featuresToRedraw);
         tableApi.draw();
@@ -453,7 +509,6 @@ Scheme.prototype = {
         layer.addFeatures(features);
 
 
-
         //layer.redraw();
 
         schema._redrawResultTableFeatures(features);
@@ -487,6 +542,7 @@ Scheme.prototype = {
             schema.reloadFeatures();
             layer.setVisibility(true);
             frame.show();
+            schema.highlightControl.activate();
             schema.selectControl.activate();
             schema.getData();
 
@@ -577,7 +633,6 @@ Scheme.prototype = {
         row.find('.button.save').removeClass("active").addClass('disabled');
 
 
-
     },
 
 
@@ -621,7 +676,7 @@ Scheme.prototype = {
         return formData;
     },
 
-    getStyleMapLabelForAllScheme: function(rawLabel) {
+    getStyleMapLabelForAllScheme: function (rawLabel) {
         var schema = this;
         return rawLabel + "-" + schema.featureType.geomType;
 
@@ -732,7 +787,7 @@ Scheme.prototype = {
         var layer = olFeature.layer;
         var styleMap = layer.options.styleMap;
         var styles = styleMap.styles;
-        var defaultSchemeStyle = styles['default-'+olFeature.attributes.geomType] || styles['default'];
+        var defaultSchemeStyle = styles['default-' + olFeature.attributes.geomType] || styles['default'];
         var defaultStyleData = olFeature.style || _.extend({}, defaultSchemeStyle.defaultStyle);
 
         if (olFeature.styleId) {
@@ -748,7 +803,7 @@ Scheme.prototype = {
             styleOptions.fillTab = false;
         }
 
-        var styleEditor = new FeatureStyleEditor(schema,styleOptions);
+        var styleEditor = new FeatureStyleEditor(schema, styleOptions);
         styleEditor.setFeature(olFeature);
 
 
@@ -851,7 +906,7 @@ Scheme.prototype = {
     //     return initialFormData(feature);
     // },
 
-    _getVisibleFeatures: function() {
+    _getVisibleFeatures: function () {
         var schema = this;
         var layer = schema.layer;
         var map = layer.map;
@@ -865,11 +920,11 @@ Scheme.prototype = {
             return olFeature && (olFeature.isNew || olFeature.geometry.getBounds().intersectsBounds(bbox));
         }) : existingFeatures;
 
-       return visibleFeatures;
+        return visibleFeatures;
     },
 
 
-    _mergeExistingFeaturesWithLoadedFeatures: function(featureCollection)  {
+    _mergeExistingFeaturesWithLoadedFeatures: function (featureCollection) {
         var schema = this;
 
         var geoJsonReader = new OpenLayers.Format.GeoJSON();
@@ -881,12 +936,12 @@ Scheme.prototype = {
         });
 
         var newFeaturesFiltered = _.filter(newFeatures, function (nFeature) {
-            return !existingFeatures.some( function(oFeature) {
+            return !existingFeatures.some(function (oFeature) {
                 return nFeature.equals(oFeature);
             });
         });
 
-        var features = _.union(newFeaturesFiltered,existingFeatures);
+        var features = _.union(newFeaturesFiltered, existingFeatures);
         return features;
 
     },
@@ -914,7 +969,7 @@ Scheme.prototype = {
 
         var features = schema._mergeExistingFeaturesWithLoadedFeatures(featureCollection);
 
-        _.each(features,function(feature) {
+        _.each(features, function (feature) {
 
             schema._setFeatureStyle(feature);
         });
@@ -1012,7 +1067,7 @@ Scheme.prototype = {
         // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
         newFeature.geometry.move(200, 200);
         // TODO Name does not necessarily exist
-        newFeature.data.name = "Copy of "+feature.attributes.name;
+        newFeature.data.name = "Copy of " + feature.attributes.name;
 
         delete newFeature.fid;
         newFeature.style = null;
@@ -1244,13 +1299,13 @@ Scheme.prototype = {
         table.delegate("tbody > tr", 'mouseenter', function () {
             var tr = this;
             var row = tableApi.row(tr);
-            schema._highlightFeature(row.data(), true);
+            schema.selectControl.highlight(row.data());
         });
 
         table.delegate("tbody > tr", 'mouseleave', function () {
             var tr = this;
             var row = tableApi.row(tr);
-            schema._highlightFeature(row.data(), false);
+            schema.selectControl.unhighlight(row.data());
         });
 
         table.delegate("tbody > tr", 'click', function () {
@@ -1258,8 +1313,7 @@ Scheme.prototype = {
             var row = tableApi.row(tr);
             var feature = row.data();
 
-            feature.selected = $('.selection input', tr).is(':checked');
-            schema._highlightFeature(feature);
+            schema.selectControl.highlight(feature);
 
             schema._zoomOrOpenDialog(feature);
 
@@ -1269,43 +1323,43 @@ Scheme.prototype = {
     },
 
 
-    /**
-     * Highlight feature on the map
-     *
-     * @param {(OpenLayers.Feature.Vector)} feature
-     * @param {boolean} highlight
-     * @private
-     */
-    _highlightFeature: function (feature, highlight) {
-
-
-        if (!feature || !feature.layer) {
-            return;
-        }
-        var layer = feature.layer;
-
-        if (feature.renderIntent && feature.renderIntent === 'invisible') {
-            return;
-        }
-
-        var isFeatureVisible = _.contains(layer.features, feature);
-        var features = [];
-
-        if (isFeatureVisible) {
-            features.push(feature);
-        } else {
-            _.each(layer.features, function (_feature) {
-                if (_feature.cluster && _.contains(_feature.cluster, feature)) {
-                    features.push(_feature);
-                    return false;
-                }
-            });
-        }
-        _.each(features, function (feature) {
-            feature.redraw(highlight);
-        });
-
-    },
+    // /**
+    //  * Highlight feature on the map
+    //  *
+    //  * @param {(OpenLayers.Feature.Vector)} feature
+    //  * @param {boolean} highlight
+    //  * @private
+    //  */
+    // _highlightFeature: function (feature, highlight) {
+    //
+    //
+    //     if (!feature || !feature.layer) {
+    //         return;
+    //     }
+    //     var layer = feature.layer;
+    //
+    //     if (feature.renderIntent && feature.renderIntent === 'invisible') {
+    //         return;
+    //     }
+    //
+    //     var isFeatureVisible = _.contains(layer.features, feature);
+    //     var features = [];
+    //
+    //     if (isFeatureVisible) {
+    //         features.push(feature);
+    //     } else {
+    //         _.each(layer.features, function (_feature) {
+    //             if (_feature.cluster && _.contains(_feature.cluster, feature)) {
+    //                 features.push(_feature);
+    //                 return false;
+    //             }
+    //         });
+    //     }
+    //     _.each(features, function (feature) {
+    //         feature.redraw(highlight);
+    //     });
+    //
+    // },
 
     _toggleVisibility: function (on) {
         var schema = this;
@@ -1417,7 +1471,7 @@ Scheme.prototype = {
     },
 
 
-    updateClusterStrategy: function() {
+    updateClusterStrategy: function () {
         var schema = this;
         var clusterSettings = null, closestClusterSettings = null;
         var widget = schema.widget;

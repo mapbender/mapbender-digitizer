@@ -36,6 +36,11 @@ Refactoring - Code sortieren:
 - Die ganze Style Map Geschichte im AllScheme ist suboptimal. Neues Model ausdenken und anwenden.
 - Die Integration von vis-ui überschreibung weiter benutzen, zum abhängigen neuzeichnen von buttons
 - nach speichern von style, style in schema feature styles einbinden
+- Die Cluster Funktionalitäten in eigene Datei auslagern, die Methoden überschreibt
+- Higlight Methoden wurden gestrichen - schauen ob was fehlt (insbesondere ResultTable anzeigen)
+- Feature._sketch reparieren
+- zugriff auf visui element in initializeResultTableEvents funktioniert nicht
+- ResultTable spezifische Methoden in resultTable extension auslagern.
 
 
 
