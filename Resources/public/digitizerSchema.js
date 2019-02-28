@@ -22,6 +22,10 @@ var Scheme = function (rawScheme, widget) {
 
     schema.initializeResultTableEvents();
 
+    schema.getStyleLabels().forEach(function(label) {
+        schema[label] = schema[label] || schema.widget[label];
+    });
+
     schema.layer.getClusteredFeatures = function () {
         return _.flatten(_.pluck(this.features, "cluster"));
     };
@@ -195,6 +199,10 @@ Scheme.prototype = {
         widget.allowUseElementContextMenu = schema.elementContextMenu.allowUseContextMenu;
         widget.buildElementContextMenu = schema.elementContextMenu.buildContextMenu;
 
+    },
+
+    getStyleLabels: function() {
+        return ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
     },
 
     createToolset: function () {
@@ -675,20 +683,18 @@ Scheme.prototype = {
         return formData;
     },
 
-    getStyleMapLabelForAllScheme: function (rawLabel) {
-        var schema = this;
-        return rawLabel + "-" + schema.featureType.geomType;
 
-    },
-
-    _createStyleMap: function (labels, styleContext) {
+    _createStyleMap: function () {
         var schema = this;
-        var widget = schema.widget;
+        var context = schema.getStyleMapContext();
         var styleMapObject = {};
+        var labels = schema.getStyleLabels();
 
         labels.forEach(function (label) {
+            var options = schema.getStyleMapOptions(label);
+            options.context = context;
             var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
-            styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, schema.styles[label] || widget.styles[label]), styleContext);
+            styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, schema.styles[label]), options);
         });
 
         if (!schema.markUnsavedFeatures) {
@@ -698,33 +704,27 @@ Scheme.prototype = {
 
     },
 
-
-    _createFeatureLayerStyleMap: function () {
-
-        // TODO find out what this is for
-        var styleContext = {
-            context: {
-                webRootPath: Mapbender.configuration.application.urls.asset,
-                feature: function (feature) {
-                    return feature;
-                },
-                label: function (feature) {
-                    if (feature.attributes.hasOwnProperty("label")) {
-                        return feature.attributes.label;
-                    }
-                    return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
-                }
-            }
-        };
-
-        // TODO maybe place this somewhere in a more public scope
-        var labels = ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
-
-        var styleMap = this._createStyleMap(labels, styleContext);
-
-        return styleMap;
-
+    // Overwrite
+    getStyleMapOptions: function(label) {
+        return {};
     },
+
+    getStyleMapContext: function() {
+        return {
+            webRootPath: Mapbender.configuration.application.urls.asset,
+            feature: function (feature) {
+                return feature;
+            },
+            label: function (feature) {
+                if (feature.attributes.hasOwnProperty("label")) {
+                    return feature.attributes.label;
+                }
+                return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
+            }
+        }
+    },
+
+
 
     // DO Nothing: This methdod is overwritten
     redesignLayerFunctions: function () {
@@ -743,7 +743,7 @@ Scheme.prototype = {
         var isClustered = schema.isClustered = schema.hasOwnProperty('clustering');
         var strategies = [];
 
-        var styleMap = schema._createFeatureLayerStyleMap();
+        var styleMap = schema._createStyleMap();
 
 
         if (isClustered) {

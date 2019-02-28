@@ -39,6 +39,7 @@ Refactoring - Code sortieren:
 - Higlight Methoden wurden gestrichen - schauen ob was fehlt (insbesondere ResultTable anzeigen)
 - Feature._sketch reparieren
 - ResultTable spezifische Methoden in resultTable extension auslagern.
+- Manche Funktionalitäten wie z.B. forEach Iteratoren tauchen sowohl als vanilla, als underscore und als jquery auf. Das ist schlecht.
 
 
 

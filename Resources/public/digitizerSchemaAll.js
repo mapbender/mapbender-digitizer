@@ -4,14 +4,14 @@ var AllScheme = function () {
 
 
     this.featureType = {
-        geomType : 'all'
+        geomType: 'all'
     };
 
 };
 
 AllScheme.prototype = Object.create(Scheme.prototype);
 
-AllScheme.prototype = $.extend({},AllScheme.prototype,{
+AllScheme.prototype = $.extend({}, AllScheme.prototype, {
 
     showExtendSearchSwitch: true,
     openFormAfterEdit: true,
@@ -26,45 +26,46 @@ AllScheme.prototype = $.extend({},AllScheme.prototype,{
     useContextMenu: true,
     schemaName: 'all',
     featureType: 'all',
-    toolset: [{type: 'drawPoint'},{type: 'drawText'},{type: 'drawLine'},{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
+    toolset: [{type: 'drawPoint'}, {type: 'drawText'}, {type: 'drawLine'}, {type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}],
     zoomDependentVisibility: [{max: 10000}],
     confirmSaveOnDeactivate: true
 });
 
-AllScheme.prototype._createStyleMap = function (labels, styleContext) {
+AllScheme.prototype.getStyleMapOptions = function (label) {
     var schema = this;
     var widget = schema.widget;
-    var styleMapObject = {};
 
-    _.each(widget.schemes, function (scheme, schemaName) {
-        if (schemaName === schema.schemaName) {
-            return;
-        }
-        labels.forEach(function (rawLabel) {
-            var label = scheme.getStyleMapLabelForAllScheme(rawLabel);
-            var styleOL = OpenLayers.Feature.Vector.style[rawLabel] || OpenLayers.Feature.Vector.style['default'];
+    var rules = [];
 
-            styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, scheme.styles[rawLabel] || widget.styles[rawLabel]), styleContext);
+    _.each(widget.schemes, function (scheme) {
+
+        var rule = new OpenLayers.Rule({
+            symbolizer: scheme.layer.styleMap.styles[label].defaultStyle,
+            evaluate: function (feature) {
+                var equals = feature.attributes.geomType === scheme.featureType.geomType;
+                return equals;
+            }
         });
 
-        if (!schema.markUnsavedFeatures) {
-            styleMapObject["unsaved-"+scheme.featureType.geomType] = styleMapObject["default-"+scheme.featureType.geomType];
-        }
-
-
+        rules.push(rule);
     });
-    return new OpenLayers.StyleMap(styleMapObject, {extendDefault: true});
+
+    return {
+        rules: rules
+    }
 };
 
-AllScheme.prototype.createToolset = function() {
+AllScheme.prototype.createToolset = function () {
     var schema = this;
     var widget = schema.widget;
     var toolset = [];
     _.each(widget.schemes, function (scheme, schemaName) {
-        $.each(scheme.toolset, function(i,element) {
+        $.each(scheme.toolset, function (i, element) {
 
             // Avoid duplicates, i.e. elements with same 'type' property
-            if (toolset.filter(function(t) { return t.type === element.type }).length === 0) {
+            if (toolset.filter(function (t) {
+                return t.type === element.type
+            }).length === 0) {
                 toolset.push(element);
             }
 
@@ -73,34 +74,22 @@ AllScheme.prototype.createToolset = function() {
     });
 
     // TODO find better place for all possible controls in array
-    var config = ['drawPoint','drawLine','drawPolygon','drawRectangle','drawCircle','drawEllipse','drawDonut','drawText','modifyFeature','moveFeature','selectFeature','removeSelected'];
+    var config = ['drawPoint', 'drawLine', 'drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'drawText', 'modifyFeature', 'moveFeature', 'selectFeature', 'removeSelected'];
 
-    toolset = toolset.sort(function(a,b) { return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : -1; });
+    toolset = toolset.sort(function (a, b) {
+        return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : -1;
+    });
 
     return toolset;
 };
 
 AllScheme.prototype.redesignLayerFunctions = function () {
 
-    var schema = this;
-    var widget = schema.widget;
-    var layer = schema.layer;
-
-    var drawFeature = OpenLayers.Layer.Vector.prototype.drawFeature;
-
-
-    layer.drawFeature = function (feature, styleId) {
-
-        var newStyleId = (styleId || 'default') + "-" +feature.attributes.geomType;
-
-        var ret = drawFeature.apply(this, [feature, feature.style ? null : newStyleId]);
-        return ret;
-    };
 
 };
 
 
-AllScheme.prototype.getFormItems = function(feature) {
+AllScheme.prototype.getFormItems = function (feature) {
     var schema = this;
     var widget = schema.widget;
     console.assert(!!feature.attributes.geomType, "geometry type of new Feature must be set");
@@ -110,13 +99,13 @@ AllScheme.prototype.getFormItems = function(feature) {
 
 
 // TODO merge this methods
-AllScheme.prototype.getSchemaName = function(feature) {
+AllScheme.prototype.getSchemaName = function (feature) {
     var schema = this;
     var widget = schema.widget;
     return widget.getSchemaByGeomType(feature.attributes.geomType).schemaName;
 };
 
-AllScheme.prototype.getSchemaByFeature = function(feature) {
+AllScheme.prototype.getSchemaByFeature = function (feature) {
     var schema = this;
     var widget = schema.widget;
 
