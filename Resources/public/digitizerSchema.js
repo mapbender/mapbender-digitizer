@@ -1292,7 +1292,7 @@ Scheme.prototype = {
 
         var tableApi = schema.resultTable.getApi();
 
-        var table = $(schema.resultTable);
+        var table =  schema.resultTable.element;
 
         table.off('mouseenter', 'mouseleave', 'click');
 

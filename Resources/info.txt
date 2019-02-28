@@ -39,7 +39,6 @@ Refactoring - Code sortieren:
 - Die Cluster Funktionalitäten in eigene Datei auslagern, die Methoden überschreibt
 - Higlight Methoden wurden gestrichen - schauen ob was fehlt (insbesondere ResultTable anzeigen)
 - Feature._sketch reparieren
-- zugriff auf visui element in initializeResultTableEvents funktioniert nicht
 - ResultTable spezifische Methoden in resultTable extension auslagern.
 
 
@@ -91,6 +90,8 @@ Gemacht:
 - Donut mit "Trapez"-Form als ausgeschnittes Loch gilt im Rahmen von Postgres nicht mehr als valide geometrie und wird nicht geladen, wenn By CurrentExtent gesucht wird. Ansonsten schon.
 - Wiederholter klick auf control führt zu js bug
 - FeatureEdit Dialog wird nach Donut und Formveränderung nicht aufgerufen
+- zugriff auf visui element in initializeResultTableEvents funktioniert nicht
+
 
 
 
