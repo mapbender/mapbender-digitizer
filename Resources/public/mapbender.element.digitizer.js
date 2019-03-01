@@ -27,7 +27,6 @@
 
         schemes: {},
         map: null,
-        currentSchema: null,
         // TODO this should not be here but in css file
         featureEditDialogWidth: "423px",
 
@@ -239,6 +238,8 @@
         },
 
 
+        deactivateSchema: function() { console.warn("This method should be overwritten"); },
+
 
         _initializeSelector: function () {
             var widget = this;
@@ -255,7 +256,7 @@
                 var option = selector.find(":selected");
                 var newSchema = option.data("schemaSettings");
 
-                widget.currentSchema && widget.currentSchema.deactivateSchema();
+                widget.deactivateSchema();
 
                 newSchema.activateSchema();
             };
@@ -264,20 +265,19 @@
 
         },
 
+
+        getData: function(zoom) {},
+
+
         _initializeMapEvents: function () {
             var widget = this;
             var map = widget.map;
 
             map.events.register("moveend", this, function () {
-                if (widget.currentSchema) {
-                    widget.currentSchema.getData();
-                }
+                widget.getData();
             });
-            map.events.register("zoomend", this, function (e) {
-                if (widget.currentSchema) {
-                    widget.currentSchema.getData();
-                    widget.updateClusterStrategies();
-                }
+            map.events.register("zoomend", this, function () {
+                widget.getData(true);
             });
             map.resetLayersZIndex();
         },
@@ -328,8 +328,6 @@
 
             widget._trigger('ready');
 
-            widget.updateClusterStrategies();
-
         },
 
 
@@ -351,30 +349,17 @@
         },
 
 
-        /**
-         * Update cluster strategies
-         */
-        updateClusterStrategies: function () {
-            var widget = this;
-
-            $.each(widget.schemes, function (i, schema) {
-                schema.updateClusterStrategy();
-            });
-        },
-
 
         activate: function () {
             var widget = this;
             widget.options.__disabled = false;
-            widget.onSelectorChange(); // necessary to set currentSchema
+            widget.onSelectorChange();
         },
 
         deactivate: function () {
             var widget = this;
             widget.options.__disabled = true;
-            if (widget.currentSchema && !widget.currentSchema.displayOnInactive) {
-                widget.currentSchema.deactivateSchema();
-            }
+            widget.deactivateSchema();
         },
 
 

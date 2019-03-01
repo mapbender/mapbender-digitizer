@@ -13,6 +13,7 @@ Ideen:
 Ansprechen:
 - Hack beim Hintergrundbild des Color Pickers
 - Die ganze Funktionalität des Features Sortieren beim Neuladen scheint überflüssig zu sein
+- Updaten von ClusterStrategy im Widget findet nicht im Callback von getData statt
 
 Refactoring - Renaming:
 - Konsistente Linie für Methodennamen, hinsichtlich des _ als Präfix

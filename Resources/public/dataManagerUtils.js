@@ -1,6 +1,7 @@
-var DataManagerUtils = function (widget) {
+var DataManagerUtils = function (schema) {
 
-    this.widget = widget;
+    this.schema = schema;
+    this.widget = schema.widget;
 
 };
 
@@ -12,7 +13,7 @@ DataManagerUtils.prototype = {
      */
     processCurrentFormItemsWithDataManager: function (olFeature) {
         var widget = this.widget;
-        var schema = widget.currentSchema;
+        var schema = this.schema;
 
         // dataManager access function
         // TODO: maybe it would be better to create public methods on dataManager to do this
@@ -32,7 +33,7 @@ DataManagerUtils.prototype = {
             });
         }
 
-        DataUtil.eachItem(widget.currentSchema.formItems, function (item) {
+        DataUtil.eachItem(schema.formItems, function (item) {
 
             if (item.type === "resultTable" && item.editable && !item.isProcessed) {
                 var onCreateClick;
@@ -178,7 +179,7 @@ DataManagerUtils.prototype = {
 
                         var dataStoreId = item.dataStore.id;
                         QueryEngine.query("datastore/get", {
-                            schema: widget.currentSchema.schemaName,
+                            schema: schema.schemaName,
                             id: dataStoreId,
                             dataItemId: dataItemId
                         }).done(function (data) {
@@ -279,8 +280,9 @@ DataManagerUtils.prototype = {
      */
     _openEditDialog: function (dataItem, formItems, schema, ref) {
         var widget = this.widget;
+        var schema = this.schema;
 
-        var schemaName = widget.currentSchema.schemaName;
+        var schemaName = schema.schemaName;
         var uniqueKey = schema.dataStore.uniqueId;
         var textKey = schema.dataStore.text;
         var buttons = [];
@@ -373,12 +375,8 @@ DataManagerUtils.prototype = {
             }, 1);
         });
 
-        /*   if(!schema.elementsTranslated) {
-         translateStructure(widget.currentSchema.formItems);
-         schema.elementsTranslated = true;
-         } */
 
-        DataUtil.eachItem(widget.currentSchema.formItems, function (item) {
+        DataUtil.eachItem(schema.formItems, function (item) {
             if (item.type === "file") {
                 item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + dataItem.fid + "&field=" + item.name;
                 if (item.hasOwnProperty("name") && dataItem.data.hasOwnProperty(item.name) && dataItem.data[item.name]) {

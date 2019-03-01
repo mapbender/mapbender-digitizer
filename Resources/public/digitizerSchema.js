@@ -56,6 +56,11 @@ var Scheme = function (rawScheme, widget) {
 
     schema.initializeStyleApplication();
 
+    if (schema.isClustered) {
+        schema = $.extend({},schema,schemaClustering);
+        schema.updateClusterStrategy();
+    }
+
 };
 
 
@@ -194,6 +199,64 @@ Scheme.prototype = {
                 $.notify(e);
             }
         });
+    },
+
+    activateSchema: function () {
+
+        /** @type {Scheme} */
+        var schema = this;
+        var widget = schema.widget;
+        var frame = schema.frame;
+        var layer = schema.layer;
+
+        if (widget.options.__disabled) {
+            return;
+        }
+
+        schema.activateContextMenu();
+
+        widget.getData = schema.getData;
+
+        if (!schema.displayOnInactive) {
+            widget.deactivateSchema = schema.deactivateSchema;
+        }
+
+        QueryEngine.query('style/list', {schema: schema.schemaName}).done(function (data) {
+            schema.featureStyles = data.featureStyles;
+
+            schema.reloadFeatures();
+            layer.setVisibility(true);
+            frame.show();
+            schema.highlightControl.activate();
+            schema.selectControl.activate();
+            schema.getData();
+
+        });
+
+    },
+
+    deactivateSchema: function () {
+        /** @type {Scheme} */
+        var schema = this;
+        var widget = schema.widget;
+        var frame = schema.frame;
+        var layer = schema.layer;
+
+        frame.hide();
+
+        if (!schema.displayPermanent) {
+            layer.setVisibility(false);
+        }
+
+        schema.selectControl.deactivate();
+
+        // https://trac.wheregroup.com/cp/issues/4548
+        if (widget.currentPopup) {
+            widget.currentPopup.popupDialog('close');
+        }
+        schema.digitizingToolset.deactivateCurrentControl();
+
+
     },
 
 
@@ -440,61 +503,7 @@ Scheme.prototype = {
     },
 
 
-    activateSchema: function () {
 
-        /** @type {Scheme} */
-        var schema = this;
-        var widget = schema.widget;
-        var frame = schema.frame;
-        var layer = schema.layer;
-
-        if (widget.options.__disabled) {
-            return;
-        }
-
-        widget.activeLayer = schema.layer;
-        widget.currentSchema = schema;
-
-        schema.activateContextMenu();
-
-        QueryEngine.query('style/list', {schema: schema.schemaName}).done(function (data) {
-            schema.featureStyles = data.featureStyles;
-
-            schema.reloadFeatures();
-            layer.setVisibility(true);
-            frame.show();
-            schema.highlightControl.activate();
-            schema.selectControl.activate();
-            schema.getData();
-
-        });
-
-    },
-
-    deactivateSchema: function () {
-        /** @type {Scheme} */
-        var schema = this;
-        var widget = schema.widget;
-        var frame = schema.frame;
-        var layer = schema.layer;
-
-        frame.hide();
-
-        if (!schema.displayPermanent) {
-            layer.setVisibility(false);
-        }
-
-        schema.selectControl.deactivate();
-
-        // https://trac.wheregroup.com/cp/issues/4548
-        if (widget.currentPopup) {
-            widget.currentPopup.popupDialog('close');
-        }
-        schema.digitizingToolset.deactivateCurrentControl();
-
-        widget.currentSchema = null;
-
-    },
 
     _createFrame: function () {
         /** @type {Scheme} */
@@ -1252,60 +1261,5 @@ Scheme.prototype = {
         });
     },
 
-
-    updateClusterStrategy: function () {
-        var schema = this;
-        var clusterSettings = null, closestClusterSettings = null;
-        var widget = schema.widget;
-        var scale = Math.round(widget.map.getScale());
-
-        if (!schema.clustering) {
-            return;
-        }
-
-        $.each(schema.clustering, function (y, _clusterSettings) {
-            if (_clusterSettings.scale == scale) {
-                clusterSettings = _clusterSettings;
-                return false;
-            }
-
-            if (_clusterSettings.scale < scale) {
-                if (closestClusterSettings && _clusterSettings.scale > closestClusterSettings.scale) {
-                    closestClusterSettings = _clusterSettings;
-                } else {
-                    if (!closestClusterSettings) {
-                        closestClusterSettings = _clusterSettings;
-                    }
-                }
-            }
-        });
-
-        if (!clusterSettings && closestClusterSettings) {
-            clusterSettings = closestClusterSettings
-        }
-
-        if (clusterSettings) {
-
-            if (clusterSettings.hasOwnProperty('disable') && clusterSettings.disable) {
-                schema.clusterStrategy.distance = -1;
-                var features = schema.layer.features;
-                schema.reloadFeatures([]);
-                schema.clusterStrategy.deactivate();
-                //schema.layer.redraw();
-                schema.isClustered = false;
-                schema.reloadFeatures(features);
-
-            } else {
-                schema.clusterStrategy.activate();
-                schema.isClustered = true;
-            }
-            if (clusterSettings.hasOwnProperty('distance')) {
-                schema.clusterStrategy.distance = clusterSettings.distance;
-            }
-
-        } else {
-            //schema.clusterStrategy.deactivate();
-        }
-    }
 
 };

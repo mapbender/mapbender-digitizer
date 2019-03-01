@@ -29,8 +29,8 @@ var FeatureEditDialog = function (feature, configuration, schema) {
 
     // TODO comprehensive schema throws Exception because no formItems
     try {
-        var dataManagerUtils = new DataManagerUtils(widget);
-        dataManagerUtils.processCurrentFormItemsWithDataManager(feature, schema);
+        var dataManagerUtils = new DataManagerUtils(schema);
+        dataManagerUtils.processCurrentFormItemsWithDataManager(feature);
     } catch (e) {
        // console.warn(e);
     }
