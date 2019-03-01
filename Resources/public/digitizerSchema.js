@@ -57,13 +57,16 @@ var Scheme = function (rawScheme, widget) {
     schema.initializeStyleApplication();
 
     if (schema.clustering) {
-        var mixin = new ClusteringSchemeMixin();
-        schema = $.extend({},schema,mixin);
-        schema.layer.strategies = mixin.strategies;
-        schema.updateClusterStrategy();
+        var clusteringScheme = ClusteringSchemeMixin();
+        var originalSchemePrototype = Object.getPrototypeOf(schema);
+        Object.setPrototypeOf(schema,clusteringScheme);
+        Object.setPrototypeOf(clusteringScheme,originalSchemePrototype);
 
-        console.log(schema);
+        schema.initializeClustering();
+
     }
+
+    console.log(schema);
 
 };
 
@@ -708,7 +711,6 @@ Scheme.prototype = {
      */
 
     getData: function () {
-
         var schema = this;
         var widget = schema.widget;
 
@@ -840,7 +842,6 @@ Scheme.prototype = {
      * @version 0.2
      */
 
-    // TODO refactor this
     _onFeatureCollectionLoaded: function (featureCollection, xhr) {
         var schema = this;
 

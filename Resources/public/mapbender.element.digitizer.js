@@ -227,6 +227,7 @@
             var widget = this;
             var schema = null;
             _.each(widget.schemes, function (scheme) {
+                console.log(scheme);
                 if (scheme.featureType.geomType === geomtype) {
                     schema = scheme;
                 }
