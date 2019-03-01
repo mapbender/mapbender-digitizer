@@ -28,9 +28,9 @@ var Scheme = function (rawScheme, widget) {
 
     schema.resultTable.initializeResultTableEvents(schema.highlightControl,schema.zoomOrOpenDialog.bind(schema));
 
-    schema.layer.getClusteredFeatures = function () {
-        return _.flatten(_.pluck(this.features, "cluster"));
-    };
+    // schema.layer.getClusteredFeatures = function () {
+    //     return _.flatten(_.pluck(this.features, "cluster"));
+    // };
 
     schema.mapContextMenu = new MapContextMenu(schema);
     schema.elementContextMenu = new ElementContextMenu(schema);
@@ -55,8 +55,6 @@ var Scheme = function (rawScheme, widget) {
 
 
     schema.initializeStyleApplication();
-
-    console.log(this);
 
 };
 
@@ -416,7 +414,6 @@ Scheme.prototype = {
 
     /**
      * Reload or replace features from the layer and feature table
-     * - Fix OpenLayer bug by clustered features.
      *
      * @param _features
      * @version 0.2
@@ -426,10 +423,6 @@ Scheme.prototype = {
         var widget = schema.widget;
         var layer = schema.layer;
         var features = _features || layer.features;
-
-        if (features.length && features[0].cluster) {
-            features = layer.getClusteredFeatures();
-        }
 
 
         layer.removeAllFeatures();
@@ -650,17 +643,10 @@ Scheme.prototype = {
 
         var schema = this;
         var widget = schema.widget;
-        var isClustered = schema.isClustered = schema.hasOwnProperty('clustering');
         var strategies = [];
 
         var styleMap = schema._createStyleMap();
 
-
-        if (isClustered) {
-            var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
-            strategies.push(clusterStrategy);
-            schema.clusterStrategy = clusterStrategy;
-        }
 
         var layer = new OpenLayers.Layer.Vector(schema.label, {
             styleMap: styleMap,
@@ -701,8 +687,6 @@ Scheme.prototype = {
             data: schema.featureStyles[feature.fid] || style,
             commonTab: false
         };
-
-        console.log(schema.layer.styleMap.styles);
 
         var styleEditor = new FeatureStyleEditor(feature, schema, styleOptions);
     },
@@ -766,7 +750,6 @@ Scheme.prototype = {
 
                 // Input fields are note
                 if (_.size(errors)) {
-                    // console.log("Search mandatory rules isn't complete", errors);
                     // Remove all features
                     schema.reloadFeatures([]);
                     schema.lastRequest = null;
@@ -800,9 +783,6 @@ Scheme.prototype = {
         return schema.xhr;
     },
 
-    // _initialFormData: function (feature) {
-    //     return initialFormData(feature);
-    // },
 
     _getVisibleFeatures: function () {
         var schema = this;
@@ -812,11 +792,10 @@ Scheme.prototype = {
         var bbox = extent.toGeometry().getBounds();
         var currentExtentOnly = schema.searchType === "currentExtent";
 
-        var existingFeatures = schema.isClustered ? layer.getClusteredFeatures() : layer.features;
 
-        var visibleFeatures = currentExtentOnly ? _.filter(existingFeatures, function (olFeature) {
+        var visibleFeatures = currentExtentOnly ? _.filter(layer.features, function (olFeature) {
             return olFeature && (olFeature.isNew || olFeature.geometry.getBounds().intersectsBounds(bbox));
-        }) : existingFeatures;
+        }) : layer.features;
 
         return visibleFeatures;
     },
@@ -875,8 +854,7 @@ Scheme.prototype = {
         var schema = this;
         var layer = schema.layer;
 
-        var existingFeatures = schema.isClustered ? layer.getClusteredFeatures() : layer.features;
-        schema.reloadFeatures(_.without(existingFeatures, olFeature));
+        schema.reloadFeatures(_.without(layer.features, olFeature));
 
         schema._refreshOtherLayersAfterFeatureSave();
     },
