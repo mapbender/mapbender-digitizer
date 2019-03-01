@@ -9,9 +9,8 @@ var AllScheme = function () {
 
 };
 
-AllScheme.prototype = Object.create(Scheme.prototype);
 
-AllScheme.prototype = $.extend({}, AllScheme.prototype, {
+AllScheme.prototype = {
 
     showExtendSearchSwitch: true,
     openFormAfterEdit: true,
@@ -28,7 +27,7 @@ AllScheme.prototype = $.extend({}, AllScheme.prototype, {
     featureType: 'all',
     zoomDependentVisibility: [{max: 10000}],
     confirmSaveOnDeactivate: true
-});
+};
 
 AllScheme.prototype.getStyleMapOptions = function (label) {
     var schema = this;
@@ -106,3 +105,6 @@ AllScheme.prototype.getSchemaByFeature = function (feature) {
 
     return widget.getSchemaByGeomType(feature.attributes.geomType);
 };
+
+
+Object.setPrototypeOf(AllScheme.prototype,Scheme.prototype);
