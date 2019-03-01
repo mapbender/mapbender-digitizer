@@ -458,13 +458,13 @@ Scheme.prototype = {
             },
 
             highlight: function (feature) {
-                schema.processFeature(function(feature){
+                schema.processFeature(feature,function(feature){
                     schema.resultTable.hoverInResultTable(feature,true);
                 });
                 return Object.getPrototypeOf(this).highlight.apply(this, [feature,true]);
             },
             unhighlight: function (feature) {
-                schema.processFeature(function(feature){
+                schema.processFeature(feature,function(feature){
                     schema.resultTable.hoverInResultTable(feature,false);
                 });
                 return Object.getPrototypeOf(this).unhighlight.apply(this, [feature,false]);
