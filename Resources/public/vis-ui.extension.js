@@ -3,6 +3,154 @@
     $.widget("digitizer.resultTable", $["vis-ui-js"].resultTable, {
 
 
+        initializeResultTableEvents: function (selectControl, processFeature) {
+            var resultTable = this;
+
+            var tableApi = resultTable.getApi();
+
+            var table =  resultTable.element;
+
+            table.off('mouseenter', 'mouseleave', 'click');
+
+            table.delegate("tbody > tr", 'mouseenter', function () {
+                var tr = this;
+                var row = tableApi.row(tr);
+                selectControl.highlight(row.data());
+            });
+
+            table.delegate("tbody > tr", 'mouseleave', function () {
+                var tr = this;
+                var row = tableApi.row(tr);
+                selectControl.unhighlight(row.data());
+            });
+
+            table.delegate("tbody > tr", 'click', function () {
+                var tr = this;
+                var row = tableApi.row(tr);
+                var feature = row.data();
+
+                selectControl.highlight(feature);
+
+                processFeature(feature);
+
+            });
+
+
+        },
+
+        hoverInResultTable: function (feature, highlight) {
+            var resultTable = this;
+
+            var domRow = resultTable.getDomRowByData(feature);
+            if (domRow && domRow.size()) {
+                resultTable.showByRow(domRow);
+
+                if (highlight) {
+                    domRow.addClass('hover');
+                } else {
+                    domRow.removeClass('hover');
+                }
+
+            }
+
+            // TODO redefine Code for Cluster
+
+            // var features = feature.cluster || [feature];
+            // var domRow;
+            //
+            // for (var k in features) {
+            //     var feature = features[k];
+            //     domRow = schema.resultTable.getDomRowByData(feature);
+            //     if (domRow && domRow.size()) {
+            //         schema.resultTable.showByRow(domRow);
+            //
+            //         if (highlight) {
+            //             domRow.addClass('hover');
+            //         } else {
+            //             domRow.removeClass('hover');
+            //         }
+            //         // $('.selection input', domRow).prop("checked", feature.selected);
+            //
+            //         break;
+            //     }
+            // }
+        },
+
+
+        redrawResultTableFeatures: function (features) {
+            var resultTable = this;
+            var tableApi = resultTable.getApi();
+
+            tableApi.clear();
+
+            var featuresToRedraw = features.filter(function (feature) {
+                return !feature.isNew
+            });
+            //console.trace(featuresToRedraw,"$");
+            tableApi.rows.add(featuresToRedraw);
+            tableApi.draw();
+
+            tableApi.rows(function (idx, feature, row) {
+
+                // TODO this is a bad solution. Disabledness etc. should be controlled by buttons themselves, which unfortunately is not possible on behalf of visui result table
+                if (feature.isChanged) {
+                    $(row).find(".save").removeAttr("disabled");
+                }
+                if (feature.printMetadata) {
+                    $(row).find(".printmetadata").addClass("active");
+                }
+                return true;
+            });
+
+        },
+
+
+
+        getTableRowByFeature: function (feature) {
+            var resultTable = this;
+            var row = resultTable.getDomRowByData(feature);
+            return row;
+        },
+
+
+        refreshFeatureRowInDataTable: function (feature) {
+            var resultTable = this;
+            var tableApi = resultTable.getApi();
+
+            tableApi.row(resultTable.getDomRowByData(feature)).invalidate();
+            tableApi.draw();
+        },
+
+
+        toggleVisibilityInResultTable: function(feature) {
+            var resultTable = this;
+            var row = resultTable.getTableRowByFeature(feature);
+            var ui = row.find('.button.visibility');
+
+            if (feature.visible) {
+                ui.removeClass("icon-invisibility");
+                ui.closest('tr').removeClass('invisible-feature');
+            } else {
+                ui.addClass("icon-invisibility");
+                ui.closest('tr').addClass('invisible-feature');
+            }
+        },
+
+        initializeColumnTitles: function() {
+            var resultTable = this;
+
+            var searchableColumnTitles = _.pluck(_.reject(resultTable.options.columns, function (column) {
+                if (!column.sTitle) {
+                    return true;
+                }
+
+                if (column.hasOwnProperty('searchable') && column.searchable === false) {
+                    return true;
+                }
+            }), 'sTitle');
+
+            resultTable.element.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
+        },
 
 
         // Allow Button disable

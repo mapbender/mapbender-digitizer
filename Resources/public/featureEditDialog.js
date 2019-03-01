@@ -19,7 +19,7 @@ var FeatureEditDialog = function (feature, configuration, schema) {
 
     if (widget.currentPopup) {
         widget.currentPopup.popupDialog('close');
-        if (dialog.isOpenLayersCloudPopup() && schema.olFeatureCloudPopup) {
+        if (dialog.configuration.isOpenLayersCloudPopup() && schema.olFeatureCloudPopup) {
             map.removePopup(schema.olFeatureCloudPopup);
             schema.olFeatureCloudPopup.destroy();
             schema.olFeatureCloudPopup = null;
@@ -138,11 +138,6 @@ FeatureEditDialog.prototype = {
 
     },
 
-    isOpenLayersCloudPopup: function () {
-        var dialog = this;
-
-        return dialog.configuration.type && dialog.configuration.type === 'openlayers-cloud';
-    },
 
     doFeatureEditDialogBindings: function () {
         var dialog = this;
@@ -164,7 +159,7 @@ FeatureEditDialog.prototype = {
         });
 
 
-        if (dialog.isOpenLayersCloudPopup()) {
+        if (dialog.configuration.isOpenLayersCloudPopup()) {
             // Hide original popup but not kill it.
             $popup.closest('.ui-dialog').css({
                 'margin-left': '-100000px'
@@ -173,6 +168,7 @@ FeatureEditDialog.prototype = {
     },
 
 
+    // TODO find out what this is for
     retrieveFeatureTableDataFromDataStore: function () {
         var dialog = this;
         var $popup = dialog.$popup;
@@ -245,7 +241,7 @@ FeatureEditDialog.prototype = {
             }
 
 
-            if (dialog.isOpenLayersCloudPopup()) {
+            if (dialog.configuration.isOpenLayersCloudPopup()) {
                 /**
                  * @var {OpenLayers.Popup.FramedCloud}
                  */

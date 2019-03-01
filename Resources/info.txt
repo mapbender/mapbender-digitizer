@@ -31,15 +31,13 @@ Refactoring - Code sortieren:
 - Konstanten für Style Namen
 - Forbidden operations on server should NOT throw a 500
 - feature.attributes.geomType und schema.featureType.geomType- variablen anders benennen
-- bei der StyleMap wird nicht der geomType verwendet sondern irgendwas anderes. Ändern
 - Die ganze Style Map Geschichte im AllScheme ist suboptimal. Neues Model ausdenken und anwenden.
 - Die Integration von vis-ui überschreibung weiter benutzen, zum abhängigen neuzeichnen von buttons
 - nach speichern von style, style in schema feature styles einbinden
 - Die Cluster Funktionalitäten in eigene Datei auslagern, die Methoden überschreibt
 - Higlight Methoden wurden gestrichen - schauen ob was fehlt (insbesondere ResultTable anzeigen)
-- Feature._sketch reparieren
-- ResultTable spezifische Methoden in resultTable extension auslagern.
 - Manche Funktionalitäten wie z.B. forEach Iteratoren tauchen sowohl als vanilla, als underscore und als jquery auf. Das ist schlecht.
+- Für Spezialfälle (Clustering, OpenLayersCloud etc. Methoden überschreiben anstatt schalter einbauen)
 
 
 
@@ -47,7 +45,7 @@ Refactoring - Code sortieren:
 Testing:
 - Testen, was mit dem Formdata passiert wenn saveFeature außerhalb des FeatureEdit Dialogs aufgerufen wird
 - Überprüfen, wie im Bahn Digitizer "alles" Layer sich die einzelnen Features hinsichtlich ihrer allow Properties im Resulttable verhalten
-
+- Popup Einstellungen in Configuration
 
 
 Selbstgemachte Bugs:
@@ -92,6 +90,9 @@ Gemacht:
 - FeatureEdit Dialog wird nach Donut und Formveränderung nicht aufgerufen
 - zugriff auf visui element in initializeResultTableEvents funktioniert nicht
 - Die Feature.redraw Methode mit generischem Parameter ist scheiße. Ändern
+- ResultTable spezifische Methoden in resultTable extension auslagern.
+- bei der StyleMap wird nicht der geomType verwendet sondern irgendwas anderes. Ändern
+
 
 
 

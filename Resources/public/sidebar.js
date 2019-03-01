@@ -206,17 +206,7 @@ Sidebar.prototype = {
         var $table = $div.resultTable(resultTableSettings);
         schema.resultTable = $table.resultTable("instance");
 
-        var searchableColumnTitles = _.pluck(_.reject(resultTableSettings.columns, function (column) {
-            if (!column.sTitle) {
-                return true;
-            }
-
-            if (column.hasOwnProperty('searchable') && column.searchable === false) {
-                return true;
-            }
-        }), 'sTitle');
-
-        $table.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
+        schema.resultTable.initializeColumnTitles();
 
 
         frame.append($table);

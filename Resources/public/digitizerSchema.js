@@ -6,6 +6,8 @@ var Scheme = function (rawScheme, widget) {
 
     schema.formItems = Mapbender.DigitizerTranslator.translateStructure(schema.formItems);
 
+    schema.popup = $.extend({},Scheme.prototype.popup,rawScheme.popup);
+
     schema._initializeHooks();
 
     schema.setModifiedState = Scheme.prototype.setModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
@@ -22,9 +24,9 @@ var Scheme = function (rawScheme, widget) {
 
     schema._createFrame();
 
-    schema._addSelectControl();
+    schema._addSelectControls();
 
-    schema.initializeResultTableEvents();
+    schema.resultTable.initializeResultTableEvents(schema.highlightControl,schema.zoomOrOpenDialog.bind(schema));
 
     schema.layer.getClusteredFeatures = function () {
         return _.flatten(_.pluck(this.features, "cluster"));
@@ -53,6 +55,8 @@ var Scheme = function (rawScheme, widget) {
 
 
     schema.initializeStyleApplication();
+
+    console.log(this);
 
 };
 
@@ -88,6 +92,9 @@ Scheme.prototype = {
     toolset: {},
     popup: {
         remoteData: false,
+        isOpenLayersCloudPopup: function() {
+            return this.type === 'openlayers-cloud';
+        }
     },
     style: {},
     formItems: null,
@@ -303,69 +310,6 @@ Scheme.prototype = {
     },
 
 
-    hoverInResultTable: function (feature, highlight) {
-        var schema = this;
-
-        var domRow = schema.resultTable.getDomRowByData(feature);
-        if (domRow && domRow.size()) {
-            schema.resultTable.showByRow(domRow);
-
-            if (highlight) {
-                domRow.addClass('hover');
-            } else {
-                domRow.removeClass('hover');
-            }
-
-        }
-
-        // TODO redefine Code for Cluster
-
-        // var features = feature.cluster || [feature];
-        // var domRow;
-        //
-        // for (var k in features) {
-        //     var feature = features[k];
-        //     domRow = schema.resultTable.getDomRowByData(feature);
-        //     if (domRow && domRow.size()) {
-        //         schema.resultTable.showByRow(domRow);
-        //
-        //         if (highlight) {
-        //             domRow.addClass('hover');
-        //         } else {
-        //             domRow.removeClass('hover');
-        //         }
-        //         // $('.selection input', domRow).prop("checked", feature.selected);
-        //
-        //         break;
-        //     }
-        // }
-    },
-    // /**
-    //  *
-    //  * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
-    //  * @param {boolean} highlight
-    //  * @private
-    //  */
-    //
-    // _highlightSchemaFeature: function (feature, highlight) {
-    //
-    //
-    //     var isSketchFeature = !feature.cluster && feature._sketch && _.size(feature.data) === 0;
-    //
-    //
-    //     if (feature.renderIntent && feature.renderIntent === 'invisible') {
-    //         return;
-    //     }
-    //
-    //     if (isSketchFeature) {
-    //         return;
-    //     }
-    //
-    //     feature.redraw(highlight);
-    //     this.hoverInResultTable(feature, highlight);
-    //
-    //
-    // },
 
 
     _mapHasActiveControlThatBlocksSelectControl: function () {
@@ -376,17 +320,13 @@ Scheme.prototype = {
         return !!_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true});
     },
 
-    _getSelectionManager: function () {
-        var schema = this;
-        return schema.resultTable.getSelection();
-    },
 
     /**
      *
      * @private
      */
 
-    _addSelectControl: function () {
+    _addSelectControls: function () {
         /** @type {Scheme} */
         var schema = this;
         var layer = schema.layer;
@@ -456,11 +396,11 @@ Scheme.prototype = {
             },
 
             highlight: function (feature) {
-                schema.hoverInResultTable(feature,true);
+                schema.resultTable.hoverInResultTable(feature,true);
                 return Object.getPrototypeOf(this).highlight.apply(this, arguments);
             },
             unhighlight: function (feature) {
-                schema.hoverInResultTable(feature,false);
+                schema.resultTable.hoverInResultTable(feature,false);
                 return Object.getPrototypeOf(this).unhighlight.apply(this, arguments);
             }
         });
@@ -475,32 +415,7 @@ Scheme.prototype = {
     },
 
 
-    _redrawResultTableFeatures: function (features) {
-        var schema = this;
-        var tableApi = schema.resultTable.getApi();
 
-        tableApi.clear();
-
-        var featuresToRedraw = features.filter(function (feature) {
-            return !feature.isNew
-        });
-        //console.trace(featuresToRedraw,"$");
-        tableApi.rows.add(featuresToRedraw);
-        tableApi.draw();
-
-        tableApi.rows(function (idx, feature, row) {
-
-            // TODO this is a bad solution. Disabledness etc. should be controlled by buttons themselves, which unfortunately is not possible on behalf of visui result table
-            if (feature.isChanged) {
-                $(row).find(".save").removeAttr("disabled");
-            }
-            if (feature.printMetadata) {
-                $(row).find(".printmetadata").addClass("active");
-            }
-            return true;
-        });
-
-    },
     /**
      * Reload or replace features from the layer and feature table
      * - Fix OpenLayer bug by clustered features.
@@ -526,7 +441,7 @@ Scheme.prototype = {
 
         //layer.redraw();
 
-        schema._redrawResultTableFeatures(features);
+        schema.resultTable.redrawResultTableFeatures(features);
 
         if (widget.options.__disabled) {
             widget.deactivate();
@@ -604,18 +519,12 @@ Scheme.prototype = {
     },
 
 
-    _getTableRowByFeature: function (feature) {
-        var schema = this;
-        var row = schema.resultTable.getDomRowByData(feature);
-        return row;
-    },
-
     setModifiedState: function (feature, control) {
 
         var schema = this;
         $(schema.frame).find(".save-all-features").addClass("active");
 
-        var row = schema._getTableRowByFeature(feature);
+        var row = schema.resultTable.getTableRowByFeature(feature);
         if (!row) {
             feature.isNew = true;
             return; // In case of non-saved feature
@@ -641,7 +550,7 @@ Scheme.prototype = {
             $(schema.frame).find(".save-all-features").removeClass("active");
         }
 
-        var row = schema._getTableRowByFeature(feature);
+        var row = schema.resultTable.getTableRowByFeature(feature);
         if (!row) {
             return; // in case of non-saved feature
         }
@@ -1184,7 +1093,7 @@ Scheme.prototype = {
             schema.reloadFeatures();
 
 
-            schema._refreshFeatureRowInDataTable(newFeature);
+            schema.resultTable.refreshFeatureRowInDataTable(newFeature);
 
             $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
 
@@ -1208,13 +1117,6 @@ Scheme.prototype = {
 
     },
 
-    _refreshFeatureRowInDataTable: function (feature) {
-        var schema = this;
-        var tableApi = schema.resultTable.getApi();
-
-        tableApi.row(schema.resultTable.getDomRowByData(feature)).invalidate();
-        tableApi.draw();
-    },
 
     _refreshConnectedDigitizerFeatures: function () {
         var schema = this;
@@ -1268,92 +1170,17 @@ Scheme.prototype = {
     },
 
 
-    _zoomOrOpenDialog: function (feature) {
+    zoomOrOpenDialog: function (feature) {
         var schema = this;
 
-        var isOpenLayerCloudPopup = schema.popup && schema.popup.type && schema.popup.type === 'openlayers-cloud';
-
-        if (isOpenLayerCloudPopup) {
+        if (schema.popup.isOpenLayersCloudPopup()) {
             schema._openFeatureEditDialog(feature);
         } else {
             schema.zoomToJsonFeature(feature);
         }
     },
 
-    initializeResultTableEvents: function () {
-        var schema = this;
-        var widget = schema.widget;
 
-        var tableApi = schema.resultTable.getApi();
-
-        var table =  schema.resultTable.element;
-
-        table.off('mouseenter', 'mouseleave', 'click');
-
-        table.delegate("tbody > tr", 'mouseenter', function () {
-            var tr = this;
-            var row = tableApi.row(tr);
-            schema.selectControl.highlight(row.data());
-        });
-
-        table.delegate("tbody > tr", 'mouseleave', function () {
-            var tr = this;
-            var row = tableApi.row(tr);
-            schema.selectControl.unhighlight(row.data());
-        });
-
-        table.delegate("tbody > tr", 'click', function () {
-            var tr = this;
-            var row = tableApi.row(tr);
-            var feature = row.data();
-
-            schema.selectControl.highlight(feature);
-
-            schema._zoomOrOpenDialog(feature);
-
-        });
-
-
-    },
-
-
-    // /**
-    //  * Highlight feature on the map
-    //  *
-    //  * @param {(OpenLayers.Feature.Vector)} feature
-    //  * @param {boolean} highlight
-    //  * @private
-    //  */
-    // _highlightFeature: function (feature, highlight) {
-    //
-    //
-    //     if (!feature || !feature.layer) {
-    //         return;
-    //     }
-    //     var layer = feature.layer;
-    //
-    //     if (feature.renderIntent && feature.renderIntent === 'invisible') {
-    //         return;
-    //     }
-    //
-    //     var isFeatureVisible = _.contains(layer.features, feature);
-    //     var features = [];
-    //
-    //     if (isFeatureVisible) {
-    //         features.push(feature);
-    //     } else {
-    //         _.each(layer.features, function (_feature) {
-    //             if (_feature.cluster && _.contains(_feature.cluster, feature)) {
-    //                 features.push(_feature);
-    //                 return false;
-    //             }
-    //         });
-    //     }
-    //     _.each(features, function (feature) {
-    //         feature.redraw(highlight);
-    //     });
-    //
-    // },
 
     _toggleVisibility: function (visible) {
         var schema = this;
@@ -1363,7 +1190,7 @@ Scheme.prototype = {
 
             feature.visible = visible;
             layer.drawFeature(feature);
-            schema.toggleVisibilityInResultTable(feature);
+            schema.resultTable.toggleVisibilityInResultTable(feature);
 
 
         });
@@ -1377,23 +1204,11 @@ Scheme.prototype = {
         feature.visible = !feature.visible;
 
         layer.drawFeature(feature);
-        schema.toggleVisibilityInResultTable(feature);
+        schema.resultTable.toggleVisibilityInResultTable(feature);
 
     },
 
-    toggleVisibilityInResultTable: function(feature) {
-        var schema = this;
-        var row = schema._getTableRowByFeature(feature);
-        var ui = row.find('.button.visibility');
 
-        if (feature.visible) {
-            ui.removeClass("icon-invisibility");
-            ui.closest('tr').removeClass('invisible-feature');
-        } else {
-            ui.addClass("icon-invisibility");
-            ui.closest('tr').addClass('invisible-feature');
-        }
-    },
 
     _getDefaultProperties: function () {
         var schema = this;
