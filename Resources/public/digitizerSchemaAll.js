@@ -26,85 +26,87 @@ AllScheme.prototype = {
     schemaName: 'all',
     featureType: 'all',
     zoomDependentVisibility: [{max: 10000}],
-    confirmSaveOnDeactivate: true
-};
+    confirmSaveOnDeactivate: true,
 
-AllScheme.prototype.getStyleMapOptions = function (label) {
-    var schema = this;
-    var widget = schema.widget;
+    getStyleMapOptions : function (label) {
+        var schema = this;
+        var widget = schema.widget;
 
-    var rules = [];
+        var rules = [];
 
-    _.each(widget.schemes, function (scheme) {
+        _.each(widget.schemes, function (scheme) {
 
-        var rule = new OpenLayers.Rule({
-            symbolizer: scheme.layer.styleMap.styles[label].defaultStyle,
-            evaluate: function (feature) {
-                var equals = feature.attributes.geomType === scheme.featureType.geomType;
-                return equals;
-            }
+            var rule = new OpenLayers.Rule({
+                symbolizer: scheme.layer.styleMap.styles[label].defaultStyle,
+                evaluate: function (feature) {
+                    var equals = feature.attributes.geomType === scheme.featureType.geomType;
+                    return equals;
+                }
+            });
+
+            rules.push(rule);
         });
 
-        rules.push(rule);
-    });
+        return {
+            rules: rules
+        }
+    },
 
-    return {
-        rules: rules
-    }
-};
+    createToolset : function () {
+        var schema = this;
+        var widget = schema.widget;
+        var toolset = [];
+        _.each(widget.schemes, function (scheme, schemaName) {
+            $.each(scheme.toolset, function (i, element) {
 
-AllScheme.prototype.createToolset = function () {
-    var schema = this;
-    var widget = schema.widget;
-    var toolset = [];
-    _.each(widget.schemes, function (scheme, schemaName) {
-        $.each(scheme.toolset, function (i, element) {
+                // Avoid duplicates, i.e. elements with same 'type' property
+                if (toolset.filter(function (t) {
+                    return t.type === element.type
+                }).length === 0) {
+                    toolset.push(element);
+                }
 
-            // Avoid duplicates, i.e. elements with same 'type' property
-            if (toolset.filter(function (t) {
-                return t.type === element.type
-            }).length === 0) {
-                toolset.push(element);
-            }
+            });
 
         });
 
-    });
+        // TODO find better place for all possible controls in array
+        var config = ['drawPoint', 'drawLine', 'drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'drawText', 'modifyFeature', 'moveFeature', 'selectFeature', 'removeSelected'];
 
-    // TODO find better place for all possible controls in array
-    var config = ['drawPoint', 'drawLine', 'drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'drawText', 'modifyFeature', 'moveFeature', 'selectFeature', 'removeSelected'];
+        toolset = toolset.sort(function (a, b) {
+            return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : -1;
+        });
 
-    toolset = toolset.sort(function (a, b) {
-        return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : -1;
-    });
-
-    return toolset;
-};
+        return toolset;
+    },
 
 
 
-AllScheme.prototype.getFormItems = function (feature) {
-    var schema = this;
-    var widget = schema.widget;
-    console.assert(!!feature.attributes.geomType, "geometry type of new Feature must be set");
-    var featureSchema = widget.getSchemaByGeomType(feature.attributes.geomType);
-    return featureSchema.getFormItems(feature);
-};
+    getFormItems: function (feature) {
+        var schema = this;
+        var widget = schema.widget;
+        console.assert(!!feature.attributes.geomType, "geometry type of new Feature must be set");
+        var featureSchema = widget.getSchemaByGeomType(feature.attributes.geomType);
+        return featureSchema.getFormItems(feature);
+    },
 
 
 // TODO merge this methods
-AllScheme.prototype.getSchemaName = function (feature) {
-    var schema = this;
-    var widget = schema.widget;
-    return widget.getSchemaByGeomType(feature.attributes.geomType).schemaName;
+    getSchemaName: function (feature) {
+        var schema = this;
+        var widget = schema.widget;
+        return widget.getSchemaByGeomType(feature.attributes.geomType).schemaName;
+    },
+
+    getSchemaByFeature: function (feature) {
+        var schema = this;
+        var widget = schema.widget;
+
+        return widget.getSchemaByGeomType(feature.attributes.geomType);
+    }
 };
 
-AllScheme.prototype.getSchemaByFeature = function (feature) {
-    var schema = this;
-    var widget = schema.widget;
 
-    return widget.getSchemaByGeomType(feature.attributes.geomType);
-};
 
 
 Object.setPrototypeOf(AllScheme.prototype,Scheme.prototype);
