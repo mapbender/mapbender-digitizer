@@ -215,16 +215,14 @@ Scheme.prototype = {
         return ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
     },
 
+
     initializeStyleApplication: function() {
         var schema = this;
 
         schema.layer.drawFeature = function(feature,style) {
             if (style === undefined || style === 'default') {
 
-                style = 'default';
-
-                var individualStyle = schema.featureStyles[feature.fid];
-                style = individualStyle || style;
+                style = schema.featureStyles[feature.fid] || style;
 
                 if (feature.isChanged || feature.isNew) {
                     style = 'unsaved';
@@ -685,37 +683,28 @@ Scheme.prototype = {
     },
 
 
+    createDefaultSymbolizer: function(feature) {
+        var schema = this;
+        return schema.layer.styleMap.styles['default'].createSymbolizer(feature);
+    },
     /**
      * Open change style dialog
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
+     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
      * @returns {*}
      */
-    openChangeStyleDialog: function (olFeature) {
-
+    openChangeStyleDialog: function (feature) {
         var schema = this;
-        var layer = olFeature.layer;
-        var styleMap = layer.options.styleMap;
-        var styles = styleMap.styles;
-        var defaultSchemeStyle = styles['default-' + olFeature.attributes.geomType] || styles['default'];
-        var defaultStyleData = olFeature.style || _.extend({}, defaultSchemeStyle.defaultStyle);
 
-        if (olFeature.styleId) {
-            _.extend(defaultStyleData, styles[olFeature.styleId].defaultStyle);
-        }
+        var style = schema.createDefaultSymbolizer(feature);
 
         var styleOptions = {
-            data: defaultStyleData,
+            data: schema.featureStyles[feature.fid] || style,
             commonTab: false
         };
 
-        if (olFeature.geometry.CLASS_NAME === "OpenLayers.Geometry.LineString") {
-            styleOptions.fillTab = false;
-        }
+        console.log(schema.layer.styleMap.styles);
 
-        var styleEditor = new FeatureStyleEditor(schema, styleOptions);
-        styleEditor.setFeature(olFeature);
-
-
+        var styleEditor = new FeatureStyleEditor(feature, schema, styleOptions);
     },
 
     /**
@@ -1021,7 +1010,6 @@ Scheme.prototype = {
         newFeature.fid = newFeature.fid || feature.fid;
 
         newFeature.layer = feature.layer;
-        newFeature.styleId = feature.styleId;
 
         return newFeature;
 

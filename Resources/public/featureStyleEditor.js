@@ -1,7 +1,8 @@
-var FeatureStyleEditor = function(schema,options) {
+var FeatureStyleEditor = function(feature,schema,options) {
 
     var editor = this;
 
+    this.feature = feature;
     this.schema = schema;
 
     var defaultOptions = {
@@ -23,6 +24,10 @@ var FeatureStyleEditor = function(schema,options) {
     };
 
     options = $.extend(defaultOptions,options);
+
+    if (feature.geometry.CLASS_NAME === "OpenLayers.Geometry.LineString") {
+        options.fillTab = false;
+    }
 
 
     var commonTab = {
@@ -516,10 +521,6 @@ var FeatureStyleEditor = function(schema,options) {
 
 FeatureStyleEditor.prototype = {
 
-
-    setFeature: function(feature) {
-        this.feature = feature;
-    },
 
 
     /**
