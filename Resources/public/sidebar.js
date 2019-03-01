@@ -71,7 +71,7 @@ Sidebar.prototype = {
                 title: Mapbender.DigitizerTranslator.translate('feature.edit'),
                 className: 'edit',
                 onClick: function (olFeature, ui) {
-                    schema._openFeatureEditDialog(olFeature);
+                    schema.openFeatureEditDialog(olFeature);
                 }
             });
         }
@@ -331,7 +331,7 @@ Sidebar.prototype = {
                 openFeatureEditDialog: function (feature) {
 
                     if (schema.openFormAfterEdit) {
-                        schema._openFeatureEditDialog(feature);
+                        schema.openFeatureEditDialog(feature);
                     }
                 },
                 getDefaultAttributes: function () {
@@ -356,7 +356,7 @@ Sidebar.prototype = {
                         if (schema.popup && schema.popup.remoteData) {
                             schema._getRemoteData(feature);
                         } else {
-                            schema._openFeatureEditDialog(feature);
+                            schema.openFeatureEditDialog(feature);
                         }
                     }
                 },

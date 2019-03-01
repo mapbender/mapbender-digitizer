@@ -368,6 +368,7 @@
          * @param featureTypeName
          */
 
+        // TODO muss getetest werden
         refreshConnectedDigitizerFeatures: function (featureTypeName) {
             var widget = this;
             $(".mb-element-digitizer").not(".mb-element-data-manager").each(function (index, element) {

@@ -30,7 +30,6 @@ MapContextMenu.prototype.buildContextMenu = function (trigger, e) {
     var schema = contextMenu.schema;
     var items = {};
     var feature = schema.layer.getFeatureFromEvent(e);
-    var features;
 
     if (!feature) {
         items['no-items'] = {name: "Nothing selected!"}
@@ -38,10 +37,10 @@ MapContextMenu.prototype.buildContextMenu = function (trigger, e) {
         if (feature._sketch) {
             return items;
         }
-        features = feature.cluster || [feature];
-        _.each(features, function (feature) {
+        schema.processFeature(function (feature) {
             items[feature.fid] = contextMenu.createMapContextMenuSubMenu(feature);
         });
+
     }
 
     return {
@@ -99,7 +98,7 @@ MapContextMenu.prototype.createMapContextMenuSubMenu = function (olFeature) {
         subItems['edit'] = {
             name: Mapbender.DigitizerTranslator.translate('feature.edit'),
             action: function (key, options, parameters) {
-                schema._openFeatureEditDialog(parameters.olFeature);
+                schema.openFeatureEditDialog(parameters.olFeature);
             }
         }
     }
@@ -146,26 +145,34 @@ ElementContextMenu.prototype.buildContextMenu = function (trigger, e) {
     if (schema.allowCustomerStyle) {
         items['changeStyle'] = {
             name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
-            action: function() { schema.openChangeStyleDialog(olFeature); }
+            action: function () {
+                schema.openChangeStyleDialog(olFeature);
+            }
         };
     }
 
     items['zoom'] = {
         name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
-        action: function() {  schema.zoomToJsonFeature(olFeature); }
+        action: function () {
+            schema.zoomToJsonFeature(olFeature);
+        }
     };
 
     if (schema.allowDelete) {
         items['removeFeature'] = {
             name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
-            action: function() { schema.removeFeature(olFeature); }
+            action: function () {
+                schema.removeFeature(olFeature);
+            }
         };
     }
 
     if (schema.allowEditData) {
         items['edit'] = {
             name: Mapbender.DigitizerTranslator.translate('feature.edit'),
-            action: function() { schema._openFeatureEditDialog(olFeature); }
+            action: function () {
+                schema.openFeatureEditDialog(olFeature);
+            }
         };
     }
 

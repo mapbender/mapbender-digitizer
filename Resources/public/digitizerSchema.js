@@ -56,9 +56,13 @@ var Scheme = function (rawScheme, widget) {
 
     schema.initializeStyleApplication();
 
-    if (schema.isClustered) {
-        schema = $.extend({},schema,schemaClustering);
+    if (schema.clustering) {
+        var mixin = new ClusteringSchemeMixin();
+        schema = $.extend({},schema,mixin);
+        schema.layer.strategies = mixin.strategies;
         schema.updateClusterStrategy();
+
+        console.log(schema);
     }
 
 };
@@ -117,7 +121,10 @@ Scheme.prototype = {
     allowPrintMetadata: false,
     printable: false,
     dataItems: null,
-    isClustered: false,
+    clustering: [{
+        scale: 5000000,
+        distance: 30
+    }],
     clusterStrategy: null,
     styles: {},
     maxScale: null,
@@ -215,16 +222,15 @@ Scheme.prototype = {
 
         schema.activateContextMenu();
 
-        widget.getData = schema.getData;
+        widget.getData = schema.getData.bind(schema);
 
         if (!schema.displayOnInactive) {
-            widget.deactivateSchema = schema.deactivateSchema;
+            widget.deactivateSchema = schema.deactivateSchema.bind(schema);
         }
 
         QueryEngine.query('style/list', {schema: schema.schemaName}).done(function (data) {
             schema.featureStyles = data.featureStyles;
 
-            schema.reloadFeatures();
             layer.setVisibility(true);
             frame.show();
             schema.highlightControl.activate();
@@ -362,7 +368,7 @@ Scheme.prototype = {
      * @private
      */
 
-    _openFeatureEditDialog: function (olFeature) {
+    openFeatureEditDialog: function (olFeature) {
         var schema = this;
         var dialog = new FeatureEditDialog(olFeature, schema.popup, schema);
 
@@ -400,10 +406,7 @@ Scheme.prototype = {
             openDialog: function (feature) {
 
                 if (schema.allowEditData) {
-                    // TODO refactor clustering
-                    //var features = feature.cluster || [feature];
-                    //schema._openFeatureEditDialog(features[0]);
-                    schema._openFeatureEditDialog(feature);
+                    schema.openFeatureEditDialog(feature);
                 }
             },
 
@@ -455,12 +458,16 @@ Scheme.prototype = {
             },
 
             highlight: function (feature) {
-                schema.resultTable.hoverInResultTable(feature,true);
-                return Object.getPrototypeOf(this).highlight.apply(this, arguments);
+                schema.processFeature(function(feature){
+                    schema.resultTable.hoverInResultTable(feature,true);
+                });
+                return Object.getPrototypeOf(this).highlight.apply(this, [feature,true]);
             },
             unhighlight: function (feature) {
-                schema.resultTable.hoverInResultTable(feature,false);
-                return Object.getPrototypeOf(this).unhighlight.apply(this, arguments);
+                schema.processFeature(function(feature){
+                    schema.resultTable.hoverInResultTable(feature,false);
+                });
+                return Object.getPrototypeOf(this).unhighlight.apply(this, [feature,false]);
             }
         });
 
@@ -481,19 +488,15 @@ Scheme.prototype = {
      * @param _features
      * @version 0.2
      */
-    reloadFeatures: function (_features) {
+    reloadFeatures: function () {
         var schema = this;
         var widget = schema.widget;
         var layer = schema.layer;
-        var features = _features || layer.features;
+        var features = schema.getLayerFeatures();
 
 
         layer.removeAllFeatures();
-
         layer.addFeatures(features);
-
-
-        //layer.redraw();
 
         schema.resultTable.redrawResultTableFeatures(features);
 
@@ -633,10 +636,7 @@ Scheme.prototype = {
                 return feature;
             },
             label: function (feature) {
-                if (feature.attributes.hasOwnProperty("label")) {
-                    return feature.attributes.label;
-                }
-                return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
+                return feature.attributes.label || feature.getClusterSize() || "";
             }
         }
     },
@@ -760,7 +760,7 @@ Scheme.prototype = {
                 // Input fields are note
                 if (_.size(errors)) {
                     // Remove all features
-                    schema.reloadFeatures([]);
+                    schema.removeAllFeatures();
                     schema.lastRequest = null;
                     return;
                 }
@@ -777,7 +777,7 @@ Scheme.prototype = {
         // If schema search activated, then only
         if (schema.search && !isExtentOnly) {
             // Remove all features
-            schema.reloadFeatures([]);
+            schema.removeAllFeatures();
         }
 
         // Abort previous request
@@ -802,7 +802,7 @@ Scheme.prototype = {
         var currentExtentOnly = schema.searchType === "currentExtent";
 
 
-        var visibleFeatures = currentExtentOnly ? _.filter(layer.features, function (olFeature) {
+        var visibleFeatures = currentExtentOnly ? _.filter(schema.getLayerFeatures(), function (olFeature) {
             return olFeature && (olFeature.isNew || olFeature.geometry.getBounds().intersectsBounds(bbox));
         }) : layer.features;
 
@@ -853,19 +853,28 @@ Scheme.prototype = {
             Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
         }
 
-        var features = schema._mergeExistingFeaturesWithLoadedFeatures(featureCollection);
+        schema.layer.features = schema._mergeExistingFeaturesWithLoadedFeatures(featureCollection);
 
-        schema.reloadFeatures(features);
+        schema.reloadFeatures();
     },
 
+    // Overwrite
+    getLayerFeatures: function() {
+        var schema = this;
+        return schema.layer.features;
+    },
 
     _removeFeatureFromUI: function (olFeature) {
         var schema = this;
-        var layer = schema.layer;
-
-        schema.reloadFeatures(_.without(layer.features, olFeature));
-
+        schema.layer.features = _.without(schema.getLayerFeatures(), olFeature);
+        schema.reloadFeatures();
         schema._refreshOtherLayersAfterFeatureSave();
+    },
+
+    removeAllFeatures: function() {
+      var schema = this;
+      schema.layer.features = [];
+      schema.reloadFeatures();
     },
 
 
@@ -954,7 +963,7 @@ Scheme.prototype = {
 
         layer.drawFeature(newFeature,'copy');
 
-        schema._openFeatureEditDialog(newFeature);
+        schema.openFeatureEditDialog(newFeature);
 
     },
 
@@ -1122,6 +1131,11 @@ Scheme.prototype = {
     },
 
 
+    processFeature: function(feature,callback) {
+        callback(feature);
+    },
+
+
     /**
      * Zoom to JSON feature
      *
@@ -1149,7 +1163,7 @@ Scheme.prototype = {
         var schema = this;
 
         if (schema.popup.isOpenLayersCloudPopup()) {
-            schema._openFeatureEditDialog(feature);
+            schema.openFeatureEditDialog(feature);
         } else {
             schema.zoomToJsonFeature(feature);
         }
@@ -1215,7 +1229,7 @@ Scheme.prototype = {
             schema._processRemoteData(response, feature);
         }).fail(function (response) {
             if (!feature.isNew) {
-                schema._openFeatureEditDialog(feature);
+                schema.openFeatureEditDialog(feature);
             }
             Mapbender.error(Mapbender.trans("mb.digitizer.remoteData.error"));
 
@@ -1237,7 +1251,7 @@ Scheme.prototype = {
         });
 
         if (!feature.isNew) {
-            schema._openFeatureEditDialog(feature);
+            schema.openFeatureEditDialog(feature);
         } else {
             schema.widget.currentPopup.formData(feature.data);
         }
