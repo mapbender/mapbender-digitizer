@@ -48,12 +48,11 @@ var ClusteringSchemeMixin = function () {
 
                 if (clusterSettings.hasOwnProperty('disable') && clusterSettings.disable) {
                     schema.clusterStrategy.distance = -1;
-                    var features = schema.layer.features;
-                    schema.reloadFeatures([]);
+                    schema.reloadFeatures();
                     schema.clusterStrategy.deactivate();
                     //schema.layer.redraw();
                     schema.isClustered = false;
-                    schema.reloadFeatures(features);
+                    schema.reloadFeatures();
 
                 } else {
                     schema.clusterStrategy.activate();
