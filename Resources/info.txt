@@ -52,8 +52,6 @@ Testing:
 Selbstgemachte Bugs:
 - Unsaved Style verschwindet, wenn Features neu geladen werden (Refactoring Style)
 - Kopiertes Feature und neues Feature bekommt nach Dragging wieder default Farbe
-- Nichtvalider Donut lässt gesamtes Polygon verschwinden
-
 
 Legacy Bugs:
 - Ungespeicherte Features verschwinden bei Dragging
@@ -93,6 +91,8 @@ Gemacht:
 - Die Feature.redraw Methode mit generischem Parameter ist scheiße. Ändern
 - ResultTable spezifische Methoden in resultTable extension auslagern.
 - bei der StyleMap wird nicht der geomType verwendet sondern irgendwas anderes. Ändern
+- Nichtvalider Donut lässt gesamtes Polygon verschwinden
+- Deaktivierung von DrawDonut muss zwei mal aufgerufen werden
 
 
 

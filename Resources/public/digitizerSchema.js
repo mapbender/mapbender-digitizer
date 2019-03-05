@@ -263,7 +263,10 @@ Scheme.prototype = {
         if (widget.currentPopup) {
             widget.currentPopup.popupDialog('close');
         }
-        schema.digitizingToolset.deactivateCurrentControl();
+        _.each(schema.digitizingToolset.controlFactory,function(control) {
+            console.log(control);
+            control.deactivate();
+        });
 
 
     },

@@ -60,10 +60,6 @@
             var toolSet = this;
             toolSet.$buttons = {};
 
-            toolSet.options.injectedMethods.deactivateCurrentControl = function () {
-                toolSet.deactivateCurrentControl();
-            };
-
             toolSet.controlFactory = DigitizingControlFactory(toolSet.options.layer, toolSet.options.injectedMethods,toolSet.createControlEvents());
             toolSet.element.addClass('digitizing-tool-set');
             toolSet.refresh();
@@ -72,13 +68,13 @@
 
                 var $el = $(e.currentTarget);
                 var control = $el.data('control');
-                var $mapElement = $(control.map.div) || null;
 
-                if (toolSet.toggleControl(control)) {
-                    $mapElement.css({cursor: 'crosshair'});
-                } else {
-                    $mapElement.css({cursor: 'default'});
-                }
+               if (control.active) {
+                 control.deactivate();
+               } else {
+                 control.activate();
+               }
+
             });
 
 
@@ -116,16 +112,8 @@
             var element = $(toolSet.element);
             element.empty();
             toolSet.createToolbar();
-            //toolSet._trigger('ready', null, this); // TODO uncommented because purpose unknown
         },
 
-        // TODO uncommented because purpose unknown
-        // _setOptions: function (options) {
-        //
-        //     console.log("set Options");
-        //     this._super(options);
-        //     this.refresh();
-        // },
 
 
         _createPlainControlButton: function (item) {
@@ -172,40 +160,6 @@
             });
         },
 
-
-
-
-        /**
-         * Toggle controls and return true if controls turned on
-         *
-         * @param control
-         * @returns {boolean}
-         */
-        toggleControl: function (control) {
-            var newState = this.activeControl !== control;
-            this.deactivateCurrentControl();
-
-            if (newState) {
-                control.activate();
-                this.activeControl = control;
-            }
-            return newState;
-        },
-
-        /**
-         * Deactivate current OpenLayer controls
-         */
-        deactivateCurrentControl: function () {
-            var control = this.activeControl;
-            if (control) {
-                if (control instanceof OpenLayers.Control.SelectFeature) {
-                    control.unselectAll();
-                }
-                control.deactivate();
-            }
-
-            this.activeControl = null;
-        }
 
 
 

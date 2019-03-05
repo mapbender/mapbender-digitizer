@@ -5,6 +5,7 @@ var createFeatureAddedMethod = function(injectedMethods, geomType) {
      * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
      */
     var func = function (feature) {
+        var control = this;
 
         _.each(injectedMethods.getDefaultAttributes(), function(prop) {
             feature.attributes[prop] = "";
@@ -14,9 +15,11 @@ var createFeatureAddedMethod = function(injectedMethods, geomType) {
 
 
         injectedMethods.setModifiedState(feature,this);
-        injectedMethods.deactivateCurrentControl();
+
         injectedMethods.openFeatureEditDialog(feature);
         feature.layer.drawFeature(feature);
+
+        control.deactivate();
     };
 
     return func;
@@ -159,7 +162,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             },
 
             deactivate: function() {
-                console.log("deactivate drawDonut");
                 this.layer.map.controls.forEach(function(control) {
                     if (control.dragPan) {
                         control.dragPan.activate();
@@ -254,7 +256,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         });
 
         control.events.register("deactivate",null,function() {
-            console.log("deactivate");
             $(control.map.div).css({cursor: 'default'});
 
         });
