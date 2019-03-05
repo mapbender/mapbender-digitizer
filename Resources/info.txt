@@ -30,7 +30,6 @@ Refactoring - Code sortieren:
 - Herausfinden, warum Openlayers.Feature 'data', 'attributes' und 'properties' hat und gegebenenfalls eins wegwerfen
 - Navigation auf Buttons über JQuery einschränken
 - Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
-- Konstanten für Style Namen
 - Forbidden operations on server should NOT throw a 500
 - feature.attributes.geomType und schema.featureType.geomType- variablen anders benennen
 - Die ganze Style Map Geschichte im AllScheme ist suboptimal. Neues Model ausdenken und anwenden.
@@ -40,7 +39,7 @@ Refactoring - Code sortieren:
 - Higlight Methoden wurden gestrichen - schauen ob was fehlt (insbesondere ResultTable anzeigen)
 - Manche Funktionalitäten wie z.B. forEach Iteratoren tauchen sowohl als vanilla, als underscore und als jquery auf. Das ist schlecht.
 - Für Spezialfälle (Clustering, OpenLayersCloud etc. Methoden überschreiben anstatt schalter einbauen)
-
+- Context Menu in den Handler des Select Controls auslagern
 
 
 

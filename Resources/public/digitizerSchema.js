@@ -300,6 +300,10 @@ Scheme.prototype = {
                     style = 'unsaved';
                 }
 
+                if (feature.isCopy) {
+                    style = 'copy';
+                }
+
                 if (!feature.visible) {
                     style = 'invisible';
                 }
@@ -424,18 +428,18 @@ Scheme.prototype = {
 
             },
 
-            // handlers : {
-            //     click: new OpenLayers.Handler.Click(this, {
-            //         'click': this.onClick,
-            //         'rightclick': function () {
-            //             console.log("right lick");
-            //         },
-            //         'dblrightclick': this.onRightClick
-            //     }, {
-            //         'single': true,
-            //         'double': true
-            //     })
-            // }
+            handlers : {
+                click: new OpenLayers.Handler.Click(this, {
+                    'click': function() { console.log("do bnthing"); },
+                    'rightclick': function () {
+                        console.log("right lick");
+                    },
+                    'dblrightclick': this.onRightClick
+                }, {
+                    'single': true,
+                    'double': true
+                })
+            }
 
             // TODO Selection of Elements does not seem to be necessary
 
@@ -462,6 +466,7 @@ Scheme.prototype = {
             // }
         });
 
+        console.log(selectControl);
 
         var highlightControl = new OpenLayers.Control.SelectFeature(layer, {
             hover: true,
@@ -969,7 +974,8 @@ Scheme.prototype = {
         });
 
         newFeature.data = newAttributes;
-        newFeature.isNew = true;
+        schema.setModifiedState(newFeature);
+        newFeature.isCopy = true;
         newFeature.layer = feature.layer;
 
         // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
@@ -980,7 +986,7 @@ Scheme.prototype = {
         delete newFeature.fid;
         newFeature.style = null;
 
-        layer.drawFeature(newFeature,'copy');
+        layer.drawFeature(newFeature);
 
         schema.openFeatureEditDialog(newFeature);
 
