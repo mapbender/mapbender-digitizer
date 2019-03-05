@@ -541,7 +541,6 @@ FeatureStyleEditor.prototype = {
         styleEditor.disableForm();
         if (feature.fid) {
             QueryEngine.query('style/save', {schema: schema.schemaName, style: styleData, featureId: feature.fid}).done(function (response) {
-                console.log(response);
                 schema.featureStyles[feature.fid] = styleData;
                 feature.layer.drawFeature(feature);
                 styleEditor.enableForm();

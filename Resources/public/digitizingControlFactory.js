@@ -159,6 +159,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             },
 
             deactivate: function() {
+                console.log("deactivate drawDonut");
                 this.layer.map.controls.forEach(function(control) {
                     if (control.dragPan) {
                         control.dragPan.activate();
@@ -252,13 +253,11 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             control.events.register(eventName,null,event);
         });
 
-        var prototype = Object.getPrototypeOf(control);
-
-        control.deactivate = function() {
+        control.events.register("deactivate",null,function() {
+            console.log("deactivate");
             $(control.map.div).css({cursor: 'default'});
-            prototype.deactivate.apply(this,arguments);
 
-        };
+        });
 
         control.name = index;
 
