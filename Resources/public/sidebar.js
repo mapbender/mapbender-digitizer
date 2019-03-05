@@ -213,95 +213,109 @@ Sidebar.prototype = {
 
     },
 
-    //TODO methode ist zu lang
-    _generateSearchForm: function () {
+
+    _onSchemaSearchForm: function() {
+        var schema = this.schema;
+        var widget = schema.widget;
+        var frame = this.frame;
+        var searchForm = $('form.search', frame);
+
+        var foreachItemTree = function (items, callback) {
+            _.each(items, function (item) {
+                callback(item);
+                if (item.children && $.isArray(item.children)) {
+                    foreachItemTree(item.children, callback);
+                }
+            })
+        };
+        var elementUrl = widget.elementUrl;
+        // $.fn.select2.defaults.set('amdBase', 'select2/');
+        // $.fn.select2.defaults.set('amdLanguageBase', 'select2/dist/js/i18n/');
+
+
+        foreachItemTree(schema.search.form, function (item) {
+
+            if (item.type && item.type === 'select') {
+                if (item.ajax) {
+
+                    // Hack to get display results as an HTML
+                    item.escapeMarkup = function (m) {
+                        return m;
+                    };
+                    // Replace auto-complete results with required key word
+                    item.templateResult = function (d, selectDom, c) {
+                        var html = d && (d.text || '');
+                        if (d && d.id && d.text) {
+                            // Highlight results
+                            html = d.text.replace(new RegExp(ajax.lastTerm, "gmi"), '<span style="background-color: #fffb67;">\$&</span>');
+                        }
+                        return html;
+                    };
+                    var ajax = item.ajax;
+                    ajax.dataType = 'json';
+                    ajax.url = elementUrl + 'form/select';
+                    ajax.data = function (params) {
+                        if (params && params.term) {
+                            // Save last given term to get highlighted in templateResult
+                            ajax.lastTerm = params.term;
+                        }
+                        return {
+                            schema: schema.schemaName,
+                            item: item,
+                            form: searchForm.formData(),
+                            params: params
+                        };
+                    };
+
+                }
+            }
+        });
+        frame.generateElements({
+            type: 'form',
+            cssClass: 'search',
+            children: schema.search.form
+        });
+    },
+
+    _onSchemaSearch: function() {
         /** @type {Scheme} */
         var schema = this.schema;
         var widget = schema.widget;
         var frame = this.frame;
         var searchForm = $('form.search', frame);
 
+        var onSubmitSearch = function (e) {
+            schema.search.request = searchForm.formData();
+            var xhr = schema.getData();
+            if (xhr) {
+                xhr.done(function () {
+                    var olMap = widget.map;
+                    olMap.zoomToExtent(layer.getDataExtent());
+
+                    if (schema.search.hasOwnProperty('zoomScale')) {
+                        olMap.zoomToScale(schema.search.zoomScale, true);
+                    }
+                });
+            }
+            return false;
+        };
+
+        searchForm
+            .on('submit', onSubmitSearch)
+            .find(' :input')
+            .on('change', onSubmitSearch);
+    },
+
+    _generateSearchForm: function () {
+        var sidebar = this;
+        var schema = sidebar.schema;
 
         // If searching defined, then try to generate a form
         if (schema.search) {
             if (schema.search.form) {
-
-                var foreachItemTree = function (items, callback) {
-                    _.each(items, function (item) {
-                        callback(item);
-                        if (item.children && $.isArray(item.children)) {
-                            foreachItemTree(item.children, callback);
-                        }
-                    })
-                };
-                var elementUrl = widget.elementUrl;
-                // $.fn.select2.defaults.set('amdBase', 'select2/');
-                // $.fn.select2.defaults.set('amdLanguageBase', 'select2/dist/js/i18n/');
-
-                foreachItemTree(schema.search.form, function (item) {
-
-                    if (item.type && item.type === 'select') {
-                        if (item.ajax) {
-
-                            // Hack to get display results as an HTML
-                            item.escapeMarkup = function (m) {
-                                return m;
-                            };
-                            // Replace auto-complete results with required key word
-                            item.templateResult = function (d, selectDom, c) {
-                                var html = d && (d.text || '');
-                                if (d && d.id && d.text) {
-                                    // Highlight results
-                                    html = d.text.replace(new RegExp(ajax.lastTerm, "gmi"), '<span style="background-color: #fffb67;">\$&</span>');
-                                }
-                                return html;
-                            };
-                            var ajax = item.ajax;
-                            ajax.dataType = 'json';
-                            ajax.url = elementUrl + 'form/select';
-                            ajax.data = function (params) {
-                                if (params && params.term) {
-                                    // Save last given term to get highlighted in templateResult
-                                    ajax.lastTerm = params.term;
-                                }
-                                return {
-                                    schema: schema.schemaName,
-                                    item: item,
-                                    form: searchForm.formData(),
-                                    params: params
-                                };
-                            };
-
-                        }
-                    }
-                });
-                frame.generateElements({
-                    type: 'form',
-                    cssClass: 'search',
-                    children: schema.search.form
-                });
+                sidebar._onSchemaSearchForm();
             }
-
-            var onSubmitSearch = function (e) {
-                schema.search.request = searchForm.formData();
-                var xhr = schema.getData();
-                if (xhr) {
-                    xhr.done(function () {
-                        var olMap = widget.map;
-                        olMap.zoomToExtent(layer.getDataExtent());
-
-                        if (schema.search.hasOwnProperty('zoomScale')) {
-                            olMap.zoomToScale(schema.search.zoomScale, true);
-                        }
-                    });
-                }
-                return false;
-            };
-
-            searchForm
-                .on('submit', onSubmitSearch)
-                .find(' :input')
-                .on('change', onSubmitSearch);
+            sidebar._onSchemaSearch();
         }
 
     },

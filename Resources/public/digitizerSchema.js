@@ -264,7 +264,6 @@ Scheme.prototype = {
             widget.currentPopup.popupDialog('close');
         }
         _.each(schema.digitizingToolset.controlFactory,function(control) {
-            console.log(control);
             control.deactivate();
         });
 
