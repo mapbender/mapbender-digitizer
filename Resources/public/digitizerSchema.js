@@ -85,6 +85,7 @@ Scheme.prototype = {
     elementContextMenu: null,
 
 
+    deactivateControlAfterModification: true,
     allowSaveAll: true,
     markUnsavedFeatures: true,
     maxResults: 500,
@@ -542,7 +543,9 @@ Scheme.prototype = {
         row.find('.button.save').removeAttr("disabled");
 
 
-        control && control.deactivate();
+        if (schema.deactivateControlAfterModification) {
+            control && control.deactivate();
+        }
 
     },
 

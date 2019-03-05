@@ -2,6 +2,7 @@ Hinzugefügte Properties:
 
 - allowSaveAll - Speicherbutton für Alle Features
 - markUnsavedFeatures - ungespeicherte Features haben speziellen Style
+- deactivateControlAfterModification - Nach Veränderung von Feature wird Control deaktiviert
 
 
 Hinweise:

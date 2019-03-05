@@ -256,6 +256,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         });
 
         control.events.register("deactivate",null,function() {
+            console.trace();
             $(control.map.div).css({cursor: 'default'});
 
         });

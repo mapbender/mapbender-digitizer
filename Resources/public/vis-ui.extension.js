@@ -15,7 +15,12 @@
             table.delegate("tbody > tr", 'mouseenter', function () {
                 var tr = this;
                 var row = tableApi.row(tr);
-                selectControl.highlight(row.data());
+                var feature = row.data();
+                if (feature) {
+                    selectControl.highlight(feature);
+                } else {
+                    console.warn("No Feature in row",row);
+                }
             });
 
             table.delegate("tbody > tr", 'mouseleave', function () {
