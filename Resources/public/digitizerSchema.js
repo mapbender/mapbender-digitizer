@@ -424,6 +424,19 @@ Scheme.prototype = {
 
             },
 
+            // handlers : {
+            //     click: new OpenLayers.Handler.Click(this, {
+            //         'click': this.onClick,
+            //         'rightclick': function () {
+            //             console.log("right lick");
+            //         },
+            //         'dblrightclick': this.onRightClick
+            //     }, {
+            //         'single': true,
+            //         'double': true
+            //     })
+            // }
+
             // TODO Selection of Elements does not seem to be necessary
 
             // onSelect: function (feature) {

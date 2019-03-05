@@ -37,7 +37,7 @@ MapContextMenu.prototype.buildContextMenu = function (trigger, e) {
         if (feature._sketch) {
             return items;
         }
-        schema.processFeature(function (feature) {
+        schema.processFeature(feature,function (feature) {
             items[feature.fid] = contextMenu.createMapContextMenuSubMenu(feature);
         });
 
