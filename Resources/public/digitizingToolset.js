@@ -72,7 +72,8 @@
                if (control.active) {
                  control.deactivate();
                } else {
-                 control.activate();
+                   toolSet.deactivateControls();
+                   control.activate();
                }
 
             });
@@ -81,6 +82,14 @@
 
         },
 
+        deactivateControls:  function() {
+            var toolSet = this;
+            _.each(toolSet.controlFactory,function(control) {
+                if (control.active) {
+                    control.deactivate();
+                }
+            });
+        },
 
         createControlEvents: function () {
             var toolSet = this;
