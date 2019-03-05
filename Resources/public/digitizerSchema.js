@@ -462,6 +462,7 @@ Scheme.prototype = {
             },
 
             highlight: function (feature) {
+                console.assert(!!feature, "Feature must be set");
                 schema.processFeature(feature,function(feature){
                     schema.resultTable.hoverInResultTable(feature,true);
                 });

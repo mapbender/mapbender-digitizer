@@ -47,6 +47,15 @@ AllScheme.prototype = {
             rules.push(rule);
         });
 
+        // Regel zur Darstellung von nicht-digitizer Features wie den Modification Vertices
+        rules.push(new OpenLayers.Rule({
+
+            symbolizer:  OpenLayers.Feature.Vector.style['default'],
+            evaluate: function (feature) {
+                return !feature.attributes.geomType;
+            }
+        }));
+
         return {
             rules: rules
         }
