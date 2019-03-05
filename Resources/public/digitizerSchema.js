@@ -574,6 +574,7 @@ Scheme.prototype = {
 
         feature.isChanged = false;
         feature.isNew = false;
+        feature.isCopy = false;
 
         if (schema._getUnsavedFeatures().length === 0) {
             $(schema.frame).find(".save-all-features").removeClass("active");
