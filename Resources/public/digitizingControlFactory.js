@@ -194,8 +194,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
             onModification: function (feature) {
 
-                console.log("modificaton");
-
                 var wkt = feature.geometry.toString();
                 var reader = new jsts.io.WKTReader();
                 var geom = reader.read(wkt);
@@ -215,7 +213,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
             },
 
-            onModificationEnd: function() { console.log("end"); },
         }),
 
         moveFeature: new OpenLayers.Control.DragFeature(layer, {
