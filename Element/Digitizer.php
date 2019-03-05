@@ -70,6 +70,7 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/openlayers.extension.js',
                 '@MapbenderDigitizerBundle/Resources/public/vis-ui.extension.js',
                 '@MapbenderDigitizerBundle/Resources/public/jsts.min.js',
+                '@MapbenderDigitizerBundle/Resources/public/setprototype.polyfill.js',
 
 
             ),

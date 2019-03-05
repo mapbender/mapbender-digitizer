@@ -534,42 +534,26 @@ FeatureStyleEditor.prototype = {
 
     submit: function() {
         var featureStyleEditor = this;
-        var olFeature = featureStyleEditor.feature;
+        var schema = featureStyleEditor.schema;
+        var feature = featureStyleEditor.feature;
         var styleEditor = featureStyleEditor.getElement();
         var styleData = styleEditor.formData();
         styleEditor.disableForm();
-        if (olFeature.fid) {
-            featureStyleEditor._saveStyle(featureStyleEditor.schemaName, styleData, olFeature).done(function (response) {
-                olFeature.style = styleData;
-                olFeature.layer.drawFeature(olFeature);
+        if (feature.fid) {
+            QueryEngine.query('style/save', {schema: schema.schemaName, style: styleData, featureId: feature.fid}).done(function (response) {
+                console.log(response);
+                schema.featureStyles[feature.fid] = styleData;
+                feature.layer.drawFeature(feature);
                 styleEditor.enableForm();
             });
         } else {
             // defer style saving until the feature itself is saved, and has an id to associate with
             var styleDataCopy = $.extend({}, styleData);
-            olFeature.saveStyleDataCallback = $.proxy(featureStyleEditor._saveStyle, featureStyleEditor, featureStyleEditor.schemaName, styleDataCopy);
+            feature.saveStyleDataCallback = $.proxy(featureStyleEditor._saveStyle, featureStyleEditor, featureStyleEditor.schemaName, styleDataCopy);
         }
         featureStyleEditor.close();
 
-    },
-
-    /**
-     *
-     * @param schemaName
-     * @param styleData
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-     * @returns {*|xhr}
-     * @private
-     */
-
-    _saveStyle: function (schemaName, styleData, olFeature) {
-        return QueryEngine.query('style/save', {
-            style: styleData,
-            featureId: olFeature.fid,
-            schema: schemaName
-        });
-    },
-
+    }
 
 
 
