@@ -194,10 +194,28 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
             onModification: function (feature) {
 
-                injectedMethods.setModifiedState(feature,this);
-                injectedMethods.openFeatureEditDialog(feature);
+                console.log("modificaton");
 
-            }
+                var wkt = feature.geometry.toString();
+                var reader = new jsts.io.WKTReader();
+                var geom = reader.read(wkt);
+                if (geom.isValid()) {
+                    injectedMethods.setModifiedState(feature,this);
+                    injectedMethods.openFeatureEditDialog(feature);
+                } else {
+                    // TODO there might be a better way to revert feature
+                    layer = feature.layer;
+                    layer.removeFeatures([feature]);
+                    feature.geometry = feature.modified.geometry;
+                    feature.modified = false;
+                    layer.addFeatures([feature]);
+                    // deactivation is necessary because the vertice features dont move back
+                    this.deactivate();
+                }
+
+            },
+
+            onModificationEnd: function() { console.log("end"); },
         }),
 
         moveFeature: new OpenLayers.Control.DragFeature(layer, {

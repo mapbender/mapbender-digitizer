@@ -26,7 +26,12 @@
             table.delegate("tbody > tr", 'mouseleave', function () {
                 var tr = this;
                 var row = tableApi.row(tr);
-                selectControl.unhighlight(row.data());
+                var feature = row.data();
+                if (feature) {
+                    selectControl.unhighlight(feature);
+                } else {
+                    console.warn("No Feature in row",row);
+                }
             });
 
             table.delegate("tbody > tr", 'click', function () {
@@ -34,9 +39,12 @@
                 var row = tableApi.row(tr);
                 var feature = row.data();
 
-                selectControl.highlight(feature);
-
-                processFeature(feature);
+                if (feature) {
+                    selectControl.highlight(feature);
+                    processFeature(feature);
+                } else {
+                    console.warn("No Feature in row",row);
+                }
 
             });
 
