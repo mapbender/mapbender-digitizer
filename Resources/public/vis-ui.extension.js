@@ -91,7 +91,6 @@
             var featuresToRedraw = features.filter(function (feature) {
                 return !feature.isNew
             });
-            //console.trace(featuresToRedraw,"$");
             tableApi.rows.add(featuresToRedraw);
             tableApi.draw();
 

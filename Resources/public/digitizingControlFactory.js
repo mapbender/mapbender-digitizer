@@ -197,8 +197,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                 injectedMethods.setModifiedState(feature,this);
                 injectedMethods.openFeatureEditDialog(feature);
 
-                console.log("onModification",feature);
-
             }
         }),
 
@@ -256,7 +254,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         });
 
         control.events.register("deactivate",null,function() {
-            console.trace();
             $(control.map.div).css({cursor: 'default'});
 
         });
