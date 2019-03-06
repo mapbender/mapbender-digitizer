@@ -476,189 +476,7 @@
                 titleElement.css('display', 'none');
             }
 
-            function createSubMenu(olFeature) {
-                var layer = olFeature.layer;
-                var schema = widget.findSchemaByLayer(layer);
-                var subItems = {
-                    zoomTo: {
-                        name: translate('feature.zoomTo'),
-                        action: function (key, options, parameters) {
-                            widget.zoomToJsonFeature(parameters.olFeature);
-                        }
-                    }
-                };
 
-                if (schema.allowChangeVisibility) {
-                    subItems['style'] = {
-                        name: translate('feature.visibility.change'),
-                        action: function (key, options, parameters) {
-                            widget.openChangeStyleDialog(olFeature);
-                        }
-                    };
-                }
-
-                if (schema.allowCustomerStyle) {
-                    subItems['style'] = {
-                        name: translate('feature.style.change'),
-                        action: function (key, options, parameters) {
-                            widget.openChangeStyleDialog(olFeature);
-                        }
-                    };
-                }
-
-                if (schema.allowEditData) {
-                    subItems['edit'] = {
-                        name: translate('feature.edit'),
-                        action: function (key, options, parameters) {
-                            widget._openFeatureEditDialog(parameters.olFeature);
-                        }
-                    }
-                }
-
-                if (schema.allowDelete) {
-                    subItems['remove'] = {
-                        name: translate('feature.remove.title'),
-                        action: function (key, options, parameters) {
-                            widget.removeFeature(parameters.olFeature);
-                        }
-                    }
-                }
-
-                return {
-                    name: "Feature #" + olFeature.fid,
-                    olFeature: olFeature,
-                    items: subItems
-                };
-            }
-
-            /**
-             * Set map context menu
-             */
-            $(map.div).contextMenu({
-                selector: 'div',
-                events: {
-                    show: function (options) {
-                        var schema = widget.currentSettings;
-                        return schema.useContextMenu;
-                    }
-                },
-                build: function (trigger, e) {
-                    var items = {};
-                    var schema = widget.currentSettings;
-                    var feature = schema.layer.getFeatureFromEvent(e);
-                    var features;
-
-                    if (!feature) {
-                        items['no-items'] = {name: "Nothing selected!"}
-                    } else {
-
-                        if (feature._sketch) {
-                            return items;
-                        }
-
-                        features = feature.cluster ? feature.cluster : [feature];
-                        //features = widget._getFeaturesFromEvent(e.clientX, e.clientY);
-
-                        _.each(features, function (feature) {
-                            if (!feature.layer) {
-                                feature.layer = olFeature.layer;
-                            }
-                            items[feature.fid] = createSubMenu(feature);
-                        });
-                    }
-
-                    return {
-                        items: items,
-                        callback: function (key, options) {
-                            var selectedElement = options.$selected;
-                            if (!selectedElement) {
-                                return
-                            }
-                            var parameters = options.items[selectedElement.parent().closest('.context-menu-item').data('contextMenuKey')];
-
-                            if (!parameters) {
-                                return;
-                            }
-
-                            if (parameters.items[key].action) {
-                                parameters.items[key].action(key, options, parameters);
-                            }
-                        }
-                    };
-                }
-            });
-
-            $(element).contextMenu({
-                selector: '.mapbender-element-result-table > div > table > tbody > tr',
-                events: {
-                    show: function (options) {
-                        var tr = $(options.$trigger);
-                        var resultTable = tr.closest('.mapbender-element-result-table');
-                        var api = resultTable.resultTable('getApi');
-                        var olFeature = api.row(tr).data();
-
-                        if (!olFeature) {
-                            return false;
-                        }
-
-                        var schema = widget.findFeatureSchema(olFeature);
-                        return schema.useContextMenu;
-                    }
-                },
-                build: function ($trigger, e) {
-                    var tr = $($trigger);
-                    var resultTable = tr.closest('.mapbender-element-result-table');
-                    var api = resultTable.resultTable('getApi');
-                    var olFeature = api.row(tr).data();
-
-                    if (!olFeature) {
-                        return {
-                            callback: function (key, options) {
-                            }
-                        };
-                    }
-
-                    var schema = widget.findFeatureSchema(olFeature);
-                    var items = {};
-
-                    items['changeStyle'] = {name: translate('feature.style.change')};
-                    items['zoom'] = {name: translate('feature.zoomTo')};
-                    if (schema.allowDelete) {
-                        items['removeFeature'] = {name: translate('feature.remove.title')};
-                    }
-
-                    if (schema.allowEditData) {
-                        items['edit'] = {name: translate('feature.edit')};
-                    }
-
-                    return {
-                        callback: function (key, options) {
-                            switch (key) {
-                                case 'removeFeature':
-                                    widget.removeFeature(olFeature);
-                                    break;
-
-                                case 'zoom':
-                                    widget.zoomToJsonFeature(olFeature);
-                                    break;
-
-                                case 'edit':
-                                    widget._openFeatureEditDialog(olFeature);
-                                    break;
-
-                                case 'exportGeoJson':
-                                    widget.exportGeoJson(olFeature);
-                                    break;
-
-                                case 'changeStyle':
-                                    widget.openChangeStyleDialog(olFeature);
-                                    break;
-                            }
-                        },
-                        items: items
-                    };
-                }
-            });
 
             if (options.tableTranslation) {
                 translateObject(options.tableTranslation);
@@ -788,6 +606,80 @@
 
                 option.val(schemaName).html(schema.label);
                 map.addLayer(layer);
+
+
+                $(element).contextMenu({
+                    selector: '.mapbender-element-result-table > div > table > tbody > tr',
+                    events: {
+                        show: function (options) {
+                            var tr = $(options.$trigger);
+                            var resultTable = tr.closest('.mapbender-element-result-table');
+                            var api = resultTable.resultTable('getApi');
+                            var olFeature = api.row(tr).data();
+
+                            if (!olFeature) {
+                                return false;
+                            }
+
+                            var schema = widget.findFeatureSchema(olFeature);
+                            return schema.useContextMenu;
+                        }
+                    },
+                    build: function ($trigger, e) {
+                        var tr = $($trigger);
+                        var resultTable = tr.closest('.mapbender-element-result-table');
+                        var api = resultTable.resultTable('getApi');
+                        var olFeature = api.row(tr).data();
+
+                        if (!olFeature) {
+                            return {
+                                callback: function (key, options) {
+                                }
+                            };
+                        }
+
+                        var schema = widget.findFeatureSchema(olFeature);
+                        var items = {};
+
+                        items['changeStyle'] = {name: translate('feature.style.change')};
+                        items['zoom'] = {name: translate('feature.zoomTo')};
+                        if (schema.allowDelete) {
+                            items['removeFeature'] = {name: translate('feature.remove.title')};
+                        }
+
+                        if (schema.allowEditData) {
+                            items['edit'] = {name: translate('feature.edit')};
+                        }
+
+                        return {
+                            callback: function (key, options) {
+                                switch (key) {
+                                    case 'removeFeature':
+                                        widget.removeFeature(olFeature);
+                                        break;
+
+                                    case 'zoom':
+                                        widget.zoomToJsonFeature(olFeature);
+                                        break;
+
+                                    case 'edit':
+                                        widget._openFeatureEditDialog(olFeature);
+                                        break;
+
+                                    case 'exportGeoJson':
+                                        widget.exportGeoJson(olFeature);
+                                        break;
+
+                                    case 'changeStyle':
+                                        widget.openChangeStyleDialog(olFeature);
+                                        break;
+                                }
+                            },
+                            items: items
+                        };
+                    }
+                });
+
 
                 var frame = schema.frame = $("<div/>").addClass('frame').data("schemaSettings", schema);
                 var columns = [];
@@ -1380,6 +1272,129 @@
          * @private
          */
         _evaluateHandler: function (handlerCode, context) {
+
+        },
+
+        _removeContextMenuMap: function() {
+            var widget = this;
+            var map = widget.map;
+
+            $(map.div).contextMenu("destroy");
+        },
+
+        _setContextMenuMap: function() {
+            var widget = this;
+            var map = widget.map;
+
+            function createSubMenu(olFeature) {
+                var layer = olFeature.layer;
+                var schema = widget.findSchemaByLayer(layer);
+                var subItems = {
+                    zoomTo: {
+                        name: translate('feature.zoomTo'),
+                        action: function (key, options, parameters) {
+                            widget.zoomToJsonFeature(parameters.olFeature);
+                        }
+                    }
+                };
+
+                if (schema.allowChangeVisibility) {
+                    subItems['style'] = {
+                        name: translate('feature.visibility.change'),
+                        action: function (key, options, parameters) {
+                            widget.openChangeStyleDialog(olFeature);
+                        }
+                    };
+                }
+
+                if (schema.allowCustomerStyle) {
+                    subItems['style'] = {
+                        name: translate('feature.style.change'),
+                        action: function (key, options, parameters) {
+                            widget.openChangeStyleDialog(olFeature);
+                        }
+                    };
+                }
+
+                if (schema.allowEditData) {
+                    subItems['edit'] = {
+                        name: translate('feature.edit'),
+                        action: function (key, options, parameters) {
+                            widget._openFeatureEditDialog(parameters.olFeature);
+                        }
+                    }
+                }
+
+                if (schema.allowDelete) {
+                    subItems['remove'] = {
+                        name: translate('feature.remove.title'),
+                        action: function (key, options, parameters) {
+                            widget.removeFeature(parameters.olFeature);
+                        }
+                    }
+                }
+
+                return {
+                    name: "Feature #" + olFeature.fid,
+                    olFeature: olFeature,
+                    items: subItems
+                };
+            }
+
+
+            $(map.div).contextMenu({
+                selector: 'div',
+                events: {
+                    show: function (options) {
+                        var schema = widget.currentSettings;
+                        return schema.useContextMenu;
+                    }
+                },
+                build: function (trigger, e) {
+                    var items = {};
+                    var schema = widget.currentSettings;
+                    var feature = schema.layer.getFeatureFromEvent(e);
+                    var features;
+
+                    if (!feature) {
+                        items['no-items'] = {name: "Nothing selected!"}
+                    } else {
+
+                        if (feature._sketch) {
+                            return items;
+                        }
+
+                        features = feature.cluster ? feature.cluster : [feature];
+                        //features = widget._getFeaturesFromEvent(e.clientX, e.clientY);
+
+                        _.each(features, function (feature) {
+                            if (!feature.layer) {
+                                feature.layer = olFeature.layer;
+                            }
+                            items[feature.fid] = createSubMenu(feature);
+                        });
+                    }
+
+                    return {
+                        items: items,
+                        callback: function (key, options) {
+                            var selectedElement = options.$selected;
+                            if (!selectedElement) {
+                                return
+                            }
+                            var parameters = options.items[selectedElement.parent().closest('.context-menu-item').data('contextMenuKey')];
+
+                            if (!parameters) {
+                                return;
+                            }
+
+                            if (parameters.items[key].action) {
+                                parameters.items[key].action(key, options, parameters);
+                            }
+                        }
+                    };
+                }
+            });
 
         },
 
@@ -2859,7 +2874,7 @@
             tableApi.draw();
 
             if (widget.options.__disabled) {
-                widget.deactivate();
+                widget.deactivate(true);
             }
 
             // var tbody = $(tableApi.body());
@@ -3187,12 +3202,13 @@
 
                 widget.options.__disabled = false;
                 widget.activateFrame(widget.currentSettings);
+                widget._setContextMenuMap();
 
             })
 
         },
 
-        deactivate: function () {
+        deactivate: function (ommitRemoveContextMenu) {
             var widget = this;
             // clear unsaved features to prevent multiple confirmation popups
             var unsavedFeatures = widget.unsavedFeatures;
@@ -3202,6 +3218,10 @@
                 if (!widget.currentSettings.displayOnInactive) {
                     widget.deactivateFrame(widget.currentSettings);
                 }
+                if (ommitRemoveContextMenu) {
+                    return;
+                }
+                widget._removeContextMenuMap();
             };
             always()
             /*if (widget.options.confirmSaveOnDeactivate) {
