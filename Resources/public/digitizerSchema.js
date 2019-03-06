@@ -898,8 +898,7 @@ Scheme.prototype = {
 
     removeAllFeatures: function() {
       var schema = this;
-      schema.layer.features = [];
-      schema.reloadFeatures();
+      schema.layer.removeAllFeatures();
     },
 
 
@@ -910,30 +909,30 @@ Scheme.prototype = {
      * @returns {*}
      * @param  {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
      */
-    removeFeature: function (olFeature) {
+    removeFeature: function (feature) {
         var schema = this;
 
-        var featureData = olFeature.attributes;
+        var featureData = feature.attributes;
 
 
-        if (olFeature.isNew) {
-            schema._removeFeatureFromUI(olFeature);
+        if (feature.isNew) {
+            schema._removeFeatureFromUI(feature);
         } else {
             Mapbender.confirmDialog({
                 html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
                 onSuccess: function () {
                     QueryEngine.query('delete', {
-                        schema: schema.getSchemaName(olFeature),
+                        schema: schema.getSchemaByFeature(feature).schemaName,
                         feature: featureData
                     }).done(function (fid) {
-                        schema._removeFeatureFromUI(olFeature);
+                        schema._removeFeatureFromUI(feature);
                         $.notify(Mapbender.DigitizerTranslator.translate('feature.remove.successfully'), 'info');
                     });
                 }
             });
         }
 
-        return olFeature;
+        return feature;
     },
 
 
@@ -993,11 +992,6 @@ Scheme.prototype = {
 
     },
 
-
-    getSchemaName: function () {
-        var schema = this;
-        return schema.schemaName;
-    },
 
     getSchemaByFeature: function () {
         return schema;
@@ -1074,7 +1068,7 @@ Scheme.prototype = {
 
         var promise = QueryEngine.query('save', {
 
-            schema: schema.getSchemaName(feature),
+            schema: schema.getSchemaByFeature(feature).schemaName,
             feature: request
         }).done(function (response) {
 
@@ -1293,7 +1287,7 @@ Scheme.prototype = {
     exportGeoJson: function (feature) {
         var schema = this;
         QueryEngine.query('export', {
-            schema: schema.getSchemaName(feature),
+            schema: schema.getSchemaByFeature(feature).schemaName,
             feature: feature,
             format: 'GeoJSON'
         }).done(function (response) {

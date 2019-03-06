@@ -100,12 +100,6 @@ AllScheme.prototype = {
     },
 
 
-// TODO merge this methods
-    getSchemaName: function (feature) {
-        var schema = this;
-        var widget = schema.widget;
-        return widget.getSchemaByGeomType(feature.attributes.geomType).schemaName;
-    },
 
     getSchemaByFeature: function (feature) {
         var schema = this;
