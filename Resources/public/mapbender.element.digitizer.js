@@ -238,7 +238,7 @@
         },
 
 
-        deactivateSchema: function() { console.warn("This method should be overwritten"); },
+        deactivateSchema: function() {},
 
 
         _initializeSelector: function () {

@@ -23,7 +23,7 @@ var MapContextMenu = function () {
 
 MapContextMenu.prototype = Object.create(ContextMenu.prototype);
 
-MapContextMenu.prototype.buildContextMenu = function (trigger, e) {
+MapContextMenu.prototype.buildContextMenu = function (element, e) {
 
 
     var contextMenu = this;
@@ -34,7 +34,7 @@ MapContextMenu.prototype.buildContextMenu = function (trigger, e) {
     if (!feature) {
         items['no-items'] = {name: "Nothing selected!"}
     } else {
-        if (feature._sketch) {
+        if (feature.isNew) {
             return items;
         }
         schema.processFeature(feature,function (feature) {
@@ -45,6 +45,7 @@ MapContextMenu.prototype.buildContextMenu = function (trigger, e) {
 
     return {
         items: items,
+
         callback: function (key, options) {
             var $selectedElement = options.$selected;
             if (!$selectedElement || !feature) {
@@ -126,14 +127,16 @@ var ElementContextMenu = function () {
 
 ElementContextMenu.prototype = Object.create(ContextMenu.prototype);
 
-ElementContextMenu.prototype.buildContextMenu = function (trigger, e) {
+ElementContextMenu.prototype.buildContextMenu = function (selectedRow, e) {
+
 
     var contextMenu = this;
     var schema = contextMenu.schema;
     var api = schema.resultTable.getApi();
-    var olFeature = api.row($(trigger)).data();
+    var feature = api.row(selectedRow).data();
 
-    if (!olFeature) {
+
+    if (!feature) {
         return {
             callback: function (key, options) {
             }
@@ -146,7 +149,7 @@ ElementContextMenu.prototype.buildContextMenu = function (trigger, e) {
         items['changeStyle'] = {
             name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
             action: function () {
-                schema.openChangeStyleDialog(olFeature);
+                schema.openChangeStyleDialog(feature);
             }
         };
     }
@@ -154,7 +157,7 @@ ElementContextMenu.prototype.buildContextMenu = function (trigger, e) {
     items['zoom'] = {
         name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
         action: function () {
-            schema.zoomToJsonFeature(olFeature);
+            schema.zoomToJsonFeature(feature);
         }
     };
 
@@ -162,7 +165,7 @@ ElementContextMenu.prototype.buildContextMenu = function (trigger, e) {
         items['removeFeature'] = {
             name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
             action: function () {
-                schema.removeFeature(olFeature);
+                schema.removeFeature(feature);
             }
         };
     }
@@ -171,7 +174,7 @@ ElementContextMenu.prototype.buildContextMenu = function (trigger, e) {
         items['edit'] = {
             name: Mapbender.DigitizerTranslator.translate('feature.edit'),
             action: function () {
-                schema.openFeatureEditDialog(olFeature);
+                schema.openFeatureEditDialog(feature);
             }
         };
     }
@@ -179,7 +182,7 @@ ElementContextMenu.prototype.buildContextMenu = function (trigger, e) {
     // if (schema['anything']) {
     //     items['exportToGeoJson'] = {
     //         name: '-',
-    //         action: function() {schema.exportGeoJson(olFeature); }
+    //         action: function() {schema.exportGeoJson(feature); }
     //     }
     // }
 
