@@ -348,8 +348,6 @@
 
         },
 
-
-
         activate: function () {
             var widget = this;
             widget.options.__disabled = false;
@@ -362,11 +360,6 @@
             widget.deactivateSchema();
         },
 
-
-        /**
-         *
-         * @param featureTypeName
-         */
 
         // TODO muss getetest werden
         refreshConnectedDigitizerFeatures: function (featureTypeName) {

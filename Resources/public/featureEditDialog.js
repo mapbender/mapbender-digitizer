@@ -48,10 +48,10 @@ var FeatureEditDialog = function (feature, configuration, schema) {
     $popup.popupDialog(dialog.configuration);
 
 
-    dialog.doFeatureEditDialogBindings(feature, $popup);
+    dialog.doFeatureEditDialogBindings();
 
-    dialog.retrieveFeatureTableDataFromDataStore(feature, $popup);
-    dialog.addFeatureDataToEditDialog(feature, $popup);
+    dialog.retrieveFeatureTableDataFromDataStore();
+    dialog.addFeatureDataToEditDialog();
 
 
 };
@@ -175,7 +175,7 @@ FeatureEditDialog.prototype = {
         var feature = dialog.feature;
 
         var tables = $popup.find(".mapbender-element-result-table");
-
+        // TODO Tables exist only when
         _.each(tables, function (table) {
 
             var item = $(table).data('item');
@@ -185,7 +185,7 @@ FeatureEditDialog.prototype = {
             }
 
             var dataStoreLinkName = item.dataStoreLink.name;
-            if (dataStoreLinkName) {
+            if (true || dataStoreLinkName) {
                 var requestData = {
                     dataStoreLinkName: dataStoreLinkName,
                     fid: feature.fid,

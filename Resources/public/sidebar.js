@@ -406,7 +406,7 @@ Sidebar.prototype = {
             $button.addClass("fa fa-eye-slash");
             $button.attr("title",Mapbender.DigitizerTranslator.translate('toolset.hideAll'));
             $button.click(function() {
-                schema._toggleVisibility(false);
+                schema.setVisibilityForAllFeaturesInLayer(false);
             });
             corporateFeatureControlButtons.push($button);
 
@@ -414,7 +414,7 @@ Sidebar.prototype = {
             $button.addClass("fa fa-eye");
             $button.attr("title",Mapbender.DigitizerTranslator.translate('toolset.showAll'));
             $button.click(function() {
-                schema._toggleVisibility(true);
+                schema.setVisibilityForAllFeaturesInLayer(true);
             });
             corporateFeatureControlButtons.push($button);
         }

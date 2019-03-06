@@ -66,8 +66,6 @@ var Scheme = function (rawScheme, widget) {
 
     }
 
-    console.log(schema);
-
 };
 
 
@@ -370,13 +368,6 @@ Scheme.prototype = {
     },
 
 
-    /**
-     * Open edit feature dialog
-     *
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-     * @private
-     */
-
     openFeatureEditDialog: function (olFeature) {
         var schema = this;
         var dialog = new FeatureEditDialog(olFeature, schema.popup, schema);
@@ -466,8 +457,6 @@ Scheme.prototype = {
             // }
         });
 
-        console.log(selectControl);
-
         var highlightControl = new OpenLayers.Control.SelectFeature(layer, {
             hover: true,
             highlightOnly: true,
@@ -505,13 +494,6 @@ Scheme.prototype = {
     },
 
 
-
-    /**
-     * Reload or replace features from the layer and feature table
-     *
-     * @param _features
-     * @version 0.2
-     */
     reloadFeatures: function () {
         var schema = this;
         var widget = schema.widget;
@@ -533,7 +515,6 @@ Scheme.prototype = {
 
 
     _createFrame: function () {
-        /** @type {Scheme} */
         var schema = this;
         var widget = schema.widget;
         var element = $(widget.element);
@@ -668,13 +649,6 @@ Scheme.prototype = {
         }
     },
 
-
-
-    /**
-     * Create vector feature layer
-     *
-     * @returns {OpenLayers.Layer.Vector}
-     */
     createSchemaFeatureLayer: function () {
 
         var schema = this;
@@ -709,11 +683,7 @@ Scheme.prototype = {
         var schema = this;
         return schema.layer.styleMap.styles['default'].createSymbolizer(feature);
     },
-    /**
-     * Open change style dialog
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
-     * @returns {*}
-     */
+
     openChangeStyleDialog: function (feature) {
         var schema = this;
 
@@ -727,12 +697,6 @@ Scheme.prototype = {
         var styleEditor = new FeatureStyleEditor(feature, schema, styleOptions);
     },
 
-    /**
-     * Analyse changed bounding box geometrie and load features as FeatureCollection.
-     *
-     * @returns {*}
-     * @private
-     */
 
     getData: function () {
         var schema = this;
@@ -828,8 +792,8 @@ Scheme.prototype = {
         var currentExtentOnly = schema.searchType === "currentExtent";
 
 
-        var visibleFeatures = currentExtentOnly ? _.filter(schema.getLayerFeatures(), function (olFeature) {
-            return olFeature && (olFeature.isNew || olFeature.geometry.getBounds().intersectsBounds(bbox));
+        var visibleFeatures = currentExtentOnly ? _.filter(schema.getLayerFeatures(), function (feature) {
+            return feature && (feature.isNew || feature.geometry.getBounds().intersectsBounds(bbox));
         }) : layer.features;
 
         return visibleFeatures;
@@ -857,14 +821,6 @@ Scheme.prototype = {
         return features;
 
     },
-    /**
-     * Handle feature collection by ajax response.
-     *
-     * @param {FeatureCollection} featureCollection
-     * @param xhr ajax request object
-     * @private
-     * @version 0.2
-     */
 
     _onFeatureCollectionLoaded: function (featureCollection, xhr) {
         var schema = this;
@@ -902,18 +858,8 @@ Scheme.prototype = {
     },
 
 
-    /**
-     * Remove OL feature
-     *
-     * @version 0.2
-     * @returns {*}
-     * @param  {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-     */
     removeFeature: function (feature) {
         var schema = this;
-
-        var featureData = feature.attributes;
-
 
         if (feature.isNew) {
             schema._removeFeatureFromUI(feature);
@@ -923,7 +869,7 @@ Scheme.prototype = {
                 onSuccess: function () {
                     QueryEngine.query('delete', {
                         schema: schema.getSchemaByFeature(feature).schemaName,
-                        feature: featureData
+                        feature: feature.attributes
                     }).done(function (fid) {
                         schema._removeFeatureFromUI(feature);
                         $.notify(Mapbender.DigitizerTranslator.translate('feature.remove.successfully'), 'info');
@@ -936,11 +882,6 @@ Scheme.prototype = {
     },
 
 
-    /**
-     * Copy feature
-     *
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
-     */
     copyFeature: function (feature) {
         var schema = this;
         var layer = schema.layer;
@@ -980,8 +921,7 @@ Scheme.prototype = {
 
         // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
         newFeature.geometry.move(200, 200);
-        // TODO Name does not necessarily exist
-        newFeature.data.name = "Copy of " + feature.attributes.name;
+        newFeature.data.name = "Copy of " + (feature.attributes.name || feature.fid);
 
         delete newFeature.fid;
         newFeature.style = null;
@@ -1031,14 +971,6 @@ Scheme.prototype = {
 
     },
 
-    /**
-     * On save button click
-     *
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature OpenLayers feature
-     * @param formData
-     * @private
-     * @return {(jQuery.jqXHR | void)} ajax XHR
-     */
     saveFeature: function (feature, formData) {
         var schema = this;
         var widget = schema.widget;
@@ -1124,6 +1056,7 @@ Scheme.prototype = {
 
     _refreshConnectedDigitizerFeatures: function () {
         var schema = this;
+        var widget = schema.widget;
 
         if (schema.refreshFeaturesAfterSave) {
             _.each(schema.refreshFeaturesAfterSave, function (el, index) {
@@ -1151,16 +1084,12 @@ Scheme.prototype = {
     },
 
 
+    // Overwrite
     processFeature: function(feature,callback) {
         callback(feature);
     },
 
 
-    /**
-     * Zoom to JSON feature
-     *
-     * @param {(OpenLayers.Feature.Vector)} feature
-     */
     zoomToJsonFeature: function (feature) {
         var schema = this;
         var widget = schema.widget;
@@ -1191,7 +1120,7 @@ Scheme.prototype = {
 
 
 
-    _toggleVisibility: function (visible) {
+    setVisibilityForAllFeaturesInLayer: function (visible) {
         var schema = this;
         var layer = schema.layer;
 
@@ -1279,11 +1208,6 @@ Scheme.prototype = {
 
     },
 
-    /**
-     * Open feature edit dialog
-     *
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
-     */
     exportGeoJson: function (feature) {
         var schema = this;
         QueryEngine.query('export', {

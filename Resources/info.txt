@@ -40,6 +40,7 @@ Refactoring - Code sortieren:
 - Manche Funktionalitäten wie z.B. forEach Iteratoren tauchen sowohl als vanilla, als underscore und als jquery auf. Das ist schlecht.
 - Für Spezialfälle (Clustering, OpenLayersCloud etc. Methoden überschreiben anstatt schalter einbauen)
 - Context Menu in den Handler des Select Controls auslagern
+- Seperation of Concerns - Inititalisierung und Anwendung trennen
 
 
 

@@ -51,11 +51,6 @@
         controlFactory: null,
         activeControl: null,
 
-        /**
-         * Init controls
-         *
-         * @private
-         */
         _create: function () {
             var toolSet = this;
             toolSet.$buttons = {};

@@ -1,9 +1,5 @@
 var createFeatureAddedMethod = function(injectedMethods, geomType) {
 
-
-    /**
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
-     */
     var func = function (feature) {
         var control = this;
 
@@ -175,11 +171,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
         modifyFeature: new OpenLayers.Control.ModifyFeature(layer,{
 
-            /**
-             * This function allows the easy use of the olEvent onModificationStart with the yml configurration
-             * e.G. to prevent the modification or add additional data on modification
-             * */
-
             onModificationStart: function (feature) {
                 console.log("onModificationStart");
 
@@ -217,12 +208,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
         moveFeature: new OpenLayers.Control.DragFeature(layer, {
 
-            /**
-             * * This function allows the easy use of the olEvent onStart( called on drag start) with the yml configurration
-             * e.G. to prevent the move or add additional data on move
-             * @param {(OpenLayers.Feature.Vector | OpenLayers.Feature)} feature
-             * @param px
-             */
             onStart: function (feature, px) {
                 console.log("onStart");
 
@@ -232,10 +217,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                 }
 
             },
-            /**
-             *
-             * @param {(OpenLayers.Feature.Vector | OpenLayers.Feature)} feature
-             */
 
             onComplete: function (feature) {
                 injectedMethods.setModifiedState(feature,this);
@@ -245,21 +226,6 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             }
         }),
 
-        selectFeature: new OpenLayers.Control.SelectFeature(layer, {
-            clickout: true,
-            toggle: true,
-            multiple: true,
-            hover: false,
-            box: true,
-            toggleKey: "ctrlKey", // ctrl key removes from selection
-            multipleKey: "shiftKey" // shift key adds to selection
-        })
-        // removeSelected: {
-        //     cssClass: 'critical'
-        // },
-        // removeAll: {
-        //     cssClass: 'critical'
-        // }
     };
 
     _.each(controls,function(control,index) {

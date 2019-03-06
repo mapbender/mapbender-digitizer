@@ -522,11 +522,6 @@ var FeatureStyleEditor = function(feature,schema,options) {
 FeatureStyleEditor.prototype = {
 
 
-
-    /**
-     *
-     * @private
-     */
     close: function() {
         var element = this.getElement();
             element.popupDialog("close");
