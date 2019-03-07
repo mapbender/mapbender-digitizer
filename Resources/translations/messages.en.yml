@@ -8,6 +8,7 @@ mb.digitizer:
     zoomTo: Zoom to
     edit: 'Edit feature'
     attributes: 'Feature attributes'
+    savesave: 'Save feature'
     save:
       title: Save
       successfully: 'Feature saved.'
