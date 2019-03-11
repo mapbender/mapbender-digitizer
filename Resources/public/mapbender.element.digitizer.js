@@ -1090,6 +1090,13 @@
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
 
+            // By default the jQuery UI Modal will give focus to the first input field in the modal.
+            // Therefore, in MOBILE DEVICES the keyboard will be automatically opened.
+            // To avoid that it is necessary to not give the focus to any of text fields.
+            if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+                $(dialog).prev().find('.close').focus();
+            }
+
             setTimeout(function() {
                 dialog.formData(olFeature.data);
             }, 21);
