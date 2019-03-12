@@ -370,7 +370,9 @@ Sidebar.prototype = {
                         if (schema.popup && schema.popup.remoteData) {
                             schema._getRemoteData(feature);
                         } else {
-                            schema.openFeatureEditDialog(feature);
+                            if (schema.openFormAfterEdit) {
+                                schema.openFeatureEditDialog(feature);
+                            }
                         }
                     }
                 },
