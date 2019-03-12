@@ -607,13 +607,16 @@ class Digitizer extends BaseElement
                     }
                 }
                 if($head["reponse_code"] !== 200){
-                    $responseArray['error'][] = array('rsponse' => $response, 'code' => $head['reponse_code']);
-                } else {
+                    $responseArray['error'][] = array('response' => $response, 'code' => $head['reponse_code']);
+                } else if (!!(json_decode($response))) {
+                   
                     $dataSets[] = $response;
+                } else {
+                    $responseArray['error'][]  = array('response' => $response, 'code' => "Response of url: {$url} is not a JSON");
                 }
                 
             } else  {
-                $responseArray['error'][]  = "Unkown error for url: {$url}";
+                $responseArray['error'][]  = "Unknown error for url: {$url}";
             }
 
         }
