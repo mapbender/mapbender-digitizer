@@ -100,6 +100,13 @@ AllScheme.prototype = {
     },
 
 
+    processWithDataManager: function(feature) {
+        var schema = this.getSchemaByFeature(feature);
+        var dataManagerUtils = new DataManagerUtils(schema);
+        dataManagerUtils.processCurrentFormItemsWithDataManager(feature);
+    },
+
+
 
     getSchemaByFeature: function (feature) {
         var schema = this;

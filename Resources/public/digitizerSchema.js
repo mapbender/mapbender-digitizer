@@ -1208,6 +1208,12 @@ Scheme.prototype = {
 
     },
 
+    processWithDataManager: function(feature) {
+        var schema = this;
+        var dataManagerUtils = new DataManagerUtils(schema);
+        dataManagerUtils.processCurrentFormItemsWithDataManager(feature);
+    },
+
     exportGeoJson: function (feature) {
         var schema = this;
         QueryEngine.query('export', {

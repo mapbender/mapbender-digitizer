@@ -33,6 +33,7 @@ DataManagerUtils.prototype = {
             });
         }
 
+
         DataUtil.eachItem(schema.formItems, function (item) {
 
             if (item.type === "resultTable" && item.editable && !item.isProcessed) {
