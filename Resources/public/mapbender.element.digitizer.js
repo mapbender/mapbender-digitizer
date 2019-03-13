@@ -803,6 +803,8 @@
 
             widget.updateClusterStrategies();
 
+            widget.printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
+
         },
 
         /**
@@ -1029,12 +1031,14 @@
                 var printButton = {
                     text: Mapbender.digitizer_translate('feature.print'),
                     click: function () {
-                        widget.printWidget = widget.printWidget || $('.mb-element-printclient').data('mapbenderMbPrintClient');
 
                         if (widget.printWidget) {
                             var dialog = $(this).closest('.ui-dialog-content');
                             var feature = dialog.data('feature');
-                            widget.printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
+                            feature.layer.printedFeatureWrapper.set(feature.fid);
+                            feature.layer.drawFeature(feature);
+
+                            widget.printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid, feature.layer.printedFeatureWrapper);
                         } else {
                             $.notify('Druck Element ist nicht verfügbar!');
                         }
@@ -1962,6 +1966,15 @@
                 fontSize: 15
             });
 
+            styleMap.styles.highlightForPrint =  new OpenLayers.Style({
+                strokeWidth: 3,
+                fillColor: "#FF0",
+                strokeColor: '#000',
+                fillOpacity: 1,
+                pointRadius: 14,
+                graphicZIndex: 1000
+            });
+
             var copyStyleData = getValueOrDefault(schema, 'copy.style', null);
 
             if (copyStyleData) {
@@ -1989,6 +2002,29 @@
             }
 
             layer.name = schema.label;
+
+            layer.printedFeatureWrapper = {
+                id : null,
+                set: function(id) {
+                    this.id = id;
+                },
+                get: function(){
+                    return this.id;
+                }
+            }
+
+
+
+            var drawFeature = OpenLayers.Layer.Vector.prototype.drawFeature;
+            layer.drawFeature = function(feature,style) {
+                if (layer.printedFeatureWrapper.get() == feature.fid) {
+                    feature.renderIntent = "highlightForPrint";
+                    drawFeature.apply(this,[feature]);
+                } else {
+                    drawFeature.apply(this, [feature, style]);
+                }
+            }
+
             return layer;
         },
 
