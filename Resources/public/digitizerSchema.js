@@ -121,7 +121,7 @@ Scheme.prototype = {
     allowLocate: true,
     showVisibilityNavigation: true,
     allowPrintMetadata: false,
-    printable: false,
+    printable: true,
     dataItems: null,
     clustering: [{
         scale: 5000000,
@@ -934,6 +934,7 @@ Scheme.prototype = {
 
 
     getSchemaByFeature: function () {
+        var schema = this;
         return schema;
     },
 

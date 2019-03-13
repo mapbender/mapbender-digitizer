@@ -40,8 +40,11 @@ Refactoring - Code sortieren:
 - Higlight Methoden wurden gestrichen - schauen ob was fehlt (insbesondere ResultTable anzeigen)
 - Manche Funktionalitäten wie z.B. forEach Iteratoren tauchen sowohl als vanilla, als underscore und als jquery auf. Das ist schlecht.
 - Für Spezialfälle (Clustering, OpenLayersCloud etc. Methoden überschreiben anstatt schalter einbauen)
-- Context Menu in den Handler des Select Controls auslagern
+- Context Menu in den Handler des Select Controls auslagern (Rechtsklick!)
 - Seperation of Concerns - Inititalisierung und Anwendung trennen
+- Einrichtung der Datenbank mittels doctrine
+- options im widget constructor wieder hinzufügen
+- Druck reparieren
 
 
 
