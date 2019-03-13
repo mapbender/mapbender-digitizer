@@ -1029,11 +1029,12 @@
                 var printButton = {
                     text: Mapbender.digitizer_translate('feature.print'),
                     click: function () {
-                        var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-                        if (printWidget) {
+                        widget.printWidget = widget.printWidget || $('.mb-element-printclient').data('mapbenderMbPrintClient');
+
+                        if (widget.printWidget) {
                             var dialog = $(this).closest('.ui-dialog-content');
                             var feature = dialog.data('feature');
-                            printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
+                            widget.printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
                         } else {
                             $.notify('Druck Element ist nicht verfügbar!');
                         }
