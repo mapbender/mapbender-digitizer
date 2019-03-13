@@ -1974,7 +1974,7 @@
                 strokeColor: '#000',
                 fillOpacity: 1,
                 pointRadius: 14,
-                graphicZIndex: 100000
+                graphicZIndex: 100
             });
 
             var copyStyleData = getValueOrDefault(schema, 'copy.style', null);
