@@ -291,6 +291,7 @@
         currentSettings: null,
         featureEditDialogWidth: "423px",
         unsavedFeatures: {},
+        layers: [],
 
         /**
          * Default styles merged by schema styles if defined
@@ -1033,8 +1034,10 @@
                         if (widget.printWidget) {
                             var dialog = $(this).closest('.ui-dialog-content');
                             var feature = dialog.data('feature');
-                            widget.printedFeatureWrapper.set(feature.fid);
-                            feature.layer.drawFeature(feature);
+                            if (feature.layer) {
+                                feature.layer.printedFeatureFID = feature.fid;
+                                feature.layer.drawFeature(feature);
+                            }
 
                             widget.printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
 
@@ -2002,27 +2005,19 @@
 
             layer.name = schema.label;
 
-            widget.printedFeatureWrapper = {
-                id : null,
-                set: function(id) {
-                    this.id = id;
-                },
-                get: function(){
-                    return this.id;
-                }
-            }
-
-
+            layer.printedFeatureFID = null;
 
             var drawFeature = OpenLayers.Layer.Vector.prototype.drawFeature;
             layer.drawFeature = function(feature,style) {
-                if (widget.printedFeatureWrapper.get() == feature.fid) {
+                if (layer.printedFeatureFID == feature.fid) {
                     feature.renderIntent = "highlightForPrint";
                     drawFeature.apply(this,[feature]);
                 } else {
                     drawFeature.apply(this, [feature, style]);
                 }
             }
+
+            widget.layers.push(layer);
 
             return layer;
         },
@@ -2612,8 +2607,11 @@
             widget.printWidget =  widget.printWidget || $('.mb-element-printclient').data('mapbenderMbPrintClient');
             var close = widget.printWidget.close;
             widget.printWidget.close = function() {
+
+                _.each(widget.layers,function(layer){
+                    layer.printedFeatureFID = null;
+                });
                 
-                widget.printedFeatureWrapper.set(null);
                 close.apply(this,arguments);
             };
 
