@@ -803,8 +803,6 @@
 
             widget.updateClusterStrategies();
 
-            widget.printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-
         },
 
         /**
@@ -1035,10 +1033,11 @@
                         if (widget.printWidget) {
                             var dialog = $(this).closest('.ui-dialog-content');
                             var feature = dialog.data('feature');
-                            feature.layer.printedFeatureWrapper.set(feature.fid);
+                            widget.printedFeatureWrapper.set(feature.fid);
                             feature.layer.drawFeature(feature);
 
-                            widget.printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid, feature.layer.printedFeatureWrapper);
+                            widget.printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
+
                         } else {
                             $.notify('Druck Element ist nicht verfügbar!');
                         }
@@ -2003,7 +2002,7 @@
 
             layer.name = schema.label;
 
-            layer.printedFeatureWrapper = {
+            widget.printedFeatureWrapper = {
                 id : null,
                 set: function(id) {
                     this.id = id;
@@ -2017,7 +2016,7 @@
 
             var drawFeature = OpenLayers.Layer.Vector.prototype.drawFeature;
             layer.drawFeature = function(feature,style) {
-                if (layer.printedFeatureWrapper.get() == feature.fid) {
+                if (widget.printedFeatureWrapper.get() == feature.fid) {
                     feature.renderIntent = "highlightForPrint";
                     drawFeature.apply(this,[feature]);
                 } else {
@@ -2610,6 +2609,14 @@
 
         activate: function () {
             var widget = this;
+            widget.printWidget =  widget.printWidget || $('.mb-element-printclient').data('mapbenderMbPrintClient');
+            var close = widget.printWidget.close;
+            widget.printWidget.close = function() {
+                
+                widget.printedFeatureWrapper.set(null);
+                close.apply(this,arguments);
+            };
+
             widget.query('getConfiguration').done(function (response) {
                 _.each(response.schemes, function(schema,schemaName){
                     widget.options.schemes[schemaName].formItems = response.schemes[schemaName].formItems
