@@ -1974,7 +1974,7 @@
                 strokeColor: '#000',
                 fillOpacity: 1,
                 pointRadius: 14,
-                graphicZIndex: 1000
+                graphicZIndex: 100000
             });
 
             var copyStyleData = getValueOrDefault(schema, 'copy.style', null);
@@ -2010,6 +2010,7 @@
             var drawFeature = OpenLayers.Layer.Vector.prototype.drawFeature;
             layer.drawFeature = function(feature,style) {
                 if (layer.printedFeatureFID == feature.fid) {
+                    feature.style = null;   // prevent Print from picking up a style object
                     feature.renderIntent = "highlightForPrint";
                     drawFeature.apply(this,[feature]);
                 } else {
