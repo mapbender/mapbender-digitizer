@@ -2605,16 +2605,20 @@
 
         activate: function () {
             var widget = this;
-            widget.printWidget =  widget.printWidget || $('.mb-element-printclient').data('mapbenderMbPrintClient');
-            var close = widget.printWidget.close;
-            widget.printWidget.close = function() {
+            if (!widget.printWidget) {
 
-                _.each(widget.layers,function(layer){
-                    layer.printedFeatureFID = null;
-                });
-                
-                close.apply(this,arguments);
-            };
+                widget.printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
+                var close = widget.printWidget.close;
+                widget.printWidget.close = function() {
+
+                    _.each(widget.layers,function(layer){
+                        layer.printedFeatureFID = null;
+                    });
+
+                    close.apply(this,arguments);
+                };
+
+            }
 
             widget.query('getConfiguration').done(function (response) {
                 _.each(response.schemes, function(schema,schemaName){
