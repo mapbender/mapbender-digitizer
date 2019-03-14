@@ -344,11 +344,11 @@
 
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
-            if('mb-element-printclient' in Mapbender.elementRegistry.classIndex){
-                Mapbender.elementRegistry.promisesBundles[Mapbender.elementRegistry.classIndex['mb-element-printclient'][0]].ready.then(function(printClient){
-                    this.printClient = printClient;
+            Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function(printClient){
+                this.printClient = printClient;
                 $.extend(this.printClient ,Mapbender.DigitzerPlugins.print,);
-                }.bind(this))
+            }.bind(this))
+
 
 
             }
