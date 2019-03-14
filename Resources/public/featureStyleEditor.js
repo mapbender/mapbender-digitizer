@@ -80,7 +80,7 @@ var FeatureStyleEditor = function(feature,schema,options) {
                 min:           0,
                 max:           20,
                 value:         0,
-                css:   {width: "35%"}
+                css:   {width: "35%", visibility: feature.geometry.CLASS_NAME === "OpenLayers.Geometry.Point" ? "visible" : "hidden" }
 
             },{
                 title:   "Aktivieren",

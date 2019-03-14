@@ -54,6 +54,22 @@ Testing:
 - Popup Einstellungen in Configuration
 
 
+Bugs von Robin gefunden:
+    • Punktradius ist noch in der Stylemaske bei Polygonen eingebunden
+    • Kopieren von Objekten: Macht die Verschiebung nach Nordosten Sinn? Eine genaue Überlappung mit dem Elternobjekt macht je nach Objekt mMn. mehr Sinn…
+    • Kopieren von Objekten: Benennung der Kopie: „Copy of“ ok. Wenn die Kopie allerdings kopiert wird, evtl. besser „Copy of Copy of“ (etc.)
+    • Erstellen von Objekten: Styles aus dem Stylemanager werden beim ersten Speichern nicht übernommen und stehen bei erneutem Aufruf des Managers nicht mehr im Formular.
+    • Verschieben von Geometrien: Automatisches Aufrufen der Maske überflüssig, da der „Cancel“-Button impliziert, dass man die Verschiebung rückgängig machen könnte. Dies ist nicht der Fall.
+    • Eingabemaske Date Picker: Möglichkeit, per Button auf heutiges Datum zu springen? (nur umständlich; yaml-Konfiguration datePicker)
+    • Verändern des Koordinatensystems mit dem SRS Switcher: Alle Objekte sind in der Karte nicht mehr sichtbar
+    • Beim Hovern über Buttons stehen noch die Namen der Objektklassen: „Alle verstecken, alle anzeigen, alle speichern, auf Feature zoomen, Objekt speichern, Sichtbarkeit des Objekts ändern“
+    • Button „Print“: Keine ersichtliche Funktionalität
+    • Bug oder Feature: Bei Style-Deaktivierung von Füllung und Rand kann das Objekt in der Karte nicht mehr angeklickt werden bzw. Informationen dazu aufgerufen werden, dies muss dann über die Sidepane-Tabelle erfolgen
+    • Erstellung von Objekten: Formularknopf „Cancel“ bewirkt nicht die Löschung des erstellten Objektes. Wenn noch kein Name angegeben wurde, wird es auch nicht in der Sidepane angezeigt und bei Neuladen von MB gelöscht → besser wäre Funktionalität à la „Remove“?
+    • Bei Erstellung von mehreren Objekten hintereinander (ohne klicken auf Speichern, sondern nur Eintragen von bspw. Titel in die Eingabemaske): Button „Alle Speichern“ speichert die Objekte folgerichtig, allerdings werden die vorher in die Maske(n) eingetragenen Informationen NICHT übernommen, Leertitel wird für die Objekte in der Sidepane angezeigt und gespeichert
+    • Ausblenden einzelner/aller Objekte: Nach Wechsel der Digitize-Funktion und erneutem Zurückspringen auf die ursprüngliche Funktion zeigt der Sichtbarkeitsbutton „Sichtbar“ an, obwohl das Objekt in der Karte noch ausgeblendet ist.
+    • Ausblenden einzelner/aller Objekte: Werden vorher alle Digitize-Objekten in ihren Kategorien ausgeblendet, so erscheinen sie in der Kategorie „all geometries“ doch wieder auf der Karte (Bug or Feature?)
+
 Selbstgemachte Bugs:
 
 
