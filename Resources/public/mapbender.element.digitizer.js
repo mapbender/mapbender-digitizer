@@ -344,6 +344,11 @@
 
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
+            Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function(printClient){
+                this.printClient = printClient;
+                $.extend(this.printClient ,Mapbender.DigitzerPlugins.print);
+            }.bind(this));
+
 
             /**
              * Reload schema layers after feature was modified or removed
@@ -1026,6 +1031,7 @@
             var schema = olFeature.schema;
 
             if (schema.printable) {
+
                 var printButton = {
                     text: Mapbender.digitizer_translate('feature.print'),
                     click: function () {
