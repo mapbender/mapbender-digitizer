@@ -15,24 +15,6 @@ DataManagerUtils.prototype = {
         var widget = this.widget;
         var schema = this.schema;
 
-        // dataManager access function
-        // TODO: maybe it would be better to create public methods on dataManager to do this
-        function withSchema(dataManager, schemaName, callback) {
-            var schema = dataManager.options.schemes[schemaName];
-            // FIXME: following lines are a hack to get dataManager to open the correct popup
-            // (it does open the popup for the scheme provided in currentSettings, not
-            // the one passed to the _openEditPopup function)
-            var prevSettings = dataManager.currentSettings;
-            var prevActiveSchema = dataManager.activeSchema;
-            dataManager.activeSchema = dataManager.currentSettings = schema;
-
-            dataManager._getData(schema).then(function () {
-                callback(schema);
-                dataManager.currentSettings = prevSettings;
-                dataManager.activeSchema = prevActiveSchema;
-            });
-        }
-
 
         DataUtil.eachItem(schema.formItems, function (item) {
 
@@ -84,7 +66,7 @@ DataManagerUtils.prototype = {
                         e.preventDefault && e.preventDefault();
 
                         var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
-                        withSchema(dm, schemaName, function (schema) {
+                        dm.withSchema(schemaName, function (schema) {
                             dm._openEditDialog(schema.create());
                         });
 
@@ -97,7 +79,7 @@ DataManagerUtils.prototype = {
 
                         var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
-                        withSchema(dm, schemaName, function (schema) {
+                        dm.withSchema(schemaName, function (schema) {
                             var dataItem = _.find(schema.dataItems, function (d) {
                                 return d[schemaFieldName] === rowData[fieldName];
                             });
@@ -144,7 +126,7 @@ DataManagerUtils.prototype = {
                         e.preventDefault && e.preventDefault();
 
                         var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
-                        withSchema(dm, schemaName, function (schema) {
+                        dm.withSchema(schemaName, function (schema) {
                             dm._openEditDialog(schema.create());
 
                         });
@@ -163,7 +145,7 @@ DataManagerUtils.prototype = {
 
                         var val = $(this).siblings().find('select').val();
                         var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
-                        withSchema(dm, schemaName, function (schema) {
+                        dm.withSchema(schemaName, function (schema) {
                             var dataItem = _.find(schema.dataItems, function (d) {
                                 return d[schemaFieldName].toString() === val;
                             });
