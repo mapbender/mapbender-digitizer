@@ -116,6 +116,11 @@
             }
 
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
+            Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function(printClient){
+                this.printClient = printClient;
+                $.extend(this.printClient ,Mapbender.DigitzerPlugins.print);
+            }.bind(this));
+
 
 
 

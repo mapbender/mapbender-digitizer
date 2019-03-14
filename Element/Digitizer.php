@@ -71,7 +71,7 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/vis-ui.extension.js',
                 '@MapbenderDigitizerBundle/Resources/public/jsts.min.js',
                 '@MapbenderDigitizerBundle/Resources/public/setprototype.polyfill.js',
-
+                '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
 
             ),
             'css'   => array(
@@ -622,25 +622,59 @@ class Digitizer extends BaseElement
         $bbox = $request['bbox'];
         $schemaName = $request['schema'];
         $srid = $request['srid'];
-        $dataSets = [];
-        $remoteData = $this->getSchemaByName($schemaName)["popup"]["remoteData"];
-
+        $dataSets = array();
+        $remoteData = ($this->getSchemaByName($schemaName))["popup"]["remoteData"];
+        $responseArray = array('dataSets' => array());
+        $responseArray = array('errors' => array());
         foreach ($remoteData as $url){
             $url = str_replace("{bbox}", $bbox, $url);
             $url = str_replace("{BBOX}", $bbox, $url);
             $url = str_replace("{srid}", $srid, $url);
             $url = str_replace("{SRID}", $srid, $url);
             try {
-                $dataSets[]  = file_get_contents($url);
-            } catch (\Exception $e) { //Todo Throw correct e in debug.
+                $context = stream_context_create(array(
+                    'http' => array(
+                        'ignore_errors' => true
+                    )
+                ));
+                $response  = file_get_contents($url, false, $context);
+            } catch (\Exception $e) {
+                $this->container->get('logger')->error('Digitizer WMS GetFeatureInfo: '. $e->getMessage());
+                $responseArray['error']  = $e->getMessage();
+            }
+            if(is_array($http_response_header)){
+                $head = array();
+                foreach( $http_response_header as $k=>$v )
+                {
+                    $t = explode( ':', $v, 2 );
+                    if( isset( $t[1] ) )
+                        $head[ trim($t[0]) ] = trim( $t[1] );
+                    else
+                    {
+                        $head[] = $v;
+                        if( preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#",$v, $out ) )
+                            $head['reponse_code'] = intval($out[1]);
+                    }
+                }
+                if($head["reponse_code"] !== 200){
+                    $responseArray['error'][] = array('response' => $response, 'code' => $head['reponse_code']);
+                } else if (!!(json_decode($response))) {
 
-                throw new \Exception('Can not recieve data form FeatureInfo request');
+                    $dataSets[] = $response;
+                } else {
+                    $responseArray['error'][]  = array('response' => $response, 'code' => "Response of url: {$url} is not a JSON");
+                }
+
+            } else  {
+                $responseArray['error'][]  = "Unknown error for url: {$url}";
             }
 
         }
 
 
-        return array('dataSets' => $dataSets);
+
+        $responseArray['dataSets'] = $dataSets;
+        return $responseArray;
     }
 
     /**
@@ -686,7 +720,6 @@ class Digitizer extends BaseElement
         $schema = $schemas[ $name ];
         return $schema;
     }
-
 
     /**
      * Get data store by settings or name
