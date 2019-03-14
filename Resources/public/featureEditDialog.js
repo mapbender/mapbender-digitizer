@@ -61,18 +61,13 @@ FeatureEditDialog.prototype = {
 
         var dialog = this;
         var schema = dialog.schema;
+        var widget = schema.widget;
         var feature = dialog.feature;
         var buttons = dialog.configuration.realButtons;
 
         if (buttons.printButton) {
             buttons.printButton.click = function() {
-                var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-                if (printWidget) {
-                    // TODO check if featureTypeName necessary
-                    printWidget.printDigitizerFeature(schema.featureTypeName || schema.schemaName, feature.fid);
-                } else {
-                    $.notify('Druck Element ist nicht verfügbar!'); // TODO translatable
-                }
+                widget.printClient.printDigitizerFeature(schema.featureTypeName || schema.schemaName, feature.fid);
             }
         }
         if (buttons.copyButton) {
