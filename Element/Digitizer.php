@@ -50,6 +50,7 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/digitizingControlFactory.js',
                 '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
+                '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
             ),
             'css'   => array(
                 '/components/select2/select2-built.css',
