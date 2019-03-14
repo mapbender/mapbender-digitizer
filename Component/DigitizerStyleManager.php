@@ -21,7 +21,12 @@ class DigitizerStyleManager
      */
     public function __construct(ContainerInterface $container = null)
     {
-        $sqlitePath = $container->getParameter('mapbender.digitizer.sqlite.storage_root') . "/{$this->tableName}.sqlite";
+        try {
+            $root = $container->getParameter('mapbender.digitizer.sqlite.storage_root');
+        } catch(\InvalidArgumentException $e) {
+            $root = $container->getParameter('kernel.root_dir')."/db";
+        }
+        $sqlitePath =  $root. "/{$this->tableName}.sqlite";
         $this->db = $this->createDB($sqlitePath, $this->tableName);
     }
 
