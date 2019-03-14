@@ -193,7 +193,20 @@ Sidebar.prototype = {
             autoWidth: false,
             columns: this._generateResultDataTableColumns(),
             buttons: this._generateResultDataTableButtons(),
-            oLanguage: tableTranslation
+            oLanguage: tableTranslation,
+            drawCallback: function(settings) {
+                this.api().rows(function(idx, feature, row) {
+                    if (feature.visible) {
+                        $(row).removeClass('invisible-feature');
+                    } else {
+                        $(row).addClass('invisible-feature');
+                    }
+
+                });
+
+
+
+            }
 
         };
 

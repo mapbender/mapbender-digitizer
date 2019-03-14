@@ -1129,10 +1129,9 @@ Scheme.prototype = {
 
             feature.visible = visible;
             layer.drawFeature(feature);
-            schema.resultTable.toggleVisibilityInResultTable(feature);
-
-
         });
+
+        schema.resultTable.getApi().draw();
 
     },
 
@@ -1143,7 +1142,8 @@ Scheme.prototype = {
         feature.visible = !feature.visible;
 
         layer.drawFeature(feature);
-        schema.resultTable.toggleVisibilityInResultTable(feature);
+        schema.resultTable.getApi().draw();
+
 
     },
 
