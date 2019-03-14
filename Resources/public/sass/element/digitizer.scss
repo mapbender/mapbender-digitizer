@@ -85,11 +85,6 @@ $selectColor: #F7F79A;
           content: "\f06e";
         }
 
-        .icon-invisibility:before{
-          font-family: FontAwesome;
-          content: "\f070";
-        }
-
         .icon-printmetadata.active:before{
             font-family: FontAwesome;
             content: "\f02f";
@@ -105,6 +100,13 @@ $selectColor: #F7F79A;
     }
   }
 
+}
+
+.invisible-feature {
+    .icon-visibility:before{
+        font-family: FontAwesome;
+        content: "\f070" !important;
+    }
 }
 
 .olHandlerBoxSelectFeature {
