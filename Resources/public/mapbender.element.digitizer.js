@@ -36,12 +36,7 @@
         },
         schemes: {},
         map: null,
-        // TODO this should not be here but in css file
-        featureEditDialogWidth: "423px",
 
-        /**
-         * Default styles merged by schema styles if defined
-         */
         styles: {
             'default': {
                 strokeWidth: 1,
@@ -106,13 +101,8 @@
             }
 
         },
-        /**
-         * Constructor.
-         *
-         * At this moment not all elements (like a OpenLayers) are avaible.
-         *
-         * @private
-         */
+        printClient: null,
+
         _create: function () {
 
             var widget = this.widget = this;
@@ -126,8 +116,8 @@
 
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function(printClient){
-                this.printClient = printClient;
-                $.extend(this.printClient ,Mapbender.DigitzerPlugins.print);
+                widget.printClient = printClient;
+                $.extend(widget.printClient ,Mapbender.DigitzerPlugins.print);
             }.bind(this));
 
 
@@ -197,12 +187,6 @@
         },
 
 
-        _getNonBlackListedOptions: function () {
-            var widget = this;
-            var blacklist = ['schemes', 'target', 'create', 'jsSrc', 'disabled'];
-            return _.omit(widget.options, blacklist);
-        },
-
         _createSchemes: function () {
             var widget = this;
             var rawSchemes = widget.options.schemes;
@@ -257,14 +241,8 @@
 
         _initializeSelector: function () {
             var widget = this;
-            var options = widget.options;
             var selector = widget.selector;
 
-
-            // TODO is this really needed?
-            if (options.schema) {
-                selector.val(options.schema);
-            }
 
             widget.onSelectorChange = function () {
                 var option = selector.find(":selected");

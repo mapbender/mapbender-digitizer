@@ -69,9 +69,9 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/queryEngine.js',
                 '@MapbenderDigitizerBundle/Resources/public/openlayers.extension.js',
                 '@MapbenderDigitizerBundle/Resources/public/vis-ui.extension.js',
-                '@MapbenderDigitizerBundle/Resources/public/jsts.min.js',
                 '@MapbenderDigitizerBundle/Resources/public/setprototype.polyfill.js',
                 '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
+                '@MapbenderDigitizerBundle/Resources/public/lib/jsts.min.js',
 
             ),
             'css'   => array(

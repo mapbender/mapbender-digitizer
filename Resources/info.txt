@@ -42,8 +42,6 @@ Refactoring - Code sortieren:
 - Für Spezialfälle (Clustering, OpenLayersCloud etc. Methoden überschreiben anstatt schalter einbauen)
 - Context Menu in den Handler des Select Controls auslagern (Rechtsklick!)
 - Seperation of Concerns - Inititalisierung und Anwendung trennen
-- Einrichtung der Datenbank mittels doctrine
-- options im widget constructor wieder hinzufügen
 - Druck reparieren
 
 
@@ -114,6 +112,8 @@ Gemacht:
 - Deaktivierung von DrawDonut muss zwei mal aufgerufen werden
 - Unsaved Style verschwindet, wenn Features neu geladen werden (Refactoring Style)
 - Kopiertes Feature und neues Feature bekommt nach Dragging wieder default Farbe
+- Default Einrichtung der Datenbank wenn parameter storage root nicht gesetzt
+- options im widget constructor wieder hinzufügen
 
 
 

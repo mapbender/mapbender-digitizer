@@ -50,10 +50,6 @@ var Scheme = function (rawScheme, widget) {
         Mapbender.layerManager.setMap(schema.layer.map);
     }
 
-    // TODO this has to be carefully checked for prototype propertys, since it fills the `undefined` properties, so it may not work at all
-    _.defaults(schema, schema.widget._getNonBlackListedOptions());
-
-
     schema.initializeStyleApplication();
 
     if (schema.clustering) {
@@ -244,7 +240,6 @@ Scheme.prototype = {
     },
 
     deactivateSchema: function () {
-        /** @type {Scheme} */
         var schema = this;
         var widget = schema.widget;
         var frame = schema.frame;

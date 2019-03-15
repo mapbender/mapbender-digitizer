@@ -414,7 +414,7 @@ DataManagerUtils.prototype = {
 
             title: Mapbender.DigitizerTranslator.translate("feature.attributes"),
 
-            width: widget.featureEditDialogWidth,
+            width: "423px",
         }, schema.popup);
 
         popupConfig.buttons = buttons;

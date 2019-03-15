@@ -92,13 +92,11 @@
 
                 activate: function(event) {
                     var $button = toolSet.$buttons[this.name];
-                    //toolSet._trigger('controlActivate', null, event); // TODO uncommented because purpose unknown
                     $button.addClass('active');
                 },
 
                 deactivate: function(event) {
                     var $button = toolSet.$buttons[this.name];
-                    //toolSet._trigger('controlDeactivate', null, event); // TODO uncommented because purpose unknown
                     $button.removeClass('active');
 
                 }
