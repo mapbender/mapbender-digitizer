@@ -25,6 +25,15 @@
 
     $.widget("mapbender.mbDigitizer", {
 
+        options:  {
+            classes: {},
+            create: null,
+            debug: false,
+            disabled: false,
+            fileURI: "uploads/featureTypes",
+            schemes: {},
+            target: null,
+        },
         schemes: {},
         map: null,
         // TODO this should not be here but in css file
