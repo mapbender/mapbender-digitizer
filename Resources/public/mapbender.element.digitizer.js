@@ -697,9 +697,15 @@
             _.each(widget.options.schemes, function(el,index){
                 el.widget = widget;
                 newSchemes[index] = new Scheme(el);
+
+                widget.activeLayer = widget.activeLayer || newSchemes[index].layer;
+                widget.schemaName = widget.schemaName || newSchemes[index].schemaName;
+                widget.currentSettings = widget.currentSettings || newSchemes[index];
             });
 
            widget.options.schemes = newSchemes;
+
+           
 
 
             /**
@@ -728,9 +734,11 @@
 
                 if (widget.currentSettings) {
                     widget.currentSettings.deactivateSchema();
+                } 
+                
+                if (widget.currentSettings.schemaName != schema.schemaName || schema.displayOnInactive || schema.displayPermanent) {
+                    schema.activateSchema();
                 }
-
-                schema.activateSchema();
 
                 table.off('mouseenter', 'mouseleave', 'click');
 
