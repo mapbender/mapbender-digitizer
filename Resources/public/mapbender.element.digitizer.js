@@ -3356,8 +3356,8 @@
             var tableName = schema.featureType.table;
             var relativeWebPath = Mapbender.configuration.application.urls.asset;
 
-            if (schema && schema.featureType && schema.featureType.files[0] && schema.featureType.files[0].hasOwnProperty('uri')) {
-                var uri = schema.featureType.files[0].uri;
+            if (schema.featureType && schema.featureType.hasOwnProperty('downloadFileUri')) {
+                var uri = schema.featureType.downloadFileUri;
                 window.open(uri + attributes[attributeName]);
             } else {
                 window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
