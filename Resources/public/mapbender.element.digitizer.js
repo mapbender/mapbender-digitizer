@@ -1513,10 +1513,12 @@
                     var hasFeatureAfterSave = response.features.length > 0;
                     delete widget.unsavedFeatures[feature.id];
 
-                    if (response.solrImportStatus === 0) {
-                        $.notify(translate("feature.solrImportStatus.successfully"), 'info');
-                    } else {
-                        $.notify(translate("feature.solrImportStatus.error"), 'error');
+                    if (response.solrImportStatus !== null) {
+                        if (response.solrImportStatus === 0) {
+                            $.notify(translate("feature.solrImportStatus.successfully"), 'info');
+                        } else {
+                            $.notify(translate("feature.solrImportStatus.error"), 'error');
+                        }
                     }
 
                     if (!hasFeatureAfterSave) {

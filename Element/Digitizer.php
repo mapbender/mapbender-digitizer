@@ -463,7 +463,7 @@ class Digitizer extends BaseElement
             $data = json_decode(file_get_contents($schema['dataSourceImportHandler']['url']));
             return $data->responseHeader->status;
         }
-        return 1;
+        return null;
     }
 
     /**
