@@ -227,13 +227,18 @@ var Scheme = OpenLayers.Class({
         widget.schemaName = schema.schemaName;
         widget.currentSettings = schema;
 
-        widget.query('style/list', {schema: schema.schemaName}).done(function (r) {
-            schema.featureStyles = r.featureStyles;
-            widget.reloadFeatures(layer);
-            layer.setVisibility(true);
-            frame.css('display', 'block');
-            schema.selectControl.activate();
-        });
+        // widget.query('style/list', {schema: schema.schemaName}).done(function (r) {
+        //     schema.featureStyles = r.featureStyles;
+        //     widget.reloadFeatures(layer);
+        //     layer.setVisibility(true);
+        //     frame.css('display', 'block');
+        //     schema.selectControl.activate();
+        // });
+
+        widget.reloadFeatures(layer);
+        layer.setVisibility(true);
+        frame.css('display', 'block');
+        schema.selectControl.activate();
 
     },
 
