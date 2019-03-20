@@ -36,8 +36,6 @@ Refactoring - Code sortieren:
 - feature.attributes.geomType und schema.featureType.geomType- variablen anders benennen
 - Die ganze Style Map Geschichte im AllScheme ist suboptimal. Neues Model ausdenken und anwenden.
 - Die Integration von vis-ui überschreibung weiter benutzen, zum abhängigen neuzeichnen von buttons
-- nach speichern von style, style in schema feature styles einbinden
-- Die Cluster Funktionalitäten in eigene Datei auslagern, die Methoden überschreibt
 - Higlight Methoden wurden gestrichen - schauen ob was fehlt (insbesondere ResultTable anzeigen)
 - Manche Funktionalitäten wie z.B. forEach Iteratoren tauchen sowohl als vanilla, als underscore und als jquery auf. Das ist schlecht.
 - Für Spezialfälle (Clustering, OpenLayersCloud etc. Methoden überschreiben anstatt schalter einbauen)
@@ -54,7 +52,6 @@ Testing:
 
 
 Bugs von Robin gefunden:
-    • Punktradius ist noch in der Stylemaske bei Polygonen eingebunden
     • Kopieren von Objekten: Macht die Verschiebung nach Nordosten Sinn? Eine genaue Überlappung mit dem Elternobjekt macht je nach Objekt mMn. mehr Sinn…
     • Kopieren von Objekten: Benennung der Kopie: „Copy of“ ok. Wenn die Kopie allerdings kopiert wird, evtl. besser „Copy of Copy of“ (etc.)
     • Erstellen von Objekten: Styles aus dem Stylemanager werden beim ersten Speichern nicht übernommen und stehen bei erneutem Aufruf des Managers nicht mehr im Formular.
@@ -115,6 +112,12 @@ Gemacht:
 - Kopiertes Feature und neues Feature bekommt nach Dragging wieder default Farbe
 - Default Einrichtung der Datenbank wenn parameter storage root nicht gesetzt
 - options im widget constructor wieder hinzufügen
+- Die Cluster Funktionalitäten in eigene Datei auslagern, die Methoden überschreibt
+- nach speichern von style, style in schema feature styles einbinden
+- Punktradius ist noch in der Stylemaske bei Polygonen eingebunden
+
+
+
 
 
 
