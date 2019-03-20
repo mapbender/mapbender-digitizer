@@ -287,7 +287,8 @@ Scheme.prototype = {
         schema.layer.drawFeature = function(feature,style) {
             if (style === undefined || style === 'default') {
 
-                style = schema.featureStyles[feature.fid] || style;
+
+                style = schema.featureStyles[feature.fid] || "default";
 
                 if (feature.isChanged || feature.isNew) {
                     style = 'unsaved';
