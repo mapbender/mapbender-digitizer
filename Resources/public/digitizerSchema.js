@@ -889,10 +889,10 @@ Scheme.prototype = {
 
         _.each(schema.copy.rules, function (ruleCode) {
             var f = feature;
-            eval('allowCopy = ' + ruleCode + ';');
             if (!allowCopy) {
                 return false;
             }
+            eval('allowCopy = ' + ruleCode + ';');
         });
 
         if (!allowCopy) {
@@ -903,7 +903,7 @@ Scheme.prototype = {
         var newAttributes = _.extend({}, defaultAttributes);
 
         _.each(feature.attributes, function (v, k) {
-            if (v !== '' && v !== null) {
+            if (v !== '' && v !== null && ) {
                 newAttributes[k] = v;
             }
 
