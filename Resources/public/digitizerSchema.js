@@ -903,7 +903,7 @@ Scheme.prototype = {
         var newAttributes = _.extend({}, defaultAttributes);
 
         _.each(feature.attributes, function (v, k) {
-            if (v !== '' && v !== null && ) {
+            if (v !== '' && v !== null) {
                 newAttributes[k] = v;
             }
 
