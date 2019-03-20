@@ -35,7 +35,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
                 if (!geom.isValid()) {
                     $.notify("Geometry not valid");
-                    this.destroyFeature(cancel);
+                    this.destroyActiveComponent(cancel);
                     this.control.deactivate();
                     return;
                 }
@@ -63,6 +63,8 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             featureAdded : createFeatureAddedMethod(injectedMethods, 'polygon'),
             handlerOptions: {
               finalize: finalizeDrawFeatureWithValidityTest,
+
+              destroyActiveComponent: function(cancel) { this.destroyFeature(cancel); }
             }
         }),
 
@@ -127,6 +129,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                     OpenLayers.Handler.Path.prototype.addPoint.apply(this, arguments);
                 },
                 finalize: finalizeDrawFeatureWithValidityTest,
+                destroyActiveComponent: function(cancel) { this.polygon.geometry.removeComponent(this.line.geometry); },
                 finalizeInteriorRing : function(event) {
 
                     var fir =  OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
