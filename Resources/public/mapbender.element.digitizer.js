@@ -292,6 +292,7 @@
         featureEditDialogWidth: "423px",
         unsavedFeatures: {},
         layers: [],
+        printClient : null,
 
         /**
          * Default styles merged by schema styles if defined
@@ -348,6 +349,17 @@
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function(printClient){
                 this.printClient = printClient;
                 $.extend(this.printClient ,Mapbender.DigitzerPlugins.print);
+                var close = Object.getPrototypeOf(this.printClient).close;
+                // this.printClient.close = function() {
+                //
+                //     console.log("overwrite");
+                //
+                //     _.each(widget.layers,function(layer){
+                //         layer.printedFeatureFID = null;
+                //     });
+                //
+                //     close.apply(this,arguments);
+                // };
             }.bind(this));
 
 
@@ -1051,19 +1063,15 @@
                     text: Mapbender.digitizer_translate('feature.print'),
                     click: function () {
 
-                        if (widget.printWidget) {
-                            var dialog = $(this).closest('.ui-dialog-content');
-                            var feature = dialog.data('feature');
-                            if (feature.layer) {
-                                feature.layer.printedFeatureFID = feature.fid;
-                                feature.layer.drawFeature(feature);
-                            }
-
-                            widget.printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
-
-                        } else {
-                            $.notify('Druck Element ist nicht verfügbar!');
+                        var dialog = $(this).closest('.ui-dialog-content');
+                        var feature = dialog.data('feature');
+                        if (feature.layer) {
+                            feature.layer.printedFeatureFID = feature.fid;
+                            feature.layer.drawFeature(feature);
                         }
+
+                        widget.printClient.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
+
                     }
                 };
                 buttons.push(printButton);
@@ -2625,20 +2633,6 @@
 
         activate: function () {
             var widget = this;
-            if (!widget.printWidget) {
-
-                widget.printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-                var close = widget.printWidget.close;
-                widget.printWidget.close = function() {
-
-                    _.each(widget.layers,function(layer){
-                        layer.printedFeatureFID = null;
-                    });
-
-                    close.apply(this,arguments);
-                };
-
-            }
 
             widget.query('getConfiguration').done(function (response) {
                 _.each(response.schemes, function(schema,schemaName){
