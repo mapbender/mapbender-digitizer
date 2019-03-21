@@ -350,16 +350,14 @@
                 this.printClient = printClient;
                 $.extend(this.printClient ,Mapbender.DigitzerPlugins.print);
                 var close = Object.getPrototypeOf(this.printClient).close;
-                // this.printClient.close = function() {
-                //
-                //     console.log("overwrite");
-                //
-                //     _.each(widget.layers,function(layer){
-                //         layer.printedFeatureFID = null;
-                //     });
-                //
-                //     close.apply(this,arguments);
-                // };
+                this.printClient.close = function() {
+                    
+                    _.each(widget.layers,function(layer){
+                        layer.printedFeatureFID = null;
+                    });
+
+                    close.apply(this,arguments);
+                };
             }.bind(this));
 
 
