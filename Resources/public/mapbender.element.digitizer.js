@@ -454,8 +454,94 @@
 
 
 
+        
+        _createElementContextMenu: function() {
+            var widget = this;
+            var element = $(widget.element);
 
-        _createMapContextMenu: function() {
+            $(element).contextMenu({
+                selector: '.mapbender-element-result-table > div > table > tbody > tr',
+                events: {
+                    show: function (options) {
+                        var tr = $(options.$trigger);
+                        var resultTable = tr.closest('.mapbender-element-result-table');
+                        var api = resultTable.resultTable('getApi');
+                        var olFeature = api.row(tr).data();
+
+                        if (!olFeature) {
+                            return false;
+                        }
+
+                        var schema = widget.findFeatureSchema(olFeature);
+                        return schema.useContextMenu;
+                    }
+                },
+                build: function ($trigger, e) {
+                    var tr = $($trigger);
+                    var resultTable = tr.closest('.mapbender-element-result-table');
+                    var api = resultTable.resultTable('getApi');
+                    var olFeature = api.row(tr).data();
+
+                    if (!olFeature) {
+                        return {
+                            callback: function (key, options) {
+                            }
+                        };
+                    }
+
+                    var schema = widget.findFeatureSchema(olFeature);
+                    var items = {};
+
+                    items['changeStyle'] = {name: Mapbender.digitizer_translate('feature.style.change')};
+                    items['zoom'] = {name: Mapbender.digitizer_translate('feature.zoomTo')};
+                    if (schema.allowDelete) {
+                        items['removeFeature'] = {name: Mapbender.digitizer_translate('feature.remove.title')};
+                    }
+
+                    if (schema.allowEditData) {
+                        items['edit'] = {name: Mapbender.digitizer_translate('feature.edit')};
+                    }
+
+                    return {
+                        callback: function (key, options) {
+                            switch (key) {
+                                case 'removeFeature':
+                                    widget.removeFeature(olFeature);
+                                    break;
+
+                                case 'zoom':
+                                    widget.zoomToJsonFeature(olFeature);
+                                    break;
+
+                                case 'edit':
+                                    widget._openFeatureEditDialog(olFeature);
+                                    break;
+
+                                case 'exportGeoJson':
+                                    widget.exportGeoJson(olFeature);
+                                    break;
+
+                                case 'changeStyle':
+                                    widget.openChangeStyleDialog(olFeature);
+                                    break;
+                            }
+                        },
+                        items: items
+                    };
+                }
+            });
+
+        },
+
+
+        _removeContextMenuMap: function() {
+            var widget = this;
+            var map = widget.map;
+
+            $(map.div).contextMenu("destroy");
+        },
+
+        _setContextMenuMap: function() {
             var widget = this;
             var map = widget.map;
 
@@ -538,8 +624,12 @@
                         }
 
                         features = feature.cluster ? feature.cluster : [feature];
+                        //features = widget._getFeaturesFromEvent(e.clientX, e.clientY);
 
                         _.each(features, function (feature) {
+                            if (!feature.layer) {
+                                feature.layer = olFeature.layer;
+                            }
                             items[feature.fid] = createSubMenu(feature);
                         });
                     }
@@ -566,85 +656,7 @@
             });
 
         },
-
-        _createElementContextMenu: function() {
-            var widget = this;
-            var element = $(widget.element);
-
-            $(element).contextMenu({
-                selector: '.mapbender-element-result-table > div > table > tbody > tr',
-                events: {
-                    show: function (options) {
-                        var tr = $(options.$trigger);
-                        var resultTable = tr.closest('.mapbender-element-result-table');
-                        var api = resultTable.resultTable('getApi');
-                        var olFeature = api.row(tr).data();
-
-                        if (!olFeature) {
-                            return false;
-                        }
-
-                        var schema = widget.findFeatureSchema(olFeature);
-                        return schema.useContextMenu;
-                    }
-                },
-                build: function ($trigger, e) {
-                    var tr = $($trigger);
-                    var resultTable = tr.closest('.mapbender-element-result-table');
-                    var api = resultTable.resultTable('getApi');
-                    var olFeature = api.row(tr).data();
-
-                    if (!olFeature) {
-                        return {
-                            callback: function (key, options) {
-                            }
-                        };
-                    }
-
-                    var schema = widget.findFeatureSchema(olFeature);
-                    var items = {};
-
-                    items['changeStyle'] = {name: Mapbender.digitizer_translate('feature.style.change')};
-                    items['zoom'] = {name: Mapbender.digitizer_translate('feature.zoomTo')};
-                    if (schema.allowDelete) {
-                        items['removeFeature'] = {name: Mapbender.digitizer_translate('feature.remove.title')};
-                    }
-
-                    if (schema.allowEditData) {
-                        items['edit'] = {name: Mapbender.digitizer_translate('feature.edit')};
-                    }
-
-                    return {
-                        callback: function (key, options) {
-                            switch (key) {
-                                case 'removeFeature':
-                                    widget.removeFeature(olFeature);
-                                    break;
-
-                                case 'zoom':
-                                    widget.zoomToJsonFeature(olFeature);
-                                    break;
-
-                                case 'edit':
-                                    widget._openFeatureEditDialog(olFeature);
-                                    break;
-
-                                case 'exportGeoJson':
-                                    widget.exportGeoJson(olFeature);
-                                    break;
-
-                                case 'changeStyle':
-                                    widget.openChangeStyleDialog(olFeature);
-                                    break;
-                            }
-                        },
-                        items: items
-                    };
-                }
-            });
-
-        },
-
+        
         _createTableTranslations: function() {
             var widget = this;
             var options = widget.options;
@@ -711,12 +723,6 @@
            widget.options.schemes = newSchemes;
 
            
-
-
-            /**
-             * Set map context menu
-             */
-            widget._createMapContextMenu();
 
             widget._createElementContextMenu();
 
@@ -2250,7 +2256,7 @@
             tableApi.draw();
 
             if (widget.options.__disabled) {
-                widget.deactivate();
+                widget.deactivate(true);
             }
 
             // var tbody = $(tableApi.body());
@@ -2594,13 +2600,13 @@
 
                 widget.options.__disabled = false;
                 widget.currentSettings.activateSchema();
-
+                widget._setContextMenuMap();
 
             })
 
         },
 
-        deactivate: function () {
+        deactivate: function (ommitRemoveContextMenu) {
             var widget = this;
             // clear unsaved features to prevent multiple confirmation popups
             var unsavedFeatures = widget.unsavedFeatures;
@@ -2610,6 +2616,10 @@
                 if (!widget.currentSettings.displayOnInactive) {
                     widget.currentSettings.deactivateSchema();
                 }
+                if (ommitRemoveContextMenu) {
+                    return;
+                }
+                widget._removeContextMenuMap();
             };
             always()
 
