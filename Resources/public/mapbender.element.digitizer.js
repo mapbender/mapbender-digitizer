@@ -291,6 +291,7 @@
         currentSettings: null,
         featureEditDialogWidth: "423px",
         unsavedFeatures: {},
+        layers: [],
 
         /**
          * Default styles merged by schema styles if defined
@@ -1049,11 +1050,17 @@
                 var printButton = {
                     text: Mapbender.digitizer_translate('feature.print'),
                     click: function () {
-                        var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-                        if (printWidget) {
+
+                        if (widget.printWidget) {
                             var dialog = $(this).closest('.ui-dialog-content');
                             var feature = dialog.data('feature');
-                            printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
+                            if (feature.layer) {
+                                feature.layer.printedFeatureFID = feature.fid;
+                                feature.layer.drawFeature(feature);
+                            }
+
+                            widget.printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
+
                         } else {
                             $.notify('Druck Element ist nicht verfügbar!');
                         }
@@ -1981,6 +1988,15 @@
                 fontSize: 15
             });
 
+            styleMap.styles.highlightForPrint =  new OpenLayers.Style({
+                strokeWidth: 3,
+                fillColor: "#FF0",
+                strokeColor: '#000',
+                fillOpacity: 1,
+                pointRadius: 14,
+                graphicZIndex: 100
+            });
+
             var copyStyleData = getValueOrDefault(schema, 'copy.style', null);
 
             if (copyStyleData) {
@@ -2008,6 +2024,22 @@
             }
 
             layer.name = schema.label;
+
+            layer.printedFeatureFID = null;
+
+            var drawFeature = OpenLayers.Layer.Vector.prototype.drawFeature;
+            layer.drawFeature = function(feature,style) {
+                if (layer.printedFeatureFID == feature.fid) {
+                    feature.style = null;   // prevent Print from picking up a style object
+                    feature.renderIntent = "highlightForPrint";
+                    drawFeature.apply(this,[feature]);
+                } else {
+                    drawFeature.apply(this, [feature, style]);
+                }
+            }
+
+            widget.layers.push(layer);
+
             return layer;
         },
 
@@ -2593,6 +2625,21 @@
 
         activate: function () {
             var widget = this;
+            if (!widget.printWidget) {
+
+                widget.printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
+                var close = widget.printWidget.close;
+                widget.printWidget.close = function() {
+
+                    _.each(widget.layers,function(layer){
+                        layer.printedFeatureFID = null;
+                    });
+
+                    close.apply(this,arguments);
+                };
+
+            }
+
             widget.query('getConfiguration').done(function (response) {
                 _.each(response.schemes, function(schema,schemaName){
                     widget.options.schemes[schemaName].formItems = response.schemes[schemaName].formItems
