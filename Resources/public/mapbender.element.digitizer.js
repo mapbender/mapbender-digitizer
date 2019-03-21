@@ -897,7 +897,7 @@
                         if(printWidget) {
                             var dialog = $(this).closest(".ui-dialog-content");
                             var olFeature = dialog.data('feature');
-                            printWidget.printDigitizerFeature(olFeature.schema.featureTypeName ? olFeature.schema.featureTypeName : olFeature.schema.schemaName, olFeature.fid);
+                            printWidget.printDigitizerFeature(olFeature, olFeature.schema.featureTypeName || olFeature.schema.schemaName);
                         } else {
                             $.notify("Druck element ist nicht verfügbar!");
                         }

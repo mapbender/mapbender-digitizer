@@ -15,6 +15,9 @@
         "mapbender/data-source": "0.*",
         "mapbender/vis-ui.js": "*"
     },
+    "conflict": {
+        "mapbender/mapbender": "<3.0.8"
+    },
     "config": {
         "bin-dir": "bin"
     },
