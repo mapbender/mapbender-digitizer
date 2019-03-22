@@ -20,6 +20,9 @@ mb.digitizer:
       title: Duplizieren
       on:
         error: Duplizieren des Objektes ist nicht erlaubt.
+    solrImportStatus:
+      successfully: 'Indizierung wurde erfolgreich ausgeführt.'
+      error: 'Indizierung ist fehlgeschlagen.'
   toolset:
     current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
     point:

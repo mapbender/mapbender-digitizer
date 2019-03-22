@@ -438,6 +438,7 @@ class Digitizer extends BaseElement
 
             }
             $results = $featureType->toFeatureCollection($results);
+            $results['solrImportStatus'] = $this->solrImport($request);
         } catch (DBALException $e) {
             $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
                 "For more information have a look at the webserver log file. \n Error code: " . $e->getCode();
@@ -448,6 +449,23 @@ class Digitizer extends BaseElement
 
         return $results;
 
+    }
+
+    /**
+     * Updates the index of solr (full import) and returns the status 
+     * @param $request
+     * @return int status
+     */
+    public function solrImport($request) {
+        $configuration = $this->getConfiguration(false);
+        $schemas       = $configuration["schemes"];
+        $schemaName  = $request["schema"];
+        $schema = $this->getSchemaByName($schemaName);
+        if (isset($schema['dataSourceImportHandler'])  && isset($schema['dataSourceImportHandler']['url'])) {
+            $data = json_decode(file_get_contents($schema['dataSourceImportHandler']['url']));
+            return $data->responseHeader->status;
+        }
+        return null;
     }
 
     /**

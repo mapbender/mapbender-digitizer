@@ -21,6 +21,9 @@ mb.digitizer:
       title: Copy
       on:
         error: Object coping is denied.
+    solrImportStatus:
+      successfully: 'Indexing has been successfully completed.'
+      error: 'Indexing failed.'
   toolset:
     current-extent: 'Select by current extent only.'
     point:
