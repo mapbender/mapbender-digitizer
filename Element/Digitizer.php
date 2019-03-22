@@ -46,9 +46,11 @@ class Digitizer extends BaseElement
                 '/components/select2/select2-built.js',
                 '/components/select2/dist/js/i18n/de.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizingToolset.js',
+                '@MapbenderDigitizerBundle/Resources/public/digitizerSchema.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizingControlFactory.js',
                 '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
+                '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
             ),
             'css'   => array(
                 '/components/select2/select2-built.css',
@@ -592,19 +594,24 @@ class Digitizer extends BaseElement
         $dataSets = [];
         $remoteData = $this->getSchemaByName($schemaName)["popup"]["remoteData"];
         $responseArray = ['dataSets' => []];
+        $responseArray = ['errors' => []];
         foreach ($remoteData as $url){
             $url = str_replace("{bbox}", $bbox, $url);
             $url = str_replace("{BBOX}", $bbox, $url);
             $url = str_replace("{srid}", $srid, $url);
             $url = str_replace("{SRID}", $srid, $url);
             try {
-
-                $dataSets[]  = file_get_contents($url);
-            } catch (\Exception $e) { //Todo Throw correct e in debug.
+                $context = stream_context_create(array(
+                    'http' => array(
+                        'ignore_errors' => true
+                    )
+                ));
+                $response  = file_get_contents($url, false, $context);
+            } catch (\Exception $e) {
                 $this->container->get('logger')->error('Digitizer WMS GetFeatureInfo: '. $e->getMessage());
                 $responseArray['error']  = $e->getMessage();
             }
-            if(end($dataSets) === false && is_array($http_response_header)){
+            if(is_array($http_response_header)){
                 $head = array();
                 foreach( $http_response_header as $k=>$v )
                 {
@@ -618,9 +625,17 @@ class Digitizer extends BaseElement
                             $head['reponse_code'] = intval($out[1]);
                     }
                 }
-                $responseArray['error']  = array('message' => "An error occured. Remote service {$url} responded with status code {$head[0]}.", 'responseHeader' => $head);
-            } elseif (end($dataSets) === false ) {
-                $responseArray['error']  = "Unkown error";
+                if($head["reponse_code"] !== 200){
+                    $responseArray['error'][] = array('response' => $response, 'code' => $head['reponse_code']);
+                } else if (!!(json_decode($response))) {
+                   
+                    $dataSets[] = $response;
+                } else {
+                    $responseArray['error'][]  = array('response' => $response, 'code' => "Response of url: {$url} is not a JSON");
+                }
+                
+            } else  {
+                $responseArray['error'][]  = "Unknown error for url: {$url}";
             }
 
         }
