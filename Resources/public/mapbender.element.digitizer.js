@@ -349,15 +349,6 @@
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function(printClient){
                 this.printClient = printClient;
                 $.extend(this.printClient ,Mapbender.DigitzerPlugins.print);
-                var close = Object.getPrototypeOf(this.printClient).close;
-                this.printClient.close = function() {
-                    
-                    _.each(widget.layers,function(layer){
-                        layer.printedFeatureFID = null;
-                    });
-
-                    close.apply(this,arguments);
-                };
             }.bind(this));
 
 
@@ -1067,8 +1058,18 @@
                             feature.layer.printedFeatureFID = feature.fid;
                             feature.layer.drawFeature(feature);
                         }
+                        
+                        var deactivePrintedFeatureFID = function() {
+                            _.each(widget.layers,function(layer){
+                                layer.printedFeatureFID = null;
+                            })
+                        }
 
-                        widget.printClient.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
+                        widget.printClient.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid).done(function(){
+                            deactivePrintedFeatureFID();
+                        }).fail(function() {
+                            deactivePrintedFeatureFID();
+                        });
 
                     }
                 };
