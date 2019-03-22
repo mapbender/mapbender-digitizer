@@ -1550,6 +1550,10 @@
 
             });
 
+            if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+                $(dialog).prev().find('.close').focus();
+            }
+
             setTimeout(function () {
 
                 if (popupConfiguration.remoteData && olFeature.isNew) {
