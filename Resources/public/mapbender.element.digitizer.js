@@ -292,6 +292,7 @@
         featureEditDialogWidth: "423px",
         unsavedFeatures: {},
         layers: [],
+        printClient : null,
 
         /**
          * Default styles merged by schema styles if defined
@@ -1060,19 +1061,25 @@
                     text: Mapbender.digitizer_translate('feature.print'),
                     click: function () {
 
-                        if (widget.printWidget) {
-                            var dialog = $(this).closest('.ui-dialog-content');
-                            var feature = dialog.data('feature');
-                            if (feature.layer) {
-                                feature.layer.printedFeatureFID = feature.fid;
-                                feature.layer.drawFeature(feature);
-                            }
-
-                            widget.printWidget.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid);
-
-                        } else {
-                            $.notify('Druck Element ist nicht verfügbar!');
+                        var dialog = $(this).closest('.ui-dialog-content');
+                        var feature = dialog.data('feature');
+                        if (feature.layer) {
+                            feature.layer.printedFeatureFID = feature.fid;
+                            feature.layer.drawFeature(feature);
                         }
+                        
+                        var deactivePrintedFeatureFID = function() {
+                            _.each(widget.layers,function(layer){
+                                layer.printedFeatureFID = null;
+                            })
+                        }
+
+                        widget.printClient.printDigitizerFeature(feature.schema.featureTypeName || feature.schema.schemaName, feature.fid).done(function(){
+                            deactivePrintedFeatureFID();
+                        }).fail(function() {
+                            deactivePrintedFeatureFID();
+                        });
+
                     }
                 };
                 buttons.push(printButton);
@@ -2638,20 +2645,6 @@
 
         activate: function () {
             var widget = this;
-            if (!widget.printWidget) {
-
-                widget.printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-                var close = widget.printWidget.close;
-                widget.printWidget.close = function() {
-
-                    _.each(widget.layers,function(layer){
-                        layer.printedFeatureFID = null;
-                    });
-
-                    close.apply(this,arguments);
-                };
-
-            }
 
             widget.query('getConfiguration').done(function (response) {
                 _.each(response.schemes, function(schema,schemaName){
