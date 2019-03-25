@@ -864,9 +864,11 @@
             }
 
             var newAttributes = {};
+            var uniqueKeyOfFeatureType = schema.featureType.uniqueId;
+
             _.extend(newAttributes, defaultAttributes);
             _.each(feature.attributes, function (v, k) {
-                if (v === '' || v === null) {
+                if (v === '' || v === null || k == uniqueKeyOfFeatureType) {
                     return;
                 }
                 newAttributes[k] = v;

@@ -52,7 +52,6 @@ var Scheme = OpenLayers.Class({
             schema.id = OpenLayers.Util.createUniqueID(schema.CLASS_NAME + "_");
         }
 
-        console.log(options,schema.schemaName,schema.featureType,"!!!")
     },
 
     /**
