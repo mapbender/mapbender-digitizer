@@ -39,7 +39,7 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                     this.control.deactivate();
                     return;
                 }
-            } catch(e) {} //In case of Error thrown in read, because there is no complete linear ring in the geometry
+            } catch(e) { console.warn("error in validation of geometry")} //In case of Error thrown in read, because there is no complete linear ring in the geometry
         }
 
         return OpenLayers.Handler.Polygon.prototype.finalize.apply(this,arguments);
@@ -93,10 +93,13 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
         }),
 
         drawDonut: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
+
             featureAdded : function() { console.warn("donut should not be created") },
+
             handlerOptions: {
                 holeModifier: 'element',
                 // Allow control only to draw holes in polygon, not to draw polygons themselves.
+                // Outsource old geometry
                 addPoint: function(pixel) {
                     if(!this.drawingHole && this.evt && this.evt[this.holeModifier]) {
                         var geometry = this.point.geometry;
@@ -116,8 +119,10 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
                                 this.control.layer.events.registerPriority(
                                     "sketchmodified", this, this.enforceTopology
                                 );
-                                polygon.geometry.addComponent(this.line.geometry);
                                 this.polygon = polygon;
+                                this.polygon.oldGeometry = this.polygon.geometry.clone();
+                                polygon.geometry.addComponent(this.line.geometry);
+
                                 this.drawingHole = true;
                                 break;
                             }
@@ -165,6 +170,8 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
 
             onModificationStart: function (feature) {
                 console.log("onModificationStart");
+
+                feature.oldGeometry =  feature.geometry.clone();
 
                 if (injectedMethods.preventModification()) {
                     this.deactivate();

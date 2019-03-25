@@ -145,6 +145,7 @@ FeatureEditDialog.prototype = {
         var widget = schema.widget;
 
         $popup.bind('popupdialogclose', function () {
+
             if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
                 schema.removeFeature(feature);
             }
