@@ -12,20 +12,7 @@ var AllScheme = function () {
 
 AllScheme.prototype = {
 
-    showExtendSearchSwitch: true,
-    openFormAfterEdit: true,
-    allowEditData: true,
-    allowDelete: true,
-    allowPrintMetadata: true,
-    allowDigitize: true,
-    displayPermanent: false,
-    displayOnSelect: true,
-    inlineSearch: true,
-    allowCustomerStyle: true,
-    useContextMenu: true,
     schemaName: 'all',
-    featureType: 'all',
-    zoomDependentVisibility: [{max: 10000}],
 
     getStyleMapOptions : function (label) {
         var schema = this;

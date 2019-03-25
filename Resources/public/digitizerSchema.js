@@ -113,6 +113,11 @@ Scheme.prototype = {
     },
     dataItems: null,
 
+    //* Server Only
+    events: {
+        onAfterSave: null,
+    },
+
 
     //* Newly added properties
     revertChangedGeometryOnCancel: true,
@@ -165,8 +170,8 @@ Scheme.prototype = {
     maxScale: null,
     minScale: null,
     group: null,
-
     // oneInstanceEdit: true,
+    //zoomDependentVisibility: [{max: 10000}],
     refreshFeaturesAfterSave: null,
     mailManager: null,
     tableTranslation: null,
