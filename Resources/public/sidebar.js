@@ -291,7 +291,6 @@ Sidebar.prototype = {
     },
 
     _onSchemaSearch: function() {
-        /** @type {Scheme} */
         var schema = this.schema;
         var widget = schema.widget;
         var frame = this.frame;
@@ -300,16 +299,15 @@ Sidebar.prototype = {
         var onSubmitSearch = function (e) {
             schema.search.request = searchForm.formData();
             var xhr = schema.getData();
-            if (xhr) {
-                xhr.done(function () {
-                    var olMap = widget.map;
-                    olMap.zoomToExtent(layer.getDataExtent());
 
-                    if (schema.search.hasOwnProperty('zoomScale')) {
-                        olMap.zoomToScale(schema.search.zoomScale, true);
-                    }
-                });
-            }
+            xhr.done(function () {
+                var olMap = widget.map;
+                olMap.zoomToExtent(layer.getDataExtent());
+                if (schema.search.zoomScale) {
+                    olMap.zoomToScale(schema.search.zoomScale, true);
+                }
+            });
+
             return false;
         };
 

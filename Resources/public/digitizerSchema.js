@@ -62,51 +62,68 @@ var Scheme = function (rawScheme, widget) {
 
     }
 
+
 };
 
 
 Scheme.prototype = {
 
 
-    schemaName: '',
-    featureTypeName: '',
+    schemaName: null,
     resultTable: null,
-    label: '',
     layer: null,
     widget: null,
     frame: null,
     mapContextMenu: null,
     elementContextMenu: null,
 
-    revertChangedGeometryOnCancel: true,
-    deactivateControlAfterModification: true,
-    allowSaveAll: true,
-    markUnsavedFeatures: true,
-    maxResults: 500,
-    displayPermanent: false,
-    dataStore: null,
-    dataStoreLink: {},
-    showExtendSearchSwitch: false,
     featureType: {
+        name: null,
         geomType: null,
         table: null,
         files: null,
         uniqueId : null,
     },
-    zoomScaleDenominator: 500,
-    useContextMenu: true,
-    toolset: {},
-    popup: {
-        remoteData: false,
-        isOpenLayersCloudPopup: function() {
-            return this.type === 'openlayers-cloud';
-        }
-    },
-    style: {},
-    formItems: null,
-    events: null,
+
     featureStyles: null,
-    search: null,
+    olFeatureCloudPopup: null,
+
+    evaluatedHooks: {},
+    lastRequest: null,
+
+
+    xhr: null,
+    view: {
+        type: null,
+        settings: null,
+    },
+
+    selectControl: null,
+    highlightControl: null,
+    clusterStrategy: null,
+    digitizingToolset: null,
+
+
+
+
+    //** Data Manager only
+    dataStore: null,
+    dataStoreLink: {
+        fieldName:null
+    },
+    dataItems: null,
+
+
+    //* Newly added properties
+    revertChangedGeometryOnCancel: true,
+    deactivateControlAfterModification: true,
+    allowSaveAll: true,
+    markUnsavedFeatures: true,
+
+
+    displayOnSelect: true, // BEV only, no implementation
+
+    label: null,
     allowDigitize: true,
     allowDelete: true,
     allowSave: true,
@@ -116,81 +133,59 @@ Scheme.prototype = {
     allowDeleteByCancelNewGeometry: false,
     allowCancelButton: true,
     allowLocate: true,
-    showVisibilityNavigation: true,
-    allowPrintMetadata: false,
-    printable: true,
-    dataItems: null,
-    clustering: [{
-        scale: 5000000,
-        distance: 30
-    }],
-    clusterStrategy: null,
-    styles: {},
-    maxScale: null,
-    minScale: null,
-    group: null,
+    maxResults: 500,
+    showExtendSearchSwitch: false,
+    zoomScaleDenominator: 500,
+    useContextMenu: true,
+    displayPermanent: false,
     displayOnInactive: false,
-    refreshFeaturesAfterSave: false,
-    olFeatureCloudPopup: null,
-    mailManager: null,
-    tableTranslation: null,
+    toolset: {},
+    popup: {
+        remoteData: false,
+        isOpenLayersCloudPopup: function() {
+            return this.type === 'openlayers-cloud';
+        }
+    },
+    styles: {
+        default: {},
+        select: {}
+    },
+
     copy: {
         enable: true,
         rules: [],
         data: {},
-        style: {
-            strokeWidth: 5,
-            fillColor: "#f7ef7e",
-            strokeColor: '#4250b5',
-            fillOpacity: 0.7,
-            graphicZIndex: 15
-        }
     },
 
-    // Save data
-    save: {}, // pop a confirmation dialog when deactivating, to ask the user to save or discard
-    // current in-memory changes
-    confirmSaveOnDeactivate: true,
+    formItems: null,
+    search: null,
+    showVisibilityNavigation: true,
+    allowPrintMetadata: false,
+    printable: true,
+    maxScale: null,
+    minScale: null,
+    group: null,
+
+    // oneInstanceEdit: true,
+    refreshFeaturesAfterSave: null,
+    mailManager: null,
+    tableTranslation: null,
+    save: {}, // pop a confirmation dialog when deactivating, to ask the user to save or discard current in-memory changes
     openFormAfterEdit: true,
     maxResults: 5001,
     pageLength: 10,
-    oneInstanceEdit: true,
-    searchType: "currentExtent",
+    searchType: "currentExtent", // TODO boolean property searchTypeCurrentExtent is preferable
     inlineSearch: false,
     hooks: {
         onModificationStart: null,
-        onStart: null,
+        onStart: null
     },
-    evaluatedHooks: {},
-
-    lastRequest: null,
-    xhr: null,
-    view: null,
-
-    selectControl: null,
-    highlightControl: null,
-
-
-    // Layer list names/ids to be refreshed after feature save complete
-    refreshLayersAfterFeatureSave: [],
-
+    refreshLayersAfterFeatureSave: [], // Layer list names/ids to be refreshed after feature save complete
     clustering: [{
         scale: 5000000,
         distance: 30
     }],
-    digitizingToolset: null,
-
-    tableFields: {
-        gid: { // TODO make sure this fields name is either always gid or find a more generic solution
-            label: 'Nr.',
-            width: "20%",
-        },
-        name: {
-            label: 'Name',
-            width: "80%",
-        },
-
-    },
+    tableFields: null,
 
     _initializeHooks: function () {
         var schema = this;
@@ -797,16 +792,11 @@ Scheme.prototype = {
     },
 
 
-    _mergeExistingFeaturesWithLoadedFeatures: function (featureCollection) {
+    _mergeExistingFeaturesWithLoadedFeatures: function (newFeatures) {
         var schema = this;
 
-        var geoJsonReader = new OpenLayers.Format.GeoJSON();
         var existingFeatures = schema._getVisibleFeatures();
 
-        var newFeatures = geoJsonReader.read({
-            type: "FeatureCollection",
-            features: featureCollection.features
-        });
 
         var newFeaturesFiltered = _.filter(newFeatures, function (nFeature) {
             return !existingFeatures.some(function (oFeature) {
@@ -830,8 +820,13 @@ Scheme.prototype = {
         if (featureCollection.features && featureCollection.features.length === parseInt(schema.maxResults)) {
             Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
         }
+        var geoJsonReader = new OpenLayers.Format.GeoJSON();
+        var newFeatures = geoJsonReader.read({
+            type: "FeatureCollection",
+            features: featureCollection.features
+        });
 
-        schema.layer.features = schema._mergeExistingFeaturesWithLoadedFeatures(featureCollection);
+        schema.layer.features =  schema.group === "all" ? newFeatures : schema._mergeExistingFeaturesWithLoadedFeatures(newFeatures);
 
         schema.reloadFeatures();
     },
@@ -1100,7 +1095,7 @@ Scheme.prototype = {
         var geometry = feature.geometry;
 
         olMap.zoomToExtent(geometry.getBounds());
-        if (schema.hasOwnProperty('zoomScaleDenominator')) {
+        if (schema.zoomScaleDenominator) {
             olMap.zoomToScale(schema.zoomScaleDenominator, true);
         }
     },

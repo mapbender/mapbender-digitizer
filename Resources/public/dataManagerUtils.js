@@ -265,9 +265,6 @@ DataManagerUtils.prototype = {
         var widget = this.widget;
         var schema = this.schema;
 
-        var schemaName = schema.schemaName;
-        var uniqueKey = schema.dataStore.uniqueId;
-        var textKey = schema.dataStore.text;
         var buttons = [];
 
         if (widget.currentPopup.currentPopup) {

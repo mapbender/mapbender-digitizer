@@ -26,7 +26,6 @@ AllScheme.prototype = {
     schemaName: 'all',
     featureType: 'all',
     zoomDependentVisibility: [{max: 10000}],
-    confirmSaveOnDeactivate: true,
 
     getStyleMapOptions : function (label) {
         var schema = this;
