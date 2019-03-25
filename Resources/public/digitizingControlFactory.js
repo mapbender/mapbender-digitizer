@@ -203,6 +203,8 @@ var DigitizingControlFactory = function (layer,injectedMethods,controlEvents) {
             onStart: function (feature, px) {
                 console.log("onStart");
 
+                feature.oldGeometry =  feature.geometry.clone();
+
                 if (injectedMethods.preventMove()) {
                     this.cancel();
                     $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));

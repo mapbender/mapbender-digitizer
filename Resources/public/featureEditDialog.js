@@ -1,4 +1,5 @@
 var FeatureEditDialog = function (feature, configuration, schema) {
+    // TODO buttons/realButtons approach is misleading and should be refactored
 
     var dialog = this;
     dialog.schema = schema;
@@ -146,6 +147,12 @@ FeatureEditDialog.prototype = {
         $popup.bind('popupdialogclose', function () {
             if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
                 schema.removeFeature(feature);
+            }
+            if (feature.isChanged && schema.revertChangedGeometryOnCancel) {
+                schema.layer.renderer.eraseGeometry(feature.geometry);
+                feature.geometry = feature.oldGeometry;
+                feature.isChanged = false;
+                schema.layer.drawFeature(feature);
             }
             if (configuration.modal) {
                 widget.currentPopup = null;

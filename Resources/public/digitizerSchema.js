@@ -78,7 +78,7 @@ Scheme.prototype = {
     mapContextMenu: null,
     elementContextMenu: null,
 
-
+    revertChangedGeometryOnCancel: true,
     deactivateControlAfterModification: true,
     allowSaveAll: true,
     markUnsavedFeatures: true,
