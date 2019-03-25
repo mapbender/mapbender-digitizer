@@ -90,7 +90,8 @@ Scheme.prototype = {
     featureType: {
         geomType: null,
         table: null,
-        files: null
+        files: null,
+        uniqueId : null,
     },
     zoomScaleDenominator: 500,
     useContextMenu: true,
@@ -904,7 +905,7 @@ Scheme.prototype = {
         var newAttributes = _.extend({}, defaultAttributes);
 
         _.each(feature.attributes, function (v, k) {
-            if (v !== '' && v !== null) {
+            if (v !== '' && v !== null && k !== schema.featureType.uniqueId) {
                 newAttributes[k] = v;
             }
 

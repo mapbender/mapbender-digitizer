@@ -688,7 +688,6 @@ class Digitizer extends BaseElement
                      'filter',
                      'geomField',
                      'connection',
-                     'uniqueId',
                      'sql',
                      'events'
                  ) as $keyName) {
