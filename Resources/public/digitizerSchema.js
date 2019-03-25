@@ -22,7 +22,7 @@ var Scheme = OpenLayers.Class({
     allowPrintMetadata: false,
     allowDelete: false,
     showExtendSearchSwitch: false,
-    featureType: {},
+    featureType: null,
     openFormAfterEdit: true,
     zoomScaleDenominator: 500,
     useContextMenu: true,
@@ -51,6 +51,8 @@ var Scheme = OpenLayers.Class({
         if (schema.id == null) {
             schema.id = OpenLayers.Util.createUniqueID(schema.CLASS_NAME + "_");
         }
+
+        console.log(options,schema.schemaName,schema.featureType,"!!!")
     },
 
     /**
@@ -745,7 +747,7 @@ var Scheme = OpenLayers.Class({
                             bbox.right = parseFloat(bbox.right + 0.00001);
                             bbox.top = parseFloat(bbox.top + 0.00001);
                             bbox = bbox.toBBOX();
-                            var srid = map.getProjection().replace('EPSG:', '');
+                            var srid = widget.map.getProjection().replace('EPSG:', '');
                             var url = widget.elementUrl + "getFeatureInfo/";
 
                             $.ajax({
@@ -767,7 +769,7 @@ var Scheme = OpenLayers.Class({
                                 widget._openFeatureEditDialog(feature);
 
                             }).fail(function () {
-                                $.notfiy("No remote data could be fetched");
+                                $.notify("No remote data could be fetched");
                                 widget._openFeatureEditDialog(feature);
                             });
 
