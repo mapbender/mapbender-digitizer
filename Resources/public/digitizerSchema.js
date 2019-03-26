@@ -52,7 +52,6 @@ var Scheme = OpenLayers.Class({
             schema.id = OpenLayers.Util.createUniqueID(schema.CLASS_NAME + "_");
         }
 
-        console.log(options,schema.schemaName,schema.featureType,"!!!")
     },
 
     /**
@@ -745,8 +744,8 @@ var Scheme = OpenLayers.Class({
                     if(isPopupOpen){
                         var activeProj = $('.-fn-coordinates-container').data('activeEpsgCode') || widget.getMap().getProjectionObject();
                         var coords = Mapbender.Transformation.transformFromMapProj(feature.geometry.x,feature.geometry.y, activeProj)
-                        $('.-fn-coordinates.x > input', widget.currentPopup).val(coords.x);
-                        $('.-fn-coordinates.y> input', widget.currentPopup).val(coords.y);
+                        $('.-fn-coordinates.x > input', widget.currentPopup).val(coords.x).trigger("change");
+                        $('.-fn-coordinates.y> input', widget.currentPopup).val(coords.y).trigger("change");
                     }
                     if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
 

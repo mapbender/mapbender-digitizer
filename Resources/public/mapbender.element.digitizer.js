@@ -1,6 +1,8 @@
 (function ($) {
     "use strict";
 
+    $.fn.dataTable.ext.errMode = 'throw';
+
     /**
      * Regular Expression to get checked if string should be translated
      *
@@ -924,6 +926,9 @@
             var tableWidget = table.data('visUiJsResultTable');
             var tableApi = table.resultTable('getApi');
             var formData = dialog && dialog.formData() || schema.initialFormData(feature);
+
+            delete formData.x;
+            delete formData.y;
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
             var request = {
@@ -1112,28 +1117,27 @@
                     click: function () {
                         var dialog = $(this).closest('.ui-dialog-content');
                         var feature = dialog.data('feature');
-                        var hasCoordnatesInput = !!$('.-fn-coordinates',dialog).length;
-                        if(hasCoordnatesInput){
-                            var x;
-                            var y;
-                            var activeEPSG;
+                        var hasCoordinatesInput = !!$('.-fn-coordinates',dialog).length;
+                        if(hasCoordinatesInput){
+
+                            var x = $('.-fn-coordinates',dialog).find("[name=x]").val();
+                            var y = $('.-fn-coordinates',dialog).find("[name=y]").val();
+                            var activeEPSG = $('.-fn-active-epsgCode',dialog).find("select").val();
                             var coords = Mapbender.Transformation.transformToMapProj(x,y,activeEPSG);
+
 
                             if(!Mapbender.Transformation.areCoordinatesValid(coords)){
                                 Mapbender.error();
                                 return false;
                             } else if(schema.remoteData)  {
-                                widget.openRemoteDataConfirmationDialog()
-                                    .error(function () {
+                                widget.openRemoteDataConfirmationDialog().error(function () {
                                     return false;
-                                })
-                                    .succes(function () {
-                                        widget._getRemoteData(feature,schema).success(function () {
-                                            widget.saveFeature(feature);
-                                        })
+                                }).succes(function () {
+                                    widget._getRemoteData(feature,schema).success(function () {
+                                        widget.saveFeature(feature);
+                                    });
 
-                                })
-                                ;
+                                });
                             } else {
                                 widget.saveFeature(feature);
                             }
@@ -1345,6 +1349,7 @@
                         value: item.epsgCodes[0][0],
                         cssClass: '-fn-active-epsgCode',
                         change: function(){
+
                             var activeProj = $('.-fn-coordinates-container').data('activeEpsgCode') || widget.getMap().getProjectionObject();
                             var epsgCode = $(event.currentTarget).find('select').val();
                             var inputX = $('.-fn-coordinates.x > input', widget.currentPopup);
@@ -1372,13 +1377,15 @@
                                 var feature = dialog.data('feature');
                                 var input = $(event.currentTarget).find('input');
                                 var layer = feature.layer;
-
+                                
                                 var x = $('.-fn-coordinates.x > input', widget.currentPopup).val();
-                                var y = $('.-fn-coordinates.y> input', widget.currentPopup).val();
+                                var y = $('.-fn-coordinates.y > input', widget.currentPopup).val();
                                 var epsgCode = $('.-fn-active-epsgCode', widget.currentPopup).find('select').val();
-                                feature.geometry = feature.geometry ? feature.geometry : new OpenLayers.Geometry.Point();
-                                feature.geometry[direction] = Mapbender.Transformation.transformToMapProj(x,y,epsgCode)[direction]
 
+                                var projection = Mapbender.Transformation.transformToMapProj(x,y,epsgCode);
+
+                                feature.geometry = new OpenLayers.Geometry.Point(projection.x,projection.y);
+                                
                                 layer.redraw();
                                 layer.setVisibility(false);
 
@@ -1660,8 +1667,8 @@
 
             });
 
-            olFeature.data.x = olFeature.geometry ? olFeature.geometry.x : null;
-            olFeature.data.y = olFeature.geometry ? olFeature.geometry.y : null;
+            // olFeature.data.x = olFeature.geometry ? olFeature.geometry.x : null;
+            // olFeature.data.y = olFeature.geometry ? olFeature.geometry.y : null;
 
             if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
                 $(dialog).prev().find('.close').focus();

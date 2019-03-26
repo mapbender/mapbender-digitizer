@@ -74,7 +74,7 @@ Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn.prototype = {
     },
 
     createGeometryLessFeature: function () {
-        feature = new OpenLayers.Feature.Vector(NaN, NaN);
+        feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(NaN, NaN));
         feature.data = {};
         feature.isNew = true;
         feature.schema = this.digitizer.currentSettings;
@@ -83,10 +83,8 @@ Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn.prototype = {
         feature.layer = layer;
 
         var properties = $.extend({}, feature.schema.newFeatureDefaultProperties); // clone from newFeatureDefaultProperties
-
-
         feature.attributes = feature.data = properties;
-        console.log(feature);
+
         return feature;
     }
 };

@@ -28,7 +28,7 @@ Mapbender.Transformation = {
 
         var c = new OpenLayers.LonLat(x,y)
         var to = Mapbender.Model.map.olMap.getProjectionObject();
-        var from = new OpenLayers.Projection(from);
+        var from = new OpenLayers.Projection(from.projCode || from);
         return this.transFromFromTo(c,from,to);
     },
 
@@ -37,13 +37,13 @@ Mapbender.Transformation = {
         var c = new OpenLayers.LonLat(x,y)
         var from = Mapbender.Model.map.olMap.getProjectionObject();
 
-        var to = new OpenLayers.Projection(to);
+        var to = new OpenLayers.Projection(to.projCode || to);
         return this.transFromFromTo(c,from,to);
     },
 
-    transFromFromTo : function(lotlan, to, from){
+    transFromFromTo : function(lonlat, to, from){
 
-        var c = lotlan.transform(from,to);
+        var c = lonlat.transform(from,to);
 
         return {x: c.lon,y: c.lat}
 
