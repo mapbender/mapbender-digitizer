@@ -210,8 +210,7 @@ Sidebar.prototype = {
 
         };
 
-
-        if (schema.view && schema.view.settings) {
+        if (schema.view.settings) {
             _.extend(resultTableSettings, schema.view.settings);
         }
 
@@ -242,8 +241,6 @@ Sidebar.prototype = {
             })
         };
         var elementUrl = widget.elementUrl;
-        // $.fn.select2.defaults.set('amdBase', 'select2/');
-        // $.fn.select2.defaults.set('amdLanguageBase', 'select2/dist/js/i18n/');
 
 
         foreachItemTree(schema.search.form, function (item) {
@@ -473,7 +470,7 @@ Sidebar.prototype = {
             frame.append("<div style='clear:both'>");
             var $div = $("<div/>");
             $div.addClass("form-group checkbox onlyExtent");
-            var $label = $("<label/>")
+            var $label = $("<label/>");
             $label.append($checkbox);
             $label.append(title);
             $div.append($label);

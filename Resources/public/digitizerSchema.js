@@ -94,7 +94,7 @@ Scheme.prototype = {
 
     xhr: null,
     view: {
-        type: null,
+        type: null, // No implementation
         settings: null,
     },
 
