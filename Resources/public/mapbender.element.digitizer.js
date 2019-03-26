@@ -456,7 +456,7 @@
 
 
 
-        
+
         _createElementContextMenu: function() {
             var widget = this;
             var element = $(widget.element);
@@ -626,7 +626,6 @@
                         }
 
                         features = feature.cluster ? feature.cluster : [feature];
-                        //features = widget._getFeaturesFromEvent(e.clientX, e.clientY);
 
                         _.each(features, function (feature) {
                             if (!feature.layer) {
@@ -658,7 +657,7 @@
             });
 
         },
-        
+
         _createTableTranslations: function() {
             var widget = this;
             var options = widget.options;
@@ -722,6 +721,9 @@
                 widget.currentSettings = widget.currentSettings || newSchemes[index];
             });
 
+           var  geometrylessfeatureAddBtn = new Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn(this);
+           geometrylessfeatureAddBtn.toggleSchemeVisibilty();
+
            widget.options.schemes = newSchemes;
 
            
@@ -783,7 +785,7 @@
                         widget.zoomToJsonFeature(feature);
                     }
                 });
-
+                widget._trigger('schemaChanged');
                 widget._getData();
             }
 
@@ -1014,7 +1016,6 @@
 
                     this.feature = feature;
 
-
                     $.notify(Mapbender.digitizer_translate("feature.save.successfully"), 'info');
 
                     widget._trigger("featuresaved", null, feature);
@@ -1067,7 +1068,7 @@
                             feature.layer.printedFeatureFID = feature.fid;
                             feature.layer.drawFeature(feature);
                         }
-                        
+
                         var deactivePrintedFeatureFID = function() {
                             _.each(widget.layers,function(layer){
                                 layer.printedFeatureFID = null;
@@ -1111,7 +1112,35 @@
                     click: function () {
                         var dialog = $(this).closest('.ui-dialog-content');
                         var feature = dialog.data('feature');
-                        widget.saveFeature(feature);
+                        var hasCoordnatesInput = !!$('.-fn-coordinates',dialog).length;
+                        if(hasCoordnatesInput){
+                            var x;
+                            var y;
+                            var activeEPSG;
+                            var coords = Mapbender.Transformation.transformToMapProj(x,y,activeEPSG);
+
+                            if(!Mapbender.Transformation.areCoordinatesValid(coords)){
+                                Mapbender.error();
+                                return false;
+                            } else if(schema.remoteData)  {
+                                widget.openRemoteDataConfirmationDialog()
+                                    .error(function () {
+                                    return false;
+                                })
+                                    .succes(function () {
+                                        widget._getRemoteData(feature,schema).success(function () {
+                                            widget.saveFeature(feature);
+                                        })
+
+                                })
+                                ;
+                            } else {
+                                widget.saveFeature(feature);
+                            }
+                        }
+
+
+
                     }
                 };
                 buttons.push(saveButton);
@@ -1302,6 +1331,71 @@
 
                 }
 
+
+                if(item.type === 'coordinates'){
+                    var input = {
+                        type : 'input',
+                        label: ''
+
+                    }
+
+                    var EPSGSelection = {
+                        type: 'select',
+                        options: item.epsgCodes,
+                        value: item.epsgCodes[0][0],
+                        cssClass: '-fn-active-epsgCode',
+                        change: function(){
+                            var activeProj = $('.-fn-coordinates-container').data('activeEpsgCode') || widget.getMap().getProjectionObject();
+                            var epsgCode = $(event.currentTarget).find('select').val();
+                            var inputX = $('.-fn-coordinates.x > input', widget.currentPopup);
+                            var inputY = $('.-fn-coordinates.y > input', widget.currentPopup);
+                            var x = Mapbender.Transformation.isDegree(inputX.val()) ? Mapbender.Transformation.toDecimal(inputX.val()) : inputX.val();
+                            var y = Mapbender.Transformation.isDegree(inputY.val()) ? Mapbender.Transformation.toDecimal(inputY.val()) : inputY.val();
+                            var    projectionToTransform = new OpenLayers.Projection(epsgCode);
+                            var lonlat = new OpenLayers.LonLat(x, y).transform(activeProj, projectionToTransform);
+                            inputX.val(lonlat.lon);
+                            inputY.val(lonlat.lat);
+                            $('.-fn-coordinates-container').data('activeEpsgCode',epsgCode);
+                        }
+                    };
+
+                    var children = [];
+                    _.each(['x','y'], function(direction,i){
+
+                        var child  = {
+                            cssClass : '-fn-coordinates ' + direction,
+                            tile: direction + ': ',
+                            name: direction,
+                            change : function(){
+
+                                var dialog = this.currentPopup;
+                                var feature = dialog.data('feature');
+                                var input = $(event.currentTarget).find('input');
+                                var layer = feature.layer;
+
+                                var x = $('.-fn-coordinates.x > input', widget.currentPopup).val();
+                                var y = $('.-fn-coordinates.y> input', widget.currentPopup).val();
+                                var epsgCode = $('.-fn-active-epsgCode', widget.currentPopup).find('select').val();
+                                feature.geometry = feature.geometry ? feature.geometry : new OpenLayers.Geometry.Point();
+                                feature.geometry[direction] = Mapbender.Transformation.transformToMapProj(x,y,epsgCode)[direction]
+
+                                layer.redraw();
+                                layer.setVisibility(false);
+
+                                layer.setVisibility(true);
+
+                            }.bind(widget)
+                        }
+                        children.push($.extend(child,input));
+                    })
+
+                    children.push(EPSGSelection);
+                    item.type = "container";
+                    item.children=  children;
+                    item.title = '';
+                    item.cssClass =  '-fn-coordinates-container'
+
+                }
                 if (item.type === "select" && !item.isProcessed && ((item.dataStore && item.dataStore.editable && item.dataStore.popupItems) || item.dataManagerLink)) {
                     var onCreateClick;
                     var onEditClick;
@@ -1565,6 +1659,9 @@
                 }
 
             });
+
+            olFeature.data.x = olFeature.geometry ? olFeature.geometry.x : null;
+            olFeature.data.y = olFeature.geometry ? olFeature.geometry.y : null;
 
             if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
                 $(dialog).prev().find('.close').focus();
@@ -2758,6 +2855,9 @@
 
         _getRemoteData : function (feature,schema){
             var map = this.getMap();
+            if(!feature.geometry){
+                return false;
+            }
             var bbox = feature.geometry.getBounds();
             bbox.right = parseFloat(bbox.right+0.00001);
             bbox.top = parseFloat(bbox.top+0.00001);
@@ -2784,6 +2884,17 @@
             ;
 
 
+
+        },
+
+        openRemoteDataConfirmationDialog: function(){
+            var d = new $.Deferred();
+            var $markup = $();
+            $markup.dialog({
+                buttons: {
+
+                }
+            });
 
         },
 

@@ -64,3 +64,4 @@ mb.digitizer:
         filtered: '(gefiltert von _MAX_ Objekte.)'
   remoteData:
       error: WMS FeatureInfo Anfrage fehlgeschlagen
+  notReady: Digitizer ist noch nicht bereit. Bitte wiederholen Sie ihre Aktion in wenigen Sekungen noch einmal.
