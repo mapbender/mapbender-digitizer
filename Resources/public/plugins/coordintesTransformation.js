@@ -4,13 +4,19 @@ window.Mapbender = window.Mapbender || {};
 
 Mapbender.Transformation = {
 
-    isDegree : function (coordinate) {
-        var isDM = coordinate.match(/(\d*)\°([\d.]*)\'/) === 6;
-        var isDMS = coordinate.match(/(\d*)\°(\d*)\'([\d.]*)\"/) === 9;
-        return isDM || isDMS;
+    isDM: function(coordinate) {
+        return coordinate.match(/(\d*)\°([\d.]*)\'/) === 6;
     },
 
-    tranformDegreeToDecimal : function(coordinate){
+    isDMS: function(coordinate) {
+      return  coordinate.match(/(\d*)\°(\d*)\'([\d.]*)\"/) === 9;
+    },
+
+    isDegree: function (coordinate) {
+        return this.isDM(coordinate) || this.isDMS(coordinate);
+    },
+
+    transformDegreeToDecimal: function(coordinate){
         if(!this.isDegree(coordinate)) {
             return false;
         }
@@ -18,8 +24,8 @@ Mapbender.Transformation = {
         match = match.length === 6 ?  match : coordinate.match(/(\d*)\°(\d*)\'([\d.]*)\"/);
 
         var decimals = (parseFloat(match[1])) + parseFloat((match[2]/60));
-        if(isDMS){
-            decimals = decimals + parseFloat((match[3]/3600))
+        if(this.isDMS(coordinate)){
+            decimals = decimals + parseFloat((match[3]/3600));
         }
         return  decimals;
     },
@@ -28,8 +34,8 @@ Mapbender.Transformation = {
 
         var c = new OpenLayers.LonLat(x,y)
         var to = Mapbender.Model.map.olMap.getProjectionObject();
-        var from = new OpenLayers.Projection(from.projCode || from);
-        return this.transFromFromTo(c,from,to);
+        var from2 = new OpenLayers.Projection(from.projCode || from);
+        return this.transFromFromTo(c,from2,to);
     },
 
     transformFromMapProj: function(x,y, to) {
@@ -37,8 +43,8 @@ Mapbender.Transformation = {
         var c = new OpenLayers.LonLat(x,y)
         var from = Mapbender.Model.map.olMap.getProjectionObject();
 
-        var to = new OpenLayers.Projection(to.projCode || to);
-        return this.transFromFromTo(c,from,to);
+        var to2 = new OpenLayers.Projection(to.projCode || to);
+        return this.transFromFromTo(c,from,to2);
     },
 
     transFromFromTo : function(lonlat, to, from){
@@ -70,6 +76,7 @@ Mapbender.Transformation = {
 
     getMap : function () {
         return Mapbender.Model.map.olMap;
-    }
+    },
+
 };
 

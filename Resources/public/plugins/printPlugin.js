@@ -1,5 +1,5 @@
 window.Mapbender = window.Mapbender || {};
-Mapbender.DigitzerPlugins = {};
+Mapbender.DigitzerPlugins = Mapbender.DigitzerPlugins || {};
 
 Mapbender.DigitzerPlugins.print =  {
 

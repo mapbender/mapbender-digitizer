@@ -1,5 +1,5 @@
 window.Mapbender = window.Mapbender || {};
-Mapbender.DigitzerPlugins = {};
+Mapbender.DigitzerPlugins = Mapbender.DigitzerPlugins || {};
 
 Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn = function (digitizerInstance) {
 
@@ -16,26 +16,29 @@ Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn.prototype = {
 
     addButtonToDigitizer: function () {
         var toolbar = $(this.digitizer.element);
-        var button
+        var button;
         if (!(button = this.generateButton())) {
             return false;
         }
 
-        toolbar
-            .append(button)
-        ;
+        toolbar.append(button);
 
     },
+
+    isButtonAlreadyGenerated: function () {
+        return !!$('.-fn-geometrylessfeatureAdd', this.digitizer.element).length;
+    },
+
     generateButton: function () {
 
         if (this.isButtonAlreadyGenerated()) {
             return false;
         }
-        var $btn = $('<button />')
+        var $btn = $('<button/>')
             .addClass('button')
-            .addClass('fa fa-plus')
-            .addClass('-fn-geometrylessfeatureAdd')
-        ;
+            .addClass('-fn-geometrylessfeatureAdd');
+
+        $('<i class="fa fa-plus" />').appendTo($btn);
 
         return $btn;
     },
@@ -54,31 +57,24 @@ Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn.prototype = {
         var feature = this.createGeometryLessFeature();
         this.digitizer._openFeatureEditDialog.call(this.digitizer, feature);
     },
+
     toggleSchemeVisibilty: function () {
 
 
         var schema = this.digitizer.currentSettings;
 
         if (schema.geometrylessfeatureBtn) {
-            this.addButtonToDigitizer() ? this.addButtonToDigitizer() : false;
-            return false;
+            this.addButtonToDigitizer();
         }
 
-        return false;
-
-
-    },
-
-    isButtonAlreadyGenerated: function () {
-        return !!$('.-fn-geometrylessfeatureAdd', this.digitizer.element).length;
     },
 
     createGeometryLessFeature: function () {
-        feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(NaN, NaN));
+        var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(NaN, NaN));
         feature.data = {};
         feature.isNew = true;
         feature.schema = this.digitizer.currentSettings;
-        layer = this.digitizer.activeLayer;
+        var layer = this.digitizer.activeLayer;
         layer.addFeatures([feature]);
         feature.layer = layer;
 

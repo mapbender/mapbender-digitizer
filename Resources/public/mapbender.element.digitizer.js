@@ -723,7 +723,7 @@
                 widget.currentSettings = widget.currentSettings || newSchemes[index];
             });
 
-           var  geometrylessfeatureAddBtn = new Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn(this);
+           var geometrylessfeatureAddBtn = new Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn(this);
            geometrylessfeatureAddBtn.toggleSchemeVisibilty();
 
            widget.options.schemes = newSchemes;
@@ -1341,7 +1341,8 @@
                         type : 'input',
                         label: ''
 
-                    }
+                    };
+                    var children = [];
 
                     var EPSGSelection = {
                         type: 'select',
@@ -1354,9 +1355,9 @@
                             var epsgCode = $(event.currentTarget).find('select').val();
                             var inputX = $('.-fn-coordinates.x > input', widget.currentPopup);
                             var inputY = $('.-fn-coordinates.y > input', widget.currentPopup);
-                            var x = Mapbender.Transformation.isDegree(inputX.val()) ? Mapbender.Transformation.toDecimal(inputX.val()) : inputX.val();
-                            var y = Mapbender.Transformation.isDegree(inputY.val()) ? Mapbender.Transformation.toDecimal(inputY.val()) : inputY.val();
-                            var    projectionToTransform = new OpenLayers.Projection(epsgCode);
+                            var x = Mapbender.Transformation.isDegree(inputX.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputX.val()) : inputX.val();
+                            var y = Mapbender.Transformation.isDegree(inputY.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputY.val()) : inputY.val();
+                            var projectionToTransform = new OpenLayers.Projection(epsgCode);
                             var lonlat = new OpenLayers.LonLat(x, y).transform(activeProj, projectionToTransform);
                             inputX.val(lonlat.lon);
                             inputY.val(lonlat.lat);
@@ -1364,7 +1365,6 @@
                         }
                     };
 
-                    var children = [];
                     _.each(['x','y'], function(direction,i){
 
                         var child  = {
@@ -1373,9 +1373,8 @@
                             name: direction,
                             change : function(){
 
-                                var dialog = this.currentPopup;
+                                var dialog = widget.currentPopup;
                                 var feature = dialog.data('feature');
-                                var input = $(event.currentTarget).find('input');
                                 var layer = feature.layer;
                                 
                                 var x = $('.-fn-coordinates.x > input', widget.currentPopup).val();
@@ -1383,19 +1382,15 @@
                                 var epsgCode = $('.-fn-active-epsgCode', widget.currentPopup).find('select').val();
 
                                 var projection = Mapbender.Transformation.transformToMapProj(x,y,epsgCode);
-
+                                layer.renderer.eraseGeometry(feature.geometry);
                                 feature.geometry = new OpenLayers.Geometry.Point(projection.x,projection.y);
                                 
-                                layer.redraw();
-                                layer.setVisibility(false);
+                                layer.drawFeature(feature);
 
-                                layer.setVisibility(true);
-
-                            }.bind(widget)
-                        }
+                            }
+                        };
                         children.push($.extend(child,input));
-                    })
-
+                    });
                     children.push(EPSGSelection);
                     item.type = "container";
                     item.children=  children;
@@ -1667,8 +1662,8 @@
 
             });
 
-            // olFeature.data.x = olFeature.geometry ? olFeature.geometry.x : null;
-            // olFeature.data.y = olFeature.geometry ? olFeature.geometry.y : null;
+            olFeature.data.x = olFeature.geometry ? olFeature.geometry.x : null;
+            olFeature.data.y = olFeature.geometry ? olFeature.geometry.y : null;
 
             if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
                 $(dialog).prev().find('.close').focus();

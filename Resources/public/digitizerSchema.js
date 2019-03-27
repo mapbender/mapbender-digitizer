@@ -36,6 +36,7 @@ var Scheme = OpenLayers.Class({
     selectControl: null,
     featureStyles: null,
     search: null,
+    geometrylessfeatureBtn: false,
 
     initialize: function (options) {
         /** @type {Scheme} */
@@ -743,7 +744,7 @@ var Scheme = OpenLayers.Class({
 
                     if(isPopupOpen){
                         var activeProj = $('.-fn-coordinates-container').data('activeEpsgCode') || widget.getMap().getProjectionObject();
-                        var coords = Mapbender.Transformation.transformFromMapProj(feature.geometry.x,feature.geometry.y, activeProj)
+                        var coords = Mapbender.Transformation.transformFromMapProj(feature.geometry.x,feature.geometry.y, activeProj);
                         $('.-fn-coordinates.x > input', widget.currentPopup).val(coords.x).trigger("change");
                         $('.-fn-coordinates.y> input', widget.currentPopup).val(coords.y).trigger("change");
                     }
