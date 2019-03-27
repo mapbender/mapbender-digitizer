@@ -723,8 +723,8 @@
                 widget.currentSettings = widget.currentSettings || newSchemes[index];
             });
 
-           var geometrylessfeatureAddBtn = new Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn(this);
-           geometrylessfeatureAddBtn.toggleSchemeVisibilty();
+           var GeometrylessfeatureAddBtn = new Mapbender.DigitzerPlugins.GeometrylessfeatureAddBtn(this);
+           GeometrylessfeatureAddBtn.toggleSchemeVisibilty();
 
            widget.options.schemes = newSchemes;
 
@@ -926,9 +926,6 @@
             var tableWidget = table.data('visUiJsResultTable');
             var tableApi = table.resultTable('getApi');
             var formData = dialog && dialog.formData() || schema.initialFormData(feature);
-
-            delete formData.x;
-            delete formData.y;
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
             var request = {
@@ -1125,25 +1122,26 @@
                             var activeEPSG = $('.-fn-active-epsgCode',dialog).find("select").val();
                             var coords = Mapbender.Transformation.transformToMapProj(x,y,activeEPSG);
 
+                            // Delete the name from the DOM in order to allow the dialog for saving
+                            $('.-fn-coordinates',dialog).find("[name=x]").removeAttr("name");
+                            $('.-fn-coordinates',dialog).find("[name=y]").removeAttr("name");
 
                             if(!Mapbender.Transformation.areCoordinatesValid(coords)){
-                                Mapbender.error();
+                                Mapbender.error('Coordinates are not valid');
                                 return false;
-                            } else if(schema.remoteData)  {
+                            } else if(schema.popup.remoteData)  {
                                 widget.openRemoteDataConfirmationDialog().error(function () {
                                     return false;
-                                }).succes(function () {
+                                }).success(function() {
                                     widget._getRemoteData(feature,schema).success(function () {
                                         widget.saveFeature(feature);
                                     });
 
                                 });
-                            } else {
-                                widget.saveFeature(feature);
+                                return false;
                             }
                         }
-
-
+                        widget.saveFeature(feature);
 
                     }
                 };
@@ -1662,8 +1660,8 @@
 
             });
 
-            olFeature.data.x = olFeature.geometry ? olFeature.geometry.x : null;
-            olFeature.data.y = olFeature.geometry ? olFeature.geometry.y : null;
+            olFeature.data.x = olFeature.geometry.x || '';
+            olFeature.data.y = olFeature.geometry.y || '';
 
             if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
                 $(dialog).prev().find('.close').focus();
@@ -2148,7 +2146,7 @@
 
             var drawFeature = OpenLayers.Layer.Vector.prototype.drawFeature;
             layer.drawFeature = function(feature,style) {
-                if (layer.printedFeatureFID == feature.fid) {
+                if (layer.printedFeatureFID && layer.printedFeatureFID == feature.fid) {
                     feature.style = null;   // prevent Print from picking up a style object
                     feature.renderIntent = "highlightForPrint";
                     drawFeature.apply(this,[feature]);
@@ -2897,7 +2895,7 @@
 
                 }
             });
-
+            return d;
         },
 
         _processRemoteData : function (response, feature) {

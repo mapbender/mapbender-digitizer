@@ -743,10 +743,14 @@ var Scheme = OpenLayers.Class({
                     var isPopupOpen = !!widget.currentPopup;
 
                     if(isPopupOpen){
-                        var activeProj = $('.-fn-coordinates-container').data('activeEpsgCode') || widget.getMap().getProjectionObject();
-                        var coords = Mapbender.Transformation.transformFromMapProj(feature.geometry.x,feature.geometry.y, activeProj);
-                        $('.-fn-coordinates.x > input', widget.currentPopup).val(coords.x).trigger("change");
-                        $('.-fn-coordinates.y> input', widget.currentPopup).val(coords.y).trigger("change");
+                        if (feature == widget.currentPopup.data("feature")) {
+                            var activeProj = $('.-fn-coordinates-container').data('activeEpsgCode') || widget.getMap().getProjectionObject();
+                            var coords = Mapbender.Transformation.transformFromMapProj(feature.geometry.x, feature.geometry.y, activeProj);
+                            $('.-fn-coordinates.x > input', widget.currentPopup).val(coords.x).trigger("change");
+                            $('.-fn-coordinates.y> input', widget.currentPopup).val(coords.y).trigger("change");
+                        } else {
+                            console.warn("Selected Feature is not affiliated with the open popup");
+                        }
                     }
                     if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
 

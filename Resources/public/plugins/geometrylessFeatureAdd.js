@@ -1,7 +1,7 @@
 window.Mapbender = window.Mapbender || {};
 Mapbender.DigitzerPlugins = Mapbender.DigitzerPlugins || {};
 
-Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn = function (digitizerInstance) {
+Mapbender.DigitzerPlugins.GeometrylessfeatureAddBtn = function (digitizerInstance) {
 
     if (!!this.digitizer) {
         return false;
@@ -12,7 +12,7 @@ Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn = function (digitizerInstanc
 
 };
 
-Mapbender.DigitzerPlugins.geometrylessfeatureAddBtn.prototype = {
+Mapbender.DigitzerPlugins.GeometrylessfeatureAddBtn.prototype = {
 
     addButtonToDigitizer: function () {
         var toolbar = $(this.digitizer.element);
