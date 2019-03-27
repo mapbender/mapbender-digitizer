@@ -1360,6 +1360,7 @@
                             inputX.val(lonlat.lon);
                             inputY.val(lonlat.lat);
                             $('.-fn-coordinates-container').data('activeEpsgCode',epsgCode);
+
                         }
                     };
 
@@ -1384,6 +1385,8 @@
                                 feature.geometry = new OpenLayers.Geometry.Point(projection.x,projection.y);
                                 
                                 layer.drawFeature(feature);
+
+                                widget._getData(widget.currentSettings); // Triggered in order to have new Feature in resultTable
 
                             }
                         };
@@ -2114,6 +2117,15 @@
                 graphicZIndex: 100
             });
 
+            styleMap.styles.unsaved = new OpenLayers.Style({
+                strokeWidth: 3,
+                fillColor: "#FFD14F",
+                strokeColor: '#F5663C',
+                fillOpacity: 0.5,
+                pointRadius: 14,
+                graphicZIndex: 100
+            });
+
             var copyStyleData = getValueOrDefault(schema, 'copy.style', null);
 
             if (copyStyleData) {
@@ -2150,10 +2162,12 @@
                     feature.style = null;   // prevent Print from picking up a style object
                     feature.renderIntent = "highlightForPrint";
                     drawFeature.apply(this,[feature]);
+                } else if (feature.isNew) {
+                    drawFeature.apply(this, [feature, feature.renderIntent || style]);
                 } else {
                     drawFeature.apply(this, [feature, style]);
                 }
-            }
+            };
 
             widget.layers.push(layer);
 
