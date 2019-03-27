@@ -1349,7 +1349,12 @@
                         cssClass: '-fn-active-epsgCode',
                         change: function(){
 
-                            var activeProj = $('.-fn-coordinates-container').data('activeEpsgCode') || widget.getMap().getProjectionObject();
+                            var oldEpsgCode = $('.-fn-coordinates-container').data('activeEpsgCode');
+                            var oldProjection;
+                            if (oldEpsgCode) {
+                                oldProjection = new OpenLayers.Projection(oldEpsgCode);
+                            }
+                            var activeProj =  oldProjection || widget.getMap().getProjectionObject();
                             var epsgCode = $(event.currentTarget).find('select').val();
                             var inputX = $('.-fn-coordinates.x > input', widget.currentPopup);
                             var inputY = $('.-fn-coordinates.y > input', widget.currentPopup);
@@ -1381,6 +1386,7 @@
                                 var epsgCode = $('.-fn-active-epsgCode', widget.currentPopup).find('select').val();
 
                                 var projection = Mapbender.Transformation.transformToMapProj(x,y,epsgCode);
+
                                 layer.renderer.eraseGeometry(feature.geometry);
                                 feature.geometry = new OpenLayers.Geometry.Point(projection.x,projection.y);
                                 

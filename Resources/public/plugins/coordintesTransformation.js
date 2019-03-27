@@ -40,18 +40,18 @@ Mapbender.Transformation = {
 
     transformFromMapProj: function(x,y, to) {
 
-        var c = new OpenLayers.LonLat(x,y)
+        var c = new OpenLayers.LonLat(x,y);
         var from = Mapbender.Model.map.olMap.getProjectionObject();
 
         var to2 = new OpenLayers.Projection(to.projCode || to);
         return this.transFromFromTo(c,from,to2);
     },
 
-    transFromFromTo : function(lonlat, to, from){
+    transFromFromTo : function(lonlat, from, to){
 
         var c = lonlat.transform(from,to);
 
-        return {x: c.lon,y: c.lat}
+        return {x: c.lon,y: c.lat};
 
 
     },
