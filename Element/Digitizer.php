@@ -51,7 +51,7 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
                 '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
-                '@MapbenderDigitizerBundle/Resources/public/plugins/coordintesTransformation.js',
+                '@MapbenderDigitizerBundle/Resources/public/plugins/coordinatesTransformation.js',
                 '@MapbenderDigitizerBundle/Resources/public/plugins/geometrylessFeatureAdd.js'
             ),
             'css'   => array(

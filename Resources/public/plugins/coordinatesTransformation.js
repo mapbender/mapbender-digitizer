@@ -32,7 +32,7 @@ Mapbender.Transformation = {
 
     transformToMapProj: function(x,y, from) {
 
-        var c = new OpenLayers.LonLat(x,y)
+        var c = new OpenLayers.LonLat(x,y);
         var to = Mapbender.Model.map.olMap.getProjectionObject();
         var from2 = new OpenLayers.Projection(from.projCode || from);
         return this.transFromFromTo(c,from2,to);

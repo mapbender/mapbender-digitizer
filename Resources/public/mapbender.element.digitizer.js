@@ -1342,6 +1342,9 @@
                     };
                     var children = [];
 
+
+
+
                     var EPSGSelection = {
                         type: 'select',
                         options: item.epsgCodes,
@@ -1361,9 +1364,9 @@
                             var x = Mapbender.Transformation.isDegree(inputX.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputX.val()) : inputX.val();
                             var y = Mapbender.Transformation.isDegree(inputY.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputY.val()) : inputY.val();
                             var projectionToTransform = new OpenLayers.Projection(epsgCode);
-                            var lonlat = new OpenLayers.LonLat(x, y).transform(activeProj, projectionToTransform);
-                            inputX.val(lonlat.lon);
-                            inputY.val(lonlat.lat);
+                            var lonlat = Mapbender.Transformation.transFromFromTo(new OpenLayers.LonLat(x, y),activeProj, projectionToTransform);
+                            inputX.val(lonlat.x);
+                            inputY.val(lonlat.y);
                             $('.-fn-coordinates-container').data('activeEpsgCode',epsgCode);
 
                         }
@@ -1605,6 +1608,7 @@
             widget.currentPopup = dialog;
             dialog.bind('edit-cancel', this.editCancel.bind(this));
             dialog.bind('popupdialogclose', function (event) {
+                $('.-fn-coordinates-container').removeData('activeEpsgCode');
                 dialog.trigger('edit-cancel', {
                     'origin': 'close-button',
                     'feature': function () {
