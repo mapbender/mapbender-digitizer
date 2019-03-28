@@ -1379,7 +1379,7 @@
 
                                 var dialog = widget.currentPopup;
                                 var feature = dialog.data('feature');
-                                var layer = feature.layer;
+                                var layer = widget.currentSettings.layer;
                                 
                                 var x = $('.-fn-coordinates.x > input', widget.currentPopup).val();
                                 var y = $('.-fn-coordinates.y > input', widget.currentPopup).val();
@@ -1389,6 +1389,8 @@
 
                                 layer.renderer.eraseGeometry(feature.geometry);
                                 feature.geometry = new OpenLayers.Geometry.Point(projection.x,projection.y);
+
+                                // TODO what happens in case of feature geometry changed to somewhere outside current bounds?
                                 
                                 layer.drawFeature(feature);
 
