@@ -36,6 +36,7 @@ var Scheme = OpenLayers.Class({
     selectControl: null,
     featureStyles: null,
     search: null,
+    geometrylessfeatureBtn: false,
 
     initialize: function (options) {
         /** @type {Scheme} */
@@ -610,7 +611,7 @@ var Scheme = OpenLayers.Class({
         var schema = this;
         var widget = schema.widget;
         var layer = schema.layer;
-        var newFeatureDefaultProperties = {};
+        var newFeatureDefaultProperties = schema.newFeatureDefaultProperties = {};
 
         $.each(schema.tableFields, function (fieldName, fieldSettings) {
             newFeatureDefaultProperties[fieldName] = "";
@@ -739,6 +740,18 @@ var Scheme = OpenLayers.Class({
                 onComplete: function (event) {
                     var feature = event.layer.findFeatureByPropertyValue('id', event.id);
                     widget.unsavedFeatures[event.id] = feature;
+                    var isPopupOpen = !!widget.currentPopup;
+
+                    if(isPopupOpen){
+                        if (feature == widget.currentPopup.data("feature")) {
+                            var activeProj = $('.-fn-coordinates-container').data('activeEpsgCode') || widget.getMap().getProjectionObject();
+                            var coords = Mapbender.Transformation.transformFromMapProj(feature.geometry.x, feature.geometry.y, activeProj);
+                            $('.-fn-coordinates.x > input', widget.currentPopup).val(coords.x).trigger("change");
+                            $('.-fn-coordinates.y> input', widget.currentPopup).val(coords.y).trigger("change");
+                        } else {
+                            console.warn("Selected Feature is not affiliated with the open popup");
+                        }
+                    }
                     if (!widget.currentPopup || !widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
 
                         if (schema.popup.remoteData) {
@@ -775,6 +788,7 @@ var Scheme = OpenLayers.Class({
                         } else {
                             widget._openFeatureEditDialog(feature);
                         }
+
                     }
                 }
             }
