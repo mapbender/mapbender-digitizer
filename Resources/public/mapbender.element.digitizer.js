@@ -972,9 +972,9 @@
 
                     if (response.solrImportStatus !== null) {
                         if (response.solrImportStatus === 0) {
-                            $.notify(translate("feature.solrImportStatus.successfully"), 'info');
+                            $.notify(Mapbender.digitizer_translate("feature.solrImportStatus.successfully"), 'info');
                         } else {
-                            $.notify(translate("feature.solrImportStatus.error"), 'error');
+                            $.notify(Mapbender.digitizer_translate("feature.solrImportStatus.error"), 'error');
                         }
                     }
 
