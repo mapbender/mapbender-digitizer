@@ -1,7 +1,5 @@
 window.Mapbender = window.Mapbender || {};
 
-
-
 Mapbender.Transformation = {
 
     isDM: function(coordinate) {
@@ -55,6 +53,7 @@ Mapbender.Transformation = {
 
 
     },
+
     areCoordinatesValid: function (coords) {
         if (!$.isNumeric(coords.x) || !$.isNumeric(coords.y)) {
             return false;
@@ -66,6 +65,8 @@ Mapbender.Transformation = {
         Proj4js.transform(currentProjection, currentProjection, Point);
 
         var lonLat = new OpenLayers.LonLat(Point.x, Point.y);
+
+        console.log("Check Validity:",lonLat,currentProjection);
 
         return this.getMap().isValidLonLat(lonLat);
     },

@@ -2059,7 +2059,7 @@
         findFeatureSchema: function (olFeature) {
             var widget = this;
             var options = widget.options;
-            return _.find(options.schemes, {layer: olFeature.layer});
+            return _.find(options.schemes, {layer: olFeature.layer}) || olFeature.schema;
         },
 
         /**
@@ -2197,7 +2197,7 @@
             var widget = this;
             var schema = widget.findFeatureSchema(olFeature);
             var isNew = olFeature.hasOwnProperty('isNew');
-            var layer = olFeature.layer;
+            var layer = olFeature.layer || schema.layer;
             var featureData = olFeature.attributes;
 
             if (!schema) {
