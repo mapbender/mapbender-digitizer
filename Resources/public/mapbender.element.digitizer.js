@@ -1347,14 +1347,24 @@
 
                     };
                     var children = [];
+                    var mapProjection = widget.getMap().getProjectionObject().projCode;
+                    var epsgCodes = item.epsgCodes;
 
-
-
+                    // Add Map Projection to EPSG codes, only if it is not already there
+                    var mapProjectionInEpsgCodes = false;
+                    epsgCodes.forEach(function(code){
+                       if (code[0]===mapProjection) {
+                           mapProjectionInEpsgCodes = true;
+                       }
+                    });
+                    if (!mapProjectionInEpsgCodes) {
+                        epsgCodes.unshift([mapProjection,mapProjection]);
+                    }
 
                     var EPSGSelection = {
                         type: 'select',
-                        options: item.epsgCodes,
-                        value: item.epsgCodes[0][0],
+                        options: epsgCodes,
+                        value: mapProjection,
                         cssClass: '-fn-active-epsgCode',
                         change: function(){
 
