@@ -911,10 +911,11 @@
          * On save button click
          *
          * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature OpenLayers feature
+         * @param disabledProperties
          * @private
          * @return {jQuery.jqXHR} ajax XHR
          */
-        saveFeature: function (feature) {
+        saveFeature: function (feature, disabledProperties) {
             if (feature.disabled) {
                 return;
             }
@@ -926,6 +927,11 @@
             var tableWidget = table.data('visUiJsResultTable');
             var tableApi = table.resultTable('getApi');
             var formData = dialog && dialog.formData() || schema.initialFormData(feature);
+            if (disabledProperties) {
+                disabledProperties.forEach(function (value) {
+                    delete formData[value];
+                });
+            }
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
             var request = {
@@ -1112,6 +1118,7 @@
                 var saveButton = {
                     text: Mapbender.digitizer_translate('feature.save.title'),
                     click: function () {
+
                         var dialog = $(this).closest('.ui-dialog-content');
                         var feature = dialog.data('feature');
                         var hasCoordinatesInput = !!$('.-fn-coordinates',dialog).length;
@@ -1122,10 +1129,6 @@
                             var activeEPSG = $('.-fn-active-epsgCode',dialog).find("select").val();
                             var coords = Mapbender.Transformation.transformToMapProj(x,y,activeEPSG);
 
-                            // Delete the name from the DOM in order to allow the dialog for saving
-                            $('.-fn-coordinates',dialog).find("[name=x]").removeAttr("name");
-                            $('.-fn-coordinates',dialog).find("[name=y]").removeAttr("name");
-
                             if(!Mapbender.Transformation.areCoordinatesValid(coords)){
                                 Mapbender.error('Coordinates are not valid');
                                 return false;
@@ -1134,14 +1137,17 @@
                                     return false;
                                 }).success(function() {
                                     widget._getRemoteData(feature,schema).success(function () {
-                                        widget.saveFeature(feature);
+                                        widget.saveFeature(feature,['x','y']);
                                     });
 
                                 });
                                 return false;
+                            } else {
+                                widget.saveFeature(feature,['x','y']); // In case of !remoteData
                             }
+                        } else {
+                            widget.saveFeature(feature,['x','y']); // In case of !hasCoordinatesInput
                         }
-                        widget.saveFeature(feature);
 
                     }
                 };
