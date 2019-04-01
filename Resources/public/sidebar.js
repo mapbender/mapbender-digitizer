@@ -464,7 +464,7 @@ Sidebar.prototype = {
                 $checkbox.attr("checked","checked");
             }
             $checkbox.change(function (e) {
-                schema..currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
+                schema.currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
                 schema.getData();
             });
             frame.append("<div style='clear:both'>");

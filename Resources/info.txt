@@ -4,6 +4,7 @@ Hinzugefügte Properties:
 - markUnsavedFeatures - ungespeicherte Features haben speziellen Style
 - deactivateControlAfterModification - Nach Veränderung von Feature wird Control deaktiviert
 - revertChangedGeometryOnCancel - Wenn nach veränderter Geometrie gecancelt wird, wird die Veränderung rückgängig gemacht
+- currentExtentSearch: bool, anstelle von searchType == "currentExtent"
 
 
 Hinweise:
