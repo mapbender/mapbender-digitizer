@@ -460,11 +460,11 @@ Sidebar.prototype = {
             var $checkbox = $("<input type='checkbox' />");
             var title = Mapbender.DigitizerTranslator.translate('toolset.current-extent');
             $checkbox.attr('title',title);
-            if (schema.searchType === "currentExtent") {
+            if (schema.currentExtentSearch) {
                 $checkbox.attr("checked","checked");
             }
             $checkbox.change(function (e) {
-                schema.searchType = $(e.originalEvent.target).prop("checked") ? "currentExtent" : "all";
+                schema..currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
                 schema.getData();
             });
             frame.append("<div style='clear:both'>");

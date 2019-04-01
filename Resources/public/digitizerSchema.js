@@ -179,7 +179,7 @@ Scheme.prototype = {
     openFormAfterEdit: true,
     maxResults: 5001,
     pageLength: 10,
-    searchType: "currentExtent", // TODO boolean property searchTypeCurrentExtent is preferable
+    currentExtentSearch: true,
     inlineSearch: false,
     hooks: {
         onModificationStart: null,
@@ -707,7 +707,7 @@ Scheme.prototype = {
             maxResults: schema.maxResults,
             schema: schema.schemaName
         };
-        var isExtentOnly = schema.searchType === "currentExtent";
+        var isExtentOnly = !!schema.currentExtentSearch;
 
         if (isExtentOnly) {
             request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
@@ -786,7 +786,7 @@ Scheme.prototype = {
         var map = layer.map;
         var extent = map.getExtent();
         var bbox = extent.toGeometry().getBounds();
-        var currentExtentOnly = schema.searchType === "currentExtent";
+        var currentExtentOnly = schema.currentExtentSearch;
 
 
         var visibleFeatures = currentExtentOnly ? _.filter(schema.getLayerFeatures(), function (feature) {
