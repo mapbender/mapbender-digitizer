@@ -76,6 +76,7 @@ Mapbender.DigitzerPlugins.GeometrylessfeatureAddBtn.prototype = {
         feature.schema = this.digitizer.currentSettings;
         feature.renderIntent = "unsaved";
         var layer = this.digitizer.activeLayer;
+
         layer.addFeatures([feature]);
         feature.layer = layer;
 
