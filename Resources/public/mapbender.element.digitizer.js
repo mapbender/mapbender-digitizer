@@ -1392,18 +1392,29 @@
                                 
                                 var x = $('.-fn-coordinates.x > input', widget.currentPopup).val();
                                 var y = $('.-fn-coordinates.y > input', widget.currentPopup).val();
-                                var epsgCode = $('.-fn-active-epsgCode', widget.currentPopup).find('select').val();
+                                var activeProjection = $('.-fn-active-epsgCode', widget.currentPopup).find('select').val();
 
-                                var projection = Mapbender.Transformation.transformToMapProj(x,y,epsgCode);
+                                var projection = Mapbender.Transformation.transformToMapProj(x,y,activeProjection);
 
-                                layer.renderer.eraseGeometry(feature.geometry);
+                                var oldGeometry = feature.geometry;
                                 feature.geometry = new OpenLayers.Geometry.Point(projection.x,projection.y);
 
-                                // TODO what happens in case of feature geometry changed to somewhere outside current bounds?
-                                
-                                layer.drawFeature(feature);
+                                var currentBounds = widget.map.calculateBounds();
 
-                                widget._getData(widget.currentSettings); // Triggered in order to have new Feature in resultTable
+                                if (currentBounds.contains(projection.x,projection.y)) {
+
+                                    layer.renderer.eraseGeometry(oldGeometry);
+                                    layer.drawFeature(feature);
+                                    widget._getData(widget.currentSettings); // Triggered in order to have new Feature in resultTable
+                                } else {
+
+                                    var transformedGeometry = Mapbender.Transformation.transformFromMapProj(oldGeometry.x,oldGeometry.y,activeProjection);
+                                    $('.-fn-coordinates.x > input', widget.currentPopup).val(transformedGeometry.x);
+                                    $('.-fn-coordinates.y > input', widget.currentPopup).val(transformedGeometry.y);
+                                    feature.geometry = oldGeometry;
+
+                                    $.notify('Coordinates are not in current viewport. Please zoom to a greater extent.');
+                                }
 
                             }
                         };
