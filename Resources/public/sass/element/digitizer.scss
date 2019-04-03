@@ -214,4 +214,34 @@ $selectColor: #F7F79A;
       height: 100%;
     }
   }
+
+
+}
+
+.ui-dialog.remoteDataConfirmationDialog {
+  z-index: 9999 !important;
+  background-color: #FAF9F1;
+  border: 1px solid #b3b3b3;
+  .ui-dialog-titlebar {
+    background-color: #e9e9e9;
+    border-bottom: 1px solid #b3b3b3;
+  }
+  .ui-dialog-titlebar-close { display: none; }
+  .ui-button { width: 50% };
+  p {
+    text-align: center;
+    float: right;
+    margin: 20px;
+    margin-top: 0px;
+  }
+}
+
+.ui-widget-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #aaaaaa;
+  opacity: 0.5;
 }
