@@ -1141,16 +1141,13 @@
                                 Mapbender.error('Coordinates are not valid');
                                 return false;
                             } else if(schema.popup.remoteData)  {
-                                widget.openRemoteDataConfirmationDialog().fail(function () {
-                                    return false;
-                                }).done(function() {
+                                widget.openRemoteDataConfirmationDialog().done(function() {
                                     widget._getRemoteData(feature,schema).success(function () {
                                         widget.saveFeature(feature,['x','y']).fail(function(){
                                             $('.-fn-coordinates',dialog).find("[name=x]").val(x);
                                             $('.-fn-coordinates',dialog).find("[name=y]").val(y);
                                         });
-                                    });
-
+                                    })
                                 });
                                 return false;
                             } else {
