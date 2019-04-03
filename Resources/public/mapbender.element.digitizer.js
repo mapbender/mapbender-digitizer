@@ -2962,7 +2962,7 @@
                     if(!feature.isNew){
                         widget._openFeatureEditDialog(feature);
                     }
-                    Mapbender.error(Mapbender.trans("mb.digitizer.remoteData.error"));
+                    Mapbender.error(Mapbender.digitizer_translate("remoteData.error"));
 
                 })
             ;
@@ -2973,7 +2973,7 @@
 
         openRemoteDataConfirmationDialog: function(){
             var d = $.Deferred();
-            var $markup = $('<div><p>Daten vom Server holen?</p></div>');
+            var $markup = $('<div><p>'+Mapbender.digitizer_translate("remoteData.confirmationText")+'</p></div>');
             $markup.dialog({
                 dialogClass: 'remoteDataConfirmationDialog',
                 width: 200,
@@ -2997,7 +2997,7 @@
 
         _processRemoteData : function (response, feature) {
             if(response.error){
-                Mapbender.error(Mapbender.trans('mb.digitizer.remoteData.error'));
+                Mapbender.error(Mapbender.digitizer_translate('remoteData.error'));
                 console.log(response.error);
             }
 
