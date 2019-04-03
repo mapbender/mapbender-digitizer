@@ -3,11 +3,11 @@ window.Mapbender = window.Mapbender || {};
 Mapbender.Transformation = {
 
     isDM: function(coordinate) {
-        return coordinate.match(/(\d*)\°([\d.]*)\'/) === 6;
+        return !!coordinate.match(/(\d*)\°([\d.]*)\'/);
     },
 
     isDMS: function(coordinate) {
-      return  coordinate.match(/(\d*)\°(\d*)\'([\d.]*)\"/) === 9;
+      return  !!coordinate.match(/(\d*)\°(\d*)\'([\d.]*)\"/);
     },
 
     isDegree: function (coordinate) {

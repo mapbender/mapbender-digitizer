@@ -868,11 +868,9 @@
             }
 
             var newAttributes = {};
-            var uniqueKeyOfFeatureType = schema.featureType.uniqueId;
-
             _.extend(newAttributes, defaultAttributes);
             _.each(feature.attributes, function (v, k) {
-                if (v === '' || v === null || k == uniqueKeyOfFeatureType) {
+                if (v === '' || v === null) {
                     return;
                 }
                 newAttributes[k] = v;
@@ -1092,7 +1090,7 @@
                             })
                         };
 
-                        widget.printClient.printDigitizerFeature(feature.schema.featureTypeName ||  feature.schema.schemaName, feature.fid).done(function(){
+                        widget.printClient.printDigitizerFeature(feature.schema.schemaName, feature.fid).done(function(){
                             deactivePrintedFeatureFID();
                         }).fail(function() {
                             deactivePrintedFeatureFID();
@@ -1143,13 +1141,16 @@
                                 Mapbender.error('Coordinates are not valid');
                                 return false;
                             } else if(schema.popup.remoteData)  {
-                                widget.openRemoteDataConfirmationDialog().done(function() {
+                                widget.openRemoteDataConfirmationDialog().fail(function () {
+                                    return false;
+                                }).done(function() {
                                     widget._getRemoteData(feature,schema).success(function () {
                                         widget.saveFeature(feature,['x','y']).fail(function(){
                                             $('.-fn-coordinates',dialog).find("[name=x]").val(x);
                                             $('.-fn-coordinates',dialog).find("[name=y]").val(y);
                                         });
-                                    })
+                                    });
+
                                 });
                                 return false;
                             } else {
@@ -1386,7 +1387,6 @@
                             var inputY = $('.-fn-coordinates.y > input', widget.currentPopup);
                             var x = Mapbender.Transformation.isDegree(inputX.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputX.val()) : inputX.val();
                             var y = Mapbender.Transformation.isDegree(inputY.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputY.val()) : inputY.val();
-
                             var projectionToTransform = new OpenLayers.Projection(epsgCode);
                             var lonlat = Mapbender.Transformation.transFromFromTo(new OpenLayers.LonLat(x, y),activeProj, projectionToTransform);
                             inputX.val(lonlat.x || '');
@@ -1415,12 +1415,9 @@
                                 var dialog = widget.currentPopup;
                                 var feature = dialog.data('feature');
                                 var layer = widget.currentSettings.layer;
-
-                                var inputX = $('.-fn-coordinates.x > input', widget.currentPopup);
-                                var inputY = $('.-fn-coordinates.y > input', widget.currentPopup);
-                                var x = Mapbender.Transformation.isDegree(inputX.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputX.val()) : inputX.val();
-                                var y = Mapbender.Transformation.isDegree(inputY.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputY.val()) : inputY.val();
-
+                                
+                                var x = $('.-fn-coordinates.x > input', widget.currentPopup).val();
+                                var y = $('.-fn-coordinates.y > input', widget.currentPopup).val();
                                 var activeProjection = $('.-fn-active-epsgCode', widget.currentPopup).find('select').val();
 
                                 var projection = Mapbender.Transformation.transformToMapProj(x,y,activeProjection);
@@ -2961,7 +2958,7 @@
                     if(!feature.isNew){
                         widget._openFeatureEditDialog(feature);
                     }
-                    Mapbender.error(Mapbender.digitizer_translate("remoteData.error"));
+                    Mapbender.error(Mapbender.trans("mb.digitizer.remoteData.error"));
 
                 })
             ;
@@ -2972,7 +2969,7 @@
 
         openRemoteDataConfirmationDialog: function(){
             var d = $.Deferred();
-            var $markup = $('<div><p>'+Mapbender.digitizer_translate("remoteData.confirmationText")+'</p></div>');
+            var $markup = $('<div><p>Daten vom Server holen?</p></div>');
             $markup.dialog({
                 dialogClass: 'remoteDataConfirmationDialog',
                 width: 200,
@@ -2996,7 +2993,7 @@
 
         _processRemoteData : function (response, feature) {
             if(response.error){
-                Mapbender.error(Mapbender.digitizer_translate('remoteData.error'));
+                Mapbender.error(Mapbender.trans('mb.digitizer.remoteData.error'));
                 console.log(response.error);
             }
 
