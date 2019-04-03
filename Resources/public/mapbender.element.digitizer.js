@@ -1090,7 +1090,7 @@
                             })
                         };
 
-                        widget.printClient.printDigitizerFeature(feature.schema.schemaName, feature.fid).done(function(){
+                        widget.printClient.printDigitizerFeature(feature.schema.featureTypeName ||  feature.schema.schemaName, feature.fid).done(function(){
                             deactivePrintedFeatureFID();
                         }).fail(function() {
                             deactivePrintedFeatureFID();
