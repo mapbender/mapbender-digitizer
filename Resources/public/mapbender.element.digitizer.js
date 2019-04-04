@@ -3001,6 +3001,10 @@
                 console.log(response.error);
             }
 
+            if (widget.currentPopup) {
+                $.extend(feature.data, widget.currentPopup.formData()); // Non-remote Data that has been edited manually must be saved as well
+            }
+
             _.each(response.dataSets, function (dataSet) {
                 var newData = JSON.parse(dataSet).features[0].properties;
                 Object.keys(feature.data);
@@ -3008,9 +3012,9 @@
             });
 
             if(!feature.isNew && !widget.currentPopup){
-                this._openFeatureEditDialog(feature);
+                widget._openFeatureEditDialog(feature);
             } else {
-                this.currentPopup.formData(feature.data);
+                widget.currentPopup.formData(feature.data);
             }
 
 
