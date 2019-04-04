@@ -2958,7 +2958,7 @@
                 }.bind(this))
                 .fail(function(response){
                     $inputElements.removeAttr('disabled');
-                    if(!feature.isNew){
+                    if(!feature.isNew && !widget.currentPopup){
                         widget._openFeatureEditDialog(feature);
                     }
                     Mapbender.error(Mapbender.digitizer_translate("remoteData.error"));
@@ -2995,6 +2995,7 @@
         },
 
         _processRemoteData : function (response, feature) {
+            var widget = this;
             if(response.error){
                 Mapbender.error(Mapbender.digitizer_translate('remoteData.error'));
                 console.log(response.error);
@@ -3006,7 +3007,7 @@
                 $.extend(feature.data, newData);
             });
 
-            if(!feature.isNew){
+            if(!feature.isNew && !widget.currentPopup){
                 this._openFeatureEditDialog(feature);
             } else {
                 this.currentPopup.formData(feature.data);
