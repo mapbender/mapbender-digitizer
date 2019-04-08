@@ -2365,8 +2365,10 @@
                 return;
             }
 
+
             if (featureCollection.features && featureCollection.features.length == schema.maxResults) {
-                Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
+                Mapbender.info(Mapbender.digitizer_translate("api.query.toomuch")+" ("+schema.maxResults+")");
+
             }
 
             var widget = this;

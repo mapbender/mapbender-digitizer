@@ -51,6 +51,7 @@ mb.digitizer:
   api:
     query:
       error-message: 'Feature API query error.'
+      toomuch: 'It is requested more than the maximal available number of results'
   table:
     fields:
       not.defined: 'Feature table fields aren''t defined.'

@@ -50,6 +50,7 @@ mb.digitizer:
   api:
     query:
       error-message: 'Feature API - Abfrage fehlgeschlagen.'
+      toomuch: 'Es sind mehr Objekte verfügbar als auf einmal geladen werden können'
   table:
     fields:
       not.defined: 'Felder der Tabelle sind nicht definiert!'
