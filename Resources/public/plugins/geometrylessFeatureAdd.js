@@ -38,6 +38,8 @@ Mapbender.DigitzerPlugins.GeometrylessfeatureAddBtn.prototype = {
             .addClass('button')
             .addClass('-fn-geometrylessfeatureAdd');
 
+        $btn.attr('title',Mapbender.digitizer_translate('toolset.geometryless'));
+
         $('<i class="fa fa-plus" />').appendTo($btn);
 
         return $btn;

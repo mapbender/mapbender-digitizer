@@ -24,6 +24,7 @@ mb.digitizer:
       successfully: 'Indizierung wurde erfolgreich ausgeführt.'
       error: 'Indizierung ist fehlgeschlagen.'
   toolset:
+    geometryless: 'Geometrielosen Stützpunkt hinzufügen'
     current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
     point:
       drawPoint: Punkt erstellen
