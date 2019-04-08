@@ -3006,9 +3006,12 @@
             }
 
             _.each(response.dataSets, function (dataSet) {
-                var newData = JSON.parse(dataSet).features[0].properties;
-                Object.keys(feature.data);
-                $.extend(feature.data, newData);
+                try {
+                    var newData = JSON.parse(dataSet).features[0].properties;
+                    $.extend(feature.data, newData);
+                } catch(e) {
+                    // Prevent interruption in case of empty features
+                }
             });
 
             if(!feature.isNew && !widget.currentPopup){
