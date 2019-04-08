@@ -413,7 +413,7 @@ var Scheme = OpenLayers.Class({
 
         if (schema.allowLocate || true) {
             buttons.push({
-                title: Mapbender.digitizer_translate('feature.zoom'),
+                title: Mapbender.digitizer_translate('feature.zoomTo'),
                 className: 'zoom',
                 cssClass: 'fa fa-crosshairs',
                 onClick: function (olFeature, ui) {
@@ -424,7 +424,7 @@ var Scheme = OpenLayers.Class({
 
         if (schema.allowSave || true) {
             buttons.push({
-                title: Mapbender.digitizer_translate('feature.save'),
+                title: Mapbender.digitizer_translate('feature.save.title'),
                 className: 'save',
                 cssClass: ' fa fa-floppy-o',
                 onClick: function (olFeature, ui) {
