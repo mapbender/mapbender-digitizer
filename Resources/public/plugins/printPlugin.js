@@ -2,41 +2,69 @@ window.Mapbender = window.Mapbender || {};
 Mapbender.DigitzerPlugins = Mapbender.DigitzerPlugins || {};
 
 Mapbender.DigitzerPlugins.print =  {
-
-    printDigitizerFeature: function(schemaName,featureId){
+    /**
+     * @param {OpenLayers.Feature.Vector} feature
+     * @return {Object}
+     * @private
+     */
+    printDigitizerFeature: function(attributesOrFeature,templateName){
+        // Sonderlocke Digitizer
         var d = new $.Deferred();
+        if (typeof attributesOrFeature !== 'object') {
+            var msg = "Unsupported mbPrintClient.printDigitizerFeature invocation. Must pass in printable attributes object (preferred) or OpenLayers feature to extract them from. Update your mapbender/digitizer to >=1.1.68";
+            console.error(msg, arguments);
+            throw new Error(msg);
+        }
+        var attributes;
+        if (attributesOrFeature.attributes) {
+            // Standard OpenLayers feature; see https://github.com/openlayers/ol2/blob/release-2.13.1/lib/OpenLayers/Feature/Vector.js#L44
+            attributes = this._extractPrintAttributes(attributesOrFeature);
+        } else {
+            // Plain-old-data attributesOrFeature object (preferred invocation method)
+            attributes = attributesOrFeature;
+        }
+
         this.digitizerData = {
-            digitizer_feature: {
-                id: featureId,
-                schemaName: schemaName
-            }
+            // Freeze attribute values in place now.
+            // Also, if the resulting object is not serializable (cyclic refs), let's run into that error right now
+            digitizer_feature: JSON.parse(JSON.stringify(attributes))
         };
 
-        this._getDigitizerTemplates(schemaName,d);
+        if (templateName) {
+            var self = this;
+            this._getDigitizerTemplates(templateName,d).then(function(data) {
+                this._overwriteTemplateSelect(data);
+                this.open();
+                this.popup.$element.one('close', function(){
+                    d.resolve();
+                });
+
+        }.bind(this))} else {
+            this.open();
+            this.popup.$element.one('close', function(){
+                    d.resolve();
+            });
+        }
+
+
+
+
         return d;
     },
 
     _getDigitizerTemplates: function(schemaName,defered) {
 
-        var self = this;
-
         var url =  this.elementUrl + 'getDigitizerTemplates';
-        $.ajax({
+        return $.ajax({
             url: url,
             type: 'GET',
             data: {schemaName: schemaName},
-            success: function(data) {
-                self._overwriteTemplateSelect(data);
-                // open changed dialog
-                self.open();
-                self.popup.$element.one('close', function(){
-                    defered.resolve();
-                }.bind(self));
-            }
+
         });
     },
 
     _overwriteTemplateSelect: function(templates) {
+
         var templateSelect = $('select[name=template]', this.element);
         var templateList = templateSelect.siblings(".dropdownList");
         var valueContainer = templateSelect.siblings(".dropdownValue");
@@ -60,7 +88,10 @@ Mapbender.DigitzerPlugins.print =  {
             }
             ++count;
         });
+
+
         this.overwriteTemplates = true;
+
     }
 
 

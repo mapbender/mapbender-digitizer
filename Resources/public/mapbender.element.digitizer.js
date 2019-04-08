@@ -1074,32 +1074,26 @@
                     text: Mapbender.digitizer_translate('feature.print'),
                     click: function () {
 
-                        // var currentBounds = widget.map.calculateBounds();
-                        // if (!currentBounds.contains(olFeature.geometry.x,olFeature.geometry.y)) {
-                        //     $.notify("Feature is outside of current bounds. It is advisable to zoom to the selected feature first","error");
-                        // }
 
-                        var dialog = $(this).closest('.ui-dialog-content');
-                        var feature = dialog.data('feature');
-                        if (feature.layer) {
-                            feature.layer.printedFeatureFID = feature.fid;
-                            feature.layer.drawFeature(feature);
-                        }
+                        var $dialog = $(this.currentPopup);
+                        var feature = $dialog.data('feature');
+                        var styleMap = this.currentSettings.layer.styleMap;
 
-                        var deactivePrintedFeatureFID = function() {
-                            _.each(widget.layers,function(layer){
-                                layer.printedFeatureFID = null;
-                            })
-                        };
+                        this.digitizerPrintLayer= new OpenLayers.Layer.Vector( 'digitizerPrintLayer')|| this.digitizerPrintLayer;
+                        this.getMap().addLayer(this.digitizerPrintLayer);
 
-                        widget.printClient.printDigitizerFeature(feature.schema.featureTypeName ||  feature.schema.schemaName, feature.fid).done(function(){
-                            deactivePrintedFeatureFID();
-                        }).fail(function() {
-                            deactivePrintedFeatureFID();
-                        });
+                        this.digitizerPrintLayer.addFeatures([feature.clone()]);
+
+                        this.digitizerPrintLayer.styleMap = this.currentSettings.layer.styleMap;
+                        this.digitizerPrintLayer.features[0].renderIntent = 'select'
+                        this.digitizerPrintLayer.redraw();
+
+                        widget.printClient.printDigitizerFeature(olFeature, olFeature.schema.featureTypeName || olFeature.schema.schemaName).always(function() {
+                            this.digitizerPrintLayer.removeAllFeatures();
+                        }.bind(this));
                         // TODO
 
-                    }
+                    }.bind(this)
                 };
                 buttons.push(printButton);
             }
@@ -2221,21 +2215,9 @@
 
             layer.name = schema.label;
 
-            layer.printedFeatureFID = null;
 
-            var drawFeature = OpenLayers.Layer.Vector.prototype.drawFeature;
-            layer.drawFeature = function(feature,style) {
-                if (layer.printedFeatureFID && layer.printedFeatureFID == feature.fid) {
-                    feature.style = null;   // prevent Print from picking up a style object
-                    feature.renderIntent = "highlightForPrint";
-                    drawFeature.apply(this,[feature]);
-                    feature.renderIntent = "default";
-                } else if (feature.isNew) {
-                    drawFeature.apply(this, [feature, feature.renderIntent || style]);
-                } else {
-                    drawFeature.apply(this, [feature, style]);
-                }
-            };
+
+
 
             widget.layers.push(layer);
 
