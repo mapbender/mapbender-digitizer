@@ -129,7 +129,7 @@ var Scheme = OpenLayers.Class({
             drawEllipse: "Ellipse zeichen",
             drawDonut: "Polygon mit Enklave zeichnen",
             selectAndEditGeometry: "Objekt Position/Größe beabeiten",
-            moveGeometry: "Objekt bewegen",
+            moveFeature: "Objekt bewegen",
             selectGeometry: "Objekt selektieren",
             removeSelected: "Selektierte objekte löschen",
             removeAll: "Alle Objekte löschen"
