@@ -1143,13 +1143,20 @@
                                 Mapbender.error('Coordinates are not valid');
                                 return false;
                             } else if(schema.popup.remoteData)  {
-                                widget.openRemoteDataConfirmationDialog().done(function() {
-                                    widget._getRemoteData(feature,schema).success(function () {
-                                        widget.saveFeature(feature,['x','y']).fail(function(){
-                                            $('.-fn-coordinates',dialog).find("[name=x]").val(x);
-                                            $('.-fn-coordinates',dialog).find("[name=y]").val(y);
+                                widget.openRemoteDataConfirmationDialog().done(function(answer) {
+                                    if (answer===true) {
+                                        widget._getRemoteData(feature, schema).done(function () {
+                                            widget.saveFeature(feature, ['x', 'y']).fail(function () {
+                                                $('.-fn-coordinates', dialog).find("[name=x]").val(x);
+                                                $('.-fn-coordinates', dialog).find("[name=y]").val(y);
+                                            });
                                         });
-                                    })
+                                    } else {
+                                        widget.saveFeature(feature, ['x', 'y']).fail(function () {
+                                            $('.-fn-coordinates', dialog).find("[name=x]").val(x);
+                                            $('.-fn-coordinates', dialog).find("[name=y]").val(y);
+                                        });
+                                    }
                                 });
                                 return false;
                             } else {
@@ -2981,11 +2988,15 @@
                 modal: true,
                 draggable: true,
                 buttons: {
-                    "OK": function() {
+                    "Ja": function() {
                         $(this).dialog("close");
-                        d.resolve();
+                        d.resolve(true);
                     },
-                    "Cancel": function() {
+                    "Nein": function() {
+                        $(this).dialog("close");
+                        d.resolve(false);
+                    },
+                    "Abbrechen": function() {
                         $(this).dialog("close");
                         d.reject();
                     },
@@ -3003,6 +3014,11 @@
 
             if (widget.currentPopup) {
                 $.extend(feature.data, widget.currentPopup.formData()); // Non-remote Data that has been edited manually must be saved as well
+            }
+
+            if (feature.isNew) {
+                feature.data.x = feature.data.x || feature.geometry.x || '';
+                feature.data.y = feature.data.y || feature.geometry.y || '';
             }
 
             _.each(response.dataSets, function (dataSet) {
