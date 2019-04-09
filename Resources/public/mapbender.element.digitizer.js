@@ -465,6 +465,9 @@
 
             $(element).contextMenu({
                 selector: '.mapbender-element-result-table > div > table > tbody > tr',
+                position: function (opt, x, y) {
+                    opt.$menu.css({top: y + 5, left: x + 5});
+                },
                 events: {
                     show: function (options) {
                         var tr = $(options.$trigger);
@@ -496,7 +499,7 @@
                     var schema = widget.findFeatureSchema(olFeature);
                     var items = {};
 
-                    items['changeStyle'] = {name: Mapbender.digitizer_translate('feature.style.change')};
+                    //items['changeStyle'] = {name: Mapbender.digitizer_translate('feature.style.change')};
                     items['zoom'] = {name: Mapbender.digitizer_translate('feature.zoomTo')};
                     if (schema.allowDelete) {
                         items['removeFeature'] = {name: Mapbender.digitizer_translate('feature.remove.title')};
@@ -525,9 +528,9 @@
                                     widget.exportGeoJson(olFeature);
                                     break;
 
-                                case 'changeStyle':
-                                    widget.openChangeStyleDialog(olFeature);
-                                    break;
+                                // case 'changeStyle':
+                                //     widget.openChangeStyleDialog(olFeature);
+                                //     break;
                             }
                         },
                         items: items
@@ -1136,23 +1139,23 @@
                             if(!Mapbender.Transformation.areCoordinatesValid(coords)){
                                 Mapbender.error('Coordinates are not valid');
                                 return false;
-                            } else if(schema.popup.remoteData)  {
-                                widget.openRemoteDataConfirmationDialog().done(function(answer) {
-                                    if (answer===true) {
-                                        widget._getRemoteData(feature, schema).done(function () {
-                                            widget.saveFeature(feature, ['x', 'y']).fail(function () {
-                                                $('.-fn-coordinates', dialog).find("[name=x]").val(x);
-                                                $('.-fn-coordinates', dialog).find("[name=y]").val(y);
-                                            });
-                                        });
-                                    } else {
-                                        widget.saveFeature(feature, ['x', 'y']).fail(function () {
-                                            $('.-fn-coordinates', dialog).find("[name=x]").val(x);
-                                            $('.-fn-coordinates', dialog).find("[name=y]").val(y);
-                                        });
-                                    }
-                                });
-                                return false;
+                            // } else if(schema.popup.remoteData)  {
+                            //     widget.openRemoteDataConfirmationDialog().done(function(answer) {
+                            //         if (answer===true) {
+                            //             widget._getRemoteData(feature, schema).done(function () {
+                            //                 widget.saveFeature(feature, ['x', 'y']).fail(function () {
+                            //                     $('.-fn-coordinates', dialog).find("[name=x]").val(x);
+                            //                     $('.-fn-coordinates', dialog).find("[name=y]").val(y);
+                            //                 });
+                            //             });
+                            //         } else {
+                            //             widget.saveFeature(feature, ['x', 'y']).fail(function () {
+                            //                 $('.-fn-coordinates', dialog).find("[name=x]").val(x);
+                            //                 $('.-fn-coordinates', dialog).find("[name=y]").val(y);
+                            //             });
+                            //         }
+                            //     });
+                            //     return false;
                             } else {
                                 widget.saveFeature(feature,['x','y']); // In case of !remoteData
                             }
@@ -1231,7 +1234,7 @@
          * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
          * @private
          */
-        _processCurrentFormItemsWithDataManager : function(olFeature) {
+        _processCurrentFormItemsWithDataManager : function(olFeature,formItemsForEditDialog) {
             var widget = this;
             var schema = olFeature.schema;
             // dataManager access function
@@ -1252,7 +1255,45 @@
                 });
             }
 
-            DataUtil.eachItem(widget.currentSettings.formItems, function (item) {
+            DataUtil.eachItem(formItemsForEditDialog, function (item) {
+
+                if (item.automatic_detection) {
+                    var children = [];
+                    var input = {
+                        type: item.type,
+                        title: item.title,
+                        label: '',
+                        name: item.name,
+                        mandatory: item.mandatory,
+                        options: item.options,
+                        css: {width: '75%'},
+                        keyup: item.keyup,
+
+                    };
+
+                    var button = {
+                        type: "button",
+                        title: "<i class='fa fa-plus'></i>",
+                        css: {'margin-left': ' 15px', 'margin-bottom': '2px'},
+                        label: '',
+                        attr: {'href': '#', 'title': 'Automatisch ermitteln' },
+                        click: function () {
+                            widget._getRemotePropertyValue(olFeature, schema, item.name).done(function (value) {
+                                $(widget.currentPopup).find("[name=" + item.name + "]").val(value).keyup();
+                            });
+                            return false;
+                        }
+                    };
+
+                    children.push(input);
+                    children.push(button);
+
+                    item.type = "fieldSet";
+                    item.title = '';
+                    item.label = '';
+                    item.children = children;
+
+                }
 
                 if (item.type === "resultTable" && item.editable && !item.isProcessed) {
                     var onCreateClick;
@@ -1620,24 +1661,29 @@
                 }
             }
 
-            var popupConfiguration = this._createPopupConfiguration(olFeature);
-
-            this._processCurrentFormItemsWithDataManager(olFeature);
-
-            var dialog = $("<div/>");
-            olFeature.editDialog = dialog;
-
             if (!schema.elementsTranslated) {
                 translateStructure(widget.currentSettings.formItems);
                 schema.elementsTranslated = true;
             }
+
+            var formItemsForEditDialog = JSON.parse(JSON.stringify(widget.currentSettings.formItems)); // Deep clone hack!
+
+
+            var popupConfiguration = this._createPopupConfiguration(olFeature);
+
+            this._processCurrentFormItemsWithDataManager(olFeature,formItemsForEditDialog);
+
+            var dialog = $("<div/>");
+            olFeature.editDialog = dialog;
+
+
 
 
 
             dialog.data('feature', olFeature);
             dialog.data('digitizerWidget', widget);
 
-            var formItems = widget.currentSettings.formItems;
+            var formItems = formItemsForEditDialog;
 
             // If pop up isn't defined, generate inputs
             if (!_.size(formItems)) {
@@ -1733,11 +1779,8 @@
 
             setTimeout(function () {
 
-                if (popupConfiguration.remoteData && olFeature.isNew) {
-                    widget._getRemoteData.call(widget,olFeature, schema);
-                } else {
-                    dialog.formData(olFeature.data);
-                }
+
+                dialog.formData(olFeature.data);
 
 
                 if (isOpenLayerCloudPopup) {
@@ -2919,107 +2962,48 @@
 
         },
 
-        _getRemoteData : function (feature,schema){
-            var widget  = this;
+        _getRemotePropertyValue: function (feature, schema, property) {
+            var widget = this;
             var map = this.getMap();
-            if(!feature.geometry){
+            if (!feature.geometry) {
                 return false;
             }
             var bbox = feature.geometry.getBounds();
-            bbox.right = parseFloat(bbox.right+0.00001);
-            bbox.top = parseFloat(bbox.top+0.00001);
+            bbox.right = parseFloat(bbox.right + 0.00001);
+            bbox.top = parseFloat(bbox.top + 0.00001);
             bbox = bbox.toBBOX();
-            var srid = map.getProjection().replace('EPSG:','');
+            var srid = map.getProjection().replace('EPSG:', '');
             var url = this.elementUrl + "getFeatureInfo/";
 
-            var $inputElements = widget.currentPopup.find('input, textarea, button, select');
+            var ajaxCall = $.get(url,{
+                bbox :bbox,
+                schema: schema.schemaName,
+                srid: srid
+            });
 
-            $inputElements.attr('disabled','disabled');
+                    // Mock:
+                    // ajaxCall = $.Deferred().resolve({dataSets: ['{"type":"FeatureCollection","totalFeatures":"unknown","features":[  {"type":"Feature","id":"","geometry":null,"properties":{    "elevation_base":844}  }],"crs":null}',
+                    //     '  {  "type": "FeatureCollection",  "features": [  {  "type": "Feature",  "geometry": null,  "properties": {  "OBJECTID": "78290",  "KG_NUMMER": "75204",  "KG_NAME": "Gschriet",  "INSPIREID": "AT.0002.I.4.KG.75204"  },  "layerName": "1"  }  ]  }  ']});
 
-            return $.get(url,{
-                    bbox :bbox,
-                    schema: schema.schemaName,
-                    srid: srid
-                })
-                .done(function (response) {
-                    $inputElements.removeAttr('disabled');
-
-                    this._processRemoteData(response, feature);
-
-                }.bind(this))
-                .fail(function(response){
-                    $inputElements.removeAttr('disabled');
-                    if(!feature.isNew && !widget.currentPopup){
-                        widget._openFeatureEditDialog(feature);
+            return ajaxCall.then(function (response) {
+                if (response.error) {
+                    Mapbender.error(Mapbender.digitizer_translate('remoteData.error'));
+                    return;
+                }
+                var newProperty = null;
+                _.each(response.dataSets, function (dataSet) {
+                    try {
+                        var json =  JSON.parse(dataSet);
+                        newProperty = json.features[0].properties[property] || newProperty; // Normally, the value is only present in one of the dataSets
+                    } catch (e) {
+                        // Prevent interruption in case of empty features
                     }
-                    Mapbender.error(Mapbender.digitizer_translate("remoteData.error"));
+                });
+                return newProperty;
+            }).fail(function (response) {
+                Mapbender.error(Mapbender.digitizer_translate("remoteData.error"));
 
-                })
-            ;
-
-
-
-        },
-
-        openRemoteDataConfirmationDialog: function(){
-            var d = $.Deferred();
-            var $markup = $('<div><p>'+Mapbender.digitizer_translate("remoteData.confirmationText")+'</p></div>');
-            $markup.dialog({
-                dialogClass: 'remoteDataConfirmationDialog',
-                width: 200,
-                height: 150,
-                resizable: false,
-                modal: true,
-                draggable: true,
-                buttons: {
-                    "Ja": function() {
-                        $(this).dialog("close");
-                        d.resolve(true);
-                    },
-                    "Nein": function() {
-                        $(this).dialog("close");
-                        d.resolve(false);
-                    },
-                    "Abbrechen": function() {
-                        $(this).dialog("close");
-                        d.reject();
-                    },
-                }
             });
-            return d;
-        },
-
-        _processRemoteData : function (response, feature) {
-            var widget = this;
-            if(response.error){
-                Mapbender.error(Mapbender.digitizer_translate('remoteData.error'));
-                console.log(response.error);
-            }
-
-            if (widget.currentPopup) {
-                $.extend(feature.data, widget.currentPopup.formData()); // Non-remote Data that has been edited manually must be saved as well
-            }
-
-            if (feature.isNew) {
-                feature.data.x = feature.data.x || feature.geometry.x || '';
-                feature.data.y = feature.data.y || feature.geometry.y || '';
-            }
-
-            _.each(response.dataSets, function (dataSet) {
-                try {
-                    var newData = JSON.parse(dataSet).features[0].properties;
-                    $.extend(feature.data, newData);
-                } catch(e) {
-                    // Prevent interruption in case of empty features
-                }
-            });
-
-            if(!feature.isNew && !widget.currentPopup){
-                widget._openFeatureEditDialog(feature);
-            } else {
-                widget.currentPopup.formData(feature.data);
-            }
-
 
 
         }
