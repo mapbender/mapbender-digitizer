@@ -571,45 +571,7 @@ Scheme.prototype = {
     },
 
 
-    /**
-     * "Fake" form data for a feature that hasn't gone through attribute
-     * editing, for saving. This is used when we save a feature that has only
-     * been moved / dragged. The popup dialog with the form is not initialized
-     * in these cases.
-     * Assigned values are copied from the feature's data, if it was already
-     * stored in the db, empty otherwise.
-     *
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
-     * @returns {{}}
-     */
-    initialFormData: function (feature) {
-        console.warn("Fake form data for feature", feature);
-        /** @type {Scheme} */
-        var schema = this;
-        var formData = {};
 
-        var extractFormData = function (definition) {
-            _.forEach(definition, function (item) {
-                if (_.isArray(item)) {
-                    // recurse into lists
-                    extractFormData(item);
-                } else if (item.name) {
-                    var currentValue = (feature.data || {})[item.name];
-                    // keep empty string, but replace undefined => null
-                    if (typeof (currentValue) === 'undefined') {
-                        currentValue = null;
-                    }
-                    formData[item.name] = currentValue;
-                } else if (item.children) {
-                    // recurse into child property (should be a list)
-                    extractFormData(item.children);
-                }
-            });
-        };
-
-        extractFormData(schema.formItems);
-        return formData;
-    },
 
 
     _createStyleMap: function () {
@@ -972,6 +934,7 @@ Scheme.prototype = {
 
     },
 
+    // TODO feature / option formData parameters are not pretty -> keep data in feature directly
     saveFeature: function (feature, formData) {
         var schema = this;
         var widget = schema.widget;
@@ -986,7 +949,7 @@ Scheme.prototype = {
 
         feature.disabled = true;
 
-        formData = formData || schema.initialFormData(feature);
+        formData = formData || schema.formItems.headlessFormData(feature);
 
         var request = {
             id: feature.isNew ? null : feature.fid,

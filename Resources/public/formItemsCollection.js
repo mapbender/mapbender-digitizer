@@ -14,10 +14,50 @@ var FormItemsCollection = function(rawFormItems, schema) {
 
     formItemsCollection.preprocess();
 
+    //TODO prevent items from being modified afterwards
+
     console.log(formItemsCollection);
 };
 
 FormItemsCollection.prototype =  {
+
+    /**
+     * "Fake" form data for a feature that hasn't gone through attribute
+     * editing, for saving. This is used when we save a feature that has only
+     * been moved / dragged. The popup dialog with the form is not initialized
+     * in these cases.
+     * Assigned values are copied from the feature's data, if it was already
+     * stored in the db, empty otherwise.
+     *
+     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
+     * @returns {{}}
+     */
+    headlessFormData: function (feature) {
+        var formItemsCollection = this;
+        var formData = {};
+
+        var extractFormData = function (definition) {
+            definition.forEach(function (item) {
+                if (_.isArray(item)) {
+                    // recurse into lists
+                    extractFormData(item);
+                } else if (item.name) {
+                    var currentValue = (feature.data || {})[item.name];
+                    // keep empty string, but replace undefined => null
+                    if (typeof (currentValue) === 'undefined') {
+                        currentValue = null;
+                    }
+                    formData[item.name] = currentValue;
+                } else if (item.children) {
+                    // recurse into child property (should be a list)
+                    extractFormData(item.children);
+                }
+            });
+        };
+
+        extractFormData(formItemsCollection.items);
+        return formData;
+    },
 
 
     process: function(feature) {
