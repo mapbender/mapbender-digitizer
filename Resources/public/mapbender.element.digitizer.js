@@ -1257,7 +1257,7 @@
 
             DataUtil.eachItem(formItemsForEditDialog, function (item) {
 
-                if (item.automatic_detection) {
+                if (schema.popup.remoteData && item.automatic_detection) {
                     var children = [];
                     var input = {
                         type: item.type,
@@ -2962,6 +2962,7 @@
 
         },
 
+        // TODO seperate Feature Info calls for individual properties in order to avoid iterating through meaningless dataSets
         _getRemotePropertyValue: function (feature, schema, property) {
             var widget = this;
             var map = this.getMap();
