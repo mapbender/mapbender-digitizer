@@ -190,6 +190,7 @@
             }
 
         },
+        printClient: null,
 
         /**
          * Constructor.
@@ -206,6 +207,12 @@
             }
             var element = widget.element;
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
+            var self = this;
+            Mapbender.elementRegistry.waitReady('.mb-element-printclient').then(function(printClient) {
+                self.printClient = printClient;
+            }, function() {
+                self.printClient = false;
+            });
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
         },
 
@@ -889,18 +896,14 @@
                 widget.currentPopup.popupDialog('close');
             }
 
-            if(schema.printable) {
+            if (schema.printable && this.printClient) {
+                var printClient = this.printClient;
                 var printButton = {
                     text:  translate("feature.print"),
                     click: function() {
-                        var printWidget = $('.mb-element-printclient').data('mapbenderMbPrintClient');
-                        if(printWidget) {
-                            var dialog = $(this).closest(".ui-dialog-content");
-                            var olFeature = dialog.data('feature');
-                            printWidget.printDigitizerFeature(olFeature, olFeature.schema.featureTypeName || olFeature.schema.schemaName);
-                        } else {
-                            $.notify("Druck element ist nicht verfügbar!");
-                        }
+                        var dialog = $(this).closest(".ui-dialog-content");
+                        var olFeature = dialog.data('feature');
+                        printClient.printDigitizerFeature(olFeature, olFeature.schema.featureTypeName || olFeature.schema.schemaName);
                     }
                 };
                 buttons.push(printButton);
