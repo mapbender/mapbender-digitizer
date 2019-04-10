@@ -349,7 +349,7 @@ Scheme.prototype = {
                 type: 'input',
                 name: key,
                 title: key
-            })
+            });
         });
 
         return formItems;
@@ -1209,7 +1209,7 @@ Scheme.prototype = {
 
     processWithDataManager: function(feature) {
         var schema = this.getSchemaByFeature(feature);
-        var dataManagerUtils = new DataManagerUtils(schema);
+        var dataManagerUtils = new FormItemsProcessor(schema);
         dataManagerUtils.processCurrentFormItemsWithDataManager(feature);
     },
 
