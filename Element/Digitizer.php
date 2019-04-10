@@ -65,6 +65,7 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.layermanager.js',
                 '@MapbenderDigitizerBundle/Resources/public/formItemsProcessor.js',
                 '@MapbenderDigitizerBundle/Resources/public/formItem.js',
+                '@MapbenderDigitizerBundle/Resources/public/formItemsCollection.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.digitizer-translator.js',
                 '@MapbenderDigitizerBundle/Resources/public/queryEngine.js',
                 '@MapbenderDigitizerBundle/Resources/public/openlayers.extension.js',

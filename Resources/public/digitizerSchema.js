@@ -4,7 +4,7 @@ var Scheme = function (rawScheme, widget) {
 
     schema = $.extend(schema, rawScheme);
 
-    schema.formItems = Mapbender.DigitizerTranslator.translateStructure(schema.formItems);
+    schema.formItems = new FormItemsCollection(schema.formItems);
 
     schema.popup = $.extend({},Scheme.prototype.popup,rawScheme.popup);
 
@@ -341,7 +341,7 @@ Scheme.prototype = {
     },
 
 
-    getDefaultFormItems: function () {
+    getDefaultFormItems: function (feature) {
 
         var formItems = [];
         _.each(feature.data, function (value, key) {
@@ -359,8 +359,10 @@ Scheme.prototype = {
      * @Overwrite
      */
     getFormItems: function (feature) {
-        var schema = this;
-        var formItems = (schema.formItems && schema.formItems.length > 0) ? schema.formItems : schema.getDefaultFormItems(feature);
+        var schema = this.getSchemaByFeature();
+        var formItems = schema.formItems || schema.getDefaultFormItems(feature);
+
+        console.log(schema.formItems,formItems);
         return formItems;
     },
 
@@ -1207,10 +1209,10 @@ Scheme.prototype = {
     },
 
 
-    processWithDataManager: function(feature) {
+    processFormItems: function(feature) {
         var schema = this.getSchemaByFeature(feature);
-        var dataManagerUtils = new FormItemsProcessor(schema);
-        dataManagerUtils.processCurrentFormItemsWithDataManager(feature);
+        var formItemsProcessor = new FormItemsProcessor(schema);
+        formItemsProcessor.process(feature);
     },
 
     exportGeoJson: function (feature) {

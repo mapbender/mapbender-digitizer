@@ -5,14 +5,9 @@ var FormItemsProcessor = function (schema) {
 };
 
 FormItemsProcessor.prototype = {
-    /**
-     *
-     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
-     * @private
-     */
 
 
-    processResultTable: function(item) {
+    process: function(item) {
         var dataManagerUtils = this;
         var schema = dataManagerUtils.schema;
         var widget = schema.widget;

@@ -30,7 +30,7 @@ var FeatureEditDialog = function (feature, configuration, schema) {
 
     // TODO comprehensive schema throws Exception because no formItems
     try {
-        schema.processWithDataManager(feature);
+        schema.processFormItems(feature);
     } catch (e) {
        // console.warn(e);
     }
@@ -234,14 +234,8 @@ FeatureEditDialog.prototype = {
 
         setTimeout(function () {
 
-            if (configuration.remoteData && feature.isNew) {
 
-                schema._getRemoteData(feature);
-
-            } else {
-                $popup.formData(feature.data);
-            }
-
+            $popup.formData(feature.data);
 
             if (dialog.configuration.isOpenLayersCloudPopup()) {
                 /**
