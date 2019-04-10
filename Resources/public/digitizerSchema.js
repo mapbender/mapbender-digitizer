@@ -2,9 +2,9 @@ var Scheme = function (rawScheme, widget) {
     /** @type {Scheme} */
     var schema = this;
 
-    schema = $.extend(schema, rawScheme);
+    $.extend(schema, rawScheme);
 
-    schema.formItems = new FormItemsCollection(schema.formItems);
+    schema.formItems = new FormItemsCollection(schema.formItems,schema);
 
     schema.popup = $.extend({},Scheme.prototype.popup,rawScheme.popup);
 
@@ -358,18 +358,19 @@ Scheme.prototype = {
     /**
      * @Overwrite
      */
-    getFormItems: function (feature) {
-        var schema = this.getSchemaByFeature();
+    processFormItems: function (feature) {
+        var schema = this.getSchemaByFeature(feature);
         var formItems = schema.formItems || schema.getDefaultFormItems(feature);
 
-        console.log(schema.formItems,formItems);
-        return formItems;
+        var processedFormItems = formItems.process(feature);
+
+        return processedFormItems;
     },
 
 
-    openFeatureEditDialog: function (olFeature) {
+    openFeatureEditDialog: function (feature) {
         var schema = this;
-        var dialog = new FeatureEditDialog(olFeature, schema.popup, schema);
+        var dialog = new FeatureEditDialog(feature, schema.popup, schema);
 
     },
 
@@ -1208,12 +1209,6 @@ Scheme.prototype = {
 
     },
 
-
-    processFormItems: function(feature) {
-        var schema = this.getSchemaByFeature(feature);
-        var formItemsProcessor = new FormItemsProcessor(schema);
-        formItemsProcessor.process(feature);
-    },
 
     exportGeoJson: function (feature) {
         var schema = this;

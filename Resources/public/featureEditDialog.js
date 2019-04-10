@@ -28,12 +28,6 @@ var FeatureEditDialog = function (feature, configuration, schema) {
     }
 
 
-    // TODO comprehensive schema throws Exception because no formItems
-    try {
-        schema.processFormItems(feature);
-    } catch (e) {
-       // console.warn(e);
-    }
 
 
     widget.currentPopup = $popup;
@@ -41,7 +35,7 @@ var FeatureEditDialog = function (feature, configuration, schema) {
 
     $popup.data('feature', feature);
 
-    var formItems = schema.getFormItems(feature);
+    var formItems = schema.processFormItems(feature);
     $popup.generateElements({children: formItems});
 
 

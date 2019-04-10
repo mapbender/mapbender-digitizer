@@ -5,9 +5,14 @@ var FormItemsProcessor = function (schema) {
 };
 
 FormItemsProcessor.prototype = {
+    /**
+     *
+     * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} olFeature
+     * @private
+     */
 
 
-    process: function(item) {
+    processResultTable: function(item) {
         var dataManagerUtils = this;
         var schema = dataManagerUtils.schema;
         var widget = schema.widget;
@@ -267,7 +272,7 @@ FormItemsProcessor.prototype = {
         return item;
     },
 
-    processCurrentFormItemsWithDataManager: function (feature) {
+    process: function (feature) {
         var dataManagerUtils = this;
         var schema = this.schema;
 
