@@ -36,6 +36,8 @@ var FeatureEditDialog = function (feature, configuration, schema) {
     $popup.data('feature', feature);
 
     var formItems = schema.processFormItems(feature);
+
+
     $popup.generateElements({children: formItems});
 
 
@@ -62,7 +64,7 @@ FeatureEditDialog.prototype = {
 
         if (buttons.printButton) {
             buttons.printButton.click = function() {
-                widget.printClient.printDigitizerFeature(schema.featureTypeName || schema.schemaName, feature.fid);
+                widget.printClient.printDigitizerFeature(schema.featureType.name || schema.schemaName, feature.fid);
             }
         }
         if (buttons.copyButton) {

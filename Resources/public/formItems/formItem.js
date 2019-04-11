@@ -1,11 +1,15 @@
 var FormItem = function (item) {
 
     var formItem = this;
+    formItem.children = [];
     $.extend(true,formItem, item);
 
 };
 
 FormItem.prototype = {
+
+    schema: null,
+    dataManager: null,
 
 
     dataStore: {
@@ -32,13 +36,20 @@ FormItem.prototype = {
     itemPattern: undefined,
     itemName: undefined,
 
+    clone: function() {
+        var formItem = this;
+        var clonedItem = $.extend(true,{},formItem);
+        clonedItem.protoype = formItem.protoype;
+        return clonedItem;
+    },
 
-    preprocess: function () {
-        return new FormItem(this);
+
+    preprocess: function (schema,dataManager) {
+        return this.clone();
     },
 
     process: function (feature) {
-        return new FormItem(this);
+        return this.clone();
     },
 
 };

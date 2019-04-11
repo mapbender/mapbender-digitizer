@@ -10,16 +10,52 @@ var FormItemsCollection = function(rawFormItems, schema) {
     $.extend(formItemsCollection.items, formItemsCollection.rawItems);
     $.extend(formItemsCollection.items,Mapbender.DigitizerTranslator.translateStructure(formItemsCollection.items));
 
-    formItemsCollection.typify();
+    formItemsCollection.items = FormItemsCollection.typify(formItemsCollection.items);
 
     formItemsCollection.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
     formItemsCollection.preprocess();
 
+
     //TODO prevent items from being modified afterwards
 
-    console.log(formItemsCollection);
 };
+
+FormItemsCollection.createTypedFormItem = function(item) {
+
+    item.children
+
+    switch(item.type) {
+        case 'resultTable' :
+            return new FormItemResultTable(item);
+        case 'select' :
+            return new FormItemSelect(item);
+        case 'image' :
+            return new FormItemImage(item);
+        case 'file' :
+            return new FormItemFile(item);
+        case 'tabs' :
+            return new FormItemTabs(item);
+    }
+
+    return new FormItem(item);
+};
+
+FormItemsCollection.typify =  function(items) {
+
+    var typedItems = [];
+    items.forEach(function (item) {
+
+        var typedItem = FormItemsCollection.createTypedFormItem(item);
+        typedItem.children = FormItemsCollection.typify(item.children || []);
+
+        typedItems.push(typedItem);
+
+    });
+
+    return typedItems;
+},
+
 
 FormItemsCollection.prototype =  {
 
@@ -68,45 +104,13 @@ FormItemsCollection.prototype =  {
         formItemsCollection.items.forEach(function(item) {
 
             //TODO use typed formItem
-            processedFormItems.push(item.processFeature ? item.processFeature(feature) : _.clone(item));
+            processedFormItems.push(item.process(feature));
 
         });
 
         return processedFormItems;
     },
 
-    createTypedFormItem: function(item) {
-
-        switch(item.type) {
-            case 'resultTable' :
-                return new FormItemResultTable(item);
-            case 'select' :
-                return new FormItemSelect(item);
-            case 'image' :
-                return new FormItemImage(item);
-            case 'file' :
-                return new FormItemFile(item);
-        }
-
-        return new FormItem();
-    },
-
-
-    typify: function() {
-        var formItemsCollection = this;
-        var typedItems = [];
-
-        formItemsCollection.items.forEach(function (item) {
-
-            var typedItem = formItemsCollection.createTypedFormItem(item);
-            typedItem.dataManager = formItemsCollection.dataManager;
-            typedItem.schema = formItemsCollection.schema;
-            typedItems.push(typedItem);
-
-        });
-
-        formItemsCollection.items = typedItems;
-    },
 
     preprocess: function() {
         var formItemsCollection = this;
@@ -114,7 +118,8 @@ FormItemsCollection.prototype =  {
 
         formItemsCollection.items.forEach(function (item) {
 
-            preprocessedItems.push(item.preprocess());
+            var preProcessedItem = item.preprocess(formItemsCollection.schema,formItemsCollection.dataManager);
+            preprocessedItems.push(preProcessedItem);
 
         });
 
@@ -122,113 +127,7 @@ FormItemsCollection.prototype =  {
 
     },
 
-    preprocessResultTable: function(item) {
-        var formItemsCollection = this;
-        var schema = formItemsCollection.schema;
-        var dataManager = formItemsCollection.dataManager;
 
-        var onCreateClick;
-        var onEditClick;
-
-        item.processFeature = function (feature) {
-            var processedItem = $.extend(true,{},item);
-            return processedItem;
-        };
-
-        if (!item.dataManagerLink) {
-
-            onCreateClick = function (e) {
-                e.preventDefault();
-                var item = $(this).next().data("item");
-                var popup = item.popupItems;
-                var table = $(this).siblings(".mapbender-element-result-table");
-                var uniqueIdKey = item.dataStore.uniqueId;
-
-                var feature = table.data('olFeature');
-                var data = {};
-
-                item.allowRemove = false;
-                data['linkId'] = feature.attributes[item.dataStoreLink.uniqueId];
-                data.item = item;
-                data[uniqueIdKey] = null;
-                dataManagerUtils.openEditDialog(data, popup, item, table);
-                return false;
-            };
-
-            onEditClick = function (rowData, ui, e) {
-                e.defaultPrevented && e.defaultPrevented();
-                e.preventDefault && e.preventDefault();
-
-                var table = ui.parents('.mapbender-element-result-table');
-                var item = table.data('item');
-                var popup = item.popupItems;
-                var feature = table.data('olFeature');
-
-                item.allowRemove = true;
-                rowData.externalId = feature.attributes[item.dataStoreLink.uniqueId];
-
-                dataManagerUtils.openEditDialog(rowData, popup, item, table);
-
-                return false;
-            };
-        }
-        else {
-            var schemaName = item.dataManagerLink.schema;
-            var fieldName = item.dataManagerLink.fieldName;
-            var schemaFieldName = item.dataManagerLink.schemaFieldName;
-
-            onCreateClick = function (e) {
-                e.preventDefault && e.preventDefault();
-
-                dataManager.withSchema(schemaName, function (schema) {
-                    dataManager._openEditDialog(schema.create());
-                });
-
-                return false;
-            };
-
-            onEditClick = function (rowData, ui, e) {
-                e.defaultPrevented && e.defaultPrevented();
-                e.preventDefault && e.preventDefault();
-
-                dataManager.withSchema(schemaName, function (schema) {
-                    var dataItem = _.find(schema.dataItems, function (d) {
-                        return d[schemaFieldName] === rowData[fieldName];
-                    });
-                    dataManager._openEditDialog(dataItem);
-                });
-
-                return false;
-            };
-        }
-
-        var cloneItem = $.extend({}, item);
-        cloneItem.isProcessed = true;
-        item.type = "container";
-
-
-        var buttons = [];
-
-        buttons.push({
-            title: Mapbender.DigitizerTranslator.translate('feature.edit'),
-            className: 'edit',
-            onClick: onEditClick
-        });
-
-        cloneItem.buttons = buttons;
-
-        var button = {
-            type: "button",
-            title: "",
-            cssClass: "fa fa-plus",
-            click: onCreateClick
-        };
-        item.children = [button, cloneItem];
-
-
-        return item;
-
-    },
 
 
     preprocessSelectWithData: function(item) {
