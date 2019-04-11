@@ -181,7 +181,7 @@ FeatureEditDialog.prototype = {
             }
 
             var dataStoreLinkName = item.dataStoreLink.name;
-            if (true || dataStoreLinkName) {
+            if (dataStoreLinkName) {
                 var requestData = {
                     dataStoreLinkName: dataStoreLinkName,
                     fid: feature.fid,

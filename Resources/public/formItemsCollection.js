@@ -32,7 +32,7 @@ FormItemsCollection.prototype =  {
      * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
      * @returns {{}}
      */
-    headlessFormData: function (feature) {
+    createHeadlessFormData: function (feature) {
         var formItemsCollection = this;
         var formData = {};
 

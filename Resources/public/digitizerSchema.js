@@ -949,7 +949,7 @@ Scheme.prototype = {
 
         feature.disabled = true;
 
-        formData = formData || schema.formItems.headlessFormData(feature);
+        formData = formData || schema.formItems.createHeadlessFormData(feature);
 
         var request = {
             id: feature.isNew ? null : feature.fid,
