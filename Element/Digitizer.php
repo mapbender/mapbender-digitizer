@@ -43,38 +43,44 @@ class Digitizer extends BaseElement
      */
     public function getAssets()
     {
-        return array(
-            'js'    => array(
-                '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
-                '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
-                '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
-                '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
-                '/components/jquery-context-menu/jquery-context-menu-built.js',
-                '/components/select2/select2-built.js',
-                '/components/select2/dist/js/i18n/de.js',
-                '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
-                '@MapbenderDigitizerBundle/Resources/public/digitizingToolset.js',
-                '@MapbenderDigitizerBundle/Resources/public/digitizerSchema.js',
-                '@MapbenderDigitizerBundle/Resources/public/digitizerSchemaAll.js',
-                '@MapbenderDigitizerBundle/Resources/public/clustering.mixin.js',
-                '@MapbenderDigitizerBundle/Resources/public/sidebar.js',
-                '@MapbenderDigitizerBundle/Resources/public/contextMenu.js',
-                '@MapbenderDigitizerBundle/Resources/public/featureEditDialog.js',
-                '@MapbenderDigitizerBundle/Resources/public/digitizingControlFactory.js',
-                '@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js',
-                '@MapbenderDigitizerBundle/Resources/public/mapbender.layermanager.js',
-                '@MapbenderDigitizerBundle/Resources/public/formItemsProcessor.js',
-                '@MapbenderDigitizerBundle/Resources/public/formItem.js',
-                '@MapbenderDigitizerBundle/Resources/public/formItemsCollection.js',
-                '@MapbenderDigitizerBundle/Resources/public/mapbender.digitizer-translator.js',
-                '@MapbenderDigitizerBundle/Resources/public/queryEngine.js',
-                '@MapbenderDigitizerBundle/Resources/public/openlayers.extension.js',
-                '@MapbenderDigitizerBundle/Resources/public/vis-ui.extension.js',
-                '@MapbenderDigitizerBundle/Resources/public/setprototype.polyfill.js',
-                '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
-                '@MapbenderDigitizerBundle/Resources/public/lib/jsts.min.js',
 
-            ),
+        $mainFiles = array('mapbender.element.digitizer','digitizingToolset','digitizerSchema','digitizerSchemaAll','clustering.mixin',
+                           'sidebar','contextMenu',
+                           'featureEditDialog','digitizingControlFactory','featureStyleEditor','mapbender.layermanager','formItemsCollection',
+                           'mapbender.digitizer-translator',
+                           'queryEngine','openlayers.extension','vis-ui.extension');
+
+
+        $formItemFiles = array("formItem","formItemBreakLine","formItemButton","formItemCheckbox","formItemContainer","formItemCoordinates","formItemDate",
+            "formItemFieldSet","formItemFile","formItemForm","formItemImage","formItemInput","formItemLabel",
+            "formItemResultTable","formItemSelect","formItemTabs","formItemTextArea","formItemText");
+
+        $js = array(
+            '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
+            '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
+            '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
+            '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
+            '/components/jquery-context-menu/jquery-context-menu-built.js',
+            '/components/select2/select2-built.js',
+            '/components/select2/dist/js/i18n/de.js',
+            '@MapbenderDigitizerBundle/Resources/public/polyfill/setprototype.polyfill.js',
+            '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
+            '@MapbenderDigitizerBundle/Resources/public/lib/jsts.min.js',
+
+        );
+
+        foreach($mainFiles as $file) {
+            $js[] = "@MapbenderDigitizerBundle/Resources/public/$file.js";
+        }
+        foreach($formItemFiles as $file) {
+            $js[] = "@MapbenderDigitizerBundle/Resources/public/formItems/$file.js";
+        }
+
+
+
+
+        return array(
+            'js'    => $js,
             'css'   => array(
                 '/components/select2/select2-built.css',
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',

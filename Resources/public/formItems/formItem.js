@@ -41,4 +41,4 @@ FormItem.prototype = {
         return new FormItem(this);
     },
 
-}
+};

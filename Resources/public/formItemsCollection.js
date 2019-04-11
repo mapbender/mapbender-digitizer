@@ -10,7 +10,7 @@ var FormItemsCollection = function(rawFormItems, schema) {
     $.extend(formItemsCollection.items, formItemsCollection.rawItems);
     $.extend(formItemsCollection.items,Mapbender.DigitizerTranslator.translateStructure(formItemsCollection.items));
 
-    formItems.typify();
+    formItemsCollection.typify();
 
     formItemsCollection.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
@@ -88,7 +88,7 @@ FormItemsCollection.prototype =  {
                 return new FormItemFile(item);
         }
 
-        return FormItem();
+        return new FormItem();
     },
 
 
