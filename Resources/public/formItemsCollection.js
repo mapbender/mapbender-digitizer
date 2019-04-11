@@ -10,6 +10,8 @@ var FormItemsCollection = function(rawFormItems, schema) {
     $.extend(formItemsCollection.items, formItemsCollection.rawItems);
     $.extend(formItemsCollection.items,Mapbender.DigitizerTranslator.translateStructure(formItemsCollection.items));
 
+    formItems.typify();
+
     formItemsCollection.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
     formItemsCollection.preprocess();
@@ -73,29 +75,50 @@ FormItemsCollection.prototype =  {
         return processedFormItems;
     },
 
-    preprocess: function() {
+    createTypedFormItem: function(item) {
+
+        switch(item.type) {
+            case 'resultTable' :
+                return new FormItemResultTable(item);
+            case 'select' :
+                return new FormItemSelect(item);
+            case 'image' :
+                return new FormItemImage(item);
+            case 'file' :
+                return new FormItemFile(item);
+        }
+
+        return FormItem();
+    },
+
+
+    typify: function() {
         var formItemsCollection = this;
+        var typedItems = [];
 
         formItemsCollection.items.forEach(function (item) {
 
-            if (item.type === "resultTable" && item.editable && !item.isProcessed) {
-                formItemsCollection.preprocessResultTable(item);
-            }
+            var typedItem = formItemsCollection.createTypedFormItem(item);
+            typedItem.dataManager = formItemsCollection.dataManager;
+            typedItem.schema = formItemsCollection.schema;
+            typedItems.push(typedItem);
 
-            if (item.type === "select" && !item.isProcessed && ((item.dataStore && item.dataStore.editable && item.dataStore.popupItems) || item.dataManagerLink)) {
-                formItemsCollection.preprocessSelectWithData(item);
-            }
-
-            if (item.type === "file") {
-                formItemsCollection.preprocessFile(item);
-            }
-
-            if (item.type === 'image') {
-
-                formItemsCollection.preprocessImage(item);
-
-            }
         });
+
+        formItemsCollection.items = typedItems;
+    },
+
+    preprocess: function() {
+        var formItemsCollection = this;
+        var preprocessedItems  = [];
+
+        formItemsCollection.items.forEach(function (item) {
+
+            preprocessedItems.push(item.preprocess());
+
+        });
+
+        formItemsCollection.items = preprocessedItems;
 
     },
 
@@ -108,7 +131,7 @@ FormItemsCollection.prototype =  {
         var onEditClick;
 
         item.processFeature = function (feature) {
-            var processedItem = _.clone(item);
+            var processedItem = $.extend(true,{},item);
             return processedItem;
         };
 
@@ -217,7 +240,7 @@ FormItemsCollection.prototype =  {
         var onEditClick;
 
         item.processFeature = function (feature) {
-            var processedItem = _.clone(item);
+            var processedItem = $.extend(true,{},item);
             return processedItem;
         };
 
@@ -313,7 +336,7 @@ FormItemsCollection.prototype =  {
         var widget = schema.widget;
 
         item.processFeature = function (feature) {
-            var processedItem = _.clone(item);
+            var processedItem = $.extend(true,{},item);
 
             processedItem.uploadHanderUrl = widget.elementUrl + "file/upload?schema=" + schema.schemaName + "&fid=" + feature.fid + "&field=" + item.name;
             if (item.name && feature.data[item.name]) {
@@ -339,7 +362,7 @@ FormItemsCollection.prototype =  {
         var widget = schema.widget;
 
         item.processFeature = function (feature) {
-            var processedItem = _.clone(item);
+            var processedItem = $.extend(true,{},item);
             if (item.name && feature.data[item.name]) {
                 processedItem.dbSrc = feature.data[item.name];
                 if (schema.featureType.files) {
