@@ -1,104 +1,100 @@
-var AllScheme = function () {
+(function () {
+    "use strict";
+    window.AllScheme = function () {
 
-    Scheme.apply(this, arguments);
+        Scheme.apply(this, arguments);
 
+        this.featureType = {
+            geomType: 'all'
+        };
 
-    this.featureType = {
-        geomType: 'all'
     };
 
-};
 
+    AllScheme.prototype = {
 
-AllScheme.prototype = {
+        schemaName: 'all',
 
-    schemaName: 'all',
+        getStyleMapOptions: function (label) {
+            var schema = this;
+            var widget = schema.widget;
 
-    getStyleMapOptions : function (label) {
-        var schema = this;
-        var widget = schema.widget;
+            var rules = [];
 
-        var rules = [];
+            _.each(widget.schemes, function (scheme) {
 
-        _.each(widget.schemes, function (scheme) {
+                var rule = new OpenLayers.Rule({
+                    symbolizer: scheme.layer.styleMap.styles[label].defaultStyle,
+                    evaluate: function (feature) {
+                        var equals = feature.attributes.geomType === scheme.featureType.geomType;
+                        return equals;
+                    }
+                });
 
-            var rule = new OpenLayers.Rule({
-                symbolizer: scheme.layer.styleMap.styles[label].defaultStyle,
+                rules.push(rule);
+            });
+
+            // Regel zur Darstellung von nicht-digitizer Features wie den Modification Vertices
+            rules.push(new OpenLayers.Rule({
+
+                symbolizer: OpenLayers.Feature.Vector.style['default'],
                 evaluate: function (feature) {
-                    var equals = feature.attributes.geomType === scheme.featureType.geomType;
-                    return equals;
+                    return !feature.attributes.geomType;
                 }
-            });
+            }));
 
-            rules.push(rule);
-        });
-
-        // Regel zur Darstellung von nicht-digitizer Features wie den Modification Vertices
-        rules.push(new OpenLayers.Rule({
-
-            symbolizer:  OpenLayers.Feature.Vector.style['default'],
-            evaluate: function (feature) {
-                return !feature.attributes.geomType;
+            return {
+                rules: rules
             }
-        }));
+        },
 
-        return {
-            rules: rules
-        }
-    },
+        createToolset: function () {
+            var schema = this;
+            var widget = schema.widget;
+            var toolset = [];
+            _.each(widget.schemes, function (scheme, schemaName) {
+                $.each(scheme.toolset, function (i, element) {
 
-    createToolset : function () {
-        var schema = this;
-        var widget = schema.widget;
-        var toolset = [];
-        _.each(widget.schemes, function (scheme, schemaName) {
-            $.each(scheme.toolset, function (i, element) {
+                    // Avoid duplicates, i.e. elements with same 'type' property
+                    if (toolset.filter(function (t) {
+                        return t.type === element.type
+                    }).length === 0) {
+                        toolset.push(element);
+                    }
 
-                // Avoid duplicates, i.e. elements with same 'type' property
-                if (toolset.filter(function (t) {
-                    return t.type === element.type
-                }).length === 0) {
-                    toolset.push(element);
-                }
+                });
 
             });
 
-        });
+            // TODO find better place for all possible controls in array
+            var config = ['drawPoint', 'drawLine', 'drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'drawText', 'modifyFeature', 'moveFeature', 'selectFeature', 'removeSelected'];
 
-        // TODO find better place for all possible controls in array
-        var config = ['drawPoint', 'drawLine', 'drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'drawText', 'modifyFeature', 'moveFeature', 'selectFeature', 'removeSelected'];
+            toolset = toolset.sort(function (a, b) {
+                return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : -1;
+            });
 
-        toolset = toolset.sort(function (a, b) {
-            return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : -1;
-        });
-
-        return toolset;
-    },
+            return toolset;
+        },
 
 
-
-    getFormItems: function (feature) {
-        var schema = this;
-        var widget = schema.widget;
-        console.assert(!!feature.attributes.geomType, "geometry type of new Feature must be set");
-        var featureSchema = widget.getSchemaByGeomType(feature.attributes.geomType);
-        return featureSchema.getFormItems(feature);
-    },
-
+        getFormItems: function (feature) {
+            var schema = this;
+            var widget = schema.widget;
+            console.assert(!!feature.attributes.geomType, "geometry type of new Feature must be set");
+            var featureSchema = widget.getSchemaByGeomType(feature.attributes.geomType);
+            return featureSchema.getFormItems(feature);
+        },
 
 
+        getSchemaByFeature: function (feature) {
+            var schema = this;
+            var widget = schema.widget;
+
+            return widget.getSchemaByGeomType(feature.attributes.geomType);
+        }
+    };
 
 
+    Object.setPrototypeOf(AllScheme.prototype, Scheme.prototype);
 
-    getSchemaByFeature: function (feature) {
-        var schema = this;
-        var widget = schema.widget;
-
-        return widget.getSchemaByGeomType(feature.attributes.geomType);
-    }
-};
-
-
-
-
-Object.setPrototypeOf(AllScheme.prototype,Scheme.prototype);
+})();

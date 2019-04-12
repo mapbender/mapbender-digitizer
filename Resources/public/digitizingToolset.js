@@ -1,4 +1,5 @@
 (function ($) {
+    "use strict";
 
     $.widget("mapbender.digitizingToolSet", {
 
