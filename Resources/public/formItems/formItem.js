@@ -5,9 +5,7 @@
 
         var formItem = this;
         formItem.children = [];
-        $.extend(true, formItem, item);
-
-
+        $.extend(true, formItem, item); // Deep copy
     };
 
     FormItem.prototype = {
@@ -16,9 +14,9 @@
 
         clone: function () {
             var formItem = this;
-            var clonedItem = new formItem.constructor(formItem);
+            console.assert(formItem.constructor !== window.FormItem,"An abstract Form Item cannot be cloned");
+            var clonedItem = new formItem.constructor(formItem,formItem.schema);
             var children = [];
-            console.assert(!!formItem.children, formItem);
             formItem.children.forEach(function (childFormItem) {
                 children.push(childFormItem.clone());
             });
@@ -29,11 +27,11 @@
         },
 
 
-        preprocess: function () {
+        preprocess: function (schema) {
             return this.clone();
         },
 
-        process: function (feature) {
+        process: function (feature,dialog,schema) {
             return this.clone();
         },
 

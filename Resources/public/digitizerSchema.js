@@ -7,6 +7,8 @@
 
         $.extend(schema, rawScheme);
 
+        schema.widget = widget;
+
         schema.formItems = new FormItemsCollection(schema.formItems, schema);
 
         schema.popup = $.extend({}, Scheme.prototype.popup, rawScheme.popup);
@@ -14,8 +16,6 @@
         schema._initializeHooks();
 
         schema.setModifiedState = Scheme.prototype.setModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
-
-        schema.widget = widget;
 
         schema.toolset = schema.createToolset();
 

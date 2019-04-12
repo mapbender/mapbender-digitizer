@@ -5,7 +5,6 @@
 
         var formItemsCollection = this;
 
-        formItemsCollection.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
         formItemsCollection.schema = schema;
 
         formItemsCollection.rawItems = rawFormItems;
@@ -21,21 +20,6 @@
         Object.freeze(formItemsCollection.preprocessedItems);
 
     };
-
-    FormItemsCollection.createTypedFormItem = function (item) {
-
-        var typeName = item.type.charAt(0).toUpperCase() + item.type.slice(1);
-        var constructorName = 'FormItem' + typeName;
-        var constructor = window[constructorName];
-
-        if (typeof constructor !== "function") {
-            throw new Error("No function '" + constructorName + "' defined");
-        }
-        return new constructor(item);
-
-        // TODO Sicherheitscheck einbauen
-    };
-
 
     FormItemsCollection.modifyRecursively = function (items, modificator) {
 
@@ -97,7 +81,7 @@
         process: function (feature, dialog) {
             var formItemsCollection = this;
             return FormItemsCollection.modifyRecursively(formItemsCollection.preprocessedItems, function (item) {
-                var processedItem = item.process(feature, dialog);
+                var processedItem = item.process(feature, dialog, formItemsCollection.schema);
                 return processedItem;
             });
 
@@ -107,7 +91,7 @@
         preprocess: function () {
             var formItemsCollection = this;
             return FormItemsCollection.modifyRecursively(formItemsCollection.typedItems, function (item) {
-                var preprocessedItem = item.preprocess();
+                var preprocessedItem = item.preprocess(formItemsCollection.schema);
                 return preprocessedItem;
             });
 
@@ -115,7 +99,21 @@
 
         typify: function () {
             var formItemsCollection = this;
-            return FormItemsCollection.modifyRecursively(formItemsCollection.rawItems, FormItemsCollection.createTypedFormItem);
+            return FormItemsCollection.modifyRecursively(formItemsCollection.rawItems, formItemsCollection.createTypedFormItem.bind(formItemsCollection));
+        },
+
+
+        createTypedFormItem: function (item) {
+            var formItemsCollection = this;
+
+            var typeName = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+            var constructorName = 'FormItem' + typeName;
+            var constructor = window[constructorName];
+
+            if (typeof constructor !== "function") {
+                throw new Error("No function '" + constructorName + "' defined");
+            }
+            return new constructor(item);
         },
 
 

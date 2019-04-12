@@ -121,6 +121,7 @@
             }.bind(this));
 
 
+            widget.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
 
         },

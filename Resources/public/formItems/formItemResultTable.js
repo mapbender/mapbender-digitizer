@@ -10,7 +10,7 @@
         CLASS_NAME: "FormItemResultTable",
 
 
-        process: function (feature, dialog) {
+        process: function (feature, dialog, schema) {
 
 
             var item = this;
@@ -51,7 +51,7 @@
 
         },
 
-        preprocess: function () {
+        preprocess: function (schema) {
             var item = this;
 
             if (!item.editable) {
