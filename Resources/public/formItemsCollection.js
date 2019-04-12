@@ -2,19 +2,17 @@ var FormItemsCollection = function(rawFormItems, schema) {
 
     var formItemsCollection = this;
 
+    formItemsCollection.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
     formItemsCollection.schema = schema;
 
     formItemsCollection.rawItems = rawFormItems;
-    formItemsCollection.items =  [];
 
-    $.extend(formItemsCollection.items, formItemsCollection.rawItems);
-    $.extend(formItemsCollection.items,Mapbender.DigitizerTranslator.translateStructure(formItemsCollection.items));
 
-    formItemsCollection.typify(formItemsCollection.items);
+    formItemsCollection.rawItems = $.extend(formItemsCollection.rawItems,Mapbender.DigitizerTranslator.translateStructure(formItemsCollection.rawItems));
 
-    formItemsCollection.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+    formItemsCollection.typedItems = formItemsCollection.typify();
 
-    formItemsCollection.preprocess();
+    formItemsCollection.preprocessedItems = formItemsCollection.preprocess();
 
 
     //TODO prevent items from being modified afterwards
@@ -25,12 +23,12 @@ FormItemsCollection.createTypedFormItem = function(item) {
 
     var typeName = item.type.charAt(0).toUpperCase() + item.type.slice(1);
     return new window['FormItem'+typeName](item);
+
+    // TODO Sicherheitscheck einbauen
 };
 
 
 FormItemsCollection.modifyRecursively =  function(items, modificator) {
-
-    console.assert(Array.isArray(items));
 
     var modifiedItems = [];
     items.forEach(function (item) {
@@ -89,7 +87,7 @@ FormItemsCollection.prototype =  {
 
     process: function(feature) {
         var formItemsCollection = this;
-        formItemsCollection.items = FormItemsCollection.modifyRecursively(formItemsCollection.items,function(item) {
+        return FormItemsCollection.modifyRecursively(formItemsCollection.preprocessedItems,function(item) {
             var processedItem = item.process(feature);
             return processedItem;
         });
@@ -99,7 +97,7 @@ FormItemsCollection.prototype =  {
 
     preprocess: function() {
         var formItemsCollection = this;
-        formItemsCollection.items = FormItemsCollection.modifyRecursively(formItemsCollection.items,function(item) {
+        return FormItemsCollection.modifyRecursively(formItemsCollection.typedItems,function(item) {
             var preprocessedItem = item.preprocess();
             return preprocessedItem;
         });
@@ -108,170 +106,170 @@ FormItemsCollection.prototype =  {
 
     typify: function() {
         var formItemsCollection = this;
-        formItemsCollection.items = FormItemsCollection.modifyRecursively(formItemsCollection.items,FormItemsCollection.createTypedFormItem);
+        return FormItemsCollection.modifyRecursively(formItemsCollection.rawItems,FormItemsCollection.createTypedFormItem);
     },
 
 
 
 
-    preprocessSelectWithData: function(item) {
-        var formItemsCollection = this;
-        var schema = formItemsCollection.schema;
-        var dataManager = formItemsCollection.dataManager;
+    // preprocessSelectWithData: function(item) {
+    //     var formItemsCollection = this;
+    //     var schema = formItemsCollection.schema;
+    //     var dataManager = formItemsCollection.dataManager;
+    //
+    //     var onCreateClick;
+    //     var onEditClick;
+    //
+    //     item.processFeature = function (feature) {
+    //         var processedItem = $.extend(true,{},item);
+    //         return processedItem;
+    //     };
+    //
+    //     if (item.dataManagerLink) {
+    //         var schemaName = item.dataManagerLink.schema;
+    //         var schemaFieldName = item.dataManagerLink.schemaFieldName;
+    //
+    //
+    //         onCreateClick = function (e) {
+    //             e.preventDefault && e.preventDefault();
+    //
+    //             dataManager.withSchema(schemaName, function (schema) {
+    //                 dataManager._openEditDialog(schema.create());
+    //
+    //             });
+    //             $(dataManager.element).on('data.manager.item.saved', function (event, eventData) {
+    //                 var uniqueIdKey = eventData.uniqueIdKey;
+    //                 var text = item.itemPattern.replace('{id}', eventData.item[uniqueIdKey]).replace('{name}', eventData.item[item.itemName]);
+    //                 var $option = $('<option />').val(eventData.item[uniqueIdKey]).text(text);
+    //                 var $select = $('select[name=' + item.name + ']').append($option);
+    //                 $select.val(eventData.item[uniqueIdKey]);
+    //             });
+    //             return false;
+    //         };
+    //
+    //         onEditClick = function (e) {
+    //             e.preventDefault && e.preventDefault();
+    //
+    //             var val = $(this).siblings().find('select').val();
+    //             dataManager.withSchema(schemaName, function (schema) {
+    //                 var dataItem = _.find(schema.dataItems, function (d) {
+    //                     return d[schemaFieldName].toString() === val;
+    //                 });
+    //                 var dialog = dataManager._openEditDialog(dataItem);
+    //
+    //             });
+    //
+    //             return false;
+    //         };
+    //     } else {
+    //
+    //
+    //         onCreateClick = function () {
+    //             var dataItemId = $(this).siblings().find('select').val();
+    //             var selectRef = $(this).siblings().find('select');
+    //
+    //             var dataStoreId = item.dataStore.id;
+    //             QueryEngine.query("datastore/get", {
+    //                 schema: schema.schemaName,
+    //                 id: dataStoreId,
+    //                 dataItemId: dataItemId
+    //             }).done(function (data) {
+    //                 dataManagerUtils.openEditDialog(data, item.dataStore.popupItems, item, selectRef);
+    //
+    //             });
+    //
+    //             return false;
+    //         };
+    //
+    //         onEditClick = function () {
+    //             var selectRef = $(this).siblings().find('select');
+    //             dataManagerUtils.openEditDialog({}, item.dataStore.popupItems, item, selectRef);
+    //
+    //             return false;
+    //         };
+    //     }
+    //
+    //     var cloneItem = $.extend({}, item);
+    //     cloneItem.isProcessed = true;
+    //     item.type = "fieldSet";
+    //     item.title = undefined;
+    //     item.children = [
+    //         cloneItem,
+    //         {
+    //             type: "button",
+    //             title: Mapbender.DigitizerTranslator.translate('feature.edit'),
+    //             cssClass: 'edit',
+    //             click: onEditClick
+    //         },
+    //         {
+    //             type: "button",
+    //             title: "",
+    //             cssClass: "fa fa-plus",
+    //             click: onCreateClick
+    //         }
+    //     ];
+    // },
+    //
+    //
+    // preprocessFile: function(item) {
+    //     var formItemsCollection = this;
+    //     var schema = formItemsCollection.schema;
+    //     var widget = schema.widget;
+    //
+    //     item.processFeature = function (feature) {
+    //         var processedItem = $.extend(true,{},item);
+    //
+    //         processedItem.uploadHanderUrl = widget.elementUrl + "file/upload?schema=" + schema.schemaName + "&fid=" + feature.fid + "&field=" + item.name;
+    //         if (item.name && feature.data[item.name]) {
+    //             processedItem.dbSrc = feature.data[item.name];
+    //             if (schema.featureType.files) {
+    //                 schema.featureType.files.forEach(function(fileInfo) {
+    //                     if (fileInfo.field === item.name) {
+    //                         if (fileInfo.formats) {
+    //                             processedItem.accept = fileInfo.formats;
+    //                         }
+    //                     }
+    //                 });
+    //             }
+    //         }
+    //         return processedItem;
+    //     }
+    //
+    // },
+    //
+    // preprocessImage: function(item) {
+    //     var formItemsCollection = this;
+    //     var schema = formItemsCollection.schema;
+    //     var widget = schema.widget;
+    //
+    //     item.processFeature = function (feature) {
+    //         var processedItem = $.extend(true,{},item);
+    //         if (item.name && feature.data[item.name]) {
+    //             processedItem.dbSrc = feature.data[item.name];
+    //             if (schema.featureType.files) {
+    //                 schema.featureType.files.forEach( function (fileInfo) {
+    //                     if (fileInfo.field === item.name) {
+    //                         if (fileInfo.uri) {
+    //                             processedItem.dbSrc = fileInfo.uri + "/" + item.dbSrc;
+    //                         } else {
+    //                             processedItem.dbSrc = widget.options.fileUri + "/" + schema.featureType.table + "/" + processedItem.name + "/" + processedItem.dbSrc;
+    //                         }
+    //                     }
+    //                 });
+    //             }
+    //         }
+    //
+    //         var src = processedItem.dbSrc || processedItem.origSrc;
+    //         if (!processedItem.relative) {
+    //             processedItem.src = src;
+    //         } else {
+    //             processedItem.src = Mapbender.configuration.application.urls.asset + src;
+    //         }
+    //
+    //         return processedItem;
+    //     };
 
-        var onCreateClick;
-        var onEditClick;
 
-        item.processFeature = function (feature) {
-            var processedItem = $.extend(true,{},item);
-            return processedItem;
-        };
-
-        if (item.dataManagerLink) {
-            var schemaName = item.dataManagerLink.schema;
-            var schemaFieldName = item.dataManagerLink.schemaFieldName;
-
-
-            onCreateClick = function (e) {
-                e.preventDefault && e.preventDefault();
-
-                dataManager.withSchema(schemaName, function (schema) {
-                    dataManager._openEditDialog(schema.create());
-
-                });
-                $(dataManager.element).on('data.manager.item.saved', function (event, eventData) {
-                    var uniqueIdKey = eventData.uniqueIdKey;
-                    var text = item.itemPattern.replace('{id}', eventData.item[uniqueIdKey]).replace('{name}', eventData.item[item.itemName]);
-                    var $option = $('<option />').val(eventData.item[uniqueIdKey]).text(text);
-                    var $select = $('select[name=' + item.name + ']').append($option);
-                    $select.val(eventData.item[uniqueIdKey]);
-                });
-                return false;
-            };
-
-            onEditClick = function (e) {
-                e.preventDefault && e.preventDefault();
-
-                var val = $(this).siblings().find('select').val();
-                dataManager.withSchema(schemaName, function (schema) {
-                    var dataItem = _.find(schema.dataItems, function (d) {
-                        return d[schemaFieldName].toString() === val;
-                    });
-                    var dialog = dataManager._openEditDialog(dataItem);
-
-                });
-
-                return false;
-            };
-        } else {
-
-
-            onCreateClick = function () {
-                var dataItemId = $(this).siblings().find('select').val();
-                var selectRef = $(this).siblings().find('select');
-
-                var dataStoreId = item.dataStore.id;
-                QueryEngine.query("datastore/get", {
-                    schema: schema.schemaName,
-                    id: dataStoreId,
-                    dataItemId: dataItemId
-                }).done(function (data) {
-                    dataManagerUtils.openEditDialog(data, item.dataStore.popupItems, item, selectRef);
-
-                });
-
-                return false;
-            };
-
-            onEditClick = function () {
-                var selectRef = $(this).siblings().find('select');
-                dataManagerUtils.openEditDialog({}, item.dataStore.popupItems, item, selectRef);
-
-                return false;
-            };
-        }
-
-        var cloneItem = $.extend({}, item);
-        cloneItem.isProcessed = true;
-        item.type = "fieldSet";
-        item.title = undefined;
-        item.children = [
-            cloneItem,
-            {
-                type: "button",
-                title: Mapbender.DigitizerTranslator.translate('feature.edit'),
-                cssClass: 'edit',
-                click: onEditClick
-            },
-            {
-                type: "button",
-                title: "",
-                cssClass: "fa fa-plus",
-                click: onCreateClick
-            }
-        ];
-    },
-
-
-    preprocessFile: function(item) {
-        var formItemsCollection = this;
-        var schema = formItemsCollection.schema;
-        var widget = schema.widget;
-
-        item.processFeature = function (feature) {
-            var processedItem = $.extend(true,{},item);
-
-            processedItem.uploadHanderUrl = widget.elementUrl + "file/upload?schema=" + schema.schemaName + "&fid=" + feature.fid + "&field=" + item.name;
-            if (item.name && feature.data[item.name]) {
-                processedItem.dbSrc = feature.data[item.name];
-                if (schema.featureType.files) {
-                    schema.featureType.files.forEach(function(fileInfo) {
-                        if (fileInfo.field === item.name) {
-                            if (fileInfo.formats) {
-                                processedItem.accept = fileInfo.formats;
-                            }
-                        }
-                    });
-                }
-            }
-            return processedItem;
-        }
-
-    },
-
-    preprocessImage: function(item) {
-        var formItemsCollection = this;
-        var schema = formItemsCollection.schema;
-        var widget = schema.widget;
-
-        item.processFeature = function (feature) {
-            var processedItem = $.extend(true,{},item);
-            if (item.name && feature.data[item.name]) {
-                processedItem.dbSrc = feature.data[item.name];
-                if (schema.featureType.files) {
-                    schema.featureType.files.forEach( function (fileInfo) {
-                        if (fileInfo.field === item.name) {
-                            if (fileInfo.uri) {
-                                processedItem.dbSrc = fileInfo.uri + "/" + item.dbSrc;
-                            } else {
-                                processedItem.dbSrc = widget.options.fileUri + "/" + schema.featureType.table + "/" + processedItem.name + "/" + processedItem.dbSrc;
-                            }
-                        }
-                    });
-                }
-            }
-
-            var src = processedItem.dbSrc || processedItem.origSrc;
-            if (!processedItem.relative) {
-                processedItem.src = src;
-            } else {
-                processedItem.src = Mapbender.configuration.application.urls.asset + src;
-            }
-
-            return processedItem;
-        };
-
-
-
-    },
+    //
+    // },
 };

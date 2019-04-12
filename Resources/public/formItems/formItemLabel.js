@@ -3,6 +3,9 @@ var FormItemLabel = function() {
 };
 
 FormItemLabel.prototype = {
+
+    CLASS_NAME: "FormItemLabel",
+
 };
 
 Object.setPrototypeOf(FormItemLabel.prototype,FormItem.prototype);

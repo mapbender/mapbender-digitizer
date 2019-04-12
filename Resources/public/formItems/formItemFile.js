@@ -3,6 +3,9 @@ var FormItemFile = function() {
 };
 
 FormItemFile.prototype = {
+
+    CLASS_NAME: "FormItemFile",
+
 };
 
 Object.setPrototypeOf(FormItemFile.prototype,FormItem.prototype);

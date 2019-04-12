@@ -3,6 +3,9 @@ var FormItemInput = function() {
 };
 
 FormItemInput.prototype = {
+
+    CLASS_NAME: "FormItemInput",
+
 };
 
 Object.setPrototypeOf(FormItemInput.prototype,FormItem.prototype);

@@ -3,6 +3,9 @@ var FormItemSelect = function() {
 };
 
 FormItemSelect.prototype = {
+
+    CLASS_NAME: "FormItemSelect",
+
 };
 
 Object.setPrototypeOf(FormItemSelect.prototype,FormItem.prototype);

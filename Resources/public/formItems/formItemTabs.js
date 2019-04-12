@@ -3,6 +3,9 @@ var FormItemTabs = function() {
 };
 
 FormItemTabs.prototype = {
+
+    CLASS_NAME: "FormItemTabs",
+
 };
 
 Object.setPrototypeOf(FormItemTabs.prototype,FormItem.prototype);

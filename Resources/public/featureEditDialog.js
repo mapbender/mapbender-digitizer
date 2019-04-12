@@ -37,6 +37,10 @@ var FeatureEditDialog = function (feature, configuration, schema) {
 
     var formItems = schema.processFormItems(feature);
 
+    console.log(schema.formItems);
+
+    console.log(formItems,"§§§");
+
 
     $popup.generateElements({children: formItems});
 

@@ -3,6 +3,9 @@ var FormItemFieldSet = function() {
 };
 
 FormItemFieldSet.prototype = {
+
+    CLASS_NAME: "FormItemFieldSet",
+
 };
 
 Object.setPrototypeOf(FormItemFieldSet.prototype,FormItem.prototype);

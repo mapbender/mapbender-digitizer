@@ -3,6 +3,9 @@ var FormItemCoordinates = function() {
 };
 
 FormItemCoordinates.prototype = {
+
+    CLASS_NAME: "FormItemCoordinates",
+
 };
 
 Object.setPrototypeOf(FormItemCoordinates.prototype,FormItem.prototype);

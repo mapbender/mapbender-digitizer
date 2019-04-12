@@ -3,6 +3,9 @@ var FormItemBreakLine = function() {
 };
 
 FormItemBreakLine.prototype = {
+
+    CLASS_NAME: "FormItemBreakLine",
+
 };
 
 Object.setPrototypeOf(FormItemBreakLine.prototype,FormItem.prototype);

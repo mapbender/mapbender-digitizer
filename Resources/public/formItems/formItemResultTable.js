@@ -4,6 +4,9 @@ var FormItemResultTable = function () {
 
 FormItemResultTable.prototype = {
 
+    CLASS_NAME: "FormItemResultTable",
+
+
     process: function (feature) {
 
 
@@ -51,7 +54,7 @@ FormItemResultTable.prototype = {
         var item = this;
 
         if (!item.editable) {
-            return FormItem.prototype.preprocess();
+            return item.clone();
         }
 
         var onCreateClick;

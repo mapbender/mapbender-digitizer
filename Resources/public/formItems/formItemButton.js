@@ -3,6 +3,9 @@ var FormItemButton = function() {
 };
 
 FormItemButton.prototype = {
+
+    CLASS_NAME: "FormItemButton",
+
 };
 
 Object.setPrototypeOf(FormItemButton.prototype,FormItem.prototype);

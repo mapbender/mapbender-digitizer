@@ -3,6 +3,9 @@ var FormItemText = function() {
 };
 
 FormItemText.prototype = {
+
+    CLASS_NAME: "FormItemText",
+
 };
 
 Object.setPrototypeOf(FormItemText.prototype,FormItem.prototype);

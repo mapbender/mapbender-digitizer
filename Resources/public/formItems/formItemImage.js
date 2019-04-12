@@ -3,6 +3,9 @@ var FormItemImage = function() {
 };
 
 FormItemImage.prototype = {
+
+    CLASS_NAME: "FormItemImage",
+
 };
 
 Object.setPrototypeOf(FormItemImage.prototype,FormItem.prototype);

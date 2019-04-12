@@ -3,6 +3,9 @@ var FormItemDate = function() {
 };
 
 FormItemDate.prototype = {
+
+    CLASS_NAME: "FormItemDate",
+
 };
 
 Object.setPrototypeOf(FormItemDate.prototype,FormItem.prototype);

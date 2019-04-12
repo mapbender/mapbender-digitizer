@@ -3,6 +3,9 @@ var FormItemTextArea = function() {
 };
 
 FormItemTextArea.prototype = {
+
+    CLASS_NAME: "FormItemTextArea",
+
 };
 
 Object.setPrototypeOf(FormItemTextArea.prototype,FormItem.prototype);

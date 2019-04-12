@@ -360,9 +360,11 @@ Scheme.prototype = {
      */
     processFormItems: function (feature) {
         var schema = this.getSchemaByFeature(feature);
-        var formItems = schema.formItems || schema.getDefaultFormItems(feature);
+        var formItems = schema.formItems || schema.getDefaultFormItems(feature); // TODO Can this ever be called?
 
-        var processedFormItems = formItems.process(feature,schema);
+        var processedFormItems = formItems.process(feature);
+
+        console.log(processedFormItems,"!");
 
         return processedFormItems;
     },
