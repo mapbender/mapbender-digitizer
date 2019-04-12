@@ -85,10 +85,10 @@ FormItemsCollection.prototype =  {
     },
 
 
-    process: function(feature) {
+    process: function(feature,dialog) {
         var formItemsCollection = this;
         return FormItemsCollection.modifyRecursively(formItemsCollection.preprocessedItems,function(item) {
-            var processedItem = item.process(feature);
+            var processedItem = item.process(feature,dialog);
             return processedItem;
         });
 

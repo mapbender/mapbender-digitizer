@@ -7,14 +7,13 @@ FormItemResultTable.prototype = {
     CLASS_NAME: "FormItemResultTable",
 
 
-    process: function (feature) {
+    process: function (feature,dialog) {
 
 
         var item = this;
 
         var dataStoreLinkName = item.dataStoreLink.name;
 
-        console.log(dataStoreLinkName,"$");
         if (dataStoreLinkName) {
 
             var requestData = {
@@ -24,7 +23,6 @@ FormItemResultTable.prototype = {
             };
 
             QueryEngine.query('dataStore/get', requestData).done(function (data) {
-                console.log("!!");
 
                 if (Array.isArray(data)) {
 
@@ -39,14 +37,14 @@ FormItemResultTable.prototype = {
                     data.item = item;
                 }
 
-                var tableApi = $('.mapbender-element-result-table').resultTable('getApi');
+                var tableApi = dialog.find('.mapbender-element-result-table').resultTable('getApi');
                 tableApi.clear();
                 tableApi.rows.add(dataItems);
                 tableApi.draw();
 
             });
         }
-
+        return this.clone();
 
     },
 

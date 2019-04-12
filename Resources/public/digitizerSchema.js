@@ -358,13 +358,11 @@ Scheme.prototype = {
     /**
      * @Overwrite
      */
-    processFormItems: function (feature) {
+    processFormItems: function (feature,dialog) {
         var schema = this.getSchemaByFeature(feature);
         var formItems = schema.formItems || schema.getDefaultFormItems(feature); // TODO Can this ever be called?
 
-        var processedFormItems = formItems.process(feature);
-
-        console.log(processedFormItems,"!");
+        var processedFormItems = formItems.process(feature,dialog);
 
         return processedFormItems;
     },

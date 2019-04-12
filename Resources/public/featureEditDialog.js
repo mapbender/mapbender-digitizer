@@ -21,7 +21,7 @@ var FeatureEditDialog = function (feature, configuration, schema) {
     if (widget.currentPopup) {
         widget.currentPopup.popupDialog('close');
         if (dialog.configuration.isOpenLayersCloudPopup() && schema.olFeatureCloudPopup) {
-            map.removePopup(schema.olFeatureCloudPopup);
+            widget.map.removePopup(schema.olFeatureCloudPopup);
             schema.olFeatureCloudPopup.destroy();
             schema.olFeatureCloudPopup = null;
         }
@@ -35,11 +35,7 @@ var FeatureEditDialog = function (feature, configuration, schema) {
 
     $popup.data('feature', feature);
 
-    var formItems = schema.processFormItems(feature);
-
-    console.log(schema.formItems);
-
-    console.log(formItems,"§§§");
+    var formItems = schema.processFormItems(feature,$popup);
 
 
     $popup.generateElements({children: formItems});
