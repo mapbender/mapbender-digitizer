@@ -1,11 +1,16 @@
-var FormItemTabs = function() {
-    FormItem.apply(this, arguments);
-};
+(function () {
+    "use strict";
 
-FormItemTabs.prototype = {
+    window.FormItemTabs = function () {
+        FormItem.apply(this, arguments);
+    };
 
-    CLASS_NAME: "FormItemTabs",
+    FormItemTabs.prototype = {
 
-};
+        CLASS_NAME: "FormItemTabs",
 
-Object.setPrototypeOf(FormItemTabs.prototype,FormItem.prototype);
+    };
+
+    Object.setPrototypeOf(FormItemTabs.prototype, FormItem.prototype);
+
+})();

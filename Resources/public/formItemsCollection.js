@@ -1,4 +1,5 @@
 var FormItemsCollection = function(rawFormItems, schema) {
+    "use strict";
 
     var formItemsCollection = this;
 
@@ -15,16 +16,20 @@ var FormItemsCollection = function(rawFormItems, schema) {
     Object.freeze(formItemsCollection.typedItems);
 
     formItemsCollection.preprocessedItems = formItemsCollection.preprocess();
-    Object.freeze(formItemsCollection.typedItems);
-
-    //TODO prevent items from being modified afterwards
+    Object.freeze(formItemsCollection.preprocessedItems);
 
 };
 
 FormItemsCollection.createTypedFormItem = function(item) {
 
     var typeName = item.type.charAt(0).toUpperCase() + item.type.slice(1);
-    return new window['FormItem'+typeName](item);
+    var constructorName = 'FormItem'+typeName;
+    var constructor = window[constructorName];
+
+    if (typeof constructor !== "function") {
+        throw new Error("No function '"+constructorName+"' defined");
+    }
+    return new constructor(item);
 
     // TODO Sicherheitscheck einbauen
 };

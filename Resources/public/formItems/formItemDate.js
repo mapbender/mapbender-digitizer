@@ -1,11 +1,16 @@
-var FormItemDate = function() {
-    FormItem.apply(this, arguments);
-};
+(function () {
+    "use strict";
 
-FormItemDate.prototype = {
+    window.FormItemDate = function () {
+        FormItem.apply(this, arguments);
+    };
 
-    CLASS_NAME: "FormItemDate",
+    FormItemDate.prototype = {
 
-};
+        CLASS_NAME: "FormItemDate",
 
-Object.setPrototypeOf(FormItemDate.prototype,FormItem.prototype);
+    };
+
+    Object.setPrototypeOf(FormItemDate.prototype, FormItem.prototype);
+
+})();

@@ -1,11 +1,16 @@
-var FormItemTextArea = function() {
-    FormItem.apply(this, arguments);
-};
+(function () {
+    "use strict";
 
-FormItemTextArea.prototype = {
+    window.FormItemTextArea = function () {
+        FormItem.apply(this, arguments);
+    };
 
-    CLASS_NAME: "FormItemTextArea",
+    FormItemTextArea.prototype = {
 
-};
+        CLASS_NAME: "FormItemTextArea",
 
-Object.setPrototypeOf(FormItemTextArea.prototype,FormItem.prototype);
+    };
+
+    Object.setPrototypeOf(FormItemTextArea.prototype, FormItem.prototype);
+
+})();

@@ -1,37 +1,42 @@
-var FormItem = function (item) {
+(function () {
+    "use strict";
 
-    var formItem = this;
-    formItem.children = [];
-    $.extend(true,formItem, item);
+    window.FormItem = function (item) {
 
-
-};
-
-FormItem.prototype = {
-
-    CLASS_NAME: "FormItem",
-
-    clone: function() {
         var formItem = this;
-        var clonedItem =  new formItem.constructor(formItem);
-        var children = [];
-        console.assert(!!formItem.children,formItem);
-        formItem.children.forEach(function(childFormItem) {
-            children.push(childFormItem.clone());
-        });
-
-        clonedItem.children = children;
-        return clonedItem;
-
-    },
+        formItem.children = [];
+        $.extend(true, formItem, item);
 
 
-    preprocess: function () {
-        return this.clone();
-    },
+    };
 
-    process: function (feature) {
-        return this.clone();
-    },
+    FormItem.prototype = {
 
-};
+        CLASS_NAME: "FormItem",
+
+        clone: function () {
+            var formItem = this;
+            var clonedItem = new formItem.constructor(formItem);
+            var children = [];
+            console.assert(!!formItem.children, formItem);
+            formItem.children.forEach(function (childFormItem) {
+                children.push(childFormItem.clone());
+            });
+
+            clonedItem.children = children;
+            return clonedItem;
+
+        },
+
+
+        preprocess: function () {
+            return this.clone();
+        },
+
+        process: function (feature) {
+            return this.clone();
+        },
+
+    };
+
+})();

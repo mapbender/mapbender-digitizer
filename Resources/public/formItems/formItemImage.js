@@ -1,11 +1,16 @@
-var FormItemImage = function() {
-    FormItem.apply(this, arguments);
-};
+(function () {
+    "use strict";
 
-FormItemImage.prototype = {
+    window.FormItemImage = function () {
+        FormItem.apply(this, arguments);
+    };
 
-    CLASS_NAME: "FormItemImage",
+    FormItemImage.prototype = {
 
-};
+        CLASS_NAME: "FormItemImage",
 
-Object.setPrototypeOf(FormItemImage.prototype,FormItem.prototype);
+    };
+
+    Object.setPrototypeOf(FormItemImage.prototype, FormItem.prototype);
+
+})();

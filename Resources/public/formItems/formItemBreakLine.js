@@ -1,11 +1,16 @@
-var FormItemBreakLine = function() {
-    FormItem.apply(this, arguments);
-};
+(function () {
+    "use strict";
 
-FormItemBreakLine.prototype = {
+    window.FormItemBreakLine = function () {
+        FormItem.apply(this, arguments);
+    };
 
-    CLASS_NAME: "FormItemBreakLine",
+    FormItemBreakLine.prototype = {
 
-};
+        CLASS_NAME: "FormItemBreakLine",
 
-Object.setPrototypeOf(FormItemBreakLine.prototype,FormItem.prototype);
+    };
+
+    Object.setPrototypeOf(FormItemBreakLine.prototype, FormItem.prototype);
+
+})();

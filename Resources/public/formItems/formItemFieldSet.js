@@ -1,11 +1,16 @@
-var FormItemFieldSet = function() {
-    FormItem.apply(this, arguments);
-};
+(function () {
+    "use strict";
 
-FormItemFieldSet.prototype = {
+    window.FormItemFieldSet = function () {
+        FormItem.apply(this, arguments);
+    };
 
-    CLASS_NAME: "FormItemFieldSet",
+    FormItemFieldSet.prototype = {
 
-};
+        CLASS_NAME: "FormItemFieldSet",
 
-Object.setPrototypeOf(FormItemFieldSet.prototype,FormItem.prototype);
+    };
+
+    Object.setPrototypeOf(FormItemFieldSet.prototype, FormItem.prototype);
+
+})();

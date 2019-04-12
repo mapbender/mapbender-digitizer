@@ -1,11 +1,16 @@
-var FormItemButton = function() {
-    FormItem.apply(this, arguments);
-};
+(function () {
+    "use strict";
 
-FormItemButton.prototype = {
+    window.FormItemButton = function () {
+        FormItem.apply(this, arguments);
+    };
 
-    CLASS_NAME: "FormItemButton",
+    FormItemButton.prototype = {
 
-};
+        CLASS_NAME: "FormItemButton",
 
-Object.setPrototypeOf(FormItemButton.prototype,FormItem.prototype);
+    };
+
+    Object.setPrototypeOf(FormItemButton.prototype, FormItem.prototype);
+
+})();

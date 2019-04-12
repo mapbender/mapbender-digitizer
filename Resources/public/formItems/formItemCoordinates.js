@@ -1,11 +1,16 @@
-var FormItemCoordinates = function() {
-    FormItem.apply(this, arguments);
-};
+(function () {
+    "use strict";
 
-FormItemCoordinates.prototype = {
+    window.FormItemCoordinates = function () {
+        FormItem.apply(this, arguments);
+    };
 
-    CLASS_NAME: "FormItemCoordinates",
+    FormItemCoordinates.prototype = {
 
-};
+        CLASS_NAME: "FormItemCoordinates",
 
-Object.setPrototypeOf(FormItemCoordinates.prototype,FormItem.prototype);
+    };
+
+    Object.setPrototypeOf(FormItemCoordinates.prototype, FormItem.prototype);
+
+})();

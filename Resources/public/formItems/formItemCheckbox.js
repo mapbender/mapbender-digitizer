@@ -1,11 +1,16 @@
-var FormItemCheckbox = function() {
-    FormItem.apply(this, arguments);
-};
+(function () {
+    "use strict";
 
-FormItemCheckbox.prototype = {
+    window.FormItemCheckbox = function () {
+        FormItem.apply(this, arguments);
+    };
 
-    CLASS_NAME: "FormItemCheckbox",
+    FormItemCheckbox.prototype = {
 
-};
+        CLASS_NAME: "FormItemCheckbox",
 
-Object.setPrototypeOf(FormItemCheckbox.prototype,FormItem.prototype);
+    };
+
+    Object.setPrototypeOf(FormItemCheckbox.prototype, FormItem.prototype);
+
+})();

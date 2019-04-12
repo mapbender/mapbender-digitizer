@@ -1,11 +1,16 @@
-var FormItemSelect = function() {
-    FormItem.apply(this, arguments);
-};
+(function () {
+    "use strict";
 
-FormItemSelect.prototype = {
+    window.FormItemSelect = function () {
+        FormItem.apply(this, arguments);
+    };
 
-    CLASS_NAME: "FormItemSelect",
+    FormItemSelect.prototype = {
 
-};
+        CLASS_NAME: "FormItemSelect",
 
-Object.setPrototypeOf(FormItemSelect.prototype,FormItem.prototype);
+    };
+
+    Object.setPrototypeOf(FormItemSelect.prototype, FormItem.prototype);
+
+})();
