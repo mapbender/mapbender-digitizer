@@ -362,7 +362,7 @@ Scheme.prototype = {
         var schema = this.getSchemaByFeature(feature);
         var formItems = schema.formItems || schema.getDefaultFormItems(feature);
 
-        var processedFormItems = formItems.process(feature);
+        var processedFormItems = formItems.process(feature,schema);
 
         return processedFormItems;
     },

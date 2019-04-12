@@ -10,7 +10,7 @@ var FormItemsCollection = function(rawFormItems, schema) {
     $.extend(formItemsCollection.items, formItemsCollection.rawItems);
     $.extend(formItemsCollection.items,Mapbender.DigitizerTranslator.translateStructure(formItemsCollection.items));
 
-    formItemsCollection.items = FormItemsCollection.typify(formItemsCollection.items);
+    formItemsCollection.typify(formItemsCollection.items);
 
     formItemsCollection.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
@@ -23,38 +23,27 @@ var FormItemsCollection = function(rawFormItems, schema) {
 
 FormItemsCollection.createTypedFormItem = function(item) {
 
-    item.children
-
-    switch(item.type) {
-        case 'resultTable' :
-            return new FormItemResultTable(item);
-        case 'select' :
-            return new FormItemSelect(item);
-        case 'image' :
-            return new FormItemImage(item);
-        case 'file' :
-            return new FormItemFile(item);
-        case 'tabs' :
-            return new FormItemTabs(item);
-    }
-
-    return new FormItem(item);
+    var typeName = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+    return new window['FormItem'+typeName](item);
 };
 
-FormItemsCollection.typify =  function(items) {
 
-    var typedItems = [];
+FormItemsCollection.modifyRecursively =  function(items, modificator) {
+
+    console.assert(Array.isArray(items));
+
+    var modifiedItems = [];
     items.forEach(function (item) {
 
-        var typedItem = FormItemsCollection.createTypedFormItem(item);
-        typedItem.children = FormItemsCollection.typify(item.children || []);
+        var modifiedItem = modificator(item);
+        modifiedItem.children = FormItemsCollection.modifyRecursively(item.children || [],modificator);
 
-        typedItems.push(typedItem);
+        modifiedItems.push(modifiedItem);
 
     });
 
-    return typedItems;
-},
+    return modifiedItems;
+};
 
 
 FormItemsCollection.prototype =  {
@@ -100,31 +89,26 @@ FormItemsCollection.prototype =  {
 
     process: function(feature) {
         var formItemsCollection = this;
-        var processedFormItems = [];
-        formItemsCollection.items.forEach(function(item) {
-
-            //TODO use typed formItem
-            processedFormItems.push(item.process(feature));
-
+        formItemsCollection.items = FormItemsCollection.modifyRecursively(formItemsCollection.items,function(item) {
+            var processedItem = item.process(feature);
+            return processedItem;
         });
 
-        return processedFormItems;
     },
 
 
     preprocess: function() {
         var formItemsCollection = this;
-        var preprocessedItems  = [];
-
-        formItemsCollection.items.forEach(function (item) {
-
-            var preProcessedItem = item.preprocess(formItemsCollection.schema,formItemsCollection.dataManager);
-            preprocessedItems.push(preProcessedItem);
-
+        formItemsCollection.items = FormItemsCollection.modifyRecursively(formItemsCollection.items,function(item) {
+            var preprocessedItem = item.preprocess();
+            return preprocessedItem;
         });
 
-        formItemsCollection.items = preprocessedItems;
+    },
 
+    typify: function() {
+        var formItemsCollection = this;
+        formItemsCollection.items = FormItemsCollection.modifyRecursively(formItemsCollection.items,FormItemsCollection.createTypedFormItem);
     },
 
 

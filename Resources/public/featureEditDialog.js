@@ -46,7 +46,6 @@ var FeatureEditDialog = function (feature, configuration, schema) {
 
     dialog.doFeatureEditDialogBindings();
 
-    dialog.retrieveFeatureTableDataFromDataStore();
     dialog.addFeatureDataToEditDialog();
 
 
@@ -165,55 +164,6 @@ FeatureEditDialog.prototype = {
         }
     },
 
-
-    // TODO find out what this is for
-    retrieveFeatureTableDataFromDataStore: function () {
-        var dialog = this;
-        var $popup = dialog.$popup;
-        var feature = dialog.feature;
-
-        var tables = $popup.find(".mapbender-element-result-table");
-        // TODO Tables exist only when
-        _.each(tables, function (table) {
-
-            var item = $(table).data('item');
-            $(table).data('feature', feature);
-            if (item.editable) {
-                item.columns.pop();
-            }
-
-            var dataStoreLinkName = item.dataStoreLink.name;
-            if (dataStoreLinkName) {
-                var requestData = {
-                    dataStoreLinkName: dataStoreLinkName,
-                    fid: feature.fid,
-                    fieldName: item.dataStoreLink.fieldName
-                };
-
-                QueryEngine.query('dataStore/get', requestData).done(function (data) {
-                    if (Array.isArray(data)) {
-
-                        var dataItems = [];
-                        _.each(data, function (el, i) {
-                            el.attributes.item = item;
-                            dataItems.push(el.attributes)
-
-                        });
-
-                    } else {
-                        data.item = item;
-                    }
-
-                    var tableApi = $(table).resultTable('getApi');
-                    tableApi.clear();
-                    tableApi.rows.add(dataItems);
-                    tableApi.draw();
-
-                });
-            }
-
-        });
-    },
 
     addFeatureDataToEditDialog: function () {
         var dialog = this;

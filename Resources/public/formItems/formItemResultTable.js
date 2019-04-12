@@ -1,18 +1,57 @@
-var FormItemResultTable = function() {
+var FormItemResultTable = function () {
     FormItem.apply(this, arguments);
 };
 
 FormItemResultTable.prototype = {
 
-    process: function(feature) {
+    process: function (feature) {
+
+
+        var item = this;
+
+        var dataStoreLinkName = item.dataStoreLink.name;
+
+        console.log(dataStoreLinkName,"$");
+        if (dataStoreLinkName) {
+
+            var requestData = {
+                dataStoreLinkName: dataStoreLinkName,
+                fid: feature.fid,
+                fieldName: item.dataStoreLink.fieldName
+            };
+
+            QueryEngine.query('dataStore/get', requestData).done(function (data) {
+                console.log("!!");
+
+                if (Array.isArray(data)) {
+
+                    var dataItems = [];
+                    _.each(data, function (el, i) {
+                        el.attributes.item = item;
+                        dataItems.push(el.attributes)
+
+                    });
+
+                } else {
+                    data.item = item;
+                }
+
+                var tableApi = $('.mapbender-element-result-table').resultTable('getApi');
+                tableApi.clear();
+                tableApi.rows.add(dataItems);
+                tableApi.draw();
+
+            });
+        }
+
 
     },
 
-    preprocess: function(schema,dataManager) {
+    preprocess: function () {
         var item = this;
 
-        if(!item.editable) {
-            return;
+        if (!item.editable) {
+            return FormItem.prototype.preprocess();
         }
 
         var onCreateClick;
@@ -54,8 +93,7 @@ FormItemResultTable.prototype = {
 
                 return false;
             };
-        }
-        else {
+        } else {
             var schemaName = item.dataManagerLink.schema;
             var fieldName = item.dataManagerLink.fieldName;
             var schemaFieldName = item.dataManagerLink.schemaFieldName;
@@ -88,7 +126,7 @@ FormItemResultTable.prototype = {
         var cloneItem = new FormItemResultTable(item);
         //cloneItem.isProcessed = true;
 
-        $.extend(cloneItem,{
+        $.extend(cloneItem, {
 
             buttons: [new FormItemButton({
                 title: Mapbender.DigitizerTranslator.translate('feature.edit'),
@@ -100,7 +138,7 @@ FormItemResultTable.prototype = {
 
         var containerItem = new FormItemContainer(item);
 
-        var button = new FormItemButton ({
+        var button = new FormItemButton({
             title: "",
             cssClass: "fa fa-plus",
             click: onCreateClick
@@ -115,4 +153,4 @@ FormItemResultTable.prototype = {
 
 };
 
-Object.setPrototypeOf(FormItemResultTable.prototype,FormItem.prototype);
+Object.setPrototypeOf(FormItemResultTable.prototype, FormItem.prototype);
