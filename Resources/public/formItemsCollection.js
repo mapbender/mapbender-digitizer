@@ -9,11 +9,13 @@ var FormItemsCollection = function(rawFormItems, schema) {
 
 
     formItemsCollection.rawItems = $.extend(formItemsCollection.rawItems,Mapbender.DigitizerTranslator.translateStructure(formItemsCollection.rawItems));
+    Object.freeze(formItemsCollection.rawItems);
 
     formItemsCollection.typedItems = formItemsCollection.typify();
+    Object.freeze(formItemsCollection.typedItems);
 
     formItemsCollection.preprocessedItems = formItemsCollection.preprocess();
-
+    Object.freeze(formItemsCollection.typedItems);
 
     //TODO prevent items from being modified afterwards
 

@@ -44,7 +44,7 @@ Refactoring - Code sortieren:
 - Context Menu in den Handler des Select Controls auslagern (Rechtsklick!)
 - Seperation of Concerns - Inititalisierung und Anwendung trennen
 - Druck reparieren
-
+- Alles in strict mode
 
 
 Testing:
