@@ -1278,8 +1278,11 @@
                         label: '',
                         attr: {'href': '#', 'title': 'Automatisch ermitteln' },
                         click: function () {
+                            var inputfield = $(widget.currentPopup).find("[name=" + item.name + "]");
+                            inputfield.attr('disabled','disabled');
                             widget._getRemotePropertyValue(olFeature, schema, item.name).done(function (value) {
-                                $(widget.currentPopup).find("[name=" + item.name + "]").val(value).keyup();
+                                inputfield.removeAttr('disabled');
+                                inputfield.val(value).keyup();
                             });
                             return false;
                         }
