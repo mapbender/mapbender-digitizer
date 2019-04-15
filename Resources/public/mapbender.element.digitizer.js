@@ -1106,7 +1106,7 @@
                     click: function (e) {
                         var dialog = $(this).closest('.ui-dialog-content');
                         var feature = dialog.data('feature');
-                        widget.copyFeature(olFeature); // TODO possibly a bug?
+                        widget.copyFeature(feature);
                     }
                 });
             }
