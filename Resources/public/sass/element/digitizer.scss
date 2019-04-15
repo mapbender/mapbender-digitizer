@@ -245,3 +245,7 @@ $selectColor: #F7F79A;
   background: #aaaaaa;
   opacity: 0.5;
 }
+
+.coordinates-container, .automatic-detection-fieldset {
+  box-sizing: content-box;
+}

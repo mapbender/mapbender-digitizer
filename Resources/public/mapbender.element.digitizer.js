@@ -1266,7 +1266,7 @@
                         name: item.name,
                         mandatory: item.mandatory,
                         options: item.options,
-                        css: {width: '75%'},
+                        css: {width: '80%'},
                         keyup: item.keyup,
 
                     };
@@ -1274,7 +1274,7 @@
                     var button = {
                         type: "button",
                         title: "<i class='fa fa-plus'></i>",
-                        css: {'margin-left': ' 15px', 'margin-bottom': '2px'},
+                        css: {'margin-left': '15px', 'margin-bottom': '2px', 'width': '10%', 'max-width': '30px'},
                         label: '',
                         attr: {'href': '#', 'title': 'Automatisch ermitteln' },
                         click: function () {
@@ -1291,6 +1291,7 @@
                     item.type = "fieldSet";
                     item.title = '';
                     item.label = '';
+                    item.cssClass = 'automatic-detection-fieldset';
                     item.children = children;
 
                 }
@@ -1409,11 +1410,11 @@
                     }
 
                     var EPSGSelection = {
-                        title: 'EPSG:',
+                        title: item.title_epsg || 'EPSG:',
                         type: 'select',
                         options: epsgCodes,
                         value: mapProjection,
-                        css : { width: '33.3%' },
+                        css : { width: '33.33%' },
                         cssClass: '-fn-active-epsgCode',
                         change: function(){
 
@@ -1441,7 +1442,7 @@
                     var input = {
                         type : 'input',
                         label: '',
-                        css : { width: '33.3%' },
+                        css : { width: '33.33%' },
 
                     };
                     _.each(['x','y'], function(direction,i){
@@ -1449,7 +1450,7 @@
                         var child  = {
                             cssClass : '-fn-coordinates ' + direction,
                             tile: direction + ': ',
-                            title: (direction==='x' ? 'longitude' : 'latitude') + ': ',
+                            title: (direction==='x' ? item.title_longitude || 'longitude' : item.title_latitude || 'latitude' ) + ': ',
                             name: direction,
                             css: " { width: 33%; }",
                             change : function(){
@@ -1496,7 +1497,7 @@
                     children.push(EPSGSelection);
                     item.type = "fieldSet";
                     item.children=  children;
-                    item.cssClass =  '-fn-coordinates-container'
+                    item.cssClass =  '-fn-coordinates-container coordinates-container';
 
                 }
                 if (item.type === "select" && !item.isProcessed && ((item.dataStore && item.dataStore.editable && item.dataStore.popupItems) || item.dataManagerLink)) {
