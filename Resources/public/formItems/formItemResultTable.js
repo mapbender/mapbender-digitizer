@@ -1,16 +1,9 @@
 (function () {
     "use strict";
 
-    window.FormItemResultTable = function () {
-        FormItem.apply(this, arguments);
-    };
+    window.FormItemResultTable = {
 
-    FormItemResultTable.prototype = {
-
-        CLASS_NAME: "FormItemResultTable",
-
-
-        process: function (feature, dialog, schema) {
+        process: function (feature, dialog) {
 
 
             var item = this;
@@ -51,7 +44,7 @@
 
         },
 
-        preprocess: function (schema) {
+        preprocess: function () {
             var item = this;
 
             if (!item.editable) {
@@ -127,27 +120,30 @@
                 };
             }
 
-            var cloneItem = new FormItemResultTable(item);
-            //cloneItem.isProcessed = true;
+            var cloneItem = item.clone();
+            Object.setPrototypeOf(cloneItem,FormItemResultTable);
+            var button = {
+                title: Mapbender.DigitizerTranslator.translate('feature.edit'),
+                className: 'edit',
+                onClick: onEditClick
+            };
+            Object.setPrototypeOf(button,FormItemButton);
+            cloneItem.buttons = [button];
 
-            $.extend(cloneItem, {
-
-                buttons: [new FormItemButton({
-                    title: Mapbender.DigitizerTranslator.translate('feature.edit'),
-                    className: 'edit',
-                    onClick: onEditClick
-                })]
-            });
+            // TODO check if otther formElements are used as buttons, not as children
 
 
-            var containerItem = new FormItemContainer(item);
 
-            var button = new FormItemButton({
+            var containerItem = item.clone();
+            Object.setPrototypeOf(containerItem,FormItemContainer);
+
+
+            var button2 = {
                 title: "",
                 cssClass: "fa fa-plus",
                 click: onCreateClick
-            });
-
+            };
+            Object.setPrototypeOf(button2,FormItemButton);
             containerItem.children = [button, cloneItem];
 
 
@@ -157,6 +153,6 @@
 
     };
 
-    Object.setPrototypeOf(FormItemResultTable.prototype, FormItem.prototype);
+    Object.setPrototypeOf(FormItemResultTable, FormItem);
 
 })();

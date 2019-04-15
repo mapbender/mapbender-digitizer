@@ -1,33 +1,49 @@
 (function () {
     "use strict";
 
-    window.FormItemsCollection = function (rawFormItems, schema) {
+    window.FormItemsCollection = function (items, schema) {
 
         var formItemsCollection = this;
 
         formItemsCollection.schema = schema;
 
-        formItemsCollection.rawItems = rawFormItems;
+
+        formItemsCollection.items = modifyRecursively(items, function(item){
+            setPrototypeOfFormItem(item);
+            item.schema = schema;
+            return item;
+        });
 
 
-        formItemsCollection.rawItems = $.extend(formItemsCollection.rawItems, Mapbender.DigitizerTranslator.translateStructure(formItemsCollection.rawItems));
-        Object.freeze(formItemsCollection.rawItems);
+        formItemsCollection.items = modifyRecursively(formItemsCollection.items, function (item) {
+            var preprocessedItem = item.preprocess();
+            return preprocessedItem;
+        });
 
-        formItemsCollection.typedItems = formItemsCollection.typify();
-        Object.freeze(formItemsCollection.typedItems);
+        Object.freeze(formItemsCollection.items);
 
-        formItemsCollection.preprocessedItems = formItemsCollection.preprocess();
-        Object.freeze(formItemsCollection.preprocessedItems);
 
     };
 
-    FormItemsCollection.modifyRecursively = function (items, modificator) {
+    var setPrototypeOfFormItem = function (item) {
+
+        var typeName = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+        var prototypeName = 'FormItem' + typeName;
+        var prototype = window[prototypeName];
+
+        if (!prototype) {
+            throw new Error("No prototype '" + prototypeName + "' defined");
+        }
+        Object.setPrototypeOf(item,prototype);
+    };
+
+    var modifyRecursively = function (items, modificator) {
 
         var modifiedItems = [];
         items.forEach(function (item) {
 
             var modifiedItem = modificator(item);
-            modifiedItem.children = FormItemsCollection.modifyRecursively(item.children || [], modificator);
+            modifiedItem.children = modifyRecursively(item.children || [], modificator);
 
             modifiedItems.push(modifiedItem);
 
@@ -35,6 +51,7 @@
 
         return modifiedItems;
     };
+
 
 
     FormItemsCollection.prototype = {
@@ -80,41 +97,16 @@
 
         process: function (feature, dialog) {
             var formItemsCollection = this;
-            return FormItemsCollection.modifyRecursively(formItemsCollection.preprocessedItems, function (item) {
-                var processedItem = item.process(feature, dialog, formItemsCollection.schema);
+            return modifyRecursively(formItemsCollection.items, function (item) {
+                var processedItem = item.process(feature, dialog);
                 return processedItem;
             });
 
         },
 
 
-        preprocess: function () {
-            var formItemsCollection = this;
-            return FormItemsCollection.modifyRecursively(formItemsCollection.typedItems, function (item) {
-                var preprocessedItem = item.preprocess(formItemsCollection.schema);
-                return preprocessedItem;
-            });
-
-        },
-
-        typify: function () {
-            var formItemsCollection = this;
-            return FormItemsCollection.modifyRecursively(formItemsCollection.rawItems, formItemsCollection.createTypedFormItem.bind(formItemsCollection));
-        },
 
 
-        createTypedFormItem: function (item) {
-            var formItemsCollection = this;
-
-            var typeName = item.type.charAt(0).toUpperCase() + item.type.slice(1);
-            var constructorName = 'FormItem' + typeName;
-            var constructor = window[constructorName];
-
-            if (typeof constructor !== "function") {
-                throw new Error("No function '" + constructorName + "' defined");
-            }
-            return new constructor(item);
-        },
 
 
         // preprocessSelectWithData: function(item) {

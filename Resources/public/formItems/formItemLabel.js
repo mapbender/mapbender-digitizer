@@ -1,16 +1,10 @@
 (function () {
     "use strict";
 
-    window.FormItemLabel = function () {
-        FormItem.apply(this, arguments);
+    window.FormItemLabel =  {
+        
     };
 
-    FormItemLabel.prototype = {
-
-        CLASS_NAME: "FormItemLabel",
-
-    };
-
-    Object.setPrototypeOf(FormItemLabel.prototype, FormItem.prototype);
+    Object.setPrototypeOf(FormItemLabel, FormItem);
 
 })();

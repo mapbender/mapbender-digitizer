@@ -1,16 +1,10 @@
 (function () {
     "use strict";
 
-    window.FormItemTextArea = function () {
-        FormItem.apply(this, arguments);
-    };
-
-    FormItemTextArea.prototype = {
-
-        CLASS_NAME: "FormItemTextArea",
+    window.FormItemTextArea = {
 
     };
 
-    Object.setPrototypeOf(FormItemTextArea.prototype, FormItem.prototype);
+    Object.setPrototypeOf(FormItemTextArea, FormItem);
 
 })();

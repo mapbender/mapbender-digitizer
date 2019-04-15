@@ -1,27 +1,31 @@
 (function () {
     "use strict";
 
-    window.FormItem = function (item) {
-
-        var formItem = this;
-        formItem.children = [];
-        $.extend(true, formItem, item); // Deep copy
-    };
-
-    FormItem.prototype = {
+    window.FormItem = {
 
         CLASS_NAME: "FormItem",
 
         clone: function () {
             var formItem = this;
-            console.assert(formItem.constructor !== window.FormItem,"An abstract Form Item cannot be cloned");
-            var clonedItem = new formItem.constructor(formItem,formItem.schema);
+            var clonedItem = {};
+            for (var property in formItem) {
+                if (formItem.hasOwnProperty(property)) {  // copy only
+                    if (property === "children") {
+                        continue;
+                    }
+                    var value = formItem[property];
+                    clonedItem[property] = typeof value == "object"  && property !== 'schema' ? $.extend(true,{},value) : value;
+                }
+            }
             var children = [];
             formItem.children.forEach(function (childFormItem) {
                 children.push(childFormItem.clone());
             });
 
             clonedItem.children = children;
+
+            Object.setPrototypeOf(clonedItem, Object.getPrototypeOf(formItem));
+
             return clonedItem;
 
         },

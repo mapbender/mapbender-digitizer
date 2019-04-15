@@ -1,18 +1,12 @@
 (function () {
     "use strict";
 
-    window.FormItemSelect = function () {
-        FormItem.apply(this, arguments);
-    };
+    window.FormItemSelect =  {
 
-    FormItemSelect.prototype = {
-
-        CLASS_NAME: "FormItemSelect",
-
-
-        preprocess: function(schema) {
+        preprocess: function() {
 
             var item = this;
+            var schema = item.schema;
 
             var onCreateClick;
             var onEditClick;
@@ -83,23 +77,31 @@
             }
 
             var preProcessedItem = item.clone();
-            var fieldSetItem = new FormItemFieldSet(item);
+            var fieldSetItem = {};
+            Object.setPrototypeOf(fieldSetItem,FormItemFieldSet);
+
             fieldSetItem.title = '';
+
+            var button1 =  {
+                type: "button",
+                title: Mapbender.DigitizerTranslator.translate('feature.edit'),
+                cssClass: 'edit',
+                click: onEditClick
+            };
+            Object.setPrototypeOf(button1,FormItemButton);
+
+            var button2 = {
+                type: "button",
+                title: "",
+                cssClass: "fa fa-plus",
+                click: onCreateClick
+            };
+            Object.setPrototypeOf(button2,FormItemButton);
+
 
             fieldSetItem.children = [
                 preProcessedItem,
-                new FormItemButton({
-                    type: "button",
-                    title: Mapbender.DigitizerTranslator.translate('feature.edit'),
-                    cssClass: 'edit',
-                    click: onEditClick
-                },item.schema),
-                new FormItemButton({
-                    type: "button",
-                    title: "",
-                    cssClass: "fa fa-plus",
-                    click: onCreateClick
-                },item.schema)
+                button1, button2
             ];
 
             return fieldSetItem;
@@ -107,7 +109,7 @@
 
     };
 
-    Object.setPrototypeOf(FormItemSelect.prototype, FormItem.prototype);
+    Object.setPrototypeOf(FormItemSelect, FormItem);
 
 
     var openEditDialog = function (dataItem, formItems, schema, ref) {
