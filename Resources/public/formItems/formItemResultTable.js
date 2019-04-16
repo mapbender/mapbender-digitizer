@@ -3,6 +3,11 @@
 
     window.FormItemResultTable = {
 
+        editable: false,
+        dataManagerLink: false,
+        popupItems: false,
+
+
         process: function (feature, dialog) {
 
 
@@ -46,6 +51,8 @@
 
         preprocess: function () {
             var item = this;
+
+            var dataManager = item.schema.widget.dataManager;
 
             if (!item.editable) {
                 return item.clone();
