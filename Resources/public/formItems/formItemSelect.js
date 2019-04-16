@@ -11,7 +11,7 @@
             var onCreateClick;
             var onEditClick;
 
-            if ((!item.dataStore.editable || !item.dataStore.popupItems) && !item.dataManagerLink) {
+            if ((!item.dataStore || !item.dataStore.editable || !item.dataStore.popupItems) && !item.dataManagerLink) {
                 return item.clone();
             }
 

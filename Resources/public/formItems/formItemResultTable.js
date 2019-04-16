@@ -13,6 +13,10 @@
 
             var item = this;
 
+            if (feature.isNew || !item.dataStoreLink || !item.dataManagerLink.name) {
+                return item.clone();
+            }
+
             var dataStoreLinkName = item.dataStoreLink.name;
 
             if (dataStoreLinkName) {
@@ -23,12 +27,15 @@
                     fieldName: item.dataStoreLink.fieldName
                 };
 
+
                 QueryEngine.query('dataStore/get', requestData).done(function (data) {
+
+                    var dataItems = [];
 
                     if (Array.isArray(data)) {
 
-                        var dataItems = [];
                         _.each(data, function (el, i) {
+                            el.attributes = el.attributes || {};
                             el.attributes.item = item;
                             dataItems.push(el.attributes)
 
@@ -45,7 +52,7 @@
 
                 });
             }
-            return this.clone();
+            return item.clone();
 
         },
 
