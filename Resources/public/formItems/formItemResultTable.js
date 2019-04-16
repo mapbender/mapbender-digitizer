@@ -66,7 +66,6 @@
                 onCreateClick = function (e) {
                     e.preventDefault();
                     var item = $(this).next().data("item");
-                    var popup = item.popupItems;
                     var table = $(this).siblings(".mapbender-element-result-table");
                     var uniqueIdKey = item.dataStore.uniqueId;
 
@@ -77,7 +76,7 @@
                     data['linkId'] = feature.attributes[item.dataStoreLink.uniqueId];
                     data.item = item;
                     data[uniqueIdKey] = null;
-                    dataManagerUtils.openEditDialog(data, popup, item, table);
+                    FormItemUtils.openEditDialog(data, item, table);
                     return false;
                 };
 
@@ -87,13 +86,12 @@
 
                     var table = ui.parents('.mapbender-element-result-table');
                     var item = table.data('item');
-                    var popup = item.popupItems;
                     var feature = table.data('olFeature');
 
                     item.allowRemove = true;
                     rowData.externalId = feature.attributes[item.dataStoreLink.uniqueId];
 
-                    dataManagerUtils.openEditDialog(rowData, popup, item, table);
+                    FormItemUtils.openEditDialog(rowData, item, table);
 
                     return false;
                 };

@@ -7,6 +7,8 @@
 
         formItemsCollection.schema = schema;
 
+        formItemsCollection.rawItems = items;
+
 
         formItemsCollection.items = modifyRecursively(items, function(item){
             setPrototypeOfFormItem(item);

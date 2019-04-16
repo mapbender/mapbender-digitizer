@@ -37,6 +37,8 @@
 
         var formItems = schema.processFormItems(feature, $popup);
 
+        console.log(formItems,schema.formItems.rawItems);
+
 
         $popup.generateElements({children: formItems});
 
