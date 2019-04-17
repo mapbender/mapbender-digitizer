@@ -11,7 +11,7 @@
 
         schema.formItems = new FormItemsCollection(schema.formItems, schema);
 
-        schema.popup = $.extend({}, Scheme.prototype.popup, rawScheme.popup);
+        schema.popup = new PopupConfiguration(schema.popup, schema);
 
         schema._initializeHooks();
 
@@ -146,12 +146,7 @@
         displayPermanent: false,
         displayOnInactive: false,
         toolset: {},
-        popup: {
-            remoteData: false,
-            isOpenLayersCloudPopup: function () {
-                return this.type === 'openlayers-cloud';
-            }
-        },
+        popup: {},
         styles: {
             default: {},
             select: {}
@@ -371,8 +366,7 @@
 
         openFeatureEditDialog: function (feature) {
             var schema = this;
-            var dialog = new FeatureEditDialog(feature, schema.popup, schema);
-
+            schema.popup.createFeatureEditDialog(feature);
         },
 
 

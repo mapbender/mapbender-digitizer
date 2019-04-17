@@ -69,6 +69,7 @@ Bugs von Robin gefunden:
     • Ausblenden einzelner/aller Objekte: Werden vorher alle Digitize-Objekten in ihren Kategorien ausgeblendet, so erscheinen sie in der Kategorie „all geometries“ doch wieder auf der Karte (Bug or Feature?)
 
 Selbstgemachte Bugs:
+- Kopieren funktioniert nur, wenn kopierendes Feature im Viewport liegt
 
 
 Legacy Bugs:
