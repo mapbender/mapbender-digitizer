@@ -11,6 +11,8 @@
 
         schema._initializeHooks();
 
+        schema.initTableFields();
+
         schema.createFormItemsCollection();
 
         schema.createPopupConfiguration();
@@ -27,7 +29,7 @@
 
         schema._createFrame();
 
-        schema._addSelectControls();
+        schema.addSelectControls();
 
         schema.resultTable.initializeResultTableEvents(schema.highlightControl, schema.zoomOrOpenDialog.bind(schema));
 
@@ -64,6 +66,8 @@
             schema.initializeClustering();
 
         }
+
+        console.assert(!!schema.tableFields,"Schema "+schema.schemaName+" does not have Tablefields");
 
 
     };
@@ -313,6 +317,10 @@
             return ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
         },
 
+        initTableFields: function() {
+           // Nothing to do
+        },
+
 
         initializeStyleApplication: function () {
             var schema = this;
@@ -415,13 +423,8 @@
         },
 
 
-        /**
-         *
-         * @private
-         */
 
-        _addSelectControls: function () {
-            /** @type {Scheme} */
+        addSelectControls: function () {
             var schema = this;
             var layer = schema.layer;
             var widget = schema.widget;
