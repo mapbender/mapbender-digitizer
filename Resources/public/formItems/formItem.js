@@ -72,7 +72,7 @@
                 click: function () {
 
                     var uniqueIdKey = schema.dataStore.uniqueId;
-                    QueryEngine.query('datastore/remove', {
+                    QueryEngine.query('datastore/remove', widget.id, {
                         schema: data.item.dataStoreLink.name,
                         dataItemId: data[uniqueIdKey],
                         dataStoreLinkFieldName: schema.dataStoreLink.fieldName,
@@ -213,6 +213,7 @@
     saveForeignDataStoreItem: function(dataItem) {
 
         var schema = dataItem.item.schema;
+        var widget = schema.widget;
         var dialog = schema.widget.currentPopup.currentPopup;
         var uniqueIdKey = dataItem.item.dataStore.uniqueId;
         var isNew = dataItem[uniqueIdKey] === null;
@@ -238,7 +239,7 @@
 
         $(dialog).disableForm();
 
-        QueryEngine.query('datastore/save', {
+        QueryEngine.query('datastore/save', widget.id, {
             schema: dataItem.item.dataStoreLink.name,
             dataItem: formData,
             dataItemId: dataItem[uniqueIdKey],

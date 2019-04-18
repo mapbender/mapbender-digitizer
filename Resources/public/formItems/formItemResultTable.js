@@ -12,6 +12,8 @@
 
 
             var item = this;
+            var schema = item.schema;
+            var widget = schema.widget;
 
             if (feature.isNew || !item.dataStoreLink || !item.dataManagerLink.name) {
                 return item.clone();
@@ -28,7 +30,7 @@
                 };
 
 
-                QueryEngine.query('dataStore/get', requestData).done(function (data) {
+                QueryEngine.query('dataStore/get',widget.id, requestData).done(function (data) {
 
                     var dataItems = [];
 

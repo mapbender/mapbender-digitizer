@@ -7,6 +7,7 @@
 
             var item = this;
             var schema = item.schema;
+            var widget = schema.widget;
 
             var onCreateClick;
             var onEditClick;
@@ -60,7 +61,7 @@
                     var selectRef = $(this).siblings().find('select');
 
                     var dataStoreId = item.dataStore.id;
-                    QueryEngine.query("datastore/get", {
+                    QueryEngine.query("datastore/get", widget.id, {
                         schema: schema.schemaName,
                         id: dataStoreId,
                         dataItemId: dataItemId

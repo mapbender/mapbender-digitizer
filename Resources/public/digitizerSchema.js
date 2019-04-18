@@ -9,11 +9,11 @@
 
         schema.widget = widget;
 
-        schema.formItems = new FormItemsCollection(schema.formItems, schema);
-
-        schema.popup = new PopupConfiguration(schema.popup, schema);
-
         schema._initializeHooks();
+
+        schema.createFormItemsCollection();
+
+        schema.createPopupConfiguration();
 
         schema.setModifiedState = Scheme.prototype.setModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
 
@@ -188,6 +188,23 @@
         }],
         tableFields: null,
 
+
+        createFormItemsCollection: function(formItems) {
+            var schema = this;
+            schema.formItems = new FormItemsCollection(formItems || schema.formItems, schema);
+
+        },
+
+        createPopupConfiguration: function() {
+            var schema = this;
+            schema.popup = new PopupConfiguration(schema.popup, schema);
+        },
+
+        updateConfigurationAfterSwitching: function(updatedSchemes) {
+            var schema = this;
+            schema.createFormItemsCollection(updatedSchemes[schema.schemaName].formItems); // Update formItems Of Schema when switiching
+        },
+
         _initializeHooks: function () {
             var schema = this;
             _.each(schema.hooks, function (value, name) {
@@ -207,6 +224,9 @@
 
             /** @type {Scheme} */
             var schema = this;
+
+            console.log(schema);
+
             var widget = schema.widget;
             var frame = schema.frame;
             var layer = schema.layer;
@@ -223,8 +243,24 @@
                 widget.deactivateSchema = schema.deactivateSchema.bind(schema);
             }
 
-            QueryEngine.query('style/list', {schema: schema.schemaName}).done(function (data) {
-                schema.featureStyles = data.featureStyles;
+            var promise;
+
+            if (schema.allowCustomerStyle) {
+                promise = QueryEngine.query('style/list', widget.id, {schema: schema.schemaName}).then(function(data) {
+                    schema.featureStyles = data.featureStyles;
+                });
+            } else {
+                promise = $.Deferred().resolve();
+            }
+
+            promise.then(function () {
+                return QueryEngine.query('getConfiguration', widget.id);
+            }).done(function (response) {
+
+                console.log(response);
+
+                 schema.updateConfigurationAfterSwitching(response.schemes);
+
 
                 layer.setVisibility(true);
                 frame.show();
@@ -285,7 +321,7 @@
                 if (style === undefined || style === 'default') {
 
 
-                    style = schema.featureStyles[feature.fid] || "default";
+                    style = schema.featureStyles && schema.featureStyles[feature.fid] || "default";
 
                     if (feature.isChanged || feature.isNew) {
                         style = 'unsaved';
@@ -339,16 +375,16 @@
 
         getDefaultFormItems: function (feature) {
 
-            var formItems = [];
+            var defaultFormItems = [];
             _.each(feature.data, function (value, key) {
-                formItems.push({
+                defaultFormItems.push({
                     type: 'input',
                     name: key,
                     title: key
                 });
             });
 
-            return formItems;
+            return defaultFormItems;
         },
 
         /**
@@ -727,7 +763,7 @@
                 schema.xhr.abort();
             }
 
-            schema.xhr = QueryEngine.query('select', request).done(function (featureCollection) {
+            schema.xhr = QueryEngine.query('select', widget.id,  request).done(function (featureCollection) {
                 schema._onFeatureCollectionLoaded(featureCollection, this);
             });
 
@@ -812,6 +848,7 @@
 
         removeFeature: function (feature) {
             var schema = this;
+            var widget = schema.widget;
 
             if (feature.isNew) {
                 schema._removeFeatureFromUI(feature);
@@ -819,7 +856,7 @@
                 Mapbender.confirmDialog({
                     html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
                     onSuccess: function () {
-                        QueryEngine.query('delete', {
+                        QueryEngine.query('delete', widget.id, {
                             schema: schema.getSchemaByFeature(feature).schemaName,
                             feature: feature.attributes
                         }).done(function (fid) {
@@ -952,7 +989,7 @@
             // TODO check this
             tableApi.draw({"paging": "page"});
 
-            var promise = QueryEngine.query('save', {
+            var promise = QueryEngine.query('save', widget.id,  {
 
                 schema: schema.getSchemaByFeature(feature).schemaName,
                 feature: request
@@ -1163,7 +1200,8 @@
 
         exportGeoJson: function (feature) {
             var schema = this;
-            QueryEngine.query('export', {
+            var widget = schema.widget;
+            QueryEngine.query('export', widget.id,  {
                 schema: schema.getSchemaByFeature(feature).schemaName,
                 feature: feature,
                 format: 'GeoJSON'

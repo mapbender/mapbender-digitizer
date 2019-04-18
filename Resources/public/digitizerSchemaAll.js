@@ -52,7 +52,7 @@
             var schema = this;
             var widget = schema.widget;
             var toolset = [];
-            _.each(widget.schemes, function (scheme, schemaName) {
+            _.each(widget.schemes, function (scheme) {
                 $.each(scheme.toolset, function (i, element) {
 
                     // Avoid duplicates, i.e. elements with same 'type' property
@@ -76,13 +76,18 @@
             return toolset;
         },
 
+        createFormItemsCollection: function(formItems) {
+            //Do Nothing - All Scheme does not administer formItemsCollection
+        },
 
-        getFormItems: function (feature) {
+        updateConfigurationAfterSwitching: function(updatedSchemes) {
             var schema = this;
             var widget = schema.widget;
-            console.assert(!!feature.attributes.geomType, "geometry type of new Feature must be set");
-            var featureSchema = widget.getSchemaByGeomType(feature.attributes.geomType);
-            return featureSchema.getFormItems(feature);
+            _.each(widget.schemes, function (scheme,schemaName) {
+                if (scheme !== schema) { // Only for Non comprehensive Schemes
+                    scheme.createFormItemsCollection(updatedSchemes[schemaName].formItems); // Update formItems Of All Schemes when switiching
+                }
+            });
         },
 
 

@@ -35,7 +35,6 @@
 
 
         createFeatureEditDialog: function(feature) {
-            console.log("!!");
             return new FeatureEditDialog(feature, this.getSchema())
         }
     };
@@ -181,10 +180,10 @@
 
         $popup.data('feature', feature);
 
-        var formItems = schema.processFormItems(feature, $popup);
+        var processedFormItems = schema.processFormItems(feature, $popup);
 
 
-        $popup.generateElements({children: formItems});
+        $popup.generateElements({children: processedFormItems});
 
 
 

@@ -34,7 +34,7 @@
             schemes: {},
             target: null,
         },
-        schemes: {},
+        schemes: null,
         map: null,
 
         styles: {
@@ -108,7 +108,7 @@
             var widget = this.widget = this;
             var element = widget.element;
 
-            QueryEngine.setId(element.attr("id"));
+            this.id = element.attr("id");
 
             if (!Mapbender.checkTarget("mbDigitizer", widget.options.target)) {
                 return;
@@ -191,6 +191,7 @@
         _createSchemes: function () {
             var widget = this;
             var rawSchemes = widget.options.schemes;
+            widget.schemes = {};
             _.each(rawSchemes, function (rawScheme, schemaName) {
                 rawScheme.schemaName = schemaName;
                 widget.schemes[schemaName] = new Scheme(rawScheme, widget);

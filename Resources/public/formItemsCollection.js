@@ -7,7 +7,7 @@
 
         formItemsCollection.schema = schema;
 
-        formItemsCollection.items = modifyRecursively(items, function(item){
+        formItemsCollection.items = modifyRecursively(items || [], function(item){
             setPrototypeOfFormItem(item);
             item.schema = schema;
             return item;

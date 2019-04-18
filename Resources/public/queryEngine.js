@@ -9,8 +9,8 @@
             this.id = id;
         },
 
-        getElementUrl: function () {
-            return Mapbender.configuration.application.urls.element + '/' + this.id + '/'
+        getElementUrl: function (id) {
+            return Mapbender.configuration.application.urls.element + '/' + id + '/'
         },
 
 
@@ -22,8 +22,8 @@
          * @return xhr jQuery XHR object
          * @version 0.2
          */
-        query: function (uri, request) {
-            var elementUrl = this.getElementUrl();
+        query: function (uri, id, request) {
+            var elementUrl = this.getElementUrl(id);
             return $.ajax({
                 url: elementUrl + uri,
                 type: 'POST',

@@ -536,12 +536,13 @@
         submit: function () {
             var featureStyleEditor = this;
             var schema = featureStyleEditor.schema;
+            var widget = schema.widget;
             var feature = featureStyleEditor.feature;
             var styleEditor = featureStyleEditor.getElement();
             var styleData = styleEditor.formData();
             styleEditor.disableForm();
             if (feature.fid) {
-                QueryEngine.query('style/save', {
+                QueryEngine.query('style/save', widget.id,  {
                     schema: schema.schemaName,
                     style: styleData,
                     featureId: feature.fid
