@@ -229,7 +229,6 @@
             /** @type {Scheme} */
             var schema = this;
 
-            console.log(schema);
 
             var widget = schema.widget;
             var frame = schema.frame;
@@ -261,7 +260,6 @@
                 return QueryEngine.query('getConfiguration', widget.id);
             }).done(function (response) {
 
-                console.log(response);
 
                  schema.updateConfigurationAfterSwitching(response.schemes);
 
