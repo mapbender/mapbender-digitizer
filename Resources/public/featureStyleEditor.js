@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    var FeatureStyleEditor = function (feature, schema, options) {
+    window.FeatureStyleEditor = function (feature, schema, options) {
 
         var editor = this;
 
