@@ -757,7 +757,17 @@
                 } 
                 
                 if (widget.currentSettings.schemaName != schema.schemaName || schema.displayOnInactive || schema.displayPermanent) {
-                    schema.activateSchema();
+
+                    widget.query('getConfiguration').done(function (response) {
+                        _.each(response.schemes, function(schema,schemaName){
+                            widget.options.schemes[schemaName].formItems = response.schemes[schemaName].formItems
+                        });
+
+                        widget.options.__disabled = false;
+                        schema.activateSchema();
+                        widget._setContextMenuMap();
+
+                    });
                 }
 
                 table.off('mouseenter', 'mouseleave', 'click');
@@ -2865,7 +2875,7 @@
                 widget.currentSettings.activateSchema();
                 widget._setContextMenuMap();
 
-            })
+            });
 
         },
 
