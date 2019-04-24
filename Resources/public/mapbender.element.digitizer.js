@@ -1458,8 +1458,13 @@
                         css : { width: '33.33%' },
 
                     };
-                    _.each(['x','y'], function(direction,i){
-
+                    
+                    // set default ordering, if the coordinatesFieldsOrder is not set in the digitizer YML
+                    if (!item.coordinatesFieldsOrder) {
+                        item.coordinatesFieldsOrder = ['x','y','epsg'];
+                    }
+                    _.each(item.coordinatesFieldsOrder, function(direction,i){
+                      if (direction != 'epsg') {
                         var child  = {
                             cssClass : '-fn-coordinates ' + direction,
                             tile: direction + ': ',
@@ -1506,8 +1511,10 @@
                             }
                         };
                         children.push($.extend(child,input));
+                      } else {
+                        children.push(EPSGSelection);
+                      }
                     });
-                    children.push(EPSGSelection);
                     item.type = "fieldSet";
                     item.children=  children;
                     item.cssClass =  '-fn-coordinates-container coordinates-container';
