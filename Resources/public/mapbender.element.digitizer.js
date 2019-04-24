@@ -754,7 +754,44 @@
 
                 if (widget.currentSettings) {
                     widget.currentSettings.deactivateSchema();
-                } 
+                }
+
+
+                var initResultTableAndData = function() {
+
+                    table.off('mouseenter', 'mouseleave', 'click');
+
+                    table.delegate("tbody > tr", 'mouseenter', function () {
+                        var tr = this;
+                        var row = tableApi.row(tr);
+                        widget._highlightFeature(row.data(), true);
+                    });
+
+                    table.delegate("tbody > tr", 'mouseleave', function () {
+                        var tr = this;
+                        var row = tableApi.row(tr);
+                        widget._highlightFeature(row.data(), false);
+                    });
+
+                    table.delegate("tbody > tr", 'click', function () {
+                        var tr = this;
+                        var row = tableApi.row(tr);
+                        var feature = row.data();
+                        var isOpenLayerCloudPopup = schema.popup && schema.popup.type && schema.popup.type === 'openlayers-cloud';
+
+                        feature.selected = $('.selection input', tr).is(':checked');
+
+                        widget._highlightFeature(feature);
+
+                        if (isOpenLayerCloudPopup) {
+                            widget._openFeatureEditDialog(feature);
+                        } else {
+                            widget.zoomToJsonFeature(feature);
+                        }
+                    });
+                    widget._trigger('schemaChanged');
+                    widget._getData();
+                }
                 
                 if (widget.currentSettings.schemaName != schema.schemaName || schema.displayOnInactive || schema.displayPermanent) {
 
@@ -766,42 +803,14 @@
                         widget.options.__disabled = false;
                         schema.activateSchema();
                         widget._setContextMenuMap();
+                        initResultTableAndData();
 
                     });
+                } else {
+                    initResultTableAndData();
                 }
 
-                table.off('mouseenter', 'mouseleave', 'click');
 
-                table.delegate("tbody > tr", 'mouseenter', function () {
-                    var tr = this;
-                    var row = tableApi.row(tr);
-                    widget._highlightFeature(row.data(), true);
-                });
-
-                table.delegate("tbody > tr", 'mouseleave', function () {
-                    var tr = this;
-                    var row = tableApi.row(tr);
-                    widget._highlightFeature(row.data(), false);
-                });
-
-                table.delegate("tbody > tr", 'click', function () {
-                    var tr = this;
-                    var row = tableApi.row(tr);
-                    var feature = row.data();
-                    var isOpenLayerCloudPopup = schema.popup && schema.popup.type && schema.popup.type === 'openlayers-cloud';
-
-                    feature.selected = $('.selection input', tr).is(':checked');
-
-                    widget._highlightFeature(feature);
-
-                    if (isOpenLayerCloudPopup) {
-                        widget._openFeatureEditDialog(feature);
-                    } else {
-                        widget.zoomToJsonFeature(feature);
-                    }
-                });
-                widget._trigger('schemaChanged');
-                widget._getData();
             }
 
             if (currentSchemaName !== undefined) {
