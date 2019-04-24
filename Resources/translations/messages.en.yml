@@ -26,6 +26,7 @@ mb.digitizer:
       error: 'Indexing failed.'
   toolset:
     current-extent: 'Select by current extent only.'
+    geometryless: Add object with manual entry of coordinates
     point:
       drawPoint: Draw point
       moveGeometry: Move feature
