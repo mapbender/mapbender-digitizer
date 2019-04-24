@@ -1458,12 +1458,17 @@
                         css : { width: '33.33%' },
 
                     };
-                    _.each(['x','y'], function(direction,i){
-
+                    
+                    // set default ordering, if the coordinatesFieldsOrder is not set in the digitizer YML
+                    if (!item.coordinatesFieldsOrder) {
+                        item.coordinatesFieldsOrder = ['longitude','latitude','epsg'];
+                    }
+                    _.each(item.coordinatesFieldsOrder, function(direction,i){
+                      if (direction != 'epsg') {
                         var child  = {
                             cssClass : '-fn-coordinates ' + direction,
                             tile: direction + ': ',
-                            title: (direction==='x' ? item.title_longitude || 'longitude' : item.title_latitude || 'latitude' ) + ': ',
+                            title: (direction==='longitude' ? item.title_longitude || 'longitude' : item.title_latitude || 'latitude' ) + ': ',
                             name: direction,
                             css: " { width: 33%; }",
                             change : function(){
@@ -1506,8 +1511,10 @@
                             }
                         };
                         children.push($.extend(child,input));
+                      } else {
+                        children.push(EPSGSelection);
+                      }
                     });
-                    children.push(EPSGSelection);
                     item.type = "fieldSet";
                     item.children=  children;
                     item.cssClass =  '-fn-coordinates-container coordinates-container';
