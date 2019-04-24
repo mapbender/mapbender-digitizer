@@ -108,7 +108,7 @@ class Digitizer extends BaseElement
      */
     protected function getFeatureTypeDeclarations()
     {
-        return $this->container->getParameter('featureTypes');
+        return $this->container->getParameter('digitizer-feature-types');
     }
 
     /**
