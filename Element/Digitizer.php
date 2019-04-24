@@ -853,6 +853,6 @@ class Digitizer extends BaseElement
      */
     protected function getCurrentUserId()
     {
-        return 1; //$this->getUser()->getId();
+        return $this->getUser()->getId();
     }
 }
