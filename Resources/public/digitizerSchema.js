@@ -125,7 +125,7 @@
 
 
         //* Newly added properties
-        revertChangedGeometryOnCancel: true,
+        revertChangedGeometryOnCancel: false,
         deactivateControlAfterModification: true,
         allowSaveAll: true,
         markUnsavedFeatures: true,
@@ -595,7 +595,7 @@
             if (!row) {
                 return; // in case of non-saved feature
             }
-            row.find('.button.save').removeClass("active").addClass('disabled');
+            row.find('.button.save').removeClass("active").attr('disabled','disabled');
 
 
         },
@@ -891,7 +891,7 @@
             });
 
             if (!allowCopy) {
-                $.notify(translate('feature.clone.on.error'));
+                $.notify(Mapbender.DigitizerTranslator.translate('feature.clone.on.error'));
                 return;
             }
 
@@ -977,7 +977,7 @@
 
             feature.disabled = true;
 
-            formData = formData || schema.formItems.createHeadlessFormData(feature);
+            formData = formData || schema.getSchemaByFeature(feature).formItems.createHeadlessFormData(feature);
 
             var request = {
                 id: feature.isNew ? null : feature.fid,

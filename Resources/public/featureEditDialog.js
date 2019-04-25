@@ -213,16 +213,22 @@
 
                 if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
                     schema.removeFeature(feature);
-                }
-                if (feature.isChanged && schema.revertChangedGeometryOnCancel) {
+                } else
+                if ( (feature.isChanged || feature.isNew) && schema.revertChangedGeometryOnCancel) {
+
                     schema.layer.renderer.eraseGeometry(feature.geometry);
                     feature.geometry = feature.oldGeometry;
                     feature.isChanged = false;
                     schema.layer.drawFeature(feature);
+
+                    schema.unsetModifiedState(feature);
+
                 }
                 if (configuration.modal) {
                     widget.currentPopup = null;
                 }
+
+
             });
 
 
