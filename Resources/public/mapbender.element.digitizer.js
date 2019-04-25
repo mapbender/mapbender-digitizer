@@ -197,6 +197,18 @@
                 widget.schemes[schemaName] = new Scheme(rawScheme, widget);
             });
 
+            var getGeomTypes = function() {
+                var geomTypes = [];
+                _.each(widget.schemes, function (scheme) {
+                    geomTypes.push(scheme.featureType.geomType);
+                });
+                return geomTypes;
+            };
+
+            var geomTypes = getGeomTypes();
+            console.assert(geomTypes.length === _.unique(geomTypes).length, "There are non-unique FeatureType.geomType Attributes in your configuration",geomTypes);
+            console.assert(geomTypes.every(function(element) { return ['point','line','polygon','label'].includes(element) }), "There is at least one schema with a  wrong FeatureType.geomType Attribute",geomTypes);
+
             if (!widget.hasOnlyOneScheme) {
                 widget.schemes['all'] = new AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
             }
@@ -221,12 +233,20 @@
 
         },
 
+        getBasicSchemes: function() {
+            var widget = this;
+
+            return _.pick(widget.schemes,function(value,key){
+                return key !== "all";
+            });
+        },
+
 
 
         getSchemaByGeomType: function (geomtype) {
             var widget = this;
             var schema = null;
-            _.each(widget.schemes, function (scheme) {
+            _.each(widget.getBasicSchemes(), function (scheme) {
                 if (scheme.featureType.geomType === geomtype) {
                     schema = scheme;
                 }
