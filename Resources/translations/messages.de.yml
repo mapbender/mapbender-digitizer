@@ -20,8 +20,13 @@ mb.digitizer:
       title: Duplizieren
       on:
         error: Duplizieren des Objektes ist nicht erlaubt.
+    visibility:
+      toggleoff: Objekt ausblenden
+      toggleon: Objekt einblenden
   toolset:
     current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
+    showAll: Alle Objekte einblenden
+    hideAll: Alle Objekte ausblenden
     point:
       drawPoint: Punkt erstellen
       moveGeometry: Punkt verschieben

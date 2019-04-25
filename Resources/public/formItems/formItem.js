@@ -58,7 +58,7 @@
             }
 
             var saveButton = {
-                text: Mapbender.DigitizerTranslator.translate("feature.save", false),
+                text: Mapbender.DigitizerTranslator.translate("feature.save.title", false),
                 click: function () {
                     FormItemUtils.saveForeignDataStoreItem(data);
                 }

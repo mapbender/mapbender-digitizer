@@ -48,7 +48,7 @@
 
             if (schema.allowLocate) {
                 buttons.push({
-                    title: Mapbender.DigitizerTranslator.translate('feature.zoom'),
+                    title: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
                     className: 'zoom',
                     cssClass: 'fa fa-crosshairs',
                     onClick: function (olFeature, ui) {
@@ -59,7 +59,7 @@
 
             if (schema.allowEditData && schema.allowSave) {
                 buttons.push({
-                    title: Mapbender.DigitizerTranslator.translate('feature.save'),
+                    title: Mapbender.DigitizerTranslator.translate('feature.save.title'),
                     className: 'save',
                     cssClass: ' fa fa-floppy-o',
                     disabled: true,
@@ -100,7 +100,7 @@
 
             if (schema.allowChangeVisibility) {
                 buttons.push({
-                    title: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
+                    title: Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'),
                     className: 'visibility',
                     onClick: function (olFeature) {
                         schema.toggleFeatureVisibility(olFeature);
@@ -201,8 +201,10 @@
                     this.api().rows(function (idx, feature, row) {
                         if (feature.visible) {
                             $(row).removeClass('invisible-feature');
+                            $(row).find(".icon-visibility").attr('title',Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'));
                         } else {
                             $(row).addClass('invisible-feature');
+                            $(row).find(".icon-visibility").attr('title',Mapbender.DigitizerTranslator.translate('feature.visibility.toggleon'));
                         }
 
                     });
