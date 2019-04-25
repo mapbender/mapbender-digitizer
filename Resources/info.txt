@@ -5,6 +5,7 @@ Hinzugefügte Properties:
 - deactivateControlAfterModification - Nach Veränderung von Feature wird Control deaktiviert
 - revertChangedGeometryOnCancel - Wenn nach veränderter Geometrie gecancelt wird, wird die Veränderung rückgängig gemacht
 - currentExtentSearch: bool, anstelle von searchType == "currentExtent"
+- copy.overwriteValuesWithDefault - Beim Kopieren werden die Daten des Kopierten Features von den eingetragenen Defaultwerten überschrieben
 
 
 Hinweise:
