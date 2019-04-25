@@ -27,6 +27,7 @@ mb.digitizer:
     current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
     showAll: Alle Objekte einblenden
     hideAll: Alle Objekte ausblenden
+    saveAll: Alle Objekte speichern
     point:
       drawPoint: Punkt erstellen
       moveGeometry: Punkt verschieben
