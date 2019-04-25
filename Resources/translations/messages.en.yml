@@ -28,6 +28,7 @@ mb.digitizer:
     current-extent: 'Select by current extent only.'
     showAll: Fade out all features
     hideAll: Fade in all features
+    saveAll: Save all features
     point:
       drawPoint: Draw point
       moveGeometry: Move feature
