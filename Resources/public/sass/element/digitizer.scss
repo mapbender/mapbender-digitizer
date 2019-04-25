@@ -82,7 +82,7 @@ $selectColor: #F7F79A;
 
         .icon-visibility:before{
           font-family: FontAwesome;
-          content: "\f06e";
+          content: "\f070";
         }
 
         .icon-printmetadata.active:before{
@@ -105,7 +105,7 @@ $selectColor: #F7F79A;
 .invisible-feature {
     .icon-visibility:before{
         font-family: FontAwesome;
-        content: "\f070" !important;
+        content: "\f06e" !important;
     }
 }
 

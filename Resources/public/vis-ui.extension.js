@@ -97,7 +97,7 @@
             tableApi.clear();
 
             var featuresToRedraw = features.filter(function (feature) {
-                return !feature.isNew
+                return !feature.isNew;
             });
             tableApi.rows.add(featuresToRedraw);
             tableApi.draw();
@@ -128,23 +128,9 @@
             var resultTable = this;
             var tableApi = resultTable.getApi();
 
+            // TODO check this
             tableApi.row(resultTable.getDomRowByData(feature)).invalidate();
             tableApi.draw();
-        },
-
-
-        toggleVisibilityInResultTable: function (feature) {
-            var resultTable = this;
-            var row = resultTable.getTableRowByFeature(feature);
-            var ui = row.find('.button.visibility');
-
-            if (feature.visible) {
-                ui.removeClass("icon-invisibility");
-                ui.closest('tr').removeClass('invisible-feature');
-            } else {
-                ui.addClass("icon-invisibility");
-                ui.closest('tr').addClass('invisible-feature');
-            }
         },
 
         initializeColumnTitles: function () {

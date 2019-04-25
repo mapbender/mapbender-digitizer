@@ -1,7 +1,7 @@
 mb.digitizer:
   feature:
     remove:
-      title: Remove
+      title: Remove feature
       successfully: 'Feature removed.'
       from:
         database: 'Delete feature.'
@@ -21,8 +21,13 @@ mb.digitizer:
       title: Copy
       on:
         error: Object coping is denied.
+    visibility:
+      toggleoff: Fade out feature
+      toggleon: Fade in feature
   toolset:
     current-extent: 'Select by current extent only.'
+    showAll: Fade out all features
+    hideAll: Fade in all features
     point:
       drawPoint: Draw point
       moveGeometry: Move feature
