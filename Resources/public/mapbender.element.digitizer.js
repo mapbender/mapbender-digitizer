@@ -233,12 +233,20 @@
 
         },
 
+        getBasicSchemes: function() {
+            var widget = this;
+
+            return _.pick(widget.schemes,function(value,key){
+                return key !== "all";
+            });
+        },
+
 
 
         getSchemaByGeomType: function (geomtype) {
             var widget = this;
             var schema = null;
-            _.each(widget.schemes, function (scheme) {
+            _.each(widget.getBasicSchemes(), function (scheme) {
                 if (scheme.featureType.geomType === geomtype) {
                     schema = scheme;
                 }

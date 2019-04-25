@@ -21,7 +21,7 @@
 
             var rules = [];
 
-            _.each(widget.schemes, function (scheme) {
+            _.each(widget.getBasicSchemes(), function (scheme) {
 
                 var rule = new OpenLayers.Rule({
                     symbolizer: scheme.layer.styleMap.styles[label].defaultStyle,
@@ -52,7 +52,7 @@
             var schema = this;
             var widget = schema.widget;
             var toolset = [];
-            _.each(widget.schemes, function (scheme) {
+            _.each(widget.getBasicSchemes(), function (scheme) {
                 $.each(scheme.toolset, function (i, element) {
 
                     // Avoid duplicates, i.e. elements with same 'type' property
@@ -83,10 +83,8 @@
         updateConfigurationAfterSwitching: function(updatedSchemes) {
             var schema = this;
             var widget = schema.widget;
-            _.each(widget.schemes, function (scheme,schemaName) {
-                if (scheme !== schema) { // Only for Non comprehensive Schemes
-                    scheme.createFormItemsCollection(updatedSchemes[schemaName].formItems); // Update formItems Of All Schemes when switiching
-                }
+            _.each(widget.getBasicSchemes(), function (scheme,schemaName) {
+                scheme.createFormItemsCollection(updatedSchemes[schemaName].formItems); // Update formItems Of All Schemes when switiching
             });
         },
 
