@@ -13,4 +13,10 @@
         return this.cluster ? this.cluster.length : null;
     };
 
+
+    $(document).ready(function() {
+        $(".mapbender-element-result-table").find("search").attr("autocomplete","off");
+    });
+
+
 })();

@@ -67,30 +67,7 @@
 
         }
 
-        if (!schema.hasOwnProperty("tableFields")) {
-
-            schema.tableFields = {
-                id: {
-                    label: '',
-                    data: function (row, type, val, meta) {
-                        var table = $('<table/>');
-                        _.each(row.data, function (value, key) {
-                            var tableRow = $('<tr/>');
-                            var keyCell = $('<td style="font-weight: bold; padding-right: 5px"/>');
-                            var valueCell = $('<td/>');
-
-                            keyCell.text(key + ':');
-                            valueCell.text(value);
-                            tableRow.append(keyCell).append(valueCell);
-                            table.append(tableRow);
-
-                        });
-                        return table.prop('outerHTML');
-                    }
-                }
-            };
-
-        }
+        console.log(this.featureType,"!!");
 
 
         console.assert(!!schema.tableFields,"Schema "+schema.schemaName+" does not have Tablefields");
@@ -342,7 +319,13 @@
         },
 
         initTableFields: function() {
-           // Nothing to do
+            var schema = this;
+            if (!schema.tableFields) {
+                schema.tableFields = {
+                    id: {label: 'Nr.' , width: '20%' },
+                    titel: {label: 'Name' , width: '80%'}
+                }
+            }
         },
 
 
