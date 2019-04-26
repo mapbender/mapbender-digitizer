@@ -131,8 +131,8 @@
 
                 spinner.openRequests = 0;
 
-                var $parent = $('#'+widget.id).parents('.container-accordion').prev().find('.tablecell').prepend("<div class='loader' style='display:none'></div>");
-                spinner.$element = $parent.find(".loader");
+                var $parent = $('#'+widget.id).parents('.container-accordion').prev().find('.tablecell').prepend("<div class='spinner' style='display:none'></div>");
+                spinner.$element = $parent.find(".spinner");
 
                 console.log(spinner.$element);
 
