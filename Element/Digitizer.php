@@ -64,6 +64,7 @@ class Digitizer extends BaseElement
             '/components/select2/select2-built.js',
             '/components/select2/dist/js/i18n/de.js',
             '@MapbenderDigitizerBundle/Resources/public/polyfill/setprototype.polyfill.js',
+            '@MapbenderDigitizerBundle/Resources/public/polyfill/confirmDialog.js',
             '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
             '@MapbenderDigitizerBundle/Resources/public/lib/jsts.min.js',
 
