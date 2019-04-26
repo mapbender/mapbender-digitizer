@@ -235,21 +235,29 @@ $selectColor: #F7F79A;
   opacity: 1;
 }
 
-.digitizing-tool-set, .general-digitizer-buttons {
-  margin-top: 10px;
-
-  > button {
+.mb-element-digitizer {
+  button {
 
     border: 1px solid #ccc !important;
 
-    &:first-child{
-      margin-left: 0px;
-    }
     &:focus {
       outline: thin dotted !important;
       box-shadow: none !important;
       border: 1px solid #ccc !important;
     }
+  }
+
+}
+
+.digitizing-tool-set, .general-digitizer-buttons {
+  margin-top: 10px;
+
+  > button {
+
+    &:first-child{
+      margin-left: 0px;
+    }
+
     width: 26px;
     margin-left: -1px;
     padding: 3px 4px;
@@ -300,7 +308,6 @@ $selectColor: #F7F79A;
         margin-top: 5px;
     }
 }
-
 
 .spinner {
   border: 1px dotted #ccc !important;

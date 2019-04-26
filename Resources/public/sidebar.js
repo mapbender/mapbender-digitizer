@@ -4,7 +4,7 @@
     window.Sidebar = function (schema) {
 
         this.schema = schema;
-        this.frame = $("<div/>").addClass('frame');
+        this.frame = $("<div />").addClass('frame');
 
 
         this._addSpecificOptionToSchemeSelector();

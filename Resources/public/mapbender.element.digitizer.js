@@ -134,9 +134,6 @@
                 var $parent = $('#'+widget.id).parents('.container-accordion').prev().find('.tablecell').prepend("<div class='spinner' style='display:none'></div>");
                 spinner.$element = $parent.find(".spinner");
 
-                console.log(spinner.$element);
-
-
                 spinner.addRequest = function() {
                     spinner.openRequests++;
                     if (spinner.openRequests >= 1) {
