@@ -240,8 +240,15 @@ $selectColor: #F7F79A;
 
   > button {
 
+    border: 1px solid #ccc !important;
+
     &:first-child{
       margin-left: 0px;
+    }
+    &:focus {
+      outline: 0 !important;
+      box-shadow: none !important;
+      border: 1px solid #ccc !important;
     }
     width: 26px;
     margin-left: -1px;
