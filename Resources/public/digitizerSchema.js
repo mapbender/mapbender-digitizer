@@ -67,8 +67,7 @@
 
         }
 
-        console.assert(['polygon','line','point'].includes(schema.featureType.geomType),"invalid geom Type: "+schema.featureType.geomType);
-        console.assert(!!schema.tableFields,"Schema "+schema.schemaName+" does not have Tablefields");
+      schema.assert();
 
 
     };
@@ -192,6 +191,14 @@
             distance: 30
         }],
         tableFields: null,
+
+
+
+        assert: function() {
+            var schema = this;
+            console.assert(['polygon','line','point'].includes(schema.featureType.geomType),"invalid geom Type: "+schema.featureType.geomType);
+            console.assert(!!schema.tableFields,"Schema "+schema.schemaName+" does not have Tablefields");
+        },
 
 
         createFormItemsCollection: function(formItems) {

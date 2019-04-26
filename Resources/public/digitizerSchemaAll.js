@@ -4,12 +4,19 @@
 
         Scheme.apply(this, arguments);
 
+        this.schemaName = 'all';
+
     };
 
 
     AllScheme.prototype = {
 
-        schemaName: 'all',
+
+        assert: function() {
+            var schema = this;
+            console.assert(!!schema.tableFields,"Schema "+schema.schemaName+" does not have Tablefields");
+        },
+
 
         getStyleMapOptions: function (label) {
             var schema = this;
