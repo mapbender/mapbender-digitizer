@@ -225,17 +225,6 @@
                 widget.schemes[schemaName] = new Scheme(rawScheme, widget);
             });
 
-            var getGeomTypes = function() {
-                var geomTypes = [];
-                _.each(widget.schemes, function (scheme) {
-                    geomTypes.push(scheme.featureType.geomType);
-                });
-                return geomTypes;
-            };
-
-            var geomTypes = getGeomTypes();
-            console.assert(geomTypes.length === _.unique(geomTypes).length, "There are non-unique FeatureType.geomType Attributes in your configuration",geomTypes);
-            console.assert(geomTypes.every(function(element) { return ['point','line','polygon','label'].includes(element) }), "There is at least one schema with a  wrong FeatureType.geomType Attribute",geomTypes);
 
             if (!widget.hasOnlyOneScheme) {
                 widget.schemes['all'] = new AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
@@ -252,8 +241,8 @@
                     return [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}];
                 case 'polygon':
                     return [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}];
-                case 'label' :
-                    return [{type: 'drawText'}, {type: 'moveFeature'}];
+                // case 'label' :
+                //     return [{type: 'drawText'}, {type: 'moveFeature'}];
 
             }
 
@@ -271,18 +260,9 @@
 
 
 
-        getSchemaByGeomType: function (geomtype) {
+        getSchemaByName: function (schemaName) {
             var widget = this;
-            var schema = null;
-            _.each(widget.getBasicSchemes(), function (scheme) {
-                if (scheme.featureType.geomType === geomtype) {
-                    schema = scheme;
-                }
-            });
-            if (!schema) {
-                console.warn("No Scheme found for geomtype", geomtype);
-            }
-            return schema;
+            return widget.getBasicSchemes()[schemaName] || null;
         },
 
 

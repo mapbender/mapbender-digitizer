@@ -87,11 +87,6 @@ class DigitizerStyleManager
 
         $sql = "SELECT * FROM {$this->db->quote($this->tableName)} WHERE {$this->db->quote("userId")} = {$userId}";
 
-//        if (null !== $schema) {
-//            $featureTypeName = SqliteExtended::escapeValue($schema['featureType']['geomType']);
-//            $sql .= " AND {$this->db->quote("schemaName")} LIKE {$featureTypeName}";
-//        }
-
         foreach ($this->db->queryAndFetch($sql) as $styleData) {
             $style  = new Style($styleData);
             $styles[ $style->featureId ] = $styleData;

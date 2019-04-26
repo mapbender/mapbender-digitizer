@@ -249,6 +249,7 @@ $selectColor: #F7F79A;
 
 }
 
+
 .digitizing-tool-set, .general-digitizer-buttons {
   margin-top: 10px;
 
@@ -261,8 +262,16 @@ $selectColor: #F7F79A;
     width: 26px;
     margin-left: -1px;
     padding: 3px 4px;
-    &.active,
-    &.active:focus {
+    &:focus {
+      background-color: $buttonBgColor !important;
+      color: $buttonFontColor !important;
+    }
+    &.active {
+      background-color: $buttonActiveBgColor !important;
+      color: $buttonActiveColor !important;
+      border: 1px solid $buttonActiveBgColor;
+    }
+    &.active, &.active:focus {
       background-color: $buttonFirstActiveColor;
     }
     &:before {

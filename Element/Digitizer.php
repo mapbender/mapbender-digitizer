@@ -351,15 +351,15 @@ class Digitizer extends BaseElement
             $config = $this->getConfiguration();
             $schemes = $config["schemes"];
             $features = array();
-            foreach($schemes as $schemaName => $scheme) {
-                if ($schemaName == 'all') {
+            foreach($schemes as $subSchemaName => $scheme) {
+                if ($subSchemaName == 'all') {
                     continue;
                 }
-                $request["schema"] = $schemaName;
+                $request["schema"] = $subSchemaName;
                 $featureCollection = $this->selectAction($request);
                 foreach ($featureCollection["features"] as &$feature) {
 
-                    $feature["properties"]["geomType"] = $scheme["featureType"]["geomType"];
+                    $feature["properties"]["schemaName"] = $subSchemaName;
                 };
                 $features = array_merge($features,$featureCollection["features"]);
             }
@@ -492,7 +492,7 @@ class Digitizer extends BaseElement
 
             }
             foreach($results as &$result) {
-                $result->setAttributes(array("geomType" => $schema["featureType"]["geomType"]));
+                $result->setAttributes(array("schemaName" => $schema["schemaName"]));
             }
             $results = $featureType->toFeatureCollection($results);
         } catch (DBALException $e) {

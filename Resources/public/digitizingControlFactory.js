@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    var createFeatureAddedMethod = function (injectedMethods, geomType) {
+    var createFeatureAddedMethod = function (injectedMethods, schemaName) {
 
         var func = function (feature) {
             var control = this;
@@ -10,7 +10,7 @@
                 feature.attributes[prop] = "";
             });
 
-            feature.attributes.geomType = geomType;
+            feature.attributes.schemaName = schemaName;
 
             injectedMethods.setModifiedState(feature, this);
 

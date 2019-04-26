@@ -4,10 +4,6 @@
 
         Scheme.apply(this, arguments);
 
-        this.featureType = {
-            geomType: 'all'
-        };
-
     };
 
 
@@ -26,7 +22,7 @@
                 var rule = new OpenLayers.Rule({
                     symbolizer: scheme.layer.styleMap.styles[label].defaultStyle,
                     evaluate: function (feature) {
-                        var equals = feature.attributes.geomType === scheme.featureType.geomType;
+                        var equals = feature.attributes.schemaName === scheme.schemaName;
                         return equals;
                     }
                 });
@@ -39,7 +35,7 @@
 
                 symbolizer: OpenLayers.Feature.Vector.style['default'],
                 evaluate: function (feature) {
-                    return !feature.attributes.geomType;
+                    return !feature.attributes.schemaName; // Feature ohne Schemaname ist keine Digitizer Feature
                 }
             }));
 
@@ -100,7 +96,7 @@
             var schema = this;
             var widget = schema.widget;
 
-            return widget.getSchemaByGeomType(feature.attributes.geomType);
+            return widget.getSchemaByName(feature.attributes.schemaName);
         }
     };
 
