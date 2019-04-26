@@ -1,8 +1,8 @@
 (function () {
     "use strict";
-    window.AllScheme = function () {
+    Mapbender.Digitizer.AllScheme = function () {
 
-        Scheme.apply(this, arguments);
+        Mapbender.Digitizer.Scheme.apply(this, arguments);
 
 
 
@@ -11,7 +11,7 @@
     };
 
 
-    AllScheme.prototype = {
+    Mapbender.Digitizer.AllScheme.prototype = {
 
         assert: function() {
             var schema = this;
@@ -112,6 +112,6 @@
     };
 
 
-    Object.setPrototypeOf(AllScheme.prototype, Scheme.prototype);
+    Object.setPrototypeOf(Mapbender.Digitizer.AllScheme.prototype, Mapbender.Digitizer.Scheme.prototype);
 
 })();

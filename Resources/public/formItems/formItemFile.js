@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    window.FormItemFile = {
+    Mapbender.Digitizer.FormItemFile = {
 
         process: function(feature) {
             var item = this.clone();
@@ -26,6 +26,6 @@
         }
     };
 
-    Object.setPrototypeOf(FormItemFile, FormItem);
+    Object.setPrototypeOf(Mapbender.Digitizer.FormItemFile, Mapbender.Digitizer.FormItem);
 
 })();

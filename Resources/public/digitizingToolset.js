@@ -42,10 +42,9 @@
 
             var toolSet = this;
 
-            console.log(toolSet,"§§§");
             toolSet.$buttons = {};
 
-            toolSet.controlFactory = DigitizingControlFactory(toolSet.options.layer, toolSet.options.injectedMethods,toolSet.createControlEvents());
+            toolSet.controlFactory = Mapbender.Digitizer.DigitizingControlFactory(toolSet.options.layer, toolSet.options.injectedMethods,toolSet.createControlEvents());
             toolSet.element.addClass('digitizing-tool-set');
             toolSet.refresh();
 

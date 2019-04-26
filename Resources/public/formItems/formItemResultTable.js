@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    window.FormItemResultTable = {
+    Mapbender.Digitizer.FormItemResultTable = {
 
         editable: false,
         dataManagerLink: false,
@@ -167,6 +167,6 @@
 
     };
 
-    Object.setPrototypeOf(FormItemResultTable, FormItem);
+    Object.setPrototypeOf(Mapbender.Digitizer.FormItemResultTable, Mapbender.Digitizer.FormItem);
 
 })();

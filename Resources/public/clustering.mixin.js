@@ -1,7 +1,7 @@
 (function() {
     "use strict";
 
-    window.ClusteringSchemeMixin = function () {
+    Mapbender.Digitizer.ClusteringSchemeMixin = function () { // Function instead of static object to guarantee uniqueness
 
         return {
 
@@ -73,7 +73,7 @@
 
             getData: function (zoom) {
                 var schema = this;
-                Scheme.prototype.getData.apply(schema);
+                Mapbender.Digitizer.Scheme.prototype.getData.apply(schema);
                 // TODO  Das ist ziemlich sicher falsch, da das Updaten der Cluster Strategy im Callback von GetData erfolgen muss
                 if (zoom) {
                     schema.updateClusterStrategy();
@@ -103,7 +103,7 @@
 
             openFeatureEditDialog: function (feature) {
                 var schema = this;
-                return Scheme.prototype.openFeatureEditDialog.apply(schema, [schema.getFeatureAsList(feature)[0]]);
+                return Mapbender.Digitizer.Scheme.prototype.openFeatureEditDialog.apply(schema, [schema.getFeatureAsList(feature)[0]]);
             },
 
 

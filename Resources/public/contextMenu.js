@@ -20,13 +20,13 @@
     };
 
 
-    window.MapContextMenu = function () {
+    Mapbender.Digitizer.MapContextMenu = function () {
         ContextMenu.apply(this, arguments);
     };
 
-    MapContextMenu.prototype = Object.create(ContextMenu.prototype);
+    Mapbender.Digitizer.MapContextMenu.prototype = Object.create(ContextMenu.prototype);
 
-    MapContextMenu.prototype.buildContextMenu = function (element, e) {
+    Mapbender.Digitizer.MapContextMenu.prototype.buildContextMenu = function (element, e) {
 
 
         var contextMenu = this;
@@ -68,7 +68,7 @@
         }
     };
 
-    MapContextMenu.prototype.createMapContextMenuSubMenu = function (olFeature) {
+    Mapbender.Digitizer.MapContextMenu.prototype.createMapContextMenuSubMenu = function (olFeature) {
         var contextMenu = this;
         var schema = contextMenu.schema;
         var subItems = {
@@ -124,13 +124,13 @@
     };
 
 
-    window.ElementContextMenu = function () {
+    Mapbender.Digitizer.ElementContextMenu = function () {
         ContextMenu.apply(this, arguments);
     };
 
-    ElementContextMenu.prototype = Object.create(ContextMenu.prototype);
+    Mapbender.Digitizer.ElementContextMenu.prototype = Object.create(ContextMenu.prototype);
 
-    ElementContextMenu.prototype.buildContextMenu = function (selectedRow, e) {
+    Mapbender.Digitizer.ElementContextMenu.prototype.buildContextMenu = function (selectedRow, e) {
 
 
         var contextMenu = this;

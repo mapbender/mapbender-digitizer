@@ -1,10 +1,10 @@
 (function () {
     "use strict";
 
-    window.FormItemLabel =  {
+    Mapbender.Digitizer.FormItemLabel =  {
         
     };
 
-    Object.setPrototypeOf(FormItemLabel, FormItem);
+    Object.setPrototypeOf(Mapbender.Digitizer.FormItemLabel, Mapbender.Digitizer.FormItem);
 
 })();

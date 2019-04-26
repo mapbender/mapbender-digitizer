@@ -55,7 +55,17 @@ class Digitizer extends BaseElement
             "formItemFieldSet","formItemFile","formItemForm","formItemImage","formItemInput","formItemLabel",
             "formItemResultTable","formItemSelect","formItemTabs","formItemTextArea","formItemText");
 
-        $js = array(
+        $js = array();
+
+        foreach($mainFiles as $file) {
+            $js[] = "@MapbenderDigitizerBundle/Resources/public/$file.js";
+        }
+
+        foreach($formItemFiles as $file) {
+            $js[] = "@MapbenderDigitizerBundle/Resources/public/formItems/$file.js";
+        }
+
+        $js = array_merge($js,array(
             '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
             '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
             '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
@@ -68,14 +78,7 @@ class Digitizer extends BaseElement
             '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
             '@MapbenderDigitizerBundle/Resources/public/lib/jsts.min.js',
 
-        );
-
-        foreach($mainFiles as $file) {
-            $js[] = "@MapbenderDigitizerBundle/Resources/public/$file.js";
-        }
-        foreach($formItemFiles as $file) {
-            $js[] = "@MapbenderDigitizerBundle/Resources/public/formItems/$file.js";
-        }
+        ));
 
 
 

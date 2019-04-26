@@ -1,10 +1,10 @@
 (function () {
     "use strict";
 
-    window.FormItemCheckbox  = {
+    Mapbender.Digitizer.FormItemCheckbox  = {
 
     };
 
-    Object.setPrototypeOf(FormItemCheckbox, FormItem);
+    Object.setPrototypeOf(Mapbender.Digitizer.FormItemCheckbox, Mapbender.Digitizer.FormItem);
 
 })();

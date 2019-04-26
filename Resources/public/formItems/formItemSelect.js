@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    window.FormItemSelect =  {
+    Mapbender.Digitizer.FormItemSelect =  {
 
     preprocess: function() {
 
@@ -114,7 +114,7 @@
 
     };
 
-    Object.setPrototypeOf(FormItemSelect, FormItem);
+    Object.setPrototypeOf(Mapbender.Digitizer.FormItemSelect, Mapbender.Digitizer.FormItem);
 
 
 })();

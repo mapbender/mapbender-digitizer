@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    window.Sidebar = function (schema) {
+    Mapbender.Digitizer.Sidebar = function (schema) {
 
         this.schema = schema;
         this.frame = $("<div />").addClass('frame');
@@ -21,7 +21,7 @@
     };
 
 
-    Sidebar.prototype = {
+    Mapbender.Digitizer.Sidebar.prototype = {
 
 
         _addSpecificOptionToSchemeSelector: function () {
@@ -347,8 +347,6 @@
 
 
             var toolset = schema.toolset;
-
-            console.log(schema.getGeomType(),"§§§");
 
             var $digitizingToolSetElement = $('<div/>').digitizingToolSet({
                 buttons: toolset,

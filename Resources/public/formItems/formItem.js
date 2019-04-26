@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    window.FormItem = {
+    Mapbender.Digitizer.FormItem = {
 
         CLASS_NAME: "FormItem",
 
@@ -42,7 +42,7 @@
     };
 
 
-    window.FormItemUtils = {
+    Mapbender.Digitizer.FormItemUtils = {
 
         openEditDialog: function (data,item, ref) {
 

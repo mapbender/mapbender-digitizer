@@ -1,10 +1,10 @@
 (function () {
     "use strict";
 
-    window.FormItemBreakLine = {
+    Mapbender.Digitizer.FormItemBreakLine = {
 
     };
 
-    Object.setPrototypeOf(FormItemBreakLine, FormItem);
+    Object.setPrototypeOf(Mapbender.Digitizer.FormItemBreakLine, Mapbender.Digitizer.FormItem);
 
 })();

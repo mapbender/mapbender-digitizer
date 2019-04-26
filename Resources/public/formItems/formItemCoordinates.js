@@ -1,10 +1,10 @@
 (function () {
     "use strict";
 
-    window.FormItemCoordinates = {
+    Mapbender.Digitizer.FormItemCoordinates = {
 
     };
 
-    Object.setPrototypeOf(FormItemCoordinates, FormItem);
+    Object.setPrototypeOf(Mapbender.Digitizer.FormItemCoordinates, Mapbender.Digitizer.FormItem);
 
 })();

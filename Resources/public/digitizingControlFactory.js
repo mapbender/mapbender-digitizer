@@ -25,7 +25,7 @@
     };
 
 
-    window.DigitizingControlFactory = function (layer, injectedMethods, controlEvents) {
+    Mapbender.Digitizer.DigitizingControlFactory = function (layer, injectedMethods, controlEvents) {
 
         var finalizeDrawFeatureWithValidityTest = function (cancel) {
             if (this.polygon) {

@@ -1,10 +1,10 @@
 (function () {
     "use strict";
 
-    window.FormItemForm =  {
+    Mapbender.Digitizer.FormItemForm =  {
 
     };
 
-    Object.setPrototypeOf(FormItemForm, FormItem);
+    Object.setPrototypeOf(Mapbender.Digitizer.FormItemForm, Mapbender.Digitizer.FormItem);
 
 })();

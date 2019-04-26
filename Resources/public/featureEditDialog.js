@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    window.PopupConfiguration = function (configuration, schema) {
+    Mapbender.Digitizer.PopupConfiguration = function (configuration, schema) {
         var popupConfiguration = this;
         $.extend(popupConfiguration, configuration);
 
@@ -16,7 +16,7 @@
 
     };
 
-    PopupConfiguration.prototype = {
+    Mapbender.Digitizer.PopupConfiguration.prototype = {
         remoteData: false,
         isOpenLayersCloudPopup: function () {
             return this.type === 'openlayers-cloud';

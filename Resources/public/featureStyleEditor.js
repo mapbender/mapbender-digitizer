@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    window.FeatureStyleEditor = function (feature, schema, options) {
+    Mapbender.Digitizer.FeatureStyleEditor = function (feature, schema, options) {
 
         var editor = this;
 
@@ -496,7 +496,7 @@
             children: tabs
         });
 
-        window.setTimeout(function () {
+        Mapbender.Digitizer.setTimeout(function () {
             element.formData(options.data);
         }, 100);
 
@@ -525,7 +525,7 @@
 
     };
 
-    FeatureStyleEditor.prototype = {
+    Mapbender.Digitizer.FeatureStyleEditor.prototype = {
 
 
         close: function () {

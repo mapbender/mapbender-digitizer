@@ -1,13 +1,10 @@
 (function() {
     "use strict";
 
-    window.Mapbender = window.Mapbender || {};
-    Mapbender.DigitzerPlugins = {};
-
-    Mapbender.DigitzerPlugins.print = {
+    Mapbender.Digitizer.printPlugin = {
 
         printDigitizerFeature: function (schemaName, featureId) {
-            var d = new $.Deferred();
+            var d = $.Deferred();
             this.digitizerData = {
                 digitizer_feature: {
                     id: featureId,

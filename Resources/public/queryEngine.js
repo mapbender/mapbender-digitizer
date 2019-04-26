@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    window.QueryEngine = function(widget) {
+    Mapbender.Digitizer.QueryEngine = function(widget) {
 
 
 

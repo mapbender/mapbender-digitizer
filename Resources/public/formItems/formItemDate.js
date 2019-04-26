@@ -1,10 +1,10 @@
 (function () {
     "use strict";
 
-    window.FormItemDate = {
+    Mapbender.Digitizer.FormItemDate = {
 
     };
 
-    Object.setPrototypeOf(FormItemDate, FormItem);
+    Object.setPrototypeOf(Mapbender.Digitizer.FormItemDate, Mapbender.Digitizer.FormItem);
 
 })();

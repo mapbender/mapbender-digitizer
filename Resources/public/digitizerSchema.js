@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    window.Scheme = function (rawScheme, widget) {
+    Mapbender.Digitizer.Scheme = function (rawScheme, widget) {
         /** @type {Scheme} */
         var schema = this;
 
@@ -17,7 +17,7 @@
 
         schema.createPopupConfiguration();
 
-        schema.setModifiedState = Scheme.prototype.setModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
+        schema.setModifiedState = Mapbender.Digitizer.Scheme.prototype.setModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
 
         schema.toolset = schema.createToolset();
 
@@ -37,8 +37,8 @@
         //     return _.flatten(_.pluck(this.features, "cluster"));
         // };
 
-        schema.mapContextMenu = new MapContextMenu(schema);
-        schema.elementContextMenu = new ElementContextMenu(schema);
+        schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
+        schema.elementContextMenu = new Mapbender.Digitizer.ElementContextMenu(schema);
 
 
         // remove removeSelected Control if !allowDelete
@@ -58,7 +58,7 @@
         schema.initializeStyleApplication();
 
         if (schema.clustering) {
-            var clusteringScheme = ClusteringSchemeMixin();
+            var clusteringScheme = Mapbender.Digitizer.ClusteringSchemeMixin();
             var originalSchemePrototype = Object.getPrototypeOf(schema);
             Object.setPrototypeOf(schema, clusteringScheme);
             Object.setPrototypeOf(clusteringScheme, originalSchemePrototype);
@@ -67,13 +67,13 @@
 
         }
 
-      schema.assert();
+        schema.assert();
 
 
     };
 
 
-    Scheme.prototype = {
+    Mapbender.Digitizer.Scheme.prototype = {
 
 
         schemaName: null,
@@ -208,13 +208,13 @@
 
         createFormItemsCollection: function(formItems) {
             var schema = this;
-            schema.formItems = new FormItemsCollection(formItems || schema.formItems, schema);
+            schema.formItems = new Mapbender.Digitizer.FormItemsCollection(formItems || schema.formItems, schema);
 
         },
 
         createPopupConfiguration: function() {
             var schema = this;
-            schema.popup = new PopupConfiguration(schema.popup, schema);
+            schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
         },
 
         updateConfigurationAfterSwitching: function(updatedSchemes) {
@@ -568,7 +568,7 @@
             var widget = schema.widget;
             var element = $(widget.element);
 
-            var sidebar = new Sidebar(schema);
+            var sidebar = new Mapbender.Digitizer.Sidebar(schema);
 
             schema.frame = sidebar.frame;
             element.append(sidebar.frame);
@@ -689,7 +689,7 @@
 
         createDefaultSymbolizer: function (feature) {
             var schema = this;
-            return schema.layer.styleMap.styles['default'].createSymbolizer(feature);
+            return schema.layer.styleMap.styles.default.createSymbolizer(feature);
         },
 
         openChangeStyleDialog: function (feature) {
@@ -1106,7 +1106,7 @@
             var widget = schema.widget;
 
             if (!feature) {
-                return
+                return;
             }
 
             var olMap = widget.map;

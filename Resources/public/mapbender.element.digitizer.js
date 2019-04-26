@@ -1,6 +1,8 @@
 (function ($) {
     "use strict";
 
+    Mapbender.Digitizer = Mapbender.Digitizer || {};
+
     $.fn.dataTable.ext.errMode = 'throw';
 
 
@@ -117,13 +119,13 @@
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function(printClient){
                 widget.printClient = printClient;
-                $.extend(widget.printClient ,Mapbender.DigitzerPlugins.print);
+                $.extend(widget.printClient ,Mapbender.Digitizer.printPlugin);
             }.bind(this));
 
 
             widget.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
-            var qe = new QueryEngine(widget);
+            var qe = new Mapbender.Digitizer.QueryEngine(widget);
             widget.query = qe.query;
 
             widget.spinner = new function() {
@@ -222,12 +224,12 @@
             widget.schemes = {};
             _.each(rawSchemes, function (rawScheme, schemaName) {
                 rawScheme.schemaName = schemaName;
-                widget.schemes[schemaName] = new Scheme(rawScheme, widget);
+                widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget);
             });
 
 
             if (!widget.hasOnlyOneScheme) {
-                widget.schemes['all'] = new AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
+                widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
             }
         },
 
@@ -322,8 +324,6 @@
         _setup: function () {
 
             var widget = this;
-
-            Mapbender.Digitizer = this;
 
             var element = $(widget.element);
             var options = widget.options;

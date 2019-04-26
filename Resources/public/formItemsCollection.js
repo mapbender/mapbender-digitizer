@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    window.FormItemsCollection = function (items, schema) {
+    Mapbender.Digitizer.FormItemsCollection = function (items, schema) {
 
         var formItemsCollection = this;
 
@@ -28,7 +28,7 @@
 
         var typeName = item.type.charAt(0).toUpperCase() + item.type.slice(1);
         var prototypeName = 'FormItem' + typeName;
-        var prototype = window[prototypeName];
+        var prototype = Mapbender.Digitizer[prototypeName];
 
         if (!prototype) {
             throw new Error("No prototype '" + prototypeName + "' defined");
@@ -53,7 +53,7 @@
 
 
 
-    FormItemsCollection.prototype = {
+    Mapbender.Digitizer.FormItemsCollection.prototype = {
 
         /**
          * "Fake" form data for a feature that hasn't gone through attribute

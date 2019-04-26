@@ -1,11 +1,11 @@
 (function () {
     "use strict";
 
-    window.FormItemTabs = {
+    Mapbender.Digitizer.FormItemTabs = {
 
 
     };
 
-    Object.setPrototypeOf(FormItemTabs, FormItem);
+    Object.setPrototypeOf(Mapbender.Digitizer.FormItemTabs, Mapbender.Digitizer.FormItem);
 
 })();
