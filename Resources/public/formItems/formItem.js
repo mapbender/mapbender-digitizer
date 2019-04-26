@@ -72,7 +72,7 @@
                 click: function () {
 
                     var uniqueIdKey = schema.dataStore.uniqueId;
-                    QueryEngine.query('datastore/remove', widget.id, {
+                    widget.query('datastore/remove', {
                         schema: data.item.dataStoreLink.name,
                         dataItemId: data[uniqueIdKey],
                         dataStoreLinkFieldName: schema.dataStoreLink.fieldName,
@@ -239,7 +239,7 @@
 
         $(dialog).disableForm();
 
-        QueryEngine.query('datastore/save', widget.id, {
+        widget.query('datastore/save', {
             schema: dataItem.item.dataStoreLink.name,
             dataItem: formData,
             dataItemId: dataItem[uniqueIdKey],

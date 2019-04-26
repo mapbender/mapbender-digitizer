@@ -1,17 +1,8 @@
 (function () {
     "use strict";
 
-    window.QueryEngine = {
+    window.QueryEngine = function(widget) {
 
-        id: null,
-
-        setId: function (id) {
-            this.id = id;
-        },
-
-        getElementUrl: function (id) {
-            return Mapbender.configuration.application.urls.element + '/' + id + '/'
-        },
 
 
         /**
@@ -22,8 +13,9 @@
          * @return xhr jQuery XHR object
          * @version 0.2
          */
-        query: function (uri, id, request) {
-            var elementUrl = this.getElementUrl(id);
+        this.query = function (uri, request) {
+            var elementUrl = Mapbender.configuration.application.urls.element + '/' + widget.id + '/';
+            widget.spinner.addRequest();
             return $.ajax({
                 url: elementUrl + uri,
                 type: 'POST',
@@ -52,8 +44,10 @@
                 $.notify(errorMessage, {
                     autoHide: false
                 });
+            }).always( function() {
+                widget.spinner.removeRequest();
             });
-        },
+        };
 
     };
 

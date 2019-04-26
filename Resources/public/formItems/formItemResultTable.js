@@ -30,7 +30,7 @@
                 };
 
 
-                QueryEngine.query('dataStore/get',widget.id, requestData).done(function (data) {
+                widget.query('dataStore/get',requestData).done(function (data) {
 
                     var dataItems = [];
 

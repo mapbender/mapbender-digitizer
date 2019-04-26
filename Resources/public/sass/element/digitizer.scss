@@ -300,3 +300,15 @@ $selectColor: #F7F79A;
         margin-top: 5px;
     }
 }
+
+
+.loader {
+  border: 1px dotted #ccc !important;
+  border-radius: 50% !important;
+  border-top: 1px dotted #555 !important;
+  width: 10px !important;
+  height: 10px !important;
+  animation: spin 1s linear infinite !important;
+  float: right !important;
+  padding: 0 !important;
+}

@@ -542,7 +542,7 @@
             var styleData = styleEditor.formData();
             styleEditor.disableForm();
             if (feature.fid) {
-                QueryEngine.query('style/save', widget.id,  {
+                widget.query('style/save', {
                     schema: schema.schemaName,
                     style: styleData,
                     featureId: feature.fid

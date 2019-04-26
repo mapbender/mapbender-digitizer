@@ -108,7 +108,7 @@
             var widget = this.widget = this;
             var element = widget.element;
 
-            this.id = element.attr("id");
+            widget.id = element.attr("id");
 
             if (!Mapbender.checkTarget("mbDigitizer", widget.options.target)) {
                 return;
@@ -122,6 +122,37 @@
 
 
             widget.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+
+            var qe = new QueryEngine(widget);
+            widget.query = qe.query;
+
+            widget.spinner = new function() {
+                var spinner = this;
+
+                spinner.openRequests = 0;
+
+                var $parent = $('#'+widget.id).parents('.container-accordion').prev().find('.tablecell').prepend("<div class='loader' style='display:none'></div>");
+                spinner.$element = $parent.find(".loader");
+
+                console.log(spinner.$element);
+
+
+                spinner.addRequest = function() {
+                    spinner.openRequests++;
+                    if (spinner.openRequests >= 1) {
+                        spinner.$element.show();
+                    }
+                };
+
+                spinner.removeRequest = function() {
+                    spinner.openRequests--;
+                    if (spinner.openRequests === 0) {
+                        spinner.$element.hide();
+                    }
+                };
+
+
+            };
 
 
         },

@@ -61,7 +61,7 @@
                     var selectRef = $(this).siblings().find('select');
 
                     var dataStoreId = item.dataStore.id;
-                    QueryEngine.query("datastore/get", widget.id, {
+                    widget.query("datastore/get", {
                         schema: schema.schemaName,
                         id: dataStoreId,
                         dataItemId: dataItemId

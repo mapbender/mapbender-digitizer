@@ -147,7 +147,7 @@
         allowCancelButton: true,
         allowLocate: true,
         maxResults: 500,
-        showExtendSearchSwitch: false,
+        showExtendSearchSwitch: true,
         zoomScaleDenominator: 500,
         useContextMenu: true,
         displayPermanent: false,
@@ -182,7 +182,7 @@
         openFormAfterEdit: true,
         maxResults: 5001,
         pageLength: 10,
-        currentExtentSearch: true,
+        currentExtentSearch: false,
         inlineSearch: false,
         hooks: {
             onModificationStart: null,
@@ -252,7 +252,7 @@
             var promise;
 
             if (schema.allowCustomerStyle) {
-                promise = QueryEngine.query('style/list', widget.id, {schema: schema.schemaName}).then(function(data) {
+                promise = widget.query('style/list', {schema: schema.schemaName}).then(function(data) {
                     schema.featureStyles = data.featureStyles;
                 });
             } else {
@@ -260,7 +260,7 @@
             }
 
             promise.then(function () {
-                return QueryEngine.query('getConfiguration', widget.id);
+                return widget.query('getConfiguration');
             }).done(function (response) {
 
 
@@ -773,7 +773,7 @@
                 schema.xhr.abort();
             }
 
-            schema.xhr = QueryEngine.query('select', widget.id,  request).done(function (featureCollection) {
+            schema.xhr = widget.query('select', request).done(function (featureCollection) {
                 schema._onFeatureCollectionLoaded(featureCollection, this);
             });
 
@@ -866,7 +866,7 @@
                 Mapbender.confirmDialog({
                     html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
                     onSuccess: function () {
-                        QueryEngine.query('delete', widget.id, {
+                        widget.query('delete', {
                             schema: schema.getSchemaByFeature(feature).schemaName,
                             feature: feature.attributes
                         }).done(function (fid) {
@@ -999,7 +999,7 @@
             // TODO check this
             tableApi.draw({"paging": "page"});
 
-            var promise = QueryEngine.query('save', widget.id,  {
+            var promise = widget.query('save', {
 
                 schema: schema.getSchemaByFeature(feature).schemaName,
                 feature: request
@@ -1211,7 +1211,7 @@
         exportGeoJson: function (feature) {
             var schema = this;
             var widget = schema.widget;
-            QueryEngine.query('export', widget.id,  {
+            widget.query('export', {
                 schema: schema.getSchemaByFeature(feature).schemaName,
                 feature: feature,
                 format: 'GeoJSON'
