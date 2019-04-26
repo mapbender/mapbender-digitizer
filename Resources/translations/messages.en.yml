@@ -31,17 +31,29 @@ mb.digitizer:
     saveAll: Save all features
     point:
       drawPoint: Draw point
-      moveGeometry: Move feature
+      moveFeature: Move point
       selectFeature: Select feature
       removeSelected: Remove selected
     line:
       drawLine: Draw line
-      modifyFeature: Modify feature
-      moveGeometry: Move feature
+      modifyFeature: Modify line
+      moveFeature: Move line
       selectFeature: Select feature
       removeSelected: Remove selected
     polygon:
-      drawPolygon: Draw polygone
+      drawPolygon: Draw polygon
+      drawRectangle: Draw rectangle
+      drawCircle: Draw circle
+      drawEllipse: Draw ellipse
+      drawDonut: Draw donut
+      modifyFeature: Modify polygon
+      moveFeature: Move polygone
+      selectFeature: Select feature
+      removeSelected: Remove selected
+    all:
+      drawPoint: Draw point
+      drawLine: Draw line
+      drawPolygon: Draw polygon
       drawRectangle: Draw rectangle
       drawCircle: Draw circle
       drawEllipse: Draw ellipse

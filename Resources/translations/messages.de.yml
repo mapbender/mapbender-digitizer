@@ -30,13 +30,13 @@ mb.digitizer:
     saveAll: Alle Objekte speichern
     point:
       drawPoint: Punkt erstellen
-      moveGeometry: Punkt verschieben
+      moveFeature: Punkt verschieben
       selectFeature: Punkte de-/selektieren
       removeSelected: Selektierte Punkte löschen
     line:
-      drawLine: Line erstellen
+      drawLine: Linie erstellen
       modifyFeature: Linie bearbeiten
-      moveGeometry: Linie verschieben
+      moveFeature: Linie verschieben
       selectFeature: Linien de-/selektieren
       removeSelected: selektierten Linien löschen
     polygon:
@@ -44,11 +44,20 @@ mb.digitizer:
       drawRectangle: Rechteck erstellen
       drawCircle: Kreis erstellen
       drawEllipse: Ellipse erstellen
-      drawDonut: Donut erstellen oder die bestehende Geometrien editieren
+      drawDonut: Enklave in Fläche zeichnen
       modifyFeature: Fläche bearbeiten
-      moveGeometry: Fläche verschieben
-      selectFeature: Flächen de-/selektieren
-      removeSelected: Selektierte Flächen löschen
+      moveFeature: Fläche verschieben
+    all:
+      drawPoint: Punkt erstellen
+      drawLine: Linie erstellen
+      drawPolygon: Fläche erstellen
+      drawRectangle: Rechteck erstellen
+      drawCircle: Kreis erstellen
+      drawEllipse: Ellipse erstellen
+      drawDonut: Enklave in Fläche zeichnen
+      modifyFeature: Objekt bearbeiten
+      moveFeature: Objekt verschieben
+
   cancel: Abbrechen
   api:
     query:

@@ -348,10 +348,12 @@
 
             var toolset = schema.toolset;
 
+            console.log(schema.getGeomType(),"§§§");
+
             var $digitizingToolSetElement = $('<div/>').digitizingToolSet({
                 buttons: toolset,
                 layer: layer,
-                translations: Mapbender.DigitizerTranslator.toolsetTranslations(schema.featureType && schema.featureType.geomType),
+                geomType: schema.getGeomType(),
                 injectedMethods: {
 
                     openFeatureEditDialog: function (feature) {

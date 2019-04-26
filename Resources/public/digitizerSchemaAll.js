@@ -4,6 +4,8 @@
 
         Scheme.apply(this, arguments);
 
+
+
         this.schemaName = 'all';
 
     };
@@ -11,12 +13,14 @@
 
     AllScheme.prototype = {
 
-
         assert: function() {
             var schema = this;
             console.assert(!!schema.tableFields,"Schema "+schema.schemaName+" does not have Tablefields");
         },
 
+        getGeomType: function() {
+            return 'all';
+        },
 
         getStyleMapOptions: function (label) {
             var schema = this;

@@ -5,21 +5,7 @@
 
         options: {
             layer: null,
-            translations: {
-                drawText : "Draw text",
-                drawPoint: "Draw point",
-                drawLine: "Draw line",
-                drawPolygon: "Draw polygon",
-                drawRectangle: "Draw rectangle",
-                drawCircle: "Draw circle",
-                drawEllipse: "Draw ellipse",
-                drawDonut: "Draw donut",
-                modifyFeature: "Select and edit geometry position/size",
-                moveFeature: "Move geometry",
-                selectFeature: "Select geometry",
-                removeSelected: "Remove selected geometries",
-                removeAll: "Remove all geometries"
-            },
+            geomType: null,
             injectedMethods: {
                 openFeatureEditDialog: function (feature) {
                     console.warn("this method shoud be overwritten");
@@ -53,7 +39,10 @@
         activeControl: null,
 
         _create: function () {
+
             var toolSet = this;
+
+            console.log(toolSet,"§§§");
             toolSet.$buttons = {};
 
             toolSet.controlFactory = DigitizingControlFactory(toolSet.options.layer, toolSet.options.injectedMethods,toolSet.createControlEvents());
@@ -121,6 +110,7 @@
 
         _createPlainControlButton: function (item) {
             var toolSet = this;
+            var geomType = toolSet.options.geomType;
 
             var $button = $("<button class='button' type='button'/>");
 
@@ -128,7 +118,7 @@
             $button.addClass('-fn-tool-button');
             $button.data(item);
 
-            $button.attr('title', toolSet.options.translations[item.type] || item.type);
+            $button.attr('title', Mapbender.DigitizerTranslator.translate('toolset.'+geomType +'.' + item.type));
             // add icon css class
             $button.addClass("icon-" + item.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
 

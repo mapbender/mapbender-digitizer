@@ -60,39 +60,5 @@
         },
 
 
-        toolsetTranslations: function (geomType) {
-
-
-            var toolSetTranslations = {
-                drawPoint: "Punkt setzen",
-                drawLine: "Linie zeichnen",
-                drawPolygon: "Polygon zeichnen",
-                drawRectangle: "Rechteck zeichen",
-                drawCircle: "Kreis zeichen",
-                drawEllipse: "Ellipse zeichen",
-                drawDonut: "Polygon mit Enklave zeichnen",
-                selectAndEditGeometry: "Objekt Position/Größe beabeiten",
-                moveGeometry: "Objekt bewegen",
-                selectGeometry: "Objekt selektieren",
-                removeSelected: "Selektierte objekte löschen",
-                removeAll: "Alle Objekte löschen"
-            };
-
-
-            //var toolSetTranslations =  {};
-
-            var translationPrefix = 'mb.digitizer.toolset.' + geomType + '.';
-
-            _.each(Mapbender.i18n, function (v, k) {
-                if (k.indexOf(translationPrefix) === 0) {
-                    var shortKeyName = k.split(translationPrefix)[1];
-                    toolSetTranslations[shortKeyName] = v;
-                }
-            });
-
-            return toolSetTranslations;
-        },
-
-
     };
 })(jQuery);

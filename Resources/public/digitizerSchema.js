@@ -200,6 +200,11 @@
             console.assert(!!schema.tableFields,"Schema "+schema.schemaName+" does not have Tablefields");
         },
 
+        getGeomType: function() {
+            var schema = this;
+            return schema.featureType.geomType;
+        },
+
 
         createFormItemsCollection: function(formItems) {
             var schema = this;
