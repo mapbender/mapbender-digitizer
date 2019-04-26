@@ -50,10 +50,6 @@
 
         var controls = {
 
-            drawText: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point, {
-                featureAdded: createFeatureAddedMethod(injectedMethods, 'label'),
-            }),
-
             drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point, {
                 featureAdded: createFeatureAddedMethod(injectedMethods, 'point'),
             }),

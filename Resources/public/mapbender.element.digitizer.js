@@ -236,13 +236,11 @@
 
             switch(geomType) {
                 case 'point':
-                    return [{type: 'drawPoint'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}];
+                    return [{type: 'drawPoint'}, {type: 'moveFeature'}];
                 case 'line':
-                    return [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}];
+                    return [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}];
                 case 'polygon':
-                    return [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}, {type: 'selectFeature'}, {type: 'removeSelected'}];
-                // case 'label' :
-                //     return [{type: 'drawText'}, {type: 'moveFeature'}];
+                    return [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}];
 
             }
 

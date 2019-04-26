@@ -67,9 +67,7 @@
 
         }
 
-        console.log(this.featureType,"!!");
-
-
+        console.assert(['polygon','line','point'].includes(schema.featureType.geomType),"invalid geom Type: "+schema.featureType.geomType);
         console.assert(!!schema.tableFields,"Schema "+schema.schemaName+" does not have Tablefields");
 
 

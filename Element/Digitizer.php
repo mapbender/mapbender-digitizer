@@ -492,7 +492,7 @@ class Digitizer extends BaseElement
 
             }
             foreach($results as &$result) {
-                $result->setAttributes(array("schemaName" => $schema["schemaName"]));
+                $result->setAttributes(array("schemaName" => $schemaName));
             }
             $results = $featureType->toFeatureCollection($results);
         } catch (DBALException $e) {
