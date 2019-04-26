@@ -98,7 +98,7 @@
 
         initTableFields: function() {
             var schemes = this.widget.schemes;
-            this.tableFields = schemes[Object.keys(schemes)[1]].tableFields; // TODO only valid solution is yaml Configuration of allScheme
+            this.tableFields = schemes[Object.keys(schemes)[1]].tableFields; // TODO Only solvable when Data of different Features is already aggregated in the database query
 
         },
 

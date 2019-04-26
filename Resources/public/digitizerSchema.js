@@ -331,9 +331,10 @@
         initTableFields: function() {
             var schema = this;
             if (!schema.tableFields) {
-                schema.tableFields = {
-                    id: {label: 'Nr.' , width: '20%' },
-                    titel: {label: 'Name' , width: '80%'}
+                schema.tableFields = {};
+                schema.tableFields[schema.featureType.uniqueId] = {label: 'Nr.' , width: '20%' };
+                if (schema.featureType.name) {
+                    schema.tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
                 }
             }
         },
