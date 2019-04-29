@@ -80,7 +80,7 @@
             var config = ['drawPoint', 'drawLine', 'drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'drawText', 'modifyFeature', 'moveFeature', 'selectFeature', 'removeSelected'];
 
             toolset = toolset.sort(function (a, b) {
-                return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : ( a.schema && b.schema && (a.schema.index >q b.schema.index) ? 1 : -1) ;
+                return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : ( a.schema && b.schema && (a.schema.index > b.schema.index) ? 1 : -1) ;
             });
 
             return toolset;
