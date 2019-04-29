@@ -8,8 +8,10 @@
         popupConfiguration.buttons = augmentFeatureEditDialogButtonsWithCustomButtons(configuration, schema);
         $.extend(popupConfiguration.buttons, createButtons(configuration, schema));
 
-        popupConfiguration.getSchema = function() {
-            return schema;
+        popupConfiguration.getSchema = function(feature) {
+            var scheme = schema.getSchemaByFeature(feature);
+            console.log(scheme,feature,"===");
+            return scheme;
         };
 
         Object.freeze(popupConfiguration.buttons);
@@ -35,7 +37,7 @@
 
 
         createFeatureEditDialog: function(feature) {
-            return new FeatureEditDialog(feature, this.getSchema())
+            return new FeatureEditDialog(feature, this.getSchema(feature))
         }
     };
 
@@ -155,6 +157,8 @@
 
         var dialog = this;
         dialog.schema = schema;
+
+        console.log(schema,"???????");
 
         var widget = schema.widget;
         var $popup = dialog.$popup = $("<div/>");

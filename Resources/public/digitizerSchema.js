@@ -1,8 +1,9 @@
 (function () {
     "use strict";
 
+
+
     Mapbender.Digitizer.Scheme = function (rawScheme, widget) {
-        /** @type {Scheme} */
         var schema = this;
 
         $.extend(schema, rawScheme);
@@ -239,7 +240,6 @@
 
         activateSchema: function () {
 
-            /** @type {Scheme} */
             var schema = this;
 
 
@@ -324,6 +324,12 @@
 
         },
 
+        createToolset: function () {
+            var schema = this;
+
+            return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
+        },
+
         getStyleLabels: function () {
             return ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
         },
@@ -363,12 +369,6 @@
                 }
                 return OpenLayers.Layer.Vector.prototype.drawFeature.apply(this, [feature, style]);
             };
-        },
-
-        createToolset: function () {
-            var schema = this;
-            var widget = schema.widget;
-            return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : widget.getDefaultToolsetByGeomType(schema.featureType.geomType);
         },
 
 
@@ -418,6 +418,7 @@
          */
         processFormItems: function (feature, dialog) {
             var schema = this.getSchemaByFeature(feature);
+            console.log(schema,this);
             var formItems = schema.formItems || schema.getDefaultFormItems(feature); // TODO Can this ever be called?
 
             var processedFormItems = formItems.process(feature, dialog);
@@ -1229,6 +1230,13 @@
             }).done(function (response) {
 
             });
+        },
+
+
+        getAddControls: function() {
+
+
+
         },
 
 

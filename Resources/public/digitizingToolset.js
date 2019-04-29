@@ -6,6 +6,7 @@
         options: {
             layer: null,
             geomType: null,
+            schemaName: null,
             injectedMethods: {
                 openFeatureEditDialog: function (feature) {
                     console.warn("this method shoud be overwritten");
@@ -42,37 +43,10 @@
 
             var toolSet = this;
 
-            toolSet.$buttons = {};
-
-            toolSet.controlFactory = Mapbender.Digitizer.DigitizingControlFactory(toolSet.options.layer, toolSet.options.injectedMethods,toolSet.createControlEvents());
+            toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.options.layer, toolSet.options.injectedMethods,toolSet.createControlEvents());
             toolSet.element.addClass('digitizing-tool-set');
-            toolSet.refresh();
+            toolSet.createToolbar();
 
-            $(this.element).on('click', '.-fn-tool-button', function (e) {
-
-                var $el = $(e.currentTarget);
-                var control = $el.data('control');
-
-               if (control.active) {
-                 control.deactivate();
-               } else {
-                   toolSet.deactivateControls();
-                   control.activate();
-               }
-
-            });
-
-
-
-        },
-
-        deactivateControls:  function() {
-            var toolSet = this;
-            _.each(toolSet.controlFactory,function(control) {
-                if (control.active) {
-                    control.deactivate();
-                }
-            });
         },
 
         createControlEvents: function () {
@@ -80,13 +54,15 @@
             var controlEvents = {
 
                 activate: function(event) {
-                    var $button = toolSet.$buttons[this.name];
-                    $button.addClass('active');
+                    var control = this;
+                    control.$button.addClass('active');
                 },
 
                 deactivate: function(event) {
-                    var $button = toolSet.$buttons[this.name];
-                    $button.removeClass('active');
+                    var control = this;
+
+                    control.$button.removeClass('active');
+                    $(control.map.div).css({cursor: 'default'});
 
                 }
             },
@@ -95,15 +71,6 @@
             return controlEvents;
         },
 
-        /**
-         * Refresh toolSet
-         */
-        refresh: function () {
-            var toolSet = this;
-            var element = $(toolSet.element);
-            element.empty();
-            toolSet.createToolbar();
-        },
 
 
 
@@ -114,8 +81,6 @@
             var $button = $("<button class='button' type='button'/>");
 
             $button.addClass(item.type);
-            $button.addClass('-fn-tool-button');
-            $button.data(item);
 
             $button.attr('title', Mapbender.DigitizerTranslator.translate('toolset.'+geomType +'.' + item.type));
             // add icon css class
@@ -139,13 +104,27 @@
                 var $button = toolSet._createPlainControlButton(rawButton);
                 var type = rawButton.type;
 
-                var control = controlFactory[type];
+                var control = controlFactory[type](rawButton.schemaName);
                 if (!control) {
-                    console.warn("control "+type+" not found");
+                    console.warn("control "+type+" does not exist");
                     return;
                 }
-                $button.data('control', control);
-                toolSet.$buttons[type] = $button;
+
+                control.$button = $button;
+
+                $($button).click(function (e) {
+
+                    if (control.active) {
+                        control.deactivate();
+                    } else {
+                        toolSet.activeControl && toolSet.activeControl.deactivate();
+                        control.activate();
+                        toolSet.activeControl = control;
+
+                    }
+
+                });
+
 
                 control.layer.map.addControl(control);
                 element.append($button);

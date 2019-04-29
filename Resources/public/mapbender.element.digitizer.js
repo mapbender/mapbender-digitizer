@@ -156,6 +156,156 @@
 
         },
 
+
+        _setup: function () {
+            var widget = this;
+            var element = $(widget.element);
+            var options = widget.options;
+
+            widget.selector = $("select.selector", element);
+
+            console.log(widget.selector,1);
+
+            widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
+
+            // TODO Kanonen->Spatzen: refactoring
+            var initializeActivationContainer = function () {
+
+                var containerInfo = new MapbenderContainerInfo(widget, {
+                    onactive: function () {
+                        widget.activate();
+                    },
+                    oninactive: function () {
+                        widget.deactivate();
+                    }
+                });
+
+                return containerInfo;
+
+            };
+
+            var initializeSelectorOrTitleElement = function () {
+
+                var options = widget.options;
+                var element = $(widget.element);
+                var titleElement = $("> div.title", element);
+
+
+                widget.hasOnlyOneScheme = _.size(options.schemes) === 1;
+
+                if (widget.hasOnlyOneScheme) {
+                    titleElement.html(_.toArray(options.schemes)[0].label);
+                    widget.selector.hide();
+                } else {
+                    titleElement.hide();
+                }
+            };
+
+
+            var createSchemes = function () {
+
+                var rawSchemes = widget.options.schemes;
+                widget.schemes = {};
+                _.each(rawSchemes, function (rawScheme, schemaName) {
+                    rawScheme.schemaName = schemaName;
+                    widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget);
+                });
+
+                if (!widget.hasOnlyOneScheme) {
+                    widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
+                }
+            };
+
+            var createMapContextMenu = function () {
+                var map = widget.map;
+
+
+                var options = {
+                    selector: 'div',
+                    events: {
+                        show: function (options) {
+                            return widget.allowUseMapContextMenu(options);
+                        }
+                    },
+                    build: function (trigger, e) {
+                        return widget.buildMapContextMenu(trigger, e);
+                    }
+                };
+
+                $(map.div).contextMenu(options);
+
+            };
+
+            var createElementContextMenu = function () {
+                var element = $(widget.element);
+
+                var options = {
+                    position: function (opt, x, y) {
+                        opt.$menu.css({top: y, left: x + 10});
+                    },
+                    selector: '.mapbender-element-result-table > div > table > tbody > tr',
+                    events: {
+                        show: function (options) {
+                            return widget.allowUseElementContextMenu(options);
+                        }
+                    },
+                    build: function (trigger, e) {
+                        return widget.buildElementContextMenu(trigger, e);
+                    }
+                };
+
+                $(element).contextMenu(options);
+
+            };
+
+            var initializeSelector = function () {
+                var selector = widget.selector;
+
+                selector.on('change', widget.onSelectorChange);
+
+            };
+
+            var initializeMapEvents = function () {
+                var map = widget.map;
+
+                map.events.register("moveend", this, function () {
+                    widget.getData();
+                });
+                map.events.register("zoomend", this, function () {
+                    widget.getData(true);
+                });
+                map.resetLayersZIndex();
+            };
+
+            initializeActivationContainer();
+
+            initializeSelectorOrTitleElement();
+
+            createSchemes();
+
+            createMapContextMenu();
+
+            createElementContextMenu();
+
+            widget.onSelectorChange = function () { // Do not implement in prototype because of static widget access
+                var selector = widget.selector;
+
+                var option = selector.find(":selected");
+                var newSchema = option.data("schemaSettings");
+
+                widget.deactivateSchema();
+
+                newSchema.activateSchema();
+            };
+
+            initializeSelector();
+
+            initializeMapEvents();
+
+            widget._trigger('ready');
+
+        },
+
         buildMapContextMenu: function () {
             console.warn("This method should be overwritten");
         },
@@ -164,26 +314,7 @@
             console.warn("This method should be overwritten");
         },
 
-        _createMapContextMenu: function () {
-            var widget = this;
-            var map = widget.map;
 
-
-            var options = {
-                selector: 'div',
-                events: {
-                    show: function (options) {
-                        return widget.allowUseMapContextMenu(options);
-                    }
-                },
-                build: function (trigger, e) {
-                    return widget.buildMapContextMenu(trigger, e);
-                }
-            };
-
-            $(map.div).contextMenu(options);
-
-        },
 
         buildElementContextMenu: function (trigger, e) {
             console.warn("This method should be overwritten");
@@ -194,61 +325,8 @@
             console.warn("This method should be overwritten");
         },
 
-        _createElementContextMenu: function () {
-            var widget = this;
-            var element = $(widget.element);
+        getData: function(zoom) { },
 
-            var options = {
-                position: function (opt, x, y) {
-                    opt.$menu.css({top: y, left: x + 10});
-                },
-                selector: '.mapbender-element-result-table > div > table > tbody > tr',
-                events: {
-                    show: function (options) {
-                        return widget.allowUseElementContextMenu(options);
-                    }
-                },
-                build: function (trigger, e) {
-                    return widget.buildElementContextMenu(trigger, e);
-                }
-            };
-
-            $(element).contextMenu(options);
-
-        },
-
-
-        _createSchemes: function () {
-            var widget = this;
-            var rawSchemes = widget.options.schemes;
-            widget.schemes = {};
-            _.each(rawSchemes, function (rawScheme, schemaName) {
-                rawScheme.schemaName = schemaName;
-                widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget);
-            });
-
-
-            if (!widget.hasOnlyOneScheme) {
-                widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
-            }
-        },
-
-
-        getDefaultToolsetByGeomType: function(geomType) {
-
-            switch(geomType) {
-                case 'point':
-                    return [{type: 'drawPoint'}, {type: 'moveFeature'}];
-                case 'line':
-                    return [{type: 'drawLine'}, {type: 'modifyFeature'}, {type: 'moveFeature'}];
-                case 'polygon':
-                    return [{type: 'drawPolygon'}, {type: 'drawRectangle'}, {type: 'drawCircle'}, {type: 'drawEllipse'}, {type: 'drawDonut'}, {type: 'modifyFeature'}, {type: 'moveFeature'}];
-
-            }
-
-            console.warn("No valid geom type",geomType)
-
-        },
 
         getBasicSchemes: function() {
             var widget = this;
@@ -259,114 +337,17 @@
         },
 
 
-
         getSchemaByName: function (schemaName) {
             var widget = this;
-            return widget.getBasicSchemes()[schemaName] || null;
+            var scheme = widget.getBasicSchemes()[schemaName];
+            if (!scheme) {
+                throw new Error("No Basic Scheme exists with the name "+schemaName);
+            }
+            return scheme;
         },
 
 
         deactivateSchema: function() {},
-
-
-        _initializeSelector: function () {
-            var widget = this;
-            var selector = widget.selector;
-
-
-            widget.onSelectorChange = function () {
-                var option = selector.find(":selected");
-                var newSchema = option.data("schemaSettings");
-
-                widget.deactivateSchema();
-
-                newSchema.activateSchema();
-            };
-
-            selector.on('change', widget.onSelectorChange);
-
-        },
-
-
-        getData: function(zoom) {},
-
-
-        _initializeMapEvents: function () {
-            var widget = this;
-            var map = widget.map;
-
-            map.events.register("moveend", this, function () {
-                widget.getData();
-            });
-            map.events.register("zoomend", this, function () {
-                widget.getData(true);
-            });
-            map.resetLayersZIndex();
-        },
-
-        _initializeSelectorOrTitleElement: function () {
-            var widget = this;
-            var options = widget.options;
-            var element = $(widget.element);
-            var titleElement = $("> div.title", element);
-
-
-            widget.hasOnlyOneScheme = _.size(options.schemes) === 1;
-
-            if (widget.hasOnlyOneScheme) {
-                titleElement.html(_.toArray(options.schemes)[0].label);
-                widget.selector.hide();
-            } else {
-                titleElement.hide();
-            }
-        },
-
-        _setup: function () {
-
-            var widget = this;
-
-            var element = $(widget.element);
-            var options = widget.options;
-
-            widget.selector = $("select.selector", element);
-
-            widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
-
-            widget._initializeActivationContainer();
-
-            widget._initializeSelectorOrTitleElement();
-
-            widget._createSchemes();
-
-            widget._createMapContextMenu();
-
-            widget._createElementContextMenu();
-
-            widget._initializeSelector();
-
-            widget._initializeMapEvents();
-
-            widget._trigger('ready');
-
-        },
-
-
-        // TODO Kanonen->Spatzen: refactoring
-        _initializeActivationContainer: function () {
-            var widget = this;
-
-            var containerInfo = new MapbenderContainerInfo(widget, {
-                onactive: function () {
-                    widget.activate();
-                },
-                oninactive: function () {
-                    widget.deactivate();
-                }
-            });
-
-            return containerInfo;
-
-        },
 
         activate: function () {
             var widget = this;

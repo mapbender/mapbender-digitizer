@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    var createFeatureAddedMethod = function (injectedMethods, schemaName) {
+    var createFeatureAddedMethod = function (injectedMethods) {
 
         var func = function (feature) {
             var control = this;
@@ -10,7 +10,9 @@
                 feature.attributes[prop] = "";
             });
 
-            feature.attributes.schemaName = schemaName;
+            feature.attributes.schemaName = control.schemaName;
+
+            console.log(feature.attributes.schemaName, "!!!");
 
             injectedMethods.setModifiedState(feature, this);
 
@@ -24,76 +26,118 @@
 
     };
 
+    var finalizeDrawFeatureWithValidityTest = function (cancel) {
+        if (this.polygon) {
+            var wkt = this.polygon.geometry.toString();
+            var reader = new jsts.io.WKTReader();
+            try {
+                var geom = reader.read(wkt);
+
+                if (!geom.isValid()) {
+                    $.notify("Geometry not valid");
+                    this.destroyActiveComponent(cancel);
+                    this.control.deactivate();
+                    return;
+                }
+            } catch (e) {
+                console.warn("error in validation of geometry", e);
+            } //In case of Error thrown in read, because there is no complete linear ring in the geometry
+        }
+
+        return OpenLayers.Handler.Polygon.prototype.finalize.apply(this, arguments);
+    };
+
 
     Mapbender.Digitizer.DigitizingControlFactory = function (layer, injectedMethods, controlEvents) {
 
-        var finalizeDrawFeatureWithValidityTest = function (cancel) {
-            if (this.polygon) {
-                var wkt = this.polygon.geometry.toString();
-                var reader = new jsts.io.WKTReader();
-                try {
-                    var geom = reader.read(wkt);
+        this.layer = layer;
+        this.injectedMethods = injectedMethods;
+        this.controlEvents = controlEvents;
 
-                    if (!geom.isValid()) {
-                        $.notify("Geometry not valid");
-                        this.destroyActiveComponent(cancel);
-                        this.control.deactivate();
-                        return;
-                    }
-                } catch (e) {
-                    console.warn("error in validation of geometry")
-                } //In case of Error thrown in read, because there is no complete linear ring in the geometry
-            }
+    };
 
-            return OpenLayers.Handler.Polygon.prototype.finalize.apply(this, arguments);
-        };
+    Mapbender.Digitizer.DigitizingControlFactory.prototype = {
 
-        var controls = {
+        drawPoint: function (schemaName) {
+            var controlFactory = this;
+            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Point, {
+                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
+                eventListeners: controlFactory.controlEvents,
+                schemaName: schemaName
+            });
+        },
 
-            drawPoint: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point, {
-                featureAdded: createFeatureAddedMethod(injectedMethods, 'point'),
-            }),
 
-            drawLine: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Path, {
-                featureAdded: createFeatureAddedMethod(injectedMethods, 'line'),
-            }),
+        drawLine: function (schemaName) {
+            var controlFactory = this;
+            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Path, {
+                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
+                eventListeners: controlFactory.controlEvents,
+                schemaName: schemaName
+            })
+        },
 
-            drawPolygon: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
-                featureAdded: createFeatureAddedMethod(injectedMethods, 'polygon'),
+
+        drawPolygon: function (schemaName) {
+            var controlFactory = this;
+            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Polygon, {
+                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
                 handlerOptions: {
                     finalize: finalizeDrawFeatureWithValidityTest,
 
                     destroyActiveComponent: function (cancel) {
                         this.destroyFeature(cancel);
                     }
-                }
-            }),
+                },
+                eventListeners: controlFactory.controlEvents,
+                schemaName: schemaName
+            })
+        },
 
 
-            drawRectangle: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
-                featureAdded: createFeatureAddedMethod(injectedMethods, 'polygon'),
+        drawRectangle: function (schemaName) {
+            var controlFactory = this;
+            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.RegularPolygon, {
+                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
                 handlerOptions: {
                     sides: 4,
                     irregular: true
-                }
-            }),
+                },
+                eventListeners: controlFactory.controlEvents,
+                schemaName: schemaName
+            })
+        },
 
-            drawCircle: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
-                featureAdded: createFeatureAddedMethod(injectedMethods, 'polygon'),
+        drawCircle: function (schemaName) {
+            var controlFactory = this;
+            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.RegularPolygon, {
+                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
                 handlerOptions: {
                     sides: 40
-                }
-            }),
+                },
+                eventListeners: controlFactory.controlEvents,
+                schemaName: schemaName
+            })
+        },
 
-            drawEllipse: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
-                featureAdded: createFeatureAddedMethod(injectedMethods, 'polygon'),
+        drawEllipse: function (schemaName) {
+            var controlFactory = this;
+            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.RegularPolygon, {
+                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
                 handlerOptions: {
                     sides: 40,
                     irregular: true
-                }
-            }),
+                },
+                eventListeners: controlFactory.controlEvents,
+                schemaName: schemaName
+            })
+        },
 
-            drawDonut: new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
+        drawDonut: function () {
+            var controlFactory = this;
+            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Polygon, {
+
+                eventListeners: controlFactory.controlEvents,
 
                 featureAdded: function () {
                     console.warn("donut should not be created")
@@ -144,8 +188,8 @@
 
                         var fir = OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
                         var feature = this.polygon;
-                        injectedMethods.setModifiedState(feature, this.control);
-                        injectedMethods.openFeatureEditDialog(feature);
+                        controlFactory.injectedMethods.setModifiedState(feature, this.control);
+                        controlFactory.injectedMethods.openFeatureEditDialog(feature);
                         return fir;
                     },
                 },
@@ -166,19 +210,24 @@
                         }
                     });
                     OpenLayers.Control.DrawFeature.prototype.deactivate.apply(this, arguments);
-                }
+                },
 
 
-            }),
+            })
+        },
 
-            modifyFeature: new OpenLayers.Control.ModifyFeature(layer, {
+        modifyFeature: function () {
+            var controlFactory = this;
+            return new OpenLayers.Control.ModifyFeature(controlFactory.layer, {
+
+                eventListeners: controlFactory.controlEvents,
 
                 onModificationStart: function (feature) {
                     console.log("onModificationStart");
 
                     feature.oldGeometry = feature.geometry.clone();
 
-                    if (injectedMethods.preventModification()) {
+                    if (controlFactory.injectedMethods.preventModification()) {
                         this.deactivate();
                         this.activate();
                         $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
@@ -193,31 +242,35 @@
                     var reader = new jsts.io.WKTReader();
                     var geom = reader.read(wkt);
                     if (geom.isValid()) {
-                        injectedMethods.setModifiedState(feature, this);
-                        injectedMethods.openFeatureEditDialog(feature);
+                        controlFactory.injectedMethods.setModifiedState(feature, this);
+                        controlFactory.injectedMethods.openFeatureEditDialog(feature);
                     } else {
                         // TODO there might be a better way to revert feature
-                        layer = feature.layer;
-                        layer.removeFeatures([feature]);
+                        controlFactory.layer.removeFeatures([feature]);
                         feature.geometry = feature.modified.geometry;
                         feature.modified = false;
-                        layer.addFeatures([feature]);
+                        controlFactory.layer.addFeatures([feature]);
                         // deactivation is necessary because the vertice features dont move back
                         this.deactivate();
                     }
 
                 },
 
-            }),
+            })
+        },
 
-            moveFeature: new OpenLayers.Control.DragFeature(layer, {
+        moveFeature: function () {
+            var controlFactory = this;
+            return new OpenLayers.Control.DragFeature(controlFactory.layer, {
+
+                eventListeners: controlFactory.controlEvents,
 
                 onStart: function (feature, px) {
                     console.log("onStart");
 
                     feature.oldGeometry = feature.geometry.clone();
 
-                    if (injectedMethods.preventMove()) {
+                    if (controlFactory.injectedMethods.preventMove()) {
                         this.cancel();
                         $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
                     }
@@ -225,31 +278,15 @@
                 },
 
                 onComplete: function (feature) {
-                    injectedMethods.setModifiedState(feature, this);
+                    controlFactory.injectedMethods.setModifiedState(feature, this);
                     console.log("onComplete");
-                    injectedMethods.extendFeatureDataWhenNoPopupOpen(feature);
+                    controlFactory.injectedMethods.extendFeatureDataWhenNoPopupOpen(feature);
 
                 }
-            }),
+            })
+        }
 
-        };
 
-        _.each(controls, function (control, index) {
-
-            _.each(controlEvents, function (event, eventName) {
-                control.events.register(eventName, null, event);
-            });
-
-            control.events.register("deactivate", null, function () {
-                $(control.map.div).css({cursor: 'default'});
-
-            });
-
-            control.name = index;
-
-        });
-
-        return controls;
-    };
+    }
 
 })();

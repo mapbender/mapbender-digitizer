@@ -64,8 +64,11 @@
 
                     // Avoid duplicates, i.e. elements with same 'type' property
                     if (toolset.filter(function (t) {
-                        return t.type === element.type
+                        return t.type === element.type && !Mapbender.Digitizer.Utilities.isAddingToolsetType(t.type);
                     }).length === 0) {
+                        if (Mapbender.Digitizer.Utilities.isAddingToolsetType(element.type)) {
+                            element.schemaName = scheme.schemaName;
+                        }
                         toolset.push(element);
                     }
 
@@ -106,8 +109,8 @@
         getSchemaByFeature: function (feature) {
             var schema = this;
             var widget = schema.widget;
-
-            return widget.getSchemaByName(feature.attributes.schemaName);
+            var scheme = widget.getSchemaByName(feature.attributes.schemaName);
+            return scheme;
         }
     };
 

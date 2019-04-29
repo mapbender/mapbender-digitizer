@@ -45,7 +45,7 @@ class Digitizer extends BaseElement
     {
 
         $mainFiles = array('mapbender.element.digitizer','digitizingToolset','digitizerSchema','digitizerSchemaAll','clustering.mixin',
-                           'sidebar','contextMenu',
+                           'sidebar','contextMenu', 'utilities',
                            'featureEditDialog','digitizingControlFactory','featureStyleEditor','mapbender.layermanager','formItemsCollection',
                            'mapbender.digitizer-translator',
                            'queryEngine','openlayers.extension','vis-ui.extension');

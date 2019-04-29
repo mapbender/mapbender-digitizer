@@ -42,7 +42,6 @@
 
 
         _generateResultDataTableButtons: function () {
-            /** @type {Scheme} */
             var schema = this.schema;
             var buttons = [];
 
@@ -350,6 +349,7 @@
 
             var $digitizingToolSetElement = $('<div/>').digitizingToolSet({
                 buttons: toolset,
+                schemaName: schema.schemaName,
                 layer: layer,
                 geomType: schema.getGeomType(),
                 injectedMethods: {
