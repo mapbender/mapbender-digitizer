@@ -110,7 +110,14 @@
             var schema = this;
             var widget = schema.widget;
             var scheme = widget.getSchemaByName(feature.attributes.schemaName);
-            return scheme;
+            //return scheme;
+            return { // This is a narrowed version of Scheme when accessed by Feature. Helpful for Debugging
+                schemaName: scheme.schemaName,
+                formItems: scheme.formItems,
+                getDefaultFormItems: scheme.getDefaultFormItems,
+                allowDelete: scheme.allowDelete
+
+            };
         }
     };
 

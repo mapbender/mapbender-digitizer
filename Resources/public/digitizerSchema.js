@@ -418,7 +418,6 @@
          */
         processFormItems: function (feature, dialog) {
             var schema = this.getSchemaByFeature(feature);
-            console.log(schema,this);
             var formItems = schema.formItems || schema.getDefaultFormItems(feature); // TODO Can this ever be called?
 
             var processedFormItems = formItems.process(feature, dialog);
@@ -429,7 +428,7 @@
 
         openFeatureEditDialog: function (feature) {
             var schema = this;
-            schema.popup.createFeatureEditDialog(feature);
+            schema.popup.createFeatureEditDialog(feature,schema);
         },
 
 

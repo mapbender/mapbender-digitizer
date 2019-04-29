@@ -164,8 +164,6 @@
 
             widget.selector = $("select.selector", element);
 
-            console.log(widget.selector,1);
-
             widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
 
             // TODO Kanonen->Spatzen: refactoring

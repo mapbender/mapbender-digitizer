@@ -12,8 +12,6 @@
 
             feature.attributes.schemaName = control.schemaName;
 
-            console.log(feature.attributes.schemaName, "!!!");
-
             injectedMethods.setModifiedState(feature, this);
 
             injectedMethods.openFeatureEditDialog(feature);

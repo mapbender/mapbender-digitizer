@@ -10,7 +10,6 @@
 
         popupConfiguration.getSchema = function(feature) {
             var scheme = schema.getSchemaByFeature(feature);
-            console.log(scheme,feature,"===");
             return scheme;
         };
 
@@ -36,8 +35,8 @@
         },
 
 
-        createFeatureEditDialog: function(feature) {
-            return new FeatureEditDialog(feature, this.getSchema(feature))
+        createFeatureEditDialog: function(feature, schema) {
+            return new FeatureEditDialog(feature, schema)
         }
     };
 
@@ -157,8 +156,6 @@
 
         var dialog = this;
         dialog.schema = schema;
-
-        console.log(schema,"???????");
 
         var widget = schema.widget;
         var $popup = dialog.$popup = $("<div/>");
