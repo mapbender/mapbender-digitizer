@@ -204,13 +204,14 @@
 
                 var rawSchemes = widget.options.schemes;
                 widget.schemes = {};
+                var index = 0;
                 _.each(rawSchemes, function (rawScheme, schemaName) {
                     rawScheme.schemaName = schemaName;
-                    widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget);
+                    widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget, index++);
                 });
 
                 if (!widget.hasOnlyOneScheme) {
-                    widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({label: 'all geometries', schemaName: 'all'}, widget);
+                    widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({label: 'all geometries', schemaName: 'all'}, widget, index++);
                 }
             };
 

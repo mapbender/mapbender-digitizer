@@ -3,8 +3,10 @@
 
 
 
-    Mapbender.Digitizer.Scheme = function (rawScheme, widget) {
+    Mapbender.Digitizer.Scheme = function (rawScheme, widget, index) {
         var schema = this;
+
+        schema.index = index;
 
         $.extend(schema, rawScheme);
 
@@ -306,7 +308,7 @@
                 widget.currentPopup.popupDialog('close');
             }
 
-            schema.digitizingToolset.deactivateControls();
+            schema.digitizingToolset.activeControl && schema.digitizingToolset.activeControl.deactivate();
 
 
         },
@@ -1232,9 +1234,18 @@
         },
 
 
-        getAddControls: function() {
+        getRestrictedVersion: function() {
+            var schema = this;
 
+            return { // This is a narrowed version of Scheme when accessed by Feature. Helpful for Debugging
+                schemaName: schema.schemaName,
+                formItems: schema.formItems,
+                getDefaultFormItems: schema.getDefaultFormItems,
+                allowDelete: schema.allowDelete,
+                featureType: schema.featureType,
+                index: schema.index
 
+            };
 
         },
 

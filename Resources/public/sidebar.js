@@ -145,7 +145,6 @@
         },
 
         _generateResultDataTableColumns: function () {
-            /** @type {Scheme} */
             var schema = this.schema;
 
             var columns = [];
@@ -349,7 +348,7 @@
 
             var $digitizingToolSetElement = $('<div/>').digitizingToolSet({
                 buttons: toolset,
-                schemaName: schema.schemaName,
+                schema: schema,
                 layer: layer,
                 geomType: schema.getGeomType(),
                 injectedMethods: {

@@ -60,16 +60,16 @@
             var widget = schema.widget;
             var toolset = [];
             _.each(widget.getBasicSchemes(), function (scheme) {
-                $.each(scheme.toolset, function (i, element) {
+                $.each(scheme.toolset, function (i, rawButton) {
 
                     // Avoid duplicates, i.e. elements with same 'type' property
                     if (toolset.filter(function (t) {
-                        return t.type === element.type && !Mapbender.Digitizer.Utilities.isAddingToolsetType(t.type);
+                        return t.type === rawButton.type && !Mapbender.Digitizer.Utilities.isAddingToolsetType(t.type);
                     }).length === 0) {
-                        if (Mapbender.Digitizer.Utilities.isAddingToolsetType(element.type)) {
-                            element.schemaName = scheme.schemaName;
+                        if (Mapbender.Digitizer.Utilities.isAddingToolsetType(rawButton.type)) {
+                            rawButton.schema = scheme.getRestrictedVersion();
                         }
-                        toolset.push(element);
+                        toolset.push(rawButton);
                     }
 
                 });
@@ -80,7 +80,7 @@
             var config = ['drawPoint', 'drawLine', 'drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'drawText', 'modifyFeature', 'moveFeature', 'selectFeature', 'removeSelected'];
 
             toolset = toolset.sort(function (a, b) {
-                return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : -1;
+                return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : ( a.schema && b.schema && (a.schema.index >q b.schema.index) ? 1 : -1) ;
             });
 
             return toolset;
@@ -110,14 +110,8 @@
             var schema = this;
             var widget = schema.widget;
             var scheme = widget.getSchemaByName(feature.attributes.schemaName);
-            //return scheme;
-            return { // This is a narrowed version of Scheme when accessed by Feature. Helpful for Debugging
-                schemaName: scheme.schemaName,
-                formItems: scheme.formItems,
-                getDefaultFormItems: scheme.getDefaultFormItems,
-                allowDelete: scheme.allowDelete
+            return scheme.getRestrictedVersion();
 
-            };
         }
     };
 
