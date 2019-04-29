@@ -346,7 +346,7 @@
 
             var toolset = schema.toolset;
 
-            var $digitizingToolSetElement = $('<div/>').digitizingToolSet({
+            schema.digitizingToolSet = new Mapbender.Digitizer.Toolset({
                 buttons: toolset,
                 schema: schema,
                 layer: layer,
@@ -396,14 +396,10 @@
             });
 
 
-            $digitizingToolSetElement.addClass("left");
-
             if (schema.allowDigitize) {
-                frame.append($digitizingToolSetElement);
+                frame.append(schema.digitizingToolSet.element);
             }
 
-
-            schema.digitizingToolset = $digitizingToolSetElement.digitizingToolSet("instance");
 
         },
 

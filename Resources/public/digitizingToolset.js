@@ -1,73 +1,42 @@
 (function ($) {
     "use strict";
 
-    $.widget("mapbender.digitizingToolSet", {
+    Mapbender.Digitizer.Toolset = function(options) {
 
-        options: {
-            layer: null,
-            geomType: null,
-            schema: null,
-            injectedMethods: {
-                openFeatureEditDialog: function (feature) {
-                    console.warn("this method shoud be overwritten");
-                },
-                getDefaultAttributes: function () {
-                    console.warn("this method shoud be overwritten");
-                    return [];
-                },
-                preventModification: function () {
-                    console.warn("this method shoud be overwritten");
-                    return false;
-                },
-                preventMove: function () {
-                    console.warn("this method shoud be overwritten");
-                    return false;
-                },
-                extendFeatureDataWhenNoPopupOpen: function () {
-                    console.warn("this method shoud be overwritten");
-                    return false;
-                },
-                setModifiedState: function (feature, control, on) {
-                    console.warn("this method shoud be overwritten");
-                    return false;
-                }
-            },
-            controlEvents: {},
+        var toolSet = this;
 
-            defaultAttributes: []
-        },
-        controlFactory: null,
-        activeControl: null,
+        $.extend(toolSet, options);
 
-        _create: function () {
 
-            var toolSet = this;
+        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.layer, toolSet.injectedMethods,toolSet.createControlEvents());
+        toolSet.element = $("<div />").addClass('digitizing-tool-set').addClass('left');
+        toolSet.createToolbar();
 
-            toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.options.layer, toolSet.options.injectedMethods,toolSet.createControlEvents());
-            toolSet.element.addClass('digitizing-tool-set');
-            toolSet.createToolbar();
+    };
 
-        },
+    Mapbender.Digitizer.Toolset.prototype = {
 
         createControlEvents: function () {
             var toolSet = this;
             var controlEvents = {
 
-                activate: function(event) {
-                    var control = this;
-                    control.$button.addClass('active');
+                    activate: function(event) {
+                        var control = this;
+                        control.$button.addClass('active');
+
+                    },
+
+                    deactivate: function(event) {
+                        var control = this;
+
+                        control.$button.removeClass('active');
+                        $(control.map.div).css({cursor: 'default'});
+
+                    }
                 },
 
-                deactivate: function(event) {
-                    var control = this;
+                controlEvents = _.defaults(toolSet.controlEvents || {},controlEvents);
 
-                    control.$button.removeClass('active');
-                    $(control.map.div).css({cursor: 'default'});
-
-                }
-            },
-
-            controlEvents = _.defaults(toolSet.options.controlEvents,controlEvents);
             return controlEvents;
         },
 
@@ -79,7 +48,7 @@
             var schema = rawButton.schema;
 
             var control = schema && schema.featureType.control || { title: null, className: null };
-            var geomType = toolSet.options.geomType;
+            var geomType = toolSet.geomType;
 
             var $button = $("<button class='button' type='button'/>");
 
@@ -100,7 +69,7 @@
             var toolSet = this;
             var element = $(toolSet.element);
             var controlFactory = toolSet.controlFactory;
-            var buttons = toolSet.options.buttons;
+            var buttons = toolSet.buttons;
 
             $.each(buttons, function (i, rawButton) {
 
@@ -134,9 +103,6 @@
             });
         },
 
-
-
-
-    });
+    };
 
 })(jQuery);
