@@ -1,4 +1,6 @@
 mb.digitizer:
+  schema:
+    allgeometries: 'All Geometries'
   feature:
     remove:
       title: Remove feature

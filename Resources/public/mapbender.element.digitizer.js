@@ -211,7 +211,7 @@
                 });
 
                 if (!widget.hasOnlyOneScheme) {
-                    widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({label: 'all geometries', schemaName: 'all'}, widget, index++);
+                    widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({label: Mapbender.DigitizerTranslator.translate('schema.allgeometries'), schemaName: 'all'}, widget, index++);
                 }
             };
 
