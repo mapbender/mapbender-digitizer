@@ -143,7 +143,7 @@
 
             DataUtil.eachItem(schema.formItems, function (item) {
                 if (item.type === "file") {
-                    item.uploadHanderUrl = dataManagerUtils.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + data.fid + "&field=" + item.name;
+                    item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + schema.schemaName + "&fid=" + data.fid + "&field=" + item.name;
                     if (item.hasOwnProperty("name") && data.data.hasOwnProperty(item.name) && data.data[item.name]) {
                         item.dbSrc = data.data[item.name];
                         if (schema.featureType.files) {
@@ -261,7 +261,7 @@
             var data = response.dataItems;
             var tableApi = $(dialog).data('table').resultTable('getApi');
             var item = $(dialog).data('table').data('item');
-            if (Object.prototype.toString.call(data) === '[object Array]') {
+            if (Array.isArray(data)) {
                 var a = [];
                 _.each(data, function (e, i) {
                     if (e.hasOwnProperty('attributes')) {

@@ -158,6 +158,7 @@
         dialog.schema = schema;
 
         var widget = schema.widget;
+        var map = widget.map;
         var $popup = dialog.$popup = $("<div/>");
 
         dialog.feature = feature;
@@ -166,42 +167,7 @@
         configuration.addFeatureAndDialog(feature,dialog);
 
 
-        if (widget.currentPopup) {
-            widget.currentPopup.popupDialog('close');
-            if (configuration.isOpenLayersCloudPopup() && schema.olFeatureCloudPopup) {
-                widget.map.removePopup(schema.olFeatureCloudPopup);
-                schema.olFeatureCloudPopup.destroy();
-                schema.olFeatureCloudPopup = null;
-            }
-        }
-
-
-        widget.currentPopup = $popup;
-
-
-        $popup.data('feature', feature);
-
-        var processedFormItems = schema.processFormItems(feature, $popup);
-
-
-        $popup.generateElements({children: processedFormItems});
-
-
-        $popup.popupDialog(configuration);
-
-
-        dialog.doFeatureEditDialogBindings();
-
-        dialog.addFeatureDataToEditDialog();
-
-
-    };
-
-    FeatureEditDialog.prototype = {
-
-
-        doFeatureEditDialogBindings: function () {
-            var dialog = this;
+        var doFeatureEditDialogBindings = function () {
             var $popup = dialog.$popup;
             var feature = dialog.feature;
             var schema = dialog.schema;
@@ -238,40 +204,47 @@
                     'margin-left': '-100000px'
                 }).hide(0);
             }
-        },
+        };
 
 
-        addFeatureDataToEditDialog: function () {
-            var dialog = this;
-            var $popup = dialog.$popup;
-            var feature = dialog.feature;
-
-            var schema = dialog.schema;
-            var configuration = dialog.schema.popup;
-
-            var widget = schema.widget;
-            var layer = schema.layer;
-            var map = layer.map;
+        if (widget.currentPopup) {
+            widget.currentPopup.popupDialog('close');
+            if (configuration.isOpenLayersCloudPopup() && schema.olFeatureCloudPopup) {
+                widget.map.removePopup(schema.olFeatureCloudPopup);
+                schema.olFeatureCloudPopup.destroy();
+                schema.olFeatureCloudPopup = null;
+            }
+        }
 
 
-            setTimeout(function () {
+        widget.currentPopup = $popup;
 
 
-                $popup.formData(feature.data);
+        $popup.data('feature', feature);
 
-                if (configuration.isOpenLayersCloudPopup()) {
-                    /**
-                     * @var {OpenLayers.Popup.FramedCloud}
-                     */
-                    var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(feature.geometry.toShortString()), null, $popup.html(), null, true);
-                    schema.featureCloudPopup = olPopup;
-                    map.addPopup(olPopup);
-                }
+        var processedFormItems = schema.processFormItems(feature, $popup);
 
-            }, 21);
-        },
 
-    }
+        $popup.generateElements({children: processedFormItems});
+
+
+        $popup.popupDialog(configuration);
+
+
+        doFeatureEditDialogBindings();
+
+        $popup.formData(feature.data);
+
+        if (configuration.isOpenLayersCloudPopup()) {
+            var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(feature.geometry.toShortString()), null, $popup.html(), null, true);
+            schema.featureCloudPopup = olPopup;
+            map.addPopup(olPopup);
+        }
+
+
+    };
+
+
 
 
 })();

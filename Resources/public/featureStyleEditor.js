@@ -496,11 +496,6 @@
             children: tabs
         });
 
-        Mapbender.Digitizer.setTimeout(function () {
-            element.formData(options.data);
-        }, 100);
-
-
         element.popupDialog({
             title: "Stylemanager",
             modal: true,
@@ -522,6 +517,8 @@
         this.getElement = function () {
             return element;
         };
+
+        element.formData(options.data);
 
     };
 
