@@ -44,6 +44,8 @@
 
     Mapbender.Digitizer.FormItemUtils = {
 
+        // TODO clean the currentPopup.currentPopup mess
+
         openEditDialog: function (data,item, ref) {
 
             var popup =  item.popupItems;

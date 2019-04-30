@@ -514,10 +514,6 @@
             }]
         });
 
-        this.getElement = function () {
-            return element;
-        };
-
         element.formData(options.data);
 
     };
@@ -526,35 +522,41 @@
 
 
         close: function () {
-            var element = this.getElement();
-            element.popupDialog("close");
+            var featureStyleEditor = this;
+            featureStyleEditor.element.popupDialog("close");
         },
 
         submit: function () {
             var featureStyleEditor = this;
-            var schema = featureStyleEditor.schema;
-            var widget = schema.widget;
             var feature = featureStyleEditor.feature;
-            var styleEditor = featureStyleEditor.getElement();
-            var styleData = styleEditor.formData();
-            styleEditor.disableForm();
+            var styleData = featureStyleEditor.element.formData();
+            featureStyleEditor.element.disableForm();
             if (feature.fid) {
-                widget.query('style/save', {
-                    schema: schema.schemaName,
-                    style: styleData,
-                    featureId: feature.fid
-                }).done(function (response) {
-                    schema.featureStyles[feature.fid] = styleData;
-                    feature.layer.drawFeature(feature);
-                    styleEditor.enableForm();
-                });
+                featureStyleEditor.saveStyle(feature,styleData);
             } else {
                 // defer style saving until the feature itself is saved, and has an id to associate with
-                var styleDataCopy = $.extend({}, styleData);
-                feature.saveStyleDataCallback = $.proxy(featureStyleEditor._saveStyle, featureStyleEditor, featureStyleEditor.schemaName, styleDataCopy);
+                feature.saveStyleDataCallback = function() {
+                    featureStyleEditor.saveStyle(feature,styleData);
+                }
             }
             featureStyleEditor.close();
 
+        },
+
+        saveStyle: function(feature,styleData) {
+            var featureStyleEditor = this;
+            var schema = featureStyleEditor.schema;
+            var widget = schema.widget;
+
+            return widget.query('style/save', {
+                schema: schema.schemaName,
+                style: styleData,
+                featureId: feature.fid
+            }).done(function (response) {
+                schema.featureStyles[feature.fid] = styleData;
+                feature.layer.drawFeature(feature);
+                featureStyleEditor.element.enableForm();
+            });
         }
 
 
