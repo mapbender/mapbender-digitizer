@@ -2,6 +2,7 @@
     "use strict";
     Mapbender.Digitizer.AllScheme = function () {
 
+
         Mapbender.Digitizer.Scheme.apply(this, arguments);
 
 
@@ -12,6 +13,11 @@
 
 
     Mapbender.Digitizer.AllScheme.prototype = {
+
+        featureType: {
+
+            geomType: '-'
+        },
 
         assert: function() {
             var schema = this;

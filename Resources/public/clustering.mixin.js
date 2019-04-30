@@ -73,12 +73,11 @@
 
             getData: function (zoom) {
                 var schema = this;
-                Mapbender.Digitizer.Scheme.prototype.getData.apply(schema);
-                // TODO  Das ist ziemlich sicher falsch, da das Updaten der Cluster Strategy im Callback von GetData erfolgen muss
-                if (zoom) {
-                    schema.updateClusterStrategy();
-                }
-
+                Mapbender.Digitizer.Scheme.prototype.getData.apply(schema,[ function() {
+                    if (zoom) {
+                        schema.updateClusterStrategy();
+                    }
+                }]);
             },
 
             getFeatureAsList: function (feature) {
