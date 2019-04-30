@@ -86,6 +86,7 @@
         frame: null,
         mapContextMenu: null,
         elementContextMenu: null,
+        menu: null,
 
         featureType: {
             name: null,
@@ -111,7 +112,6 @@
         selectControl: null,
         highlightControl: null,
         clusterStrategy: null,
-        digitizingToolSet: null,
 
 
         //** Data Manager only
@@ -309,10 +309,11 @@
                 widget.currentPopup.popupDialog('close');
             }
 
-            schema.digitizingToolSet.activeControl && schema.digitizingToolSet.activeControl.deactivate();
+            schema.menu.deactivateControls();
 
 
         },
+
 
 
         activateContextMenu: function () {
@@ -572,11 +573,11 @@
             var widget = schema.widget;
             var element = $(widget.element);
 
-            var menu = new Mapbender.Digitizer.Menu(schema);
+            schema.menu = new Mapbender.Digitizer.Menu(schema);
             schema.addSpecificOptionToSelector();
 
-            schema.frame = menu.frame;
-            element.append(menu.frame);
+            schema.frame = schema.menu.frame;
+            element.append(schema.menu.frame);
 
         },
 

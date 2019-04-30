@@ -16,7 +16,7 @@
 
             var toolset = schema.toolset;
 
-            schema.digitizingToolSet = new Mapbender.Digitizer.Toolset({
+            menu.toolSet = new Mapbender.Digitizer.Toolset({
                 buttons: toolset,
                 schema: schema,
                 layer: layer,
@@ -68,7 +68,7 @@
 
 
             if (schema.allowDigitize) {
-                frame.append(schema.digitizingToolSet.element);
+                frame.append(menu.toolSet.element);
             }
 
 
@@ -443,6 +443,12 @@
 
     Mapbender.Digitizer.Menu.prototype = {
 
+        deactivateControls: function() {
+            var menu = this;
+
+            menu.toolSet.activeControl && menu.toolSet.activeControl.deactivate();
+
+        }
 
     };
 
