@@ -2,6 +2,15 @@
 @import "../vendor/mapbender/vis-ui.js/src/styles/modal";
 
 $selectColor: #F7F79A;
+$backGroundColor: #fff;
+$textColor: #2b2b2b;
+$buttonActiveBgColor: #d10a10;
+$buttonActiveColor: $backGroundColor;
+$buttonFontColor: $textColor;
+$buttonFirstActiveColor: #47791f;
+
+
+
 
 .mb-element-digitizer {
 
@@ -263,7 +272,7 @@ $selectColor: #F7F79A;
     margin-left: -1px;
     padding: 3px 4px;
     &:focus {
-      background-color: $buttonBgColor !important;
+      background-color: $buttonActiveBgColor !important;
       color: $buttonFontColor !important;
     }
     &.active {

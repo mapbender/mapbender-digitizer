@@ -44,7 +44,7 @@ class Digitizer extends BaseElement
     public function getAssets()
     {
 
-        $mainFiles = array('mapbender.element.digitizer','digitizingToolset','digitizerSchema','digitizerSchemaAll','clustering.mixin',
+        $mainFiles = array('mapbender.element.digitizer','toolset','digitizerSchema','digitizerSchemaAll','clustering.mixin',
                            'sidebar','contextMenu', 'utilities',
                            'featureEditDialog','digitizingControlFactory','featureStyleEditor','mapbender.layermanager','formItemsCollection',
                            'mapbender.digitizer-translator',

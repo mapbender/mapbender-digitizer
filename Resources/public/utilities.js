@@ -26,7 +26,7 @@
             }
 
             if (!toolset) {
-                console.warn("No valid geom type",geomType)
+                console.error("No valid geom type",geomType)
             }
             return toolset.map(function(type) { return { 'type' : type }});
 
