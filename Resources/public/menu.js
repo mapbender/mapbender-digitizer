@@ -2,7 +2,6 @@
     "use strict";
 
 
-
     Mapbender.Digitizer.Menu = function (schema) {
 
         var menu = this;
@@ -31,7 +30,7 @@
                         }
                     },
                     getDefaultAttributes: function () {
-                        return schema._getDefaultProperties();
+                        return schema.getDefaultProperties();
                     },
                     preventModification: function () {
 
@@ -45,18 +44,12 @@
                     },
                     extendFeatureDataWhenNoPopupOpen: function (feature) {
 
-                        if (widget.currentPopup && widget.currentPopup.data('visUiJsPopupDialog')._isOpen) {
 
-                        } else {
-
-                            if (schema.popup && schema.popup.remoteData) {
-                                schema._getRemoteData(feature);
-                            } else {
-                                if (schema.openFormAfterEdit) {
-                                    schema.openFeatureEditDialog(feature);
-                                }
-                            }
+                        if (schema.openFormAfterEdit) {
+                            schema.openFeatureEditDialog(feature);
                         }
+
+
                     },
 
 
@@ -257,7 +250,7 @@
 
                 var columns = [];
 
-                var createResultTableDataFunction = function(columnId) {
+                var createResultTableDataFunction = function (columnId) {
 
                     return function (row, type, val, meta) {
                         var data = row.data[columnId];
@@ -302,10 +295,10 @@
                     this.api().rows(function (idx, feature, row) {
                         if (feature.visible) {
                             $(row).removeClass('invisible-feature');
-                            $(row).find(".icon-visibility").attr('title',Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'));
+                            $(row).find(".icon-visibility").attr('title', Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'));
                         } else {
                             $(row).addClass('invisible-feature');
-                            $(row).find(".icon-visibility").attr('title',Mapbender.DigitizerTranslator.translate('feature.visibility.toggleon'));
+                            $(row).find(".icon-visibility").attr('title', Mapbender.DigitizerTranslator.translate('feature.visibility.toggleon'));
                         }
 
                     });
@@ -442,7 +435,7 @@
 
     Mapbender.Digitizer.Menu.prototype = {
 
-        deactivateControls: function() {
+        deactivateControls: function () {
             var menu = this;
 
             menu.toolSet.activeControl && menu.toolSet.activeControl.deactivate();

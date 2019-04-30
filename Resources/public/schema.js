@@ -494,7 +494,7 @@
 
 
 
-        _refreshOtherLayersAfterFeatureSave: function () {
+        refreshOtherLayersAfterFeatureSave: function () {
             var schema = this;
 
             if (schema.refreshLayersAfterFeatureSave) {
@@ -526,7 +526,7 @@
         },
 
 
-        _mapHasActiveControlThatBlocksSelectControl: function () {
+        mapHasActiveControlThatBlocksSelectControl: function () {
             var schema = this;
             var widget = schema.widget;
             var map = widget.map;
@@ -719,7 +719,7 @@
             }
 
             schema.xhr = widget.query('select', request).done(function (featureCollection) {
-                schema._onFeatureCollectionLoaded(featureCollection, this);
+                schema.onFeatureCollectionLoaded(featureCollection, this);
                 if (callback) {
                     callback.apply();
                 }
@@ -729,7 +729,7 @@
         },
 
 
-        _getVisibleFeatures: function () {
+        getVisibleFeatures: function () {
             var schema = this;
             var layer = schema.layer;
             var map = layer.map;
@@ -746,10 +746,10 @@
         },
 
 
-        _mergeExistingFeaturesWithLoadedFeatures: function (newFeatures) {
+        mergeExistingFeaturesWithLoadedFeatures: function (newFeatures) {
             var schema = this;
 
-            var existingFeatures = schema._getVisibleFeatures();
+            var existingFeatures = schema.getVisibleFeatures();
 
 
             var newFeaturesFiltered = _.filter(newFeatures, function (nFeature) {
@@ -763,7 +763,7 @@
 
         },
 
-        _onFeatureCollectionLoaded: function (featureCollection, xhr) {
+        onFeatureCollectionLoaded: function (featureCollection, xhr) {
             var schema = this;
 
             if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
@@ -780,7 +780,7 @@
                 features: featureCollection.features
             });
 
-            schema.layer.features = schema.group === "all" ? newFeatures : schema._mergeExistingFeaturesWithLoadedFeatures(newFeatures);
+            schema.layer.features = schema.group === "all" ? newFeatures : schema.mergeExistingFeaturesWithLoadedFeatures(newFeatures);
 
             schema.reloadFeatures();
         },
@@ -795,7 +795,7 @@
             var schema = this;
             schema.layer.features = _.without(schema.getLayerFeatures(), olFeature);
             schema.reloadFeatures();
-            schema._refreshOtherLayersAfterFeatureSave();
+            schema.refreshOtherLayersAfterFeatureSave();
         },
 
         removeAllFeatures: function () {
@@ -968,12 +968,12 @@
 
                 var newFeature = createNewFeatureWithDBFeature(feature, response);
 
-                newFeature.isNew = false;
-
                 if (newFeature == null) {
                     console.warn("Creation of new Feature failed");
                     return;
                 }
+
+                newFeature.isNew = false;
 
                 schema.removeFeatureFromUI(feature);
 
@@ -996,7 +996,7 @@
                     eval(successHandler);
                 }
 
-                schema._refreshOtherLayersAfterFeatureSave();
+                schema.refreshOtherLayersAfterFeatureSave();
 
                 schema.refreshConnectedDigitizerFeatures();
 
@@ -1100,7 +1100,7 @@
         },
 
 
-        _getDefaultProperties: function () {
+        getDefaultProperties: function () {
             var schema = this;
 
             var newFeatureDefaultProperties = [];
@@ -1111,54 +1111,6 @@
         },
 
 
-        _getRemoteData: function (feature) {
-            var schema = this;
-            var widget = schema.widget;
-            var map = widget.map;
-            var bbox = feature.geometry.getBounds();
-            bbox.right = parseFloat(bbox.right + 0.00001);
-            bbox.top = parseFloat(bbox.top + 0.00001);
-            bbox = bbox.toBBOX();
-            var srid = map.getProjection().replace('EPSG:', '');
-            var url = widget.elementUrl + "getFeatureInfo/";
-
-            return $.get(url, {
-                bbox: bbox,
-                schema: schema.schemaName,
-                srid: srid
-            }).done(function (response) {
-                schema._processRemoteData(response, feature);
-            }).fail(function (response) {
-                if (!feature.isNew) {
-                    schema.openFeatureEditDialog(feature);
-                }
-                Mapbender.error(Mapbender.trans("mb.digitizer.remoteData.error"));
-
-            });
-
-
-        },
-
-        _processRemoteData: function (response, feature) {
-            var schema = this;
-            if (response.error) {
-                Mapbender.error(Mapbender.trans('mb.digitizer.remoteData.error'));
-            }
-
-            _.each(response.dataSets, function (dataSet) {
-                var newData = JSON.parse(dataSet).features[0].properties;
-                Object.keys(feature.data);
-                $.extend(feature.data, newData);
-            });
-
-            if (!feature.isNew) {
-                schema.openFeatureEditDialog(feature);
-            } else {
-                schema.widget.currentPopup.formData(feature.data);
-            }
-
-
-        },
 
 
         exportGeoJson: function (feature) {
