@@ -412,10 +412,8 @@
                     return false;
                 };
 
-                searchForm
-                    .on('submit', onSubmitSearch)
-                    .find(' :input')
-                    .on('change', onSubmitSearch);
+                searchForm.on('submit', onSubmitSearch);
+                searchForm.find(' :input').on('change', onSubmitSearch);
             };
 
             // If searching defined, then try to generate a form
