@@ -82,6 +82,7 @@
                     title: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
                     className: 'clone',
                     cssClass: ' fa fa-files-o',
+                    // TODO this might be still a bug
                     onClick: function (olFeature, ui) {
                         schema.copyFeature(olFeature);
                     }

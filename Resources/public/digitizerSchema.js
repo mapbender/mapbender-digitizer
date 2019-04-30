@@ -161,8 +161,9 @@
 
         copy: {
             enable: true,
-            rules: [],
-            data: {},
+            rules: null,
+            data: null,
+            overwriteValuesWithDefault: false,
         },
 
         formItems: null,
@@ -898,8 +899,7 @@
             var schema = this;
             var layer = schema.layer;
             var newFeature = feature.clone();
-            var config = schema.copy;
-            var defaultAttributes = config.data || {};
+            var defaultAttributes = schema.copy.data || {};
             var allowCopy = true;
 
             layer.addFeatures([newFeature]);
@@ -921,7 +921,12 @@
 
             _.each(feature.attributes, function (v, k) {
                 if (v !== '' && v !== null && k !== schema.featureType.uniqueId) {
-                    newAttributes[k] = v;
+
+                    if (schema.copy.overwriteValuesWithDefault) {
+                        newAttributes[k] = newAttributes[k] || v; // Keep default value when existing
+                    } else {
+                        newAttributes[k] = v;
+                    }
                 }
 
             });
