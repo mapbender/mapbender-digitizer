@@ -30,7 +30,7 @@
 
         schema.createSchemaFeatureLayer();
 
-        schema._createFrame();
+        schema.createMenu();
 
         schema.addSelectControls();
 
@@ -111,7 +111,7 @@
         selectControl: null,
         highlightControl: null,
         clusterStrategy: null,
-        digitizingToolset: null,
+        digitizingToolSet: null,
 
 
         //** Data Manager only
@@ -309,7 +309,7 @@
                 widget.currentPopup.popupDialog('close');
             }
 
-            schema.digitizingToolset.activeControl && schema.digitizingToolset.activeControl.deactivate();
+            schema.digitizingToolSet.activeControl && schema.digitizingToolSet.activeControl.deactivate();
 
 
         },
@@ -567,12 +567,12 @@
         },
 
 
-        _createFrame: function () {
+        createMenu: function () {
             var schema = this;
             var widget = schema.widget;
             var element = $(widget.element);
 
-            var sidebar = new Mapbender.Digitizer.Sidebar(schema);
+            var sidebar = new Mapbender.Digitizer.Menu(schema);
 
             schema.frame = sidebar.frame;
             element.append(sidebar.frame);

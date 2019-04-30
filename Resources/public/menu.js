@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    Mapbender.Digitizer.Sidebar = function (schema) {
+    Mapbender.Digitizer.Menu = function (schema) {
 
         this.schema = schema;
         this.frame = $("<div />").addClass('frame');
@@ -21,7 +21,7 @@
     };
 
 
-    Mapbender.Digitizer.Sidebar.prototype = {
+    Mapbender.Digitizer.Menu.prototype = {
 
 
         _addSpecificOptionToSchemeSelector: function () {

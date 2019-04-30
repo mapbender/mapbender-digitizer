@@ -97,7 +97,7 @@
 
         }
         if (schema.allowCustomerStyle) {
-            buttons.copyButton = createButton('feature.style.change', function (feature) {
+            buttons.styleButton = createButton('feature.style.change', function (feature) {
                 schema.openChangeStyleDialog(feature);
             });
         }
@@ -185,7 +185,6 @@
 
 
         $popup.generateElements({children: processedFormItems});
-
 
 
         $popup.popupDialog(configuration);
