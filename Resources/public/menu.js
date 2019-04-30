@@ -9,7 +9,7 @@
         var frame = menu.frame = $("<div />").addClass('frame');
 
 
-        var appendDigitizingToolset = function () {
+        var appendToolset = function () {
             var widget = schema.widget;
             var layer = schema.layer;
 
@@ -77,7 +77,7 @@
 
         var appendGeneralDigitizerButtons = function () {
 
-            var corporateFeatureControlButtons = [];
+            var buttons = {};
             if (schema.showVisibilityNavigation) {
 
                 var $button = $("<button class='button' type='button'/>");
@@ -86,7 +86,7 @@
                 $button.click(function () {
                     schema.setVisibilityForAllFeaturesInLayer(false);
                 });
-                corporateFeatureControlButtons.push($button);
+                buttons['hideAll'] = $button;
 
                 var $button = $("<button class='button' type='button'/>");
                 $button.addClass("fa fa-eye");
@@ -94,7 +94,7 @@
                 $button.click(function () {
                     schema.setVisibilityForAllFeaturesInLayer(true);
                 });
-                corporateFeatureControlButtons.push($button);
+                buttons['showAll'] = $button;
             }
             if (schema.allowSaveAll) {
 
@@ -103,26 +103,26 @@
                 $button.attr("title", Mapbender.DigitizerTranslator.translate('toolset.saveAll'));
                 $button.addClass("save-all-features");
                 $button.click(function () {
-                    var unsavedFeatures = schema._getUnsavedFeatures();
+                    var unsavedFeatures = schema.getUnsavedFeatures();
                     _.forEach(unsavedFeatures, function (feature) {
                         schema.saveFeature(feature);
                     });
                 });
-                corporateFeatureControlButtons.push($button);
+                buttons['allowAll'] = $button;
+
 
             }
 
 
-            var generalDigitizerControl = $("<div/>");
-            generalDigitizerControl.addClass("general-digitizer-buttons");
-            generalDigitizerControl.addClass("right");
+            var generalDigitizerButtonsDiv = $("<div/>");
+            generalDigitizerButtonsDiv.addClass("general-digitizer-buttons").addClass("right");
 
-            $.each(corporateFeatureControlButtons, function (i, button) {
-                generalDigitizerControl.append(button);
+            $.each(buttons, function (i, button) {
+                generalDigitizerButtonsDiv.append(button);
 
             });
 
-            frame.append(generalDigitizerControl);
+            frame.append(generalDigitizerButtonsDiv);
 
             if (schema.showExtendSearchSwitch) {
                 var $checkbox = $("<input type='checkbox' />");
@@ -257,20 +257,21 @@
 
                 var columns = [];
 
+                var createResultTableDataFunction = function(columnId) {
+
+                    return function (row, type, val, meta) {
+                        var data = row.data[columnId];
+                        if (typeof (data) == 'string') {
+                            data = data.escapeHtml();
+                        }
+                        return data;
+                    };
+                };
+
 
                 $.each(schema.tableFields, function (fieldName, fieldSettings) {
                     fieldSettings.title = fieldSettings.label;
-                    fieldSettings.data = fieldSettings.data || schema._createResultTableDataFunction(fieldName);
-                    if (!fieldSettings.data) {
-                        fieldSettings.data = function (row, type, val, meta) {
-                            var data = row.data[fieldName];
-                            if (typeof (data) == 'string') {
-                                data = data.escapeHtml();
-                            }
-                            return data;
-                        };
-                    }
-
+                    fieldSettings.data = fieldSettings.data || createResultTableDataFunction(fieldName);
                     if (fieldSettings.render) {
                         eval('fieldSettings.render = ' + fieldSettings.render);
                     }
@@ -320,9 +321,9 @@
 
             var $div = $("<div/>");
             var $table = $div.resultTable(resultTableSettings);
-            schema.resultTable = $table.resultTable("instance");
+            menu.resultTable = $table.resultTable("instance");
 
-            schema.resultTable.initializeColumnTitles();
+            menu.resultTable.initializeColumnTitles();
 
 
             frame.append($table);
@@ -427,7 +428,7 @@
 
         };
 
-        appendDigitizingToolset();
+        appendToolset();
 
         appendGeneralDigitizerButtons();
 
@@ -449,6 +450,7 @@
             menu.toolSet.activeControl && menu.toolSet.activeControl.deactivate();
 
         }
+
 
     };
 

@@ -34,7 +34,7 @@
 
         schema.addSelectControls();
 
-        schema.resultTable.initializeResultTableEvents(schema.highlightControl, schema.zoomOrOpenDialog.bind(schema));
+        schema.menu.resultTable.initializeResultTableEvents(schema.highlightControl, schema.zoomOrOpenDialog.bind(schema));
 
         // schema.layer.getClusteredFeatures = function () {
         //     return _.flatten(_.pluck(this.features, "cluster"));
@@ -80,7 +80,6 @@
 
 
         schemaName: null,
-        resultTable: null,
         layer: null,
         widget: null,
         frame: null,
@@ -391,16 +390,6 @@
 
         },
 
-        _createResultTableDataFunction: function (columnId) {
-
-            return function (row, type, val, meta) {
-                var data = row.data[columnId];
-                if (typeof (data) == 'string') {
-                    data = data.escapeHtml();
-                }
-                return data;
-            };
-        },
 
 
         getDefaultFormItems: function (feature) {
@@ -528,13 +517,13 @@
                 highlight: function (feature) {
                     console.assert(!!feature, "Feature must be set");
                     schema.processFeature(feature, function (feature) {
-                        schema.resultTable.hoverInResultTable(feature, true);
+                        schema.menu.resultTable.hoverInResultTable(feature, true);
                     });
                     return Object.getPrototypeOf(this).highlight.apply(this, [feature, true]);
                 },
                 unhighlight: function (feature) {
                     schema.processFeature(feature, function (feature) {
-                        schema.resultTable.hoverInResultTable(feature, false);
+                        schema.menu.resultTable.hoverInResultTable(feature, false);
                     });
                     return Object.getPrototypeOf(this).unhighlight.apply(this, [feature, false]);
                 }
@@ -560,7 +549,7 @@
             layer.removeAllFeatures();
             layer.addFeatures(features);
 
-            schema.resultTable.redrawResultTableFeatures(features);
+            schema.menu.resultTable.redrawResultTableFeatures(features);
 
             if (widget.options.__disabled) {
                 widget.deactivate();
@@ -603,7 +592,7 @@
             var schema = this;
             $(schema.frame).find(".save-all-features").addClass("active");
 
-            var row = schema.resultTable.getTableRowByFeature(feature);
+            var row = schema.menu.resultTable.getTableRowByFeature(feature);
             if (!row) {
                 feature.isNew = true;
                 return; // In case of non-saved feature
@@ -628,11 +617,11 @@
             feature.isNew = false;
             feature.isCopy = false;
 
-            if (schema._getUnsavedFeatures().length === 0) {
+            if (schema.getUnsavedFeatures().length === 0) {
                 $(schema.frame).find(".save-all-features").removeClass("active");
             }
 
-            var row = schema.resultTable.getTableRowByFeature(feature);
+            var row = schema.menu.resultTable.getTableRowByFeature(feature);
             if (!row) {
                 return; // in case of non-saved feature
             }
@@ -1011,7 +1000,7 @@
         saveFeature: function (feature, formData) {
             var schema = this;
             var widget = schema.widget;
-            var tableApi = schema.resultTable.getApi();
+            var tableApi = schema.menu.resultTable.getApi();
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
 
@@ -1066,7 +1055,7 @@
                 schema.reloadFeatures();
 
 
-                schema.resultTable.refreshFeatureRowInDataTable(newFeature);
+                schema.menu.resultTable.refreshFeatureRowInDataTable(newFeature);
 
                 $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
 
@@ -1113,7 +1102,7 @@
             }
         },
 
-        _getUnsavedFeatures: function () {
+        getUnsavedFeatures: function () {
             var schema = this;
             return schema.layer.features.filter(function (feature) {
                 return feature.isNew || feature.isChanged
@@ -1166,7 +1155,7 @@
                 layer.drawFeature(feature);
             });
 
-            schema.resultTable.getApi().draw();
+            schema.menu.resultTable.getApi().draw();
 
         },
 

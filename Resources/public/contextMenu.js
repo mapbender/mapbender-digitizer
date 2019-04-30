@@ -135,7 +135,7 @@
 
         var contextMenu = this;
         var schema = contextMenu.schema;
-        var api = schema.resultTable.getApi();
+        var api = schema.menu.resultTable.getApi();
         var feature = api.row(selectedRow).data();
 
 
