@@ -19,6 +19,7 @@
 
     Mapbender.Digitizer.PopupConfiguration.prototype = {
         remoteData: false,
+
         isOpenLayersCloudPopup: function () {
             return this.type === 'openlayers-cloud';
         },
@@ -152,7 +153,6 @@
 
 
     var FeatureEditDialog = function (feature, schema) {
-        // TODO buttons/realButtons approach is misleading and should be refactored
 
         var dialog = this;
         dialog.schema = schema;
@@ -209,10 +209,10 @@
 
         if (widget.currentPopup) {
             widget.currentPopup.popupDialog('close');
-            if (configuration.isOpenLayersCloudPopup() && schema.olFeatureCloudPopup) {
-                widget.map.removePopup(schema.olFeatureCloudPopup);
-                schema.olFeatureCloudPopup.destroy();
-                schema.olFeatureCloudPopup = null;
+            if (configuration.isOpenLayersCloudPopup() && schema.featureCloudPopup) {
+                widget.map.removePopup(schema.featureCloudPopup);
+                schema.featureCloudPopup.destroy();
+                schema.featureCloudPopup = null;
             }
         }
 

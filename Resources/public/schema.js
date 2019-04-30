@@ -267,7 +267,7 @@
         },
 
         featureStyles: null,
-        olFeatureCloudPopup: null,
+        featureCloudPopup: null,
 
         evaluatedHooks: {},
         lastRequest: null,
