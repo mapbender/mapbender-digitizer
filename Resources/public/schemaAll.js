@@ -19,10 +19,6 @@
             geomType: '-'
         },
 
-        assert: function() {
-            var schema = this;
-            console.assert(!!schema.tableFields,"Schema "+schema.schemaName+" does not have Tablefields");
-        },
 
         getGeomType: function() {
             return 'all';

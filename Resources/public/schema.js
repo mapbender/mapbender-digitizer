@@ -25,18 +25,6 @@
             });
         };
 
-        var initTableFields = function() {
-
-            if (!schema.tableFields) {
-                schema.tableFields = {};
-                schema.tableFields[schema.featureType.uniqueId] = {label: 'Nr.' , width: '20%' };
-                if (schema.featureType.name) {
-                    schema.tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
-                }
-            }
-        };
-
-
 
         var createPopupConfiguration = function() {
             schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
@@ -205,7 +193,7 @@
 
         initializeHooks();
 
-        initTableFields();
+        schema.initTableFields();
 
         schema.createFormItemsCollection();
 
@@ -382,6 +370,18 @@
         getGeomType: function() {
             var schema = this;
             return schema.featureType.geomType;
+        },
+
+        initTableFields: function() {
+
+            var schema = this;
+            if (!schema.tableFields) {
+                schema.tableFields = {};
+                schema.tableFields[schema.featureType.uniqueId] = {label: 'Nr.' , width: '20%' };
+                if (schema.featureType.name) {
+                    schema.tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
+                }
+            }
         },
 
 
