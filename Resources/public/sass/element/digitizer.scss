@@ -132,6 +132,7 @@ $selectColor: #F7F79A;
       position: relative;
       height: 24px;
       margin-left: 5px;
+
     }
   }
 
@@ -265,7 +266,6 @@ $selectColor: #F7F79A;
     width: 26px;
     margin-left: -1px;
     padding: 3px 4px;
-    &.active
     &:before {
       display: inline-block;
       font-size: 17px;
