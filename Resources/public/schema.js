@@ -507,30 +507,12 @@
 
         },
 
-
-
-        getDefaultFormItems: function (feature) {
-
-            var defaultFormItems = [];
-            _.each(feature.data, function (value, key) {
-                defaultFormItems.push({
-                    type: 'input',
-                    name: key,
-                    title: key
-                });
-            });
-
-            return defaultFormItems;
-        },
-
-        /**
-         * @Overwrite
-         */
         processFormItems: function (feature, dialog) {
-            var schema = this.getSchemaByFeature(feature);
-            var formItems = schema.formItems || schema.getDefaultFormItems(feature); // TODO Can this ever be called?
+            var schema = this;
 
-            var processedFormItems = formItems.process(feature, dialog);
+            var scheme = schema.getSchemaByFeature(feature);
+
+            var processedFormItems = scheme.formItems.process(feature, dialog);
 
             return processedFormItems;
         },
@@ -1194,7 +1176,6 @@
             return { // This is a narrowed version of Scheme when accessed by Feature. Helpful for Debugging
                 schemaName: schema.schemaName,
                 formItems: schema.formItems,
-                getDefaultFormItems: schema.getDefaultFormItems,
                 allowDelete: schema.allowDelete,
                 featureType: schema.featureType,
                 index: schema.index

@@ -94,9 +94,26 @@
         },
 
 
+
+
         process: function (feature, dialog) {
             var formItemsCollection = this;
-            return modifyRecursively(formItemsCollection.items, function (item) {
+
+            var getDefaultFormItems = function () {
+
+                var defaultFormItems = [];
+                _.each(feature.data, function (value, key) {
+                    defaultFormItems.push({
+                        type: 'input',
+                        name: key,
+                        title: key
+                    });
+                });
+
+                return defaultFormItems;
+            };
+
+            return modifyRecursively(formItemsCollection.items || getDefaultFormItems(), function (item) {
                 var processedItem = item.process(feature, dialog);
                 return processedItem;
             });
