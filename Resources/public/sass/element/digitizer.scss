@@ -2,12 +2,6 @@
 @import "../vendor/mapbender/vis-ui.js/src/styles/modal";
 
 $selectColor: #F7F79A;
-$backGroundColor: #fff;
-$textColor: #2b2b2b;
-$buttonActiveBgColor: #d10a10;
-$buttonActiveColor: $backGroundColor;
-$buttonFontColor: $textColor;
-$buttonFirstActiveColor: #47791f;
 
 
 
@@ -271,18 +265,7 @@ $buttonFirstActiveColor: #47791f;
     width: 26px;
     margin-left: -1px;
     padding: 3px 4px;
-    &:focus {
-      background-color: $buttonActiveBgColor !important;
-      color: $buttonFontColor !important;
-    }
-    &.active {
-      background-color: $buttonActiveBgColor !important;
-      color: $buttonActiveColor !important;
-      border: 1px solid $buttonActiveBgColor;
-    }
-    &.active, &.active:focus {
-      background-color: $buttonFirstActiveColor;
-    }
+    &.active
     &:before {
       display: inline-block;
       font-size: 17px;

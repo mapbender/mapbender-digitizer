@@ -183,7 +183,7 @@
         maxResults: 5001,
         pageLength: 10,
         currentExtentSearch: false,
-        inlineSearch: false,
+        inlineSearch: true,
         hooks: {
             onModificationStart: null,
             onStart: null
