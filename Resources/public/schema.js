@@ -36,10 +36,7 @@
             }
         };
 
-        var createFormItemsCollection = function(formItems) {
-            schema.formItems = new Mapbender.Digitizer.FormItemsCollection(formItems || schema.formItems, schema);
 
-        };
 
         var createPopupConfiguration = function() {
             schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
@@ -210,7 +207,7 @@
 
         initTableFields();
 
-        createFormItemsCollection();
+        schema.createFormItemsCollection();
 
         createPopupConfiguration();
 
@@ -388,6 +385,11 @@
         },
 
 
+        createFormItemsCollection: function(formItems) {
+            var schema = this;
+            schema.formItems = new Mapbender.Digitizer.FormItemsCollection(formItems || schema.formItems, schema);
+
+        },
 
 
         updateConfigurationAfterSwitching: function(updatedSchemes) {
