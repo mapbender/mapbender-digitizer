@@ -66,7 +66,7 @@
                         id: dataStoreId,
                         dataItemId: dataItemId
                     }).done(function (data) {
-                        FormItemUtils.openEditDialog(data,  item, selectRef);
+                        Mapbender.Digitizer.FormItemUtils.openEditDialog(data,  item, selectRef);
 
                     });
 
@@ -75,7 +75,7 @@
 
                 onEditClick = function () {
                     var selectRef = $(this).siblings().find('select');
-                    FormItemUtils.openEditDialog({}, item, selectRef);
+                    Mapbender.Digitizer.FormItemUtils.openEditDialog({}, item, selectRef);
 
                     return false;
                 };
@@ -83,7 +83,7 @@
 
             var preProcessedItem = item.clone();
             var fieldSetItem = {};
-            Object.setPrototypeOf(fieldSetItem,FormItemFieldSet);
+            Object.setPrototypeOf(fieldSetItem,Mapbender.Digitizer.FormItemFieldSet);
 
             fieldSetItem.title = '';
 
@@ -93,7 +93,7 @@
                 cssClass: 'edit',
                 click: onEditClick
             };
-            Object.setPrototypeOf(button1,FormItemButton);
+            Object.setPrototypeOf(button1,Mapbender.Digitizer.FormItemButton);
 
             var button2 = {
                 type: "button",
@@ -101,7 +101,7 @@
                 cssClass: "fa fa-plus",
                 click: onCreateClick
             };
-            Object.setPrototypeOf(button2,FormItemButton);
+            Object.setPrototypeOf(button2,Mapbender.Digitizer.FormItemButton);
 
 
             fieldSetItem.children = [

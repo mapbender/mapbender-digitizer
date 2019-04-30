@@ -85,7 +85,7 @@
                     data['linkId'] = feature.attributes[item.dataStoreLink.uniqueId];
                     data.item = item;
                     data[uniqueIdKey] = null;
-                    FormItemUtils.openEditDialog(data, item, table);
+                    Mapbender.Digitizer.FormItemUtils.openEditDialog(data, item, table);
                     return false;
                 };
 
@@ -100,7 +100,7 @@
                     item.allowRemove = true;
                     rowData.externalId = feature.attributes[item.dataStoreLink.uniqueId];
 
-                    FormItemUtils.openEditDialog(rowData, item, table);
+                    Mapbender.Digitizer.FormItemUtils.openEditDialog(rowData, item, table);
 
                     return false;
                 };
@@ -135,13 +135,13 @@
             }
 
             var cloneItem = item.clone();
-            Object.setPrototypeOf(cloneItem,FormItemResultTable);
+            Object.setPrototypeOf(cloneItem,Mapbender.Digitizer.FormItemResultTable);
             var button = {
                 title: Mapbender.DigitizerTranslator.translate('feature.edit'),
                 className: 'edit',
                 onClick: onEditClick
             };
-            Object.setPrototypeOf(button,FormItemButton);
+            Object.setPrototypeOf(button,Mapbender.Digitizer.FormItemButton);
             cloneItem.buttons = [button];
 
             // TODO check if otther formElements are used as buttons, not as children
@@ -149,7 +149,7 @@
 
 
             var containerItem = item.clone();
-            Object.setPrototypeOf(containerItem,FormItemContainer);
+            Object.setPrototypeOf(containerItem,Mapbender.Digitizer.FormItemContainer);
 
 
             var button2 = {
@@ -157,7 +157,7 @@
                 cssClass: "fa fa-plus",
                 click: onCreateClick
             };
-            Object.setPrototypeOf(button2,FormItemButton);
+            Object.setPrototypeOf(button2,Mapbender.Digitizer.FormItemButton);
             containerItem.children = [button, cloneItem];
 
 

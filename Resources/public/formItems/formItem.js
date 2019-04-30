@@ -60,7 +60,7 @@
             var saveButton = {
                 text: Mapbender.DigitizerTranslator.translate("feature.save.title", false),
                 click: function () {
-                    FormItemUtils.saveForeignDataStoreItem(data);
+                    Mapbender.Digitizer.FormItemUtils.saveForeignDataStoreItem(data);
                 }
             };
             buttons.push(saveButton);
