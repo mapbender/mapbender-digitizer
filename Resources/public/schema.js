@@ -572,10 +572,27 @@
             var widget = schema.widget;
             var element = $(widget.element);
 
-            var sidebar = new Mapbender.Digitizer.Menu(schema);
+            var menu = new Mapbender.Digitizer.Menu(schema);
+            schema.addSpecificOptionToSelector();
 
-            schema.frame = sidebar.frame;
-            element.append(sidebar.frame);
+            schema.frame = menu.frame;
+            element.append(menu.frame);
+
+        },
+
+        addSpecificOptionToSelector: function () {
+            var schema = this;
+            var option = $("<option/>");
+            option.val(schema.schemaName).html(schema.label);
+            option.data("schemaSettings", schema);
+            schema.appendSpecificOptionToSelector(option);
+        },
+
+        appendSpecificOptionToSelector: function(option) {
+            var schema = this;
+            var widget = schema.widget;
+            var selector = widget.selector;
+            selector.append(option);
 
         },
 
