@@ -854,9 +854,11 @@
 
         copyFeature: function (feature) {
             var schema = this;
+            var featureSchema = schema.getSchemaByFeature(feature);
+
             var layer = schema.layer;
             var newFeature = feature.clone();
-            var defaultAttributes = schema.copy.data || {};
+            var defaultAttributes = featureSchema.copy.data || {};
             var allowCopy = true;
 
             layer.addFeatures([newFeature]);
@@ -873,7 +875,7 @@
             var newAttributes = _.extend({}, defaultAttributes);
 
             _.each(feature.attributes, function (v, k) {
-                if (v !== '' && v !== null && k !== schema.featureType.uniqueId) {
+                if (v !== '' && v !== null && k !== featureSchema.featureType.uniqueId) {
 
                     if (schema.copy.overwriteValuesWithDefault) {
                         newAttributes[k] = newAttributes[k] || v; // Keep default value when existing
@@ -890,11 +892,12 @@
             newFeature.layer = feature.layer;
 
             // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
-            if (schema.copy.moveCopy) {
-                newFeature.geometry.move(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
+            if (featureSchema.copy.moveCopy) {
+                newFeature.geometry.move(featureSchema.copy.moveCopy.x, featureSchema.copy.moveCopy.y);
             }
 
-            newFeature.data.name = "Copy of " + (feature.attributes.name || feature.fid);
+            var name = featureSchema.featureType.name;
+            newFeature.data[name] = "Copy of " + (feature.attributes[name] || feature.fid);
 
             delete newFeature.fid;
             newFeature.style = null;
@@ -1160,6 +1163,7 @@
                 index: schema.index,
                 popup: schema.popup,
                 allowDeleteByCancelNewGeometry: schema.allowDeleteByCancelNewGeometry,
+                copy: schema.copy,
 
             };
 

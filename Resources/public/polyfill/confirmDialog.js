@@ -2,7 +2,7 @@
     "use strict";
 
     Mapbender.confirmDialog = Mapbender.confirmDialog || function (options) {
-        var dialog = $("<div class='confirm-dialog'>" + (options.hasOwnProperty('html') ? options.html : "") + "</div>").popupDialog({
+        var dialog = $("<div></div>").popupDialog({
             title: options.hasOwnProperty('title') ? options.title : "",
             maximizable: false,
             dblclick: false,
@@ -29,6 +29,8 @@
                 }
             }]
         });
+        console.log(dialog);
+        dialog.html('<div class="confirm-dialog">'+(options.hasOwnProperty('html') ? options.html : "") + '</div>');
         return dialog;
     };
 
