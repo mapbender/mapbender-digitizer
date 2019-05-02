@@ -632,12 +632,10 @@
 
             var createDefaultSymbolizer = function (feature) {
                 return schema.layer.styleMap.styles.default.createSymbolizer(feature);
-            }
-
-            var style = createDefaultSymbolizer(feature);
+            };
 
             var styleOptions = {
-                data: schema.featureStyles[feature.fid] || style,
+                data: schema.featureStyles[feature.fid] || createDefaultSymbolizer(feature),
                 commonTab: false
             };
 
