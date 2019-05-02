@@ -27,7 +27,6 @@ Refactoring - Code sortieren:
 - Die current Variablen in Widget currentSchema und currentPopup sind schlechter Stil und gehören weg : currentSchema durch abgespeckte Version ersetzen, die Methoden beinhaltet, da kommen die contextMenu Methoden auch rein
 - Helper Klasse/Datei für Feldlose Methoden anlegen, evtl. auch mehrere
 - Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen
-- Auf die Hooks Rücksicht nehmen - am besten vorhandene Konfigurationen begutachten
 - Herausfinden, warum Openlayers.Feature 'data', 'attributes' und 'properties' hat und gegebenenfalls eins wegwerfen
 - Navigation auf Buttons über JQuery einschränken
 - Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
@@ -39,7 +38,6 @@ Refactoring - Code sortieren:
 - Context Menu in den Handler des Select Controls auslagern (Rechtsklick!)
 - Seperation of Concerns - Inititalisierung und Anwendung trennen
 - Druck reparieren
-- Alles in strict mode
 
 
 Testing:
@@ -117,6 +115,8 @@ Gemacht:
 - Die Cluster Funktionalitäten in eigene Datei auslagern, die Methoden überschreibt
 - nach speichern von style, style in schema feature styles einbinden
 - Punktradius ist noch in der Stylemaske bei Polygonen eingebunden
+- Auf die Hooks Rücksicht nehmen - am besten vorhandene Konfigurationen begutachten
+- Alles in strict mode
 
 
 

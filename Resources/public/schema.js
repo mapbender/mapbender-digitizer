@@ -18,7 +18,11 @@
                 }
 
                 try {
-                    schema.evaluatedHooks[name] = eval(value);
+                    schema.evaluatedHooksForControlPrevention[name] = function(feature) {
+                        var control = this;
+                        var attributes = feature.attributes;
+                        return eval(value);
+                    }
                 } catch (e) {
                     $.notify(e);
                 }
@@ -269,7 +273,7 @@
         featureStyles: null,
         featureCloudPopup: null,
 
-        evaluatedHooks: {},
+        evaluatedHooksForControlPrevention: {},
         lastRequest: null,
 
 

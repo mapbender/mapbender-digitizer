@@ -225,7 +225,7 @@
 
                     feature.oldGeometry = feature.geometry.clone();
 
-                    if (controlFactory.injectedMethods.preventModification()) {
+                    if (controlFactory.injectedMethods.preventModification(feature)) {
                         this.deactivate();
                         this.activate();
                         $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
@@ -268,7 +268,7 @@
 
                     feature.oldGeometry = feature.geometry.clone();
 
-                    if (controlFactory.injectedMethods.preventMove()) {
+                    if (controlFactory.injectedMethods.preventMove(feature)) {
                         this.cancel();
                         $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
                     }

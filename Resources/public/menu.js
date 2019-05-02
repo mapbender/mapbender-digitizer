@@ -32,14 +32,14 @@
                     getDefaultAttributes: function () {
                         return schema.getDefaultProperties();
                     },
-                    preventModification: function () {
+                    preventModification: function (feature) {
 
-                        return !!schema.evaluatedHooks.onModificationStart;
+                        return schema.evaluatedHooksForControlPrevention.onModificationStart  && schema.evaluatedHooksForControlPrevention.onModificationStart(feature);
 
                     },
-                    preventMove: function () {
+                    preventMove: function (feature) {
 
-                        return !!schema.evaluatedHooks.onStart;
+                        return schema.evaluatedHooksForControlPrevention.onStart && schema.evaluatedHooksForControlPrevention.onStart(feature);
 
                     },
                     extendFeatureDataWhenNoPopupOpen: function (feature) {
