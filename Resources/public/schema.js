@@ -10,7 +10,7 @@
 
         var styleLabels = ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
 
-        var initializeHooks = function () {
+        var initializeHooksForControlPrevention = function () {
             _.each(schema.hooks, function (value, name) {
                 if (!value) {
                     return false;
@@ -23,9 +23,23 @@
                         return eval(value);
                     }
                 } catch (e) {
-                    $.notify(e);
+                    console.warn ("Evaluation of control prevention hooks failed",e);
                 }
             });
+        };
+
+        var initializeHooksForCopyPrevention = function() {
+            _.each(schema.copy.rules, function (value,name) {
+                try {
+                    schema.evaluatedHooksForCopyPrevention[name] = function (feature) {
+                        var f = feature;
+                        return eval(value);
+                    }
+                } catch (e) {
+                    console.warn ("Evaluation of copy prevention hooks failed",e);
+                }
+            });
+
         };
 
 
@@ -194,7 +208,9 @@
         };
 
 
-        initializeHooks();
+        initializeHooksForControlPrevention();
+
+        initializeHooksForCopyPrevention();
 
         schema.initTableFields();
 
@@ -273,6 +289,7 @@
         featureCloudPopup: null,
 
         evaluatedHooksForControlPrevention: {},
+        evaluatedHooksForCopyPrevention: {},
         lastRequest: null,
 
 
@@ -337,6 +354,7 @@
             rules: null,
             data: null,
             overwriteValuesWithDefault: false,
+            moveCopy: null,
         },
 
         formItems: null,
@@ -685,12 +703,10 @@
 
             if (isExtentOnly) {
                 request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
-            }
-
-            // Prevent send same request
-            if (!isExtentOnly && schema.lastRequest && schema.lastRequest === JSON.stringify(request)) {
+            } else if (schema.lastRequest === JSON.stringify(request)) {
                 return;
             }
+
             schema.lastRequest = JSON.stringify(request);
 
             if (schema.search) {
@@ -700,13 +716,10 @@
                 }
             }
 
-            // If schema search activated, then only
             if (schema.search && !isExtentOnly) {
-                // Remove all features
                 schema.removeAllFeatures();
             }
 
-            // Abort previous request
             if (schema.xhr) {
                 schema.xhr.abort();
             }
@@ -831,12 +844,8 @@
 
             layer.addFeatures([newFeature]);
 
-            _.each(schema.copy.rules, function (ruleCode) {
-                var f = feature;
-                if (!allowCopy) {
-                    return false;
-                }
-                eval('allowCopy = ' + ruleCode + ';');
+            _.each(schema.evaluatedHooksForCopyPrevention, function (allowCopyForFeature) {
+                allowCopy = allowCopy && (allowCopyForFeature(feature));
             });
 
             if (!allowCopy) {
@@ -864,7 +873,10 @@
             newFeature.layer = feature.layer;
 
             // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
-            newFeature.geometry.move(200, 200);
+            if (schema.copy.moveCopy) {
+                newFeature.geometry.move(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
+            }
+
             newFeature.data.name = "Copy of " + (feature.attributes.name || feature.fid);
 
             delete newFeature.fid;
