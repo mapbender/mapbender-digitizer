@@ -1438,7 +1438,7 @@
                         value: mapProjection,
                         css : { width: '33.33%' },
                         cssClass: '-fn-active-epsgCode',
-                        change: function(){
+                        change: function(event){
 
                             var oldEpsgCode = $('.-fn-coordinates-container').data('activeEpsgCode');
                             var oldProjection;
