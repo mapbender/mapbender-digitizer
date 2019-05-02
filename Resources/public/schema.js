@@ -861,7 +861,10 @@
             var defaultAttributes = featureSchema.copy.data || {};
             var allowCopy = true;
 
-            layer.addFeatures([newFeature]);
+            // Feature must be removed and added for z-indexing
+            layer.removeFeatures([feature]);
+
+            layer.addFeatures([feature,newFeature]);
 
             _.each(schema.evaluatedHooksForCopyPrevention, function (allowCopyForFeature) {
                 allowCopy = allowCopy && (allowCopyForFeature(feature));
@@ -1028,6 +1031,7 @@
 
                 schema.refreshConnectedDigitizerFeatures();
 
+                return response;
 
             });
 
