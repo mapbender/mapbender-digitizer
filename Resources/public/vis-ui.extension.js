@@ -146,7 +146,7 @@
                 }
             }), 'sTitle');
 
-            resultTable.element.find(".dataTables_filter input[type='search']").attr("autocomplete","off").attr('placeholder', searchableColumnTitles.join(', '));
+            resultTable.element.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
         },
 
 

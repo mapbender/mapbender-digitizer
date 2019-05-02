@@ -976,7 +976,7 @@
 
                 schema: schema.getSchemaByFeature(feature).schemaName,
                 feature: request
-            }).done(function (response) {
+            }).then(function (response) {
 
                 if (response.hasOwnProperty('errors')) {
                     return;

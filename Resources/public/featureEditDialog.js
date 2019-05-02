@@ -138,9 +138,14 @@
         addFeatureAndDialog: function (feature, dialog) {
 
             _.each(this.buttons, function (button) {
-                console.log(button.click,"!");
                 button.click = button.createClick(feature, dialog);
             });
+
+            // buttons are deep copied! Should be moved to button constructing function though
+            if (feature.isNew) {
+                delete this.buttons.styleButton;
+                delete this.buttons.copyButton;
+            }
         },
 
         clone: function () {
@@ -155,12 +160,11 @@
 
 
 
-    // Take care - the difference between schema and dialog.schema is vital!
+    // TODO - - Carefully separate Feature Scheme and Loading Scheme in order to, for example, enable buttons of other schemes in allscheme!
 
     var FeatureEditDialog = function (feature, schema) {
 
         var dialog = this;
-        dialog.schema = schema.getSchemaByFeature(feature);
 
         var widget = schema.widget;
         var map = widget.map;
@@ -168,7 +172,8 @@
 
         dialog.feature = feature;
 
-        var configuration = dialog.schema.popup.clone();
+        var configuration = schema.popup.clone();
+
         configuration.addFeatureAndDialog(feature, dialog);
 
 
@@ -177,9 +182,9 @@
 
             $popup.bind('popupdialogclose', function () {
 
-                if (feature.isNew && dialog.schema.allowDeleteByCancelNewGeometry) {
+                if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
                     schema.removeFeature(feature);
-                } else if ((feature.isChanged || feature.isNew) && dialog.schema.revertChangedGeometryOnCancel) {
+                } else if ((feature.isChanged || feature.isNew) && schema.revertChangedGeometryOnCancel) {
 
                     schema.layer.renderer.eraseGeometry(feature.geometry);
                     feature.geometry = feature.oldGeometry;

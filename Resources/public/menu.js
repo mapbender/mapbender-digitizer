@@ -301,8 +301,12 @@
                     });
 
 
-                }
+                },
+                // This may be needed to prevent autocomplete in search field / [google chrome]
+                initComplete: function() {
+                    //$(this.api().table().container()).find('input').parent().wrap('<form>').parent().attr('autocomplete', 'off');
 
+                }
             };
 
             if (schema.view.settings) {
