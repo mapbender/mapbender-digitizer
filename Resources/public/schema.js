@@ -121,7 +121,7 @@
                 },
 
                 clickFeature: function (feature) {
-                    if (schema._mapHasActiveControlThatBlocksSelectControl()) {
+                    if (schema.mapHasActiveControlThatBlocksSelectControl()) {
                         return;
                     }
                     this.openDialog(feature);

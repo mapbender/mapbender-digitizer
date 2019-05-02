@@ -5,10 +5,11 @@
 
         var editor = this;
 
-        this.feature = feature;
-        this.schema = schema;
+        editor.feature = feature;
+        editor.schema = schema;
 
         var defaultOptions = {
+
             asPopup: true,
             data: {
                 'id': null,
@@ -516,6 +517,8 @@
 
         element.formData(options.data);
 
+        editor.element = element;
+
     };
 
     Mapbender.Digitizer.FeatureStyleEditor.prototype = {
@@ -536,7 +539,7 @@
             } else {
                 // defer style saving until the feature itself is saved, and has an id to associate with
                 feature.saveStyleDataCallback = function() {
-                    featureStyleEditor.saveStyle(feature,styleData);
+                    return featureStyleEditor.saveStyle(feature,styleData);
                 }
             }
             featureStyleEditor.close();
@@ -552,7 +555,7 @@
                 schema: schema.schemaName,
                 style: styleData,
                 featureId: feature.fid
-            }).done(function (response) {
+            }).then(function (response) {
                 schema.featureStyles[feature.fid] = styleData;
                 feature.layer.drawFeature(feature);
                 featureStyleEditor.element.enableForm();

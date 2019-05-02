@@ -273,7 +273,7 @@ $selectColor: #F7F79A;
     }
     &.active,
     &.active:focus {
-      background-color: $buttonFirstActiveColor;
+      background-color: $buttonFirstActiveColor !important;
     }
   }
 
