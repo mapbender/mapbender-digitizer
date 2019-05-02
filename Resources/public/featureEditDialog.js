@@ -50,7 +50,8 @@
 
             if (schema.printable) {
                 buttons.printButton = createButton('feature.print', function (feature) {
-                    widget.printClient.printDigitizerFeature(schema.featureType.name || schema.schemaName, feature.fid);
+                    var featureSchema = schema.getSchemaByFeature(feature);
+                    widget.printClient.printDigitizerFeature(featureSchema.featureType.name || featureSchema.schemaName, feature.fid);
 
                 });
             }

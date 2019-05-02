@@ -34,14 +34,10 @@ mb.digitizer:
     point:
       drawPoint: Draw point
       moveFeature: Move point
-      selectFeature: Select feature
-      removeSelected: Remove selected
     line:
       drawLine: Draw line
       modifyFeature: Modify line
       moveFeature: Move line
-      selectFeature: Select feature
-      removeSelected: Remove selected
     polygon:
       drawPolygon: Draw polygon
       drawRectangle: Draw rectangle
@@ -50,8 +46,6 @@ mb.digitizer:
       drawDonut: Draw donut
       modifyFeature: Modify polygon
       moveFeature: Move polygone
-      selectFeature: Select feature
-      removeSelected: Remove selected
     all:
       drawPoint: Draw point
       drawLine: Draw line
@@ -61,9 +55,7 @@ mb.digitizer:
       drawEllipse: Draw ellipse
       drawDonut: Draw donut
       modifyFeature: Modify feature
-      moveGeometry: Move feature
-      selectFeature: Select feature
-      removeSelected: Remove selected
+      moveFeature: Move feature
   cancel: Cancel
   api:
     query:
