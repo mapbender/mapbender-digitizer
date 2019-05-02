@@ -2,7 +2,6 @@
     "use strict";
 
 
-
     Mapbender.Digitizer.Scheme = function (rawScheme, widget, index) {
         var schema = this;
         schema.index = index;
@@ -18,7 +17,7 @@
                 }
 
                 try {
-                    schema.evaluatedHooksForControlPrevention[name] = function(feature) {
+                    schema.evaluatedHooksForControlPrevention[name] = function (feature) {
                         var control = this;
                         var attributes = feature.attributes;
                         return eval(value);
@@ -30,7 +29,7 @@
         };
 
 
-        var createPopupConfiguration = function() {
+        var createPopupConfiguration = function () {
             schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
         };
 
@@ -240,9 +239,9 @@
         }
 
 
-        var assert = function() {
-            console.assert(['polygon','line','point',"-"].includes(schema.featureType.geomType),"invalid geom Type: "+schema.featureType.geomType+" in schema "+schema.schemaName);
-            console.assert(!!schema.tableFields,"Schema "+schema.schemaName+" does not have Tablefields");
+        var assert = function () {
+            console.assert(['polygon', 'line', 'point', "-"].includes(schema.featureType.geomType), "invalid geom Type: " + schema.featureType.geomType + " in schema " + schema.schemaName);
+            console.assert(!!schema.tableFields, "Schema " + schema.schemaName + " does not have Tablefields");
         };
 
         assert();
@@ -371,17 +370,17 @@
         tableFields: null,
 
 
-        getGeomType: function() {
+        getGeomType: function () {
             var schema = this;
             return schema.featureType.geomType;
         },
 
-        initTableFields: function() {
+        initTableFields: function () {
 
             var schema = this;
             if (!schema.tableFields) {
                 schema.tableFields = {};
-                schema.tableFields[schema.featureType.uniqueId] = {label: 'Nr.' , width: '20%' };
+                schema.tableFields[schema.featureType.uniqueId] = {label: 'Nr.', width: '20%'};
                 if (schema.featureType.name) {
                     schema.tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
                 }
@@ -389,18 +388,17 @@
         },
 
 
-        createFormItemsCollection: function(formItems) {
+        createFormItemsCollection: function (formItems) {
             var schema = this;
             schema.formItems = new Mapbender.Digitizer.FormItemsCollection(formItems || schema.formItems, schema);
 
         },
 
 
-        updateConfigurationAfterSwitching: function(updatedSchemes) {
+        updateConfigurationAfterSwitching: function (updatedSchemes) {
             var schema = this;
             schema.createFormItemsCollection(updatedSchemes[schema.schemaName].formItems); // Update formItems Of Schema when switiching
         },
-
 
 
         activateSchema: function () {
@@ -427,7 +425,7 @@
             var promise;
 
             if (schema.allowCustomerStyle) {
-                promise = widget.query('style/list', {schema: schema.schemaName}).then(function(data) {
+                promise = widget.query('style/list', {schema: schema.schemaName}).then(function (data) {
                     schema.featureStyles = data.featureStyles;
                 });
             } else {
@@ -477,7 +475,6 @@
         },
 
 
-
         activateContextMenu: function () {
             var schema = this;
             var widget = schema.widget;
@@ -495,7 +492,6 @@
 
             return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
         },
-
 
 
         refreshOtherLayersAfterFeatureSave: function () {
@@ -526,7 +522,7 @@
 
         openFeatureEditDialog: function (feature) {
             var schema = this;
-            schema.popup.createFeatureEditDialog(feature,schema);
+            schema.popup.createFeatureEditDialog(feature, schema);
         },
 
 
@@ -565,7 +561,7 @@
             schema.appendSpecificOptionToSelector(option);
         },
 
-        appendSpecificOptionToSelector: function(option) {
+        appendSpecificOptionToSelector: function (option) {
             var schema = this;
             var widget = schema.widget;
             var selector = widget.selector;
@@ -612,19 +608,16 @@
             if (!row) {
                 return; // in case of non-saved feature
             }
-            row.find('.button.save').removeClass("active").attr('disabled','disabled');
+            row.find('.button.save').removeClass("active").attr('disabled', 'disabled');
 
 
         },
-
 
 
         // Overwrite
         getStyleMapOptions: function (label) {
             return {};
         },
-
-
 
 
         openChangeStyleDialog: function (feature) {
@@ -640,6 +633,39 @@
             };
 
             var styleEditor = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, styleOptions);
+        },
+
+        // TODO test this.
+        extendSearchRequest: function (basicRequest) {
+            var schema = this;
+            var search = schema.search;
+            var request = _.clone(basicRequest);
+
+            if (!search.request) {
+                return false;
+            }
+
+            if (search.request) {
+                request.search = search.request;
+            }
+
+            if (search.mandatory) {
+
+                var hasError = Object.keys(search.mandatory).some(function(key) {
+                    var mandatoryNotInRequest = !search.request[key];
+                    var mandatoryDoesNotMatchRegExp = !(search.request[key]).toString().match(new RegExp(search.mandatory[key], "mg"));
+                    return mandatoryNotInRequest || mandatoryDoesNotMatchRegExp;
+                });
+
+                if (hasError) {
+                    schema.removeAllFeatures();
+                    schema.lastRequest = null;
+                    return false;
+                }
+            }
+
+            return request;
+
         },
 
 
@@ -661,53 +687,18 @@
                 request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
             }
 
-            // Only if search is defined
-            if (schema.search) {
-
-                // No user inputs - no search :)
-                if (!schema.search.request) {
-                    return;
-                }
-
-                // Aggregate request with search form values
-                if (schema.search.request) {
-                    request.search = schema.search.request;
-                }
-
-                // Check mandatory settings
-                if (schema.search.mandatory) {
-
-                    var mandatory = schema.search.mandatory;
-                    var req = schema.search.request;
-                    var errors = [];
-                    _.each(mandatory, function (expression, key) {
-                        if (!req[key]) {
-                            errors.push(key);
-                            return;
-                        }
-                        var reg = new RegExp(expression, "mg");
-                        if (!(req[key]).toString().match(reg)) {
-                            errors.push(key);
-                            return;
-                        }
-                    });
-
-                    // Input fields are note
-                    if (_.size(errors)) {
-                        // Remove all features
-                        schema.removeAllFeatures();
-                        schema.lastRequest = null;
-                        return;
-                    }
-                }
-            }
-
             // Prevent send same request
-            if (!isExtentOnly // only if search isn't for current extent
-                && schema.lastRequest && schema.lastRequest === JSON.stringify(request)) {
+            if (!isExtentOnly && schema.lastRequest && schema.lastRequest === JSON.stringify(request)) {
                 return;
             }
             schema.lastRequest = JSON.stringify(request);
+
+            if (schema.search) {
+                request = schema.extendSearchRequest(request);
+                if (!request) {
+                    return;
+                }
+            }
 
             // If schema search activated, then only
             if (schema.search && !isExtentOnly) {
@@ -890,8 +881,6 @@
             var schema = this;
             return schema;
         },
-
-
 
 
         // TODO feature / option formData parameters are not pretty -> keep data in feature directly
@@ -1113,8 +1102,6 @@
         },
 
 
-
-
         exportGeoJson: function (feature) {
             var schema = this;
             var widget = schema.widget;
@@ -1128,7 +1115,7 @@
         },
 
 
-        getRestrictedVersion: function() {
+        getRestrictedVersion: function () {
             var schema = this;
 
             return { // This is a narrowed version of Scheme when accessed by Feature. Helpful for Debugging
