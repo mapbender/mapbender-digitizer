@@ -262,12 +262,9 @@
                 };
 
 
-                $.each(schema.tableFields, function (fieldName, fieldSettings) {
+                $.each(schema.tableFields, function (columnId, fieldSettings) {
                     fieldSettings.title = fieldSettings.label;
-                    fieldSettings.data = fieldSettings.data || createResultTableDataFunction(fieldName);
-                    if (fieldSettings.render) {
-                        eval('fieldSettings.render = ' + fieldSettings.render);
-                    }
+                    fieldSettings.data = fieldSettings.data || createResultTableDataFunction(columnId);
                     columns.push(fieldSettings);
                 });
 

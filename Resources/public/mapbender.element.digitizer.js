@@ -361,7 +361,7 @@
         },
 
 
-        // TODO muss getetest werden
+        // TODO muss repariert werden
         refreshConnectedDigitizerFeatures: function (featureTypeName) {
             var widget = this;
             $(".mb-element-digitizer").not(".mb-element-data-manager").each(function (index, element) {

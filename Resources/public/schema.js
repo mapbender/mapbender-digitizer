@@ -42,6 +42,19 @@
 
         };
 
+        var initializeHooksForTableFields = function() {
+            _.each(schema.tableFields, function (tableField,name) {
+                if (tableField.render) {
+                    try {
+                        tableField.render = eval(tableField.render);
+                    } catch (e) {
+                        console.warn("Evaluation of table field render hooks failed", e);
+                    }
+                }
+            });
+
+        };
+
 
         var createPopupConfiguration = function () {
             schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
@@ -211,6 +224,8 @@
         initializeHooksForControlPrevention();
 
         initializeHooksForCopyPrevention();
+
+        initializeHooksForTableFields();
 
         schema.initTableFields();
 
@@ -512,12 +527,14 @@
         },
 
 
-        refreshOtherLayersAfterFeatureSave: function () {
+        refreshOtherLayersAfterFeatureSave: function (feature) {
             var schema = this;
 
-            if (schema.refreshLayersAfterFeatureSave) {
+            var scheme = schema.getSchemaByFeature(feature);
 
-                _.each(schema.refreshLayersAfterFeatureSave, function (layerInstanceId) {
+            if (scheme.refreshLayersAfterFeatureSave) {
+
+                _.each(scheme.refreshLayersAfterFeatureSave, function (layerInstanceId) {
                     var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
                     _.each(layers, function (layer) {
                         Mapbender.layerManager.refreshLayer(layer);
@@ -797,11 +814,11 @@
             return schema.layer.features;
         },
 
-        removeFeatureFromUI: function (olFeature) {
+        removeFeatureFromUI: function (feature) {
             var schema = this;
-            schema.layer.features = _.without(schema.getLayerFeatures(), olFeature);
+            schema.layer.features = _.without(schema.getLayerFeatures(), feature);
             schema.reloadFeatures();
-            schema.refreshOtherLayersAfterFeatureSave();
+            schema.refreshOtherLayersAfterFeatureSave(feature);
         },
 
         removeAllFeatures: function () {
@@ -891,7 +908,7 @@
 
         getSchemaByFeature: function () {
             var schema = this;
-            return schema;
+            return schema.getRestrictedVersion();
         },
 
 
@@ -994,12 +1011,17 @@
                 schema.tryMailManager(newFeature);
 
 
-                var successHandler = schema.save && schema.save.on && schema.save.on.success;
-                if (successHandler) {
-                    eval(successHandler);
-                }
+                var successHandler = function() {
+                    var scheme = schema.getSchemaByFeature(feature);
+                    var successHandler = scheme.save && scheme.save.on && scheme.save.on.success;
+                    if (successHandler) {
+                        eval(successHandler);
+                    }
+                };
 
-                schema.refreshOtherLayersAfterFeatureSave();
+                successHandler();
+
+                schema.refreshOtherLayersAfterFeatureSave(feature);
 
                 schema.refreshConnectedDigitizerFeatures();
 
@@ -1016,8 +1038,8 @@
             var widget = schema.widget;
 
             if (schema.refreshFeaturesAfterSave) {
-                _.each(schema.refreshFeaturesAfterSave, function (el, index) {
-                    widget.refreshConnectedDigitizerFeatures(el);
+                _.each(schema.refreshFeaturesAfterSave, function (schemaName, index) {
+                    widget.refreshConnectedDigitizerFeatures(schemaName);
                 })
             }
         },
@@ -1135,7 +1157,9 @@
                 formItems: schema.formItems,
                 allowDelete: schema.allowDelete,
                 featureType: schema.featureType,
-                index: schema.index
+                index: schema.index,
+                popup: schema.popup,
+                allowDeleteByCancelNewGeometry: schema.allowDeleteByCancelNewGeometry,
 
             };
 

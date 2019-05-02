@@ -5,13 +5,124 @@
         var popupConfiguration = this;
         $.extend(popupConfiguration, configuration);
 
-        popupConfiguration.buttons = augmentFeatureEditDialogButtonsWithCustomButtons(configuration, schema);
-        $.extend(popupConfiguration.buttons, createButtons(configuration, schema));
+        var augmentFeatureEditDialogButtonsWithCustomButtons = function () {
+            // Initialize custom button events
+            var newButtons = {};
+            _.each(configuration.buttons, function (button) {
+                newButtons[button.text] = _.clone(button);
+                if (button.click) {
+                    newButtons[button.text].createClick = function (feature, dialog) {
 
-        popupConfiguration.getSchema = function(feature) {
+                        return function (e) {
+                            var _widget = schema.widget;
+                            var el = $(this);
+                            var form = dialog;
+                            var data = feature.data;
+
+                            eval(button.click);
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                }
+
+            });
+
+            return newButtons;
+        };
+
+        var createButtons = function () {
+            var widget = schema.widget;
+
+
+            var createButton = function (title, click) {
+                return {
+                    text: Mapbender.DigitizerTranslator.translate(title),
+                    createClick: function (feature, dialog) {
+                        return function () {
+                            click(feature, dialog);
+                        };
+                    }
+                }
+            };
+
+            var buttons = {};
+
+            if (schema.printable) {
+                buttons.printButton = createButton('feature.print', function (feature) {
+                    widget.printClient.printDigitizerFeature(schema.featureType.name || schema.schemaName, feature.fid);
+
+                });
+            }
+            if (schema.copy.enable) {
+                buttons.copyButton = createButton('feature.clone.title', function (feature) {
+                    schema.copyFeature(feature);
+
+                });
+
+            }
+            if (schema.allowCustomerStyle) {
+                buttons.styleButton = createButton('feature.style.change', function (feature) {
+                    schema.openChangeStyleDialog(feature);
+                });
+            }
+            if (schema.allowEditData && schema.allowSave) {
+                buttons.saveButton = createButton('feature.save.title', function (feature, dialog) {
+                    var formData = dialog.$popup.formData();
+
+                    // TODO this is not nice. Find a better solution
+                    var errorInputs = $(".has-error", dialog.$popup);
+                    if (errorInputs.length > 0) {
+                        console.warn("Error", errorInputs);
+                        return;
+                    }
+
+                    dialog.$popup.disableForm();
+                    schema.saveFeature(feature, formData).done(function (response) {
+                        if (response.hasOwnProperty('errors')) {
+                            dialog.feature.disabled = false;
+                            $.each(response.errors, function (i, error) {
+                                $.notify(error.message, {
+                                    title: 'API Error',
+                                    autoHide: false,
+                                    className: 'error'
+                                });
+                                console.error(error.message);
+                            });
+                            dialog.$popup.enableForm();
+
+                            return;
+                        }
+
+                        dialog.$popup.popupDialog('close');
+
+                    });
+                });
+            }
+            if (schema.allowDelete) {
+                buttons.deleteButton = createButton('feature.remove.title', function (feature, dialog) {
+                    schema.removeFeature(feature);
+                    dialog.$popup.popupDialog('close');
+                });
+            }
+            if (schema.allowCancelButton) {
+                buttons.cancelButton = createButton('cancel', function (feature, dialog) {
+                    dialog.$popup.popupDialog('close');
+                });
+            }
+
+            return buttons;
+
+        };
+
+        popupConfiguration.buttons = augmentFeatureEditDialogButtonsWithCustomButtons();
+        $.extend(popupConfiguration.buttons, createButtons());
+
+        popupConfiguration.getSchema = function (feature) {
             var scheme = schema.getSchemaByFeature(feature);
             return scheme;
         };
+
 
         Object.freeze(popupConfiguration.buttons);
 
@@ -24,138 +135,32 @@
             return this.type === 'openlayers-cloud';
         },
 
-        addFeatureAndDialog: function (feature,dialog) {
+        addFeatureAndDialog: function (feature, dialog) {
 
             _.each(this.buttons, function (button) {
-                button.click =  button.createClick(feature,dialog);
+                console.log(button.click,"!");
+                button.click = button.createClick(feature, dialog);
             });
         },
 
-        clone: function() {
+        clone: function () {
             return $.extend(true, {}, this)
         },
 
 
-        createFeatureEditDialog: function(feature, schema) {
+        createFeatureEditDialog: function (feature, schema) {
             return new FeatureEditDialog(feature, schema)
         }
     };
 
-    var augmentFeatureEditDialogButtonsWithCustomButtons = function (configuration, schema) {
-        // Initialize custom button events
-        var newButtons = {};
-        _.each(configuration.buttons, function (button) {
-            if (button.click) {
-                var eventHandlerCode = button.click;
-                newButtons[button.text] = {
-                    click: function (e) {
-                        var _widget = schema.widget;
-                        var el = $(this);
-                        var form = $(this).closest(".ui-dialog-content");
-                        var feature = form.data('feature');
-                        var data = feature.data;
-
-                        eval(eventHandlerCode);
-                        e.preventDefault();
-                        return false;
-                    }
-                }
-
-            }
-        });
-
-        return newButtons;
-    };
-
-    var createButtons = function (configuration, schema) {
-        var widget = schema.widget;
 
 
-        var createButton = function (title, click) {
-            return {
-                text: Mapbender.DigitizerTranslator.translate(title),
-                createClick: function (feature,dialog) {
-                    return function () {
-                        click(feature,dialog);
-                    };
-                }
-            }
-        };
-
-        var buttons = {};
-
-        if (schema.printable) {
-            buttons.printButton = createButton('feature.print', function (feature) {
-                widget.printClient.printDigitizerFeature(schema.featureType.name || schema.schemaName, feature.fid);
-
-            });
-        }
-        if (schema.copy.enable) {
-            buttons.copyButton = createButton('feature.clone.title', function (feature) {
-                schema.copyFeature(feature);
-
-            });
-
-        }
-        if (schema.allowCustomerStyle) {
-            buttons.styleButton = createButton('feature.style.change', function (feature) {
-                schema.openChangeStyleDialog(feature);
-            });
-        }
-        if (schema.allowEditData && schema.allowSave) {
-            buttons.saveButton = createButton('feature.save.title', function (feature,dialog) {
-                var formData = dialog.$popup.formData();
-
-                // TODO this is not nice. Find a better solution
-                var errorInputs = $(".has-error", dialog.$popup);
-                if (errorInputs.length > 0) {
-                    console.warn("Error", errorInputs);
-                    return;
-                }
-
-                dialog.$popup.disableForm();
-                schema.saveFeature(feature, formData).done(function (response) {
-                    if (response.hasOwnProperty('errors')) {
-                        dialog.feature.disabled = false;
-                        $.each(response.errors, function (i, error) {
-                            $.notify(error.message, {
-                                title: 'API Error',
-                                autoHide: false,
-                                className: 'error'
-                            });
-                            console.error(error.message);
-                        });
-                        dialog.$popup.enableForm();
-
-                        return;
-                    }
-
-                    dialog.$popup.popupDialog('close');
-
-                });
-            });
-        }
-        if (schema.allowDelete) {
-            buttons.deleteButton = createButton('feature.remove.title', function (feature,dialog) {
-                schema.removeFeature(feature);
-                dialog.$popup.popupDialog('close');
-            });
-        }
-        if (schema.allowCancelButton) {
-            buttons.cancelButton = createButton('cancel', function (feature,dialog) {
-                dialog.$popup.popupDialog('close');
-            });
-        }
-
-        return buttons;
-
-    };
-
+    // Take care - the difference between schema and dialog.schema is vital!
 
     var FeatureEditDialog = function (feature, schema) {
 
         var dialog = this;
-        dialog.schema = schema;
+        dialog.schema = schema.getSchemaByFeature(feature);
 
         var widget = schema.widget;
         var map = widget.map;
@@ -163,30 +168,23 @@
 
         dialog.feature = feature;
 
-        var configuration = schema.popup.clone();
-        configuration.addFeatureAndDialog(feature,dialog);
+        var configuration = dialog.schema.popup.clone();
+        configuration.addFeatureAndDialog(feature, dialog);
 
 
         var doFeatureEditDialogBindings = function () {
-            var $popup = dialog.$popup;
             var feature = dialog.feature;
-            var schema = dialog.schema;
-            var configuration = dialog.schema.popup;
-
-            var widget = schema.widget;
 
             $popup.bind('popupdialogclose', function () {
 
-                if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
+                if (feature.isNew && dialog.schema.allowDeleteByCancelNewGeometry) {
                     schema.removeFeature(feature);
-                } else
-                if ( (feature.isChanged || feature.isNew) && schema.revertChangedGeometryOnCancel) {
+                } else if ((feature.isChanged || feature.isNew) && dialog.schema.revertChangedGeometryOnCancel) {
 
                     schema.layer.renderer.eraseGeometry(feature.geometry);
                     feature.geometry = feature.oldGeometry;
                     feature.isChanged = false;
                     schema.layer.drawFeature(feature);
-
                     schema.unsetModifiedState(feature);
 
                 }
@@ -198,11 +196,9 @@
             });
 
 
+            // TODO this looks evil. Test it and change it
             if (configuration.isOpenLayersCloudPopup()) {
-                // Hide original popup but not kill it.
-                $popup.closest('.ui-dialog').css({
-                    'margin-left': '-100000px'
-                }).hide(0);
+                $popup.closest('.ui-dialog').css({'margin-left': '-100000px' }).hide(0);
             }
         };
 
@@ -243,8 +239,6 @@
 
 
     };
-
-
 
 
 })();

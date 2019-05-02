@@ -124,7 +124,8 @@
             var scheme = widget.getSchemaByName(feature.attributes.schemaName);
             return scheme.getRestrictedVersion();
 
-        }
+        },
+
     };
 
 

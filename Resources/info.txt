@@ -11,6 +11,7 @@ Hinzugefügte Properties:
 
 Ideen:
 - Features nach vorne setzen (z-index)
+- Schema aufteilen, in Konfiguration (wird über Schema.getSchemaByFeature übergeben, ist statisch) und GUI bzw. Layer spezifische Daten (dynamisch)
 
 Ansprechen:
 - Hack beim Hintergrundbild des Color Pickers
@@ -28,7 +29,6 @@ Refactoring - Code sortieren:
 - Helper Klasse/Datei für Feldlose Methoden anlegen, evtl. auch mehrere
 - Herausfinden, warum Openlayers.Feature 'data', 'attributes' und 'properties' hat und gegebenenfalls eins wegwerfen
 - Navigation auf Buttons über JQuery einschränken
-- Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
 - Forbidden operations on server should NOT throw a 500
 - Die Integration von vis-ui überschreibung weiter benutzen, zum abhängigen neuzeichnen von buttons
 - Higlight Methoden wurden gestrichen - schauen ob was fehlt (insbesondere ResultTable anzeigen)
@@ -43,6 +43,7 @@ Testing:
 - Testen, was mit dem Formdata passiert wenn saveFeature außerhalb des FeatureEdit Dialogs aufgerufen wird
 - Überprüfen, wie im Bahn Digitizer "alles" Layer sich die einzelnen Features hinsichtlich ihrer allow Properties im Resulttable verhalten
 - Popup Einstellungen in Configuration
+- OpenLayersCloudPopup testen
 
 
 Bugs von Robin gefunden:
@@ -116,6 +117,8 @@ Gemacht:
 - Auf die Hooks Rücksicht nehmen - am besten vorhandene Konfigurationen begutachten
 - Alles in strict mode
 - Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen
+- Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
+
 
 
 
