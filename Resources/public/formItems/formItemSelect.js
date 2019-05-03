@@ -1,9 +1,13 @@
 (function () {
     "use strict";
 
-    Mapbender.Digitizer.FormItemSelect =  {
+    Mapbender.Digitizer.FormItemSelect = {
 
-    preprocess: function() {
+        value: function(event) {
+            return $(event.currentTarget).find('select').val();
+        },
+
+        preprocess: function () {
 
             var item = this;
             var schema = item.schema;
@@ -19,7 +23,7 @@
             if (item.dataManagerLink) {
                 var schemaName = item.dataManagerLink.schema;
                 var schemaFieldName = item.dataManagerLink.schemaFieldName;
-                var dataManager =  schema.widget.dataManager;
+                var dataManager = schema.widget.dataManager;
 
 
                 onCreateClick = function (e) {
@@ -66,7 +70,7 @@
                         id: dataStoreId,
                         dataItemId: dataItemId
                     }).done(function (data) {
-                        Mapbender.Digitizer.FormItemUtils.openEditDialog(data,  item, selectRef);
+                        Mapbender.Digitizer.FormItemUtils.openEditDialog(data, item, selectRef);
 
                     });
 
@@ -83,17 +87,17 @@
 
             var preProcessedItem = item.clone();
             var fieldSetItem = {};
-            Object.setPrototypeOf(fieldSetItem,Mapbender.Digitizer.FormItemFieldSet);
+            Object.setPrototypeOf(fieldSetItem, Mapbender.Digitizer.FormItemFieldSet);
 
             fieldSetItem.title = '';
 
-            var button1 =  {
+            var button1 = {
                 type: "button",
                 title: Mapbender.DigitizerTranslator.translate('feature.edit'),
                 cssClass: 'edit',
                 click: onEditClick
             };
-            Object.setPrototypeOf(button1,Mapbender.Digitizer.FormItemButton);
+            Object.setPrototypeOf(button1, Mapbender.Digitizer.FormItemButton);
 
             var button2 = {
                 type: "button",
@@ -101,7 +105,7 @@
                 cssClass: "fa fa-plus",
                 click: onCreateClick
             };
-            Object.setPrototypeOf(button2,Mapbender.Digitizer.FormItemButton);
+            Object.setPrototypeOf(button2, Mapbender.Digitizer.FormItemButton);
 
 
             fieldSetItem.children = [
@@ -111,6 +115,9 @@
 
             return fieldSetItem;
         },
+
+
+        process: Mapbender.Digitizer.FormItemInput.process
 
     };
 
