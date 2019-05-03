@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "mapbender/mapbender": "dev-feature/addConfirmDialog#dd09635c9c12250c84a8810ebe06fcd038e91a9b",
+        "mapbender/mapbender": "dev-master@dev",
         "blueimp/jquery-file-upload": "9.*",
         "debugteam/bootstrap-colorpicker": "1.x",
         "mapbender/data-manager": "~1.0.6.3@dev",
