@@ -11,6 +11,7 @@
 
         activeEPSGCode: null,
         epsgSelection: null,
+
         inputX: null,
         inputY: null,
 

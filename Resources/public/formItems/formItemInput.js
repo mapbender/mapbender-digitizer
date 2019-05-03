@@ -5,6 +5,7 @@
 
         process: function (feature,dialog,schema) {
             var formItem = this;
+
             if (schema.popup.remoteData && formItem.automatic_detection) {
                 var children = [];
 
@@ -51,6 +52,8 @@
                 return fieldSetItem;
                 
             }
+
+            return formItem.clone();
         }
         
     };

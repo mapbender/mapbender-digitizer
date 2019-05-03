@@ -549,7 +549,7 @@
 
             var scheme = schema.getSchemaByFeature(feature);
 
-            var processedFormItems = scheme.formItems.process(feature, dialog);
+            var processedFormItems = scheme.formItems.process(feature, dialog, schema);
 
             return processedFormItems;
         },
