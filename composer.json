@@ -11,7 +11,6 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "mapbender/mapbender": "dev-master@dev",
         "blueimp/jquery-file-upload": "9.*",
         "debugteam/bootstrap-colorpicker": "1.x",
         "mapbender/data-manager": "~1.0.6.3@dev",
