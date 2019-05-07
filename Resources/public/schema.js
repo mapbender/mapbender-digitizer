@@ -549,7 +549,7 @@
 
             var scheme = schema.getSchemaByFeature(feature);
 
-            var processedFormItems = scheme.formItems.process(feature, dialog);
+            var processedFormItems = scheme.formItems.process(feature, dialog, schema);
 
             return processedFormItems;
         },
@@ -1157,7 +1157,7 @@
 
 
         // TODO seperate Feature Info calls for individual properties in order to avoid iterating through meaningless dataSets
-        _getRemotePropertyValue: function (feature, property) {
+        getRemotePropertyValue: function (feature, property) {
             var schema = this;
             var widget = schema.widget;
             var map = widget.getMap();

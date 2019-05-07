@@ -31,7 +31,7 @@
         },
 
 
-        preprocess: function (schema) {
+        preprocess: function () {
             return this.clone();
         },
 
