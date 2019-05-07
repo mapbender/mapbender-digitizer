@@ -1126,7 +1126,7 @@
             feature.visible = !feature.visible;
 
             layer.drawFeature(feature);
-            schema.resultTable.getApi().draw();
+            schema.menu.resultTable.getApi().draw();
 
 
         },
