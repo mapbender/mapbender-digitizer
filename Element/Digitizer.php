@@ -4,6 +4,7 @@ namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
+use Mapbender\CoreBundle\Component\Exception\InvalidElementClassException;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
@@ -112,7 +113,11 @@ class Digitizer extends BaseElement
      */
     protected function getFeatureTypeDeclarations()
     {
-        return $this->container->getParameter("digitizer.featuretypes");
+        try {
+            return $this->container->getParameter("digitizer.featuretypes");
+        } catch (\InvalidArgumentException $e) {
+            return $this->container->getParameter('featureTypes');
+        }
     }
 
     /**

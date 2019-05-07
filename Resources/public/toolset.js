@@ -76,7 +76,8 @@
                 var $button = toolSet._createPlainControlButton(rawButton);
                 var type = rawButton.type;
 
-                var control = controlFactory[type](rawButton.schema && rawButton.schema.schemaName);
+
+                var control = controlFactory[type] && controlFactory[type](rawButton.schema && rawButton.schema.schemaName);
                 if (!control) {
                     console.warn("control "+type+" does not exist");
                     return;

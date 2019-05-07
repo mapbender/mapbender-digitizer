@@ -115,6 +115,7 @@
 
             return modifyRecursively(formItemsCollection.items || getDefaultFormItems(), function (item) {
                 var processedItem = item.process(feature, dialog);
+                delete processedItem.schema;
                 return processedItem;
             });
 
