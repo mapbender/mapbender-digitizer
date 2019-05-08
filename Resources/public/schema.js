@@ -46,9 +46,7 @@
             _.each(schema.tableFields, function (tableField,name) {
                 if (tableField.render) {
                     try {
-                        var func;
-                        eval(tableField.render);
-                        tableField.render = func;
+                        eval("tableField.render = "+tableField.render);
                     } catch (e) {
                         console.warn("Evaluation of table field render hooks failed!", tableField.render, e);
                     }

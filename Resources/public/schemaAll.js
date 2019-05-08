@@ -113,7 +113,7 @@
 
         initTableFields: function() {
             var schemes = this.widget.schemes;
-            this.tableFields = schemes[Object.keys(schemes)[1]].tableFields; // TODO Only solvable when Data of different Features is already aggregated in the database query
+            this.tableFields = schemes[Object.keys(schemes)[0]].tableFields; // TODO Only solvable when Data of different Features is already aggregated in the database query
 
         },
 

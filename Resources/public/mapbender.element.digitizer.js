@@ -27,7 +27,7 @@
 
     $.widget("mapbender.mbDigitizer", {
 
-        options:  {
+        options: {
             classes: {},
             create: null,
             debug: false,
@@ -116,35 +116,28 @@
                 return;
             }
 
-            Mapbender.elementRegistry.waitReady(widget.options.target).then( widget.setup.bind(widget));
-
-            Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function(printClient){
-                widget.printClient = printClient;
-                $.extend(widget.printClient ,Mapbender.Digitizer.printPlugin);
-            }.bind(widget));
-
 
             widget.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
             var qe = new Mapbender.Digitizer.QueryEngine(widget);
             widget.query = qe.query;
 
-            widget.spinner = new function() {
+            widget.spinner = new function () {
                 var spinner = this;
 
                 spinner.openRequests = 0;
 
-                var $parent = $('#'+widget.id).parents('.container-accordion').prev().find('.tablecell').prepend("<div class='spinner' style='display:none'></div>");
+                var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell').prepend("<div class='spinner' style='display:none'></div>");
                 spinner.$element = $parent.find(".spinner");
 
-                spinner.addRequest = function() {
+                spinner.addRequest = function () {
                     spinner.openRequests++;
                     if (spinner.openRequests >= 1) {
                         spinner.$element.show();
                     }
                 };
 
-                spinner.removeRequest = function() {
+                spinner.removeRequest = function () {
                     spinner.openRequests--;
                     if (spinner.openRequests === 0) {
                         spinner.$element.hide();
@@ -155,6 +148,12 @@
             };
 
 
+            Mapbender.elementRegistry.waitReady(widget.options.target).then(widget.setup.bind(widget));
+
+            Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function (printClient) {
+                widget.printClient = printClient;
+                $.extend(widget.printClient, Mapbender.Digitizer.printPlugin);
+            });
         },
 
 
@@ -212,7 +211,10 @@
                 });
 
                 if (!widget.hasOnlyOneScheme) {
-                    widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({label: Mapbender.DigitizerTranslator.translate('schema.allgeometries'), schemaName: 'all'}, widget, index++);
+                    widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({
+                        label: Mapbender.DigitizerTranslator.translate('schema.allgeometries'),
+                        schemaName: 'all'
+                    }, widget, index++);
                 }
             };
 
@@ -277,15 +279,7 @@
                 map.resetLayersZIndex();
             };
 
-            initializeActivationContainer();
-
-            initializeSelectorOrTitleElement();
-
             createSchemes();
-
-            createMapContextMenu();
-
-            createElementContextMenu();
 
             widget.onSelectorChange = function () { // Do not implement in prototype because of static widget access
                 var selector = widget.selector;
@@ -297,6 +291,14 @@
 
                 newSchema.activateSchema();
             };
+
+            initializeActivationContainer();
+
+            initializeSelectorOrTitleElement();
+
+            createMapContextMenu();
+
+            createElementContextMenu();
 
             initializeSelector();
 
@@ -315,7 +317,6 @@
         },
 
 
-
         buildElementContextMenu: function (trigger, e) {
             console.warn("This method should be overwritten");
 
@@ -325,13 +326,14 @@
             console.warn("This method should be overwritten");
         },
 
-        getData: function(zoom) { },
+        getData: function (zoom) {
+        },
 
 
-        getBasicSchemes: function() {
+        getBasicSchemes: function () {
             var widget = this;
 
-            return _.pick(widget.schemes,function(value,key){
+            return _.pick(widget.schemes, function (value, key) {
                 return key !== "all";
             });
         },
@@ -341,13 +343,14 @@
             var widget = this;
             var scheme = widget.getBasicSchemes()[schemaName];
             if (!scheme) {
-                throw new Error("No Basic Scheme exists with the name "+schemaName);
+                throw new Error("No Basic Scheme exists with the name " + schemaName);
             }
             return scheme;
         },
 
 
-        deactivateSchema: function() {},
+        deactivateSchema: function () {
+        },
 
         activate: function () {
             var widget = this;
