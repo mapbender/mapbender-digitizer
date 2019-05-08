@@ -14,7 +14,11 @@
                         continue;
                     }
                     var value = formItem[property];
-                    clonedItem[property] = typeof value == "object"  && property !== 'schema' && property !== "columns" ? $.extend(true,{},value) : value;
+                    if (typeof value == "object"  && !Array.isArray(value) && property !== 'schema' && property !== "columns") {
+                        clonedItem[property] = $.extend(true,{},value);
+                    } else {
+                        clonedItem[property] = value;
+                    }
                 }
             }
             var children = [];

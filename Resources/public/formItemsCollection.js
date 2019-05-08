@@ -8,6 +8,9 @@
         formItemsCollection.schema = schema;
 
         formItemsCollection.items = modifyRecursively(items || [], function(item){
+            if (item.type == "coordinates") {
+                console.log(item);
+            }
             setPrototypeOfFormItem(item);
             item.schema = schema;
             return item;

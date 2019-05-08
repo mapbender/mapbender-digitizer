@@ -32,13 +32,15 @@
 
         process: function (feature,dialog,schema) {
             var formItem = this;
-            var schema = formItem.schema;
             var widget = schema.widget;
-            var mapProjection = widget.getMap().getProjectionObject().projCode;
+            var mapProjection = widget.map.getProjectionObject().projCode;
+
+            console.log(formItem.epsgCodes);
 
             var getEPSGCodes = function() {
 
                 var mapProjectionInEpsgCodes = false;
+                console.log(formItem,formItem.epsgCodes);
                 formItem.epsgCodes.forEach(function(code){ // Add Map Projection to EPSG codes, only if it is not already there
                     if (code[0]===mapProjection) {
                         mapProjectionInEpsgCodes = true;
@@ -129,7 +131,7 @@
             var children = {
                 'x' : createInputChild('x'),
                 'y' : createInputChild('y'),
-                'epsg' : epsgSelection
+                'epsg' : formItem.epsgSelection
             };
 
             var fieldSetItem = {
