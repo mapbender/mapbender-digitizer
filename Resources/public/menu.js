@@ -396,10 +396,9 @@
                     var xhr = schema.getData();
 
                     xhr.done(function () {
-                        var olMap = widget.map;
-                        olMap.zoomToExtent(layer.getDataExtent());
+                        widget.map.zoomToExtent(schema.layer.getDataExtent());
                         if (schema.search.zoomScale) {
-                            olMap.zoomToScale(schema.search.zoomScale, true);
+                            widget.map.zoomToScale(schema.search.zoomScale, true);
                         }
                     });
 

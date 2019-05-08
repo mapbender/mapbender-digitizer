@@ -73,7 +73,7 @@
 
             getData: function (zoom) {
                 var schema = this;
-                Mapbender.Digitizer.Scheme.prototype.getData.apply(schema,[ function() {
+                return Mapbender.Digitizer.Scheme.prototype.getData.apply(schema,[ function() {
                     if (zoom) {
                         schema.updateClusterStrategy();
                     }

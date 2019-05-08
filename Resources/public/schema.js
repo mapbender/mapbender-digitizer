@@ -23,30 +23,30 @@
                         return eval(value);
                     }
                 } catch (e) {
-                    console.warn ("Evaluation of control prevention hooks failed!",value, e);
+                    console.warn("Evaluation of control prevention hooks failed!", value, e);
                 }
             });
         };
 
-        var initializeHooksForCopyPrevention = function() {
-            _.each(schema.copy.rules, function (value,name) {
+        var initializeHooksForCopyPrevention = function () {
+            _.each(schema.copy.rules, function (value, name) {
                 try {
                     schema.evaluatedHooksForCopyPrevention[name] = function (feature) {
                         var f = feature;
                         return eval(value);
                     }
                 } catch (e) {
-                    console.warn ("Evaluation of copy prevention hooks failed!",value, e);
+                    console.warn("Evaluation of copy prevention hooks failed!", value, e);
                 }
             });
 
         };
 
-        var initializeHooksForTableFields = function() {
-            _.each(schema.tableFields, function (tableField,name) {
+        var initializeHooksForTableFields = function () {
+            _.each(schema.tableFields, function (tableField, name) {
                 if (tableField.render) {
                     try {
-                        eval("tableField.render = "+tableField.render);
+                        eval("tableField.render = " + tableField.render);
                     } catch (e) {
                         console.warn("Evaluation of table field render hooks failed!", tableField.render, e);
                     }
@@ -335,22 +335,22 @@
         //* Newly added properties
         revertChangedGeometryOnCancel: false,
         deactivateControlAfterModification: true,
-        allowSaveAll: true,
+        allowSaveAll: false,
         markUnsavedFeatures: true,
 
 
         displayOnSelect: true, // BEV only, no implementation
 
         label: null,
-        allowDigitize: true,
-        allowDelete: true,
-        allowSave: true,
-        allowEditData: true,
-        allowCustomerStyle: true,
-        allowChangeVisibility: true,
+        allowDigitize: false,
+        allowDelete: false,
+        allowSave: false,
+        allowEditData: false,
+        allowCustomerStyle: false,
+        allowChangeVisibility: false,
         allowDeleteByCancelNewGeometry: false,
-        allowCancelButton: true,
-        allowLocate: true,
+        allowCancelButton: false,
+        allowLocate: false,
         maxResults: 500,
         showExtendSearchSwitch: true,
         zoomScaleDenominator: 500,
@@ -365,7 +365,7 @@
         },
 
         copy: {
-            enable: true,
+            enable: false,
             rules: null,
             data: null,
             overwriteValuesWithDefault: false,
@@ -437,7 +437,6 @@
         activateSchema: function () {
 
             var schema = this;
-
 
             var widget = schema.widget;
             var frame = schema.frame;
@@ -670,39 +669,6 @@
             var styleEditor = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, styleOptions);
         },
 
-        // TODO test this.
-        extendSearchRequest: function (basicRequest) {
-            var schema = this;
-            var search = schema.search;
-            var request = _.clone(basicRequest);
-
-            if (!search.request) {
-                return false;
-            }
-
-            if (search.request) {
-                request.search = search.request;
-            }
-
-            if (search.mandatory) {
-
-                var hasError = Object.keys(search.mandatory).some(function(key) {
-                    var mandatoryNotInRequest = !search.request[key];
-                    var mandatoryDoesNotMatchRegExp = !(search.request[key]).toString().match(new RegExp(search.mandatory[key], "mg"));
-                    return mandatoryNotInRequest || mandatoryDoesNotMatchRegExp;
-                });
-
-                if (hasError) {
-                    schema.removeAllFeatures();
-                    schema.lastRequest = null;
-                    return false;
-                }
-            }
-
-            return request;
-
-        },
-
 
         getData: function (callback) {
             var schema = this;
@@ -711,37 +677,106 @@
             var map = widget.map;
             var projection = map.getProjectionObject();
             var extent = map.getExtent();
-            var request = {
-                srid: projection.proj.srsProjNumber,
-                maxResults: schema.maxResults,
-                schema: schema.schemaName
-            };
-            var isExtentOnly = !!schema.currentExtentSearch;
 
-            if (isExtentOnly) {
-                request = $.extend(true, {intersectGeometry: extent.toGeometry().toString()}, request);
-            } else if (schema.lastRequest === JSON.stringify(request)) {
-                return;
+            // var extendSearchRequest = function (basicRequest) {
+            //     var schema = this;
+            //     var search = schema.search;
+            //     var request = _.clone(basicRequest);
+            //
+            //     if (!search.request) {
+            //         return false;
+            //     }
+            //
+            //     if (search.request) {
+            //         request.search = search.request;
+            //     }
+            //
+            //     if (search.mandatory) {
+            //
+            //         var hasError = Object.keys(search.mandatory).some(function(key) {
+            //             var mandatoryNotInRequest = !search.request[key];
+            //             var mandatoryDoesNotMatchRegExp = !(search.request[key]).toString().match(new RegExp(search.mandatory[key], "mg"));
+            //             return mandatoryNotInRequest || mandatoryDoesNotMatchRegExp;
+            //         });
+            //
+            //         if (hasError) {
+            //             schema.removeAllFeatures();
+            //             schema.lastRequest = null;
+            //             console.log(2);
+            //             return false;
+            //         }
+            //     }
+            //
+            //     return request;
+            //
+            // };
+
+            var prepareRequest = function () {
+
+                var request = {
+                    srid: projection.proj.srsProjNumber,
+                    maxResults: schema.maxResults,
+                    schema: schema.schemaName
+                };
+
+                if (schema.currentExtentSearch) {
+                    request.intersectGeometry = extent.toGeometry().toString();
+                }
+
+                if (schema.search) {
+                    request.search = schema.search.request || void 0;
+                }
+
+                if (schema.lastRequest === JSON.stringify(request)) {
+                    request = null;
+                }
+
+
+                return request;
+
+            };
+
+            var hasMissingMandatory = function () {
+                var hasError = false;
+                if (schema.search && schema.search.mandatory && schema.search.request) {
+
+                    hasError = Object.keys(schema.search.mandatory).some(function (key) {
+                        var mandatoryNotInRequest = !schema.search.request[key];
+                        var mandatoryDoesNotMatchRegExp = !(schema.search.request[key]).toString().match(new RegExp(schema.search.mandatory[key], "mg"));
+                        return mandatoryNotInRequest || mandatoryDoesNotMatchRegExp;
+                    });
+
+
+                }
+
+                return hasError;
+            };
+
+            var request = prepareRequest();
+
+            if (!request) {
+                return $.Deferred().reject();
             }
+
+            if (hasMissingMandatory()) {
+                schema.removeAllFeatures();
+                schema.lastRequest = null;
+                return $.Deferred().reject();
+            }
+
 
             schema.lastRequest = JSON.stringify(request);
 
-            if (schema.search) {
-                request = schema.extendSearchRequest(request);
-                if (!request) {
-                    return;
-                }
-            }
 
-            if (schema.search && !isExtentOnly) {
+            if (schema.search && !schema.currentExtentSearch) {
                 schema.removeAllFeatures();
             }
 
-            if (schema.xhr) {
+            if (schema.xhr && schema.xhr.abort) {
                 schema.xhr.abort();
             }
 
-            schema.xhr = widget.query('select', request).done(function (featureCollection) {
+            schema.xhr = widget.query('select', request).then(function (featureCollection) {
                 schema.onFeatureCollectionLoaded(featureCollection, this);
                 if (callback) {
                     callback.apply();
@@ -864,7 +899,7 @@
             // Feature must be removed and added for z-indexing
             layer.removeFeatures([feature]);
 
-            layer.addFeatures([feature,newFeature]);
+            layer.addFeatures([feature, newFeature]);
 
             _.each(schema.evaluatedHooksForCopyPrevention, function (allowCopyForFeature) {
                 allowCopy = allowCopy && (allowCopyForFeature(feature));
@@ -1017,7 +1052,7 @@
                 schema.tryMailManager(newFeature);
 
 
-                var successHandler = function() {
+                var successHandler = function () {
                     var scheme = schema.getSchemaByFeature(feature);
                     var successHandler = scheme.save && scheme.save.on && scheme.save.on.success;
                     if (successHandler) {
@@ -1173,7 +1208,7 @@
             var srid = map.getProjection().replace('EPSG:', '');
 
             var ajaxCall = widget.query('getFeatureInfo', {
-                bbox :bbox,
+                bbox: bbox,
                 schema: schema.getSchemaByFeature(feature).schemaName,
                 srid: srid
             });
@@ -1191,7 +1226,7 @@
                 var newProperty = null;
                 _.each(response.dataSets, function (dataSet) {
                     try {
-                        var json =  JSON.parse(dataSet);
+                        var json = JSON.parse(dataSet);
                         newProperty = json.features[0].properties[property] || newProperty; // Normally, the value is only present in one of the dataSets
                     } catch (e) {
                         // Prevent interruption in case of empty features

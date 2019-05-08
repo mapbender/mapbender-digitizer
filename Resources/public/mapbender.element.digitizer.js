@@ -279,6 +279,8 @@
                 map.resetLayersZIndex();
             };
 
+            initializeSelectorOrTitleElement();
+
             createSchemes();
 
             widget.onSelectorChange = function () { // Do not implement in prototype because of static widget access
@@ -293,8 +295,6 @@
             };
 
             initializeActivationContainer();
-
-            initializeSelectorOrTitleElement();
 
             createMapContextMenu();
 
