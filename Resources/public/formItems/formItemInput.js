@@ -10,6 +10,7 @@
             var formItem = this;
 
             if (schema.popup.remoteData && formItem.automatic_detection) {
+
                 var children = [];
 
                 var input = {
@@ -31,6 +32,8 @@
                     label: '',
                     attr: {'href': '#', 'title': 'Automatisch ermitteln' },
                     click: function () {
+
+                        // TODO there should be not direct DOM access here
                         var inputfield = $(dialog).find("[name=" + formItem.name + "]");
                         inputfield.attr('disabled','disabled');
                         schema.getRemotePropertyValue(feature, formItem.name).done(function (value) {
@@ -51,6 +54,7 @@
                 fieldSetItem.label = '';
                 fieldSetItem.cssClass = 'automatic-detection-fieldset';
                 fieldSetItem.children = children;
+                fieldSetItem.isProcessed = true;
 
                 return fieldSetItem;
                 

@@ -1160,7 +1160,10 @@
         getRemotePropertyValue: function (feature, property) {
             var schema = this;
             var widget = schema.widget;
-            var map = widget.getMap();
+
+            console.log(widget);
+
+            var map = widget.map;
 
             if (!feature.geometry) {
                 return false;
@@ -1171,13 +1174,13 @@
             bbox.top = parseFloat(bbox.top + 0.00001);
             bbox = bbox.toBBOX();
             var srid = map.getProjection().replace('EPSG:', '');
-            var url = widget.elementUrl + "getFeatureInfo/";
 
-            var ajaxCall = $.get(url,{
+            var ajaxCall = widget.query('getFeatureInfo', {
                 bbox :bbox,
                 schema: schema.getSchemaByFeature(feature).schemaName,
                 srid: srid
             });
+
 
             // Mock:
             // ajaxCall = $.Deferred().resolve({dataSets: ['{"type":"FeatureCollection","totalFeatures":"unknown","features":[  {"type":"Feature","id":"","geometry":null,"properties":{    "elevation_base":844}  }],"crs":null}',
