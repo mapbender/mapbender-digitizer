@@ -23,7 +23,7 @@
                         return eval(value);
                     }
                 } catch (e) {
-                    console.warn ("Evaluation of control prevention hooks failed",e);
+                    console.warn ("Evaluation of control prevention hooks failed!",value, e);
                 }
             });
         };
@@ -36,7 +36,7 @@
                         return eval(value);
                     }
                 } catch (e) {
-                    console.warn ("Evaluation of copy prevention hooks failed",e);
+                    console.warn ("Evaluation of copy prevention hooks failed!",value, e);
                 }
             });
 
@@ -46,10 +46,13 @@
             _.each(schema.tableFields, function (tableField,name) {
                 if (tableField.render) {
                     try {
-                        tableField.render = eval(tableField.render);
+                        var func;
+                        eval(tableField.render);
+                        tableField.render = func;
                     } catch (e) {
-                        console.warn("Evaluation of table field render hooks failed", e);
+                        console.warn("Evaluation of table field render hooks failed!", tableField.render, e);
                     }
+
                 }
             });
 
@@ -276,7 +279,6 @@
         };
 
         assert();
-
 
     };
 

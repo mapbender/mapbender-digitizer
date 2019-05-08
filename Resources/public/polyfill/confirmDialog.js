@@ -34,4 +34,16 @@
         return dialog;
     };
 
+    Mapbender.elementRegistry.waitReady = Mapbender.elementRegistry.waitReady || function(target) {
+
+        var d = $.Deferred();
+        Mapbender.elementRegistry.onElementReady(target,d.resolve);
+
+        return d;
+
+    };
+
+
+    Mapbender.elementRegistry.waitCreated = Mapbender.elementRegistry.waitCreated ||  Mapbender.elementRegistry.waitReady;
+
 })();
