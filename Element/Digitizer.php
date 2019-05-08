@@ -157,6 +157,7 @@ class Digitizer extends BaseElement
 
                 if (isset($scheme['search']) && isset($scheme['search']["form"])) {
                     $scheme['search']["form"] = $this->prepareItems($scheme['search']["form"]);
+                    $scheme['search']["form"][0]["value"] = isset($_GET["kat"]) ? $_GET["kat"] : $scheme['search']["form"][0]["value"];
                 }
             }
         }
