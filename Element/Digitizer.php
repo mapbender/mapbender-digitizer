@@ -654,35 +654,35 @@ class Digitizer extends BaseElement
                     )
                 ));
                 $response  = file_get_contents($url, false, $context);
+                if(is_array($http_response_header)){
+                    $head = array();
+                    foreach( $http_response_header as $k=>$v )
+                    {
+                        $t = explode( ':', $v, 2 );
+                        if( isset( $t[1] ) )
+                            $head[ trim($t[0]) ] = trim( $t[1] );
+                        else
+                        {
+                            $head[] = $v;
+                            if( preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#",$v, $out ) )
+                                $head['reponse_code'] = intval($out[1]);
+                        }
+                    }
+                    if($head["reponse_code"] !== 200){
+                        $responseArray['error'][] = array('response' => $response, 'code' => $head['reponse_code']);
+                    } else if (!!(json_decode($response))) {
+
+                        $dataSets[] = $response;
+                    } else {
+                        $responseArray['error'][]  = array('response' => $response, 'code' => "Response of url: {$url} is not a JSON");
+                    }
+
+                } else  {
+                    $responseArray['error'][]  = "Unknown error for url: {$url}";
+                }
             } catch (\Exception $e) {
                 $this->container->get('logger')->error('Digitizer WMS GetFeatureInfo: '. $e->getMessage());
                 $responseArray['error']  = $e->getMessage();
-            }
-            if(is_array($http_response_header)){
-                $head = array();
-                foreach( $http_response_header as $k=>$v )
-                {
-                    $t = explode( ':', $v, 2 );
-                    if( isset( $t[1] ) )
-                        $head[ trim($t[0]) ] = trim( $t[1] );
-                    else
-                    {
-                        $head[] = $v;
-                        if( preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#",$v, $out ) )
-                            $head['reponse_code'] = intval($out[1]);
-                    }
-                }
-                if($head["reponse_code"] !== 200){
-                    $responseArray['error'][] = array('response' => $response, 'code' => $head['reponse_code']);
-                } else if (!!(json_decode($response))) {
-
-                    $dataSets[] = $response;
-                } else {
-                    $responseArray['error'][]  = array('response' => $response, 'code' => "Response of url: {$url} is not a JSON");
-                }
-
-            } else  {
-                $responseArray['error'][]  = "Unknown error for url: {$url}";
             }
 
         }

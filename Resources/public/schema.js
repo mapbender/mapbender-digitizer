@@ -1160,9 +1160,6 @@
         getRemotePropertyValue: function (feature, property) {
             var schema = this;
             var widget = schema.widget;
-
-            console.log(widget);
-
             var map = widget.map;
 
             if (!feature.geometry) {
