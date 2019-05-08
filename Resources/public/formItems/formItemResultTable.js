@@ -3,6 +3,9 @@
 
     Mapbender.Digitizer.FormItemResultTable = {
 
+        type: "resultTable",
+        CLASS_NAME: "FormItemResultTable",
+
         editable: false,
         dataManagerLink: false,
         popupItems: false,

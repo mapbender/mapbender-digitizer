@@ -2,6 +2,9 @@
     "use strict";
 
     Mapbender.Digitizer.FormItemLabel =  {
+
+        type: "label",
+        CLASS_NAME: "FormItemLabel",
         
     };
 

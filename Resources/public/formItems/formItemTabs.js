@@ -3,6 +3,8 @@
 
     Mapbender.Digitizer.FormItemTabs = {
 
+        type: "tabs",
+        CLASS_NAME: "FormItemTabs",
 
     };
 

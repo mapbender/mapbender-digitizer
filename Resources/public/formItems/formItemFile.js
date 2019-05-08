@@ -3,6 +3,9 @@
 
     Mapbender.Digitizer.FormItemFile = {
 
+        type: "file",
+        CLASS_NAME: "FormItemFile",
+
         process: function(feature) {
             var item = this.clone();
             var schema = this.schema;

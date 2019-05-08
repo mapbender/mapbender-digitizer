@@ -4,6 +4,7 @@
     Mapbender.Digitizer.FormItemSelect = {
 
         type: "select",
+        CLASS_NAME: "FormItemSelect",
 
         value: function(event) {
             return $(event.currentTarget).find('select').val();

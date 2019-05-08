@@ -4,6 +4,7 @@
     Mapbender.Digitizer.FormItemInput = {
 
         type: "input",
+        CLASS_NAME: "FormItemInput",
 
         process: function (feature,dialog,schema) {
             var formItem = this;

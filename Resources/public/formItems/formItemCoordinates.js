@@ -3,6 +3,9 @@
 
     Mapbender.Digitizer.FormItemCoordinates = {
 
+        type: "coordinates",
+        CLASS_NAME: "FormItemCoordinates",
+
         epsgCodes: [],
         title_epsg: 'EPSG',
         title_longitude: 'longitude',

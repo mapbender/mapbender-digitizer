@@ -3,7 +3,8 @@
 
     Mapbender.Digitizer.FormItemFieldSet = {
 
-        type: "fieldSet"
+        type: "fieldSet",
+        CLASS_NAME: "FormItemFieldSet",
         
     };
 

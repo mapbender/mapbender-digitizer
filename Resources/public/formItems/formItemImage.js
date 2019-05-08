@@ -3,6 +3,9 @@
 
     Mapbender.Digitizer.FormItemImage = {
 
+        type: "image",
+        CLASS_NAME: "FormItemImage",
+
         process: function(feature) {
             var item = this.clone();
             var schema = item.schema;
