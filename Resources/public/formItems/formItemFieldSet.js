@@ -2,6 +2,8 @@
     "use strict";
 
     Mapbender.Digitizer.FormItemFieldSet = {
+
+        type: "fieldSet"
         
     };
 

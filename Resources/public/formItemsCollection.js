@@ -8,9 +8,6 @@
         formItemsCollection.schema = schema;
 
         formItemsCollection.items = modifyRecursively(items || [], function(item){
-            if (item.type == "coordinates") {
-                console.log(item);
-            }
             setPrototypeOfFormItem(item);
             item.schema = schema;
             return item;
@@ -45,7 +42,9 @@
         items.forEach(function (item) {
 
             var modifiedItem = modificator(item);
-            modifiedItem.children = modifyRecursively(item.children || [], modificator);
+            if (!modifiedItem.isProcessed) { // in some cases, processed formItems get Children that are not part of the original formItems children
+                modifiedItem.children = modifyRecursively(item.children || [], modificator);
+            }
 
             modifiedItems.push(modifiedItem);
 

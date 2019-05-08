@@ -226,8 +226,6 @@
 
         var processedFormItems = schema.processFormItems(feature, $popup);
 
-        console.log(processedFormItems);
-
         $popup.generateElements({children: processedFormItems});
 
 
