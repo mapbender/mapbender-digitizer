@@ -116,11 +116,12 @@
                 return;
             }
 
-            Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
+            Mapbender.elementRegistry.waitReady(widget.options.target).then( widget.setup.bind(widget));
+
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function(printClient){
                 widget.printClient = printClient;
                 $.extend(widget.printClient ,Mapbender.Digitizer.printPlugin);
-            }.bind(this));
+            }.bind(widget));
 
 
             widget.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
@@ -157,7 +158,7 @@
         },
 
 
-        _setup: function () {
+        setup: function () {
             var widget = this;
             var element = $(widget.element);
             var options = widget.options;
