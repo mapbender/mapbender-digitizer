@@ -51,11 +51,12 @@
 
             callback: function (key, options) {
                 var $selectedElement = options.$selected;
+                var feature =  $selectedElement.data().contextMenu.feature;
+
                 if (!$selectedElement || !feature) {
                     return;
                 }
-
-                var id = feature.fid; //$selectedElement.parent().closest('.context-menu-item').data('contextMenuKey');
+                var id = feature.fid;
                 var parameters = options.items[id];
                 if (!parameters) {
                     return;
@@ -68,14 +69,14 @@
         }
     };
 
-    Mapbender.Digitizer.MapContextMenu.prototype.createMapContextMenuSubMenu = function (olFeature) {
+    Mapbender.Digitizer.MapContextMenu.prototype.createMapContextMenuSubMenu = function (feature) {
         var contextMenu = this;
         var schema = contextMenu.schema;
         var subItems = {
             zoomTo: {
                 name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
                 action: function (key, options, parameters) {
-                    schema.zoomToJsonFeature(parameters.olFeature);
+                    schema.zoomToJsonFeature(feature);
                 }
             }
         };
@@ -84,16 +85,7 @@
             subItems['style'] = {
                 name: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
                 action: function (key, options, parameters) {
-                    schema.openChangeStyleDialog(olFeature);
-                }
-            };
-        }
-
-        if (schema.allowCustomerStyle) {
-            subItems['style'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
-                action: function (key, options, parameters) {
-                    schema.openChangeStyleDialog(olFeature);
+                    schema.openChangeStyleDialog(feature);
                 }
             };
         }
@@ -102,7 +94,7 @@
             subItems['edit'] = {
                 name: Mapbender.DigitizerTranslator.translate('feature.edit'),
                 action: function (key, options, parameters) {
-                    schema.openFeatureEditDialog(parameters.olFeature);
+                    schema.openFeatureEditDialog(feature);
                 }
             }
         }
@@ -111,14 +103,14 @@
             subItems['remove'] = {
                 name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
                 action: function (key, options, parameters) {
-                    schema.removeFeature(parameters.olFeature);
+                    schema.removeFeature(feature);
                 }
             }
         }
 
         return {
-            name: "Feature #" + olFeature.fid,
-            olFeature: olFeature,
+            name: "Feature #" + feature.fid,
+            feature: feature,
             items: subItems
         };
     };
