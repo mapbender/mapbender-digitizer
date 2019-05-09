@@ -13,6 +13,7 @@
                 var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
                 strategies.push(clusterStrategy);
                 schema.layer.strategies = strategies;
+                clusterStrategy.layer = schema.layer;
                 schema.clusterStrategy = clusterStrategy;
 
                 schema.updateClusterStrategy();
@@ -27,7 +28,7 @@
                 var scale = Math.round(widget.map.getScale());
 
                 $.each(schema.clustering, function (y, _clusterSettings) {
-                    if (_clusterSettings.scale == scale) {
+                    if (_clusterSettings.scale === scale) {
                         clusterSettings = _clusterSettings;
                         return false;
                     }
@@ -58,6 +59,7 @@
                         schema.reloadFeatures();
 
                     } else {
+                        console.log(schema.clusterStrategy,"!");
                         schema.clusterStrategy.activate();
                         schema.isClustered = true;
                     }
