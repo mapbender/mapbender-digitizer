@@ -87,7 +87,7 @@
                         var ret = {
                             schema: schema.schemaName,
                             item: item,
-                            form: menu.getSearchData(),
+                            form: schema.menu.getSearchData(),
                             params: params
                         };
 
