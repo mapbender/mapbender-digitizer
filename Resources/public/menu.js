@@ -327,74 +327,48 @@
 
         var generateSearchForm = function () {
 
-            var onSchemaSearchForm = function () {
 
-                var widget = schema.widget;
+            var widget = schema.widget;
 
-                _.each(schema.search.form, function (item) {
+            _.each(schema.search.form, function (item) {
 
-                    console.log(item,"!");
-
-                    if (item.type === 'select' && item.ajax) {
-
-                        item.ajax.dataType = 'json';
-                        item.ajax.url = widget.getElementURL() + 'form/select';
-                        item.ajax.data = function (params) {
-                            var searchForm = $('form.search', frame);
-
-                            if (params && params.term) {
-                                // Save last given term to get highlighted in templateResult
-                                item.ajax.lastTerm = params.term;
-                            }
-                            var ret = {
-                                schema: schema.schemaName,
-                                item: item,
-                                form: searchForm.formData(),
-                                params: params
-                            };
-
-                            return ret;
-                        };
-
-                        console.log(item);
-
-                    }
-                });
-                frame.generateElements({
-                    type: 'form',
-                    cssClass: 'search',
-                    children: schema.search.form
-                });
-            };
-
-            var onSchemaSearch = function () {
-                var widget = schema.widget;
-                var searchForm = $('form.search', frame);
-
-                var onSubmitSearch = function (e) {
-                    schema.search.request = searchForm.formData();
-
+                item.change = function () {
                     schema.getData().done(function () {
-                        console.log("on Schema search");
                         widget.map.zoomToExtent(schema.layer.getDataExtent());
                         if (schema.search.zoomScale) {
                             widget.map.zoomToScale(schema.search.zoomScale, true);
                         }
                     });
-
-                    return false;
                 };
 
-                searchForm.find(' :input').on('change', onSubmitSearch);
-            };
+                if (item.type === 'select' && item.ajax) {
 
-            // If searching defined, then try to generate a form
-            if (schema.search) {
-                if (schema.search.form) {
-                    onSchemaSearchForm();
+                    item.ajax.dataType = 'json';
+                    item.ajax.url = widget.getElementURL() + 'form/select';
+                    item.ajax.data = function (params) {
+
+                        if (params && params.term) {
+                            // Save last given term to get highlighted in templateResult
+                            item.ajax.lastTerm = params.term;
+                        }
+                        var ret = {
+                            schema: schema.schemaName,
+                            item: item,
+                            form: menu.getSearchData(),
+                            params: params
+                        };
+
+                        return ret;
+                    };
+
                 }
-                onSchemaSearch();
-            }
+            });
+            frame.generateElements({
+                type: 'form',
+                cssClass: 'search',
+                children: schema.search.form
+            });
+
 
         };
 
@@ -402,7 +376,10 @@
 
         appendGeneralDigitizerButtons();
 
-        generateSearchForm();
+
+        if (schema.search && schema.search.form) {
+            generateSearchForm();
+        }
 
         frame.append('<div style="clear:both;"/>');
 
@@ -419,6 +396,11 @@
 
             menu.toolSet.activeControl && menu.toolSet.activeControl.deactivate();
 
+        },
+
+        getSearchData: function() {
+            var menu = this;
+            return  $('form.search', menu.frame).length > 0 ? $('form.search', menu.frame).formData() : void 0;
         }
 
 

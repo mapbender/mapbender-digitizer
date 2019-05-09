@@ -122,17 +122,7 @@
         };
 
 
-        var createMenu = function () {
-            var widget = schema.widget;
-            var element = $(widget.element);
 
-            schema.menu = new Mapbender.Digitizer.Menu(schema);
-            schema.addSpecificOptionToSelector();
-
-            schema.frame = schema.menu.frame;
-            element.append(schema.menu.frame);
-
-        };
 
         var addSelectControls = function () {
             var layer = schema.layer;
@@ -244,7 +234,7 @@
 
         createSchemaFeatureLayer();
 
-        createMenu();
+        schema.createMenu();
 
         addSelectControls();
 
@@ -308,7 +298,7 @@
         lastRequest: null,
 
 
-        xhr: null,
+        selectXHR: null,
         view: {
             type: null, // No implementation
             settings: null,
@@ -373,7 +363,10 @@
         },
 
         formItems: null,
-        search: null,
+        search: {
+            form: null,
+            zoomScale: null,
+        },
         showVisibilityNavigation: true,
         allowPrintMetadata: false,
         printable: true,
@@ -431,6 +424,19 @@
         updateConfigurationAfterSwitching: function (updatedSchemes) {
             var schema = this;
             schema.createFormItemsCollection(updatedSchemes[schema.schemaName].formItems); // Update formItems Of Schema when switiching
+        },
+
+        createMenu: function () {
+            var schema = this;
+            var widget = schema.widget;
+            var element = $(widget.element);
+
+            schema.menu = new Mapbender.Digitizer.Menu(schema);
+            schema.addSpecificOptionToSelector();
+
+            schema.frame = schema.menu.frame;
+            element.append(schema.menu.frame);
+
         },
 
 
@@ -670,6 +676,11 @@
         },
 
 
+        removeFeaturesOnNewLoad: function() {
+            var schema = this;
+            return !!(schema.search && schema.search.form);
+        },
+
         getData: function (callback) {
             var schema = this;
             var widget = schema.widget;
@@ -678,57 +689,19 @@
             var projection = map.getProjectionObject();
             var extent = map.getExtent();
 
-            var prepareRequest = function () {
 
-                var request = {
-                    srid: projection.proj.srsProjNumber,
-                    maxResults: schema.maxResults,
-                    schema: schema.schemaName
-                };
-
-                if (schema.currentExtentSearch) {
-                    request.intersectGeometry = extent.toGeometry().toString();
-                }
-
-                if (schema.search) {
-                    request.search = schema.search.request || void 0;
-                }
-
-                if (schema.lastRequest === JSON.stringify(request)) {
-                    request = null;
-                }
-
-
-                return request;
-
+            var request = {
+                srid: projection.proj.srsProjNumber,
+                maxResults: schema.maxResults,
+                schema: schema.schemaName,
+                search: schema.menu.getSearchData()
             };
 
-            var hasMissingMandatory = function () {
-                var hasError = false;
-                if (schema.search && schema.search.mandatory && schema.search.request) {
-
-                    hasError = Object.keys(schema.search.mandatory).some(function (key) {
-                        console.log(key,"!",schema.search.mandatory[key],"|",schema.search.request);
-                        var mandatoryNotInRequest = !schema.search.request[key];
-                        var mandatoryDoesNotMatchRegExp = !(schema.search.request[key]).toString().match(new RegExp(schema.search.mandatory[key], "mg"));
-                        return mandatoryNotInRequest || mandatoryDoesNotMatchRegExp;
-                    });
-
-
-                }
-
-                return hasError;
-            };
-
-            var request = prepareRequest();
-
-            if (!request) {
-                return $.Deferred().reject();
+            if (schema.currentExtentSearch) {
+                request.intersectGeometry = extent.toGeometry().toString();
             }
 
-            if (hasMissingMandatory()) {
-                schema.removeAllFeatures();
-                schema.lastRequest = null;
+            if (schema.lastRequest === JSON.stringify(request)) {
                 return $.Deferred().reject();
             }
 
@@ -736,24 +709,24 @@
             schema.lastRequest = JSON.stringify(request);
 
 
-            if (schema.search && !schema.currentExtentSearch) {
-                schema.removeAllFeatures();
+            if (schema.selectXHR && schema.selectXHR.abort) {
+                schema.selectXHR.abort();
             }
 
-            if (schema.xhr && schema.xhr.abort) {
-                schema.xhr.abort();
-            }
 
-            console.log(request);
 
-            schema.xhr = widget.query('select', request).then(function (featureCollection) {
+            schema.selectXHR = widget.query('select', request).then(function (featureCollection) {
+                if (schema.removeFeaturesOnNewLoad()) {
+                    schema.removeAllFeatures();
+                }
                 schema.onFeatureCollectionLoaded(featureCollection, this);
                 if (callback) {
                     callback.apply();
                 }
+                schema.selectXHR = null;
             });
 
-            return schema.xhr;
+            return schema.selectXHR;
         },
 
 
