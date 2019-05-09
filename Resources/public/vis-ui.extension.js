@@ -76,7 +76,7 @@
             tableApi.clear();
 
             var featuresToRedraw = features.filter(function (feature) {
-                return !feature.isNew;
+                return !feature.isNew && !feature.cluster;
             });
             tableApi.rows.add(featuresToRedraw);
             tableApi.draw();

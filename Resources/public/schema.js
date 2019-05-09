@@ -444,10 +444,6 @@
             onStart: null
         },
         refreshLayersAfterFeatureSave: [], // Layer list names/ids to be refreshed after feature save complete
-        clustering: [{
-            scale: 5000000,
-            distance: 30
-        }],
         tableFields: null,
 
 
@@ -627,6 +623,7 @@
             layer.removeAllFeatures();
             layer.addFeatures(features);
 
+            console.log("new ResulttableFeatures",features);
             schema.menu.resultTable.redrawResultTableFeatures(features);
 
             if (widget.options.__disabled) {
