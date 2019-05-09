@@ -61,6 +61,63 @@
             schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
         };
 
+
+        var extendSearchOptions = function() {
+            _.each(schema.search.form, function (item) {
+
+                item.change = function () {
+                    schema.getData().done(function () {
+                        widget.map.zoomToExtent(schema.layer.getDataExtent());
+                        if (schema.search.zoomScale) {
+                            widget.map.zoomToScale(schema.search.zoomScale, true);
+                        }
+                    });
+                };
+
+                if (item.type === 'select' && item.ajax) {
+
+                    item.ajax.dataType = 'json';
+                    item.ajax.url = widget.getElementURL() + 'form/select';
+                    item.ajax.data = function (params) {
+
+                        if (params && params.term) {
+                            // Save last given term to get highlighted in templateResult
+                            item.ajax.lastTerm = params.term;
+                        }
+                        var ret = {
+                            schema: schema.schemaName,
+                            item: item,
+                            form: menu.getSearchData(),
+                            params: params
+                        };
+
+                        return ret;
+                    };
+
+                }
+            });
+        };
+
+        var addSpecificOptionToSelector = function () {
+            var option = $("<option/>");
+            option.val(schema.schemaName).html(schema.label);
+            option.data("schemaSettings", schema);
+            schema.widget.selector.append(option);
+
+        };
+
+        var createMenu = function () {
+            var widget = schema.widget;
+            var element = $(widget.element);
+
+            schema.menu = new Mapbender.Digitizer.Menu(schema);
+            addSpecificOptionToSelector();
+
+            schema.frame = schema.menu.frame;
+            element.append(schema.menu.frame);
+
+        };
+
         var createSchemaFeatureLayer = function () {
 
             var widget = schema.widget;
@@ -120,9 +177,6 @@
             widget.map.addLayer(schema.layer);
 
         };
-
-
-
 
         var addSelectControls = function () {
             var layer = schema.layer;
@@ -234,7 +288,9 @@
 
         createSchemaFeatureLayer();
 
-        schema.createMenu();
+        extendSearchOptions();
+
+        createMenu();
 
         addSelectControls();
 
@@ -426,19 +482,6 @@
             schema.createFormItemsCollection(updatedSchemes[schema.schemaName].formItems); // Update formItems Of Schema when switiching
         },
 
-        createMenu: function () {
-            var schema = this;
-            var widget = schema.widget;
-            var element = $(widget.element);
-
-            schema.menu = new Mapbender.Digitizer.Menu(schema);
-            schema.addSpecificOptionToSelector();
-
-            schema.frame = schema.menu.frame;
-            element.append(schema.menu.frame);
-
-        },
-
 
         activateSchema: function () {
 
@@ -593,21 +636,7 @@
         },
 
 
-        addSpecificOptionToSelector: function () {
-            var schema = this;
-            var option = $("<option/>");
-            option.val(schema.schemaName).html(schema.label);
-            option.data("schemaSettings", schema);
-            schema.appendSpecificOptionToSelector(option);
-        },
 
-        appendSpecificOptionToSelector: function (option) {
-            var schema = this;
-            var widget = schema.widget;
-            var selector = widget.selector;
-            selector.append(option);
-
-        },
 
 
         setModifiedState: function (feature, control) {

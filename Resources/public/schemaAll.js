@@ -24,15 +24,6 @@
             return 'all';
         },
 
-        appendSpecificOptionToSelector: function(option) {
-            var schema = this;
-            var widget = schema.widget;
-            var selector = widget.selector;
-
-            selector.prepend(option);
-            selector.val(schema.schemaName);
-
-        },
 
         getStyleMapOptions: function (label) {
             var schema = this;

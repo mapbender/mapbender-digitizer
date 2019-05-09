@@ -216,7 +216,12 @@
                         label: Mapbender.DigitizerTranslator.translate('schema.allgeometries'),
                         schemaName: 'all'
                     }, widget, index++);
+
                 }
+                var basicScheme = Object.keys(widget.schemes)[0];
+                console.log(widget.selector,basicScheme,"$");
+                widget.selector.val(basicScheme).trigger('change');
+
             };
 
             var createMapContextMenu = function () {
@@ -282,9 +287,8 @@
 
             initializeSelectorOrTitleElement();
 
-            createSchemes();
-
             widget.onSelectorChange = function () { // Do not implement in prototype because of static widget access
+                console.log("change");
                 var selector = widget.selector;
 
                 var option = selector.find(":selected");
@@ -295,13 +299,15 @@
                 newSchema.activateSchema();
             };
 
+            initializeSelector();
+
+            createSchemes();
+
             initializeActivationContainer();
 
             createMapContextMenu();
 
             createElementContextMenu();
-
-            initializeSelector();
 
             initializeMapEvents();
 
@@ -356,7 +362,6 @@
         activate: function () {
             var widget = this;
             widget.options.__disabled = false;
-            widget.onSelectorChange();
         },
 
         deactivate: function () {
