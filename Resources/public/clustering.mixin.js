@@ -71,6 +71,7 @@
             },
 
 
+            // TODO check this - parameter difference to parent
             getData: function (zoom) {
                 var schema = this;
                 return Mapbender.Digitizer.Scheme.prototype.getData.apply(schema,[ function() {

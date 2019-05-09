@@ -133,7 +133,8 @@
         remoteData: false,
 
         isOpenLayersCloudPopup: function () {
-            return this.type === 'openlayers-cloud';
+            var isCloud = this.type === 'openlayers-cloud';
+            return isCloud;
         },
 
         addFeatureAndDialog: function (feature, dialog) {
@@ -237,9 +238,13 @@
         $popup.formData(feature.data);
 
         if (configuration.isOpenLayersCloudPopup()) {
+            // TODO find better solution for ImgPath
+            var originalImagePath = OpenLayers.ImgPath;
+            OpenLayers.ImgPath = Mapbender.configuration.application.urls.asset + 'ol2/img/';
             var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(feature.geometry.toShortString()), null, $popup.html(), null, true);
             schema.featureCloudPopup = olPopup;
             map.addPopup(olPopup);
+            OpenLayers.ImgPath = originalImagePath;
         }
 
 
