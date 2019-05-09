@@ -66,27 +66,6 @@
 
             }
 
-            // TODO redefine Code for Cluster
-
-            // var features = feature.cluster || [feature];
-            // var domRow;
-            //
-            // for (var k in features) {
-            //     var feature = features[k];
-            //     domRow = schema.resultTable.getDomRowByData(feature);
-            //     if (domRow && domRow.size()) {
-            //         schema.resultTable.showByRow(domRow);
-            //
-            //         if (highlight) {
-            //             domRow.addClass('hover');
-            //         } else {
-            //             domRow.removeClass('hover');
-            //         }
-            //         // $('.selection input', domRow).prop("checked", feature.selected);
-            //
-            //         break;
-            //     }
-            // }
         },
 
 

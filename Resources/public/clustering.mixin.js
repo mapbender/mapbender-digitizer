@@ -59,7 +59,6 @@
                         schema.reloadFeatures();
 
                     } else {
-                        console.log(schema.clusterStrategy,"!");
                         schema.clusterStrategy.activate();
                         schema.isClustered = true;
                     }

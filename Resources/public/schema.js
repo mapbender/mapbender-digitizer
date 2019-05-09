@@ -212,12 +212,18 @@
 
                 highlight: function (feature) {
                     console.assert(!!feature, "Feature must be set");
+                    if (!schema.layer.features.includes(feature)) {
+                        return;
+                    }
                     schema.processFeature(feature, function (feature) {
                         schema.menu.resultTable.hoverInResultTable(feature, true);
                     });
                     return Object.getPrototypeOf(this).highlight.apply(this, [feature, true]);
                 },
                 unhighlight: function (feature) {
+                    if (!schema.layer.features.includes(feature)) {
+                        return;
+                    }
                     schema.processFeature(feature, function (feature) {
                         schema.menu.resultTable.hoverInResultTable(feature, false);
                     });
