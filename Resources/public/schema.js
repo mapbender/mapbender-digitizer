@@ -100,20 +100,11 @@
             }
         };
 
-        var addSpecificOptionToSelector = function () {
-            var option = $("<option/>");
-            option.val(schema.schemaName).html(schema.label);
-            option.data("schemaSettings", schema);
-            schema.widget.selector.append(option);
-
-        };
-
         var createMenu = function () {
             var widget = schema.widget;
             var element = $(widget.element);
 
             schema.menu = new Mapbender.Digitizer.Menu(schema);
-            addSpecificOptionToSelector();
 
             schema.frame = schema.menu.frame;
             element.append(schema.menu.frame);

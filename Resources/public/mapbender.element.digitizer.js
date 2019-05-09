@@ -203,23 +203,38 @@
 
             var createSchemes = function () {
 
+                var createSchemaOption = function (schema) {
+                    var option = $("<option/>");
+                    option.val(schema.schemaName).html(schema.label);
+                    option.data("schemaSettings", schema);
+                    return option;
+
+                };
+
                 var rawSchemes = widget.options.schemes;
                 widget.schemes = {};
                 var index = 0;
                 _.each(rawSchemes, function (rawScheme, schemaName) {
                     rawScheme.schemaName = schemaName;
                     widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget, index++);
+                    widget.selector.append(createSchemaOption(widget.schemes[schemaName]));
                 });
+
+
+                var basicScheme = Object.keys(widget.schemes)[0];
+
 
                 if (!widget.hasOnlyOneScheme) {
                     widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({
                         label: Mapbender.DigitizerTranslator.translate('schema.allgeometries'),
                         schemaName: 'all'
                     }, widget, index++);
-
+                    widget.selector.prepend(createSchemaOption(widget.schemes['all']));
+                    basicScheme = 'all';
                 }
-                var basicScheme = Object.keys(widget.schemes)[0];
-                widget.selector.val(basicScheme).trigger('change');
+
+                widget.selector.val(basicScheme);
+
 
             };
 
@@ -360,6 +375,9 @@
         activate: function () {
             var widget = this;
             widget.options.__disabled = false;
+            widget.onSelectorChange();
+
+
         },
 
         deactivate: function () {
