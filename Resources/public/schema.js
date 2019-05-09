@@ -63,39 +63,41 @@
 
 
         var extendSearchOptions = function() {
-            _.each(schema.search.form, function (item) {
+            if (schema.search.form) {
+                _.each(schema.search.form, function (item) {
 
-                item.change = function () {
-                    schema.getData().done(function () {
-                        widget.map.zoomToExtent(schema.layer.getDataExtent());
-                        if (schema.search.zoomScale) {
-                            widget.map.zoomToScale(schema.search.zoomScale, true);
-                        }
-                    });
-                };
-
-                if (item.type === 'select' && item.ajax) {
-
-                    item.ajax.dataType = 'json';
-                    item.ajax.url = widget.getElementURL() + 'form/select';
-                    item.ajax.data = function (params) {
-
-                        if (params && params.term) {
-                            // Save last given term to get highlighted in templateResult
-                            item.ajax.lastTerm = params.term;
-                        }
-                        var ret = {
-                            schema: schema.schemaName,
-                            item: item,
-                            form: schema.menu.getSearchData(),
-                            params: params
-                        };
-
-                        return ret;
+                    item.change = function () {
+                        schema.getData().done(function () {
+                            widget.map.zoomToExtent(schema.layer.getDataExtent());
+                            if (schema.search.zoomScale) {
+                                widget.map.zoomToScale(schema.search.zoomScale, true);
+                            }
+                        });
                     };
 
-                }
-            });
+                    if (item.type === 'select' && item.ajax) {
+
+                        item.ajax.dataType = 'json';
+                        item.ajax.url = widget.getElementURL() + 'form/select';
+                        item.ajax.data = function (params) {
+
+                            if (params && params.term) {
+                                // Save last given term to get highlighted in templateResult
+                                item.ajax.lastTerm = params.term;
+                            }
+                            var ret = {
+                                schema: schema.schemaName,
+                                item: item,
+                                form: schema.menu.getSearchData(),
+                                params: params
+                            };
+
+                            return ret;
+                        };
+
+                    }
+                });
+            }
         };
 
         var addSpecificOptionToSelector = function () {

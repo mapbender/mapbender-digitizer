@@ -219,7 +219,6 @@
 
                 }
                 var basicScheme = Object.keys(widget.schemes)[0];
-                console.log(widget.selector,basicScheme,"$");
                 widget.selector.val(basicScheme).trigger('change');
 
             };
@@ -288,7 +287,6 @@
             initializeSelectorOrTitleElement();
 
             widget.onSelectorChange = function () { // Do not implement in prototype because of static widget access
-                console.log("change");
                 var selector = widget.selector;
 
                 var option = selector.find(":selected");

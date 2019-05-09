@@ -221,7 +221,6 @@
                 eventListeners: controlFactory.controlEvents,
 
                 onModificationStart: function (feature) {
-                    console.log("onModificationStart");
 
                     feature.oldGeometry = feature.geometry.clone();
 
@@ -264,7 +263,6 @@
                 eventListeners: controlFactory.controlEvents,
 
                 onStart: function (feature, px) {
-                    console.log("onStart");
 
                     feature.oldGeometry = feature.geometry.clone();
 
@@ -277,7 +275,6 @@
 
                 onComplete: function (feature) {
                     controlFactory.injectedMethods.setModifiedState(feature, this);
-                    console.log("onComplete");
                     controlFactory.injectedMethods.extendFeatureDataWhenNoPopupOpen(feature);
 
                 }

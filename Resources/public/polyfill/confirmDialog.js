@@ -29,7 +29,6 @@
                 }
             }]
         });
-        console.log(dialog);
         dialog.html('<div class="confirm-dialog">'+(options.hasOwnProperty('html') ? options.html : "") + '</div>');
         return dialog;
     };
