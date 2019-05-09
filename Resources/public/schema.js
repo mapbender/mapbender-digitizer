@@ -678,39 +678,6 @@
             var projection = map.getProjectionObject();
             var extent = map.getExtent();
 
-            // var extendSearchRequest = function (basicRequest) {
-            //     var schema = this;
-            //     var search = schema.search;
-            //     var request = _.clone(basicRequest);
-            //
-            //     if (!search.request) {
-            //         return false;
-            //     }
-            //
-            //     if (search.request) {
-            //         request.search = search.request;
-            //     }
-            //
-            //     if (search.mandatory) {
-            //
-            //         var hasError = Object.keys(search.mandatory).some(function(key) {
-            //             var mandatoryNotInRequest = !search.request[key];
-            //             var mandatoryDoesNotMatchRegExp = !(search.request[key]).toString().match(new RegExp(search.mandatory[key], "mg"));
-            //             return mandatoryNotInRequest || mandatoryDoesNotMatchRegExp;
-            //         });
-            //
-            //         if (hasError) {
-            //             schema.removeAllFeatures();
-            //             schema.lastRequest = null;
-            //             console.log(2);
-            //             return false;
-            //         }
-            //     }
-            //
-            //     return request;
-            //
-            // };
-
             var prepareRequest = function () {
 
                 var request = {
@@ -741,6 +708,7 @@
                 if (schema.search && schema.search.mandatory && schema.search.request) {
 
                     hasError = Object.keys(schema.search.mandatory).some(function (key) {
+                        console.log(key,"!",schema.search.mandatory[key],"|",schema.search.request);
                         var mandatoryNotInRequest = !schema.search.request[key];
                         var mandatoryDoesNotMatchRegExp = !(schema.search.request[key]).toString().match(new RegExp(schema.search.mandatory[key], "mg"));
                         return mandatoryNotInRequest || mandatoryDoesNotMatchRegExp;
@@ -775,6 +743,8 @@
             if (schema.xhr && schema.xhr.abort) {
                 schema.xhr.abort();
             }
+
+            console.log(request);
 
             schema.xhr = widget.query('select', request).then(function (featureCollection) {
                 schema.onFeatureCollectionLoaded(featureCollection, this);

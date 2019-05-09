@@ -121,6 +121,7 @@
 
             var qe = new Mapbender.Digitizer.QueryEngine(widget);
             widget.query = qe.query;
+            widget.getElementURL = qe.getElementURL;
 
             widget.spinner = new function () {
                 var spinner = this;

@@ -34,7 +34,7 @@
                     },
                     preventModification: function (feature) {
 
-                        return schema.evaluatedHooksForControlPrevention.onModificationStart  && schema.evaluatedHooksForControlPrevention.onModificationStart(feature);
+                        return schema.evaluatedHooksForControlPrevention.onModificationStart && schema.evaluatedHooksForControlPrevention.onModificationStart(feature);
 
                     },
                     preventMove: function (feature) {
@@ -303,7 +303,7 @@
 
                 },
                 // This may be needed to prevent autocomplete in search field / [google chrome]
-                initComplete: function() {
+                initComplete: function () {
                     //$(this.api().table().container()).find('input').parent().wrap('<form>').parent().attr('autocomplete', 'off');
 
                 }
@@ -330,54 +330,34 @@
             var onSchemaSearchForm = function () {
 
                 var widget = schema.widget;
-                var searchForm = $('form.search', frame);
 
-                var foreachItemTree = function (items, callback) {
-                    _.each(items, function (item) {
-                        callback(item);
-                        if (item.children && $.isArray(item.children)) {
-                            foreachItemTree(item.children, callback);
-                        }
-                    })
-                };
-                var elementUrl = widget.elementUrl;
+                _.each(schema.search.form, function (item) {
 
+                    console.log(item,"!");
 
-                foreachItemTree(schema.search.form, function (item) {
+                    if (item.type === 'select' && item.ajax) {
 
-                    if (item.type && item.type === 'select') {
-                        if (item.ajax) {
+                        item.ajax.dataType = 'json';
+                        item.ajax.url = widget.getElementURL() + 'form/select';
+                        item.ajax.data = function (params) {
+                            var searchForm = $('form.search', frame);
 
-                            // Hack to get display results as an HTML
-                            item.escapeMarkup = function (m) {
-                                return m;
-                            };
-                            // Replace auto-complete results with required key word
-                            item.templateResult = function (d, selectDom, c) {
-                                var html = d && (d.text || '');
-                                if (d && d.id && d.text) {
-                                    // Highlight results
-                                    html = d.text.replace(new RegExp(ajax.lastTerm, "gmi"), '<span style="background-color: #fffb67;">\$&</span>');
-                                }
-                                return html;
-                            };
-                            var ajax = item.ajax;
-                            ajax.dataType = 'json';
-                            ajax.url = elementUrl + 'form/select';
-                            ajax.data = function (params) {
-                                if (params && params.term) {
-                                    // Save last given term to get highlighted in templateResult
-                                    ajax.lastTerm = params.term;
-                                }
-                                return {
-                                    schema: schema.schemaName,
-                                    item: item,
-                                    form: searchForm.formData(),
-                                    params: params
-                                };
+                            if (params && params.term) {
+                                // Save last given term to get highlighted in templateResult
+                                item.ajax.lastTerm = params.term;
+                            }
+                            var ret = {
+                                schema: schema.schemaName,
+                                item: item,
+                                form: searchForm.formData(),
+                                params: params
                             };
 
-                        }
+                            return ret;
+                        };
+
+                        console.log(item);
+
                     }
                 });
                 frame.generateElements({
@@ -393,9 +373,9 @@
 
                 var onSubmitSearch = function (e) {
                     schema.search.request = searchForm.formData();
-                    var xhr = schema.getData();
 
-                    xhr.done(function () {
+                    schema.getData().done(function () {
+                        console.log("on Schema search");
                         widget.map.zoomToExtent(schema.layer.getDataExtent());
                         if (schema.search.zoomScale) {
                             widget.map.zoomToScale(schema.search.zoomScale, true);
@@ -405,7 +385,6 @@
                     return false;
                 };
 
-                searchForm.on('submit', onSubmitSearch);
                 searchForm.find(' :input').on('change', onSubmitSearch);
             };
 

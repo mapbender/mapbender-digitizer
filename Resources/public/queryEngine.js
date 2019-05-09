@@ -4,6 +4,9 @@
     Mapbender.Digitizer.QueryEngine = function(widget) {
 
 
+        this.getElementURL = function() {
+            return Mapbender.configuration.application.urls.element + '/' + widget.id + '/';
+        };
 
         /**
          * Digitizer API connection query
@@ -14,7 +17,7 @@
          * @version 0.2
          */
         this.query = function (uri, request) {
-            var elementUrl = Mapbender.configuration.application.urls.element + '/' + widget.id + '/';
+            var elementUrl = this.getElementURL();
             widget.spinner.addRequest();
             return $.ajax({
                 url: elementUrl + uri,
