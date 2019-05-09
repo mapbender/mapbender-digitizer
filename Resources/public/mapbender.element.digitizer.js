@@ -200,6 +200,17 @@
                 }
             };
 
+            var usesAllScheme = function() {
+                return !widget.hasOnlyOneScheme; // TODO extend with setting for disabling allscheme
+            };
+
+            // TODO this is not the proper implementation - fix that
+            var isOpenByDefault = function() {
+                var sidePane = $(widget.element).closest(".sidePane");
+
+                var accordion = $(".accordionContainer", sidePane);
+                return accordion.length === 0;
+            };
 
             var createSchemes = function () {
 
@@ -224,7 +235,7 @@
                 var basicScheme = Object.keys(widget.schemes)[0];
 
 
-                if (!widget.hasOnlyOneScheme) {
+                if (usesAllScheme()) {
                     widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({
                         label: Mapbender.DigitizerTranslator.translate('schema.allgeometries'),
                         schemaName: 'all'
@@ -234,6 +245,10 @@
                 }
 
                 widget.selector.val(basicScheme);
+
+                if (isOpenByDefault()) {
+                    widget.activate();
+                }
 
 
             };
