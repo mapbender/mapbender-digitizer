@@ -105,6 +105,8 @@
         },
         printClient: null,
 
+        useAllScheme: true,
+
         _create: function () {
 
             var widget = this.widget = this;
@@ -116,6 +118,7 @@
                 return;
             }
 
+            widget.useAllScheme = widget.options.useAllScheme;
 
             widget.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
@@ -201,7 +204,7 @@
             };
 
             var usesAllScheme = function() {
-                return !widget.hasOnlyOneScheme; // TODO extend with setting for disabling allscheme
+                return !widget.hasOnlyOneScheme && widget.useAllScheme;
             };
 
             // TODO this is not the proper implementation - fix that

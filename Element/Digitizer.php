@@ -157,7 +157,10 @@ class Digitizer extends BaseElement
 
                 if (isset($scheme['search']) && isset($scheme['search']["form"])) {
                     $scheme['search']["form"] = $this->prepareItems($scheme['search']["form"]);
-                    $scheme['search']["form"][0]["value"] = isset($_GET["kat"]) ? $_GET["kat"] : $scheme['search']["form"][0]["value"];
+                    $URLParam = $configuration["URLParam"];
+                    if ($URLParam) {
+                        $scheme['search']["form"][0]["value"] = isset($_GET[$URLParam]) ? $_GET[$URLParam] : $scheme['search']["form"][0]["value"];
+                    }
                 }
             }
         }
@@ -861,6 +864,7 @@ class Digitizer extends BaseElement
     /**
      * @return mixed
      */
+    // This supports different Mapbender Versions
     protected function getCurrentUserId()
     {
         if (method_exists($this,"getUser")) {
