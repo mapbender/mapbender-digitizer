@@ -54,7 +54,6 @@
                         schema.clusterStrategy.distance = -1;
                         schema.reloadFeatures();
                         schema.clusterStrategy.deactivate();
-                        //schema.layer.redraw();
                         schema.isClustered = false;
                         schema.reloadFeatures();
 
@@ -62,17 +61,15 @@
                         schema.clusterStrategy.activate();
                         schema.isClustered = true;
                     }
+
                     if (clusterSettings.hasOwnProperty('distance')) {
                         schema.clusterStrategy.distance = clusterSettings.distance;
                     }
 
-                } else {
-                    //schema.clusterStrategy.deactivate();
                 }
             },
 
 
-            // TODO check this - parameter difference to parent
             getData: function (zoom) {
                 var schema = this;
                 return Mapbender.Digitizer.Scheme.prototype.getData.apply(schema,[ function() {

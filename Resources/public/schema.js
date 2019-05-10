@@ -623,7 +623,6 @@
             layer.removeAllFeatures();
             layer.addFeatures(features);
 
-            console.log("new ResulttableFeatures",features);
             schema.menu.resultTable.redrawResultTableFeatures(features);
 
             if (widget.options.__disabled) {
@@ -726,7 +725,7 @@
                 request.intersectGeometry = extent.toGeometry().toString();
             }
 
-            if (schema.lastRequest === JSON.stringify(request)) {
+            if (!schema.currentExtentSearch && schema.lastRequest === JSON.stringify(request)) {
                 return $.Deferred().reject();
             }
 
@@ -745,7 +744,7 @@
                     schema.removeAllFeatures();
                 }
                 schema.onFeatureCollectionLoaded(featureCollection, this);
-                if (callback) {
+                if (typeof callback === "function") {
                     callback.apply();
                 }
                 schema.selectXHR = null;
