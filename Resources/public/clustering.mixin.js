@@ -16,49 +16,41 @@
                 schema.clusterStrategy = clusterStrategy;
 
                 schema.updateClusterStrategy();
+
+
+            },
+
+            getClusterSettingByScale: function(scale) {
+                var schema = this;
+                var hits = schema.clustering.filter(function(clusterSetting) {
+                    return clusterSetting.scale <= scale;
+                }).sort(function(a,b){
+                    return b.scale - a.scale;
+                });
+                return hits[0];
             },
 
 
             updateClusterStrategy: function () {
 
                 var schema = this;
-                var clusterSettings = null, closestClusterSettings = null;
                 var widget = schema.widget;
                 var scale = Math.round(widget.map.getScale());
 
-                $.each(schema.clustering, function (y, _clusterSettings) {
-                    if (_clusterSettings.scale === scale) {
-                        clusterSettings = _clusterSettings;
-                        return false;
-                    }
+                var clusterSetting =  schema.getClusterSettingByScale(scale);
 
-                    if (_clusterSettings.scale < scale) {
-                        if (closestClusterSettings && _clusterSettings.scale > closestClusterSettings.scale) {
-                            closestClusterSettings = _clusterSettings;
-                        } else {
-                            closestClusterSettings =  closestClusterSettings || _clusterSettings
-                        }
-                    }
-                });
+                if (clusterSetting) {
 
-                clusterSettings = clusterSettings || closestClusterSettings;
-
-                if (clusterSettings) {
-
-                    if (clusterSettings.disable) {
-                        console.log("disabled");
+                    if (clusterSetting.disable) {
                         schema.clusterStrategy.distance = -1;
-                        schema.reloadFeatures();
                         schema.clusterStrategy.deactivate();
                         schema.reloadFeatures();
-
                     } else {
-                        console.log("enabled");
                         schema.clusterStrategy.activate();
                     }
 
-                    if (clusterSettings.distance) {
-                        schema.clusterStrategy.distance = clusterSettings.distance;
+                    if (clusterSetting.distance) {
+                        schema.clusterStrategy.distance = clusterSetting.distance;
                     }
 
                 }
