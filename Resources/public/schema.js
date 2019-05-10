@@ -48,8 +48,8 @@
 
         var initializeHooksForTableFields = function () {
             _.each(schema.tableFields, function (tableField, name) {
-                console.error("Using Javascript code in the configuration is deprecated");
                 if (tableField.render) {
+                    console.error("Using Javascript code in the configuration is deprecated");
                     try {
                         eval("tableField.render = " + tableField.render);
                     } catch (e) {
@@ -492,7 +492,7 @@
             _.each(schema.tableFields,function(tableField) {
                 if (tableField.type === "image") {
                     tableField.render = function (imgName, renderType, feature, x){
-                        return $("<img style='width: 20px'/>").attr('src', tableField.path + imgName)[0].outerHTML;
+                        return $("<img style='width: 20px'/>").attr('src', Mapbender.Digitizer.Utilities.getAssetsPath(tableField.path + imgName))[0].outerHTML;
                     }
                 }
             });
