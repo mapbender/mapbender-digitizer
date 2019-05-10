@@ -11,6 +11,8 @@
             _.each(configuration.buttons, function (button) {
                 newButtons[button.text] = _.clone(button);
                 if (button.click) {
+                    console.error("Using Javascript code in the configuration is deprecated");
+
                     newButtons[button.text].createClick = function (feature, dialog) {
 
                         return function (e) {

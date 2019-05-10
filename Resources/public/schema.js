@@ -15,6 +15,8 @@
                 if (!value) {
                     return false;
                 }
+                console.error("Using Javascript code in the configuration is deprecated");
+
 
                 try {
                     schema.evaluatedHooksForControlPrevention[name] = function (feature) {
@@ -30,6 +32,8 @@
 
         var initializeHooksForCopyPrevention = function () {
             _.each(schema.copy.rules, function (value, name) {
+                console.error("Using Javascript code in the configuration is deprecated");
+
                 try {
                     schema.evaluatedHooksForCopyPrevention[name] = function (feature) {
                         var f = feature;
@@ -44,6 +48,7 @@
 
         var initializeHooksForTableFields = function () {
             _.each(schema.tableFields, function (tableField, name) {
+                console.error("Using Javascript code in the configuration is deprecated");
                 if (tableField.render) {
                     try {
                         eval("tableField.render = " + tableField.render);
@@ -1023,6 +1028,7 @@
                     var scheme = schema.getSchemaByFeature(feature);
                     var successHandler = scheme.save && scheme.save.on && scheme.save.on.success;
                     if (successHandler) {
+                        console.error("Using Javascript code in the configuration is deprecated");
                         eval(successHandler);
                     }
                 };
