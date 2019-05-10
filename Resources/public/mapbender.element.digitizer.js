@@ -12,7 +12,7 @@
      */
     String.prototype.escapeHtml = function () {
 
-        return this.replace(/[\"&'\/<>]/g, function (a) {
+        return this.replace(/["&'\/<>]/g, function (a) {
             return {
                 '"': '&quot;',
                 '&': '&amp;',

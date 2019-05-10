@@ -55,7 +55,7 @@
                     'html': template.label,
                     'class': "item-" + count
                 }));
-                if (count == 0) {
+                if (count === 0) {
                     valueContainer.text(template.label);
                 }
                 ++count;

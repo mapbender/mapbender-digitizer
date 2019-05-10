@@ -188,7 +188,7 @@
 
                     var src = item.dbSrc ? item.dbSrc : item.origSrc;
                     if (item.relative) {
-                        item.src = src.match(/^(http[s]?\:|\/{2})/) ? src : Mapbender.configuration.application.urls.asset + src;
+                        item.src = src.match(/^(http[s]?:|\/{2})/) ? src : Mapbender.configuration.application.urls.asset + src;
                     } else {
                         item.src = src;
                     }
