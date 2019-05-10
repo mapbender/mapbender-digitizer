@@ -45,19 +45,19 @@
 
                 if (clusterSettings) {
 
-                    if (clusterSettings.hasOwnProperty('disable') && clusterSettings.disable) {
+                    if (clusterSettings.disable) {
+                        console.log("disabled");
                         schema.clusterStrategy.distance = -1;
                         schema.reloadFeatures();
                         schema.clusterStrategy.deactivate();
-                        schema.isClustered = false;
                         schema.reloadFeatures();
 
                     } else {
+                        console.log("enabled");
                         schema.clusterStrategy.activate();
-                        schema.isClustered = true;
                     }
 
-                    if (clusterSettings.hasOwnProperty('distance')) {
+                    if (clusterSettings.distance) {
                         schema.clusterStrategy.distance = clusterSettings.distance;
                     }
 
