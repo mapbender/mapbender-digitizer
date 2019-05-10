@@ -31,7 +31,7 @@
             }
 
             var src = item.dbSrc || item.origSrc;
-            item.src = item.relative ? Mapbender.configuration.application.urls.asset + src : src;
+            item.src = item.relative ? Mapbender.Digitizer.Utilities.getAssetsPath(src) : src;
             return item;
         }
 

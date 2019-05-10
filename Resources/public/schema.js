@@ -141,7 +141,7 @@
 
                 var getStyleMapContext = function () {
                     return {
-                        webRootPath: Mapbender.configuration.application.urls.asset,
+                        webRootPath: Mapbender.Digitizer.Utilities.getAssetsPath(),
 
                         feature: function (feature) {
                             return feature;
@@ -475,15 +475,27 @@
         },
 
         initTableFields: function () {
-
             var schema = this;
-            if (!schema.tableFields) {
-                schema.tableFields = {};
-                schema.tableFields[schema.featureType.uniqueId] = {label: 'Nr.', width: '20%'};
+
+            var getDefaultTableFields = function() {
+                var tableFields = {};
+                tableFields[schema.featureType.uniqueId] = {label: 'Nr.', width: '20%'};
                 if (schema.featureType.name) {
-                    schema.tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
+                    tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
                 }
-            }
+                return tableFields;
+
+            };
+
+            schema.tableFields = schema.tableFields || getDefaultTableFields();
+
+            _.each(schema.tableFields,function(tableField) {
+                if (tableField.type === "image") {
+                    tableField.render = function (imgName, renderType, feature, x){
+                        return $("<img style='width: 20px'/>").attr('src', tableField.path + imgName)[0].outerHTML;
+                    }
+                }
+            });
         },
 
 

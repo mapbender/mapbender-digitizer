@@ -341,5 +341,6 @@ li.select2-search--inline {
 .mapbender-element-result-table {
 
   tr td {
+    word-break: keep-all !important;
   }
 }

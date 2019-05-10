@@ -351,7 +351,7 @@
 
         getOpenLayersCloudImagePath: function() {
             var widget = this;
-            return widget.openLayersCloudImagePath ? Mapbender.configuration.application.urls.asset + widget.openLayersCloudImagePath : OpenLayers.ImgPath;
+            return widget.openLayersCloudImagePath ? Mapbender.Digitizer.Utilities.getAssetsPath(widget.openLayersCloudImagePath) : OpenLayers.ImgPath;
         },
 
         buildMapContextMenu: function () {

@@ -31,7 +31,13 @@
             return toolset.map(function(type) { return { 'type' : type }});
 
 
+        },
+
+        getAssetsPath: function(path) {
+            return Mapbender.configuration.application.urls.asset + (path || '');
         }
+
+
     }
 
 })();
