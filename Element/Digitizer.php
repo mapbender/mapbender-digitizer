@@ -159,7 +159,11 @@ class Digitizer extends BaseElement
                     $scheme['search']["form"] = $this->prepareItems($scheme['search']["form"]);
                     $URLParam = $configuration["URLParam"];
                     if ($URLParam) {
-                        $scheme['search']["form"][0]["value"] = isset($_GET[$URLParam]) ? $_GET[$URLParam] : $scheme['search']["form"][0]["value"];
+                        $formValue = $this->container->get('request')->get($URLParam);
+                        if ($formValue) {
+                            $scheme['search']["mapping"] = isset($scheme['search']["mapping"]) ? $scheme['search']["mapping"] : array();
+                            $scheme['search']["mapping"][$URLParam] =  $formValue;
+                        }
                     }
                 }
             }

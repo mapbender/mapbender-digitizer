@@ -68,8 +68,23 @@
 
 
         var extendSearchOptions = function() {
+
             if (schema.search.form) {
+
                 _.each(schema.search.form, function (item) {
+
+                    if (schema.search.mapping) {
+                        var value = schema.search.mapping[item.name];
+
+                        if (value && item.options) {
+                            if (item.options.filter(function(option) { return option[0] === value }).length >= 1) {
+                                item.value = value;
+                            } else {
+                                $.notify(value +" is not a valid value for "+item.name);
+                            }
+                        }
+
+                    }
 
                     item.change = function () {
                         schema.getData().done(function () {
