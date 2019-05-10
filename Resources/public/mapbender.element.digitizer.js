@@ -121,6 +121,7 @@
             }
 
             widget.useAllScheme = widget.options.useAllScheme;
+            widget.openLayersCloudImagePath = widget.options.openLayersCloudImagePath;
 
             widget.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
