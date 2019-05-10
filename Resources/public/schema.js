@@ -88,9 +88,10 @@
 
                     item.change = function () {
                         schema.getData().done(function () {
-                            widget.map.zoomToExtent(schema.layer.getDataExtent());
                             if (schema.search.zoomScale) {
                                 widget.map.zoomToScale(schema.search.zoomScale, true);
+                            } else {
+                                widget.map.zoomToExtent(schema.layer.getDataExtent());
                             }
                         });
                     };
@@ -440,6 +441,7 @@
         formItems: null,
         search: {
             form: null,
+            mapping: null,
             zoomScale: null,
         },
         showVisibilityNavigation: true,

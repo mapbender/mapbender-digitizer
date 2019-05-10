@@ -242,7 +242,7 @@
         if (configuration.isOpenLayersCloudPopup()) {
             // TODO find better solution for ImgPath
             var originalImagePath = OpenLayers.ImgPath;
-            OpenLayers.ImgPath = Mapbender.configuration.application.urls.asset + 'ol2/img/';
+            OpenLayers.ImgPath =  schema.widget.getOpenLayersCloudImagePath();
             var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(feature.geometry.toShortString()), null, $popup.html(), null, true);
             schema.featureCloudPopup = olPopup;
             map.addPopup(olPopup);
