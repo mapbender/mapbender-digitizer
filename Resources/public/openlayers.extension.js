@@ -16,6 +16,17 @@
             return this.cluster ? this.cluster.length : null;
         };
 
+
+        // Prevent adding of clustering features themselves to cluster
+        var addToCluster = OpenLayers.Strategy.Cluster.prototype.addToCluster;
+        OpenLayers.Strategy.Cluster.prototype.addToCluster = function(cluster, feature) {
+           if (!feature.fid) {
+               return;
+           }
+           addToCluster.apply(this,[cluster,feature]);
+        };
+
+
     });
 
 })();

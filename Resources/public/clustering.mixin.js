@@ -9,9 +9,8 @@
             initializeClustering: function () {
                 var schema = this;
 
-                var strategies = [];
                 var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
-                strategies.push(clusterStrategy);
+                var strategies = [clusterStrategy];
                 schema.layer.strategies = strategies;
                 clusterStrategy.layer = schema.layer;
                 schema.clusterStrategy = clusterStrategy;
@@ -37,16 +36,12 @@
                         if (closestClusterSettings && _clusterSettings.scale > closestClusterSettings.scale) {
                             closestClusterSettings = _clusterSettings;
                         } else {
-                            if (!closestClusterSettings) {
-                                closestClusterSettings = _clusterSettings;
-                            }
+                            closestClusterSettings =  closestClusterSettings || _clusterSettings
                         }
                     }
                 });
 
-                if (!clusterSettings && closestClusterSettings) {
-                    clusterSettings = closestClusterSettings
-                }
+                clusterSettings = clusterSettings || closestClusterSettings;
 
                 if (clusterSettings) {
 
