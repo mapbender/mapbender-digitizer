@@ -1,6 +1,7 @@
 (function () {
     "use strict";
 
+    console.log("normal");
 
     Mapbender.Digitizer.Scheme = function (rawScheme, widget, index) {
         var schema = this;
@@ -490,12 +491,21 @@
             schema.tableFields = schema.tableFields || getDefaultTableFields();
 
             _.each(schema.tableFields,function(tableField) {
+
+                tableField = schema.processTableField(tableField);
                 if (tableField.type === "image") {
                     tableField.render = function (imgName, renderType, feature, x){
                         return $("<img style='width: 20px'/>").attr('src', Mapbender.Digitizer.Utilities.getAssetsPath(tableField.path + imgName))[0].outerHTML;
                     }
                 }
             });
+        },
+
+        // Override
+        processTableField: function(tableField) {
+            console.log(tableField+ "No override");
+
+            return tableField;
         },
 
 

@@ -250,21 +250,22 @@
 
                 var columns = [];
 
-                var createResultTableDataFunction = function (columnId) {
+                var createResultTableDataFunction = function (columnId,fieldSettings) {
 
-                    return function (row, type, val, meta) {
-                        var data = row.data[columnId];
+                    return function (feature, type, val, meta) {
+
+                        var data = feature.data[columnId];
                         if (typeof (data) == 'string') {
                             data = data.escapeHtml();
                         }
-                        return data;
+                        return data || '';
                     };
                 };
 
 
                 $.each(schema.tableFields, function (columnId, fieldSettings) {
                     fieldSettings.title = fieldSettings.label;
-                    fieldSettings.data = fieldSettings.data || createResultTableDataFunction(columnId);
+                    fieldSettings.data = fieldSettings.data || createResultTableDataFunction(columnId,fieldSettings);
                     columns.push(fieldSettings);
                 });
 
