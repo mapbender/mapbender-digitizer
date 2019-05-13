@@ -111,13 +111,12 @@ class Digitizer extends BaseElement
     /**
      * @return mixed[]
      */
+    /**
+     * @return mixed[]
+     */
     protected function getFeatureTypeDeclarations()
     {
-        try {
-            return $this->container->getParameter("digitizer.featuretypes");
-        } catch (\InvalidArgumentException $e) {
-            return $this->container->getParameter('featureTypes');
-        }
+        return $this->container->getParameter('featureTypes');
     }
 
     /**

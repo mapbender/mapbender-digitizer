@@ -340,7 +340,6 @@
 
         var assert = function () {
             console.assert(['polygon', 'line', 'point', "-"].includes(schema.featureType.geomType), "invalid geom Type: " + schema.featureType.geomType + " in schema " + schema.schemaName);
-            console.assert(!!schema.tableFields, "Schema " + schema.schemaName + " does not have Tablefields");
         };
 
         assert();
