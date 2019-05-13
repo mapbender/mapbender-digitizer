@@ -133,8 +133,6 @@
             searchType: "currentExtent",
             inlineSearch: false,
             useContextMenu: false,
-            clustering: [
-            ]
         },
         // Default tool-sets
         toolsets: {
