@@ -120,7 +120,10 @@
                 return;
             }
 
-            widget.useAllScheme = widget.options.useAllScheme;
+            if (typeof widget.options.useAllScheme !== "undefined") {
+                widget.useAllScheme = widget.options.useAllScheme;
+            }
+
             widget.openLayersCloudImagePath = widget.options.openLayersCloudImagePath;
 
             widget.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
