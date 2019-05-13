@@ -259,7 +259,7 @@
             allowDelete: true,
             allowSave: true,
             allowEditData: true,
-            allowCustomerStyle: false,
+            allowCustomStyle: false,
             allowChangeVisibility: false,
             allowDeleteByCancelNewGeometry: false,
             allowCancelButton: true,
@@ -497,7 +497,7 @@
                     };
                 }
 
-                if (schema.allowCustomerStyle) {
+                if (schema.allowCustomStyle) {
                     subItems['style'] = {
                         name: translate('feature.style.change'),
                         action: function (key, options, parameters) {
@@ -714,7 +714,7 @@
                         }
                     });
                 }
-                if (schema.allowCustomerStyle) {
+                if (schema.allowCustomStyle) {
                     buttons.push({
                         title: translate('feature.style.change'),
                         className: 'style',
@@ -1619,7 +1619,7 @@
                     }
                 });
             }
-            if (schema.allowCustomerStyle) {
+            if (schema.allowCustomStyle) {
                 var styleButton = {
                     text: translate('feature.style.change'),
                     click: function (e) {

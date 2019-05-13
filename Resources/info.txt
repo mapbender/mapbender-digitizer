@@ -1,6 +1,7 @@
 Hinzugefügte Properties:
 
 - allowSaveAll - Speicherbutton für Alle Features
+- allowSave / allowSaveInResultTable: Speichern im Dialog und im Result Table
 - markUnsavedFeatures - ungespeicherte Features haben speziellen Style
 - deactivateControlAfterModification - Nach Veränderung von Feature wird Control deaktiviert
 - revertChangedGeometryOnCancel - Wenn nach veränderter Geometrie gecancelt wird, wird die Veränderung rückgängig gemacht

@@ -140,7 +140,7 @@
 
         var items = {};
 
-        if (schema.allowCustomerStyle) {
+        if (schema.allowCustomStyle) {
             items['changeStyle'] = {
                 name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
                 action: function () {

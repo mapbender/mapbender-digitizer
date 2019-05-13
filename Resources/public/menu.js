@@ -157,7 +157,7 @@
                     });
                 }
 
-                if (schema.allowEditData && schema.allowSave) {
+                if (schema.allowEditData && schema.allowSaveInResultTable) {
                     buttons.push({
                         title: Mapbender.DigitizerTranslator.translate('feature.save.title'),
                         className: 'save',
@@ -189,7 +189,7 @@
                         }
                     });
                 }
-                if (schema.allowCustomerStyle) {
+                if (schema.allowCustomStyle) {
                     buttons.push({
                         title: Mapbender.DigitizerTranslator.translate('feature.style.change'),
                         className: 'style',

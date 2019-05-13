@@ -1,8 +1,6 @@
 (function () {
     "use strict";
 
-    console.log("normal");
-
     Mapbender.Digitizer.Scheme = function (rawScheme, widget, index) {
         var schema = this;
         schema.index = index;
@@ -410,9 +408,10 @@
         label: null,
         allowDigitize: false,
         allowDelete: false,
-        allowSave: false,
+        allowSave: true,
+        allowSaveInResultTable: false,
         allowEditData: false,
-        allowCustomerStyle: false,
+        allowCustomStyle: false,
         allowChangeVisibility: false,
         allowDeleteByCancelNewGeometry: false,
         allowCancelButton: false,
@@ -474,24 +473,24 @@
             return schema.featureType.geomType;
         },
 
+        getDefaultTableFields: function() {
+            var schema = this;
+            var tableFields = {};
+            tableFields[schema.featureType.uniqueId] = {label: 'Nr.', width: '20%'};
+            if (schema.featureType.name) {
+                tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
+            }
+            return tableFields;
+
+        },
+
         initTableFields: function () {
             var schema = this;
 
-            var getDefaultTableFields = function() {
-                var tableFields = {};
-                tableFields[schema.featureType.uniqueId] = {label: 'Nr.', width: '20%'};
-                if (schema.featureType.name) {
-                    tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
-                }
-                return tableFields;
-
-            };
-
-            schema.tableFields = schema.tableFields || getDefaultTableFields();
+            schema.tableFields = schema.tableFields || schema.getDefaultTableFields();
 
             _.each(schema.tableFields,function(tableField) {
 
-                tableField = schema.processTableField(tableField);
                 if (tableField.type === "image") {
                     tableField.render = function (imgName, renderType, feature, x){
                         return $("<img style='width: 20px'/>").attr('src', Mapbender.Digitizer.Utilities.getAssetsPath(tableField.path + imgName))[0].outerHTML;
@@ -500,12 +499,9 @@
             });
         },
 
-        // Override
-        processTableField: function(tableField) {
-            console.log(tableField+ "No override");
 
-            return tableField;
-        },
+
+
 
 
         createFormItemsCollection: function (formItems) {
@@ -543,7 +539,7 @@
 
             var promise;
 
-            if (schema.allowCustomerStyle) {
+            if (schema.allowCustomStyle) {
                 promise = widget.query('style/list', {schema: schema.schemaName}).then(function (data) {
                     schema.featureStyles = data.featureStyles;
                 });

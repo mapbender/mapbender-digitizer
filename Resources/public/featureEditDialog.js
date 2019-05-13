@@ -64,7 +64,7 @@
                 });
 
             }
-            if (schema.allowCustomerStyle) {
+            if (schema.allowCustomStyle) {
                 buttons.styleButton = createButton('feature.style.change', function (feature) {
                     schema.openChangeStyleDialog(feature);
                 });
