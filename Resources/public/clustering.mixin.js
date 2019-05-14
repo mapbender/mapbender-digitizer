@@ -5,6 +5,18 @@
 
         return {
 
+            clusteringLabel: true,
+
+
+            getExtendedStyle: function(label) {
+                var schema = this;
+                var style = schema.styles[label];
+                if (schema.clusteringLabel) {
+                    style.label = '${label}';
+                }
+                return style;
+            },
+
 
             initializeClustering: function () {
                 var schema = this;

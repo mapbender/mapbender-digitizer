@@ -158,7 +158,7 @@
                     var options = schema.getStyleMapOptions(label);
                     options.context = context;
                     var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
-                    styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, schema.styles[label]), options);
+                    styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, schema.getExtendedStyle(label)), options);
                 });
 
                 if (!schema.markUnsavedFeatures) {
@@ -305,6 +305,13 @@
             schema.styles[label] = _.isEmpty(schema.styles[label]) ? schema.widget.styles[label] : schema.styles[label];
         });
 
+        if (schema.clustering) { // Move the clustering prototype just between the scheme and its native prototype
+            var clusteringScheme = Mapbender.Digitizer.ClusteringSchemeMixin();
+            var originalSchemePrototype = Object.getPrototypeOf(schema);
+            Object.setPrototypeOf(schema, clusteringScheme);
+            Object.setPrototypeOf(clusteringScheme, originalSchemePrototype);
+        }
+
         createSchemaFeatureLayer();
 
         extendSearchOptions();
@@ -325,15 +332,8 @@
 
         initializeStyleApplication();
 
-        if (schema.clustering) { // Move the clustering prototype just between the scheme and its native prototype
-            var clusteringScheme = Mapbender.Digitizer.ClusteringSchemeMixin();
-            var originalSchemePrototype = Object.getPrototypeOf(schema);
-            Object.setPrototypeOf(schema, clusteringScheme);
-            Object.setPrototypeOf(clusteringScheme, originalSchemePrototype);
+        schema.initializeClustering && schema.initializeClustering();
 
-            schema.initializeClustering();
-
-        }
 
 
         var assert = function () {
@@ -482,6 +482,11 @@
             }
             return tableFields;
 
+        },
+
+        getExtendedStyle: function(label) {
+            var schema = this;
+            return schema.styles[label];
         },
 
         initTableFields: function () {
