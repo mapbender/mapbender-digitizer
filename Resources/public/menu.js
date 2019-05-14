@@ -71,7 +71,7 @@
         var appendGeneralDigitizerButtons = function () {
 
             var buttons = {};
-            if (schema.showVisibilityNavigation) {
+            if (schema.showVisibilityNavigation && schema.allowChangeVisibility) {
 
                 var $button = $("<button class='button' type='button'/>");
                 $button.addClass("fa fa-eye-slash");
@@ -151,8 +151,8 @@
                         title: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
                         className: 'zoom',
                         cssClass: 'fa fa-crosshairs',
-                        onClick: function (olFeature, ui) {
-                            schema.zoomToJsonFeature(olFeature);
+                        onClick: function (feature, ui) {
+                            schema.zoomToJsonFeature(feature);
                         }
                     });
                 }
@@ -163,18 +163,19 @@
                         className: 'save',
                         cssClass: ' fa fa-floppy-o',
                         disabled: true,
-                        onClick: function (olFeature, ui) {
-                            schema.saveFeature(olFeature);
+                        onClick: function (feature, ui) {
+                            schema.saveFeature(feature);
                         }
                     });
                 }
 
                 if (schema.allowEditData) {
+                    console.log("$");
                     buttons.push({
                         title: Mapbender.DigitizerTranslator.translate('feature.edit'),
                         className: 'edit',
-                        onClick: function (olFeature, ui) {
-                            schema.openFeatureEditDialog(olFeature);
+                        onClick: function (feature, ui) {
+                            schema.openFeatureEditDialog(feature);
                         }
                     });
                 }
@@ -183,9 +184,8 @@
                         title: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
                         className: 'clone',
                         cssClass: ' fa fa-files-o',
-                        // TODO this might be still a bug
-                        onClick: function (olFeature, ui) {
-                            schema.copyFeature(olFeature);
+                        onClick: function (feature, ui) {
+                            schema.copyFeature(feature);
                         }
                     });
                 }
@@ -193,8 +193,8 @@
                     buttons.push({
                         title: Mapbender.DigitizerTranslator.translate('feature.style.change'),
                         className: 'style',
-                        onClick: function (olFeature, ui) {
-                            schema.openChangeStyleDialog(olFeature);
+                        onClick: function (feature, ui) {
+                            schema.openChangeStyleDialog(feature);
                         }
                     });
                 }
@@ -203,8 +203,8 @@
                     buttons.push({
                         title: Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'),
                         className: 'visibility',
-                        onClick: function (olFeature) {
-                            schema.toggleFeatureVisibility(olFeature);
+                        onClick: function (feature) {
+                            schema.toggleFeatureVisibility(feature);
                         }
                     });
                 }
@@ -213,12 +213,12 @@
                     buttons.push({
                         title: 'Sachdaten drucken',
                         className: 'printmetadata',
-                        onClick: function (olFeature, ui, b, c) {
-                            if (!olFeature.printMetadata) {
-                                olFeature.printMetadata = true;
+                        onClick: function (feature, ui, b, c) {
+                            if (!feature.printMetadata) {
+                                feature.printMetadata = true;
                                 ui.addClass("active");
                             } else {
-                                olFeature.printMetadata = false;
+                                feature.printMetadata = false;
                                 ui.removeClass("active");
                             }
                         }
@@ -231,9 +231,9 @@
                         title: Mapbender.DigitizerTranslator.translate("feature.remove.title"),
                         className: 'remove',
                         cssClass: 'critical',
-                        onClick: function (olFeature, ui) {
-                            if (schema.getSchemaByFeature(olFeature).allowDelete) {
-                                schema.removeFeature(olFeature);
+                        onClick: function (feature, ui) {
+                            if (schema.getSchemaByFeature(feature).allowDelete) {
+                                schema.removeFeature(feature);
                             } else {
                                 $.notify("Deletion is not allowed");
                             }
