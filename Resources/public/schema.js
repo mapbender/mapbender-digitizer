@@ -147,7 +147,7 @@
                         },
                         label: function (feature) {
                             var label = schema.featureType.name;
-                            if (schema.showLabel) {
+                            if (schema.showLabel && label) {
                                 return feature.attributes[label] || feature.getClusterSize() || "";
                             } else {
                                 return '';
