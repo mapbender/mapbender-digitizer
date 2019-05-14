@@ -5,6 +5,18 @@
 
         return {
 
+            clusteringLabel: true,
+
+
+            getExtendedStyle: function(label) {
+                var schema = this;
+                var style = schema.styles[label];
+                if (schema.clusteringLabel) {
+                    style.label = '${label}';
+                }
+                return style;
+            },
+
 
             initializeClustering: function () {
                 var schema = this;
@@ -78,13 +90,12 @@
                 });
             },
 
-            // TODO this is weird. if this function is applied, only cluster features get loaded
-            // getLayerFeatures: function() {
-            //     var schema = this;
-            //     var layer = schema.layer;
-            //
-            //     return layer.features.filter(function(feature) { return !!feature.cluster; });
-            // },
+            getLayerFeatures: function() {
+                var schema = this;
+                var layer = schema.layer;
+
+                return layer.features.filter(function(feature) { return !feature.cluster; });
+            },
 
             openFeatureEditDialog: function (feature) {
                 var schema = this;
