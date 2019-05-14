@@ -663,7 +663,6 @@
             var layer = schema.layer;
             var features = schema.getLayerFeatures();
 
-
             layer.removeAllFeatures();
             layer.addFeatures(features);
 
