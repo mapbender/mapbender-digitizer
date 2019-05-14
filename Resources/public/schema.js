@@ -146,7 +146,8 @@
                             return feature;
                         },
                         label: function (feature) {
-                            return feature.attributes.label || feature.getClusterSize() || "";
+                            var label = schema.featureType.name;
+                            return feature.attributes[label] || feature.getClusterSize() || "";
                         }
                     }
                 };

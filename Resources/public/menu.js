@@ -170,7 +170,6 @@
                 }
 
                 if (schema.allowEditData) {
-                    console.log("$");
                     buttons.push({
                         title: Mapbender.DigitizerTranslator.translate('feature.edit'),
                         className: 'edit',
