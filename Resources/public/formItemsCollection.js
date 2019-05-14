@@ -19,6 +19,8 @@
             return preprocessedItem;
         });
 
+        formItemsCollection.extend();
+
         Object.freeze(formItemsCollection.items);
 
 
@@ -56,6 +58,11 @@
 
 
     Mapbender.Digitizer.FormItemsCollection.prototype = {
+
+        //Override
+        extend: function() {
+
+        },
 
         /**
          * "Fake" form data for a feature that hasn't gone through attribute

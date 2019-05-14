@@ -22,7 +22,7 @@
                 }
             }
             var children = [];
-            formItem.children.forEach(function (childFormItem) {
+            formItem.children && formItem.children.forEach(function (childFormItem) {
                 children.push(childFormItem.clone());
             });
 
