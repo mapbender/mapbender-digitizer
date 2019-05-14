@@ -466,6 +466,7 @@
         },
         refreshLayersAfterFeatureSave: [], // Layer list names/ids to be refreshed after feature save complete
         tableFields: null,
+        clustering: null,
 
 
         getGeomType: function () {
