@@ -147,7 +147,11 @@
                         },
                         label: function (feature) {
                             var label = schema.featureType.name;
-                            return feature.attributes[label] || feature.getClusterSize() || "";
+                            if (schema.showLabel) {
+                                return feature.attributes[label] || feature.getClusterSize() || "";
+                            } else {
+                                return '';
+                            }
                         }
                     }
                 };
@@ -402,6 +406,7 @@
         deactivateControlAfterModification: true,
         allowSaveAll: false,
         markUnsavedFeatures: true,
+        showLabel: false,
 
 
         displayOnSelect: true, // BEV only, no implementation
