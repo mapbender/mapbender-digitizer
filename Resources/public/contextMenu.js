@@ -93,7 +93,7 @@
 
         if (schema.allowChangeVisibility) {
             subItems['style'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.visibility.change'),
+                name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
                 action: function (key, options, parameters) {
                     schema.openChangeStyleDialog(feature);
                 }
