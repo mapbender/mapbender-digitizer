@@ -11,6 +11,7 @@
             });
 
             feature.attributes.schemaName = control.schemaName;
+            feature.mbOrigin = 'digitizer';
 
             injectedMethods.setModifiedState(feature, this);
 

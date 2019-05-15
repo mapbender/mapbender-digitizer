@@ -820,6 +820,7 @@
 
             schema.layer.features.forEach(function(feature){
                 feature.style = schema.featureStyles[feature.fid] || null;
+                feature.mbOrigin = 'digitizer';
             });
 
             schema.reloadFeatures();
