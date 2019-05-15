@@ -119,7 +119,7 @@
         }
 
         return {
-            name: "Feature #" + feature.fid,
+            name: feature.attributes[schema.featureType.name] || "Feature #" + feature.fid,
             feature: feature,
             items: subItems
         };

@@ -1009,8 +1009,20 @@
                 feature: request
             }).then(function (response) {
 
-                if (response.hasOwnProperty('errors')) {
-                    return;
+                feature.disabled = false;
+
+                if (response.errors) {
+
+                    response.errors.forEach(function(error){
+                        console.error(error.message);
+                        $.notify(error.message, {
+                            title: 'API Error',
+                            autoHide: false,
+                            className: 'error'
+                        });
+                    });
+
+                    return response;
                 }
 
 

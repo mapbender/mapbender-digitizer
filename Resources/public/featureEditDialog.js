@@ -82,19 +82,9 @@
                     }
 
                     dialog.$popup.disableForm();
-                    schema.saveFeature(feature, formData).done(function (response) {
+                    schema.saveFeature(feature, formData).then(function (response) {
                         if (response.hasOwnProperty('errors')) {
-                            dialog.feature.disabled = false;
-                            $.each(response.errors, function (i, error) {
-                                $.notify(error.message, {
-                                    title: 'API Error',
-                                    autoHide: false,
-                                    className: 'error'
-                                });
-                                console.error(error.message);
-                            });
                             dialog.$popup.enableForm();
-
                             return;
                         }
 
