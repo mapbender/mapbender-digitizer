@@ -11,10 +11,20 @@
 
     ContextMenu.prototype = {
 
+        disabled: true,
+
+        disable: function() {
+          this.disabled = true;
+        },
+
+        enable: function() {
+            this.disabled = false;
+        },
+
         allowUseContextMenu: function () {
             var contextMenu = this;
             var schema = contextMenu.schema;
-            return schema.useContextMenu;
+            return !contextMenu.disabled && schema.useContextMenu;
         }
 
     };

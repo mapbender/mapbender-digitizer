@@ -535,18 +535,9 @@
             var widget = schema.widget;
             var frame = schema.frame;
             var layer = schema.layer;
-
-            if (widget.options.__disabled) {
-                return;
-            }
-
-            schema.activateContextMenu();
-
-            widget.getData = schema.getData.bind(schema);
-
-            if (!schema.displayOnInactive) {
-                widget.deactivateSchema = schema.deactivateSchema.bind(schema);
-            }
+            widget.getCurrentSchema = function() {
+                return schema;
+            };
 
             var promise;
 
@@ -584,6 +575,8 @@
 
             frame.hide();
 
+            delete widget.getCurrentSchema;
+
             if (!schema.displayPermanent) {
                 layer.setVisibility(false);
             }
@@ -600,18 +593,6 @@
 
         },
 
-
-        activateContextMenu: function () {
-            var schema = this;
-            var widget = schema.widget;
-
-            widget.allowUseMapContextMenu = schema.mapContextMenu.allowUseContextMenu;
-            widget.buildMapContextMenu = schema.mapContextMenu.buildContextMenu;
-
-            widget.allowUseElementContextMenu = schema.elementContextMenu.allowUseContextMenu;
-            widget.buildElementContextMenu = schema.elementContextMenu.buildContextMenu;
-
-        },
 
         createToolset: function () {
             var schema = this;
@@ -665,7 +646,6 @@
 
         reloadFeatures: function () {
             var schema = this;
-            var widget = schema.widget;
             var layer = schema.layer;
             var features = schema.getLayerFeatures();
 
@@ -674,9 +654,6 @@
 
             schema.menu.resultTable.redrawResultTableFeatures(features);
 
-            if (widget.options.__disabled) {
-                widget.deactivate();
-            }
         },
 
 

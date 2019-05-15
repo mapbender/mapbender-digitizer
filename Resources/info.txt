@@ -19,7 +19,6 @@ Ideen:
 Ansprechen:
 - Hack beim Hintergrundbild des Color Pickers
 - Die ganze Funktionalität des Features Sortieren beim Neuladen scheint überflüssig zu sein
-- Updaten von ClusterStrategy im Widget findet nicht im Callback von getData statt
 - Korrektes Einbinden von jsts.min.js
 - Was soll passieren, wenn über Speichern Button Elemente gespeichert werden, deren mandatory Formular Elemente nicht gesetzt sind.
 
@@ -28,15 +27,13 @@ Refactoring - Renaming:
 - Markiere JQuery Variablen mit $ Präfix
 
 Refactoring - Code sortieren:
-- Die current Variablen in Widget currentSchema und currentPopup sind schlechter Stil und gehören weg : currentSchema durch abgespeckte Version ersetzen, die Methoden beinhaltet, da kommen die contextMenu Methoden auch rein
+- currentPopup ist schlechter Stil und gehören weg
 - Helper Klasse/Datei für Feldlose Methoden anlegen, evtl. auch mehrere
-- Herausfinden, warum Openlayers.Feature 'data', 'attributes' und 'properties' hat und gegebenenfalls eins wegwerfen
 - Navigation auf Buttons über JQuery einschränken
 - Forbidden operations on server should NOT throw a 500
 - Die Integration von vis-ui überschreibung weiter benutzen, zum abhängigen neuzeichnen von buttons
 - Higlight Methoden wurden gestrichen - schauen ob was fehlt (insbesondere ResultTable anzeigen)
 - Manche Funktionalitäten wie z.B. forEach Iteratoren tauchen sowohl als vanilla, als underscore und als jquery auf. Das ist schlecht.
-- Für Spezialfälle (Clustering, OpenLayersCloud etc. Methoden überschreiben anstatt schalter einbauen)
 - Context Menu in den Handler des Select Controls auslagern (Rechtsklick!)
 - Seperation of Concerns - Inititalisierung und Anwendung trennen
 - Druck reparieren
@@ -121,6 +118,7 @@ Gemacht:
 - Alles in strict mode
 - Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen
 - Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
+- Updaten von ClusterStrategy im Widget findet nicht im Callback von getData statt
 
 
 

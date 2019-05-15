@@ -31,8 +31,12 @@
                     self.open();
                     self.popup.$element.one('close', function () {
                         defered.resolve();
-                    }.bind(self));
-                }
+                    });
+                },
+                error: function() {
+                  console.error("Print Request failed");
+                  defered.resolve();
+                },
             });
         },
 

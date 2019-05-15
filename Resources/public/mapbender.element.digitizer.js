@@ -31,7 +31,7 @@
             classes: {},
             create: null,
             debug: false,
-            disabled: false,
+            // disabled: false,
             fileURI: "uploads/featureTypes",
             schemes: {},
             target: null,
@@ -76,31 +76,8 @@
             },
 
             'invisible': {
-                strokeWidth: 1,
-                fillColor: "#F7F79A",
-                strokeColor: '#6fb536',
                 display: 'none'
             },
-
-            'labelText': {
-                strokeWidth: 0,
-                fillColor: '#cccccc',
-                fillOpacity: 0,
-                strokeColor: '#5e1a2b',
-                strokeOpacity: 0,
-                pointRadius: 15,
-                label: '${label}',
-                fontSize: 15
-            },
-            'labelTextHover': {
-                strokeWidth: 0,
-                fillColor: '#cccccc',
-                strokeColor: '#2340d3',
-                fillOpacity: 1,
-                pointRadius: 15,
-                label: '${label}',
-                fontSize: 15
-            }
 
         },
         printClient: null,
@@ -108,6 +85,8 @@
         useAllScheme: true,
 
         openLayersCloudImagePath: null,
+
+        disabled: true,
 
         _create: function () {
 
@@ -270,11 +249,11 @@
                     selector: 'div',
                     events: {
                         show: function (options) {
-                            return widget.allowUseMapContextMenu(options);
+                            return widget.getCurrentSchema().mapContextMenu.allowUseContextMenu(options);
                         }
                     },
                     build: function (trigger, e) {
-                        return widget.buildMapContextMenu(trigger, e);
+                        return widget.getCurrentSchema().mapContextMenu.buildContextMenu(trigger, e);
                     }
                 };
 
@@ -292,11 +271,11 @@
                     selector: '.mapbender-element-result-table > div > table > tbody > tr',
                     events: {
                         show: function (options) {
-                            return widget.allowUseElementContextMenu(options);
+                            return widget.getCurrentSchema().elementContextMenu.allowUseContextMenu(options);
                         }
                     },
                     build: function (trigger, e) {
-                        return widget.buildElementContextMenu(trigger, e);
+                        return widget.getCurrentSchema().elementContextMenu.buildContextMenu(trigger, e);
                     }
                 };
 
@@ -311,18 +290,6 @@
 
             };
 
-            var initializeMapEvents = function () {
-                var map = widget.map;
-
-                map.events.register("moveend", this, function () {
-                    widget.getData();
-                });
-                map.events.register("zoomend", this, function () {
-                    widget.getData(true);
-                });
-                map.resetLayersZIndex();
-            };
-
             initializeSelectorOrTitleElement();
 
             widget.onSelectorChange = function () { // Do not implement in prototype because of static widget access
@@ -331,7 +298,7 @@
                 var option = selector.find(":selected");
                 var newSchema = option.data("schemaSettings");
 
-                widget.deactivateSchema();
+                widget.getCurrentSchema && widget.getCurrentSchema().deactivateSchema();
 
                 newSchema.activateSchema();
             };
@@ -346,36 +313,51 @@
 
             createElementContextMenu();
 
-            initializeMapEvents();
+            widget.registerMapEvents();
 
             widget._trigger('ready');
 
         },
 
+        disable: function() {
+          var widget = this;
+          widget.disabled = true;
+        },
+
+        enable: function() {
+            var widget = this;
+            widget.disabled = false;
+        },
+
+        isEnabled: function() {
+            var widget = this;
+            return !widget.disabled;
+        },
+
+        registerMapEvents: function () {
+            var widget = this;
+            var map = widget.map;
+
+            map.events.register("moveend", this, function () {
+                widget.isEnabled() && widget.getCurrentSchema().getData();
+            });
+            map.events.register("zoomend", this, function () {
+                widget.isEnabled() && widget.getCurrentSchema().getData(true);
+            });
+
+            map.events.register("mouseover", this, function() {
+                widget.isEnabled() && widget.getCurrentSchema().mapContextMenu.enable();
+            });
+
+            map.events.register("mouseout", this, function() {
+                widget.isEnabled() && widget.getCurrentSchema().mapContextMenu.disable();
+            });
+            map.resetLayersZIndex();
+        },
+
         getOpenLayersCloudImagePath: function() {
             var widget = this;
             return widget.openLayersCloudImagePath ? Mapbender.Digitizer.Utilities.getAssetsPath(widget.openLayersCloudImagePath) : OpenLayers.ImgPath;
-        },
-
-        buildMapContextMenu: function () {
-            console.warn("This method should be overwritten");
-        },
-
-        allowUseMapContextMenu: function () {
-            console.warn("This method should be overwritten");
-        },
-
-
-        buildElementContextMenu: function (trigger, e) {
-            console.warn("This method should be overwritten");
-
-        },
-
-        allowUseElementContextMenu: function (options) {
-            console.warn("This method should be overwritten");
-        },
-
-        getData: function (zoom) {
         },
 
 
@@ -397,22 +379,18 @@
             return scheme;
         },
 
-
-        deactivateSchema: function () {
-        },
-
         activate: function () {
             var widget = this;
-            widget.options.__disabled = false;
-            widget.onSelectorChange();
+            widget.enable();
+            widget.onSelectorChange(); // triggers schema activation
 
 
         },
 
         deactivate: function () {
             var widget = this;
-            widget.options.__disabled = true;
-            widget.deactivateSchema();
+            widget.disable();
+            widget.getCurrentSchema().deactivateSchema();
         },
 
 
