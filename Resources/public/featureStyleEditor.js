@@ -557,6 +557,7 @@
                 featureId: feature.fid
             }).then(function (response) {
                 schema.featureStyles[feature.fid] = styleData;
+                feature.style = styleData || null;
                 feature.layer.drawFeature(feature);
                 featureStyleEditor.element.enableForm();
             });

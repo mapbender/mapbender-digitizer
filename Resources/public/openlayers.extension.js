@@ -17,6 +17,27 @@
         };
 
 
+        OpenLayers.Feature.prototype.setRenderIntent = function () {
+            var feature = this;
+
+            feature.renderIntent = "default";
+
+            if (feature.isChanged || feature.isNew) {
+                feature.renderIntent = 'unsaved';
+            }
+
+            if (feature.isCopy) {
+                feature.renderIntent = 'copy';
+            }
+
+            if (!feature.visible) {
+                feature.renderIntent = 'invisible';
+            }
+
+
+        }
+
+
     });
 
 })();

@@ -49,7 +49,7 @@
 
                 symbolizer: OpenLayers.Feature.Vector.style['default'],
                 evaluate: function (feature) {
-                    return !feature.attributes.schemaName; // Feature ohne Schemaname ist keine Digitizer Feature
+                    return !feature.attributes.schemaName; // Feature ohne Schemaname ist kein Digitizer Feature
                 }
             }));
 

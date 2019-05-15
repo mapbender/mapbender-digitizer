@@ -226,9 +226,12 @@
 
                 overFeature: function (feature) {
                     this.highlight(feature);
+                    feature.setRenderIntent();
+
 
                 },
                 outFeature: function (feature) {
+                    feature.setRenderIntent();
                     this.unhighlight(feature);
                 },
 
@@ -240,7 +243,12 @@
                     schema.processFeature(feature, function (feature) {
                         schema.menu.resultTable.hoverInResultTable(feature, true);
                     });
-                    return Object.getPrototypeOf(this).highlight.apply(this, [feature, true]);
+                    var style = this.selectStyle || this.renderIntent;
+                    var featureStyle = feature.style;
+                    feature.style = null;
+                    layer.drawFeature(feature, style);
+                    feature.style = featureStyle;
+                    this.events.triggerEvent("featurehighlighted", {feature : feature});
                 },
                 unhighlight: function (feature) {
                     if (!schema.layer.features.includes(feature)) {
@@ -249,7 +257,10 @@
                     schema.processFeature(feature, function (feature) {
                         schema.menu.resultTable.hoverInResultTable(feature, false);
                     });
-                    return Object.getPrototypeOf(this).unhighlight.apply(this, [feature, false]);
+                    //return Object.getPrototypeOf(this).unhighlight.apply(this, [feature, false]);
+                    schema.layer.drawFeature(feature, feature.style || feature.layer.style ||
+                        feature.renderIntent);
+                    this.events.triggerEvent("featureunhighlighted", {feature : feature});
                 }
             });
 
@@ -263,29 +274,7 @@
 
         };
 
-        var initializeStyleApplication = function () { // TODO is should be refactored without monkeyPatch
 
-            schema.layer.drawFeature = function (feature, style) {
-                if (style === undefined || style === 'default') {
-
-
-                    style = schema.featureStyles && schema.featureStyles[feature.fid] || "default";
-
-                    if (feature.isChanged || feature.isNew) {
-                        style = 'unsaved';
-                    }
-
-                    if (feature.isCopy) {
-                        style = 'copy';
-                    }
-
-                    if (!feature.visible) {
-                        style = 'invisible';
-                    }
-                }
-                return OpenLayers.Layer.Vector.prototype.drawFeature.apply(this, [feature, style]);
-            };
-        };
 
 
         initializeHooksForControlPrevention();
@@ -332,8 +321,6 @@
         if (schema.refreshLayersAfterFeatureSave) {
             Mapbender.layerManager.setMap(schema.layer.map);
         }
-
-        initializeStyleApplication();
 
         schema.initializeClustering && schema.initializeClustering();
 
@@ -551,9 +538,7 @@
                 return widget.query('getConfiguration');
             }).done(function (response) {
 
-
                 schema.updateConfigurationAfterSwitching(response.schemes);
-
 
                 layer.setVisibility(true);
                 frame.show();
@@ -665,9 +650,11 @@
             var row = schema.menu.resultTable.getTableRowByFeature(feature);
             if (!row) {
                 feature.isNew = true;
+                feature.setRenderIntent();
                 return; // In case of non-saved feature
             }
             feature.isChanged = true;
+            feature.setRenderIntent();
 
             row.find('.button.save').removeAttr("disabled");
 
@@ -686,6 +673,7 @@
             feature.isChanged = false;
             feature.isNew = false;
             feature.isCopy = false;
+            feature.setRenderIntent();
 
             if (schema.getUnsavedFeatures().length === 0) {
                 $(schema.frame).find(".save-all-features").removeClass("active");
@@ -830,6 +818,10 @@
 
             schema.layer.features = schema.group === "all" ? newFeatures : schema.mergeExistingFeaturesWithLoadedFeatures(newFeatures);
 
+            schema.layer.features.forEach(function(feature){
+                feature.style = schema.featureStyles[feature.fid] || null;
+            });
+
             schema.reloadFeatures();
         },
 
@@ -917,6 +909,7 @@
             newFeature.data = newAttributes;
             schema.setModifiedState(newFeature);
             newFeature.isCopy = true;
+            feature.setRenderIntent();
             newFeature.layer = feature.layer;
 
             // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
@@ -1037,6 +1030,7 @@
                 }
 
                 newFeature.isNew = false;
+                feature.setRenderIntent();
 
                 schema.removeFeatureFromUI(feature);
 
@@ -1150,6 +1144,7 @@
             layer.features.forEach(function (feature) {
 
                 feature.visible = visible;
+                feature.setRenderIntent();
                 layer.drawFeature(feature);
             });
 
@@ -1162,6 +1157,7 @@
             var layer = schema.layer;
 
             feature.visible = !feature.visible;
+            feature.setRenderIntent();
 
             layer.drawFeature(feature);
             schema.menu.resultTable.getApi().draw();
