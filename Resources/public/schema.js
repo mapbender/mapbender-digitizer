@@ -147,7 +147,7 @@
                         },
                         label: function (feature) {
                             var label = schema.featureType.name;
-                            if (schema.showLabel) {
+                            if (schema.showLabel && label) {
                                 return feature.attributes[label] || feature.getClusterSize() || "";
                             } else {
                                 return '';
@@ -472,6 +472,7 @@
         },
         refreshLayersAfterFeatureSave: [], // Layer list names/ids to be refreshed after feature save complete
         tableFields: null,
+        clustering: null,
 
 
         getGeomType: function () {
