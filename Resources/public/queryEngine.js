@@ -26,11 +26,14 @@
                 dataType: "json",
                 data: JSON.stringify(request)
             }).fail(function (xhr) {
+
+                console.error("error",xhr.status,xhr.responseText);
+
                 // this happens on logout: error callback with status code 200 'ok'
                 if (xhr.status === 200 && xhr.getResponseHeader("Content-Type").toLowerCase().indexOf("text/html") >= 0) {
                     window.location.reload();
                 }
-            }).fail(function (xhr) {
+
                 if (xhr.statusText === 'abort') {
                     return;
                 }
