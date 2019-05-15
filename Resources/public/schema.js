@@ -206,6 +206,8 @@
                 toggle: true,
                 multiple: true,
 
+                hover: true,
+
                 openDialog: function (feature) {
 
                     if (schema.allowEditData) {
@@ -220,12 +222,7 @@
                     this.openDialog(feature);
                     return Object.getPrototypeOf(this).clickFeature.apply(this, arguments);
 
-                }
-            });
-
-            var highlightControl = new OpenLayers.Control.SelectFeature(layer, {
-                hover: true,
-                highlightOnly: true,
+                },
 
                 overFeature: function (feature) {
                     this.highlight(feature);
@@ -256,13 +253,14 @@
                 }
             });
 
+
+
             // Workaround to move map by touch vector features
             selectControl.handlers && selectControl.handlers.feature && (selectControl.handlers.feature.stopDown = false);
             schema.selectControl = selectControl;
-            schema.highlightControl = highlightControl;
 
-            widget.map.addControl(schema.highlightControl);
             widget.map.addControl(schema.selectControl);
+
         };
 
         var initializeStyleApplication = function () { // TODO is should be refactored without monkeyPatch
@@ -325,7 +323,7 @@
 
         addSelectControls();
 
-        schema.menu.resultTable.initializeResultTableEvents(schema.highlightControl, schema.zoomOrOpenDialog.bind(schema));
+        schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.zoomOrOpenDialog.bind(schema));
 
         schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
         schema.elementContextMenu = new Mapbender.Digitizer.ElementContextMenu(schema);
@@ -384,7 +382,6 @@
         },
 
         selectControl: null,
-        highlightControl: null,
         clusterStrategy: null,
 
 
@@ -560,7 +557,6 @@
 
                 layer.setVisibility(true);
                 frame.show();
-                schema.highlightControl.activate();
                 schema.selectControl.activate();
                 schema.getData();
 
