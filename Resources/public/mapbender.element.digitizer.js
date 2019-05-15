@@ -390,7 +390,7 @@
         deactivate: function () {
             var widget = this;
             widget.disable();
-            widget.getCurrentSchema().deactivateSchema();
+            widget.getCurrentSchema && widget.getCurrentSchema().deactivateSchema();
         },
 
 
