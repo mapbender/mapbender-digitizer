@@ -1003,7 +1003,7 @@
                 feature: request
             }).then(function (response) {
 
-                feature.disabled = false;
+                feature.disabled = false; // feature is actually removed anyways
 
                 if (response.errors) {
 
@@ -1031,6 +1031,8 @@
                 }
 
                 newFeature.isNew = false;
+                newFeature.style = schema.featureStyles[newFeature.fid] || null;
+
                 feature.setRenderIntent();
 
                 schema.removeFeatureFromUI(feature);
