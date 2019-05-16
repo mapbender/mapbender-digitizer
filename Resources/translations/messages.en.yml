@@ -1,4 +1,5 @@
 mb.digitizer:
+  useAllScheme: 'Use aggregating Scheme'
   schema:
     allgeometries: 'All Geometries'
   feature:
