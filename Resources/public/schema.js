@@ -703,7 +703,7 @@
             };
 
             var styleOptions = {
-                data: schema.featureStyles[feature.fid] || createDefaultSymbolizer(feature),
+                data: schema.getFeatureStyle(feature.fid) || createDefaultSymbolizer(feature),
                 commonTab: false
             };
 
@@ -819,11 +819,16 @@
             schema.layer.features = schema.group === "all" ? newFeatures : schema.mergeExistingFeaturesWithLoadedFeatures(newFeatures);
 
             schema.layer.features.forEach(function(feature){
-                feature.style = schema.featureStyles[feature.fid] || null;
+                feature.style = schema.getFeatureStyle(feature.fid);
                 feature.mbOrigin = 'digitizer';
             });
 
             schema.reloadFeatures();
+        },
+
+        getFeatureStyle: function(id) {
+            var schema = this;
+            return (schema.featureStyles && schema.featureStyles[id]) || null;
         },
 
         // Overwrite
@@ -1031,7 +1036,7 @@
                 }
 
                 newFeature.isNew = false;
-                newFeature.style = schema.featureStyles[newFeature.fid] || null;
+                newFeature.style = schema.getFeatureStyle(newFeature.fid);
 
                 feature.setRenderIntent();
 
