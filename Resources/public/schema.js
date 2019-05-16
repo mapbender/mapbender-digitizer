@@ -234,7 +234,8 @@
                 },
 
                 highlight: function (feature) {
-                    feature.setRenderIntent();
+                    console.log(feature.renderIntent);
+
                     console.assert(!!feature, "Feature must be set");
                     if (!schema.layer.features.includes(feature)) {
                         return;
@@ -242,28 +243,26 @@
                     schema.processFeature(feature, function (feature) {
                         schema.menu.resultTable.hoverInResultTable(feature, true);
                     });
-                    var style = this.selectStyle || this.renderIntent;
-                    var featureStyle = feature.style;
-                    feature.style = null;
-                    layer.drawFeature(feature, style);
-                    feature.style = featureStyle;
+
+                    layer.drawFeature(feature, this.selectStyle || this.renderIntent);
                     this.events.triggerEvent("featurehighlighted", {feature : feature});
-                    feature.setRenderIntent();
 
                 },
                 unhighlight: function (feature) {
-                    feature.setRenderIntent();
+                    console.log(feature.renderIntent);
+
                     if (!schema.layer.features.includes(feature)) {
                         return;
                     }
                     schema.processFeature(feature, function (feature) {
                         schema.menu.resultTable.hoverInResultTable(feature, false);
                     });
-                    //return Object.getPrototypeOf(this).unhighlight.apply(this, [feature, false]);
-                    schema.layer.drawFeature(feature, feature.style || feature.layer.style ||
-                        feature.renderIntent);
+
+
+                    schema.layer.drawFeature(feature, feature.style || feature.renderIntent);
                     this.events.triggerEvent("featureunhighlighted", {feature : feature});
-                    feature.setRenderIntent();
+                    console.log(feature.renderIntent+"!");
+
                 }
             });
 
@@ -653,11 +652,10 @@
             var row = schema.menu.resultTable.getTableRowByFeature(feature);
             if (!row) {
                 feature.isNew = true;
-                feature.setRenderIntent();
+                schema.setStyleProperties(feature);
                 return; // In case of non-saved feature
             }
             feature.isChanged = true;
-            feature.setRenderIntent();
 
             row.find('.button.save').removeAttr("disabled");
 
@@ -676,7 +674,6 @@
             feature.isChanged = false;
             feature.isNew = false;
             feature.isCopy = false;
-            feature.setRenderIntent();
 
             if (schema.getUnsavedFeatures().length === 0) {
                 $(schema.frame).find(".save-all-features").removeClass("active");
@@ -822,11 +819,56 @@
             schema.layer.features = schema.group === "all" ? newFeatures : schema.mergeExistingFeaturesWithLoadedFeatures(newFeatures);
 
             schema.layer.features.forEach(function(feature){
-                feature.style = schema.getFeatureStyle(feature.fid);
+
+                schema.setStyleProperties(feature);
                 feature.mbOrigin = 'digitizer';
             });
 
             schema.reloadFeatures();
+        },
+
+        setStyleProperties: function(feature) {
+            var schema = this;
+
+            Object.defineProperty(feature,'style', {
+                get: function() {
+                    var feature = this;
+                    var style = schema.getFeatureStyle(feature.fid);
+                    console.warn("style",feature,style);
+                    return style;
+                },
+                set: function(value) {
+                    var feature = this;
+                    console.log("1",value);
+                    feature._style = value;
+                }
+            });
+
+            Object.defineProperty(feature,'renderIntent', {
+                get: function() {
+                    var feature = this;
+                    var renderIntent = "default";
+
+                    if (feature.isChanged || feature.isNew) {
+                        renderIntent = 'unsaved';
+                    }
+
+                    if (feature.isCopy) {
+                        renderIntent = 'copy';
+                    }
+
+                    if (!feature.visible) {
+                        renderIntent = 'invisible';
+                    }
+                    console.warn("renderIntent",feature,renderIntent);
+                    return renderIntent;
+                },
+                set: function(value) {
+                    var feature = this;
+                    console.warn("2",value);
+                    feature._renderIntent = value;
+                }
+            });
         },
 
         getFeatureStyle: function(id) {
@@ -918,7 +960,6 @@
             newFeature.data = newAttributes;
             schema.setModifiedState(newFeature);
             newFeature.isCopy = true;
-            feature.setRenderIntent();
             newFeature.layer = feature.layer;
 
             // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
@@ -930,7 +971,6 @@
             newFeature.data[name] = "Copy of " + (feature.attributes[name] || feature.fid);
 
             delete newFeature.fid;
-            newFeature.style = null;
 
             layer.drawFeature(newFeature);
 
@@ -1039,9 +1079,6 @@
                 }
 
                 newFeature.isNew = false;
-                newFeature.style = schema.getFeatureStyle(newFeature.fid);
-
-                feature.setRenderIntent();
 
                 schema.removeFeatureFromUI(feature);
 
@@ -1155,7 +1192,6 @@
             layer.features.forEach(function (feature) {
 
                 feature.toggleVisibility(visible);
-                feature.setRenderIntent();
                 layer.drawFeature(feature);
             });
 
@@ -1168,7 +1204,6 @@
             var layer = schema.layer;
 
             feature.toggleVisibility(!feature.visible);
-            feature.setRenderIntent();
 
             layer.drawFeature(feature);
             schema.menu.resultTable.getApi().draw();

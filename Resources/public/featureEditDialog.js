@@ -184,7 +184,6 @@
                     schema.layer.renderer.eraseGeometry(feature.geometry);
                     feature.geometry = feature.oldGeometry;
                     feature.isChanged = false;
-                    feature.setRenderIntent();
                     schema.layer.drawFeature(feature);
                     schema.unsetModifiedState(feature);
 
