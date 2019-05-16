@@ -32,7 +32,13 @@
 
             if (!feature.visible) {
                 feature.renderIntent = 'invisible';
+                feature.deactivatedStyle = feature.style;
+                feature.style = null;
+            } else {
+                feature.style = feature.deactivatedStyle;
             }
+
+
 
 
         }
