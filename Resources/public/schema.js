@@ -226,16 +226,15 @@
 
                 overFeature: function (feature) {
                     this.highlight(feature);
-                    feature.setRenderIntent();
 
 
                 },
                 outFeature: function (feature) {
-                    feature.setRenderIntent();
                     this.unhighlight(feature);
                 },
 
                 highlight: function (feature) {
+                    feature.setRenderIntent();
                     console.assert(!!feature, "Feature must be set");
                     if (!schema.layer.features.includes(feature)) {
                         return;
@@ -249,8 +248,11 @@
                     layer.drawFeature(feature, style);
                     feature.style = featureStyle;
                     this.events.triggerEvent("featurehighlighted", {feature : feature});
+                    feature.setRenderIntent();
+
                 },
                 unhighlight: function (feature) {
+                    feature.setRenderIntent();
                     if (!schema.layer.features.includes(feature)) {
                         return;
                     }
@@ -261,6 +263,7 @@
                     schema.layer.drawFeature(feature, feature.style || feature.layer.style ||
                         feature.renderIntent);
                     this.events.triggerEvent("featureunhighlighted", {feature : feature});
+                    feature.setRenderIntent();
                 }
             });
 
@@ -1151,7 +1154,7 @@
 
             layer.features.forEach(function (feature) {
 
-                feature.visible = visible;
+                feature.toggleVisibility(visible);
                 feature.setRenderIntent();
                 layer.drawFeature(feature);
             });
@@ -1164,7 +1167,7 @@
             var schema = this;
             var layer = schema.layer;
 
-            feature.visible = !feature.visible;
+            feature.toggleVisibility(!feature.visible);
             feature.setRenderIntent();
 
             layer.drawFeature(feature);
