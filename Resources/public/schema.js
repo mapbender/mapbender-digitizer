@@ -834,13 +834,11 @@
                 get: function() {
                     var feature = this;
                     var style = schema.getFeatureStyle(feature.fid);
-                    console.warn("style",feature,style);
                     return style;
                 },
                 set: function(value) {
                     var feature = this;
-                    console.log("1",value);
-                    feature._style = value;
+                    feature._style = value; // is never used
                 }
             });
 
@@ -860,13 +858,11 @@
                     if (!feature.visible) {
                         renderIntent = 'invisible';
                     }
-                    console.warn("renderIntent",feature,renderIntent);
                     return renderIntent;
                 },
                 set: function(value) {
                     var feature = this;
-                    console.warn("2",value);
-                    feature._renderIntent = value;
+                    feature._renderIntent = value; // is never used
                 }
             });
         },
