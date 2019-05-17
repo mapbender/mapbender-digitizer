@@ -19,6 +19,15 @@
             width: 100%;
         }
 
+        .iconCheckbox {
+            margin-top:3px;
+        }
+
+        .checkboxLabel {
+            white-space: nowrap;
+            margin-left: 20px;
+        }
+
     </style>
     <script language="JavaScript">
         $(function(){
@@ -161,7 +170,10 @@
     <div class="clearContainer"></div>
     {{ form_label(form.configuration.target) }}{{ form_widget(form.configuration.target) }}
     <div class="clearContainer"></div>
-    {{ form_label(form.configuration.useAllScheme) }}{{ form_widget(form.configuration.useAllScheme) }}
+    {{ form_widget(form.configuration.useAllScheme) }}
+    <div class="checkboxLabel">
+    {{ form_label(form.configuration.useAllScheme) }}
+    </div>
     <div class="clearContainer"></div>
     {{ form_label(form.configuration.schemes) }}{{ form_widget(form.configuration.schemes) }}
 </div>
