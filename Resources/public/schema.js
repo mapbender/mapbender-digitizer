@@ -725,9 +725,6 @@
             var callback = options && options.callback;
             var reloadNew = schema.repopulateWithReloadedFeatures() || (options && options.reloadNew);
 
-            console.log(reloadNew,"$$$");
-
-
             var request = {
                 srid: projection.proj.srsProjNumber,
                 maxResults: schema.maxResults,
