@@ -828,47 +828,57 @@
         setStyleProperties: function(feature) {
             var schema = this;
 
-            Object.defineProperty(feature,'style', {
-                get: function() {
-                    var feature = this;
-                    var style =  feature.visible && !feature.isHighlighted ? schema.getFeatureStyle(feature.fid) : null;
+            try {
 
-                    return style;
-                },
-                set: function(value) {
-                    var feature = this;
-                    feature._style = value; // is never used
-                }
-            });
+                Object.defineProperty(feature, 'style', {
+                    get: function () {
+                        var feature = this;
+                        var style = feature.visible && !feature.isHighlighted ? schema.getFeatureStyle(feature.fid) : null;
 
-            Object.defineProperty(feature,'renderIntent', {
-                get: function() {
-                    var feature = this;
-                    var renderIntent = "default";
-
-                    if (feature.isChanged || feature.isNew) {
-                        renderIntent = 'unsaved';
+                        return style;
+                    },
+                    set: function (value) {
+                        var feature = this;
+                        feature._style = value; // is never used
                     }
+                });
+            } catch(e) {
+                console.error("Error in redefining property 'style'",e);
+            }
 
-                    if (feature.isCopy) {
-                        renderIntent = 'copy';
+            try {
+
+                Object.defineProperty(feature, 'renderIntent', {
+                    get: function () {
+                        var feature = this;
+                        var renderIntent = "default";
+
+                        if (feature.isChanged || feature.isNew) {
+                            renderIntent = 'unsaved';
+                        }
+
+                        if (feature.isCopy) {
+                            renderIntent = 'copy';
+                        }
+
+                        if (!feature.visible) {
+                            renderIntent = 'invisible';
+                        }
+
+                        if (feature.isHighlighted) {
+                            renderIntent = "select";
+                        }
+                        return renderIntent;
+                    },
+                    set: function (value) {
+                        var feature = this;
+
+                        feature._renderIntent = value; // is never used
                     }
-
-                    if (!feature.visible) {
-                        renderIntent = 'invisible';
-                    }
-
-                    if (feature.isHighlighted) {
-                        renderIntent = "select";
-                    }
-                    return renderIntent;
-                },
-                set: function(value) {
-                    var feature = this;
-
-                    feature._renderIntent = value; // is never used
-                }
-            });
+                });
+            } catch(e) {
+                console.error("Error in redefining property 'renderIntent'",e);
+            }
         },
 
         getFeatureStyle: function(id) {
