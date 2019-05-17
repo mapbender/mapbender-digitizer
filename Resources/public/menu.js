@@ -52,7 +52,7 @@
 
                     },
 
-                    setStyleProperties: schema.setStyleProperties.bind(schema),
+                    introduceFeature: schema.introduceFeature.bind(schema),
 
                     setModifiedState: schema.setModifiedState.bind(schema)
                 }

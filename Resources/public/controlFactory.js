@@ -11,10 +11,10 @@
             });
 
             feature.attributes.schemaName = control.schemaName;
-            feature.mbOrigin = 'digitizer';
 
             feature.isNew = true;
-            injectedMethods.setStyleProperties(feature);
+            injectedMethods.introduceFeature(feature);
+
 
             injectedMethods.setModifiedState(feature, this);
 

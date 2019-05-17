@@ -824,9 +824,7 @@
 
 
             schema.layer.features.forEach(function(feature){
-
-                schema.setStyleProperties(feature);
-                feature.mbOrigin = 'digitizer';
+                schema.introduceFeature(feature);
             });
 
             schema.reloadFeatures();
@@ -838,7 +836,7 @@
             var isGetter = function(obj, prop) {
                 var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
                 return !!descriptor && !!descriptor['get'];
-            }
+            };
 
             var usesSpecificStyle = function(feature) {
                 return feature.visible && !feature.isHighlighted && !feature.isCopy && !feature.isChanged && !feature.isNew;
@@ -848,6 +846,7 @@
 
                 Object.defineProperty(feature, 'style', {
                     get: function () {
+
                         var feature = this;
                         var style = usesSpecificStyle(feature) ? schema.getFeatureStyle(feature.fid) : null;
 
@@ -1007,6 +1006,12 @@
             return schema.getRestrictedVersion();
         },
 
+        introduceFeature: function(feature) {
+            var schema = this;
+            schema.setStyleProperties(feature);
+            feature.mbOrigin = 'digitizer';
+        },
+
 
         // TODO feature / option formData parameters are not pretty -> keep data in feature directly
         saveFeature: function (feature, formData) {
@@ -1103,9 +1108,9 @@
 
                 newFeature.isNew = false;
 
-                schema.removeFeatureFromUI(feature);
+                schema.introduceFeature(newFeature);
 
-                schema.layer.removeFeatures([feature]);
+                schema.removeFeatureFromUI(feature);
                 schema.layer.addFeatures([newFeature]);
 
                 schema.reloadFeatures();
