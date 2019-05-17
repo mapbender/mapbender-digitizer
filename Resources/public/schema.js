@@ -234,6 +234,7 @@
                 },
 
                 highlight: function (feature) {
+                    feature.isHighlighted = true;
 
                     console.assert(!!feature, "Feature must be set");
                     if (!schema.layer.features.includes(feature)) {
@@ -243,11 +244,14 @@
                         schema.menu.resultTable.hoverInResultTable(feature, true);
                     });
 
-                    layer.drawFeature(feature, this.selectStyle || this.renderIntent);
+                    layer.drawFeature(feature);
                     this.events.triggerEvent("featurehighlighted", {feature : feature});
 
                 },
                 unhighlight: function (feature) {
+
+                    feature.isHighlighted = false;
+
                     if (!schema.layer.features.includes(feature)) {
                         return;
                     }
@@ -256,8 +260,9 @@
                     });
 
 
-                    schema.layer.drawFeature(feature, feature.style || feature.renderIntent);
+                    schema.layer.drawFeature(feature);
                     this.events.triggerEvent("featureunhighlighted", {feature : feature});
+
                 }
             });
 
@@ -826,7 +831,8 @@
             Object.defineProperty(feature,'style', {
                 get: function() {
                     var feature = this;
-                    var style = schema.getFeatureStyle(feature.fid);
+                    var style =  feature.visible && !feature.isHighlighted ? schema.getFeatureStyle(feature.fid) : null;
+
                     return style;
                 },
                 set: function(value) {
@@ -851,10 +857,15 @@
                     if (!feature.visible) {
                         renderIntent = 'invisible';
                     }
+
+                    if (feature.isHighlighted) {
+                        renderIntent = "select";
+                    }
                     return renderIntent;
                 },
                 set: function(value) {
                     var feature = this;
+
                     feature._renderIntent = value; // is never used
                 }
             });
