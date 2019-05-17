@@ -19,6 +19,8 @@
             geomType: '-'
         },
 
+        allowCustomStyle: true,
+
 
         getGeomType: function() {
             return 'all';

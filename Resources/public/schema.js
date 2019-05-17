@@ -234,7 +234,8 @@
                 },
 
                 highlight: function (feature) {
-                    console.log(feature.renderIntent);
+
+                    feature.isHighlighted = true;
 
                     console.assert(!!feature, "Feature must be set");
                     if (!schema.layer.features.includes(feature)) {
@@ -244,12 +245,13 @@
                         schema.menu.resultTable.hoverInResultTable(feature, true);
                     });
 
-                    layer.drawFeature(feature, this.selectStyle || this.renderIntent);
+                    layer.drawFeature(feature);
                     this.events.triggerEvent("featurehighlighted", {feature : feature});
 
                 },
                 unhighlight: function (feature) {
-                    console.log(feature.renderIntent);
+
+                    feature.isHighlighted = false;
 
                     if (!schema.layer.features.includes(feature)) {
                         return;
@@ -259,9 +261,8 @@
                     });
 
 
-                    schema.layer.drawFeature(feature, feature.style || feature.renderIntent);
+                    schema.layer.drawFeature(feature);
                     this.events.triggerEvent("featureunhighlighted", {feature : feature});
-                    console.log(feature.renderIntent+"!");
 
                 }
             });
@@ -833,13 +834,11 @@
             Object.defineProperty(feature,'style', {
                 get: function() {
                     var feature = this;
-                    var style = schema.getFeatureStyle(feature.fid);
-                    console.warn("style",feature,style);
+                    var style =  feature.visible && !feature.isHighlighted ? schema.getFeatureStyle(feature.fid) : null;
                     return style;
                 },
                 set: function(value) {
                     var feature = this;
-                    console.log("1",value);
                     feature._style = value;
                 }
             });
@@ -860,12 +859,14 @@
                     if (!feature.visible) {
                         renderIntent = 'invisible';
                     }
-                    console.warn("renderIntent",feature,renderIntent);
+
+                    if (feature.isHighlighted) {
+                        renderIntent = "select";
+                    }
                     return renderIntent;
                 },
                 set: function(value) {
                     var feature = this;
-                    console.warn("2",value);
                     feature._renderIntent = value;
                 }
             });
