@@ -16,7 +16,6 @@
         "mapbender/data-manager": "~1.0.6.3@dev",
         "mapbender/data-source": "0.*",
         "phayes/geophp": "1.2",
-        "mapbender/vis-ui.js": "dev-master"
     },
     "require-dev": {
         "mapbender/data-source": "@dev"
