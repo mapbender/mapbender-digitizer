@@ -835,17 +835,21 @@
         setStyleProperties: function(feature) {
             var schema = this;
 
-            function isGetter (obj, prop) {
+            var isGetter = function(obj, prop) {
                 var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
                 return !!descriptor && !!descriptor['get'];
             }
+
+            var usesSpecificStyle = function(feature) {
+                return feature.visible && !feature.isHighlighted && !feature.isCopy && !feature.isChanged && !feature.isNew;
+            };
 
             if (!isGetter(feature,'style')) {
 
                 Object.defineProperty(feature, 'style', {
                     get: function () {
                         var feature = this;
-                        var style = feature.visible && !feature.isHighlighted ? schema.getFeatureStyle(feature.fid) : null;
+                        var style = usesSpecificStyle(feature) ? schema.getFeatureStyle(feature.fid) : null;
 
                         return style;
                     },
