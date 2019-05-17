@@ -69,13 +69,13 @@
             },
 
 
-            getData: function (zoom) {
+            getData: function (options) {
                 var schema = this;
-                return Mapbender.Digitizer.Scheme.prototype.getData.apply(schema,[ function() {
-                    if (zoom) {
+                return Mapbender.Digitizer.Scheme.prototype.getData.apply(schema,[ { callback: function() {
+                    if (options && options.zoom) {
                         schema.updateClusterStrategy();
                     }
-                }]);
+                }}]);
             },
 
             getFeatureAsList: function (feature) {

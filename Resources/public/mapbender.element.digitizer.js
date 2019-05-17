@@ -342,7 +342,7 @@
                 widget.isEnabled() && widget.getCurrentSchema().getData();
             });
             map.events.register("zoomend", this, function () {
-                widget.isEnabled() && widget.getCurrentSchema().getData(true);
+                widget.isEnabled() && widget.getCurrentSchema().getData({ zoom: true});
             });
 
             map.events.register("mouseover", this, function() {

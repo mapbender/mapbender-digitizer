@@ -86,13 +86,13 @@
                     }
 
                     item.change = function () {
-                        schema.getData().done(function () {
+                        schema.getData().done({ callback: function () {
                             if (schema.search.zoomScale) {
                                 widget.map.zoomToScale(schema.search.zoomScale, true);
                             } else {
                                 widget.map.zoomToExtent(schema.layer.getDataExtent());
                             }
-                        });
+                        }});
                     };
 
                     if (item.type === 'select' && item.ajax) {
@@ -543,7 +543,9 @@
                 layer.setVisibility(true);
                 frame.show();
                 schema.selectControl.activate();
-                schema.getData();
+                schema.getData({
+                    reloadNew: true
+                });
 
             });
 
@@ -707,20 +709,23 @@
         },
 
 
-        removeFeaturesOnNewLoad: function() {
+        repopulateWithReloadedFeatures: function() {
             var schema = this;
-            return !!(schema.search && schema.search.form);
+            return (schema.search && schema.search.form) || schema.group === "all";
         },
 
-        getData: function (callback) {
+        getData: function (options) {
             var schema = this;
             var widget = schema.widget;
-
-            console.log("getData");
 
             var map = widget.map;
             var projection = map.getProjectionObject();
             var extent = map.getExtent();
+
+            var callback = options && options.callback;
+            var reloadNew = schema.repopulateWithReloadedFeatures() || (options && options.reloadNew);
+
+            console.log(reloadNew,"$$$");
 
 
             var request = {
@@ -749,10 +754,7 @@
 
 
             schema.selectXHR = widget.query('select', request).then(function (featureCollection) {
-                if (schema.removeFeaturesOnNewLoad()) {
-                    schema.removeAllFeatures();
-                }
-                schema.onFeatureCollectionLoaded(featureCollection, this);
+                schema.onFeatureCollectionLoaded(featureCollection, reloadNew, this);
                 if (typeof callback === "function") {
                     callback.apply();
                 }
@@ -797,7 +799,8 @@
 
         },
 
-        onFeatureCollectionLoaded: function (featureCollection, xhr) {
+
+        onFeatureCollectionLoaded: function (featureCollection, newFeaturesOnly, xhr) {
             var schema = this;
 
             if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
@@ -814,7 +817,14 @@
                 features: featureCollection.features
             });
 
-            schema.layer.features = schema.group === "all" ? newFeatures : schema.mergeExistingFeaturesWithLoadedFeatures(newFeatures);
+            if (newFeaturesOnly) {
+                schema.removeAllFeatures();
+                schema.layer.features = newFeatures;
+            } else {
+                schema.layer.features = schema.mergeExistingFeaturesWithLoadedFeatures(newFeatures);
+            }
+
+
 
             schema.layer.features.forEach(function(feature){
 
@@ -828,7 +838,12 @@
         setStyleProperties: function(feature) {
             var schema = this;
 
-            try {
+            function isGetter (obj, prop) {
+                var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+                return !!descriptor && !!descriptor['get'];
+            }
+
+            if (!isGetter(feature,'style')) {
 
                 Object.defineProperty(feature, 'style', {
                     get: function () {
@@ -842,11 +857,10 @@
                         feature._style = value; // is never used
                     }
                 });
-            } catch(e) {
-                console.error("Error in redefining property 'style'",e);
             }
 
-            try {
+            if (!isGetter(feature,'renderIntent')) {
+
 
                 Object.defineProperty(feature, 'renderIntent', {
                     get: function () {
@@ -876,8 +890,6 @@
                         feature._renderIntent = value; // is never used
                     }
                 });
-            } catch(e) {
-                console.error("Error in redefining property 'renderIntent'",e);
             }
         },
 
