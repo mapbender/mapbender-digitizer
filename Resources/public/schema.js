@@ -234,7 +234,6 @@
                 },
 
                 highlight: function (feature) {
-                    console.log(feature.renderIntent);
 
                     console.assert(!!feature, "Feature must be set");
                     if (!schema.layer.features.includes(feature)) {
@@ -249,8 +248,6 @@
 
                 },
                 unhighlight: function (feature) {
-                    console.log(feature.renderIntent);
-
                     if (!schema.layer.features.includes(feature)) {
                         return;
                     }
@@ -261,8 +258,6 @@
 
                     schema.layer.drawFeature(feature, feature.style || feature.renderIntent);
                     this.events.triggerEvent("featureunhighlighted", {feature : feature});
-                    console.log(feature.renderIntent+"!");
-
                 }
             });
 
@@ -290,8 +285,6 @@
         schema.createFormItemsCollection();
 
         createPopupConfiguration();
-
-        schema.setModifiedState = Mapbender.Digitizer.Scheme.prototype.setModifiedState.bind(this); // In order to achive arrow-function like "this" behaviour
 
         schema.toolset = schema.createToolset(); // Is overwritten and must therefore be implemented in the prototype
 
@@ -651,8 +644,6 @@
 
             var row = schema.menu.resultTable.getTableRowByFeature(feature);
             if (!row) {
-                feature.isNew = true;
-                schema.setStyleProperties(feature);
                 return; // In case of non-saved feature
             }
             feature.isChanged = true;
@@ -719,6 +710,8 @@
         getData: function (callback) {
             var schema = this;
             var widget = schema.widget;
+
+            console.log("getData");
 
             var map = widget.map;
             var projection = map.getProjectionObject();

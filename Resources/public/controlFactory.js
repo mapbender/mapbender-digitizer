@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    var createFeatureAddedMethod = function (injectedMethods) {
+    var createFeatureAddedMethod = function (injectedMethods) { // injectedMethods is actually not much more than a restricted Version of Scheme
 
         var func = function (feature) {
             var control = this;
@@ -12,6 +12,9 @@
 
             feature.attributes.schemaName = control.schemaName;
             feature.mbOrigin = 'digitizer';
+
+            feature.isNew = true;
+            injectedMethods.setStyleProperties(feature);
 
             injectedMethods.setModifiedState(feature, this);
 
