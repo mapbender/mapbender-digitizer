@@ -835,11 +835,12 @@
                 get: function() {
                     var feature = this;
                     var style =  feature.visible && !feature.isHighlighted ? schema.getFeatureStyle(feature.fid) : null;
+
                     return style;
                 },
                 set: function(value) {
                     var feature = this;
-                    feature._style = value;
+                    feature._style = value; // is never used
                 }
             });
 
@@ -867,7 +868,8 @@
                 },
                 set: function(value) {
                     var feature = this;
-                    feature._renderIntent = value;
+
+                    feature._renderIntent = value; // is never used
                 }
             });
         },
