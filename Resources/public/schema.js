@@ -541,10 +541,11 @@
             }).done(function (response) {
 
                 schema.updateConfigurationAfterSwitching(response.schemes);
-
                 layer.setVisibility(true);
                 frame.show();
-                schema.selectControl.activate();
+                if (schema.widget.isFullyActive) {
+                    schema.selectControl.activate();
+                }
                 schema.getData({
                     reloadNew: true
                 });

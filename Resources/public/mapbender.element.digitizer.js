@@ -110,6 +110,8 @@
 
         disabled: true,
 
+        isFullyActive: true,
+
         _create: function () {
 
             var widget = this.widget = this;
@@ -135,30 +137,35 @@
             widget.query = qe.query;
             widget.getElementURL = qe.getElementURL;
 
-            widget.spinner = new function () {
-                var spinner = this;
+            var createSpinner = function() {
 
-                spinner.openRequests = 0;
+                widget.spinner = new function () {
+                    var spinner = this;
 
-                var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell').prepend("<div class='spinner' style='display:none'></div>");
-                spinner.$element = $parent.find(".spinner");
+                    spinner.openRequests = 0;
 
-                spinner.addRequest = function () {
-                    spinner.openRequests++;
-                    if (spinner.openRequests >= 1) {
-                        spinner.$element.show();
-                    }
+                    var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell').prepend("<div class='spinner' style='display:none'></div>");
+                    spinner.$element = $parent.find(".spinner");
+
+                    spinner.addRequest = function () {
+                        spinner.openRequests++;
+                        if (spinner.openRequests >= 1) {
+                            spinner.$element.show();
+                        }
+                    };
+
+                    spinner.removeRequest = function () {
+                        spinner.openRequests--;
+                        if (spinner.openRequests === 0) {
+                            spinner.$element.hide();
+                        }
+                    };
+
+
                 };
-
-                spinner.removeRequest = function () {
-                    spinner.openRequests--;
-                    if (spinner.openRequests === 0) {
-                        spinner.$element.hide();
-                    }
-                };
-
-
             };
+
+            createSpinner();
 
 
             Mapbender.elementRegistry.waitReady(widget.options.target).then(widget.setup.bind(widget));
@@ -174,7 +181,6 @@
             var widget = this;
             var element = $(widget.element);
             var options = widget.options;
-
             widget.selector = $("select.selector", element);
 
             widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
@@ -273,11 +279,11 @@
                     selector: 'div',
                     events: {
                         show: function (options) {
-                            return widget.getCurrentSchema && widget.getCurrentSchema().mapContextMenu.allowUseContextMenu(options);
+                            return widget.isFullyActive && widget.getCurrentSchema && widget.getCurrentSchema().mapContextMenu.allowUseContextMenu(options);
                         }
                     },
                     build: function (trigger, e) {
-                        return widget.getCurrentSchema && widget.getCurrentSchema().mapContextMenu.buildContextMenu(trigger, e);
+                        return widget.isFullyActive && widget.getCurrentSchema && widget.getCurrentSchema().mapContextMenu.buildContextMenu(trigger, e);
                     }
                 };
 
@@ -352,7 +358,13 @@
 
             widget.registerMapEvents();
 
-            widget._trigger('ready');
+           widget._trigger('ready');
+
+           if(widget.displayOnInactive) {
+               widget.activate();
+               widget.isFullyActive = false;
+               widget.getCurrentSchema().selectControl.deactivate();
+           }
 
         },
 
@@ -419,7 +431,7 @@
         activate: function () {
             var widget = this;
             widget.enable();
-
+            widget.isFullyActive = true;
             widget.onSelectorChange(); // triggers schema activation
 
 
@@ -428,6 +440,7 @@
         deactivate: function () {
             var widget = this;
             widget.disable();
+            widget.isFullyActive = false;
             widget.getCurrentSchema && widget.getCurrentSchema().deactivateSchema();
         },
 
