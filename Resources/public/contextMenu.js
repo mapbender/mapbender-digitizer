@@ -82,14 +82,16 @@
     Mapbender.Digitizer.MapContextMenu.prototype.createMapContextMenuSubMenu = function (feature) {
         var contextMenu = this;
         var schema = contextMenu.schema;
-        var subItems = {
-            zoomTo: {
+        var subItems = { };
+
+        if (schema.allowLocate) {
+            subItems['zoomTo'] = {
                 name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
                 action: function (key, options, parameters) {
                     schema.zoomToJsonFeature(feature);
                 }
             }
-        };
+        }
 
         if (schema.allowCustomStyle) {
             subItems['style'] = {
