@@ -91,7 +91,7 @@
             }
         };
 
-        if (schema.allowChangeVisibility) {
+        if (schema.allowCustomStyle) {
             subItems['style'] = {
                 name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
                 action: function (key, options, parameters) {
