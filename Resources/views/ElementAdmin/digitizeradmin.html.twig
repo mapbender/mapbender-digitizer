@@ -175,5 +175,10 @@
     {{ form_label(form.configuration.useAllScheme) }}
     </div>
     <div class="clearContainer"></div>
+    {{ form_widget(form.configuration.displayOnInactive) }}
+    <div class="checkboxLabel">
+        {{ form_label(form.configuration.displayOnInactive) }}
+    </div>
+    <div class="clearContainer"></div>
     {{ form_label(form.configuration.schemes) }}{{ form_widget(form.configuration.schemes) }}
 </div>

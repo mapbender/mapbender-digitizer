@@ -26,6 +26,7 @@ Ansprechen:
 Refactoring - Renaming:
 - Konsistente Linie für Methodennamen, hinsichtlich des _ als Präfix
 - Markiere JQuery Variablen mit $ Präfix
+- Jquery Ui Kontextmenü durch Openlayers nahe Lösung erstetzen
 
 Refactoring - Code sortieren:
 - currentPopup ist schlechter Stil und gehören weg
@@ -37,7 +38,6 @@ Refactoring - Code sortieren:
 - Manche Funktionalitäten wie z.B. forEach Iteratoren tauchen sowohl als vanilla, als underscore und als jquery auf. Das ist schlecht.
 - Context Menu in den Handler des Select Controls auslagern (Rechtsklick!)
 - Seperation of Concerns - Inititalisierung und Anwendung trennen
-- Druck reparieren
 
 
 Testing:
@@ -120,6 +120,8 @@ Gemacht:
 - Evaluieren ob es sich lohnt, digitizingToolset den widget Status zu entziehen
 - Alle "Evals" in seperate Funktionen auslagern, wo sie zugriff auf alle eventuell sie umgebenden Klassen haben
 - Updaten von ClusterStrategy im Widget findet nicht im Callback von getData statt
+- Druck reparieren
+
 
 
 

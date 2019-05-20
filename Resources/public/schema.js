@@ -521,6 +521,7 @@
             var widget = schema.widget;
             var frame = schema.frame;
             var layer = schema.layer;
+
             widget.getCurrentSchema = function() {
                 return schema;
             };
@@ -562,13 +563,12 @@
 
             delete widget.getCurrentSchema;
 
-            if (!schema.displayPermanent) {
+            if (!schema.displayPermanent && !schema.widget.displayOnInactive) {
                 layer.setVisibility(false);
             }
 
             schema.selectControl.deactivate();
 
-            // https://trac.wheregroup.com/cp/issues/4548
             if (widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
             }

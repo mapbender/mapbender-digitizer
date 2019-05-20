@@ -127,6 +127,8 @@
 
             widget.openLayersCloudImagePath = widget.options.openLayersCloudImagePath;
 
+            widget.displayOnInactive = widget.options.displayOnInactive;
+
             widget.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
 
             var qe = new Mapbender.Digitizer.QueryEngine(widget);
@@ -271,11 +273,11 @@
                     selector: 'div',
                     events: {
                         show: function (options) {
-                            return widget.getCurrentSchema().mapContextMenu.allowUseContextMenu(options);
+                            return widget.getCurrentSchema && widget.getCurrentSchema().mapContextMenu.allowUseContextMenu(options);
                         }
                     },
                     build: function (trigger, e) {
-                        return widget.getCurrentSchema().mapContextMenu.buildContextMenu(trigger, e);
+                        return widget.getCurrentSchema && widget.getCurrentSchema().mapContextMenu.buildContextMenu(trigger, e);
                     }
                 };
 
@@ -293,11 +295,11 @@
                     selector: '.mapbender-element-result-table > div > table > tbody > tr',
                     events: {
                         show: function (options) {
-                            return widget.getCurrentSchema().elementContextMenu.allowUseContextMenu(options);
+                            return widget.getCurrentSchema && widget.getCurrentSchema().elementContextMenu.allowUseContextMenu(options);
                         }
                     },
                     build: function (trigger, e) {
-                        return widget.getCurrentSchema().elementContextMenu.buildContextMenu(trigger, e);
+                        return widget.getCurrentSchema && widget.getCurrentSchema().elementContextMenu.buildContextMenu(trigger, e);
                     }
                 };
 
@@ -334,6 +336,19 @@
             createMapContextMenu();
 
             createElementContextMenu();
+
+            // widget.map.div.oncontextmenu = function(e) {
+            //
+            //     if(!e){ //dear IE...
+            //         var e = window.event;
+            //         e.returnValue = false;
+            //     }
+            //     var f = widget.getCurrentSchema().layer.getFeatureFromEvent(e);
+            //     alert(f);
+            //     //f is the pointed vector.feature :)
+            //
+            //     return false; //Prevent display of browser context menu
+            // };
 
             widget.registerMapEvents();
 
@@ -404,6 +419,7 @@
         activate: function () {
             var widget = this;
             widget.enable();
+
             widget.onSelectorChange(); // triggers schema activation
 
 
