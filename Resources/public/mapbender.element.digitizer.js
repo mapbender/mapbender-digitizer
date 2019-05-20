@@ -363,7 +363,6 @@
            if(widget.displayOnInactive) {
                widget.activate();
                widget.isFullyActive = false;
-               widget.getCurrentSchema().selectControl.deactivate();
            }
 
         },
