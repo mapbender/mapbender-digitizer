@@ -91,6 +91,8 @@ class Digitizer extends BaseElement
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/context-menu.scss',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
+                '@MapbenderDigitizerBundle/Resources/public/sass/element/modal.scss',
+
             ),
             'trans' => array(
                 'MapbenderDigitizerBundle:Element:digitizer.json.twig',
