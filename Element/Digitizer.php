@@ -163,7 +163,6 @@ class Digitizer extends BaseElement
                             $formValue = $this->container->get('request')->get($URLParam);
                             if ($formValue) {
                                 $form["mapping"][$URLParam] = $formValue;
-                                $a = 1;
                             }
                         }
                     }
