@@ -73,7 +73,6 @@
                 _.each(schema.search.form, function (item) {
 
                     if (item.URLParam) {
-                        console.log(item);
                         var value = item.mapping[item.name];
 
                         if (value && item.options) {
