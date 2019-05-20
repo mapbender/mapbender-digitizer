@@ -7,6 +7,10 @@
         schema.widget = widget;
         $.extend(schema, rawScheme);
 
+        if (!rawScheme.currentExtentSearch && rawScheme.searchType) {
+            schema.currentExtentSearch = rawScheme.searchType === "current";
+        }
+
         var styleLabels = ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
 
         var initializeHooksForControlPrevention = function () {
