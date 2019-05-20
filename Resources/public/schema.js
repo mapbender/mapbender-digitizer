@@ -131,7 +131,6 @@
 
             schema.menu = new Mapbender.Digitizer.Menu(schema);
 
-            schema.frame = schema.menu.frame;
             element.append(schema.menu.frame);
 
         };
@@ -523,7 +522,7 @@
             var schema = this;
 
             var widget = schema.widget;
-            var frame = schema.frame;
+            var frame = schema.menu.frame;
             var layer = schema.layer;
 
             widget.getCurrentSchema = function() {
@@ -561,7 +560,7 @@
         deactivateSchema: function () {
             var schema = this;
             var widget = schema.widget;
-            var frame = schema.frame;
+            var frame = schema.menu.frame;
             var layer = schema.layer;
 
             frame.hide();
@@ -653,7 +652,7 @@
         setModifiedState: function (feature, control) {
 
             var schema = this;
-            $(schema.frame).find(".save-all-features").addClass("active");
+            $(schema.menu.frame).find(".save-all-features").addClass("active");
 
             var row = schema.menu.resultTable.getTableRowByFeature(feature);
             if (!row) {
@@ -680,7 +679,7 @@
             feature.isCopy = false;
 
             if (schema.getUnsavedFeatures().length === 0) {
-                $(schema.frame).find(".save-all-features").removeClass("active");
+                $(schema.menu.frame).find(".save-all-features").removeClass("active");
             }
 
             var row = schema.menu.resultTable.getTableRowByFeature(feature);
