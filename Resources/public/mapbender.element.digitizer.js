@@ -79,10 +79,32 @@
                 display: 'none'
             },
 
+            'labelText': {
+                strokeWidth: 0,
+                fillColor: '#cccccc',
+                fillOpacity: 0,
+                strokeColor: '#5e1a2b',
+                strokeOpacity: 0,
+                pointRadius: 15,
+                label: '${label}',
+                fontSize: 15
+            },
+            'labelTextHover': {
+                strokeWidth: 0,
+                fillColor: '#cccccc',
+                strokeColor: '#2340d3',
+                fillOpacity: 1,
+                pointRadius: 15,
+                label: '${label}',
+                fontSize: 15
+            },
+
         },
         printClient: null,
 
         useAllScheme: true,
+
+        displayOnInactive: false,
 
         openLayersCloudImagePath: null,
 

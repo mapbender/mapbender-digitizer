@@ -413,7 +413,6 @@
         zoomScaleDenominator: 500,
         useContextMenu: true,
         displayPermanent: false,
-        displayOnInactive: false,
         toolset: {},
         popup: {},
         styles: {

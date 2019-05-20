@@ -9,6 +9,7 @@ Hinzugefügte Properties:
 - copy.overwriteValuesWithDefault - Beim Kopieren werden die Daten des Kopierten Features von den eingetragenen Defaultwerten überschrieben
 - copy.moveCopy.x, copy.moveCopy.y - Koordinatenverschiebungen beim Kopieren
 - showLabel - Zeige Featuretype.Name als Label von Geometrie an
+- useAllScheme, displayOnInactive, openLayersCloudImagePath: Parameter für Digitizer gesamt
 
 
 

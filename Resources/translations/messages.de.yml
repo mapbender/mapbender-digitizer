@@ -1,5 +1,6 @@
 mb.digitizer:
   useAllScheme: 'Verwende aggregierendes Schema'
+  displayOnInactive: 'Auch anzeigen, wenn nicht aktiv'
   schema:
     allgeometries: 'Alle Geometrien'
   feature:

@@ -43,6 +43,7 @@ class DigitizerAdminType extends AbstractType
                 'property_path' => '[target]',
                 'required'      => false))
             ->add('useAllScheme','checkbox',array('required' => false, 'label' => 'mb.digitizer.useAllScheme'))
+            ->add('displayOnInactive','checkbox',array('required' => false, 'label' => 'mb.digitizer.displayOnInactive'))
             ->add('schemes', new YAMLConfigurationType(),
                 array('required' => false, 'attr' => array('class' => 'code-yaml')));
     }

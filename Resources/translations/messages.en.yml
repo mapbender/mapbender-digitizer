@@ -1,5 +1,6 @@
 mb.digitizer:
   useAllScheme: 'Use aggregating Scheme'
+  displayOnInactive: 'Display when not active'
   schema:
     allgeometries: 'All Geometries'
   feature:
