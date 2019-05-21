@@ -100,6 +100,9 @@
             },
 
         },
+
+        initialScheme: null,
+
         printClient: null,
 
         useAllScheme: true,
@@ -137,7 +140,7 @@
             widget.query = qe.query;
             widget.getElementURL = qe.getElementURL;
 
-            var createSpinner = function() {
+            var createSpinner = function () {
 
                 widget.spinner = new function () {
                     var spinner = this;
@@ -218,12 +221,12 @@
                 }
             };
 
-            var usesAllScheme = function() {
+            var usesAllScheme = function () {
                 return !widget.hasOnlyOneScheme && widget.useAllScheme;
             };
 
             // TODO this is not the proper implementation - fix that
-            var isOpenByDefault = function() {
+            var isOpenByDefault = function () {
                 var sidePane = $(widget.element).closest(".sidePane");
 
                 var accordion = $(".accordionContainer", sidePane);
@@ -264,6 +267,8 @@
 
                 widget.selector.val(basicScheme);
 
+                widget.initialScheme = widget.schemes[basicScheme];
+
                 if (isOpenByDefault()) {
                     widget.activate();
                 }
@@ -279,11 +284,11 @@
                     selector: 'div',
                     events: {
                         show: function (options) {
-                            return widget.isFullyActive && widget.getCurrentSchema && widget.getCurrentSchema().mapContextMenu.allowUseContextMenu(options);
+                            return widget.isFullyActive && widget.getCurrentSchema().mapContextMenu.allowUseContextMenu(options);
                         }
                     },
                     build: function (trigger, e) {
-                        return widget.isFullyActive && widget.getCurrentSchema && widget.getCurrentSchema().mapContextMenu.buildContextMenu(trigger, e);
+                        return widget.isFullyActive && widget.getCurrentSchema().mapContextMenu.buildContextMenu(trigger, e);
                     }
                 };
 
@@ -301,11 +306,11 @@
                     selector: '.mapbender-element-result-table > div > table > tbody > tr',
                     events: {
                         show: function (options) {
-                            return widget.getCurrentSchema && widget.getCurrentSchema().elementContextMenu.allowUseContextMenu(options);
+                            return widget.getCurrentSchema().elementContextMenu.allowUseContextMenu(options);
                         }
                     },
                     build: function (trigger, e) {
-                        return widget.getCurrentSchema && widget.getCurrentSchema().elementContextMenu.buildContextMenu(trigger, e);
+                        return widget.getCurrentSchema().elementContextMenu.buildContextMenu(trigger, e);
                     }
                 };
 
@@ -315,23 +320,29 @@
 
             var initializeSelector = function () {
                 var selector = widget.selector;
+                var previousSchema = null;
 
-                selector.on('change', widget.onSelectorChange);
+                selector.on('focus', function () {
+                    var selector = widget.selector;
+                    var option = selector.find(":selected");
+                    previousSchema = option.data("schemaSettings");
+
+                }).on('change', function () {
+
+                    var selector = widget.selector;
+                    var option = selector.find(":selected");
+                    var schema = option.data("schemaSettings");
+
+                    previousSchema.deactivateSchema();
+                    schema.activateSchema();
+                    previousSchema = schema;
+
+                });
+
 
             };
 
             initializeSelectorOrTitleElement();
-
-            widget.onSelectorChange = function () { // Do not implement in prototype because of static widget access
-                var selector = widget.selector;
-
-                var option = selector.find(":selected");
-                var newSchema = option.data("schemaSettings");
-
-                widget.getCurrentSchema && widget.getCurrentSchema().deactivateSchema();
-
-                newSchema.activateSchema();
-            };
 
             initializeSelector();
 
@@ -358,29 +369,30 @@
 
             widget.registerMapEvents();
 
-           widget._trigger('ready');
+            widget._trigger('ready');
 
-           if(widget.displayOnInactive) {
-               widget.activate();
-               widget.isFullyActive = false;
-           }
+            if (widget.displayOnInactive) {
+                widget.activate();
+                widget.isFullyActive = false;
+            }
 
         },
 
-        disable: function() {
-          var widget = this;
-          widget.disabled = true;
+        disable: function () {
+            var widget = this;
+            widget.disabled = true;
         },
 
-        enable: function() {
+        enable: function () {
             var widget = this;
             widget.disabled = false;
         },
 
-        isEnabled: function() {
+        isEnabled: function () {
             var widget = this;
             return !widget.disabled;
         },
+
 
         registerMapEvents: function () {
             var widget = this;
@@ -390,20 +402,20 @@
                 widget.isEnabled() && widget.getCurrentSchema().getData();
             });
             map.events.register("zoomend", this, function () {
-                widget.isEnabled() && widget.getCurrentSchema().getData({ zoom: true});
+                widget.isEnabled() && widget.getCurrentSchema().getData({zoom: true});
             });
 
-            map.events.register("mouseover", this, function() {
+            map.events.register("mouseover", this, function () {
                 widget.isEnabled() && widget.getCurrentSchema().mapContextMenu.enable();
             });
 
-            map.events.register("mouseout", this, function() {
+            map.events.register("mouseout", this, function () {
                 widget.isEnabled() && widget.getCurrentSchema().mapContextMenu.disable();
             });
             map.resetLayersZIndex();
         },
 
-        getOpenLayersCloudImagePath: function() {
+        getOpenLayersCloudImagePath: function () {
             var widget = this;
             return widget.openLayersCloudImagePath ? Mapbender.Digitizer.Utilities.getAssetsPath(widget.openLayersCloudImagePath) : OpenLayers.ImgPath;
         },
@@ -427,11 +439,16 @@
             return scheme;
         },
 
+        getCurrentSchema: function() {
+            var widget = this;
+            return widget.initialScheme;
+        },
+
         activate: function () {
             var widget = this;
             widget.enable();
             widget.isFullyActive = true;
-            widget.onSelectorChange(); // triggers schema activation
+            widget.getCurrentSchema().activateSchema(true); // triggers schema activation
 
 
         },
@@ -440,7 +457,7 @@
             var widget = this;
             widget.disable();
             widget.isFullyActive = false;
-            widget.getCurrentSchema && widget.getCurrentSchema().deactivateSchema();
+            widget.getCurrentSchema().deactivateSchema(true);
         },
 
 

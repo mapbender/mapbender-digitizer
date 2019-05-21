@@ -517,7 +517,7 @@
         },
 
 
-        activateSchema: function () {
+        activateSchema: function (activateWidget) {
 
             var schema = this;
 
@@ -557,7 +557,7 @@
 
         },
 
-        deactivateSchema: function () {
+        deactivateSchema: function (deactivateWidget) {
             var schema = this;
             var widget = schema.widget;
             var frame = schema.menu.frame;
@@ -565,9 +565,7 @@
 
             frame.hide();
 
-            delete widget.getCurrentSchema;
-
-            if (!schema.displayPermanent && !schema.widget.displayOnInactive) {
+            if ( (deactivateWidget && !schema.widget.displayOnInactive) || (!deactivateWidget && !schema.displayPermanent)) {
                 layer.setVisibility(false);
             }
 
