@@ -184,7 +184,39 @@
             var widget = this;
             var element = $(widget.element);
             var options = widget.options;
+
+
+
             widget.selector = $("select.selector", element);
+
+            widget.selector.getSelectedSchema = function() {
+                var selector = this;
+                var option = selector.find(":selected");
+                return option.data("schemaSettings");
+            };
+
+            widget.selector.appendSchema = function(schema,prepend) {
+                var selector = this;
+                var option = $("<option/>");
+                option.val(schema.schemaName).html(schema.label);
+                option.data("schemaSettings", schema);
+                prepend ? selector.prepend(option) : selector.append(option);
+            };
+
+            widget.selector.on('focus', function () {
+                var selector = widget.selector;
+                selector.previousSchema = selector.getSelectedSchema();
+
+            }).on('change', function () {
+
+                var selector = widget.selector;
+                var schema = selector.getSelectedSchema();
+
+                selector.previousSchema.deactivateSchema();
+                schema.activateSchema();
+                selector.previousSchema = schema;
+
+            });
 
             widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
 
@@ -235,13 +267,6 @@
 
             var createSchemes = function () {
 
-                var createSchemaOption = function (schema) {
-                    var option = $("<option/>");
-                    option.val(schema.schemaName).html(schema.label);
-                    option.data("schemaSettings", schema);
-                    return option;
-
-                };
 
                 var rawSchemes = widget.options.schemes;
                 widget.schemes = {};
@@ -249,7 +274,7 @@
                 _.each(rawSchemes, function (rawScheme, schemaName) {
                     rawScheme.schemaName = schemaName;
                     widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget, index++);
-                    widget.selector.append(createSchemaOption(widget.schemes[schemaName]));
+                    widget.selector.appendSchema(widget.schemes[schemaName])
                 });
 
 
@@ -261,7 +286,7 @@
                         label: Mapbender.DigitizerTranslator.translate('schema.allgeometries'),
                         schemaName: 'all'
                     }, widget, index++);
-                    widget.selector.prepend(createSchemaOption(widget.schemes['all']));
+                    widget.selector.appendSchema(widget.schemes['all'],true);
                     basicScheme = 'all';
                 }
 
@@ -318,33 +343,8 @@
 
             };
 
-            var initializeSelector = function () {
-                var selector = widget.selector;
-                var previousSchema = null;
-
-                selector.on('focus', function () {
-                    var selector = widget.selector;
-                    var option = selector.find(":selected");
-                    previousSchema = option.data("schemaSettings");
-
-                }).on('change', function () {
-
-                    var selector = widget.selector;
-                    var option = selector.find(":selected");
-                    var schema = option.data("schemaSettings");
-
-                    previousSchema.deactivateSchema();
-                    schema.activateSchema();
-                    previousSchema = schema;
-
-                });
-
-
-            };
 
             initializeSelectorOrTitleElement();
-
-            initializeSelector();
 
             createSchemes();
 
