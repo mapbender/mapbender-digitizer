@@ -70,7 +70,7 @@
         };
 
 
-        var extendSearchOptions = function() {
+        var extendSearchOptions = function () {
 
             if (schema.search.form) {
 
@@ -80,24 +80,28 @@
                         var value = item.mapping[item.name];
 
                         if (value && item.options) {
-                           var option = item.options.find(function(option) { return option[0].toLowerCase() === value.toLowerCase() });
+                            var option = item.options.find(function (option) {
+                                return option[0].toLowerCase() === value.toLowerCase()
+                            });
                             if (option) {
                                 item.value = option;
                             } else {
-                                $.notify(value +" is not a valid value for "+item.name);
+                                $.notify(value + " is not a valid value for " + item.name);
                             }
                         }
 
                     }
 
                     item.change = function () {
-                        schema.getData().done({ callback: function () {
-                            if (schema.search.zoomScale) {
-                                widget.map.zoomToScale(schema.search.zoomScale, true);
-                            } else {
-                                widget.map.zoomToExtent(schema.layer.getDataExtent());
+                        schema.getData().done({
+                            callback: function () {
+                                if (schema.search.zoomScale) {
+                                    widget.map.zoomToScale(schema.search.zoomScale, true);
+                                } else {
+                                    widget.map.zoomToExtent(schema.layer.getDataExtent());
+                                }
                             }
-                        }});
+                        });
                     };
 
                     if (item.type === 'select' && item.ajax) {
@@ -142,25 +146,8 @@
 
             var createStyleMap = function () {
 
-                var getStyleMapContext = function () {
-                    return {
-                        webRootPath: Mapbender.Digitizer.Utilities.getAssetsPath(),
 
-                        feature: function (feature) {
-                            return feature;
-                        },
-                        label: function (feature) {
-                            var label = schema.featureType.name;
-                            if (schema.showLabel && label) {
-                                return feature.attributes[label] || feature.getClusterSize() || "";
-                            } else {
-                                return '';
-                            }
-                        }
-                    }
-                };
-
-                var context = getStyleMapContext();
+                var context = schema.getStyleMapContext();
                 var styleMapObject = {};
 
                 styleLabels.forEach(function (label) {
@@ -249,7 +236,7 @@
                     });
 
                     layer.drawFeature(feature);
-                    this.events.triggerEvent("featurehighlighted", {feature : feature});
+                    this.events.triggerEvent("featurehighlighted", {feature: feature});
 
                 },
                 unhighlight: function (feature) {
@@ -265,11 +252,10 @@
 
 
                     schema.layer.drawFeature(feature);
-                    this.events.triggerEvent("featureunhighlighted", {feature : feature});
+                    this.events.triggerEvent("featureunhighlighted", {feature: feature});
 
                 }
             });
-
 
 
             // Workaround to move map by touch vector features
@@ -279,8 +265,6 @@
             widget.map.addControl(schema.selectControl);
 
         };
-
-
 
 
         initializeHooksForControlPrevention();
@@ -328,7 +312,6 @@
         }
 
         schema.initializeClustering && schema.initializeClustering();
-
 
 
         var assert = function () {
@@ -468,7 +451,7 @@
             return schema.featureType.geomType;
         },
 
-        getDefaultTableFields: function() {
+        getDefaultTableFields: function () {
             var schema = this;
             var tableFields = {};
             tableFields[schema.featureType.uniqueId] = {label: 'Nr.', width: '20%'};
@@ -479,7 +462,18 @@
 
         },
 
-        getExtendedStyle: function(label) {
+        getStyleMapContext: function () {
+            var schema = this;
+            return {
+                webRootPath: Mapbender.Digitizer.Utilities.getAssetsPath(),
+
+                feature: function (feature) {
+                    return feature;
+                }
+            }
+        },
+
+        getExtendedStyle: function (label) {
             var schema = this;
             return schema.styles[label];
         },
@@ -489,19 +483,15 @@
 
             schema.tableFields = schema.tableFields || schema.getDefaultTableFields();
 
-            _.each(schema.tableFields,function(tableField) {
+            _.each(schema.tableFields, function (tableField) {
 
                 if (tableField.type === "image") {
-                    tableField.render = function (imgName, renderType, feature, x){
+                    tableField.render = function (imgName, renderType, feature, x) {
                         return $("<img style='width: 20px'/>").attr('src', Mapbender.Digitizer.Utilities.getAssetsPath(tableField.path + imgName))[0].outerHTML;
                     }
                 }
             });
         },
-
-
-
-
 
 
         createFormItemsCollection: function (formItems) {
@@ -525,7 +515,7 @@
             var frame = schema.menu.frame;
             var layer = schema.layer;
 
-            widget.getCurrentSchema = function() {
+            widget.getCurrentSchema = function () {
                 return schema;
             };
 
@@ -565,7 +555,7 @@
 
             frame.hide();
 
-            if ( (deactivateWidget && !schema.widget.displayOnInactive) || (!deactivateWidget && !schema.displayPermanent)) {
+            if ((deactivateWidget && !schema.widget.displayOnInactive) || (!deactivateWidget && !schema.displayPermanent)) {
                 layer.setVisibility(false);
             }
 
@@ -644,9 +634,6 @@
         },
 
 
-
-
-
         setModifiedState: function (feature, control) {
 
             var schema = this;
@@ -712,7 +699,7 @@
         },
 
 
-        repopulateWithReloadedFeatures: function(forcedReload,zoom) {
+        repopulateWithReloadedFeatures: function (forcedReload, zoom) {
             var schema = this;
             var doReload = ((schema.search && schema.search.form) || schema.group === "all") && (!zoom);
             return doReload || forcedReload;
@@ -752,7 +739,6 @@
             if (schema.selectXHR && schema.selectXHR.abort) {
                 schema.selectXHR.abort();
             }
-
 
 
             schema.selectXHR = widget.query('select', request).then(function (featureCollection) {
@@ -828,27 +814,26 @@
             }
 
 
-
-            schema.layer.features.forEach(function(feature){
+            schema.layer.features.forEach(function (feature) {
                 schema.introduceFeature(feature);
             });
 
             schema.reloadFeatures();
         },
 
-        setStyleProperties: function(feature) {
+        setStyleProperties: function (feature) {
             var schema = this;
 
-            var isGetter = function(obj, prop) {
+            var isGetter = function (obj, prop) {
                 var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
                 return !!descriptor && !!descriptor['get'];
             };
 
-            var usesSpecificStyle = function(feature) {
+            var usesSpecificStyle = function (feature) {
                 return feature.visible && !feature.isHighlighted && !feature.isCopy && !feature.isChanged && !feature.isNew;
             };
 
-            if (!isGetter(feature,'style')) {
+            if (!isGetter(feature, 'style')) {
 
                 Object.defineProperty(feature, 'style', {
                     get: function () {
@@ -865,7 +850,7 @@
                 });
             }
 
-            if (!isGetter(feature,'renderIntent')) {
+            if (!isGetter(feature, 'renderIntent')) {
 
 
                 Object.defineProperty(feature, 'renderIntent', {
@@ -899,7 +884,7 @@
             }
         },
 
-        getFeatureStyle: function(id) {
+        getFeatureStyle: function (id) {
             var schema = this;
             return (schema.featureStyles && schema.featureStyles[id]) || null;
         },
@@ -1012,7 +997,7 @@
             return schema.getRestrictedVersion();
         },
 
-        introduceFeature: function(feature) {
+        introduceFeature: function (feature) {
             var schema = this;
             schema.setStyleProperties(feature);
             feature.mbOrigin = 'digitizer';
@@ -1089,7 +1074,7 @@
 
                 if (response.errors) {
 
-                    response.errors.forEach(function(error){
+                    response.errors.forEach(function (error) {
                         console.error(error.message);
                         $.notify(error.message, {
                             title: 'API Error',

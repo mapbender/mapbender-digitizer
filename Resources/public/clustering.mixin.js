@@ -17,6 +17,23 @@
                 return style;
             },
 
+            getStyleMapContext: function () {
+                var schema = this;
+
+                var styleMapContext =  Object.getPrototypeOf(schema).getStyleMapContext();
+
+                styleMapContext.label = function (feature) {
+                    var label = schema.featureType.name;
+                    if (schema.showLabel && label) {
+                        return feature.attributes[label] || feature.getClusterSize() || "";
+                    } else {
+                        return '';
+                    }
+                };
+
+                return styleMapContext;
+            },
+
 
             initializeClustering: function () {
                 var schema = this;
