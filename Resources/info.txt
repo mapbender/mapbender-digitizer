@@ -66,6 +66,7 @@ Bugs von Robin gefunden:
 Selbstgemachte Bugs:
 - Wenn Label zum Schema in schema.style definiert ist, wird es nicht gestylet über individuellen Style sondern überschreibt diesen.
   Das ist merkwürdig, Da individelle style Definitionen sonst Schema Style Definitionen überschreiben.
+  Wenn Ein Label im Backend Default Style definiert ist (${label}), und im Select Style nicht, wird bei Highlighting trotzdem das Label angezeigt, aber in anderem Style
 
 
 Legacy Bugs:
