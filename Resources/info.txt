@@ -64,6 +64,8 @@ Bugs von Robin gefunden:
     • Ausblenden einzelner/aller Objekte: Werden vorher alle Digitize-Objekten in ihren Kategorien ausgeblendet, so erscheinen sie in der Kategorie „all geometries“ doch wieder auf der Karte (Bug or Feature?)
 
 Selbstgemachte Bugs:
+- Wenn Label zum Schema in schema.style definiert ist, wird es nicht gestylet über individuellen Style sondern überschreibt diesen.
+  Das ist merkwürdig, Da individelle style Definitionen sonst Schema Style Definitionen überschreiben.
 
 
 Legacy Bugs:
