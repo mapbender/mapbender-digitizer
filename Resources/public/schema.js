@@ -712,9 +712,10 @@
         },
 
 
-        repopulateWithReloadedFeatures: function() {
+        repopulateWithReloadedFeatures: function(forcedReload,zoom) {
             var schema = this;
-            return (schema.search && schema.search.form) || schema.group === "all";
+            var doReload = ((schema.search && schema.search.form) || schema.group === "all") && (!zoom);
+            return doReload || forcedReload;
         },
 
         getData: function (options) {
@@ -726,7 +727,8 @@
             var extent = map.getExtent();
 
             var callback = options && options.callback;
-            var reloadNew = schema.repopulateWithReloadedFeatures() || (options && options.reloadNew);
+
+            var reloadNew = schema.repopulateWithReloadedFeatures(options && options.reloadNew, options && options.zoom);
 
             var request = {
                 srid: projection.proj.srsProjNumber,
@@ -754,7 +756,8 @@
 
 
             schema.selectXHR = widget.query('select', request).then(function (featureCollection) {
-                schema.onFeatureCollectionLoaded(featureCollection, reloadNew, this);
+                var xhr = this;
+                schema.onFeatureCollectionLoaded(featureCollection, reloadNew, xhr);
                 if (typeof callback === "function") {
                     callback.apply();
                 }
