@@ -23,9 +23,13 @@
 
                 injectedMethods: {
 
-                    openFeatureEditDialog: function (feature) {
+                    openFeatureEditDialog: function (feature,type) {
 
-                        if (schema.openFormAfterEdit) {
+                        console.assert(type === "add" || type === "donut" || type === "modify" || type === "move", "Type "+type+" is wrong in 'openFeatureEditDialog'");
+
+                        if (type === 'add' && schema.openFormAfterEdit) {
+                            schema.openFeatureEditDialog(feature);
+                        } else if (schema.openFormAfterModification) {
                             schema.openFeatureEditDialog(feature);
                         }
                     },
@@ -40,15 +44,6 @@
                     preventMove: function (feature) {
 
                         return schema.evaluatedHooksForControlPrevention.onStart && schema.evaluatedHooksForControlPrevention.onStart(feature);
-
-                    },
-                    extendFeatureDataWhenNoPopupOpen: function (feature) {
-
-
-                        if (schema.openFormAfterEdit) {
-                            schema.openFeatureEditDialog(feature);
-                        }
-
 
                     },
 

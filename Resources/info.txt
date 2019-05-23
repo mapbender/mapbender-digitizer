@@ -10,6 +10,7 @@ Hinzugefügte Properties:
 - copy.moveCopy.x, copy.moveCopy.y - Koordinatenverschiebungen beim Kopieren
 - showLabel - Zeige Featuretype.Name als Label von Geometrie an
 - useAllScheme, displayOnInactive, openLayersCloudImagePath: Parameter für Digitizer gesamt
+- openFormAfterModification - Öffnet Formular nach verschieben, Donut oder Modifikation
 
 
 
