@@ -940,6 +940,8 @@
 
             var layer = schema.layer;
             var newFeature = feature.clone();
+            schema.introduceFeature(newFeature);
+
             var defaultAttributes = featureSchema.copy.data || {};
             var allowCopy = true;
 
@@ -1025,12 +1027,6 @@
                     console.warn("More than 1 Feature returned from DB Operation");
                 }
 
-
-                if (feature.saveStyleDataCallback) {
-                    feature.saveStyleDataCallback(feature);
-                    feature.saveStyleDataCallback = null;
-                }
-
                 var geoJsonReader = new OpenLayers.Format.GeoJSON();
 
                 var newFeatures = geoJsonReader.read(response);
@@ -1040,6 +1036,11 @@
                 newFeature.fid = newFeature.fid || feature.fid;
 
                 newFeature.layer = feature.layer;
+
+                if (feature.saveStyleDataCallback) {
+                    feature.saveStyleDataCallback(newFeature);
+                    feature.saveStyleDataCallback = null;
+                }
 
                 return newFeature;
 
@@ -1165,7 +1166,7 @@
         getUnsavedFeatures: function () {
             var schema = this;
             return schema.layer.features.filter(function (feature) {
-                return feature.isNew || feature.isChanged
+                return feature.isNew || feature.isChanged || feature.isCopy;
             });
         },
 

@@ -138,7 +138,7 @@
 
             // buttons are deep copied! Should be moved to button constructing function though
             if (feature.isNew) {
-                delete this.buttons.styleButton;
+                //delete this.buttons.styleButton;
                 delete this.buttons.copyButton;
             }
         },
