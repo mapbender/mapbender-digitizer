@@ -175,6 +175,9 @@
             widget.map.removePopup(schema.featureCloudPopup);
             schema.featureCloudPopup.destroy();
             schema.featureCloudPopup = null;
+            if (configuration.hideSidepane) {
+                $('#sidepane').show();
+            }
 
         };
 
@@ -242,6 +245,9 @@
             var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(feature.geometry.toShortString()), null, $popup.html(), null, true, destroyCloudPopup);
             schema.featureCloudPopup = olPopup;
             map.addPopup(olPopup);
+            if (configuration.hideSidepane) {
+                $('#sidepane').hide();
+            }
             OpenLayers.ImgPath = originalImagePath;
         }
 

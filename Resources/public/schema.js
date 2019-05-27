@@ -402,7 +402,12 @@
         useContextMenu: true,
         displayPermanent: false,
         toolset: {},
-        popup: {},
+        popup: {
+            title: null,
+            width: '350px',
+            type: null,
+            hideSidepane: false
+        },
         styles: {
             default: {},
             select: {}
