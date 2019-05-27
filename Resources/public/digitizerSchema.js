@@ -239,6 +239,12 @@ var Scheme = OpenLayers.Class({
 
         widget.reloadFeatures(layer);
         layer.setVisibility(true);
+
+        _.each(widget.options.schemes,function(scheme){
+            if (scheme !== schema) {
+                scheme.frame.css('display', 'none'); // hide other schemes
+            }
+        });
         frame.css('display', 'block');
         schema.selectControl.activate();
 
@@ -252,15 +258,13 @@ var Scheme = OpenLayers.Class({
         //var tableApi = schema.table.resultTable('getApi');
         var layer = schema.layer;
 
-        frame.css('display', 'none');
+       frame.css('display', 'none');
 
         if (!schema.displayPermanent) {
             layer.setVisibility(false);
         }
 
         schema.selectControl.deactivate();
-
-        schema.xhr && schema.xhr.abort();
 
         // https://trac.wheregroup.com/cp/issues/4548
         if (widget.currentPopup) {
