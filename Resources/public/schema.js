@@ -201,7 +201,7 @@
 
                 openDialog: function (feature) {
 
-                    if (schema.allowEditData) {
+                    if (schema.allowEditData || schema.allowOpenEditDialog) {
                         schema.openFeatureEditDialog(feature);
                     }
                 },
@@ -379,6 +379,7 @@
         allowSaveAll: false,
         markUnsavedFeatures: true,
         showLabel: false,
+        allowOpenEditDialog: false,
 
 
         displayOnSelect: true, // BEV only, no implementation
