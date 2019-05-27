@@ -424,7 +424,7 @@
         },
         showVisibilityNavigation: true,
         allowPrintMetadata: false,
-        printable: true,
+        printable: false,
         maxScale: null,
         minScale: null,
         group: null,
