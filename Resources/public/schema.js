@@ -301,7 +301,7 @@
 
         addSelectControls();
 
-        schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.zoomOrOpenDialog.bind(schema));
+        schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.doDefaultClickAction.bind(schema));
 
         schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
         schema.elementContextMenu = new Mapbender.Digitizer.ElementContextMenu(schema);
@@ -380,6 +380,7 @@
         markUnsavedFeatures: true,
         showLabel: false,
         allowOpenEditDialog: false,
+        openDialogOnResultTableClick: false,
 
 
         displayOnSelect: true, // BEV only, no implementation
@@ -1196,10 +1197,10 @@
         },
 
 
-        zoomOrOpenDialog: function (feature) {
+        doDefaultClickAction: function (feature) {
             var schema = this;
 
-            if (schema.popup.isOpenLayersCloudPopup()) {
+            if (schema.openDialogOnResultTableClick) {
                 schema.openFeatureEditDialog(feature);
             } else {
                 schema.zoomToJsonFeature(feature);

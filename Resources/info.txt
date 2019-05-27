@@ -12,6 +12,7 @@ Hinzugefügte Properties:
 - useAllScheme, displayOnInactive, openLayersCloudImagePath: Parameter für Digitizer gesamt
 - openFormAfterModification - Öffnet Formular nach verschieben, Donut oder Modifikation
 - allowOpenEditDialog: Ermöglicht, bei klick EditDialog zu öffnen, wenn allowEditData = false ist, wenn dieser als Info-popup genutzt wird
+- openDialogOnResultTableClick: Bei Klick auf Element in Result Table wird Dialog geöffnet (statt standard zoom)
 
 
 
