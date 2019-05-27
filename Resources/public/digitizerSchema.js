@@ -260,6 +260,8 @@ var Scheme = OpenLayers.Class({
 
         schema.selectControl.deactivate();
 
+        schema.xhr && schema.xhr.abort();
+
         // https://trac.wheregroup.com/cp/issues/4548
         if (widget.currentPopup) {
             widget.currentPopup.popupDialog('close');
