@@ -17,23 +17,12 @@
                 return style;
             },
 
-            getStyleMapContext: function () {
+            getStyleLabel: function(feature) {
                 var schema = this;
-
-                var styleMapContext =  Object.getPrototypeOf(schema).getStyleMapContext();
-
-                styleMapContext.label = function (feature) {
-                    var label = schema.featureType.name;
-                    if (schema.showLabel && label) {
-                        return feature.attributes[label] || feature.getClusterSize() || "";
-                    } else {
-                        return '';
-                    }
-                };
-
-                return styleMapContext;
+                var parentMethod = Mapbender.Digitizer.Scheme.prototype.getStyleLabel.bind(schema);
+                var clusterSize = feature.getClusterSize();
+                return clusterSize > 1 ? clusterSize : parentMethod(clusterSize === 1 ? feature.cluster[0] : feature);
             },
-
 
             initializeClustering: function () {
                 var schema = this;

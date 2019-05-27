@@ -470,6 +470,12 @@
 
         },
 
+        getStyleLabel: function(feature) {
+            var schema = this;
+            var label = schema.featureType.name;
+            return feature.attributes[label] || '';
+        },
+
         getStyleMapContext: function () {
             var schema = this;
             return {
@@ -477,7 +483,9 @@
 
                 feature: function (feature) {
                     return feature;
-                }
+                },
+
+                label: schema.getStyleLabel.bind(schema)
             }
         },
 
