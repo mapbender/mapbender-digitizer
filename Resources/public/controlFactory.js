@@ -283,7 +283,65 @@
 
                 }
             })
-        }
+        },
+
+        selectFeature:    function() {
+            var controlFactory = this;
+            return new OpenLayers.Control.SelectFeature(controlFactory.layer, {
+
+                eventListeners: controlFactory.controlEvents,
+                clickout:    true,
+                toggle:      true,
+                multiple:    true,
+                hover:       false,
+                box:         true,
+                toggleKey:   "ctrlKey", // ctrl key removes from selection
+                multipleKey: "shiftKey", // shift key adds to selection,
+
+                clickFeature: function(feature) {
+
+                   feature.isSelected = !feature.isSelected;
+                   controlFactory.layer.drawFeature(feature);
+
+                },
+
+                activate: function () {
+                    controlFactory.injectedMethods.toggleMainSelectControl(false);
+                    OpenLayers.Control.SelectFeature.prototype.activate.apply(this, arguments);
+                },
+
+                deactivate: function () {
+                    controlFactory.injectedMethods.toggleMainSelectControl(true);
+                    OpenLayers.Control.SelectFeature.prototype.deactivate.apply(this, arguments);
+                },
+
+            })
+        },
+        //{
+        //     infoText: translations.selectGeometry,
+        //     onClick: function(e) {
+        //         var el = $(e.currentTarget);
+        //         widget.toggleController(el.data('control'));
+        //         mapElement.css({cursor: 'default'});
+        //
+        //     },
+        //     control:  new OpenLayers.Control.SelectFeature(layer, {
+        //         clickout:    true,
+        //         toggle:      true,
+        //         multiple:    true,
+        //         hover:       false,
+        //         box:         true,
+        //         toggleKey:   "ctrlKey", // ctrl key removes from selection
+        //         multipleKey: "shiftKey" // shift key adds to selection
+        //     })
+        // },
+        // removeSelected: {
+        //     infoText: translations.removeSelected,
+        //     cssClass: 'critical',
+        //     onClick: function() {
+        //         layer.removeFeatures(layer.selectedFeatures);
+        //     }
+        // },
 
 
     }

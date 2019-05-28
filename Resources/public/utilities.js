@@ -28,6 +28,8 @@
             if (!toolset) {
                 console.error("No valid geom type",geomType)
             }
+            toolset.push('selectFeature');
+            toolset.push('removeSelected');
             return toolset.map(function(type) { return { 'type' : type }});
 
 

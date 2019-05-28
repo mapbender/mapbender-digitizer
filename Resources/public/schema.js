@@ -11,7 +11,7 @@
             schema.currentExtentSearch = rawScheme.searchType === "current";
         }
 
-        var styleLabels = ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
+        var styleLabels = ['default', 'select', 'selected', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
 
         var initializeHooksForControlPrevention = function () {
             _.each(schema.hooks, function (value, name) {
@@ -199,6 +199,11 @@
 
                 hover: true,
 
+                activate: function() {
+                    console.log("schemaSele scat");
+                    return Object.getPrototypeOf(this).activate.apply(this, arguments);
+                },
+
                 openDialog: function (feature) {
 
                     if (schema.allowEditData) {
@@ -216,6 +221,7 @@
                 },
 
                 overFeature: function (feature) {
+                    console.warn("overF");
                     this.highlight(feature);
 
 
@@ -831,7 +837,7 @@
             };
 
             var usesSpecificStyle = function (feature) {
-                return feature.visible && !feature.isHighlighted && !feature.isCopy && !feature.isChanged && !feature.isNew;
+                return feature.visible && !feature.isHighlighted && !feature.isCopy && !feature.isChanged && !feature.isNew && !feature.isSelected;
             };
 
             if (!isGetter(feature, 'style')) {
@@ -867,6 +873,10 @@
                             renderIntent = 'copy';
                         }
 
+                        if (feature.isSelected) {
+                            renderIntent = 'selected';
+                        }
+
                         if (!feature.visible) {
                             renderIntent = 'invisible';
                         }
@@ -874,6 +884,7 @@
                         if (feature.isHighlighted) {
                             renderIntent = "select";
                         }
+
                         return renderIntent;
                     },
                     set: function (value) {

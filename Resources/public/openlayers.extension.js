@@ -23,6 +23,19 @@
             feature.visible = visible;
         };
 
+        // var h = OpenLayers.Events.prototype.handleBrowserEvent;
+        // OpenLayers.Events.prototype.handleBrowserEvent = function() {
+        //   console.warn("!");
+        //   h.apply(this,arguments);
+        // };
+        var tc = OpenLayers.Handler.Feature.prototype.triggerCallback;
+
+        OpenLayers.Handler.Feature.prototype.triggerCallback = function() {
+
+            console.warn("3",arguments);
+            tc.apply(this,arguments);
+        };
+
 
     });
 

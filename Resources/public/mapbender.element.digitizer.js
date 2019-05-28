@@ -54,13 +54,13 @@
                 fillOpacity: 0.5,
                 graphicZIndex: 15
             },
-            // 'selected': {
-            //     strokeWidth: 3,
-            //     fillColor: "#74b1f7",
-            //     strokeColor: '#b5ac14',
-            //     fillOpacity: 0.7,
-            //     graphicZIndex: 15
-            // },
+            'selected': {
+                strokeWidth: 3,
+                fillColor: "#74b1f7",
+                strokeColor: '#b5ac14',
+                fillOpacity: 0.7,
+                graphicZIndex: 15
+            },
             'copy': {
                 strokeWidth: 5,
                 fillColor: "#f7ef7e",
