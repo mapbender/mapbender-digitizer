@@ -148,7 +148,7 @@
                         className: 'zoom',
                         cssClass: 'fa fa-crosshairs',
                         onClick: function (feature, ui) {
-                            schema.zoomToFeature(feature);
+                            schema.zoomToJsonFeature(feature);
                         }
                     });
                 }
@@ -271,6 +271,8 @@
 
             var tableTranslation = schema.tableTranslation ? Mapbender.DigitizerTranslator.translateObject(schema.tableTranslation) : Mapbender.DigitizerTranslator.tableTranslations();
 
+            var buttons = generateResultDataTableButtons();
+
             var resultTableSettings = {
                 lengthChange: false,
                 pageLength: schema.pageLength,
@@ -282,7 +284,7 @@
                 selectable: false,
                 autoWidth: false,
                 columns: generateResultDataTableColumns(),
-                buttons: generateResultDataTableButtons(),
+                buttons: buttons,
                 oLanguage: tableTranslation,
                 drawCallback: function (settings) {
                     this.api().rows(function (idx, feature, row) {

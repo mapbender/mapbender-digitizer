@@ -55,6 +55,13 @@ $selectColor: #F7F79A;
       .no-footer{
         overflow: hidden;
       }
+
+      table.dataTable {
+        table-layout: fixed;
+        td {
+          overflow:hidden;
+        }
+      }
     }
 
     // Row higlight by feature select
