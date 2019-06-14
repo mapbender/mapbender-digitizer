@@ -8,12 +8,12 @@ Hinzugefügte Properties:
 - currentExtentSearch: bool, anstelle von searchType == "currentExtent"
 - copy.overwriteValuesWithDefault - Beim Kopieren werden die Daten des Kopierten Features von den eingetragenen Defaultwerten überschrieben
 - copy.moveCopy.x, copy.moveCopy.y - Koordinatenverschiebungen beim Kopieren
-- showLabel - Zeige Featuretype.Name als Label von Geometrie an
+- showLabel - Zeige Featuretype.Name als Label von Geometrie an (noch nicht implementiert)
 - useAllScheme, displayOnInactive, openLayersCloudImagePath: Parameter für Digitizer gesamt
 - openFormAfterModification - Öffnet Formular nach verschieben, Donut oder Modifikation
 - allowOpenEditDialog: Ermöglicht, bei klick EditDialog zu öffnen, wenn allowEditData = false ist, wenn dieser als Info-popup genutzt wird
 - openDialogOnResultTableClick: Bei Klick auf Element in Result Table wird Dialog geöffnet (statt standard zoom)
-- showLabel:
+- zoomOnResultTableClick: Default true, zoomt auf Feature bei click auf Feature in Result Table
 
 
 Ideen:

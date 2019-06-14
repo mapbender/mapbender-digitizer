@@ -381,6 +381,7 @@
         showLabel: false,
         allowOpenEditDialog: false,
         openDialogOnResultTableClick: false,
+        zoomOnResultTableClick: true,
 
 
         displayOnSelect: true, // BEV only, no implementation
@@ -406,7 +407,6 @@
             title: null,
             width: '350px',
             type: null,
-            hideSidepane: false
         },
         styles: {
             default: {},
@@ -1192,7 +1192,7 @@
         },
 
 
-        zoomToJsonFeature: function (feature) {
+        zoomToFeature: function (feature) {
             var schema = this;
             var widget = schema.widget;
 
@@ -1213,11 +1213,13 @@
         doDefaultClickAction: function (feature) {
             var schema = this;
 
+            if (schema.zoomOnResultTableClick){
+                schema.zoomToFeature(feature);
+            }
             if (schema.openDialogOnResultTableClick) {
                 schema.openFeatureEditDialog(feature);
-            } else {
-                schema.zoomToJsonFeature(feature);
             }
+
         },
 
 
