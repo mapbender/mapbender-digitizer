@@ -538,8 +538,8 @@
                 featureStyleEditor.saveStyle(feature,styleData);
             } else {
                 // defer style saving until the feature itself is saved, and has an id to associate with
-                feature.saveStyleDataCallback = function() {
-                    return featureStyleEditor.saveStyle(feature,styleData);
+                feature.saveStyleDataCallback = function(newFeature) {
+                    return featureStyleEditor.saveStyle(newFeature,styleData);
                 }
             }
             featureStyleEditor.close();
@@ -550,14 +550,14 @@
             var featureStyleEditor = this;
             var schema = featureStyleEditor.schema;
             var widget = schema.widget;
-
+            console.assert(!!feature.fid, "Feature has no ID to be assoicated with for style saving");
             return widget.query('style/save', {
                 schema: schema.schemaName,
                 style: styleData,
                 featureId: feature.fid
             }).then(function (response) {
                 schema.featureStyles[feature.fid] = styleData;
-                feature.layer.drawFeature(feature);
+                schema.layer.drawFeature(feature);
                 featureStyleEditor.element.enableForm();
             });
         }

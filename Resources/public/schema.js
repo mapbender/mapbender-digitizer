@@ -201,7 +201,7 @@
 
                 openDialog: function (feature) {
 
-                    if (schema.allowEditData) {
+                    if (schema.allowEditData || schema.allowOpenEditDialog) {
                         schema.openFeatureEditDialog(feature);
                     }
                 },
@@ -301,7 +301,7 @@
 
         addSelectControls();
 
-        schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.zoomOrOpenDialog.bind(schema));
+        schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.doDefaultClickAction.bind(schema));
 
         schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
         schema.elementContextMenu = new Mapbender.Digitizer.ElementContextMenu(schema);
@@ -379,6 +379,9 @@
         allowSaveAll: false,
         markUnsavedFeatures: true,
         showLabel: false,
+        allowOpenEditDialog: false,
+        openDialogOnResultTableClick: false,
+        zoomOnResultTableClick: true,
 
 
         displayOnSelect: true, // BEV only, no implementation
@@ -400,7 +403,11 @@
         useContextMenu: true,
         displayPermanent: false,
         toolset: {},
-        popup: {},
+        popup: {
+            title: null,
+            width: '350px',
+            type: null,
+        },
         styles: {
             default: {},
             select: {}
@@ -422,7 +429,7 @@
         },
         showVisibilityNavigation: true,
         allowPrintMetadata: false,
-        printable: true,
+        printable: false,
         maxScale: null,
         minScale: null,
         group: null,
@@ -433,6 +440,7 @@
         tableTranslation: null,
         save: {}, // pop a confirmation dialog when deactivating, to ask the user to save or discard current in-memory changes
         openFormAfterEdit: true,
+        openFormAfterModification: false,
         maxResults: 5001,
         pageLength: 10,
         currentExtentSearch: false,
@@ -462,6 +470,12 @@
 
         },
 
+        getStyleLabel: function(feature) {
+            var schema = this;
+            var label = schema.featureType.name;
+            return feature.attributes[label] || '';
+        },
+
         getStyleMapContext: function () {
             var schema = this;
             return {
@@ -469,7 +483,9 @@
 
                 feature: function (feature) {
                     return feature;
-                }
+                },
+
+                label: schema.getStyleLabel.bind(schema)
             }
         },
 
@@ -939,6 +955,8 @@
 
             var layer = schema.layer;
             var newFeature = feature.clone();
+            schema.introduceFeature(newFeature);
+
             var defaultAttributes = featureSchema.copy.data || {};
             var allowCopy = true;
 
@@ -1024,12 +1042,6 @@
                     console.warn("More than 1 Feature returned from DB Operation");
                 }
 
-
-                if (feature.saveStyleDataCallback) {
-                    feature.saveStyleDataCallback(feature);
-                    feature.saveStyleDataCallback = null;
-                }
-
                 var geoJsonReader = new OpenLayers.Format.GeoJSON();
 
                 var newFeatures = geoJsonReader.read(response);
@@ -1039,6 +1051,11 @@
                 newFeature.fid = newFeature.fid || feature.fid;
 
                 newFeature.layer = feature.layer;
+
+                if (feature.saveStyleDataCallback) {
+                    feature.saveStyleDataCallback(newFeature);
+                    feature.saveStyleDataCallback = null;
+                }
 
                 return newFeature;
 
@@ -1164,7 +1181,7 @@
         getUnsavedFeatures: function () {
             var schema = this;
             return schema.layer.features.filter(function (feature) {
-                return feature.isNew || feature.isChanged
+                return feature.isNew || feature.isChanged || feature.isCopy;
             });
         },
 
@@ -1175,7 +1192,7 @@
         },
 
 
-        zoomToJsonFeature: function (feature) {
+        zoomToFeature: function (feature) {
             var schema = this;
             var widget = schema.widget;
 
@@ -1193,14 +1210,16 @@
         },
 
 
-        zoomOrOpenDialog: function (feature) {
+        doDefaultClickAction: function (feature) {
             var schema = this;
 
-            if (schema.popup.isOpenLayersCloudPopup()) {
-                schema.openFeatureEditDialog(feature);
-            } else {
-                schema.zoomToJsonFeature(feature);
+            if (schema.zoomOnResultTableClick){
+                schema.zoomToFeature(feature);
             }
+            if (schema.openDialogOnResultTableClick) {
+                schema.openFeatureEditDialog(feature);
+            }
+
         },
 
 

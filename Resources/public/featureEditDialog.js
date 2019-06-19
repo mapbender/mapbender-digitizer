@@ -138,7 +138,7 @@
 
             // buttons are deep copied! Should be moved to button constructing function though
             if (feature.isNew) {
-                delete this.buttons.styleButton;
+                //delete this.buttons.styleButton;
                 delete this.buttons.copyButton;
             }
         },
@@ -171,6 +171,14 @@
 
         configuration.addFeatureAndDialog(feature, dialog);
 
+        var destroyCloudPopup = function() {
+            widget.map.removePopup(schema.featureCloudPopup);
+            schema.featureCloudPopup.destroy();
+            schema.featureCloudPopup = null;
+
+
+        };
+
 
         var doFeatureEditDialogBindings = function () {
             var feature = dialog.feature;
@@ -196,7 +204,7 @@
             });
 
 
-            // TODO this looks evil. Test it and change it
+            // // TODO this looks evil. Test it and change it
             if (configuration.isOpenLayersCloudPopup()) {
                 $popup.closest('.ui-dialog').css({'margin-left': '-100000px' }).hide(0);
             }
@@ -206,9 +214,7 @@
         if (widget.currentPopup) {
             widget.currentPopup.popupDialog('close');
             if (configuration.isOpenLayersCloudPopup() && schema.featureCloudPopup) {
-                widget.map.removePopup(schema.featureCloudPopup);
-                schema.featureCloudPopup.destroy();
-                schema.featureCloudPopup = null;
+                destroyCloudPopup();
             }
         }
 
@@ -233,8 +239,8 @@
         if (configuration.isOpenLayersCloudPopup()) {
             // TODO find better solution for ImgPath
             var originalImagePath = OpenLayers.ImgPath;
-            OpenLayers.ImgPath =  schema.widget.getOpenLayersCloudImagePath();
-            var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(feature.geometry.toShortString()), null, $popup.html(), null, true);
+            OpenLayers.ImgPath = schema.widget.getOpenLayersCloudImagePath();
+            var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(feature.geometry.toShortString()), null, $popup.html(), null, true, destroyCloudPopup);
             schema.featureCloudPopup = olPopup;
             map.addPopup(olPopup);
             OpenLayers.ImgPath = originalImagePath;

@@ -23,9 +23,13 @@
 
                 injectedMethods: {
 
-                    openFeatureEditDialog: function (feature) {
+                    openFeatureEditDialog: function (feature,type) {
 
-                        if (schema.openFormAfterEdit) {
+                        console.assert(type === "add" || type === "donut" || type === "modify" || type === "move", "Type "+type+" is wrong in 'openFeatureEditDialog'");
+
+                        if (type === 'add' && schema.openFormAfterEdit) {
+                            schema.openFeatureEditDialog(feature);
+                        } else if (schema.openFormAfterModification) {
                             schema.openFeatureEditDialog(feature);
                         }
                     },
@@ -40,15 +44,6 @@
                     preventMove: function (feature) {
 
                         return schema.evaluatedHooksForControlPrevention.onStart && schema.evaluatedHooksForControlPrevention.onStart(feature);
-
-                    },
-                    extendFeatureDataWhenNoPopupOpen: function (feature) {
-
-
-                        if (schema.openFormAfterEdit) {
-                            schema.openFeatureEditDialog(feature);
-                        }
-
 
                     },
 
@@ -276,6 +271,8 @@
 
             var tableTranslation = schema.tableTranslation ? Mapbender.DigitizerTranslator.translateObject(schema.tableTranslation) : Mapbender.DigitizerTranslator.tableTranslations();
 
+            var buttons = generateResultDataTableButtons();
+
             var resultTableSettings = {
                 lengthChange: false,
                 pageLength: schema.pageLength,
@@ -287,7 +284,7 @@
                 selectable: false,
                 autoWidth: false,
                 columns: generateResultDataTableColumns(),
-                buttons: generateResultDataTableButtons(),
+                buttons: buttons,
                 oLanguage: tableTranslation,
                 drawCallback: function (settings) {
                     this.api().rows(function (idx, feature, row) {

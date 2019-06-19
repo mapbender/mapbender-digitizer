@@ -88,7 +88,7 @@
             subItems['zoomTo'] = {
                 name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
                 action: function (key, options, parameters) {
-                    schema.zoomToJsonFeature(feature);
+                    schema.zoomToFeature(feature);
                 }
             }
         }
@@ -164,7 +164,7 @@
         items['zoom'] = {
             name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
             action: function () {
-                schema.zoomToJsonFeature(feature);
+                schema.zoomToFeature(feature);
             }
         };
 

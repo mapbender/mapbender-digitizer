@@ -18,7 +18,7 @@
 
             injectedMethods.setModifiedState(feature, this);
 
-            injectedMethods.openFeatureEditDialog(feature);
+            injectedMethods.openFeatureEditDialog(feature,'add');
             feature.layer.drawFeature(feature);
 
             control.deactivate();
@@ -191,7 +191,7 @@
                         var fir = OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
                         var feature = this.polygon;
                         controlFactory.injectedMethods.setModifiedState(feature, this.control);
-                        controlFactory.injectedMethods.openFeatureEditDialog(feature);
+                        controlFactory.injectedMethods.openFeatureEditDialog(feature,'donut');
                         return fir;
                     },
                 },
@@ -244,7 +244,7 @@
                     var geom = reader.read(wkt);
                     if (geom.isValid()) {
                         controlFactory.injectedMethods.setModifiedState(feature, this);
-                        controlFactory.injectedMethods.openFeatureEditDialog(feature);
+                        controlFactory.injectedMethods.openFeatureEditDialog(feature,'modify');
                     } else {
                         // TODO there might be a better way to revert feature
                         controlFactory.layer.removeFeatures([feature]);
@@ -279,7 +279,7 @@
 
                 onComplete: function (feature) {
                     controlFactory.injectedMethods.setModifiedState(feature, this);
-                    controlFactory.injectedMethods.extendFeatureDataWhenNoPopupOpen(feature);
+                    controlFactory.injectedMethods.openFeatureEditDialog(feature,'move');
 
                 }
             })
