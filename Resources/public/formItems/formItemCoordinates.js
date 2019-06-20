@@ -33,6 +33,12 @@
             this.inputY.setValue(y);
         },
 
+        getActiveProjection: function() {
+            var formItem = this;
+            var value = formItem.epsgSelection.getValue();
+            return value;
+        },
+
         process: function (feature,dialog,schema) {
             var formItem = this;
             var widget = schema.widget;
@@ -40,8 +46,10 @@
 
             var getEPSGCodes = function() {
 
+                var epsgCodes = formItem.epsgCodes;
+
                 var mapProjectionInEpsgCodes = false;
-                formItem.epsgCodes.forEach(function(code){ // Add Map Projection to EPSG codes, only if it is not already there
+                epsgCodes.forEach(function(code){ // Add Map Projection to EPSG codes, only if it is not already there
                     if (code[0]===mapProjection) {
                         mapProjectionInEpsgCodes = true;
                     }
@@ -59,7 +67,12 @@
                 options: epsgCodes,
                 value: mapProjection,
                 css : { width: '33.33%' },
+                name: 'srs',
                 cssClass: '-fn-active-epsgCode',
+
+                getValue: function() {
+                    return $('.-fn-active-epsgCode select', widget.currentPopup).val();
+                },
 
 
                 change: function(event) {
@@ -95,7 +108,13 @@
                     name: direction,
                     css: {width: '33%'},
 
+                    // TODO have this in Vis-UI !!!
+                    getValue: function() {
+                        return $('input[name='+direction+']', widget.currentPopup).val();
+                    },
+
                     getValueAsDecimal: function () {
+
                         return Mapbender.Digitizer.Transformation.transformDegreeToDecimal(this.getValue());
                     },
 
@@ -107,10 +126,10 @@
                     change: function () {
 
                         var layer = schema.layer;
-                        var activeProjection = formItem.activeEPSGCode;
+                        var activeProjection = formItem.getActiveProjection();
 
                         var ll = formItem.getLonLat();
-                        var lonlat = Mapbender.Transformation.transformToMapProj(ll.x, ll.y, activeProjection);
+                        var lonlat = Mapbender.Digitizer.Transformation.transformToMapProj(ll.x, ll.y, activeProjection);
 
                         var oldGeometry = feature.geometry;
                         if (oldGeometry.x && oldGeometry.y) {
@@ -128,9 +147,12 @@
                 return inputChild;
             };
 
+            formItem.inputX = createInputChild('x');
+            formItem.inputY = createInputChild('y');
+
             var children = {
-                'x' : createInputChild('x'),
-                'y' : createInputChild('y'),
+                'x' : formItem.inputX,
+                'y' : formItem.inputY,
                 'epsg' : formItem.epsgSelection
             };
 

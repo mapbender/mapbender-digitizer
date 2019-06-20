@@ -382,6 +382,7 @@
         allowOpenEditDialog: false,
         openDialogOnResultTableClick: false,
         zoomOnResultTableClick: true,
+        allowGeometrylessfeatureBtn: true,
 
 
         displayOnSelect: true, // BEV only, no implementation

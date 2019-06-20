@@ -37,8 +37,9 @@
                         var inputfield = $(dialog).find("[name=" + formItem.name + "]");
                         inputfield.attr('disabled','disabled');
                         schema.getRemotePropertyValue(feature, formItem.name).done(function (value) {
-                            inputfield.removeAttr('disabled');
                             inputfield.val(value).keyup();
+                        }).always(function(){
+                            inputfield.removeAttr('disabled');
                         });
                         return false;
                     }
