@@ -13,7 +13,7 @@
         "php": ">=5.3.3",
         "blueimp/jquery-file-upload": "9.*",
         "debugteam/bootstrap-colorpicker": "1.x",
-        "mapbender/data-manager": "~1.0.6.3@dev",
+        "mapbender/data-manager": "dev-master",
         "mapbender/data-source": "0.*",
         "phayes/geophp": "1.2",
         "mapbender/vis-ui.js": "dev-master"
