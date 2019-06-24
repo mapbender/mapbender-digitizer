@@ -234,6 +234,13 @@
 
         doFeatureEditDialogBindings();
 
+        //TODO this belongs somewhere else and should be injected (BEV-Code)
+        if (true) {
+
+            feature.data.x = feature.geometry.x || '';
+            feature.data.y = feature.geometry.y || '';
+        }
+
         $popup.formData(feature.data);
 
         if (configuration.isOpenLayersCloudPopup()) {

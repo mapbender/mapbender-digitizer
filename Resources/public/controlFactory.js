@@ -281,6 +281,7 @@
                     controlFactory.injectedMethods.setModifiedState(feature, this);
                     controlFactory.injectedMethods.openFeatureEditDialog(feature,'move');
 
+
                 }
             })
         }

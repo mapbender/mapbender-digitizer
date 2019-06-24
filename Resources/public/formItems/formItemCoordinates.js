@@ -69,6 +69,7 @@
                 css : { width: '33.33%' },
                 name: 'srs',
                 cssClass: '-fn-active-epsgCode',
+                attr: { 'data-ignore' : true },
 
                 getValue: function() {
                     return $('.-fn-active-epsgCode select', widget.currentPopup).val();
@@ -82,7 +83,7 @@
                     var activeEpsgCode = formItem.activeEPSGCode;
                     var activeProjection = formItem.activeEPSGCode ? new OpenLayers.Projection(activeEpsgCode) : widget.getMap().getProjectionObject();
 
-                    var epsgCode = epsgSelection.value(event);
+                    var epsgCode = epsgSelection.getValue(event);
 
                     var projectionToTransform = new OpenLayers.Projection(epsgCode);
 
@@ -107,6 +108,7 @@
                     title: (direction === 'x' ? formItem.title_longitude : formItem.title_latitude) + ': ',
                     name: direction,
                     css: {width: '33%'},
+                    attr: { 'data-ignore' : true },
 
                     // TODO have this in Vis-UI !!!
                     getValue: function() {

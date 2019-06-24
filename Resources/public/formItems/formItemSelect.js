@@ -6,7 +6,7 @@
         type: "select",
         CLASS_NAME: "FormItemSelect",
 
-        value: function(event) {
+        getValue: function(event) {
             return $(event.currentTarget).find('select').val();
         },
 
@@ -120,7 +120,7 @@
         },
 
 
-        process: Mapbender.Digitizer.FormItemInput.process
+      //  process: Mapbender.Digitizer.FormItemInput.process
 
     };
 
