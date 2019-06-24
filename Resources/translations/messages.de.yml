@@ -37,6 +37,7 @@ mb.digitizer:
       moveFeature: Punkt verschieben
       selectFeature: Punkte de-/selektieren
       removeSelected: Selektierte Punkte löschen
+      createGeometryLessFeature: Punkt ohne initiale Geometrie erstellen
     line:
       drawLine: Linie erstellen
       modifyFeature: Linie bearbeiten
