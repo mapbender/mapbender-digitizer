@@ -1259,6 +1259,11 @@
 
         },
 
+        /** Override **/
+        updateAfterMove: function() {
+
+        },
+
 
         getDefaultProperties: function () {
             var schema = this;

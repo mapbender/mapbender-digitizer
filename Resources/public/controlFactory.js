@@ -280,6 +280,7 @@
                 onComplete: function (feature) {
                     controlFactory.injectedMethods.setModifiedState(feature, this);
                     controlFactory.injectedMethods.openFeatureEditDialog(feature,'move');
+                    controlFactory.injectedMethods.updateAfterMove(feature);
 
 
                 }

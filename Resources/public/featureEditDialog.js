@@ -150,6 +150,11 @@
 
         createFeatureEditDialog: function (feature, schema) {
             return new FeatureEditDialog(feature, schema)
+        },
+
+        // This can be overridden
+        augment: function(feature) {
+
         }
     };
 
@@ -234,14 +239,12 @@
 
         doFeatureEditDialogBindings();
 
-        //TODO this belongs somewhere else and should be injected (BEV-Code)
-        if (true) {
+        configuration.augment(feature);
 
-            feature.data.x = feature.geometry.x || '';
-            feature.data.y = feature.geometry.y || '';
-        }
-
-        $popup.formData(feature.data);
+        /** This is evil, but filling of input fields currently relies on that (see select field) **/
+        setTimeout(function () {
+            $popup.formData(feature.data);
+        },0);
 
         if (configuration.isOpenLayersCloudPopup()) {
             // TODO find better solution for ImgPath

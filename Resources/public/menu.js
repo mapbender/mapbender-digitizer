@@ -23,6 +23,9 @@
 
                 injectedMethods: {
 
+                    // Override
+                    updateAfterMove: schema.updateAfterMove.bind(schema),
+
                     openFeatureEditDialog: function (feature,type) {
 
                         console.assert(type === "add" || type === "donut" || type === "modify" || type === "move", "Type "+type+" is wrong in 'openFeatureEditDialog'");
@@ -33,21 +36,6 @@
                             schema.openFeatureEditDialog(feature);
                         }
 
-
-                        // Update Data in Open Feature Edit Dialog
-                        //TODO this belongs somewhere else and should be injected (BEV-Code)
-                        if (type === 'move' && (true) && !!widget.currentPopup) {
-                            if (feature === widget.currentPopup.data("feature")) {
-                                var activeProj = $('.coordinates-container [name=srs]',widget.currentPopup).val() || widget.map.getProjectionObject();
-                                var coords = Mapbender.Digitizer.Transformation.transformFromMapProj(feature.geometry.x, feature.geometry.y, activeProj);
-                                console.log(coords,"!");
-                                $('.coordinates-container [name=x]', widget.currentPopup).val(coords.x).trigger("change");
-                                $('.coordinates-container [name=y]', widget.currentPopup).val(coords.y).trigger("change");
-                            } else {
-                                console.warn("Selected Feature is not affiliated with the open popup");
-                            }
-
-                        }
                     },
                     getDefaultAttributes: function () {
                         return schema.getDefaultProperties();
