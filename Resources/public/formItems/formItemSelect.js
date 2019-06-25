@@ -119,9 +119,6 @@
             return fieldSetItem;
         },
 
-
-        process: Mapbender.Digitizer.FormItemInput.process
-
     };
 
     Object.setPrototypeOf(Mapbender.Digitizer.FormItemSelect, Mapbender.Digitizer.FormItem);
