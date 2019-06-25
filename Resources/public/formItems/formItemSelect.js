@@ -120,7 +120,7 @@
         },
 
 
-      //  process: Mapbender.Digitizer.FormItemInput.process
+        process: Mapbender.Digitizer.FormItemInput.process
 
     };
 
