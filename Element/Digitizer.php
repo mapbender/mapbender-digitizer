@@ -52,7 +52,7 @@ class Digitizer extends BaseElement
                            'queryEngine','openlayers.extension','vis-ui.extension');
 
 
-        $formItemFiles = array("formItem","formItemBreakLine","formItemButton","formItemCheckbox","formItemContainer","formItemCoordinates","formItemDate",
+        $formItemFiles = array("formItem","formItemBreakLine","formItemButton","formItemCheckbox","formItemContainer","formItemDate",
             "formItemFieldSet","formItemFile","formItemForm","formItemImage","formItemInput","formItemLabel",
             "formItemResultTable","formItemSelect","formItemTabs","formItemTextArea","formItemText");
 

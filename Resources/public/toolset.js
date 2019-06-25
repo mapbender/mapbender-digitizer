@@ -7,23 +7,7 @@
 
         $.extend(toolSet, options);
 
-        var schema = toolSet.schema;
-
-
         toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.layer, toolSet.injectedMethods,toolSet.createControlEvents());
-
-
-        if (schema.allowGeometrylessfeatureBtn) {
-
-            Mapbender.Digitizer.DigitizingControlFactory.prototype.createGeometryLessFeature = function (schemaName) {
-                return new OpenLayers.Control ({
-                    activate: function() {
-                       schema.openFeatureEditDialog(toolSet.createGeometryLessFeature());
-                    },
-                    layer: schema.layer,
-                });
-            };
-        }
 
         toolSet.element = $("<div />").addClass('digitizing-tool-set').addClass('left');
         toolSet.createToolbar();
@@ -31,25 +15,6 @@
     };
 
     Mapbender.Digitizer.Toolset.prototype = {
-
-        createGeometryLessFeature: function () {
-            var toolSet = this;
-            var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(NaN, NaN));
-            feature.data = {};
-            feature.isNew = true;
-            feature.renderIntent = "unsaved";
-            var layer = toolSet.schema.layer;
-            layer.addFeatures([feature]);
-            feature.layer = layer;
-
-            var properties = toolSet.schema.getDefaultProperties();
-            feature.attributes = {};
-            properties.forEach(function(prop){
-                feature.attributes[prop] = "";
-            });
-
-            return feature;
-        },
 
         createControlEvents: function () {
             var toolSet = this;

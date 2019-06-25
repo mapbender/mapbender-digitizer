@@ -7,11 +7,16 @@
         schema.widget = widget;
         $.extend(schema, rawScheme);
 
+        /**
+         *  Backward Compatibility
+         */
         if (!rawScheme.currentExtentSearch && rawScheme.searchType) {
             schema.currentExtentSearch = rawScheme.searchType === "current";
         }
 
         var styleLabels = ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
+
+        schema.inject();
 
         var initializeHooksForControlPrevention = function () {
             _.each(schema.hooks, function (value, name) {
@@ -382,8 +387,6 @@
         allowOpenEditDialog: false,
         openDialogOnResultTableClick: false,
         zoomOnResultTableClick: true,
-        allowGeometrylessfeatureBtn: true,
-
 
         displayOnSelect: true, // BEV only, no implementation
 
@@ -453,6 +456,13 @@
         tableFields: null,
         clustering: null,
 
+
+        /**
+         *  Can be overriden in specific digitizer instances
+         */
+        inject: function() {
+
+        },
 
         getGeomType: function () {
             var schema = this;
@@ -1272,58 +1282,6 @@
 
             });
         },
-
-
-        // TODO seperate Feature Info calls for individual properties in order to avoid iterating through meaningless dataSets
-        getRemotePropertyValue: function (feature, property) {
-            var schema = this;
-            var widget = schema.widget;
-            var map = widget.map;
-
-            if (!feature.geometry) {
-                return false;
-            }
-
-            var bbox = feature.geometry.getBounds();
-            bbox.right = parseFloat(bbox.right + 0.00001);
-            bbox.top = parseFloat(bbox.top + 0.00001);
-            bbox = bbox.toBBOX();
-            var srid = map.getProjection().replace('EPSG:', '');
-
-            var ajaxCall = widget.query('getFeatureInfo', {
-                bbox: bbox,
-                schema: schema.getSchemaByFeature(feature).schemaName,
-                srid: srid
-            });
-
-
-            // Mock:
-            // ajaxCall = $.Deferred().resolve({dataSets: ['{"type":"FeatureCollection","totalFeatures":"unknown","features":[  {"type":"Feature","id":"","geometry":null,"properties":{    "elevation_base":844}  }],"crs":null}',
-            //     '  {  "type": "FeatureCollection",  "features": [  {  "type": "Feature",  "geometry": null,  "properties": {  "OBJECTID": "78290",  "KG_NUMMER": "75204",  "KG_NAME": "Gschriet",  "INSPIREID": "AT.0002.I.4.KG.75204"  },  "layerName": "1"  }  ]  }  ']});
-
-            return ajaxCall.then(function (response) {
-                if (response.error) {
-                    Mapbender.error(Mapbender.DigitizerTranslator.translate('remoteData.error'));
-                    return;
-                }
-                var newProperty = null;
-                _.each(response.dataSets, function (dataSet) {
-                    try {
-                        var json = JSON.parse(dataSet);
-                        newProperty = json.features[0].properties[property] || newProperty; // Normally, the value is only present in one of the dataSets
-                    } catch (e) {
-                        // Prevent interruption in case of empty features
-                    }
-                });
-                return newProperty;
-            }).fail(function (response) {
-                Mapbender.error(Mapbender.DigitizerTranslator.translate("remoteData.error"));
-
-            });
-
-
-        },
-
 
         getRestrictedVersion: function () {
             var schema = this;
