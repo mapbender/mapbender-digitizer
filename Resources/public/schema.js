@@ -671,24 +671,32 @@
             return doReload || forcedReload;
         },
 
-        getData: function (options) {
+        createRequest: function() {
             var schema = this;
             var widget = schema.widget;
 
             var map = widget.map;
             var projection = map.getProjectionObject();
+            return {
+                srid: projection.proj.srsProjNumber,
+                maxResults: schema.maxResults,
+                schema: schema.schemaName,
+            }
+
+        },
+
+        getData: function (options) {
+            var schema = this;
+            var widget = schema.widget;
+
+            var map = widget.map;
             var extent = map.getExtent();
 
             var callback = options && options.callback;
 
             var reloadNew = schema.repopulateWithReloadedFeatures(options && options.reloadNew, options && options.zoom);
 
-            var request = {
-                srid: projection.proj.srsProjNumber,
-                maxResults: schema.maxResults,
-                schema: schema.schemaName,
-                search: schema.menu.getSearchData()
-            };
+            var request = schema.createRequest();
 
             if (schema.currentExtentSearch) {
                 request.intersectGeometry = extent.toGeometry().toString();

@@ -357,10 +357,6 @@
 
         },
 
-        getSearchData: function() {
-            var menu = this;
-            return  $('form.search', menu.frame).length > 0 ? $('form.search', menu.frame).formData() : void 0;
-        }
 
 
     };
