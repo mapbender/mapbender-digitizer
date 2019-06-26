@@ -364,11 +364,7 @@
         },
 
         formItems: null,
-        search: {
-            form: null,
-            mapping: null,
-            zoomScale: null,
-        },
+
         showVisibilityNavigation: true,
         allowPrintMetadata: false,
         printable: false,
@@ -663,9 +659,15 @@
         },
 
 
+        /** override **/
+        doReload: function() {
+          return false;
+        },
+
+
         repopulateWithReloadedFeatures: function (forcedReload, zoom) {
             var schema = this;
-            var doReload = ((schema.search && schema.search.form) || schema.group === "all") && (!zoom);
+            var doReload = (schema.doReload() || schema.group === "all") && (!zoom);
             return doReload || forcedReload;
         },
 

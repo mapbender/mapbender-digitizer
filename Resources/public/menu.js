@@ -5,6 +5,7 @@
     Mapbender.Digitizer.Menu = function (schema) {
 
         var menu = this;
+        menu.schema = schema;
         var frame = menu.frame = $("<div />").addClass('frame');
 
 
@@ -327,26 +328,12 @@
         };
 
 
-        var generateSearchForm = function () {
-
-
-            frame.generateElements({
-                type: 'form',
-                cssClass: 'search',
-                children: schema.search.form
-            });
-
-
-        };
-
         appendToolset();
 
         appendGeneralDigitizerButtons();
 
 
-        if (schema.search && schema.search.form) {
-            generateSearchForm();
-        }
+        menu.augment();
 
         frame.append('<div style="clear:both;"/>');
 
@@ -357,6 +344,11 @@
 
 
     Mapbender.Digitizer.Menu.prototype = {
+
+        /** Override **/
+        augment: function() {
+
+        },
 
         deactivateControls: function () {
             var menu = this;
