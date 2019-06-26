@@ -30,11 +30,8 @@
 
         var typeName = item.type.charAt(0).toUpperCase() + item.type.slice(1);
         var prototypeName = 'FormItem' + typeName;
-        var prototype = Mapbender.Digitizer[prototypeName];
+        var prototype = Mapbender.Digitizer[prototypeName] || Mapbender.Digitizer.FormItem;
 
-        if (!prototype) {
-            throw new Error("No prototype '" + prototypeName + "' defined");
-        }
         Object.setPrototypeOf(item,prototype);
     };
 
