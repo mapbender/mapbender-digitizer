@@ -378,7 +378,7 @@
         tableTranslation: null,
         save: {}, // pop a confirmation dialog when deactivating, to ask the user to save or discard current in-memory changes
         openFormAfterEdit: true,
-        openFormAfterModification: false,
+        openFormAfterModification: true,
         pageLength: 10,
         currentExtentSearch: false,
         inlineSearch: true,
