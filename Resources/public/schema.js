@@ -75,64 +75,6 @@
         };
 
 
-        var extendSearchOptions = function () {
-
-            if (schema.search.form) {
-
-                _.each(schema.search.form, function (item) {
-
-                    if (item.mapping) {
-                        var value = item.mapping[item.name];
-
-                        if (value && item.options) {
-                            var option = item.options.find(function (option) {
-                                return option[0].toLowerCase() === value.toLowerCase()
-                            });
-                            if (option) {
-                                item.value = option;
-                            } else {
-                                $.notify(value + " is not a valid value for " + item.name);
-                            }
-                        }
-
-                    }
-
-                    item.change = function () {
-                        schema.getData().done({
-                            callback: function () {
-                                if (schema.search.zoomScale) {
-                                    widget.map.zoomToScale(schema.search.zoomScale, true);
-                                } else {
-                                    widget.map.zoomToExtent(schema.layer.getDataExtent());
-                                }
-                            }
-                        });
-                    };
-
-                    if (item.type === 'select' && item.ajax) {
-
-                        item.ajax.dataType = 'json';
-                        item.ajax.url = widget.getElementURL() + 'form/select';
-                        item.ajax.data = function (params) {
-
-                            if (params && params.term) {
-                                // Save last given term to get highlighted in templateResult
-                                item.ajax.lastTerm = params.term;
-                            }
-                            var ret = {
-                                schema: schema.schemaName,
-                                item: item,
-                                form: schema.menu.getSearchData(),
-                                params: params
-                            };
-
-                            return ret;
-                        };
-
-                    }
-                });
-            }
-        };
 
         var createMenu = function () {
             var widget = schema.widget;
@@ -299,9 +241,6 @@
 
         createSchemaFeatureLayer();
 
-
-        extendSearchOptions();
-
         createMenu();
 
         addSelectControls();
@@ -348,7 +287,6 @@
         },
 
         featureStyles: null,
-        featureCloudPopup: null,
 
         evaluatedHooksForControlPrevention: {},
         evaluatedHooksForCopyPrevention: {},

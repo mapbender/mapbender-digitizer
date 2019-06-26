@@ -109,8 +109,6 @@
 
         displayOnInactive: false,
 
-        openLayersCloudImagePath: null,
-
         disabled: true,
 
         isFullyActive: true,
@@ -130,7 +128,6 @@
                 widget.useAllScheme = widget.options.useAllScheme;
             }
 
-            widget.openLayersCloudImagePath = widget.options.openLayersCloudImagePath;
 
             widget.displayOnInactive = widget.options.displayOnInactive;
 
@@ -414,12 +411,6 @@
             });
             map.resetLayersZIndex();
         },
-
-        getOpenLayersCloudImagePath: function () {
-            var widget = this;
-            return widget.openLayersCloudImagePath ? Mapbender.Digitizer.Utilities.getAssetsPath(widget.openLayersCloudImagePath) : OpenLayers.ImgPath;
-        },
-
 
         getBasicSchemes: function () {
             var widget = this;

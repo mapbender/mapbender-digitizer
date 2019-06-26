@@ -3,6 +3,8 @@
 
     Mapbender.Digitizer.PopupConfiguration = function (configuration, schema) {
         var popupConfiguration = this;
+        popupConfiguration.schema = schema;
+
         $.extend(popupConfiguration, configuration);
 
         var augmentFeatureEditDialogButtonsWithCustomButtons = function () {
@@ -125,10 +127,6 @@
     Mapbender.Digitizer.PopupConfiguration.prototype = {
         remoteData: false,
 
-        isOpenLayersCloudPopup: function () {
-            var isCloud = this.type === 'openlayers-cloud';
-            return isCloud;
-        },
 
         addFeatureAndDialog: function (feature, dialog) {
 
@@ -153,7 +151,7 @@
         },
 
         // This can be overridden
-        augment: function(feature) {
+        augment: function(feature, $popup) {
 
         }
     };
@@ -167,7 +165,6 @@
         var dialog = this;
 
         var widget = schema.widget;
-        var map = widget.map;
         var $popup = dialog.$popup = $("<div/>");
 
         dialog.feature = feature;
@@ -175,14 +172,6 @@
         var configuration = schema.popup.clone();
 
         configuration.addFeatureAndDialog(feature, dialog);
-
-        var destroyCloudPopup = function() {
-            widget.map.removePopup(schema.featureCloudPopup);
-            schema.featureCloudPopup.destroy();
-            schema.featureCloudPopup = null;
-
-
-        };
 
 
         var doFeatureEditDialogBindings = function () {
@@ -208,20 +197,8 @@
 
             });
 
-
-            // // TODO this looks evil. Test it and change it
-            if (configuration.isOpenLayersCloudPopup()) {
-                $popup.closest('.ui-dialog').css({'margin-left': '-100000px' }).hide(0);
-            }
         };
 
-
-        if (widget.currentPopup) {
-            widget.currentPopup.popupDialog('close');
-            if (configuration.isOpenLayersCloudPopup() && schema.featureCloudPopup) {
-                destroyCloudPopup();
-            }
-        }
 
 
         widget.currentPopup = $popup;
@@ -239,23 +216,12 @@
 
         doFeatureEditDialogBindings();
 
-        configuration.augment(feature);
+        configuration.augment(feature, $popup);
 
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
         setTimeout(function () {
             $popup.formData(feature.data);
         },0);
-
-        if (configuration.isOpenLayersCloudPopup()) {
-            // TODO find better solution for ImgPath
-            var originalImagePath = OpenLayers.ImgPath;
-            OpenLayers.ImgPath = schema.widget.getOpenLayersCloudImagePath();
-            var olPopup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(feature.geometry.toShortString()), null, $popup.html(), null, true, destroyCloudPopup);
-            schema.featureCloudPopup = olPopup;
-            map.addPopup(olPopup);
-            OpenLayers.ImgPath = originalImagePath;
-        }
-
 
     };
 

@@ -139,39 +139,31 @@ class Digitizer extends BaseElement
 
         if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
             foreach ($configuration['schemes'] as $key => &$scheme) {
-                if (is_string($scheme['featureType'])) {
-                    if ($featureTypes === null) {
-                        $featureTypes = $this->getFeatureTypeDeclarations();
-                    }
-                    $featureTypeName           = $scheme['featureType'];
-                    $scheme['featureType']     = $featureTypes[ $featureTypeName ];
-                    $scheme['featureTypeName'] = $featureTypeName;
-                }
-
-                if ($public) {
-                    $this->cleanFromInternConfiguration($scheme['featureType']);
-                }
-
-                if (isset($scheme['formItems'])) {
-                    $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
-                }
-
-                if (isset($scheme['search']) && isset($scheme['search']["form"])) {
-                    $scheme['search']["form"] = $this->prepareItems($scheme['search']["form"]);
-                    foreach($scheme['search']["form"] as &$form) {
-                        $URLParamSet = isset($form["URLParam"]) && $form["URLParam"]==true;
-                        if ($URLParamSet) {
-                            $URLParam = $form["name"];
-                            $formValue = $this->container->get('request')->get($URLParam);
-                            if ($formValue) {
-                                $form["mapping"][$URLParam] = $formValue;
-                            }
-                        }
-                    }
-                }
+                $this->adjustScheme($scheme, $featureTypes, $public);
             }
         }
         return $configuration;
+    }
+
+    public function adjustScheme(&$scheme, &$featureTypes,$public) {
+        if (is_string($scheme['featureType'])) {
+            if ($featureTypes === null) {
+                $featureTypes = $this->getFeatureTypeDeclarations();
+            }
+            $featureTypeName           = $scheme['featureType'];
+            $scheme['featureType']     = $featureTypes[ $featureTypeName ];
+            $scheme['featureTypeName'] = $featureTypeName;
+        }
+
+        if ($public) {
+            $this->cleanFromInternConfiguration($scheme['featureType']);
+        }
+
+        if (isset($scheme['formItems'])) {
+            $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
+        }
+
+
     }
 
     public function getConfigurationAction(){
