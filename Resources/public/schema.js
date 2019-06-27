@@ -484,7 +484,7 @@
 
         getStyleLabel: function(feature) {
             var schema = this;
-            var label = schema.featureType.name;
+            var label = schema.getSchemaByFeature(feature).featureType.name;
             return feature.attributes[label] || '';
         },
 
