@@ -84,7 +84,7 @@
                 var type = rawButton.type;
 
 
-                var control = controlFactory[type] && controlFactory[type](toolSet.schema);
+                var control = controlFactory[type] && controlFactory[type](rawButton.schemaName);
                 if (!control) {
                     console.warn("control "+type+" does not exist");
                     return;
