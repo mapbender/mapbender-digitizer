@@ -42,21 +42,28 @@
 
 
 
-
-        _createPlainControlButton: function (rawButton) {
+        createLayoutTitle: function(rawButton) {
             var toolSet = this;
-            var schema = rawButton.schema;
-
-            var control = schema && schema.featureType.control || { title: null, className: null };
             var geomType = toolSet.geomType;
+
+            return Mapbender.DigitizerTranslator.translate('toolset.'+geomType +'.' + rawButton.type);
+        },
+
+        createLayoutClass: function(rawButton) {
+            return "icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1');
+        },
+
+        createPlainControlButton: function (rawButton) {
+            var toolSet = this;
+
 
             var $button = $("<button class='button' type='button'/>");
 
             $button.addClass(rawButton.type);
 
-            $button.attr('title', control.title || Mapbender.DigitizerTranslator.translate('toolset.'+geomType +'.' + rawButton.type));
+            $button.attr('title',toolSet.createLayoutTitle(rawButton));
             // add icon css class
-            $button.addClass(control.className || "icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
+            $button.addClass(toolSet.createLayoutClass(rawButton).toLowerCase());
 
             return $button;
         },
@@ -73,11 +80,11 @@
 
             $.each(buttons, function (i, rawButton) {
 
-                var $button = toolSet._createPlainControlButton(rawButton);
+                var $button = toolSet.createPlainControlButton(rawButton);
                 var type = rawButton.type;
 
 
-                var control = controlFactory[type] && controlFactory[type](rawButton.schema && rawButton.schema.schemaName);
+                var control = controlFactory[type] && controlFactory[type](toolSet.schema);
                 if (!control) {
                     console.warn("control "+type+" does not exist");
                     return;

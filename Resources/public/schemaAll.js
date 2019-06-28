@@ -71,9 +71,7 @@
                     if (toolset.filter(function (t) {
                         return t.type === rawButton.type && !Mapbender.Digitizer.Utilities.isAddingToolsetType(t.type);
                     }).length === 0) {
-                        if (Mapbender.Digitizer.Utilities.isAddingToolsetType(rawButton.type)) {
-                            rawButton.schema = scheme.getRestrictedVersion();
-                        }
+                        rawButton.schemaName = scheme.schemaName; // This is necessary for some Client configurations
                         toolset.push(rawButton);
                     }
 
@@ -81,14 +79,16 @@
 
             });
 
-            // TODO find better place for all possible controls in array
-            var config = ['drawPoint', 'drawLine', 'drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'drawText', 'modifyFeature', 'moveFeature', 'selectFeature', 'removeSelected'];
-
-            toolset = toolset.sort(function (a, b) {
-                return config.indexOf(a.type) > config.indexOf(b.type) ? 1 : ( a.schema && b.schema && (a.schema.index > b.schema.index) ? 1 : -1) ;
-            });
+           schema.sortToolSet(toolset);
 
             return toolset;
+        },
+
+        /**
+         * Override
+         */
+        sortToolSet: function(toolset) {
+           return toolset;
         },
 
         createFormItemsCollection: function(formItems) {

@@ -390,6 +390,8 @@
         tableFields: null,
         clustering: null,
 
+        featureVisibility: true,
+
 
         /**
          *  Can be overriden in specific digitizer instances
@@ -416,7 +418,7 @@
 
         getStyleLabel: function(feature) {
             var schema = this;
-            var label = schema.featureType.name;
+            var label = schema.getSchemaByFeature(feature).featureType.name;
             return feature.attributes[label] || '';
         },
 
@@ -474,6 +476,8 @@
             var widget = schema.widget;
             var frame = schema.menu.frame;
             var layer = schema.layer;
+
+            schema.lastRequest = null;
 
             widget.getCurrentSchema = function () {
                 return schema;
@@ -793,6 +797,8 @@
             });
 
             schema.reloadFeatures();
+
+            schema.setVisibilityForAllFeaturesInLayer();
         },
 
         setStyleProperties: function (feature) {
@@ -1181,13 +1187,13 @@
         },
 
 
-        setVisibilityForAllFeaturesInLayer: function (visible) {
+        setVisibilityForAllFeaturesInLayer: function () {
             var schema = this;
             var layer = schema.layer;
 
             layer.features.forEach(function (feature) {
 
-                feature.toggleVisibility(visible);
+                feature.toggleVisibility(schema.featureVisibility);
                 layer.drawFeature(feature);
             });
 

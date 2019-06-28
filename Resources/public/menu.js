@@ -78,7 +78,8 @@
                 $button.addClass("fa fa-eye-slash");
                 $button.attr("title", Mapbender.DigitizerTranslator.translate('toolset.hideAll'));
                 $button.click(function () {
-                    schema.setVisibilityForAllFeaturesInLayer(false);
+                    schema.featureVisibility = false;
+                    schema.setVisibilityForAllFeaturesInLayer();
                 });
                 buttons['hideAll'] = $button;
 
@@ -86,7 +87,8 @@
                 $button.addClass("fa fa-eye");
                 $button.attr("title", Mapbender.DigitizerTranslator.translate('toolset.showAll'));
                 $button.click(function () {
-                    schema.setVisibilityForAllFeaturesInLayer(true);
+                    schema.featureVisibility = true;
+                    schema.setVisibilityForAllFeaturesInLayer();
                 });
                 buttons['showAll'] = $button;
             }
