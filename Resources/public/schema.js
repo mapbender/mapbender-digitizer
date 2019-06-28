@@ -543,6 +543,8 @@
             var frame = schema.menu.frame;
             var layer = schema.layer;
 
+            schema.lastRequest = null;
+
             widget.getCurrentSchema = function () {
                 return schema;
             };
