@@ -27,7 +27,7 @@
             initializeClustering: function () {
                 var schema = this;
 
-                var clusterStrategy = new OpenLayers.Strategy.Cluster({distance: 40});
+                var clusterStrategy = new ol.Strategy.Cluster({distance: 40});
                 var strategies = [clusterStrategy];
                 schema.layer.strategies = strategies;
                 clusterStrategy.layer = schema.layer;

@@ -35,10 +35,10 @@
 
             _.each(widget.getBasicSchemes(), function (scheme) {
 
-                var rule = new OpenLayers.Rule({
+                var rule = new ol.Rule({
                     symbolizer: scheme.layer.styleMap.styles[label].defaultStyle,
                     evaluate: function (feature) {
-                        var equals = feature.attributes.schemaName === scheme.schemaName;
+                        var equals = feature.getProperties().schemaName === scheme.schemaName;
                         return equals;
                     }
                 });
@@ -47,11 +47,11 @@
             });
 
             // Regel zur Darstellung von nicht-digitizer Features wie den Modification Vertices
-            rules.push(new OpenLayers.Rule({
+            rules.push(new ol.Rule({
 
-                symbolizer: OpenLayers.Feature.Vector.style['default'],
+                symbolizer: ol.Feature.style['default'],
                 evaluate: function (feature) {
-                    return !feature.attributes.schemaName; // Feature ohne Schemaname ist kein Digitizer Feature
+                    return !feature.getProperties().schemaName; // Feature ohne Schemaname ist kein Digitizer Feature
                 }
             }));
 
@@ -114,7 +114,7 @@
         getSchemaByFeature: function (feature) {
             var schema = this;
             var widget = schema.widget;
-            var scheme = widget.getSchemaByName(feature.attributes.schemaName);
+            var scheme = widget.getSchemaByName(feature.getProperties().schemaName);
             return scheme.getRestrictedVersion();
 
         },

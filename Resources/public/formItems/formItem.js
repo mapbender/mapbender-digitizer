@@ -105,8 +105,8 @@
                             var a = [];
                             _.each(data, function (e, i) {
                                 if (e.hasOwnProperty('attributes')) {
-                                    e.attributes.item = item;
-                                    a.push(e.attributes);
+                                    e.getProperties().item = item;
+                                    a.push(e.getProperties());
                                 }
                             });
 
@@ -114,7 +114,7 @@
 
                         } else {
                             if (data.hasOwnProperty('attributes')) {
-                                data = [data.attributes];
+                                data = [data.getProperties()];
 
                             }
 
@@ -198,7 +198,7 @@
 
             var popupConfig = _.extend({
 
-                title: Mapbender.DigitizerTranslator.translate("feature.attributes"),
+                title: Mapbender.DigitizerTranslator.translate("feature.getProperties()"),
 
                 width: "423px",
             }, schema.popup);
@@ -271,8 +271,8 @@
                 var a = [];
                 _.each(data, function (e, i) {
                     if (e.hasOwnProperty('attributes')) {
-                        e.attributes.item = item;
-                        a.push(e.attributes);
+                        e.getProperties().item = item;
+                        a.push(e.getProperties());
                     }
                 });
 
@@ -280,7 +280,7 @@
 
             } else {
                 if (data.hasOwnProperty('attributes')) {
-                    data = [data.attributes];
+                    data = [data.getProperties()];
 
                 }
 

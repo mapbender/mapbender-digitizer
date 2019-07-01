@@ -24,6 +24,8 @@
 
                 injectedMethods: {
 
+                    layer: layer,
+
                     // Override
                     updateAfterMove: schema.updateAfterMove.bind(schema),
 
@@ -353,7 +355,7 @@
         deactivateControls: function () {
             var menu = this;
 
-            menu.toolSet.activeControl && menu.toolSet.activeControl.deactivate();
+            menu.toolSet.activeControl && menu.toolSet.activeControl.setActive(false);
 
         },
 

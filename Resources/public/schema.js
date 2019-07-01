@@ -29,7 +29,7 @@
                 try {
                     schema.evaluatedHooksForControlPrevention[name] = function (feature) {
                         var control = this;
-                        var attributes = feature.attributes;
+                        var attributes = feature.getProperties();
                         return eval(value);
                     }
                 } catch (e) {
@@ -91,36 +91,55 @@
             var widget = schema.widget;
             var strategies = [];
 
-            var createStyleMap = function () {
+            // var createStyleMap = function () {
+            //
+            //
+            //     var context = schema.getStyleMapContext();
+            //     var styleMapObject = {};
+            //
+            //     styleLabels.forEach(function (label) {
+            //         var options = schema.getStyleMapOptions(label);
+            //         options.context = context;
+            //         var styleOL = ol.Feature.style_[label] || ol.Feature.style_['default'];
+            //         styleMapObject[label] = new ol.Style($.extend({}, {}, schema.getExtendedStyle(label)), options);
+            //     });
+            //
+            //     if (!schema.markUnsavedFeatures) {
+            //         styleMapObject.unsaved = styleMapObject.default;
+            //     }
+            //     return new ol.StyleMap(styleMapObject, {extendDefault: true});
+            //
+            // };
 
+            //var styleMap = createStyleMap();
 
-                var context = schema.getStyleMapContext();
-                var styleMapObject = {};
-
-                styleLabels.forEach(function (label) {
-                    var options = schema.getStyleMapOptions(label);
-                    options.context = context;
-                    var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
-                    styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, schema.getExtendedStyle(label)), options);
-                });
-
-                if (!schema.markUnsavedFeatures) {
-                    styleMapObject.unsaved = styleMapObject.default;
-                }
-                return new OpenLayers.StyleMap(styleMapObject, {extendDefault: true});
-
-            };
-
-            var styleMap = createStyleMap();
-
-
-            var layer = new OpenLayers.Layer.Vector(schema.label, {
-                styleMap: styleMap,
-                name: schema.label,
-                visibility: false,
-                rendererOptions: {zIndexing: true},
-                strategies: strategies
+            var layer = new ol.layer.Vector({
+                projection: 'EPSG:4258',
+                source: new ol.source.Vector({
+                    format: new ol.format.GeoJSON({defaultDataProjection: 'EPSG:4258'})
+                }),
+                // name: schema.label,
+                visible: true,
+                // rendererOptions: {zIndexing: true},
+                strategy: ol.loadingstrategy.bbox,
+                loader: function() {
+                    console.log("olad");
+                    schema.getData();
+                },
+                // style: new ol.style.Style({
+                //     fill: new ol.style.Fill({
+                //         color: 'rgba(255, 255, 255, 0.2)'
+                //     }),
+                //     stroke: new ol.style.Stroke({
+                //         color: '#ffcc33',
+                //         width: 2
+                //     }),
+                //
+                // })
             });
+
+            Mapbender.llayer = layer;
+            Mapbender.mmap = schema.widget.map;
 
             if (schema.maxScale) {
                 layer.options.maxScale = schema.maxScale;
@@ -139,77 +158,77 @@
             var widget = schema.widget;
 
 
-            var selectControl = new OpenLayers.Control.SelectFeature(layer, {
-                clickout: true,
-                toggle: true,
-                multiple: true,
+            var selectControl = new ol.interaction.Select(layer, {
 
-                hover: true,
+                condition: ol.events.condition.pointerMove,
 
-                openDialog: function (feature) {
-
-                    if (schema.allowEditData || schema.allowOpenEditDialog) {
-                        schema.openFeatureEditDialog(feature);
-                    }
-                },
-
-                clickFeature: function (feature) {
-                    if (schema.mapHasActiveControlThatBlocksSelectControl()) {
-                        return;
-                    }
-                    this.openDialog(feature);
-                    return Object.getPrototypeOf(this).clickFeature.apply(this, arguments);
-
-                },
-
-                overFeature: function (feature) {
-                    this.highlight(feature);
-
-
-                },
-                outFeature: function (feature) {
-                    this.unhighlight(feature);
-                },
-
-                highlight: function (feature) {
-                    feature.isHighlighted = true;
-
-                    console.assert(!!feature, "Feature must be set");
-                    if (!schema.layer.features.includes(feature)) {
-                        return;
-                    }
-                    schema.processFeature(feature, function (feature) {
-                        schema.menu.resultTable.hoverInResultTable(feature, true);
-                    });
-
-                    layer.drawFeature(feature);
-                    this.events.triggerEvent("featurehighlighted", {feature: feature});
-
-                },
-                unhighlight: function (feature) {
-
-                    feature.isHighlighted = false;
-
-                    if (!schema.layer.features.includes(feature)) {
-                        return;
-                    }
-                    schema.processFeature(feature, function (feature) {
-                        schema.menu.resultTable.hoverInResultTable(feature, false);
-                    });
-
-
-                    schema.layer.drawFeature(feature);
-                    this.events.triggerEvent("featureunhighlighted", {feature: feature});
-
-                }
+                // openDialog: function (feature) {
+                //
+                //     if (schema.allowEditData || schema.allowOpenEditDialog) {
+                //         schema.openFeatureEditDialog(feature);
+                //     }
+                // },
+                //
+                // clickFeature: function (feature) {
+                //     if (schema.mapHasActiveControlThatBlocksSelectControl()) {
+                //         return;
+                //     }
+                //     this.openDialog(feature);
+                //     return Object.getPrototypeOf(this).clickFeature.apply(this, arguments);
+                //
+                // },
+                //
+                // overFeature: function (feature) {
+                //     this.highlight(feature);
+                //
+                //
+                // },
+                // outFeature: function (feature) {
+                //     this.unhighlight(feature);
+                // },
+                //
+                // highlight: function (feature) {
+                //     feature.isHighlighted = true;
+                //
+                //     console.assert(!!feature, "Feature must be set");
+                //     if (!schema.layer.features.includes(feature)) {
+                //         return;
+                //     }
+                //     schema.processFeature(feature, function (feature) {
+                //         schema.menu.resultTable.hoverInResultTable(feature, true);
+                //     });
+                //
+                //     layer.drawFeature(feature);
+                //     this.events.triggerEvent("featurehighlighted", {feature: feature});
+                //
+                // },
+                // unhighlight: function (feature) {
+                //
+                //     feature.isHighlighted = false;
+                //
+                //     if (!schema.layer.features.includes(feature)) {
+                //         return;
+                //     }
+                //     schema.processFeature(feature, function (feature) {
+                //         schema.menu.resultTable.hoverInResultTable(feature, false);
+                //     });
+                //
+                //
+                //     schema.layer.drawFeature(feature);
+                //     this.events.triggerEvent("featureunhighlighted", {feature: feature});
+                //
+                // }
             });
+
+            selectControl.onchange = function() { console.log("@@@@")}
+
 
 
             // Workaround to move map by touch vector features
             selectControl.handlers && selectControl.handlers.feature && (selectControl.handlers.feature.stopDown = false);
             schema.selectControl = selectControl;
 
-            widget.map.addControl(schema.selectControl);
+            widget.map.addInteraction(schema.selectControl);
 
         };
 
@@ -263,6 +282,10 @@
         };
 
         assert();
+
+        schema.layer.getSource().on('addfeature',function(event){
+            console.log(event,"??????");
+        });
 
     };
 
@@ -417,7 +440,7 @@
         getStyleLabel: function(feature) {
             var schema = this;
             var label = schema.featureType.name;
-            return feature.attributes[label] || '';
+            return feature.getProperties()[label] || '';
         },
 
         getStyleMapContext: function () {
@@ -494,10 +517,10 @@
             }).done(function (response) {
 
                 schema.updateConfigurationAfterSwitching(response.schemes);
-                layer.setVisibility(true);
+                layer.setVisible(true);
                 frame.show();
                 if (schema.widget.isFullyActive) {
-                    schema.selectControl.activate();
+                    schema.selectControl.setActive(true);
                 }
                 schema.getData({
                     reloadNew: true
@@ -516,10 +539,10 @@
             frame.hide();
 
             if ((deactivateWidget && !schema.widget.displayOnInactive) || (!deactivateWidget && !schema.displayPermanent)) {
-                layer.setVisibility(false);
+                layer.setVisible(false);
             }
 
-            schema.selectControl.deactivate();
+            schema.selectControl.setActive(false);
 
             if (widget.currentPopup) {
                 widget.currentPopup.popupDialog('close');
@@ -577,7 +600,7 @@
             var widget = schema.widget;
             var map = widget.map;
 
-            return !!_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true});
+            return !!_.find(map.getControlsByClass('ol.interaction.ModifyFeature'), {active: true});
         },
 
 
@@ -586,8 +609,8 @@
             var layer = schema.layer;
             var features = schema.getLayerFeatures();
 
-            layer.removeAllFeatures();
-            layer.addFeatures(features);
+            layer.getSource().clear();
+            layer.getSource().addFeatures(features);
 
             schema.menu.resultTable.redrawResultTableFeatures(features);
 
@@ -609,7 +632,7 @@
 
 
             if (schema.deactivateControlAfterModification) {
-                control && control.deactivate();
+                control && control.setActive(false);
             }
 
         },
@@ -676,9 +699,9 @@
             var widget = schema.widget;
 
             var map = widget.map;
-            var projection = map.getProjectionObject();
+            var projection = map.getView().getProjection();
             return {
-                srid: projection.proj.srsProjNumber,
+                srid: projection.srsProjNumber,
                 maxResults: schema.maxResults,
                 schema: schema.schemaName,
             }
@@ -690,7 +713,7 @@
             var widget = schema.widget;
 
             var map = widget.map;
-            var extent = map.getExtent();
+            var extent = map.getView().calculateExtent(map.getSize());
 
             var callback = options && options.callback;
 
@@ -731,15 +754,14 @@
         getVisibleFeatures: function () {
             var schema = this;
             var layer = schema.layer;
-            var map = layer.map;
-            var extent = map.getExtent();
-            var bbox = extent.toGeometry().getBounds();
+            var map = schema.widget.map;
+            var bbox = map.getView().calculateExtent(map.getSize());
             var currentExtentOnly = schema.currentExtentSearch;
 
 
             var visibleFeatures = currentExtentOnly ? _.filter(schema.getLayerFeatures(), function (feature) {
                 return feature && (feature.isNew || feature.geometry.getBounds().intersectsBounds(bbox));
-            }) : layer.features;
+            }) : layer.getSource().getFeatures();
 
             return visibleFeatures;
         },
@@ -766,6 +788,8 @@
         onFeatureCollectionLoaded: function (featureCollection, newFeaturesOnly, xhr) {
             var schema = this;
 
+
+
             if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
                 Mapbender.error(Mapbender.DigitizerTranslator.translate("features.loading.error"), featureCollection, xhr);
                 return;
@@ -774,25 +798,33 @@
             if (featureCollection.features && featureCollection.features.length === parseInt(schema.maxResults)) {
                 Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
             }
-            var geoJsonReader = new OpenLayers.Format.GeoJSON();
-            var newFeatures = geoJsonReader.read({
+            var geoJsonReader = new ol.format.GeoJSON();
+            var newFeatures = geoJsonReader.readFeaturesFromObject({
                 type: "FeatureCollection",
                 features: featureCollection.features
             });
 
-            if (newFeaturesOnly) {
-                schema.removeAllFeatures();
-                schema.layer.features = newFeatures;
-            } else {
-                schema.layer.features = schema.mergeExistingFeaturesWithLoadedFeatures(newFeatures);
-            }
+            console.log(newFeatures);
 
+            schema.layer.getSource().addFeatures(newFeatures);
 
-            schema.layer.features.forEach(function (feature) {
-                schema.introduceFeature(feature);
-            });
+            // if (newFeaturesOnly) {
+            //     schema.removeAllFeatures();
+            //     schema.layer.getSource().addFeatures(newFeatures);
+            // } else {
+            //     schema.layer.getSource().addFeatures(schema.mergeExistingFeaturesWithLoadedFeatures(newFeatures));
+            // }
+            //
+            //
+            //
+            //
+            // schema.layer.getSource().getFeatures().forEach(function (feature) {
+            //     schema.introduceFeature(feature);
+            //     feature.data = feature.getProperties();
+            // });
+            //
+            // schema.reloadFeatures();
 
-            schema.reloadFeatures();
         },
 
         setStyleProperties: function (feature) {
@@ -866,19 +898,20 @@
         // Overwrite
         getLayerFeatures: function () {
             var schema = this;
-            return schema.layer.features;
+            return schema.layer.getSource().getFeatures();
         },
 
         removeFeatureFromUI: function (feature) {
             var schema = this;
-            schema.layer.features = _.without(schema.getLayerFeatures(), feature);
+            schema.layer.getSource().clear();
+            schema.layer.getSource().addFeatures(_.without(schema.getLayerFeatures(), feature));
             schema.reloadFeatures();
             schema.refreshOtherLayersAfterFeatureSave(feature);
         },
 
         removeAllFeatures: function () {
             var schema = this;
-            schema.layer.removeAllFeatures();
+            schema.layer.getSource().clear();
         },
 
 
@@ -894,7 +927,7 @@
                     onSuccess: function () {
                         widget.query('delete', {
                             schema: schema.getSchemaByFeature(feature).schemaName,
-                            feature: feature.attributes
+                            feature: feature.getProperties()
                         }).done(function (fid) {
                             schema.removeFeatureFromUI(feature);
                             $.notify(Mapbender.DigitizerTranslator.translate('feature.remove.successfully'), 'info');
@@ -934,7 +967,7 @@
 
             var newAttributes = _.extend({}, defaultAttributes);
 
-            _.each(feature.attributes, function (v, k) {
+            _.each(feature.getProperties(), function (v, k) {
                 if (v !== '' && v !== null && k !== featureSchema.featureType.uniqueId) {
 
                     if (schema.copy.overwriteValuesWithDefault) {
@@ -957,7 +990,7 @@
             }
 
             var name = featureSchema.featureType.name;
-            newFeature.data[name] = "Copy of " + (feature.attributes[name] || feature.fid);
+            newFeature.data[name] = "Copy of " + (feature.getProperties()[name] || feature.fid);
 
             delete newFeature.fid;
 
@@ -985,8 +1018,8 @@
             var schema = this;
             var widget = schema.widget;
             var tableApi = schema.menu.resultTable.getApi();
-            var wkt = new OpenLayers.Format.WKT().write(feature);
-            var srid = widget.map.getProjectionObject().proj.srsProjNumber;
+            var wkt = new ol.Format.WKT().write(feature);
+            var srid = widget.map.getView().getProjection().srsProjNumber;
 
             var createNewFeatureWithDBFeature = function (feature, response) {
 
@@ -1000,9 +1033,9 @@
                     console.warn("More than 1 Feature returned from DB Operation");
                 }
 
-                var geoJsonReader = new OpenLayers.Format.GeoJSON();
+                var geoJsonReader = new ol.format.GeoJSON();
 
-                var newFeatures = geoJsonReader.read(response);
+                var newFeatures = geoJsonReader.readFeaturesFromObject(response);
                 var newFeature = _.first(newFeatures);
 
 

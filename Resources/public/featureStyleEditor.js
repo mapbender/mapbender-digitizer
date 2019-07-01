@@ -29,7 +29,7 @@
 
         options = $.extend(defaultOptions, options);
 
-        if (feature.geometry.CLASS_NAME === "OpenLayers.Geometry.LineString") {
+        if (feature.geometry.CLASS_NAME === "ol.Geometry.LineString") {
             options.fillTab = false;
         }
 
@@ -86,7 +86,7 @@
                     value: 0,
                     css: {
                         width: "35%",
-                        visibility: feature.geometry.CLASS_NAME === "OpenLayers.Geometry.Point" ? "visible" : "hidden"
+                        visibility: feature.geometry.CLASS_NAME === "ol.Geometry.Point" ? "visible" : "hidden"
                     }
 
                 }, {

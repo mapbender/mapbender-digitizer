@@ -69,7 +69,7 @@
          * Assigned values are copied from the feature's data, if it was already
          * stored in the db, empty otherwise.
          *
-         * @param {(OpenLayers.Feature | OpenLayers.Feature.Vector)} feature
+         * @param {(ol.Feature)} feature
          * @returns {{}}
          */
         createHeadlessFormData: function (feature) {

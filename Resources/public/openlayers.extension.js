@@ -3,25 +3,26 @@
 
 
     $(document).ready(function () {
-        OpenLayers.Feature.prototype.equals = function (feature) {
+        ol.Feature.prototype.equals = function (feature) {
             return this.fid === feature.fid;
         };
-        OpenLayers.Feature.prototype.isNew = false;
-        OpenLayers.Feature.prototype.isChanged = false;
-        OpenLayers.Feature.prototype.isCopy = false;
-        OpenLayers.Feature.prototype.disabled = false;
-        OpenLayers.Feature.prototype.visible = true;
-        OpenLayers.Feature.prototype.cluster = false;
-        OpenLayers.Feature.prototype.getClusterSize = function () {
+        ol.Feature.prototype.isNew = false;
+        ol.Feature.prototype.isChanged = false;
+        ol.Feature.prototype.isCopy = false;
+        ol.Feature.prototype.disabled = false;
+        ol.Feature.prototype.visible = true;
+        ol.Feature.prototype.cluster = false;
+        ol.Feature.prototype.getClusterSize = function () {
             return this.cluster ? this.cluster.length : null;
         };
 
 
 
-        OpenLayers.Feature.prototype.toggleVisibility = function(visible) {
+        ol.Feature.prototype.toggleVisibility = function(visible) {
             var feature = this;
             feature.visible = visible;
         };
+
 
     });
 

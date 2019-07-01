@@ -40,9 +40,9 @@
                     if (Array.isArray(data)) {
 
                         _.each(data, function (el, i) {
-                            el.attributes = el.attributes || {};
-                            el.attributes.item = item;
-                            dataItems.push(el.attributes)
+                            el.getProperties() = el.getProperties() || {};
+                            el.getProperties().item = item;
+                            dataItems.push(el.getProperties())
 
                         });
 
@@ -85,7 +85,7 @@
                     var data = {};
 
                     item.allowRemove = false;
-                    data['linkId'] = feature.attributes[item.dataStoreLink.uniqueId];
+                    data['linkId'] = feature.getProperties()[item.dataStoreLink.uniqueId];
                     data.item = item;
                     data[uniqueIdKey] = null;
                     Mapbender.Digitizer.FormItemUtils.openEditDialog(data, item, table);
@@ -101,7 +101,7 @@
                     var feature = table.data('olFeature');
 
                     item.allowRemove = true;
-                    rowData.externalId = feature.attributes[item.dataStoreLink.uniqueId];
+                    rowData.externalId = feature.getProperties()[item.dataStoreLink.uniqueId];
 
                     Mapbender.Digitizer.FormItemUtils.openEditDialog(rowData, item, table);
 

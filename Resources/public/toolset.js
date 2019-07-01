@@ -67,6 +67,7 @@
          */
         createToolbar: function () {
             var toolSet = this;
+            var schema = toolSet.schema;
             var element = $(toolSet.element);
             var controlFactory = toolSet.controlFactory;
             var buttons = toolSet.buttons;
@@ -88,18 +89,19 @@
                 $($button).click(function (e) {
 
                     if (control.active) {
-                        control.deactivate();
+                        control.setActive(false);
                     } else {
-                        toolSet.activeControl && toolSet.activeControl.deactivate();
-                        control.activate();
+                        console.log("activierter");
+                        toolSet.activeControl && toolSet.activeControl.setActive(false);
+                        schema.widget.map.addInteraction(control);
+                        //control.setActive(true);
                         toolSet.activeControl = control;
 
                     }
 
                 });
 
-
-                control.layer.map.addControl(control);
+                schema.widget.map.addControl(control);
                 element.append($button);
             });
         },

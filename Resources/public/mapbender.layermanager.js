@@ -4,14 +4,14 @@
     Mapbender.layerManager = new function () {
         var layerManager = this;
         /**
-         * @define {OpenLayers.Map}
+         * @define {ol.Map}
          */
         var olMap;
 
         /**
          * Set map object to handle with
          *
-         * @param {OpenLayers.Map} map
+         * @param {ol.Map} map
          */
         layerManager.setMap = function (map) {
             olMap = map;
@@ -22,18 +22,18 @@
          * Refresh layer. Only if visible.
          *
          * @see http://osgeo-org.1560.x6.nabble.com/layer-WMS-don-t-redraw-td5086852.html
-         * @see http://dev.openlayers.org/apidocs/files/OpenLayers/Layer-js.html#OpenLayers.Layer.redraw
+         * @see http://dev.openlayers.org/apidocs/files/ol/Layer-js.html#ol.Layer.redraw
          * @see https://gis.stackexchange.com/questions/36741/how-to-update-a-vector-layer-with-wfs-protocol-after-updating-the-filter
-         * @param {(OpenLayers.Layer | OpenLayers.Layer.Vector)} layer
-         * @return {OpenLayers.Layer}
+         * @param {(ol.Layer | ol.layer.Vector)} layer
+         * @return {ol.Layer}
          */
         layerManager.refreshLayer = function (layer) {
             if (!layer.getVisibility()) {
                 return layer;
             }
 
-            layer.setVisibility(false);
-            layer.setVisibility(true);
+            layer.setVisible(false);
+            layer.setVisible(true);
 
             if (layer.redraw) {
                 layer.redraw(true);
@@ -49,7 +49,7 @@
          * Get layers by layer instance ID
          *
          * @param {number|string} _layerInstanceId
-         * @return {Array<OpenLayers.Layer>}
+         * @return {Array<ol.Layer>}
          */
         layerManager.getLayersByInstanceId = function (_layerInstanceId) {
             var layers = [];

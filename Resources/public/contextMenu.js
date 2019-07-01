@@ -121,7 +121,7 @@
         }
 
         return {
-            name: feature.attributes[schema.featureType.name] || "Feature #" + feature.fid,
+            name: feature.getProperties()[schema.featureType.name] || "Feature #" + feature.fid,
             feature: feature,
             items: subItems
         };

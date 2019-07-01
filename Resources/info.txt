@@ -48,7 +48,7 @@ Testing:
 - Testen, was mit dem Formdata passiert wenn saveFeature außerhalb des FeatureEdit Dialogs aufgerufen wird
 - Überprüfen, wie im Bahn Digitizer "alles" Layer sich die einzelnen Features hinsichtlich ihrer allow Properties im Resulttable verhalten
 - Popup Einstellungen in Configuration
-- OpenLayersCloudPopup testen
+- olCloudPopup testen
 
 
 Bugs von Robin gefunden:
@@ -84,7 +84,7 @@ Optische Bugs:
 Gemacht:
 - DataManagerUtils refactorn
 - Properties in Scheme aussortieren und sortieren
-- feature.attributes.geomType und schema.featureType.geomType- variablen anders benennen
+- feature.getProperties().geomType und schema.featureType.geomType- variablen anders benennen
 - Die ganze Style Map Geschichte im AllScheme ist suboptimal. Neues Model ausdenken und anwenden.
 - In All geometries verschwindet unsaved feature markierung nicht
 - Kontext-Menü Funktionen irgendwie in Schema auslagern

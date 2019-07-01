@@ -6,31 +6,36 @@
         var func = function (feature) {
             var control = this;
 
-            _.each(injectedMethods.getDefaultAttributes(), function (prop) {
-                feature.attributes[prop] = "";
-            });
+            console.log(feature,feature.getGeometry(),"§§§§§§");
 
-            feature.attributes.schemaName = control.schemaName;
+        //    injectedMethods.layer.getSource().addFeature(feature);
 
-            feature.isNew = true;
-            injectedMethods.introduceFeature(feature);
+            // _.each(injectedMethods.getDefaultAttributes(), function (prop) {
+            //     feature.getProperties()[prop] = "";
+            // });
 
+            // feature.setProperties({ schemaName: control.get('schemaName') });
+            //
+            // feature.isNew = true;
+            // injectedMethods.introduceFeature(feature);
+            //
+            //
+            // injectedMethods.setModifiedState(feature, this);
+            //
+            // injectedMethods.openFeatureEditDialog(feature,'add');
+            //
+            // control.setActive(false);
 
-            injectedMethods.setModifiedState(feature, this);
-
-            injectedMethods.openFeatureEditDialog(feature,'add');
-            feature.layer.drawFeature(feature);
-
-            control.deactivate();
         };
 
         return func;
 
     };
 
-    var finalizeDrawFeatureWithValidityTest = function (cancel) {
-        if (this.polygon) {
-            var wkt = this.polygon.geometry.toString();
+    var finalizeDrawFeatureWithValidityTest = function (feature) {
+        if (feature) {
+            console.log(feature);
+            var wkt = feature.getGeometry().toString();
             var reader = new jsts.io.WKTReader();
             try {
                 var geom = reader.read(wkt);
@@ -38,15 +43,13 @@
                 if (!geom.isValid()) {
                     $.notify("Geometry not valid");
                     this.destroyActiveComponent(cancel);
-                    this.control.deactivate();
-                    return;
+                    this.control.setActive(false);
+                    // TODO do something to prevent finalization
                 }
             } catch (e) {
                 console.warn("error in validation of geometry", e);
             } //In case of Error thrown in read, because there is no complete linear ring in the geometry
         }
-
-        return OpenLayers.Handler.Polygon.prototype.finalize.apply(this, arguments);
     };
 
 
@@ -62,7 +65,7 @@
 
         drawPoint: function (schemaName) {
             var controlFactory = this;
-            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Point, {
+            return new ol.interaction.Draw(controlFactory.layer, 'Point', {
                 featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
                 eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
@@ -72,7 +75,7 @@
 
         drawLine: function (schemaName) {
             var controlFactory = this;
-            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Path, {
+            return new ol.interaction.Draw(controlFactory.layer,'LineString', {
                 featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
                 eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
@@ -82,24 +85,51 @@
 
         drawPolygon: function (schemaName) {
             var controlFactory = this;
-            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Polygon, {
-                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
-                handlerOptions: {
-                    finalize: finalizeDrawFeatureWithValidityTest,
+            var drawPolygon =  new ol.interaction.Draw({
+                source: controlFactory.layer.getSource(),
+                type: 'Polygon',
+            });
+            //
+            // var method = createFeatureAddedMethod(controlFactory.injectedMethods).bind(drawPolygon);
+            //
+            //
+            // drawPolygon.set('schemaName',schemaName);
 
-                    destroyActiveComponent: function (cancel) {
-                        this.destroyFeature(cancel);
-                    }
-                },
-                eventListeners: controlFactory.controlEvents,
-                schemaName: schemaName
-            })
+//             drawPolygon.on('drawend',function(event) {
+//                 finalizeDrawFeatureWithValidityTest(event.feature);
+// console.log(event,"****");
+//                 method(event.feature);
+//             });
+
+
+            // controlFactory.layer.getSource().on('addfeature',function(event){
+            //     console.trace();
+            //     console.log(event,event.target);
+            //     if (event.target === drawPolygon) {
+            //         console.log("$$$$$$");
+            //
+            //     }
+            // });
+            return drawPolygon;
+
+            // {
+            //     featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
+            //         handlerOptions: {
+            //     finalize: finalizeDrawFeatureWithValidityTest,
+            //
+            //         destroyActiveComponent: function (cancel) {
+            //         this.destroyFeature(cancel);
+            //     }
+            // },
+            //     eventListeners: controlFactory.controlEvents,
+            //         schemaName: schemaName
+            // })
         },
 
 
         drawRectangle: function (schemaName) {
             var controlFactory = this;
-            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.RegularPolygon, {
+            return new ol.interaction.Draw(controlFactory.layer, 'Rectangle', {
                 featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
                 handlerOptions: {
                     sides: 4,
@@ -112,7 +142,7 @@
 
         drawCircle: function (schemaName) {
             var controlFactory = this;
-            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.RegularPolygon, {
+            return new ol.interaction.Draw(controlFactory.layer, 'Circle', {
                 featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
                 handlerOptions: {
                     sides: 40
@@ -124,7 +154,7 @@
 
         drawEllipse: function (schemaName) {
             var controlFactory = this;
-            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.RegularPolygon, {
+            return new ol.interaction.Draw(controlFactory.layer, 'Ellipse', {
                 featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
                 handlerOptions: {
                     sides: 40,
@@ -137,7 +167,7 @@
 
         drawDonut: function () {
             var controlFactory = this;
-            return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Polygon, {
+            return new ol.interaction.Draw(controlFactory.layer,'Donut', {
 
                 eventListeners: controlFactory.controlEvents,
 
@@ -157,8 +187,8 @@
                             // look for intersections, last drawn gets priority
                             for (var i = features.length - 1; i >= 0; --i) {
                                 candidate = features[i].geometry;
-                                if ((candidate instanceof OpenLayers.Geometry.Polygon ||
-                                    candidate instanceof OpenLayers.Geometry.MultiPolygon) &&
+                                if ((candidate instanceof ol.Geometry.Polygon ||
+                                    candidate instanceof ol.Geometry.MultiPolygon) &&
                                     candidate.intersects(geometry)) {
                                     polygon = features[i];
                                     this.control.layer.removeFeatures([polygon], {silent: true});
@@ -180,7 +210,7 @@
                         if (!this.drawingHole) {
                             return;
                         }
-                        OpenLayers.Handler.Path.prototype.addPoint.apply(this, arguments);
+                        ol.Handler.Path.prototype.addPoint.apply(this, arguments);
                     },
                     finalize: finalizeDrawFeatureWithValidityTest,
                     destroyActiveComponent: function (cancel) {
@@ -188,7 +218,7 @@
                     },
                     finalizeInteriorRing: function (event) {
 
-                        var fir = OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
+                        var fir = ol.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
                         var feature = this.polygon;
                         controlFactory.injectedMethods.setModifiedState(feature, this.control);
                         controlFactory.injectedMethods.openFeatureEditDialog(feature,'donut');
@@ -199,19 +229,21 @@
                 activate: function () {
                     this.layer.map.controls.forEach(function (control) {
                         if (control.dragPan) {
-                            control.dragPan.deactivate();
+                            control.dragPan.setActive(false);
                         }
                     });
-                    OpenLayers.Control.DrawFeature.prototype.activate.apply(this, arguments);
+                    ol.interaction.Draw.prototype.activate.apply(this, arguments);
                 },
 
-                deactivate: function () {
-                    this.layer.map.controls.forEach(function (control) {
-                        if (control.dragPan) {
-                            control.dragPan.activate();
-                        }
-                    });
-                    OpenLayers.Control.DrawFeature.prototype.deactivate.apply(this, arguments);
+                setActive: function (active) {
+                    if (!active) {
+                        this.layer.map.controls.forEach(function (control) {
+                            if (control.dragPan) {
+                                control.dragPan.setActive(true);
+                            }
+                        });
+                    }
+                    ol.interaction.Draw.prototype.setActive.apply(this, arguments);
                 },
 
 
@@ -220,7 +252,9 @@
 
         modifyFeature: function () {
             var controlFactory = this;
-            return new OpenLayers.Control.ModifyFeature(controlFactory.layer, {
+            return new ol.interaction.Modify(/*controlFactory.layer,*/ {
+
+                source: controlFactory.layer.getSource(),
 
                 eventListeners: controlFactory.controlEvents,
 
@@ -229,8 +263,6 @@
                     feature.oldGeometry = feature.geometry.clone();
 
                     if (controlFactory.injectedMethods.preventModification(feature)) {
-                        this.deactivate();
-                        this.activate();
                         $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
                     }
 
@@ -262,7 +294,7 @@
 
         moveFeature: function () {
             var controlFactory = this;
-            return new OpenLayers.Control.DragFeature(controlFactory.layer, {
+            return new ol.interaction.DragPan(controlFactory.layer, {
 
                 eventListeners: controlFactory.controlEvents,
 

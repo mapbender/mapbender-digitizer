@@ -934,7 +934,7 @@
 
                             var control = this;
                             var schema = feature.schema;
-                            var attributes = feature.attributes;
+                            var attributes = feature.getProperties();
                             var preventDefault = false;
                             feature.oldGeom = {x:feature.geometry.x,y:feature.geometry.y};
                             if (!schema.hooks || !schema.hooks.onStart) {
@@ -965,7 +965,7 @@
 
                             var control = this;
                             var schema = feature.schema;
-                            var attributes = feature.attributes;
+                            var attributes = feature.getProperties();
                             var preventDefault = false;
 
                             if (!schema.hooks || !schema.hooks.onModificationStart) {
@@ -1412,14 +1412,14 @@
 
             var newAttributes = {};
             _.extend(newAttributes, defaultAttributes);
-            _.each(feature.attributes, function (v, k) {
+            _.each(feature.getProperties(), function (v, k) {
                 if (v === '' || v === null) {
                     return;
                 }
                 newAttributes[k] = v;
             });
 
-            newFeature.data = newFeature.properties = newFeature.attributes = newAttributes;
+            newFeature.data = newFeature.properties = newFeature.getProperties() = newAttributes;
             newFeature.schema = schema;
             delete newFeature.fid;
 
@@ -1662,7 +1662,7 @@
                 });
             }
             var popupConfiguration = {
-                title: translate('feature.attributes'),
+                title: translate('feature.getProperties()'),
                 width: widget.featureEditDialogWidth
             };
 
@@ -1747,7 +1747,7 @@
                             var data = {};
 
                             item.allowRemove = false;
-                            data['linkId'] = feature.attributes[item.dataStoreLink.uniqueId];
+                            data['linkId'] = feature.getProperties()[item.dataStoreLink.uniqueId];
                             data.item = item;
                             data[uniqueIdKey] = null;
                             widget._openEditDialog(data, popup, item, table);
@@ -1764,7 +1764,7 @@
                             var feature = table.data('olFeature');
 
                             item.allowRemove = true;
-                            rowData.externalId = feature.attributes[item.dataStoreLink.uniqueId];
+                            rowData.externalId = feature.getProperties()[item.dataStoreLink.uniqueId];
 
                             widget._openEditDialog(rowData, popup, item, table);
 
@@ -2071,8 +2071,8 @@
 
                             var dataItems = [];
                             _.each(data, function (el, i) {
-                                el.attributes.item = item;
-                                dataItems.push(el.attributes)
+                                el.getProperties().item = item;
+                                dataItems.push(el.getProperties())
 
                             });
 
@@ -2296,7 +2296,7 @@
 
             var styleId = feature.styleId ? feature.styleId : 'default';
 
-            if (feature.attributes && feature.attributes.label) {
+            if (feature.getProperties() && feature.getProperties().label) {
                 layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
             } else {
 
@@ -2362,7 +2362,7 @@
             }
             _.each(features, function (feature) {
                 var styleId = feature.styleId ? feature.styleId : 'default';
-                if (feature.attributes && feature.attributes.label) {
+                if (feature.getProperties() && feature.getProperties().label) {
                     layer.drawFeature(feature, highlight ? 'labelTextHover' : 'labelText');
                 } else {
                     if (highlight) {
@@ -2545,8 +2545,8 @@
                         return feature;
                     },
                     label: function (feature) {
-                        if (feature.attributes.hasOwnProperty("label")) {
-                            return feature.attributes.label;
+                        if (feature.getProperties().hasOwnProperty("label")) {
+                            return feature.getProperties().label;
                         }
                         return feature.cluster && feature.cluster.length > 1 ? feature.cluster.length : "";
                     }
@@ -2627,7 +2627,7 @@
             var schema = widget.findFeatureSchema(olFeature);
             var isNew = olFeature.hasOwnProperty('isNew');
             var layer = olFeature.layer;
-            var featureData = olFeature.attributes;
+            var featureData = olFeature.getProperties();
 
             if (!schema) {
                 $.notify("Feature remove failed.", "error");
@@ -2789,7 +2789,7 @@
                         break;
                     case  "OpenLayers.Geometry.Point":
                         points.push(feature);
-                        // if(feature.attributes.label) {
+                        // if(feature.getProperties().label) {
                         //     feature.style = new OpenLayers.Style({
                         //         'label': '${label}'
                         //     });
@@ -2830,7 +2830,7 @@
                 feature.layer = layer;
                 feature.schema = schema;
 
-                if (feature.attributes && feature.attributes.label) {
+                if (feature.getProperties() && feature.getProperties().label) {
                     feature.styleId = "labelText";
                     widget._highlightFeature(feature);
                     return;
@@ -2933,8 +2933,8 @@
                             var a = [];
                             _.each(data, function (e, i) {
                                 if (e.hasOwnProperty('attributes')) {
-                                    e.attributes.item = item;
-                                    a.push(e.attributes);
+                                    e.getProperties().item = item;
+                                    a.push(e.getProperties());
                                 }
                             });
 
@@ -2942,7 +2942,7 @@
 
                         } else {
                             if (data.hasOwnProperty('attributes')) {
-                                data = [data.attributes];
+                                data = [data.getProperties()];
 
                             }
 
@@ -3032,7 +3032,7 @@
              } */
             var popupConfig = _.extend({
 
-                title: translate("feature.attributes"),
+                title: translate("feature.getProperties()"),
 
                 width: widget.featureEditDialogWidth,
             }, schema.popup);
@@ -3105,8 +3105,8 @@
                     var a = [];
                     _.each(data, function (e, i) {
                         if (e.hasOwnProperty('attributes')) {
-                            e.attributes.item = item;
-                            a.push(e.attributes);
+                            e.getProperties().item = item;
+                            a.push(e.getProperties());
                         }
                     });
 
@@ -3114,7 +3114,7 @@
 
                 } else {
                     if (data.hasOwnProperty('attributes')) {
-                        data = [data.attributes];
+                        data = [data.getProperties()];
 
                     }
 
@@ -3350,7 +3350,7 @@
         download: function (feature, attributeName) {
             var widget = this;
             var schema = feature.schema;
-            var attributes = feature.attributes;
+            var attributes = feature.getProperties();
             var tableName = schema.featureType.table;
             var relativeWebPath = Mapbender.configuration.application.urls.asset;
             window.open(relativeWebPath + widget.options.fileUri + '/' + tableName + '/' + attributeName + '/' + attributes[attributeName]);
