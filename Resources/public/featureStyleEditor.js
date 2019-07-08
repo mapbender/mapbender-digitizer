@@ -23,8 +23,10 @@
                 '#f0ad4e': '#f0ad4e',
                 '#d9534f': '#d9534f'
             },
-            commonTab: true,
-            fillTab: true
+            commonTab: false,
+            fillTab: true,
+            strokeTab: true,
+            labelTab: true,
         };
 
         options = $.extend(defaultOptions, options);
@@ -341,6 +343,7 @@
                 {
                     type: 'textArea',
                     css: {width: "100 %"},
+                    disabled: options.label_disabled,
                     name: 'label',
                     infoText: 'The text for an optional label.  For browsers that use the canvas renderer, this requires either fillText or mozDrawText to be available.'
                 }, {
@@ -488,8 +491,12 @@
             tabs.push(fillTab);
         }
 
-        tabs.push(strokeTab);
-        tabs.push(labelTab);
+        if (options.strokeTab) {
+            tabs.push(strokeTab);
+        }
+        if (options.labelTab) {
+            tabs.push(labelTab);
+        }
         // tabs.push(imageTab);
         // tabs.push(backGroundTab);
         // tabs.push(miscTab);
@@ -545,7 +552,7 @@
             } else {
                 // defer style saving until the feature itself is saved, and has an id to associate with
                 feature.saveStyleDataCallback = function(newFeature) {
-                    return featureStyleEditor.saveStyle(newFeature,styleData);
+                    return featureStyleEditor.saveStyle.bind(featureStyleEditor)(newFeature,styleData);
                 }
             }
             featureStyleEditor.close();
@@ -557,15 +564,20 @@
             var schema = featureStyleEditor.schema;
             var widget = schema.widget;
             console.assert(!!feature.fid, "Feature has no ID to be assoicated with for style saving");
+            schema.featureStyles[feature.fid] = styleData;
+            schema.layer.drawFeature(feature);
             return widget.query('style/save', {
                 schema: schema.schemaName,
                 style: styleData,
                 featureId: feature.fid
-            }).then(function (response) {
-                schema.featureStyles[feature.fid] = styleData;
-                schema.layer.drawFeature(feature);
-                featureStyleEditor.element.enableForm();
             });
+
+            /** Redrawing is better done before saving style**/
+            // .then(function (response) {
+            //     schema.featureStyles[feature.fid] = styleData;
+            //     schema.layer.drawFeature(feature);
+            //     featureStyleEditor.element.enableForm();
+            // });
         }
 
 

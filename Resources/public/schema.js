@@ -646,6 +646,10 @@
             return {};
         },
 
+        // Overwrite
+        extendFeatureStyleOptions: function(styleOptions) {
+        },
+
 
         openChangeStyleDialog: function (feature) {
             var schema = this;
@@ -656,8 +660,9 @@
 
             var styleOptions = {
                 data: schema.getFeatureStyle(feature.fid) || createDefaultSymbolizer(feature),
-                commonTab: false
             };
+
+            schema.extendFeatureStyleOptions(feature,styleOptions);
 
             var styleEditor = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, styleOptions);
         },
@@ -1017,11 +1022,6 @@
 
                 newFeature.layer = feature.layer;
 
-                if (feature.saveStyleDataCallback) {
-                    feature.saveStyleDataCallback(newFeature);
-                    feature.saveStyleDataCallback = null;
-                }
-
                 return newFeature;
 
             };
@@ -1073,6 +1073,11 @@
 
 
                 var newFeature = createNewFeatureWithDBFeature(feature, response);
+
+                if (feature.saveStyleDataCallback) {
+                    feature.saveStyleDataCallback(newFeature);
+                    feature.saveStyleDataCallback = null;
+                }
 
                 if (newFeature == null) {
                     console.warn("Creation of new Feature failed");
