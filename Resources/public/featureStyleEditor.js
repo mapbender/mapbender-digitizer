@@ -33,6 +33,15 @@
             options.fillTab = false;
         }
 
+        var scale = function(min,max) {
+
+            var object = {};
+
+            for(var i=min;i<=max;i++) {
+              object[i] = i;
+            }
+            return object;
+        };
 
         var commonTab = {
             title: "Allgemein",
@@ -362,14 +371,7 @@
                         name: 'fontSize',
                         type: 'select',
                         value: 11,
-                        options: {
-                            "9": 9,
-                            "10": 10,
-                            "11": 11,
-                            "12": 12,
-                            "13": 13,
-                            "14": 14
-                        },
+                        options: scale(9,20),
                         css: {width: "20%"},
                         infoText: 'The font size for the label, to be provided like in CSS'
                     }, //     {
@@ -515,7 +517,11 @@
             }]
         });
 
-        element.formData(options.data);
+        // Unfortunately, vis-ui demands it like this
+        window.setTimeout(function(){
+            element.formData(options.data);
+        },0);
+
 
         editor.element = element;
 

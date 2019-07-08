@@ -963,7 +963,8 @@
             }
 
             var name = featureSchema.featureType.name;
-            newFeature.data[name] = "Copy of " + (feature.attributes[name] || feature.fid);
+            newFeature.data[name] = newFeature.attributes[name] = "Copy of " + (feature.attributes[name] || feature.fid);
+
 
             delete newFeature.fid;
 
