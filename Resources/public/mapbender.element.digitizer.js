@@ -440,9 +440,11 @@
 
         activate: function () {
             var widget = this;
-            widget.enable();
             widget.isFullyActive = true;
-            widget.getCurrentSchema().activateSchema(true); // triggers schema activation
+            if (!widget.isEnabled()) {
+                widget.enable();
+                widget.getCurrentSchema().activateSchema(true); // triggers schema activation
+            }
 
 
         },

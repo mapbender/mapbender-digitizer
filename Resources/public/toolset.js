@@ -7,7 +7,7 @@
 
         $.extend(toolSet, options);
 
-        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.layer, toolSet.injectedMethods,toolSet.createControlEvents());
+        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.layer, toolSet.injectedMethods);
 
         toolSet.element = $("<div />").addClass('digitizing-tool-set').addClass('left');
         toolSet.createToolbar();
@@ -16,29 +16,6 @@
 
     Mapbender.Digitizer.Toolset.prototype = {
 
-        createControlEvents: function () {
-            var toolSet = this;
-            var controlEvents = {
-
-                    activate: function(event) {
-                        var control = this;
-                        control.$button.addClass('active');
-
-                    },
-
-                    deactivate: function(event) {
-                        var control = this;
-
-                        control.$button.removeClass('active');
-                        $(control.map.div).css({cursor: 'default'});
-
-                    }
-                },
-
-                controlEvents = _.defaults(toolSet.controlEvents || {},controlEvents);
-
-            return controlEvents;
-        },
 
 
 
@@ -83,25 +60,28 @@
                     console.warn("control "+type+" does not exist");
                     return;
                 }
+                control.setActive(false);
+
+                schema.widget.map.addInteraction(control);
 
                 control.$button = $button;
 
                 $($button).click(function (e) {
 
-                    if (control.active) {
-                        control.setActive(false);
+                    if (control.getActive()) {
+                       control.setActive(false);
+                       control.$button.removeClass('active');
+
                     } else {
-                        console.log("activierter");
                         toolSet.activeControl && toolSet.activeControl.setActive(false);
-                        schema.widget.map.addInteraction(control);
-                        //control.setActive(true);
+                        control.setActive(true);
                         toolSet.activeControl = control;
+                        control.$button.addClass('active');
 
                     }
 
                 });
 
-                schema.widget.map.addControl(control);
                 element.append($button);
             });
         },

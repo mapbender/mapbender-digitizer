@@ -60,7 +60,7 @@
 
                 });
             }
-            if (schema.copy.enable) {
+            if (schema.copy && schema.copy.enable) {
                 buttons.copyButton = createButton('feature.clone.title', function (feature) {
                     schema.copyFeature(feature);
 
@@ -219,9 +219,11 @@
         configuration.augment(feature, $popup);
 
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
-        setTimeout(function () {
-            $popup.formData(feature.data);
-        },0);
+      if (feature.data) {
+          setTimeout(function () {
+              $popup.formData(feature.data);
+          }, 0);
+      }
 
     };
 

@@ -6,7 +6,6 @@
         var func = function (feature) {
             var control = this;
 
-            console.log(feature,feature.getGeometry(),"§§§§§§");
 
         //    injectedMethods.layer.getSource().addFeature(feature);
 
@@ -34,7 +33,6 @@
 
     var finalizeDrawFeatureWithValidityTest = function (feature) {
         if (feature) {
-            console.log(feature);
             var wkt = feature.getGeometry().toString();
             var reader = new jsts.io.WKTReader();
             try {
@@ -53,11 +51,10 @@
     };
 
 
-    Mapbender.Digitizer.DigitizingControlFactory = function (layer, injectedMethods, controlEvents) {
+    Mapbender.Digitizer.DigitizingControlFactory = function (layer, injectedMethods) {
 
         this.layer = layer;
         this.injectedMethods = injectedMethods;
-        this.controlEvents = controlEvents;
 
     };
 
@@ -67,7 +64,6 @@
             var controlFactory = this;
             return new ol.interaction.Draw(controlFactory.layer, 'Point', {
                 featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             });
         },
@@ -77,7 +73,6 @@
             var controlFactory = this;
             return new ol.interaction.Draw(controlFactory.layer,'LineString', {
                 featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             })
         },
@@ -95,11 +90,13 @@
             //
             // drawPolygon.set('schemaName',schemaName);
 
-//             drawPolygon.on('drawend',function(event) {
-//                 finalizeDrawFeatureWithValidityTest(event.feature);
-// console.log(event,"****");
-//                 method(event.feature);
-//             });
+            drawPolygon.on(ol.interaction.DrawEventType.DRAWEND,function(event) {
+                controlFactory.injectedMethods.removeInteraction(drawPolygon);
+                drawPolygon.setActive(false);
+                event.feature.changed();
+                event.feature.set("isNew",true);
+
+            });
 
 
             // controlFactory.layer.getSource().on('addfeature',function(event){
@@ -121,7 +118,6 @@
             //         this.destroyFeature(cancel);
             //     }
             // },
-            //     eventListeners: controlFactory.controlEvents,
             //         schemaName: schemaName
             // })
         },
@@ -135,7 +131,6 @@
                     sides: 4,
                     irregular: true
                 },
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             })
         },
@@ -147,7 +142,6 @@
                 handlerOptions: {
                     sides: 40
                 },
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             })
         },
@@ -160,7 +154,6 @@
                     sides: 40,
                     irregular: true
                 },
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             })
         },
@@ -169,7 +162,6 @@
             var controlFactory = this;
             return new ol.interaction.Draw(controlFactory.layer,'Donut', {
 
-                eventListeners: controlFactory.controlEvents,
 
                 featureAdded: function () {
                     console.warn("donut should not be created")
@@ -256,8 +248,6 @@
 
                 source: controlFactory.layer.getSource(),
 
-                eventListeners: controlFactory.controlEvents,
-
                 onModificationStart: function (feature) {
 
                     feature.oldGeometry = feature.geometry.clone();
@@ -295,8 +285,6 @@
         moveFeature: function () {
             var controlFactory = this;
             return new ol.interaction.DragPan(controlFactory.layer, {
-
-                eventListeners: controlFactory.controlEvents,
 
                 onStart: function (feature, px) {
 
