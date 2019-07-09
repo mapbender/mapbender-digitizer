@@ -216,6 +216,10 @@
                         title: 'Sachdaten drucken',
                         className: 'printmetadata',
                         onClick: function (feature, ui, b, c) {
+                            if (!schema.getSchemaByFeature(feature).allowPrintMetadata) {
+                                $.notify("Der Druck von Detailinformationen ist für Features dieses Schemas deaktiviert");
+                                return;
+                            }
                             if (!feature.printMetadata) {
                                 feature.printMetadata = true;
                                 ui.addClass("active");

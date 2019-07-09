@@ -1257,6 +1257,7 @@
                 featureType: schema.featureType,
                 index: schema.index,
                 popup: schema.popup,
+                allowPrintMetadata: schema.allowPrintMetadata,
                 allowDeleteByCancelNewGeometry: schema.allowDeleteByCancelNewGeometry,
                 copy: schema.copy,
 
