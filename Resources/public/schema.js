@@ -896,8 +896,7 @@
         removeFeature: function (feature) {
             var schema = this;
             var widget = schema.widget;
-
-            if (feature.isNew) {
+            if (feature.isNew || feature.isCopy) {
                 schema.removeFeatureFromUI(feature);
             } else {
                 Mapbender.confirmDialog({
@@ -970,8 +969,8 @@
             var name = featureSchema.featureType.name;
             newFeature.data[name] = newFeature.attributes[name] = "Copy of " + (feature.attributes[name] || feature.fid);
 
-
             delete newFeature.fid;
+            delete newFeature[schema.featureType.uniqueId];
 
             layer.drawFeature(newFeature);
 
