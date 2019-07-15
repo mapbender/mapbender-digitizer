@@ -17,7 +17,7 @@
         "mapbender/data-source": "0.*",
         "phayes/geophp": "1.2",
         "mapbender/vis-ui.js": "*",
-        "mapbender/ol4-extensions" : "*"
+        "mapbender/ol4-extensions" : "dev-master"
     },
     "require-dev": {
         "mapbender/data-source": "@dev"

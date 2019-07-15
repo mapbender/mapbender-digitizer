@@ -7,14 +7,11 @@
         schema.widget = widget;
         $.extend(schema, rawScheme);
 
-
         schema.initTableFields();
 
         schema.createFormItemsCollection();
 
         schema.createPopupConfiguration_();
-
-        schema.toolset = schema.createToolset(); // Is overwritten and must therefore be implemented in the prototype
 
         schema.createSchemaFeatureLayer_();
 
@@ -23,7 +20,6 @@
         schema.addSelectControls_();
 
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
-           console.log(arguments);
 
         });
 
@@ -32,7 +28,6 @@
         });
 
         schema.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
-            console.log(event.feature);
 
         });
 
@@ -216,13 +211,6 @@
             schema.menu.deactivateControls();
 
 
-        },
-
-
-        createToolset: function () {
-            var schema = this;
-
-            return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
         },
 
 

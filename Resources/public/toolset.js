@@ -4,8 +4,11 @@
     Mapbender.Digitizer.Toolset = function (options) {
 
         var toolSet = this;
-
         $.extend(toolSet, options);
+
+        var schema = toolSet.schema;
+
+        toolSet.buttons = schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
 
         toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.schema.widget.map);
 
@@ -17,11 +20,10 @@
     Mapbender.Digitizer.Toolset.prototype = {
 
 
-        createPlainControlButton_: function (rawButton) {
+        createPlainControlButton_: function (rawButton,interaction) {
             var toolSet = this;
             var schema = rawButton.schema;
 
-            var interaction = schema && schema.featureType.interaction || {title: null, className: null};
             var geomType = toolSet.geomType;
 
             var $button = $("<button class='button' type='button'/>");
@@ -48,7 +50,6 @@
 
             buttons.forEach(function (rawButton) {
 
-                var $button = toolSet.createPlainControlButton_(rawButton);
                 var type = rawButton.type;
 
                 var interaction = controlFactory[type] && controlFactory[type](toolSet.schema.layer.getSource());
@@ -57,17 +58,7 @@
                     return;
                 }
 
-
-                var original_setActive = interaction.setActive;
-                interaction.setActive = function (active) {
-                    if (active) {
-                        $button.addClass('active');
-                    } else {
-                        $button.removeClass('active');
-                    }
-                    original_setActive.apply(this, arguments);
-                };
-
+                var $button = toolSet.createPlainControlButton_(rawButton,interaction);
 
                 interaction.setActive(false);
 
@@ -78,11 +69,20 @@
                     if (interaction.getActive()) {
                         interaction.setActive(false);
                         toolSet.activeInteraction = null;
-
                     } else {
                         toolSet.activeInteraction && toolSet.activeInteraction.setActive(false);
                         interaction.setActive(true);
                         toolSet.activeInteraction = interaction;
+                    }
+
+                });
+
+                // Keep activation status of buttons in sync with active control
+                interaction.on('controlFactory.Activation', function (event) {
+                    if (event.active) {
+                        $button.addClass('active');
+                    } else {
+                        $button.removeClass('active');
                     }
 
                 });

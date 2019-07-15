@@ -35,10 +35,7 @@
             var layer = schema.layer;
 
 
-            var toolset = schema.toolset;
-
             menu.toolSet = new Mapbender.Digitizer.Toolset({
-                buttons: toolset,
                 schema: schema,
                 geomType: schema.getGeomType(),
 

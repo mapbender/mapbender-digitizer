@@ -24,11 +24,21 @@
             var controlFactory = this;
 
             interaction.on(ol.interaction.DrawEventType.DRAWEND,function(event) {
-                console.log("drawend");
                 var feature = event.feature;
                 source.dispatchEvent({ type: 'controlFactory.FeatureAdded', feature: feature});
 
             });
+        },
+
+        createActivator_: function(interaction) {
+
+            return function(active) {
+                var setActive = ol.interaction.Interaction.prototype.setActive;
+                setActive.apply(this,arguments);
+                interaction.dispatchEvent({ type: 'controlFactory.Activation', active: active});
+            };
+
+
         },
 
         drawPoint: function (source) {
@@ -38,6 +48,7 @@
                 type: "Point",
             });
 
+            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -51,6 +62,7 @@
                 type: "LineString",
             });
 
+            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -64,6 +76,7 @@
                 type: 'Polygon',
             });
 
+            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -80,6 +93,7 @@
 
             });
 
+            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -101,6 +115,7 @@
                 freehand: true
             });
 
+            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -130,6 +145,7 @@
                 freehand: true
             });
 
+            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -145,8 +161,9 @@
             });
 
 
+            interaction.setActive = controlFactory.createActivator_(interaction);
             interaction.on(ol.interaction.DrawDonutEventType.DRAWDONUTEND,function(event) {
-                console.log(event,"@@@@");
+                source.dispatchEvent({ type: 'controlFactory.FeatureModified', feature: event.feature});
             });
 
             return interaction;
@@ -158,6 +175,7 @@
                 source: source
             });
 
+            interaction.setActive = controlFactory.createActivator_(interaction);
             interaction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
                 var features = event.features;
                 features.forEach(function(feature) {
@@ -176,6 +194,7 @@
                 source: source
             });
 
+            interaction.setActive = controlFactory.createActivator_(interaction);
             interaction.on(ol.interaction.TranslateEventType.TRANSLATEEND,function(event) {
                 var features = event.features;
                 features.forEach(function(feature) {
