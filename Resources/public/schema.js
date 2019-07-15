@@ -22,12 +22,17 @@
 
         schema.addSelectControls_();
 
-        schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
-            var feature = event.feature;
+        schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
+           console.log(arguments);
 
-            if (feature.get("isNew")) {
-                schema.openFeatureEditDialog(feature);
-            }
+        });
+
+        schema.layer.getSource().on('controlFactory.FeatureModified', function (event) {
+
+        });
+
+        schema.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
+            console.log(event.feature);
 
         });
 
@@ -312,7 +317,7 @@
             schema.layer.getSource().addFeatures(newFeatures);
 
             schema.layer.getSource().getFeatures().forEach(function (feature) {
-                feature.data = feature.getProperties();
+
             });
 
 

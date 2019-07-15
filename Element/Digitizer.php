@@ -49,7 +49,7 @@ class Digitizer extends BaseElement
                            'menu','contextMenu', 'utilities',
                            'featureEditDialog','controlFactory','featureStyleEditor','mapbender.layermanager','formItemsCollection',
                            'mapbender.digitizer-translator',
-                           'queryEngine','openlayers.extension','vis-ui.extension');
+                           'queryEngine','vis-ui.extension');
 
 
         $formItemFiles = array("formItem","formItemBreakLine","formItemButton","formItemCheckbox","formItemContainer","formItemDate",

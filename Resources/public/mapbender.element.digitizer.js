@@ -413,6 +413,9 @@
                 console.log("MOT",arguments);
                 widget.isEnabled() && widget.getCurrentSchema().mapContextMenu.disable();
             });
+
+
+
         },
 
         getBasicSchemes: function () {

@@ -1,13 +1,13 @@
 (function ($) {
     "use strict";
 
-    Mapbender.Digitizer.Toolset = function(options) {
+    Mapbender.Digitizer.Toolset = function (options) {
 
         var toolSet = this;
 
         $.extend(toolSet, options);
 
-        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.layer, toolSet.injectedMethods);
+        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.schema.widget.map);
 
         toolSet.element = $("<div />").addClass('digitizing-tool-set').addClass('left');
         toolSet.createToolbar();
@@ -17,23 +17,20 @@
     Mapbender.Digitizer.Toolset.prototype = {
 
 
-
-
-
-        _createPlainControlButton: function (rawButton) {
+        createPlainControlButton_: function (rawButton) {
             var toolSet = this;
             var schema = rawButton.schema;
 
-            var control = schema && schema.featureType.control || { title: null, className: null };
+            var interaction = schema && schema.featureType.interaction || {title: null, className: null};
             var geomType = toolSet.geomType;
 
             var $button = $("<button class='button' type='button'/>");
 
             $button.addClass(rawButton.type);
 
-            $button.attr('title', control.title || Mapbender.DigitizerTranslator.translate('toolset.'+geomType +'.' + rawButton.type));
+            $button.attr('title', interaction.title || Mapbender.DigitizerTranslator.translate('toolset.' + geomType + '.' + rawButton.type));
             // add icon css class
-            $button.addClass(control.className || "icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
+            $button.addClass(interaction.className || "icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
 
             return $button;
         },
@@ -49,35 +46,43 @@
             var controlFactory = toolSet.controlFactory;
             var buttons = toolSet.buttons;
 
-            $.each(buttons, function (i, rawButton) {
+            buttons.forEach(function (rawButton) {
 
-                var $button = toolSet._createPlainControlButton(rawButton);
+                var $button = toolSet.createPlainControlButton_(rawButton);
                 var type = rawButton.type;
 
-
-                var control = controlFactory[type] && controlFactory[type](rawButton.schema && rawButton.schema.schemaName);
-                if (!control) {
-                    console.warn("control "+type+" does not exist");
+                var interaction = controlFactory[type] && controlFactory[type](toolSet.schema.layer.getSource());
+                if (!interaction) {
+                    console.warn("interaction " + type + " does not exist");
                     return;
                 }
-                control.setActive(false);
 
-                schema.widget.map.addInteraction(control);
 
-                control.$button = $button;
+                var original_setActive = interaction.setActive;
+                interaction.setActive = function (active) {
+                    if (active) {
+                        $button.addClass('active');
+                    } else {
+                        $button.removeClass('active');
+                    }
+                    original_setActive.apply(this, arguments);
+                };
 
-                $($button).click(function (e) {
 
-                    if (control.getActive()) {
-                       control.setActive(false);
-                       control.$button.removeClass('active');
+                interaction.setActive(false);
+
+                schema.widget.map.addInteraction(interaction);
+
+                $button.click(function (e) {
+
+                    if (interaction.getActive()) {
+                        interaction.setActive(false);
+                        toolSet.activeInteraction = null;
 
                     } else {
-                        toolSet.activeControl && toolSet.activeControl.setActive(false);
-                        control.setActive(true);
-                        toolSet.activeControl = control;
-                        control.$button.addClass('active');
-
+                        toolSet.activeInteraction && toolSet.activeInteraction.setActive(false);
+                        interaction.setActive(true);
+                        toolSet.activeInteraction = interaction;
                     }
 
                 });
