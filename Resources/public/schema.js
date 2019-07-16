@@ -38,9 +38,9 @@
 
         schema.createSchemaFeatureLayer_();
 
-        schema.createMenu_();
-
         schema.addSelectControl_();
+
+        schema.createMenu_();
 
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
 
@@ -64,6 +64,7 @@
             var schema = this;
             schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
         },
+
 
 
         createSchemaFeatureLayer_: function () {
@@ -114,10 +115,17 @@
 
 
             schema.highlightControl = highlightControl;
-
             widget.map.addInteraction(schema.highlightControl);
 
             highlightControl.on('select', function (e) {
+
+                e.selected.forEach(function (feature) {
+                    schema.menu.resultTable.hoverInResultTable(feature, true);
+                });
+
+                e.deselected.forEach(function (feature) {
+                    schema.menu.resultTable.hoverInResultTable(feature, false);
+                });
 
             });
 
@@ -145,14 +153,6 @@
                     selectControl.getFeatures().clear();
                 }
             });
-
-        },
-
-
-        /**
-         *  Can be overriden in specific digitizer instances
-         */
-        inject: function () {
 
         },
 
@@ -329,12 +329,16 @@
                 features: featureCollection.features
             });
 
-            console.log(newFeatures);
-            schema.layer.getSource().addFeatures(newFeatures);
 
-            schema.layer.getSource().getFeatures().forEach(function (feature) {
+
+            newFeatures.forEach(function (feature) {
 
             });
+            schema.layer.getSource().addFeatures(newFeatures);
+
+
+            schema.menu.resultTable.redrawResultTableFeatures(newFeatures);
+
 
 
 
@@ -421,6 +425,8 @@
 
                     schema.layer.getSource().removeFeature(feature);
                     schema.layer.getSource().addFeature(newFeature);
+
+                    schema.menu.resultTable.redrawResultTableFeatures(schema.layer.getSource().getFeatures());
 
                     $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
 
