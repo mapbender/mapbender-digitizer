@@ -66,6 +66,8 @@ class Digitizer extends BaseElement
             $js[] = "@MapbenderDigitizerBundle/Resources/public/formItems/$file.js";
         }
 
+        $js[] = "@MapbenderDigitizerBundle/Resources/public/vis-ui/vis-ui.js-built.js";
+
         $js = array_merge($js,array(
             '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
             '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
@@ -93,8 +95,9 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/context-menu.scss',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/modal.scss',
+                "@MapbenderDigitizerBundle/Resources/public/vis-ui/vis-ui.js-built.css"
 
-            ),
+    ),
             'trans' => array(
                 'MapbenderDigitizerBundle:Element:digitizer.json.twig',
             ),
@@ -453,6 +456,7 @@ class Digitizer extends BaseElement
      *
      * @param array $request
      * @return array
+     * @throws \Exception
      */
     public function saveAction($request)
     {

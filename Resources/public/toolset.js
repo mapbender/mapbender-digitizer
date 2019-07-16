@@ -81,8 +81,10 @@
                 interaction.on('controlFactory.Activation', function (event) {
                     if (event.active) {
                         $button.addClass('active');
+                        schema.selectControl.setActive(false);
                     } else {
                         $button.removeClass('active');
+                        schema.selectControl.setActive(true);
                     }
 
                 });

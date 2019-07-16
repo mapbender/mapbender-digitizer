@@ -142,6 +142,7 @@
                 if (schema.allowEditData || schema.allowOpenEditDialog) {
                     console.log(event.selected,"!!");
                     schema.openFeatureEditDialog(event.selected[0]);
+                    selectControl.getFeatures().clear();
                 }
             });
 
@@ -346,10 +347,7 @@
             return schema.layer.getSource().getFeatures();
         },
 
-        removeFeatureFromUI: function (feature) {
-            var schema = this;
-            schema.layer.getSource().removeFeature(feature);
-        },
+
 
         removeAllFeatures: function () {
             var schema = this;
@@ -359,11 +357,9 @@
 
 
         // TODO feature / option formData parameters are not pretty -> keep data in feature directly
-        saveFeature: function (feature, formData) {
+        saveFeature: function (feature, data) {
             var schema = this;
             var widget = schema.widget;
-            var wkt = new ol.format.WKT().writeFeatureText(feature);
-            var srid = widget.map.getView().getProjection().getCode().split(':').pop();
 
             var createNewFeatureWithDBFeature = function (feature, response) {
 
@@ -371,7 +367,7 @@
 
                 if (features.length === 0) {
                     console.warn("No Feature returned from DB Operation");
-                    schema.removeFeatureFromUI(feature);
+                    schema.layer.getSource().removeFeature(feature);
                     return null;
                 } else if (features.length > 1) {
                     console.warn("More than 1 Feature returned from DB Operation");
@@ -382,40 +378,25 @@
                 var newFeatures = geoJsonReader.readFeaturesFromObject(response);
                 var newFeature = _.first(newFeatures);
 
-                if (feature.saveStyleDataCallback) {
-                    feature.saveStyleDataCallback(newFeature);
-                    feature.saveStyleDataCallback = null;
-                }
-
                 return newFeature;
 
             };
 
-
-            if (feature.disabled) { // Feature is temporarily disabled
-                return;
-            }
-
-            feature.disabled = true;
-
-            formData = formData || schema.getSchemaByFeature(feature).formItems.createHeadlessFormData(feature);
+            var formData = data || schema.formItems.createHeadlessFormData(feature);
 
             var request = {
                 id: feature.getId(),
                 properties: formData,
-                geometry: wkt,
-                srid: srid,
+                geometry:  new ol.format.WKT().writeFeatureText(feature),
+                srid: widget.map.getView().getProjection().getCode().split(':').pop(),
                 type: "Feature"
             };
 
 
             var promise = widget.query('save', {
-
-                schema: schema.getSchemaByFeature(feature).schemaName,
+                schema: schema.schemaName,
                 feature: request
             }).then(function (response) {
-
-                feature.disabled = false; // feature is actually removed anyways
 
                 if (response.errors) {
 
@@ -428,24 +409,22 @@
                         });
                     });
 
-                    return response;
+                } else {
+
+
+                    var newFeature = createNewFeatureWithDBFeature(feature, response);
+
+                    if (newFeature == null) {
+                        console.warn("Creation of new Feature failed");
+                        return;
+                    }
+
+                    schema.layer.getSource().removeFeature(feature);
+                    schema.layer.getSource().addFeature(newFeature);
+
+                    $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
+
                 }
-
-
-                var newFeature = createNewFeatureWithDBFeature(feature, response);
-
-                if (newFeature == null) {
-                    console.warn("Creation of new Feature failed");
-                    return;
-                }
-
-                newFeature.isNew = false;
-
-                schema.removeFeatureFromUI(feature);
-                schema.layer.getSource().addFeature(newFeature);
-
-                $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
-
 
                 return response;
 
@@ -454,21 +433,6 @@
             return promise;
 
         },
-
-
-
-
-        getDefaultProperties: function () {
-            var schema = this;
-
-            var newFeatureDefaultProperties = [];
-            $.each(schema.tableFields, function (fieldName) {
-                newFeatureDefaultProperties.push(fieldName);
-            });
-            return newFeatureDefaultProperties;
-        },
-
-
 
 
 

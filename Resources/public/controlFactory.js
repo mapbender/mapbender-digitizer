@@ -104,13 +104,27 @@
             var interaction =  new ol.interaction.Draw({
                 source: source,
                 type: 'Circle',
-                geometryFunction: function(coordinates, opt_geometry) {
-                    var circle = opt_geometry ? /** @type {ol.geom.Circle} */ (opt_geometry) :
-                        new ol.geom.Circle([NaN, NaN]);
-                    var squaredLength = ol.coordinate.squaredDistance(
-                        coordinates[0], coordinates[1]);
-                    circle.setCenterAndRadius(coordinates[0], Math.sqrt(squaredLength));
-                    return circle;
+                geometryFunction: function(coordinates, geometry) {
+                    // var circle = opt_geometry ? /** @type {ol.geom.Circle} */ (opt_geometry) :
+                    //     new ol.geom.Circle([NaN, NaN]);
+                    // var squaredLength = ol.coordinate.squaredDistance(
+                    //     coordinates[0], coordinates[1]);
+                    // circle.setCenterAndRadius(coordinates[0], Math.sqrt(squaredLength));
+                    // return ol.geom.Polygon.fromCircle(circle, 64);
+
+                    var center = coordinates[0];
+                    var last = coordinates[1];
+                    var dx = center[0] - last[0];
+                    var radius = Math.sqrt(dx * dx + dx * dx);
+                    var circle = new ol.geom.Circle(center, radius);
+                    var polygon = ol.geom.Polygon.fromCircle(circle, 64);
+                    polygon.scale(dx/radius, dx/radius);
+                    if (!geometry) {
+                        geometry = polygon;
+                    } else {
+                        geometry.setCoordinates(polygon.getCoordinates());
+                    }
+                    return geometry;
                 },
                 freehand: true
             });

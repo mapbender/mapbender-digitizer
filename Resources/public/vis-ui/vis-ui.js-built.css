@@ -1,0 +1,124 @@
+/*.mb-element-popup-dialog {*/
+/*    position: absolute !important;*/
+/*    z-index: 5;*/
+/*}*/
+
+/*.mb-element-popup-dialog .ui-dialog-titlebar-close {*/
+/*    display: inline-block;*/
+/*    font: normal normal normal 14px/1 FontAwesome;*/
+/*    font-size: inherit;*/
+/*    text-rendering: auto;*/
+/*    -webkit-font-smoothing: antialiased;*/
+/*}*/
+
+/*.mb-element-popup-dialog .ui-dialog-titlebar-close:after {*/
+/*    content: "\f00d";*/
+/*}*/
+
+
+/*.ui-icon{*/
+/*    font-size: 0;*/
+/*    color: inherit;*/
+
+/*}*/
+
+/*.ui-icon:before{*/
+/*    font-family: FontAwesome;*/
+/*    font-size: 14px;*/
+/*    display: block;*/
+/*    vertical-align: middle;*/
+/*}*/
+
+/*!* close *!*/
+/*.ui-icon-closethick:before {*/
+/*    content: "\f00d";*/
+/*    font-size: 13px;*/
+/*}*/
+
+/*!* restore *!*/
+/*.ui-icon-minus:before {*/
+/*    content: '\f096';*/
+/*}*/
+
+/*!* collapse *!*/
+/*.ui-icon-triangle-1-s:before {*/
+/*    content: '\f068';*/
+/*}*/
+
+/*!* restore *!*/
+/*.ui-icon-newwin:before {*/
+/*    content: "\f096";*/
+/*}*/
+
+/*!* maiximize *!*/
+/*.ui-icon-extlink:before {*/
+/*    content: '\f065';*/
+/*}*/
+
+/*!**/
+/** popupDialog resizing fix*/
+/**!*/
+/*.ui-dialog.ui-resizable > * {*/
+/*    box-sizing: content-box !important;*/
+/*}*/
+
+/*.ui-dialog  > .ui-dialog-titlebar.modal-header{*/
+/*    position: relative;*/
+/*}*/
+
+/*.ui-dialog > .ui-dialog-titlebar > .ui-dialog-titlebar-buttonpane a,*/
+/*.ui-dialog > .ui-dialog-titlebar > .ui-dialog-titlebar-buttonpane button*/
+/*{*/
+/*    display: inline-block;*/
+/*    text-decoration: none;*/
+/*    text-align: center;*/
+/*    opacity: 1;*/
+/*    color: #989898;*/
+/*    background: #E4E4E4;*/
+/*    height: 21px;*/
+/*    width: 21px;*/
+/*    margin-right: 5px;*/
+/*    border-radius: 3px;*/
+/*    text-shadow: 0px 1px 1px #fff;*/
+/*}*/
+/*.ui-dialog > .ui-dialog-titlebar > .ui-dialog-titlebar-buttonpane a{*/
+/*    float: none;*/
+/*}*/
+
+/*.ui-dialog > .ui-dialog-titlebar > .ui-dialog-titlebar-buttonpane a:hover,*/
+/*.ui-dialog > .ui-dialog-titlebar > .ui-dialog-titlebar-buttonpane button:hover{*/
+/*    color: #000000;*/
+/*}*/
+
+
+/*.ui-dialog > .ui-dialog-titlebar  .ui-dialog-titlebar-close > .ui-button-text {*/
+/*    display: block;*/
+/*    font-size: 0;*/
+/*}*/
+
+/*.popup-dialog.modal-body{*/
+/*    overflow-y: auto;*/
+/*}*/
+
+/*fieldset.form-group{*/
+/*    margin-left: -15px;*/
+/*    padding: 0;*/
+/*    box-sizing: border-box;*/
+/*}*/
+
+/*fieldset.form-group > .checkbox,*/
+/*fieldset.form-group > .radio,*/
+/*fieldset.form-group > .form-group{*/
+/*    display: inline-block;*/
+/*    vertical-align: bottom;*/
+/*    margin-bottom: 5px;*/
+/*    padding-left: 15px;*/
+/*}*/
+/*.mb-element-modal-dialog{*/
+/*    background-color: rgba(192, 192, 192, 0.3);*/
+/*    position: absolute;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    right: 0;*/
+/*    bottom: 0;*/
+/*    z-index: 10000;}*/

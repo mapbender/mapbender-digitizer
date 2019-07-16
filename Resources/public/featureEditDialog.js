@@ -78,12 +78,14 @@
             return $.extend(true, {}, this)
         },
 
-        initButtons: function(feature) {
+        initButtons: function (feature) {
             var configuration = this;
-            
-            $.each(configuration.buttons,function(name,button){
-                button.text = button.title  = Mapbender.DigitizerTranslator.translate(button.title);
-                button.click = function(event)  {  feature.dispatchEvent({ type: 'Digitizer.FeatureEditDialog.'+button.event }); }
+
+            $.each(configuration.buttons, function (name, button) {
+                button.text = button.title = Mapbender.DigitizerTranslator.translate(button.title);
+                button.click = function (event) {
+                    feature.dispatchEvent({type: 'Digitizer.FeatureEditDialog.' + button.event});
+                }
             });
         },
 
@@ -91,10 +93,6 @@
             return new FeatureEditDialog(feature, schema)
         },
 
-        // This can be overridden
-        augment: function (feature, $popup) {
-
-        }
     };
 
 
@@ -105,14 +103,9 @@
         var widget = schema.widget;
         var $popup = dialog.$popup = $("<div/>");
 
-        dialog.feature = feature;
-
         var configuration = schema.popup.clone();
 
         configuration.initButtons(feature);
-
-
-
 
 
         feature.on('Digitizer.FeatureEditDialog.Print', function (event) {
@@ -126,7 +119,30 @@
             schema.openChangeStyleDialog(feature);
         });
 
-        feature.on('Digitizer.FeatureEditDialog.Save', function (event)  {
+        feature.on('Digitizer.FeatureEditDialog.Save', function (event) {
+
+            var formData = dialog.$popup.formData();
+            console.log("save",formData,feature);
+
+
+            //
+            // // TODO this is not nice. Find a better solution
+            // var errorInputs = $(".has-error", dialog.$popup);
+            // if (errorInputs.length > 0) {
+            //     console.warn("Error", errorInputs);
+            //     return;
+            // }
+
+            dialog.$popup.disableForm();
+
+            schema.saveFeature(feature, formData).then(function (response) {
+
+                if (response.hasOwnProperty('errors')) {
+                    dialog.$popup.enableForm();
+                    return;
+                }
+                dialog.$popup.popupDialog('close');
+            });
         });
 
         feature.on('Digitizer.FeatureEditDialog.Delete', function (event) {
@@ -136,30 +152,30 @@
         });
 
 
-        var doFeatureEditDialogBindings = function () {
-            var feature = dialog.feature;
-
-            $popup.bind('popupdialogclose', function () {
-
-                if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
-                    schema.removeFeature(feature);
-                } else if ((feature.isChanged || feature.isNew) && schema.revertChangedGeometryOnCancel) {
-
-                    schema.layer.renderer.eraseGeometry(feature.geometry);
-                    feature.geometry = feature.oldGeometry;
-                    feature.isChanged = false;
-                    schema.layer.drawFeature(feature);
-                    schema.unsetModifiedState(feature);
-
-                }
-                if (configuration.modal) {
-                    widget.currentPopup = null;
-                }
-
-
-            });
-
-        };
+        // var doFeatureEditDialogBindings = function () {
+        //     var feature = dialog.feature;
+        //
+        //     $popup.bind('popupdialogclose', function () {
+        //
+        //         if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
+        //             schema.removeFeature(feature);
+        //         } else if ((feature.isChanged || feature.isNew) && schema.revertChangedGeometryOnCancel) {
+        //
+        //             schema.layer.renderer.eraseGeometry(feature.geometry);
+        //             feature.geometry = feature.oldGeometry;
+        //             feature.isChanged = false;
+        //             schema.layer.drawFeature(feature);
+        //             schema.unsetModifiedState(feature);
+        //
+        //         }
+        //         if (configuration.modal) {
+        //             widget.currentPopup = null;
+        //         }
+        //
+        //
+        //     });
+        //
+        // };
 
 
         widget.currentPopup = $popup;
@@ -174,17 +190,11 @@
 
         $popup.popupDialog(configuration);
 
-
-        doFeatureEditDialogBindings();
-
-        configuration.augment(feature, $popup);
-
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
-        if (feature.data) {
-            setTimeout(function () {
-                $popup.formData(feature.data);
-            }, 0);
-        }
+        setTimeout(function () {
+            $popup.formData(feature.getProperties());
+        }, 0);
+
 
     };
 
