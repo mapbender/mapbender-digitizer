@@ -119,14 +119,6 @@
 
             highlightControl.on('select', function (e) {
 
-                // e.selected.forEach(function (feature) {
-                //     schema.menu.resultTable.hoverInResultTable(feature, true);
-                // });
-                //
-                // e.deselected.forEach(function (feature) {
-                //     schema.menu.resultTable.hoverInResultTable(feature, false);
-                // });
-
             });
 
 

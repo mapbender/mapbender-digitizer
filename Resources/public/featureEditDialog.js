@@ -82,7 +82,7 @@
             var configuration = this;
             
             $.each(configuration.buttons,function(name,button){
-                button.title  = Mapbender.DigitizerTranslator.translate(button.title);
+                button.text = button.title  = Mapbender.DigitizerTranslator.translate(button.title);
                 button.click = function(event)  {  feature.dispatchEvent({ type: 'Digitizer.FeatureEditDialog.'+button.event }); }
             });
         },
