@@ -1,13 +1,36 @@
 (function () {
     "use strict";
 
+    /**
+     *
+     * @param {Object} rawScheme
+     * @param widget
+     * @param {number} index
+     * @constructor
+     */
+
     Mapbender.Digitizer.Scheme = function (rawScheme, widget, index) {
+
+        /**
+         *
+         * @type {Mapbender.Digitizer.Scheme}
+         */
         var schema = this;
         schema.index = index;
         schema.widget = widget;
+        /**
+         * @type {boolean}
+         */
+        this.allowEditData = false;
+
+        /**
+         * @type {boolean}
+         */
+        this.allowOpenEditDialog = false;
+
         $.extend(schema, rawScheme);
 
-        schema.initTableFields();
+        //schema.initTableFields();
 
         schema.createFormItemsCollection();
 
@@ -17,7 +40,7 @@
 
         schema.createMenu_();
 
-        schema.addSelectControls_();
+        schema.addSelectControl_();
 
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
 
@@ -52,7 +75,8 @@
                 projection: 'EPSG:4258',
                 source: new ol.source.Vector({
                     format: new ol.format.GeoJSON(),
-                    loader: schema.getData.bind(schema)
+                    loader: schema.getData.bind(schema),
+                    strategy: ol.loadingstrategy.all // ol.loadingstrategy.bbox
                 }),
                 visible: true,
                 strategy: ol.loadingstrategy.bbox,
@@ -76,12 +100,12 @@
 
         },
 
-        addSelectControls_: function () {
+        addSelectControl_: function () {
             var schema = this;
             var widget = schema.widget;
 
 
-            var selectControl = new ol.interaction.Select({
+            var highlightControl = new ol.interaction.Select({
 
                 condition: ol.events.condition.pointerMove,
                 layers: [schema.layer]
@@ -89,11 +113,11 @@
             });
 
 
-            schema.selectControl = selectControl;
+            schema.highlightControl = highlightControl;
 
-            widget.map.addInteraction(schema.selectControl);
+            widget.map.addInteraction(schema.highlightControl);
 
-            selectControl.on('select', function (e) {
+            highlightControl.on('select', function (e) {
 
                 // e.selected.forEach(function (feature) {
                 //     schema.menu.resultTable.hoverInResultTable(feature, true);
@@ -103,6 +127,30 @@
                 //     schema.menu.resultTable.hoverInResultTable(feature, false);
                 // });
 
+            });
+
+
+
+            var selectControl = new ol.interaction.Select({
+
+                condition: ol.events.condition.singleClick,
+                layers: [schema.layer],
+                style: function() {
+                    return null;
+                }
+
+            });
+
+
+            schema.selectControl = selectControl;
+
+            widget.map.addInteraction(schema.selectControl);
+
+            selectControl.on('select', function (event) {
+                if (schema.allowEditData || schema.allowOpenEditDialog) {
+                    console.log(event.selected,"!!");
+                    schema.openFeatureEditDialog(event.selected[0]);
+                }
             });
 
         },
@@ -120,31 +168,31 @@
             return schema.featureType.geomType;
         },
 
-        getDefaultTableFields: function () {
-            var schema = this;
-            var tableFields = {};
-            tableFields[schema.featureType.uniqueId] = {label: 'Nr.', width: '20%'};
-            if (schema.featureType.name) {
-                tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
-            }
-            return tableFields;
-
-        },
-
-        initTableFields: function () {
-            var schema = this;
-
-            schema.tableFields = schema.tableFields || schema.getDefaultTableFields();
-
-            _.each(schema.tableFields, function (tableField) {
-
-                if (tableField.type === "image") {
-                    tableField.render = function (imgName, renderType, feature, x) {
-                        return $("<img style='width: 20px'/>").attr('src', Mapbender.Digitizer.Utilities.getAssetsPath(tableField.path + imgName))[0].outerHTML;
-                    }
-                }
-            });
-        },
+        // getDefaultTableFields: function () {
+        //     var schema = this;
+        //     var tableFields = {};
+        //     tableFields[schema.featureType.uniqueId] = {label: 'Nr.', width: '20%'};
+        //     if (schema.featureType.name) {
+        //         tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
+        //     }
+        //     return tableFields;
+        //
+        // },
+        //
+        // initTableFields: function () {
+        //     var schema = this;
+        //
+        //     schema.tableFields = schema.tableFields || schema.getDefaultTableFields();
+        //
+        //     _.each(schema.tableFields, function (tableField) {
+        //
+        //         if (tableField.type === "image") {
+        //             tableField.render = function (imgName, renderType, feature, x) {
+        //                 return $("<img style='width: 20px'/>").attr('src', Mapbender.Digitizer.Utilities.getAssetsPath(tableField.path + imgName))[0].outerHTML;
+        //             }
+        //         }
+        //     });
+        // },
 
 
         createFormItemsCollection: function (formItems) {
@@ -183,6 +231,7 @@
                 layer.setVisible(true);
                 frame.show();
                 if (schema.widget.isFullyActive) {
+                    schema.highlightControl.setActive(true);
                     schema.selectControl.setActive(true);
                 }
 
@@ -202,6 +251,7 @@
                 layer.setVisible(false);
             }
 
+            schema.highlightControl.setActive(false);
             schema.selectControl.setActive(false);
 
             if (widget.currentPopup) {
@@ -244,52 +294,36 @@
         },
 
 
-        createRequest: function () {
+        createRequest_: function (projectionCode) {
             var schema = this;
-            var widget = schema.widget;
 
-            var map = widget.map;
-            var projection = map.getView().getProjection().getCode().split(':').pop();
             return {
-                srid: projection,
+                srid: projectionCode,
                 maxResults: schema.maxResults,
                 schema: schema.schemaName,
             }
 
         },
 
-        getData: function (options) {
+        getData: function (extent, resolution, projection) {
             var schema = this;
             var widget = schema.widget;
 
+            var request = schema.createRequest_(projection.getCode().split(":").pop());
 
-            var callback = options && options.callback;
+            var selectXHR = widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
 
-            var request = schema.createRequest();
-
-
-            schema.lastRequest = JSON.stringify(request);
-
-            schema.selectXHR = widget.query('select', request).then(function (featureCollection) {
-                var xhr = this;
-                schema.onFeatureCollectionLoaded(featureCollection, false, xhr);
-                if (typeof callback === "function") {
-                    callback.apply();
-                }
-                schema.selectXHR = null;
-            });
-
-            return schema.selectXHR;
+            return selectXHR;
         },
 
 
 
-        onFeatureCollectionLoaded: function (featureCollection, newFeaturesOnly, xhr) {
+        onFeatureCollectionLoaded: function (featureCollection) {
             var schema = this;
 
 
             if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
-                Mapbender.error(Mapbender.DigitizerTranslator.translate("features.loading.error"), featureCollection, xhr);
+                Mapbender.error(Mapbender.DigitizerTranslator.translate("features.loading.error"), featureCollection);
                 return;
             }
 
@@ -302,6 +336,7 @@
                 features: featureCollection.features
             });
 
+            console.log(newFeatures);
             schema.layer.getSource().addFeatures(newFeatures);
 
             schema.layer.getSource().getFeatures().forEach(function (feature) {

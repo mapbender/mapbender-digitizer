@@ -7,117 +7,9 @@
 
         $.extend(popupConfiguration, configuration);
 
-        var augmentFeatureEditDialogButtonsWithCustomButtons = function () {
-            // Initialize custom button events
-            var newButtons = {};
-            _.each(configuration.buttons, function (button) {
-                newButtons[button.text] = _.clone(button);
-                if (button.click) {
-                    console.error("Using Javascript code in the configuration is deprecated");
+        popupConfiguration.checkForDeprecatedUsageOfButtons_();
 
-                    newButtons[button.text].createClick = function (feature, dialog) {
-
-                        return function (e) {
-                            var _widget = schema.widget;
-                            var el = $(this);
-                            var form = dialog;
-                            var data = feature.data;
-
-                            eval(button.click);
-                            e.preventDefault();
-                            return false;
-                        }
-                    }
-                }
-
-            });
-
-            return newButtons;
-        };
-
-        var createButtons = function () {
-            var widget = schema.widget;
-
-
-            var createButton = function (title, click) {
-                return {
-                    text: Mapbender.DigitizerTranslator.translate(title),
-                    createClick: function (feature, dialog) {
-                        return function () {
-                            click(feature, dialog);
-                        };
-                    }
-                }
-            };
-
-            var buttons = {};
-
-            if (schema.printable) {
-                buttons.printButton = createButton('feature.print', function (feature) {
-                    var featureSchema = schema.getSchemaByFeature(feature);
-                    widget.printClient.printDigitizerFeature(featureSchema.schemaName, feature.fid).then(function(){ // On Finish, on Close
-                    });
-
-                });
-            }
-            if (schema.copy && schema.copy.enable) {
-                buttons.copyButton = createButton('feature.clone.title', function (feature) {
-                    schema.copyFeature(feature);
-
-                });
-
-            }
-            if (schema.allowCustomStyle) {
-                buttons.styleButton = createButton('feature.style.change', function (feature) {
-                    schema.openChangeStyleDialog(feature);
-                });
-            }
-            if (schema.allowEditData && schema.allowSave) {
-                buttons.saveButton = createButton('feature.save.title', function (feature, dialog) {
-                    var formData = dialog.$popup.formData();
-
-                    // TODO this is not nice. Find a better solution
-                    var errorInputs = $(".has-error", dialog.$popup);
-                    if (errorInputs.length > 0) {
-                        console.warn("Error", errorInputs);
-                        return;
-                    }
-
-                    dialog.$popup.disableForm();
-                    schema.saveFeature(feature, formData).then(function (response) {
-                        if (response.hasOwnProperty('errors')) {
-                            dialog.$popup.enableForm();
-                            return;
-                        }
-
-                        dialog.$popup.popupDialog('close');
-
-                    });
-                });
-            }
-            if (schema.allowDelete) {
-                buttons.deleteButton = createButton('feature.remove.title', function (feature, dialog) {
-                    schema.removeFeature(feature);
-                    dialog.$popup.popupDialog('close');
-                });
-            }
-            if (schema.allowCancelButton) {
-                buttons.cancelButton = createButton('cancel', function (feature, dialog) {
-                    dialog.$popup.popupDialog('close');
-                });
-            }
-
-            return buttons;
-
-        };
-
-        popupConfiguration.buttons = augmentFeatureEditDialogButtonsWithCustomButtons();
-        $.extend(popupConfiguration.buttons, createButtons());
-
-        popupConfiguration.getSchema = function (feature) {
-            var scheme = schema.getSchemaByFeature(feature);
-            return scheme;
-        };
+        popupConfiguration.buttons = popupConfiguration.createButtons_();
 
 
         Object.freeze(popupConfiguration.buttons);
@@ -128,37 +20,83 @@
         remoteData: false,
 
 
-        addFeatureAndDialog: function (feature, dialog) {
-
-            _.each(this.buttons, function (button) {
-                button.click = button.createClick(feature, dialog);
+        checkForDeprecatedUsageOfButtons_: function () {
+            var configuration = this;
+            _.each(configuration.buttons, function (button) {
+                console.error("Using Javascript code in the configuration is deprecated:", button);
             });
+        },
 
-            // buttons are deep copied! Should be moved to button constructing function though
-            if (feature.isNew) {
-                //delete this.buttons.styleButton;
-                delete this.buttons.copyButton;
+        createButtons_: function () {
+            var popupConfiguration = this;
+            var schema = popupConfiguration.schema;
+
+            var buttons = {};
+            if (schema.printable) {
+                buttons.printButton = {
+                    title: 'feature.print',
+                    event: 'Print'
+                };
             }
+            if (schema.copy && schema.copy.enable) {
+                buttons.copyButton = {
+                    title: 'feature.clone.title',
+                    event: 'Copy'
+                };
+            }
+            if (schema.allowCustomStyle) {
+                buttons.styleButton = {
+                    title: 'feature.style.change',
+                    event: 'Style'
+                };
+            }
+
+            if (schema.allowEditData && schema.allowSave) {
+                buttons.saveButton = {
+                    title: 'feature.save.title',
+                    event: 'Save',
+                };
+            }
+            if (schema.allowDelete) {
+                buttons.deleteButton = {
+                    title: 'feature.remove.title',
+                    event: 'Delete',
+                };
+            }
+            if (schema.allowCancelButton) {
+                buttons.cancelButton = {
+                    title: 'cancel',
+                    event: 'Cancel',
+                };
+            }
+
+            return buttons;
+
         },
 
         clone: function () {
             return $.extend(true, {}, this)
         },
 
+        initButtons: function(feature) {
+            var configuration = this;
+            
+            $.each(configuration.buttons,function(name,button){
+                button.title  = Mapbender.DigitizerTranslator.translate(button.title);
+                button.click = function(event)  {  feature.dispatchEvent({ type: 'Digitizer.FeatureEditDialog.'+button.event }); }
+            });
+        },
 
         createFeatureEditDialog: function (feature, schema) {
             return new FeatureEditDialog(feature, schema)
         },
 
         // This can be overridden
-        augment: function(feature, $popup) {
+        augment: function (feature, $popup) {
 
         }
     };
 
-
-
-    // TODO - - Carefully separate Feature Scheme and Loading Scheme in order to, for example, enable buttons of other schemes in allscheme!
 
     var FeatureEditDialog = function (feature, schema) {
 
@@ -171,7 +109,31 @@
 
         var configuration = schema.popup.clone();
 
-        configuration.addFeatureAndDialog(feature, dialog);
+        configuration.initButtons(feature);
+
+
+
+
+
+        feature.on('Digitizer.FeatureEditDialog.Print', function (event) {
+
+        });
+
+        feature.on('Digitizer.FeatureEditDialog.Copy', function (event) {
+        });
+
+        feature.on('Digitizer.FeatureEditDialog.Style', function (event) {
+            schema.openChangeStyleDialog(feature);
+        });
+
+        feature.on('Digitizer.FeatureEditDialog.Save', function (event)  {
+        });
+
+        feature.on('Digitizer.FeatureEditDialog.Delete', function (event) {
+        });
+
+        feature.on('Digitizer.FeatureEditDialog.Cancel', function (event) {
+        });
 
 
         var doFeatureEditDialogBindings = function () {
@@ -200,7 +162,6 @@
         };
 
 
-
         widget.currentPopup = $popup;
 
 
@@ -219,11 +180,11 @@
         configuration.augment(feature, $popup);
 
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
-      if (feature.data) {
-          setTimeout(function () {
-              $popup.formData(feature.data);
-          }, 0);
-      }
+        if (feature.data) {
+            setTimeout(function () {
+                $popup.formData(feature.data);
+            }, 0);
+        }
 
     };
 

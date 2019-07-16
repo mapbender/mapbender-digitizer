@@ -1233,16 +1233,16 @@
                 });
 
                 // Workaround to move map by touch vector features
-                if (typeof(selectControl.handlers) != "undefined") { // OL 2.7
-                    selectControl.handlers.feature.stopDown = false;
+                if (typeof(highlightControl.handlers) != "undefined") { // OL 2.7
+                    highlightControl.handlers.feature.stopDown = false;
                 } else if (typeof(selectFeatureControl.handler) != "undefined") { // OL < 2.7
-                    selectControl.handler.stopDown = false;
-                    selectControl.handler.stopUp = false;
+                    highlightControl.handler.stopDown = false;
+                    highlightControl.handler.stopUp = false;
                 }
 
-                schema.selectControl = selectControl;
-                selectControl.deactivate();
-                map.addControl(selectControl);
+                schema.selectControl = highlightControl;
+                highlightControl.deactivate();
+                map.addControl(highlightControl);
             });
 
             function deactivateFrame(schema) {
@@ -1256,7 +1256,7 @@
                     layer.setVisibility(false);
                 }
 
-                schema.selectControl.deactivate();
+                schema.highlightControl.deactivate();
 
                 // https://trac.wheregroup.com/cp/issues/4548
                 if (widget.currentPopup) {
@@ -1280,7 +1280,7 @@
                 //layer.redraw();
                 frame.css('display', 'block');
 
-                schema.selectControl.activate();
+                schema.highlightControl.activate();
             }
 
             function onSelectorChange() {
@@ -3272,7 +3272,7 @@
                 widget.reloadFeatures(layer);
                 layer.setVisibility(true);
                 frame.css('display', 'block');
-                schema.selectControl.activate();
+                schema.highlightControl.activate();
             });
 
         },
@@ -3289,7 +3289,7 @@
                 layer.setVisibility(false);
             }
 
-            schema.selectControl.deactivate();
+            schema.highlightControl.deactivate();
 
             // https://trac.wheregroup.com/cp/issues/4548
             if (widget.currentPopup) {
