@@ -176,6 +176,8 @@
 
 
             interaction.setActive = controlFactory.createActivator_(interaction);
+
+
             interaction.on(ol.interaction.DrawDonutEventType.DRAWDONUTEND,function(event) {
                 source.dispatchEvent({ type: 'controlFactory.FeatureModified', feature: event.feature});
             });
@@ -190,11 +192,16 @@
             });
 
             interaction.setActive = controlFactory.createActivator_(interaction);
+
+            interaction.on(ol.interaction.ModifyEventType.MODIFYSTART,function(event) {
+
+            });
+
             interaction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
-                var features = event.features;
-                features.forEach(function(feature) {
-                    source.dispatchEvent({ type: 'controlFactory.FeatureModified', feature: feature});
-                });
+
+                // TODO this is so far the only way to obtain the modified Feature
+                source.dispatchEvent({ type: 'controlFactory.FeatureModified', feature: interaction.dragSegments_[0][0].feature || null});
+
 
             });
 

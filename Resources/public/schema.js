@@ -11,13 +11,9 @@
 
     Mapbender.Digitizer.Scheme = function (rawScheme, widget, index) {
 
-        /**
-         *
-         * @type {Mapbender.Digitizer.Scheme}
-         */
-        var schema = this;
-        schema.index = index;
-        schema.widget = widget;
+
+        this.index = index;
+        this.widget = widget;
         /**
          * @type {boolean}
          */
@@ -28,11 +24,9 @@
          */
         this.allowOpenEditDialog = false;
 
+
+        var schema = this;
         $.extend(schema, rawScheme);
-
-        //schema.initTableFields();
-
-        schema.createFormItemsCollection();
 
         schema.createPopupConfiguration_();
 
@@ -43,14 +37,26 @@
         schema.createMenu_();
 
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
-
+            var feature = event.feature;
+            feature.setStyle(Mapbender.Digitizer.Utilities.STYLE.CHANGED);
         });
 
         schema.layer.getSource().on('controlFactory.FeatureModified', function (event) {
 
+            var feature = event.feature;
+
+            feature.setStyle(Mapbender.Digitizer.Utilities.STYLE.CHANGED);
+
         });
 
         schema.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
+            var feature = event.feature;
+
+            feature.setStyle(Mapbender.Digitizer.Utilities.STYLE.CHANGED);
+
+
+            feature.mbOrigin = 'digitizer';
+            schema.openFeatureEditDialog(feature);
 
         });
 
@@ -188,17 +194,6 @@
         // },
 
 
-        createFormItemsCollection: function (formItems) {
-            var schema = this;
-            schema.formItems = new Mapbender.Digitizer.FormItemsCollection(formItems || schema.formItems, schema);
-
-        },
-
-
-        updateConfigurationAfterSwitching: function (updatedSchemes) {
-            var schema = this;
-            schema.createFormItemsCollection(updatedSchemes[schema.schemaName].formItems); // Update formItems Of Schema when switiching
-        },
 
 
         activateSchema: function (activateWidget) {
@@ -220,7 +215,6 @@
                 return widget.query('getConfiguration');
             }).done(function (response) {
 
-                schema.updateConfigurationAfterSwitching(response.schemes);
                 layer.setVisible(true);
                 frame.show();
                 if (schema.widget.isFullyActive) {
@@ -256,17 +250,6 @@
 
         },
 
-
-
-        processFormItems: function (feature, dialog) {
-            var schema = this;
-
-            //var scheme = schema.getSchemaByFeature(feature);
-
-            var processedFormItems = schema.formItems.process(feature, dialog, schema);
-
-            return processedFormItems;
-        },
 
 
         openFeatureEditDialog: function (feature) {
@@ -323,6 +306,8 @@
             if (featureCollection.features && featureCollection.features.length === parseInt(schema.maxResults)) {
                 Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
             }
+
+
             var geoJsonReader = new ol.format.GeoJSON();
             var newFeatures = geoJsonReader.readFeaturesFromObject({
                 type: "FeatureCollection",
@@ -331,8 +316,11 @@
 
 
 
-            newFeatures.forEach(function (feature) {
 
+
+
+            newFeatures.forEach(function (feature) {
+                feature.mbOrigin = 'digitizer';
             });
             schema.layer.getSource().addFeatures(newFeatures);
 
@@ -359,9 +347,7 @@
         },
 
 
-
-        // TODO feature / option formData parameters are not pretty -> keep data in feature directly
-        saveFeature: function (feature, data) {
+        saveFeature: function (feature, formData) {
             var schema = this;
             var widget = schema.widget;
 
@@ -379,19 +365,21 @@
 
                 var geoJsonReader = new ol.format.GeoJSON();
 
+                console.log(response,"$");
+
                 var newFeatures = geoJsonReader.readFeaturesFromObject(response);
                 var newFeature = _.first(newFeatures);
+
+                newFeature.mbOrigin = 'digitizer';
 
                 return newFeature;
 
             };
 
-            var formData = data || schema.formItems.createHeadlessFormData(feature);
-
             var request = {
                 id: feature.getId(),
                 properties: formData,
-                geometry:  new ol.format.WKT().writeFeatureText(feature),
+                geometry:  new ol.format.WKT().writeGeometryText(feature.getGeometry()),
                 srid: widget.map.getView().getProjection().getCode().split(':').pop(),
                 type: "Feature"
             };

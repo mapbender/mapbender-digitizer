@@ -1,16 +1,14 @@
 (function ($) {
     "use strict";
 
-    Mapbender.Digitizer.Toolset = function (options) {
+    Mapbender.Digitizer.Toolset = function (schema) {
 
         var toolSet = this;
-        $.extend(toolSet, options);
-
-        var schema = toolSet.schema;
+        toolSet.schema = schema;
 
         toolSet.buttons = schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
 
-        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.schema.widget.map);
+        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(schema.widget.map);
 
         toolSet.element = $("<div />").addClass('digitizing-tool-set').addClass('left');
         toolSet.createToolbar();
@@ -22,9 +20,9 @@
 
         createPlainControlButton_: function (rawButton,interaction) {
             var toolSet = this;
-            var schema = rawButton.schema;
 
-            var geomType = toolSet.geomType;
+            var schema = toolSet.schema;
+            var geomType = schema.getGeomType();
 
             var $button = $("<button class='button' type='button'/>");
 
@@ -64,7 +62,8 @@
 
                 schema.widget.map.addInteraction(interaction);
 
-                $button.click(function (e) {
+
+                $button.on('click',null,function (e) {
 
                     if (interaction.getActive()) {
                         interaction.setActive(false);

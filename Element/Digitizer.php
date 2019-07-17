@@ -47,14 +47,14 @@ class Digitizer extends BaseElement
 
         $mainFiles = array('mapbender.element.digitizer','toolset','schema','schemaAll','clustering.mixin',
                            'menu','contextMenu', 'utilities',
-                           'featureEditDialog','controlFactory','featureStyleEditor','mapbender.layermanager','formItemsCollection',
+                           'featureEditDialog','controlFactory','featureStyleEditor','mapbender.layermanager',
                            'mapbender.digitizer-translator',
-                           'queryEngine','vis-ui.extension');
+                           'queryEngine');
 
 
-        $formItemFiles = array("formItem","formItemBreakLine","formItemButton","formItemCheckbox","formItemContainer","formItemDate",
-            "formItemFieldSet","formItemFile","formItemForm","formItemImage","formItemInput","formItemLabel",
-            "formItemResultTable","formItemSelect","formItemTabs","formItemTextArea","formItemText");
+//        $formItemFiles = array("formItem","formItemBreakLine","formItemButton","formItemCheckbox","formItemContainer","formItemDate",
+//            "formItemFieldSet","formItemFile","formItemForm","formItemImage","formItemInput","formItemLabel",
+//            "formItemResultTable","formItemSelect","formItemTabs","formItemTextArea","formItemText");
 
         $js = array();
 
@@ -62,9 +62,9 @@ class Digitizer extends BaseElement
             $js[] = "@MapbenderDigitizerBundle/Resources/public/$file.js";
         }
 
-        foreach($formItemFiles as $file) {
-            $js[] = "@MapbenderDigitizerBundle/Resources/public/formItems/$file.js";
-        }
+//        foreach($formItemFiles as $file) {
+//            $js[] = "@MapbenderDigitizerBundle/Resources/public/formItems/$file.js";
+//        }
 
         $js[] = "@MapbenderDigitizerBundle/Resources/public/vis-ui/vis-ui.js-built.js";
 

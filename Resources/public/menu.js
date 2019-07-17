@@ -6,11 +6,13 @@
 
         var menu = this;
         menu.schema = schema;
-        var frame = menu.frame = $("<div />").addClass('frame').append('<div style="clear:both;"/>');
+        var frame = menu.frame = $("<div />").addClass('frame');
+
         menu.appendToolset_();
 
-        menu.generateDataTable_();
+        frame.append('<div style="clear:both;"/>');
 
+        menu.generateDataTable_();
 
         frame.hide();
     };
@@ -24,11 +26,7 @@
             var frame = menu.frame;
             var schema = menu.schema;
 
-            menu.toolSet = new Mapbender.Digitizer.Toolset({
-                schema: schema,
-                geomType: schema.getGeomType(),
-
-            });
+            menu.toolSet = new Mapbender.Digitizer.Toolset(schema);
 
 
             if (schema.allowDigitize) {
