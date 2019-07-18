@@ -108,74 +108,62 @@
         configuration.initButtons(feature);
 
 
-        feature.on('Digitizer.FeatureEditDialog.Print', function (event) {
+        var eventListeners = {
 
+            'Digitizer.FeatureEditDialog.Print' : function(event) {
+
+            },
+            'Digitizer.FeatureEditDialog.Copy' : function(event) {
+
+            },
+            'Digitizer.FeatureEditDialog.Style' : function(event) {
+                schema.openChangeStyleDialog(feature);
+            },
+            'Digitizer.FeatureEditDialog.Save' : function(event) {
+                var formData = dialog.$popup.formData();
+
+
+                //
+                // // TODO this is not nice. Find a better solution
+                // var errorInputs = $(".has-error", dialog.$popup);
+                // if (errorInputs.length > 0) {
+                //     console.warn("Error", errorInputs);
+                //     return;
+                // }
+
+                dialog.$popup.disableForm();
+
+                schema.saveFeature(feature, formData).then(function (response) {
+
+                    if (response.hasOwnProperty('errors')) {
+                        dialog.$popup.enableForm();
+                        return;
+                    }
+                    dialog.$popup.popupDialog('close');
+                });
+
+            },
+            'Digitizer.FeatureEditDialog.Delete' : function(event) {
+
+            },
+            'Digitizer.FeatureEditDialog.Cancel' : function(event) {
+
+            },
+
+        };
+
+        $.each(eventListeners,function(type,listener){
+            feature.on(type,listener);
         });
 
-        feature.on('Digitizer.FeatureEditDialog.Copy', function (event) {
-        });
+        $popup.bind('popupdialogclose', function () {
 
-        feature.on('Digitizer.FeatureEditDialog.Style', function (event) {
-            schema.openChangeStyleDialog(feature);
-        });
-
-        feature.on('Digitizer.FeatureEditDialog.Save', function (event) {
-
-            var formData = dialog.$popup.formData();
-            console.log("save",formData,feature);
-
-
-            //
-            // // TODO this is not nice. Find a better solution
-            // var errorInputs = $(".has-error", dialog.$popup);
-            // if (errorInputs.length > 0) {
-            //     console.warn("Error", errorInputs);
-            //     return;
-            // }
-
-            dialog.$popup.disableForm();
-
-            schema.saveFeature(feature, formData).then(function (response) {
-
-                if (response.hasOwnProperty('errors')) {
-                    dialog.$popup.enableForm();
-                    return;
-                }
-                dialog.$popup.popupDialog('close');
+            $.each(eventListeners,function(type,listener){
+                feature.un(type,listener);
             });
         });
 
-        feature.on('Digitizer.FeatureEditDialog.Delete', function (event) {
-        });
 
-        feature.on('Digitizer.FeatureEditDialog.Cancel', function (event) {
-        });
-
-
-        // var doFeatureEditDialogBindings = function () {
-        //     var feature = dialog.feature;
-        //
-        //     $popup.bind('popupdialogclose', function () {
-        //
-        //         if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
-        //             schema.removeFeature(feature);
-        //         } else if ((feature.isChanged || feature.isNew) && schema.revertChangedGeometryOnCancel) {
-        //
-        //             schema.layer.renderer.eraseGeometry(feature.geometry);
-        //             feature.geometry = feature.oldGeometry;
-        //             feature.isChanged = false;
-        //             schema.layer.drawFeature(feature);
-        //             schema.unsetModifiedState(feature);
-        //
-        //         }
-        //         if (configuration.modal) {
-        //             widget.currentPopup = null;
-        //         }
-        //
-        //
-        //     });
-        //
-        // };
 
 
         widget.currentPopup = $popup;
@@ -188,10 +176,13 @@
 
         $popup.popupDialog(configuration);
 
+
+
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
         setTimeout(function () {
             $popup.formData(feature.getProperties());
         }, 0);
+
 
 
     };

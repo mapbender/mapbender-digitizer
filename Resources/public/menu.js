@@ -175,7 +175,6 @@
 
 
                 $.each(schema.tableFields || getDefaultTableFields(), function (columnId, fieldSettings) {
-                    console.log(fieldSettings);
                     fieldSettings.title = fieldSettings.label;
                     fieldSettings.data = fieldSettings.data || createResultTableDataFunction(columnId,fieldSettings);
                     columns.push(fieldSettings);
