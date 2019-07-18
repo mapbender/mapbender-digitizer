@@ -51,7 +51,7 @@
                 };
             }
 
-            if (schema.allowEditData && schema.allowSave) {
+            if (schema.allowEditData) {
                 buttons.saveButton = {
                     title: 'feature.save.title',
                     event: 'Save',

@@ -39,6 +39,8 @@
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
             var feature = event.feature;
             feature.setStyle(Mapbender.Digitizer.Utilities.STYLE.CHANGED);
+
+            console.log(feature,"moved");
         });
 
         schema.layer.getSource().on('controlFactory.FeatureModified', function (event) {
@@ -52,10 +54,10 @@
         schema.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
             var feature = event.feature;
 
+            schema.introduceFeature(feature);
+
             feature.setStyle(Mapbender.Digitizer.Utilities.STYLE.CHANGED);
 
-
-            feature.mbOrigin = 'digitizer';
             schema.openFeatureEditDialog(feature);
 
         });
@@ -127,10 +129,12 @@
 
                 e.selected.forEach(function (feature) {
                     schema.menu.resultTable.hoverInResultTable(feature, true);
+                    feature.setStyle(new ol.style.StyleConverter().convert(schema.styles.select));
                 });
 
                 e.deselected.forEach(function (feature) {
                     schema.menu.resultTable.hoverInResultTable(feature, false);
+                    feature.setStyle(new ol.style.StyleConverter().convert(schema.styles.default));
                 });
 
             });
@@ -154,7 +158,6 @@
 
             selectControl.on('select', function (event) {
                 if (schema.allowEditData || schema.allowOpenEditDialog) {
-                    console.log(event.selected,"!!");
                     schema.openFeatureEditDialog(event.selected[0]);
                     selectControl.getFeatures().clear();
                 }
@@ -245,11 +248,17 @@
                 widget.currentPopup.popupDialog('close');
             }
 
-            schema.menu.deactivateControls();
+            schema.deactivateInteractions();
 
 
         },
 
+        deactivateInteractions: function() {
+            var schema = this;
+            schema.menu.toolSet.activeInteraction && schema.menu.toolSet.activeInteraction.setActive(false);
+            schema.highlightControl.setActive(false);
+            schema.selectControl.setActive(false);
+        },
 
 
         openFeatureEditDialog: function (feature) {
@@ -259,14 +268,12 @@
 
 
 
-        reloadFeatures: function () {
+        introduceFeature: function(feature) {
+
             var schema = this;
-            var layer = schema.layer;
-            var features = schema.getLayerFeatures();
+            feature.mbOrigin = 'digitizer';
 
-            layer.getSource().clear();
-            layer.getSource().addFeatures(features);
-
+            feature.setStyle(new ol.style.StyleConverter().convert(schema.styles.default));
         },
 
 
@@ -320,7 +327,7 @@
 
 
             newFeatures.forEach(function (feature) {
-                feature.mbOrigin = 'digitizer';
+                schema.introduceFeature(feature);
             });
             schema.layer.getSource().addFeatures(newFeatures);
 
@@ -370,7 +377,7 @@
                 var newFeatures = geoJsonReader.readFeaturesFromObject(response);
                 var newFeature = _.first(newFeatures);
 
-                newFeature.mbOrigin = 'digitizer';
+                schema.introduceFeature(newFeature);
 
                 return newFeature;
 
