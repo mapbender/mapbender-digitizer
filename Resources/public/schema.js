@@ -273,12 +273,12 @@
             var schema = this;
             feature.mbOrigin = 'digitizer';
 
-            feature.setStyle(new ol.style.StyleConverter().convert(schema.styles.default));
+            feature.setStyle(ol.style.StyleConverter.convertToOL4Style(schema.styles.default));
 
             feature.on('Digitizer.HoverFeature', function(event) {
 
                 schema.menu.resultTable.hoverInResultTable(feature,event.value);
-                feature.setStyle(new ol.style.StyleConverter().convert(event.value ? schema.styles.select : schema.styles.default));
+                feature.setStyle(ol.style.StyleConverter.convertToOL4Style(event.value ? schema.styles.select : schema.styles.default));
 
             });
         },

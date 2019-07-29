@@ -526,8 +526,9 @@ window.confirmDialog = function(options) {
                 var tr = this;
                 var row = tableApi.row(tr);
                 var feature = row.data();
-
-                feature.dispatchEvent({ type: 'Digitizer.HoverFeature', value: true});
+                if (feature) {
+                    feature.dispatchEvent({type: 'Digitizer.HoverFeature', value: true});
+                }
 
 
                 // if (feature) {
@@ -542,7 +543,9 @@ window.confirmDialog = function(options) {
                 var row = tableApi.row(tr);
                 var feature = row.data();
 
-                feature.dispatchEvent({ type: 'Digitizer.HoverFeature', value: false});
+                if (feature) {
+                    feature.dispatchEvent({type: 'Digitizer.HoverFeature', value: false});
+                }
 
 
                 // if (feature) {
@@ -722,10 +725,10 @@ window.confirmDialog = function(options) {
         getApi: function() {
             return this._dataTable;
         },
-        
+
         /**
          * Get widget itself
-         * 
+         *
          * @returns widget
          */
         getWidget: function(){
@@ -952,16 +955,16 @@ window.confirmDialog = function(options) {
             });
             return r;
         },
-        
+
         /**
-         * 
+         *
          * @param {type} id
          * @param {type} key
          * @returns {@exp;selector|@exp;seed@pro;length|@exp;selector@call;slice|String|@exp;compiled@pro;selector|@exp;selector@call;replace|@exp;handleObjIn@pro;selector|until|seed.length|compiled.selector|handleObjIn.selector|@exp;type|@exp;type@call;slice|@exp;callback|@exp;props|@exp;params|@arr;@this;|@exp;data|@exp;speed|@exp;options|Array|@exp;props@call;split|@exp;jQuery@call;param|@exp;query@call;split|@exp;jQuery@call;makeArray|@exp;selectorundefined|@exp;options@pro;duration|@exp;_@call;extend|options|@exp;s@call;join@call;replace|selectorundefined|_@call;extend.duration|options.duration}Get data by id
          */
-        getDataById: function(value, key){    
+        getDataById: function(value, key){
             var result;
-            
+
             if(!key){
                 key = 'id'
             }
@@ -987,7 +990,7 @@ window.confirmDialog = function(options) {
 
             return result ? $(result) : result;
         },
-        
+
         /**
          * Show by DOM row
          * @return int page number
@@ -999,7 +1002,7 @@ window.confirmDialog = function(options) {
             if(domRow.hasOwnProperty('length')){
                 domRow = domRow[0]
             }
-            
+
             var nodePosition = tableApi.rows({order: 'current'}).nodes().indexOf(domRow);
             var pageNumber = Math.floor(nodePosition / rowsOnOnePage);
             tableApi.page(pageNumber).draw( false );
