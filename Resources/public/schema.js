@@ -128,13 +128,13 @@
             highlightControl.on('select', function (e) {
 
                 e.selected.forEach(function (feature) {
-                    schema.menu.resultTable.hoverInResultTable(feature, true);
-                    feature.setStyle(new ol.style.StyleConverter().convert(schema.styles.select));
+
+                    feature.dispatchEvent({ type: 'Digitizer.HoverFeature', value: true});
+
                 });
 
                 e.deselected.forEach(function (feature) {
-                    schema.menu.resultTable.hoverInResultTable(feature, false);
-                    feature.setStyle(new ol.style.StyleConverter().convert(schema.styles.default));
+                   feature.dispatchEvent({ type: 'Digitizer.HoverFeature', value: false});
                 });
 
             });
@@ -274,6 +274,13 @@
             feature.mbOrigin = 'digitizer';
 
             feature.setStyle(new ol.style.StyleConverter().convert(schema.styles.default));
+
+            feature.on('Digitizer.HoverFeature', function(event) {
+
+                schema.menu.resultTable.hoverInResultTable(feature,event.value);
+                feature.setStyle(new ol.style.StyleConverter().convert(event.value ? schema.styles.select : schema.styles.default));
+
+            });
         },
 
 

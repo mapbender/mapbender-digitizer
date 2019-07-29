@@ -526,22 +526,30 @@ window.confirmDialog = function(options) {
                 var tr = this;
                 var row = tableApi.row(tr);
                 var feature = row.data();
-                if (feature) {
-                    highlightControl.getFeatures().push(feature);
-                } else {
-                    console.warn("No Feature in row", row);
-                }
+
+                feature.dispatchEvent({ type: 'Digitizer.HoverFeature', value: true});
+
+
+                // if (feature) {
+                //     highlightControl.getFeatures().push(feature);
+                // } else {
+                //     console.warn("No Feature in row", row);
+                // }
             });
 
             table.delegate("tbody > tr", 'mouseleave', function () {
                 var tr = this;
                 var row = tableApi.row(tr);
                 var feature = row.data();
-                if (feature) {
-                    highlightControl.getFeatures().remove(feature);
-                } else {
-                    console.warn("No Feature in row", row);
-                }
+
+                feature.dispatchEvent({ type: 'Digitizer.HoverFeature', value: false});
+
+
+                // if (feature) {
+                //     highlightControl.getFeatures().remove(feature);
+                // } else {
+                //     console.warn("No Feature in row", row);
+                // }
             });
 
             // table.delegate("tbody > tr", 'click', function () {

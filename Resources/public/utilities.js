@@ -57,46 +57,79 @@
 
 
 
-
+    // fillColor: "#ee9900",
+    //     fillOpacity: 0.4,
+    //     hoverFillColor: "white",
+    //     hoverFillOpacity: 0.8,
+    //     strokeColor: "#ee9900",
+    //     strokeOpacity: 1,
+    //     strokeWidth: 1,
+    //     strokeLinecap: "round",
+    //     strokeDashstyle: "solid",
+    //     hoverStrokeColor: "red",
+    //     hoverStrokeOpacity: 1,
+    //     hoverStrokeWidth: 0.2,
+    //     pointRadius: 6,
+    //     hoverPointRadius: 1,
+    //     hoverPointUnit: "%",
+    //     pointerEvents: "visiblePainted",
+    //     cursor: "inherit",
+    //     fontColor: "#000000",
+    //     labelAlign: "cm",
+    //     labelOutlineColor: "white",
+    //     labelOutlineWidth: 3
 
 
 
 
     ol.style.StyleConverter = function() {
-        this.defaultStyle = ol.style.Style.defaultFunction()[0];
     };
 
     ol.style.StyleConverter.prototype.convert = function(style) {
 
-        var newStyle = new ol.style.Style();
+        var newStyle = ol.style.Style.defaultFunction()[0];
 
-        var stroke = new ol.style.Stroke();
+        // creates 4 element array with color and opacity
+        function calculateColor(color,opacity,originalColor) {
+            var newColor = ol.color.asArray(color !== undefined ? color : originalColor);
+            newColor[3] = opacity !== undefined ? opacity : newColor[3];
 
-        var hexToRgb = ol.style.StyleConverter.hexToRgb;
+            return newColor;
+        }
 
-        stroke.setWidth(style.strokeWidth );
-        stroke.setColor(hexToRgb(style.strokeColor));
+        newStyle.getStroke().setColor(calculateColor(style.strokeColor,style.strokeOpacity, newStyle.getStroke().getColor()));
+        newStyle.getStroke().setWidth(style.strokeWidth || newStyle.getStroke().getWidth());
+        newStyle.getStroke().setLineCap(style.strokeLinecap || newStyle.getStroke().getLineCap());
+        newStyle.getStroke().setLineDash(style.strokeDashstyle || newStyle.getStroke().getLineDash());
 
-        var fill = new ol.style.Fill();
-
-        var color = ol.style.StyleConverter.hexToRgb(style.fillColor,style.fillOpacity);
-        fill.setColor(color);
-
-
-        //
-        // var circle = new ol.style.Circle({
-        //     fill: fill,
-        //     stroke: stroke
-        // });
-        //
-        // circle.setRadius(style.pointRadius);
+        newStyle.getFill().setColor(calculateColor(style.fillColor,style.fillOpacity,newStyle.getFill().getColor()));
 
 
-        newStyle.setStroke(stroke);
-        newStyle.setFill(fill);
-       // newStyle.setImage(circle);
+       //
+       //  stroke.setColor(hexToRgb(style.strokeColor));
+       //
+       //  var fill = new ol.style.Fill();
+       //
+       //  var color = ol.style.StyleConverter.hexToRgb(style.fillColor,style.fillOpacity);
+       //  fill.setColor(color);
+       //
+       //
+       //  //
+       //  // var circle = new ol.style.Circle({
+       //  //     fill: fill,
+       //  //     stroke: stroke
+       //  // });
+       //  //
+       //  // circle.setRadius(style.pointRadius);
+       //
+       //
+       //  newStyle.setStroke(stroke);
+       //  newStyle.setFill(fill);
+       // // newStyle.setImage(circle);
 
-        return [newStyle];
+
+
+        return newStyle;
 
     };
 
