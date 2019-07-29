@@ -779,6 +779,10 @@
                 }
             });
 
+            if (!widget.currentSettings.displayPermanent) {
+                deactivateFrame(widget.currentSettings);
+            }
+
             widget.updateClusterStrategies();
 
         },
