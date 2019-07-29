@@ -91,17 +91,4 @@
     };
 
 
-//  default:
-//       strokeWidth: 2
-//       strokeColor: '#0e6a9e'
-//       fillColor: '#ff0000'
-//       fillOpacity: 1
-//       fillWidth: 2
-//       pointRadius: 10
-//     select:
-//       strokeWidth: 3
-//       strokeColor: '#0e6a9e'
-//       fillOpacity: 0.7
-//       pointRadius: 10
-
 })();

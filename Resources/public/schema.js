@@ -36,6 +36,13 @@
 
         schema.createMenu_();
 
+        schema.styles = schema.styles || {};
+        schema.styles.default = schema.styles.default || {};
+        schema.styles.select = schema.styles.select || {};
+
+        schema.styles.default = ol.style.StyleConverter.convertToOL4Style(schema.styles.default);
+        schema.styles.select = ol.style.StyleConverter.convertToOL4Style(schema.styles.select);
+
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
             var feature = event.feature;
             feature.setStyle(Mapbender.Digitizer.Utilities.STYLE.CHANGED);
@@ -81,7 +88,6 @@
 
 
             var layer = new ol.layer.Vector({
-                projection: 'EPSG:4258',
                 source: new ol.source.Vector({
                     format: new ol.format.GeoJSON(),
                     loader: schema.getData.bind(schema),
@@ -170,35 +176,6 @@
             return schema.featureType.geomType;
         },
 
-        // getDefaultTableFields: function () {
-        //     var schema = this;
-        //     var tableFields = {};
-        //     tableFields[schema.featureType.uniqueId] = {label: 'Nr.', width: '20%'};
-        //     if (schema.featureType.name) {
-        //         tableFields[schema.featureType.name] = {label: 'Name', width: '80%'};
-        //     }
-        //     return tableFields;
-        //
-        // },
-        //
-        // initTableFields: function () {
-        //     var schema = this;
-        //
-        //     schema.tableFields = schema.tableFields || schema.getDefaultTableFields();
-        //
-        //     _.each(schema.tableFields, function (tableField) {
-        //
-        //         if (tableField.type === "image") {
-        //             tableField.render = function (imgName, renderType, feature, x) {
-        //                 return $("<img style='width: 20px'/>").attr('src', Mapbender.Digitizer.Utilities.getAssetsPath(tableField.path + imgName))[0].outerHTML;
-        //             }
-        //         }
-        //     });
-        // },
-
-
-
-
         activateSchema: function (activateWidget) {
 
             var schema = this;
@@ -211,12 +188,9 @@
                 return schema;
             };
 
-            var promise;
-            promise = $.Deferred().resolve();
 
-            promise.then(function () {
-                return widget.query('getConfiguration');
-            }).done(function (response) {
+
+            return widget.query('getConfiguration').then(function (response) {
 
                 layer.setVisible(true);
                 frame.show();
@@ -273,12 +247,12 @@
             var schema = this;
             feature.mbOrigin = 'digitizer';
 
-            feature.setStyle(ol.style.StyleConverter.convertToOL4Style(schema.styles.default));
+            feature.setStyle(schema.styles.default);
 
             feature.on('Digitizer.HoverFeature', function(event) {
 
                 schema.menu.resultTable.hoverInResultTable(feature,event.value);
-                feature.setStyle(ol.style.StyleConverter.convertToOL4Style(event.value ? schema.styles.select : schema.styles.default));
+                feature.setStyle(event.value ? schema.styles.select : schema.styles.default);
 
             });
         },
@@ -378,8 +352,6 @@
                 }
 
                 var geoJsonReader = new ol.format.GeoJSON();
-
-                console.log(response,"$");
 
                 var newFeatures = geoJsonReader.readFeaturesFromObject(response);
                 var newFeature = _.first(newFeatures);
