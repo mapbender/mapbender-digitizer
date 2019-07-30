@@ -194,7 +194,9 @@
             schema.highlightControl.setActive(true);
             schema.selectControl.setActive(true);
 
-            layer.setVisible(true);
+            if (!wholeWidget) {
+                layer.setVisible(true);
+            }
         },
 
         deactivateSchema: function (wholeWidget) {
@@ -215,25 +217,9 @@
 
             schema.deactivateInteractions();
 
-            if (!wholeWidget || !widget.displayOnInactive) {
+            if (!wholeWidget) {
                 if (!schema.displayPermanent) {
                     layer.setVisible(false);
-                }
-            }
-
-        },
-
-        recalculateVisibility: function(activateWidget) {
-            var schema = this;
-            var widget = schema.widget;
-
-            if (activateWidget) {
-                if (schema.displayPermanent) {
-                    schema.layer.setVisible(true);
-                }
-            } else {
-                if (!schema.displayPermanent) {
-                    schema.layer.setVisible(false);
                 }
             }
 

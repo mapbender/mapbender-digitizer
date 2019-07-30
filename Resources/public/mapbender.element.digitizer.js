@@ -372,12 +372,18 @@
 
 
 
-        recalculateLayerVisibilityForNonActiveLayers_: function(activateWidget) {
+        recalculateLayerVisibility_: function(activateWidget) {
             var widget = this;
 
             $.each(widget.schemes,function(schemaName,schema){
-                if (widget.getCurrentSchema() !== schema) {
-                    schema.recalculateVisibility(activateWidget);
+                if (activateWidget) {
+                    if (schema === widget.getCurrentSchema() || schema.displayPermanent) {
+                        schema.layer.setVisible(true);
+                    }
+                } else {
+                    if (!widget.displayOnInactive) {
+                        schema.layer.setVisible(false);
+                    }
                 }
             });
 
@@ -387,16 +393,16 @@
             var widget = this;
             if (!widget.isEnabled()) {
                 widget.enable();
-                widget.recalculateLayerVisibilityForNonActiveLayers_(true);
                 widget.getCurrentSchema().activateSchema(true);
+                widget.recalculateLayerVisibility_(true);
             }
         },
 
         deactivate: function () {
             var widget = this;
             widget.disable();
-            widget.recalculateLayerVisibilityForNonActiveLayers_(false);
             widget.getCurrentSchema().deactivateSchema(true);
+            widget.recalculateLayerVisibility_(false);
         },
 
 
