@@ -36,70 +36,10 @@
             schemes: {},
             target: null,
         },
+
         schemes: null,
+
         map: null,
-
-        styles: {
-            'default': {
-                strokeWidth: 1,
-                strokeColor: '#6fb536',
-                fillColor: "#6fb536",
-                fillOpacity: 0.3
-                //, label: '${label}'
-            },
-            'select': {
-                strokeWidth: 3,
-                fillColor: "#F7F79A",
-                strokeColor: '#6fb536',
-                fillOpacity: 0.5,
-                graphicZIndex: 15
-            },
-            // 'selected': {
-            //     strokeWidth: 3,
-            //     fillColor: "#74b1f7",
-            //     strokeColor: '#b5ac14',
-            //     fillOpacity: 0.7,
-            //     graphicZIndex: 15
-            // },
-            'copy': {
-                strokeWidth: 5,
-                fillColor: "#f7ef7e",
-                strokeColor: '#4250b5',
-                fillOpacity: 0.7,
-                graphicZIndex: 1000
-            },
-            'unsaved': {
-                strokeWidth: 3,
-                fillColor: "#FFD14F",
-                strokeColor: '#F5663C',
-                fillOpacity: 0.5
-            },
-
-            'invisible': {
-                display: 'none'
-            },
-
-            'labelText': {
-                strokeWidth: 0,
-                fillColor: '#cccccc',
-                fillOpacity: 0,
-                strokeColor: '#5e1a2b',
-                strokeOpacity: 0,
-                pointRadius: 15,
-                label: '${label}',
-                fontSize: 15
-            },
-            'labelTextHover': {
-                strokeWidth: 0,
-                fillColor: '#cccccc',
-                strokeColor: '#2340d3',
-                fillOpacity: 1,
-                pointRadius: 15,
-                label: '${label}',
-                fontSize: 15
-            },
-
-        },
 
         initialScheme: null,
 
@@ -111,11 +51,9 @@
 
         disabled: true,
 
-        isFullyActive: true,
-
         _create: function () {
 
-            var widget = this.widget = this;
+            var widget  = this;
             var element = widget.element;
 
             widget.id = element.attr("id");
@@ -124,10 +62,9 @@
                 return;
             }
 
-            if (typeof widget.options.useAllScheme !== "undefined") {
+            if (widget.options.useAllScheme !== undefined) {
                 widget.useAllScheme = widget.options.useAllScheme;
             }
-
 
             widget.displayOnInactive = widget.options.displayOnInactive;
 
@@ -137,36 +74,7 @@
             widget.query = qe.query;
             widget.getElementURL = qe.getElementURL;
 
-            var createSpinner = function () {
-
-                widget.spinner = new function () {
-                    var spinner = this;
-
-                    spinner.openRequests = 0;
-
-                    var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell').prepend("<div class='spinner' style='display:none'></div>");
-                    spinner.$element = $parent.find(".spinner");
-
-                    spinner.addRequest = function () {
-                        spinner.openRequests++;
-                        if (spinner.openRequests >= 1) {
-                            spinner.$element.show();
-                        }
-                    };
-
-                    spinner.removeRequest = function () {
-                        spinner.openRequests--;
-                        if (spinner.openRequests === 0) {
-                            spinner.$element.hide();
-                        }
-                    };
-
-
-                };
-            };
-
-            createSpinner();
-
+            widget.createSpinner_();
 
             Mapbender.elementRegistry.waitReady(widget.options.target).then(widget.setup.bind(widget));
 
@@ -176,13 +84,39 @@
             });
         },
 
+        createSpinner_: function () {
+            var widget = this;
 
-        setup: function () {
+            widget.spinner = new function () {
+                var spinner = this;
+
+                spinner.openRequests = 0;
+
+                var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell');
+                $parent.prepend("<div class='spinner' style='display:none'></div>");
+                spinner.$element = $parent.find(".spinner");
+
+                spinner.addRequest = function () {
+                    spinner.openRequests++;
+                    if (spinner.openRequests >= 1) {
+                        spinner.$element.show();
+                    }
+                };
+
+                spinner.removeRequest = function () {
+                    spinner.openRequests--;
+                    if (spinner.openRequests === 0) {
+                        spinner.$element.hide();
+                    }
+                };
+
+
+            };
+        },
+
+        createSelector_: function() {
             var widget = this;
             var element = $(widget.element);
-            var options = widget.options;
-
-
 
             widget.selector = $("select.selector", element);
 
@@ -214,24 +148,28 @@
                 selector.previousSchema = schema;
 
             });
+        },
+
+        reveal: function() {
+            var widget = this;
+            widget.activate(true);
+        },
+
+        hide: function() {
+            var widget = this;
+            widget.deactivate();
+        },
+
+        setup: function () {
+            var widget = this;
+            var options = widget.options;
+
+
+
+            widget.createSelector_();
 
             widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
 
-            // TODO Kanonen->Spatzen: refactoring
-            var initializeActivationContainer = function () {
-
-                var containerInfo = new MapbenderContainerInfo(widget, {
-                    onactive: function () {
-                        widget.activate();
-                    },
-                    oninactive: function () {
-                        widget.deactivate();
-                    }
-                });
-
-                return containerInfo;
-
-            };
 
             var initializeSelectorOrTitleElement = function () {
 
@@ -292,64 +230,62 @@
                 widget.initialScheme = widget.schemes[basicScheme];
 
                 if (isOpenByDefault()) {
-                    widget.activate();
+                    widget.activate(true);
                 }
 
 
             };
 
-            var createMapContextMenu = function () {
-                var map = widget.map;
-
-
-                var options = {
-                    selector: 'div',
-                    events: {
-                        show: function (options) {
-                            return widget.isFullyActive && widget.getCurrentSchema().mapContextMenu.allowUseContextMenu(options);
-                        }
-                    },
-                    build: function (trigger, e) {
-                        return widget.isFullyActive && widget.getCurrentSchema().mapContextMenu.buildContextMenu(trigger, e);
-                    }
-                };
-
-                $(map.div).contextMenu(options);
-
-            };
-
-            var createElementContextMenu = function () {
-                var element = $(widget.element);
-
-                var options = {
-                    position: function (opt, x, y) {
-                        opt.$menu.css({top: y, left: x + 10});
-                    },
-                    selector: '.mapbender-element-result-table > div > table > tbody > tr',
-                    events: {
-                        show: function (options) {
-                            return widget.getCurrentSchema().elementContextMenu.allowUseContextMenu(options);
-                        }
-                    },
-                    build: function (trigger, e) {
-                        return widget.getCurrentSchema().elementContextMenu.buildContextMenu(trigger, e);
-                    }
-                };
-
-                $(element).contextMenu(options);
-
-            };
+            // var createMapContextMenu = function () {
+            //     var map = widget.map;
+            //
+            //
+            //     var options = {
+            //         selector: 'div',
+            //         events: {
+            //             show: function (options) {
+            //                 return widget.getCurrentSchema().mapContextMenu.allowUseContextMenu(options);
+            //             }
+            //         },
+            //         build: function (trigger, e) {
+            //             return widget.getCurrentSchema().mapContextMenu.buildContextMenu(trigger, e);
+            //         }
+            //     };
+            //
+            //     $(map.div).contextMenu(options);
+            //
+            // };
+            //
+            // var createElementContextMenu = function () {
+            //     var element = $(widget.element);
+            //
+            //     var options = {
+            //         position: function (opt, x, y) {
+            //             opt.$menu.css({top: y, left: x + 10});
+            //         },
+            //         selector: '.mapbender-element-result-table > div > table > tbody > tr',
+            //         events: {
+            //             show: function (options) {
+            //                 return widget.getCurrentSchema().elementContextMenu.allowUseContextMenu(options);
+            //             }
+            //         },
+            //         build: function (trigger, e) {
+            //             return widget.getCurrentSchema().elementContextMenu.buildContextMenu(trigger, e);
+            //         }
+            //     };
+            //
+            //     $(element).contextMenu(options);
+            //
+            // };
 
 
             initializeSelectorOrTitleElement();
 
             createSchemes();
 
-            initializeActivationContainer();
-
-            createMapContextMenu();
-
-            createElementContextMenu();
+            // createMapContextMenu();
+            //
+            // createElementContextMenu();
 
             // widget.map.div.oncontextmenu = function(e) {
             //
@@ -369,8 +305,7 @@
             widget._trigger('ready');
 
             if (widget.displayOnInactive) {
-                widget.activate();
-                widget.isFullyActive = false;
+                widget.activate(false);
             }
 
         },
@@ -389,6 +324,7 @@
             var widget = this;
             return !widget.disabled;
         },
+
 
 
         registerMapEvents: function () {
@@ -418,14 +354,6 @@
 
         },
 
-        getBasicSchemes: function () {
-            var widget = this;
-
-            return _.pick(widget.schemes, function (value, key) {
-                return key !== "all";
-            });
-        },
-
 
         getSchemaByName: function (schemaName) {
             var widget = this;
@@ -441,22 +369,30 @@
             return widget.initialScheme;
         },
 
+
+        toggleSchemeLayerVisibility_: function(visible) {
+            var widget = this;
+            if (!widget.displayOnInactive) {
+                $.each(widget.schemes,function(schemaName,schema){
+                    schema.layer.setVisible(visible && schema.displayPermanent || visible && schema === widget.getCurrentSchema());
+                });
+            }
+        },
+
         activate: function () {
             var widget = this;
-            widget.isFullyActive = true;
             if (!widget.isEnabled()) {
                 widget.enable();
-                widget.getCurrentSchema().activateSchema(true); // triggers schema activation
+                widget.getCurrentSchema().activateSchema();
+                widget.toggleSchemeLayerVisibility_(true);
             }
-
-
         },
 
         deactivate: function () {
             var widget = this;
             widget.disable();
-            widget.isFullyActive = false;
-            widget.getCurrentSchema().deactivateSchema(true);
+            widget.getCurrentSchema().deactivateSchema();
+            widget.toggleSchemeLayerVisibility_(false);
         },
 
 

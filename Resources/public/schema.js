@@ -93,7 +93,7 @@
                     loader: schema.getData.bind(schema),
                     strategy: ol.loadingstrategy.all // ol.loadingstrategy.bbox
                 }),
-                visible: true,
+                visible: false,
                 strategy: ol.loadingstrategy.bbox,
 
             });
@@ -145,7 +145,7 @@
 
             });
 
-
+            highlightControl.setActive(false);
 
             var selectControl = new ol.interaction.Select({
 
@@ -156,7 +156,6 @@
                 }
 
             });
-
 
             schema.selectControl = selectControl;
 
@@ -169,6 +168,8 @@
                 }
             });
 
+            selectControl.setActive(false);
+
         },
 
         getGeomType: function () {
@@ -176,7 +177,7 @@
             return schema.featureType.geomType;
         },
 
-        activateSchema: function (activateWidget) {
+        activateSchema: function () {
 
             var schema = this;
 
@@ -188,22 +189,19 @@
                 return schema;
             };
 
+            layer.setVisible(true);
+            frame.show();
 
 
-            return widget.query('getConfiguration').then(function (response) {
+            schema.highlightControl.setActive(true);
+            schema.selectControl.setActive(true);
 
-                layer.setVisible(true);
-                frame.show();
-                if (schema.widget.isFullyActive) {
-                    schema.highlightControl.setActive(true);
-                    schema.selectControl.setActive(true);
-                }
 
-            });
 
         },
 
-        deactivateSchema: function (deactivateWidget) {
+        deactivateSchema: function () {
+
             var schema = this;
             var widget = schema.widget;
             var frame = schema.menu.frame;
@@ -211,7 +209,7 @@
 
             frame.hide();
 
-            if ((deactivateWidget && !schema.widget.displayOnInactive) || (!deactivateWidget && !schema.displayPermanent)) {
+            if (!schema.displayPermanent) {
                 layer.setVisible(false);
             }
 
