@@ -527,7 +527,7 @@ window.confirmDialog = function(options) {
                 var row = tableApi.row(tr);
                 var feature = row.data();
                 if (feature) {
-                    feature.dispatchEvent({type: 'Digitizer.HoverFeature', value: true});
+                    feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: true});
                 }
 
 
@@ -544,7 +544,7 @@ window.confirmDialog = function(options) {
                 var feature = row.data();
 
                 if (feature) {
-                    feature.dispatchEvent({type: 'Digitizer.HoverFeature', value: false});
+                    feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: false});
                 }
 
 
@@ -1197,7 +1197,6 @@ window.confirmDialog = function(options) {
                 });
                 element.bind('popupdialogclose',function(){
 
-                    console.log(modal,"??");
                     modal.fadeOut(function(){
                         modal.remove();
                     });

@@ -4,20 +4,6 @@
 
     Mapbender.Digitizer.Utilities = {
 
-        STYLE : {
-
-            CHANGED: new ol.style.Style({
-
-                fill: new ol.style.Fill({
-                    color:  [255,209,79,0.5],//'rgba(255,209,79,0.5)',
-                }),
-                stroke: new ol.style.Stroke({
-                    width: 3,
-                    color: 'rgba(244,83,36)'
-                }),
-            }),
-        },
-
 
 
         isAddingToolsetType: function(toolsetType) {

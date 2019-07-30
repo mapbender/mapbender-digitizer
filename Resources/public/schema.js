@@ -42,11 +42,17 @@
 
         schema.styles.default = ol.style.StyleConverter.convertToOL4Style(schema.styles.default);
         schema.styles.select = ol.style.StyleConverter.convertToOL4Style(schema.styles.select);
+        schema.styles.unsaved = schema.styles.unsaved ? ol.style.StyleConverter.convertToOL4Style(schema.styles.unsaved) : ol.style.StyleConverter.convertToOL4Style({
+            strokeWidth: 3,
+            fillColor: '#FFD14F',
+            strokeColor: '#F5663C',
+            fillOpacity: 0.5
+        });
 
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
             var feature = event.feature;
 
-            feature.temporaryStyle = Mapbender.Digitizer.Utilities.STYLE.CHANGED
+            feature.temporaryStyle = schema.styles.unsaved;
             feature.setStyle(feature.temporaryStyle);
 
         });
@@ -55,7 +61,7 @@
 
             var feature = event.feature;
 
-            feature.temporaryStyle = Mapbender.Digitizer.Utilities.STYLE.CHANGED
+            feature.temporaryStyle = schema.styles.unsaved;
             feature.setStyle(feature.temporaryStyle);
 
         });
@@ -65,7 +71,7 @@
 
             schema.introduceFeature(feature);
 
-            feature.temporaryStyle = Mapbender.Digitizer.Utilities.STYLE.CHANGED
+            feature.temporaryStyle = schema.styles.unsaved;
             feature.setStyle(feature.temporaryStyle);
 
             schema.openFeatureEditDialog(feature);
@@ -310,6 +316,34 @@
 
             schema.menu.resultTable.redrawResultTableFeatures(newFeatures);
 
+        },
+
+
+        removeFeature: function (feature) {
+            var schema = this;
+            var widget = schema.widget;
+
+            var limitedFeature = {};
+            limitedFeature[schema.featureType.uniqueId] = feature.getId();
+            if (!feature.getId()) {
+                schema.layer.getSource().removeFeature(feature);
+            } else {
+                Mapbender.confirmDialog({
+                    html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
+
+                    onSuccess: function () {
+                        widget.query('delete', {
+                            schema: schema.schemaName,
+                            feature: limitedFeature,
+                        }).done(function (fid) {
+                            schema.layer.getSource().removeFeature(feature);
+                            $.notify(Mapbender.DigitizerTranslator.translate('feature.remove.successfully'), 'info');
+                        });
+                    }
+                });
+            }
+
+            return feature;
         },
 
 

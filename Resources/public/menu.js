@@ -131,7 +131,7 @@
                         className: 'remove',
                         cssClass: 'critical',
                         onClick: function (feature, ui) {
-                            if (schema.getSchemaByFeature(feature).allowDelete) {
+                            if (schema.allowDelete) {
                                 schema.removeFeature(feature);
                             } else {
                                 $.notify("Deletion is not allowed");
