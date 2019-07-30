@@ -45,16 +45,18 @@
 
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
             var feature = event.feature;
-            feature.setStyle(Mapbender.Digitizer.Utilities.STYLE.CHANGED);
 
-            console.log(feature,"moved");
+            feature.temporaryStyle = Mapbender.Digitizer.Utilities.STYLE.CHANGED
+            feature.setStyle(feature.temporaryStyle);
+
         });
 
         schema.layer.getSource().on('controlFactory.FeatureModified', function (event) {
 
             var feature = event.feature;
 
-            feature.setStyle(Mapbender.Digitizer.Utilities.STYLE.CHANGED);
+            feature.temporaryStyle = Mapbender.Digitizer.Utilities.STYLE.CHANGED
+            feature.setStyle(feature.temporaryStyle);
 
         });
 
@@ -63,7 +65,8 @@
 
             schema.introduceFeature(feature);
 
-            feature.setStyle(Mapbender.Digitizer.Utilities.STYLE.CHANGED);
+            feature.temporaryStyle = Mapbender.Digitizer.Utilities.STYLE.CHANGED
+            feature.setStyle(feature.temporaryStyle);
 
             schema.openFeatureEditDialog(feature);
 
@@ -135,12 +138,12 @@
 
                 e.selected.forEach(function (feature) {
 
-                    feature.dispatchEvent({ type: 'Digitizer.HoverFeature', value: true});
+                    feature.dispatchEvent({ type: 'Digitizer.HoverFeature', hover: true});
 
                 });
 
                 e.deselected.forEach(function (feature) {
-                   feature.dispatchEvent({ type: 'Digitizer.HoverFeature', value: false});
+                   feature.dispatchEvent({ type: 'Digitizer.HoverFeature', hover: false});
                 });
 
             });
@@ -249,8 +252,8 @@
 
             feature.on('Digitizer.HoverFeature', function(event) {
 
-                schema.menu.resultTable.hoverInResultTable(feature,event.value);
-                feature.setStyle(event.value ? schema.styles.select : schema.styles.default);
+                schema.menu.resultTable.hoverInResultTable(feature,event.hover);
+                feature.setStyle(event.hover ? schema.styles.select : feature.temporaryStyle || schema.styles.default);
 
             });
         },
@@ -300,36 +303,13 @@
                 features: featureCollection.features
             });
 
-
-
-
-
-
             newFeatures.forEach(function (feature) {
                 schema.introduceFeature(feature);
             });
             schema.layer.getSource().addFeatures(newFeatures);
 
-
             schema.menu.resultTable.redrawResultTableFeatures(newFeatures);
 
-
-
-
-        },
-
-
-        // Overwrite
-        getLayerFeatures: function () {
-            var schema = this;
-            return schema.layer.getSource().getFeatures();
-        },
-
-
-
-        removeAllFeatures: function () {
-            var schema = this;
-            schema.layer.getSource().clear();
         },
 
 
