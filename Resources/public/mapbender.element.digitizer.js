@@ -370,29 +370,33 @@
         },
 
 
-        toggleSchemeLayerVisibility_: function(visible) {
+
+
+        recalculateLayerVisibilityForNonActiveLayers_: function(activateWidget) {
             var widget = this;
-            if (!widget.displayOnInactive) {
-                $.each(widget.schemes,function(schemaName,schema){
-                    schema.layer.setVisible(visible && schema.displayPermanent || visible && schema === widget.getCurrentSchema());
-                });
-            }
+
+            $.each(widget.schemes,function(schemaName,schema){
+                if (widget.getCurrentSchema() !== schema) {
+                    schema.recalculateVisibility(activateWidget);
+                }
+            });
+
         },
 
         activate: function () {
             var widget = this;
             if (!widget.isEnabled()) {
                 widget.enable();
-                widget.getCurrentSchema().activateSchema();
-                widget.toggleSchemeLayerVisibility_(true);
+                widget.recalculateLayerVisibilityForNonActiveLayers_(true);
+                widget.getCurrentSchema().activateSchema(true);
             }
         },
 
         deactivate: function () {
             var widget = this;
             widget.disable();
-            widget.getCurrentSchema().deactivateSchema();
-            widget.toggleSchemeLayerVisibility_(false);
+            widget.recalculateLayerVisibilityForNonActiveLayers_(false);
+            widget.getCurrentSchema().deactivateSchema(true);
         },
 
 

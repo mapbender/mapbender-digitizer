@@ -177,7 +177,7 @@
             return schema.featureType.geomType;
         },
 
-        activateSchema: function () {
+        activateSchema: function (wholeWidget) {
 
             var schema = this;
 
@@ -189,18 +189,15 @@
                 return schema;
             };
 
-            layer.setVisible(true);
             frame.show();
-
 
             schema.highlightControl.setActive(true);
             schema.selectControl.setActive(true);
 
-
-
+            layer.setVisible(true);
         },
 
-        deactivateSchema: function () {
+        deactivateSchema: function (wholeWidget) {
 
             var schema = this;
             var widget = schema.widget;
@@ -208,10 +205,6 @@
             var layer = schema.layer;
 
             frame.hide();
-
-            if (!schema.displayPermanent) {
-                layer.setVisible(false);
-            }
 
             schema.highlightControl.setActive(false);
             schema.selectControl.setActive(false);
@@ -222,6 +215,27 @@
 
             schema.deactivateInteractions();
 
+            if (!wholeWidget || !widget.displayOnInactive) {
+                if (!schema.displayPermanent) {
+                    layer.setVisible(false);
+                }
+            }
+
+        },
+
+        recalculateVisibility: function(activateWidget) {
+            var schema = this;
+            var widget = schema.widget;
+
+            if (activateWidget) {
+                if (schema.displayPermanent) {
+                    schema.layer.setVisible(true);
+                }
+            } else {
+                if (!schema.displayPermanent) {
+                    schema.layer.setVisible(false);
+                }
+            }
 
         },
 
