@@ -24,7 +24,6 @@
          */
         this.allowOpenEditDialog = false;
 
-
         var schema = this;
         $.extend(schema, rawScheme);
 
@@ -36,18 +35,12 @@
 
         schema.createMenu_();
 
-        schema.styles = schema.styles || {};
-        schema.styles.default = schema.styles.default || {};
-        schema.styles.select = schema.styles.select || {};
+        schema.initializeWithDefaultStyles_();
+
 
         schema.styles.default = ol.style.StyleConverter.convertToOL4Style(schema.styles.default);
         schema.styles.select = ol.style.StyleConverter.convertToOL4Style(schema.styles.select);
-        schema.styles.unsaved = schema.styles.unsaved ? ol.style.StyleConverter.convertToOL4Style(schema.styles.unsaved) : ol.style.StyleConverter.convertToOL4Style({
-            strokeWidth: 3,
-            fillColor: '#FFD14F',
-            strokeColor: '#F5663C',
-            fillOpacity: 0.5
-        });
+        schema.styles.unsaved =ol.style.StyleConverter.convertToOL4Style(schema.styles.unsaved);
 
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
             var feature = event.feature;
@@ -82,6 +75,45 @@
 
 
     Mapbender.Digitizer.Scheme.prototype = {
+
+        initializeWithDefaultStyles_: function() {
+            var schema = this;
+            var styles = {
+                default: {
+                    strokeWidth: 1,
+                    strokeColor: '#6fb536',
+                    fillColor: '#6fb536',
+                    fillOpacity: 0.3
+                },
+                select: {
+                    strokeWidth: 3,
+                    fillColor: '#F7F79A',
+                    strokeColor: '#6fb536',
+                    fillOpacity: 0.5,
+                    graphicZIndex: 15
+                },
+                copy: {
+                    strokeWidth: 5,
+                    fillColor: '#f7ef7e',
+                    strokeColor: '#4250b5',
+                    fillOpacity: 0.7,
+                },
+                unsaved: {
+                    strokeWidth: 3,
+                    fillColor: '#FFD14F',
+                    strokeColor: '#F5663C',
+                    fillOpacity: 0.5
+                },
+            };
+
+            schema.styles = schema.styles || {};
+
+            $.each(styles,function(label,style){
+               schema.styles[label] = schema.styles[label] || style;
+
+            });
+
+        },
 
 
         createPopupConfiguration_: function () {
