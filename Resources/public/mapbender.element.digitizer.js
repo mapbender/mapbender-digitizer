@@ -337,6 +337,11 @@
 
         },
 
+        getProjectionCode: function() {
+            var widget = this;
+            return widget.map.getView().getProjection().getCode().split(':').pop();
+        },
+
 
         getSchemaByName: function (schemaName) {
             var widget = this;

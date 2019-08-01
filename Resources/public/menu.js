@@ -237,15 +237,6 @@
                 columns: generateResultDataTableColumns(),
                 buttons: buttons,
                 oLanguage: tableTranslation,
-                drawCallback: function (settings) {
-                    this.api().rows(function (idx, feature, row) {
-                    });
-                },
-                // This may be needed to prevent autocomplete in search field / [google chrome]
-                initComplete: function () {
-                    //$(this.api().table().container()).find('input').parent().wrap('<form>').parent().attr('autocomplete', 'off');
-
-                }
             };
 
             if (schema.view && schema.view.settings) {

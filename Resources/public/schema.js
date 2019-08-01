@@ -154,11 +154,12 @@
 
         createSourceModification_: function () {
             var schema = this;
+            var widget = schema.widget;
 
-            var createRequest = function (extent, projectionCode) {
+            var createRequest = function (extent) {
 
                 var request = {
-                    srid: projectionCode,
+                    srid: widget.getProjectionCode(),
                     maxResults: schema.maxResults,
                     schema: schema.schemaName,
 
@@ -179,8 +180,8 @@
                     }
                     return [extent];
                 },
-                createRequest: function (extent, projectionCode) {
-                    var request = createRequest(extent, projectionCode);
+                createRequest: function (extent) {
+                    var request = createRequest(extent);
                     var extentPolygon = new ol.geom.Polygon.fromExtent(extent);
                     request['intersectGeometry'] = new ol.format.WKT().writeGeometryText(extentPolygon);
 
@@ -391,7 +392,7 @@
             // This is necessary to enable cache deletion in currentExtentSearch when zooming In
             schema.layer.getSource().resolution = resolution;
 
-            var request = schema.currentSourceModificator.createRequest(extent, projection.getCode().split(":").pop());
+            var request = schema.currentSourceModificator.createRequest(extent);
 
             var selectXHR =widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
 
@@ -551,7 +552,7 @@
                 id: feature.getId(),
                 properties: formData,
                 geometry: new ol.format.WKT().writeGeometryText(feature.getGeometry()),
-                srid: widget.map.getView().getProjection().getCode().split(':').pop(),
+                srid: widget.getProjectionCode(),
                 type: "Feature"
             };
 
