@@ -198,7 +198,8 @@
                 schema.currentSourceModificator = sourceModificator;
                 schema.layer.getSource().strategy_ = sourceModificator.strategy;
 
-                schema.layer.getSource().clear();
+
+                schema.layer.getSource().loadedExtentsRtree_.clear();
                 schema.layer.getSource().refresh();
             };
         },
@@ -392,7 +393,7 @@
 
             var request = schema.currentSourceModificator.createRequest(extent, projection.getCode().split(":").pop());
 
-            var selectXHR = widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
+            var selectXHR =widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
 
             return selectXHR;
         },
