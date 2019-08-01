@@ -35,7 +35,7 @@
                 }
                 $checkbox.change(function (e) {
                     var currentExtent = !!$(e.originalEvent.target).prop("checked");
-                    schema.reload(currentExtent);
+                    schema.switchSourceModificator(currentExtent);
                 });
                 frame.append("<div style='clear:both'>");
                 var $div = $("<div/>");

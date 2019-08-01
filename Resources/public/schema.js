@@ -16,40 +16,8 @@
         this.index = index;
         this.widget = widget;
 
-        this.sources_ = {
-            'all' : new ol.source.Vector({
-                format: new ol.format.GeoJSON(),
-                loader: schema.getData.bind(schema),
-                strategy: ol.loadingstrategy.all
-            }),
-            'bbox' : new ol.source.Vector({
-                format: new ol.format.GeoJSON(),
-                loader: function(extent,resolution,projection) {
-                    this.resolution = resolution;
-                    schema.getData.bind(schema).apply(this,arguments);
-                },
-                //strategy: ol.loadingstrategy.bbox
-                strategy: function(extent, resolution) {
-                    if(this.resolution && this.resolution != resolution){
-                        this.loadedExtentsRtree_.clear();
-                    }
-                    return [extent];
-                }
-            }),
 
-        };
 
-        // this.sources_['all'].on(ol.events.EventType.CHANGE, function(event){
-        //     schema.menu.resultTable.redrawResultTableFeatures(event.target.getFeatures());
-        //
-        //
-        // });
-        //
-        // this.sources_['bbox'].on(ol.events.EventType.CHANGE, function(event){
-        //     schema.menu.resultTable.redrawResultTableFeatures(event.target.getFeatures());
-        //
-        //
-        // });
         /**
          * @type {boolean}
          */
@@ -64,6 +32,8 @@
 
         schema.createPopupConfiguration_();
 
+        schema.createSourceModification_();
+
         schema.createSchemaFeatureLayer_();
 
         schema.addSelectControl_();
@@ -71,7 +41,6 @@
         schema.createMenu_();
 
         schema.initializeWithDefaultStyles_();
-
 
         schema.styles.default = ol.style.StyleConverter.convertToOL4Style(schema.styles.default);
         schema.styles.select = ol.style.StyleConverter.convertToOL4Style(schema.styles.select);
@@ -151,16 +120,63 @@
         },
 
 
+        createSourceModification_: function() {
+            var schema = this;
+
+            var createRequest = function (extent,projectionCode) {
+
+                var request = {
+                    srid: projectionCode,
+                    maxResults: schema.maxResults,
+                    schema: schema.schemaName,
+
+                };
+                return request;
+
+            };
+
+            var sourceModificatorGlobal = {
+                strategy: ol.loadingstrategy.all,
+                createRequest: createRequest
+            };
+
+            var sourceModificatorExtent = {
+                strategy: function(extent, resolution) {
+                    if(this.resolution && this.resolution !== resolution){
+                        this.loadedExtentsRtree_.clear();
+                    }
+                    return [extent];
+                },
+                createRequest: function(extent,projectionCode) {
+                    var request =  createRequest(extent,projectionCode);
+                    var extentPolygon = new ol.geom.Polygon.fromExtent(extent);
+                    request['intersectGeometry'] =  new ol.format.WKT().writeGeometryText(extentPolygon);
+
+                    return request;
+
+                }
+            };
+
+            schema.currentSourceModificator = schema.currentExtentSearch ? sourceModificatorExtent : sourceModificatorGlobal;
+
+            schema.switchSourceModificator = function(currentExtent) {
+
+                var sourceModificator = currentExtent ? sourceModificatorExtent : sourceModificatorGlobal;
+
+                schema.currentSourceModificator = sourceModificator;
+                schema.layer.getSource().strategy_ = sourceModificator.strategy;
+
+                schema.layer.getSource().clear();
+                schema.layer.getSource().refresh();
+            };
+        },
+
+
         createPopupConfiguration_: function () {
             var schema = this;
             schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
         },
 
-
-        getVectorSource: function(strategy) {
-            var schema = this;
-            return schema.sources_[strategy];
-        },
 
         createSchemaFeatureLayer_: function () {
             var schema = this;
@@ -168,7 +184,11 @@
 
 
             var layer = new ol.layer.Vector({
-                source: schema.getVectorSource(schema.currentExtentSearch ? 'bbox' : 'all'),
+                source: new ol.source.Vector({
+                    format: new ol.format.GeoJSON(),
+                    loader: schema.getData.bind(schema),
+                    strategy: schema.currentSourceModificator.strategy // ol.loadingstrategy.bbox
+                }),
                 visible: false,
             });
 
@@ -329,41 +349,15 @@
             });
         },
 
-
-        createRequest_: function (extent,projectionCode) {
-            var schema = this;
-
-            var request = {
-                srid: projectionCode,
-                maxResults: schema.maxResults,
-                schema: schema.schemaName,
-
-            };
-
-            if (schema.layer.getSource().strategy_ !== ol.loadingstrategy.all) {
-                 var extentPolygon = new ol.geom.Polygon.fromExtent(extent);
-                 request['intersectGeometry'] =  new ol.format.WKT().writeGeometryText(extentPolygon);
-            }
-
-
-            return request;
-
-        },
-
-        reload: function(currentExtent) {
-            var schema = this;
-            var source = currentExtent ? schema.getVectorSource('bbox') : schema.getVectorSource('all');
-            schema.layer.setSource(source);
-            source.clear();
-            source.refresh();
-        },
-
         getData: function (extent, resolution, projection) {
 
             var schema = this;
             var widget = schema.widget;
 
-            var request = schema.createRequest_(extent,projection.getCode().split(":").pop());
+            // This is necessary to enable cache deletion in currentExtentSearch when zooming In
+            schema.layer.getSource().resolution = resolution;
+
+            var request = schema.currentSourceModificator.createRequest(extent,projection.getCode().split(":").pop());
 
             var selectXHR = widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
 
@@ -374,7 +368,6 @@
 
         onFeatureCollectionLoaded: function (featureCollection) {
             var schema = this;
-
 
             if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
                 Mapbender.error(Mapbender.DigitizerTranslator.translate("features.loading.error"), featureCollection);
@@ -392,6 +385,7 @@
                 features: featureCollection.features
             });
 
+            // Actually, this only needs to be done when doing currentExtent Search, but as long as it doesn't hurt performance, it can stay
             $.each(schema.layer.getSource().getFeatures(),function(key,feature) {
                 schema.layer.getSource().removeFeature(feature);
             });
@@ -405,9 +399,6 @@
 
         },
 
-        notifyResultTable: function() {
-          var schema = this;
-        },
 
         redrawFeaturesInResultTable: function() {
             var schema = this;
