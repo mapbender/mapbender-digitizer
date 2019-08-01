@@ -17,7 +17,6 @@
         this.widget = widget;
 
 
-
         /**
          * @type {boolean}
          */
@@ -42,9 +41,7 @@
 
         schema.initializeWithDefaultStyles_();
 
-        schema.styles.default = ol.style.StyleConverter.convertToOL4Style(schema.styles.default);
-        schema.styles.select = ol.style.StyleConverter.convertToOL4Style(schema.styles.select);
-        schema.styles.unsaved =ol.style.StyleConverter.convertToOL4Style(schema.styles.unsaved);
+
 
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
             var feature = event.feature;
@@ -75,12 +72,25 @@
 
         });
 
+
+        schema.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
+            var feature = event.feature;
+
+            schema.introduceFeature(feature);
+
+            feature.temporaryStyle = schema.styles.copy;
+            feature.setStyle(feature.temporaryStyle);
+
+            schema.openFeatureEditDialog(feature);
+
+        });
+
     };
 
 
     Mapbender.Digitizer.Scheme.prototype = {
 
-        initializeWithDefaultStyles_: function() {
+        initializeWithDefaultStyles_: function () {
             var schema = this;
             var styles = {
                 default: {
@@ -112,18 +122,18 @@
 
             schema.styles = schema.styles || {};
 
-            $.each(styles,function(label,style){
-               schema.styles[label] = schema.styles[label] || style;
+            $.each(styles, function (label, style) {
+                schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(schema.styles[label] || style);
 
             });
 
         },
 
 
-        createSourceModification_: function() {
+        createSourceModification_: function () {
             var schema = this;
 
-            var createRequest = function (extent,projectionCode) {
+            var createRequest = function (extent, projectionCode) {
 
                 var request = {
                     srid: projectionCode,
@@ -141,16 +151,16 @@
             };
 
             var sourceModificatorExtent = {
-                strategy: function(extent, resolution) {
-                    if(this.resolution && this.resolution !== resolution){
+                strategy: function (extent, resolution) {
+                    if (this.resolution && this.resolution !== resolution) {
                         this.loadedExtentsRtree_.clear();
                     }
                     return [extent];
                 },
-                createRequest: function(extent,projectionCode) {
-                    var request =  createRequest(extent,projectionCode);
+                createRequest: function (extent, projectionCode) {
+                    var request = createRequest(extent, projectionCode);
                     var extentPolygon = new ol.geom.Polygon.fromExtent(extent);
-                    request['intersectGeometry'] =  new ol.format.WKT().writeGeometryText(extentPolygon);
+                    request['intersectGeometry'] = new ol.format.WKT().writeGeometryText(extentPolygon);
 
                     return request;
 
@@ -159,7 +169,7 @@
 
             schema.currentSourceModificator = schema.currentExtentSearch ? sourceModificatorExtent : sourceModificatorGlobal;
 
-            schema.switchSourceModificator = function(currentExtent) {
+            schema.switchSourceModificator = function (currentExtent) {
 
                 var sourceModificator = currentExtent ? sourceModificatorExtent : sourceModificatorGlobal;
 
@@ -229,12 +239,12 @@
 
                 e.selected.forEach(function (feature) {
 
-                    feature.dispatchEvent({ type: 'Digitizer.HoverFeature', hover: true});
+                    feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: true});
 
                 });
 
                 e.deselected.forEach(function (feature) {
-                   feature.dispatchEvent({ type: 'Digitizer.HoverFeature', hover: false});
+                    feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: false});
                 });
 
             });
@@ -245,7 +255,7 @@
 
                 condition: ol.events.condition.singleClick,
                 layers: [schema.layer],
-                style: function() {
+                style: function () {
                     return null;
                 }
 
@@ -319,7 +329,7 @@
 
         },
 
-        deactivateInteractions: function() {
+        deactivateInteractions: function () {
             var schema = this;
             schema.menu.toolSet.activeInteraction && schema.menu.toolSet.activeInteraction.setActive(false);
             schema.highlightControl.setActive(false);
@@ -333,17 +343,16 @@
         },
 
 
-
-        introduceFeature: function(feature) {
+        introduceFeature: function (feature) {
 
             var schema = this;
             feature.mbOrigin = 'digitizer';
 
             feature.setStyle(schema.styles.default);
 
-            feature.on('Digitizer.HoverFeature', function(event) {
+            feature.on('Digitizer.HoverFeature', function (event) {
 
-                schema.menu.resultTable.hoverInResultTable(feature,event.hover);
+                schema.menu.resultTable.hoverInResultTable(feature, event.hover);
                 feature.setStyle(event.hover ? schema.styles.select : feature.temporaryStyle || schema.styles.default);
 
             });
@@ -357,13 +366,12 @@
             // This is necessary to enable cache deletion in currentExtentSearch when zooming In
             schema.layer.getSource().resolution = resolution;
 
-            var request = schema.currentSourceModificator.createRequest(extent,projection.getCode().split(":").pop());
+            var request = schema.currentSourceModificator.createRequest(extent, projection.getCode().split(":").pop());
 
             var selectXHR = widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
 
             return selectXHR;
         },
-
 
 
         onFeatureCollectionLoaded: function (featureCollection) {
@@ -386,7 +394,7 @@
             });
 
             // Actually, this only needs to be done when doing currentExtent Search, but as long as it doesn't hurt performance, it can stay
-            $.each(schema.layer.getSource().getFeatures(),function(key,feature) {
+            $.each(schema.layer.getSource().getFeatures(), function (key, feature) {
                 schema.layer.getSource().removeFeature(feature);
             });
 
@@ -400,10 +408,62 @@
         },
 
 
-        redrawFeaturesInResultTable: function() {
+        redrawFeaturesInResultTable: function () {
             var schema = this;
             var features = schema.layer.getSource().getFeatures();
             schema.menu.resultTable.redrawResultTableFeatures(features);
+        },
+
+
+        copyFeature: function (feature) {
+            var schema = this;
+            var layer = schema.layer;
+            var newFeature = feature.clone();
+
+            var defaultAttributes = schema.copy.data || {};
+
+            /** Copy prevention is disabled - no code in Configuration**/
+                // var allowCopy = true;
+                //
+                //
+                // _.each(schema.evaluatedHooksForCopyPrevention, function (allowCopyForFeature) {
+                //     allowCopy = allowCopy && (allowCopyForFeature(feature));
+                // });
+                //
+                // if (!allowCopy) {
+                //     $.notify(Mapbender.DigitizerTranslator.translate('feature.clone.on.error'));
+                //     return;
+                // }
+
+            var newAttributes = _.extend({}, defaultAttributes);
+
+            $.each(feature.getProperties(), function (key, value) {
+                if (key === schema.featureType.uniqueId || value === '' || value === null) {
+                    return;
+                }
+                if (schema.copy.overwriteValuesWithDefault) {
+                    newAttributes[key] = newAttributes[key] || value; // Keep default value when existing
+                } else {
+                    newAttributes[key] = value;
+                }
+
+
+            });
+
+            // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
+            if (schema.copy.moveCopy) {
+                newFeature.getGeometry().translate(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
+            }
+
+            var name = schema.featureType.name;
+            if (name) {
+                newFeature.set(name, "Copy of " + (feature.get(name) || feature.getId()));
+            }
+
+            schema.layer.getSource().addFeature(newFeature);
+
+            schema.layer.getSource().dispatchEvent({ type: 'controlFactory.FeatureCopied', feature: newFeature});
+
         },
 
 
@@ -465,7 +525,7 @@
             var request = {
                 id: feature.getId(),
                 properties: formData,
-                geometry:  new ol.format.WKT().writeGeometryText(feature.getGeometry()),
+                geometry: new ol.format.WKT().writeGeometryText(feature.getGeometry()),
                 srid: widget.map.getView().getProjection().getCode().split(':').pop(),
                 type: "Feature"
             };
@@ -513,7 +573,6 @@
             return promise;
 
         },
-
 
 
     };
