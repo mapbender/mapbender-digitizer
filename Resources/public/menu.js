@@ -130,7 +130,7 @@
                         title: Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'),
                         className: 'visibility',
                         onClick: function (feature) {
-                            schema.toggleFeatureVisibility(feature);
+                            schema.layer.getSource().dispatchEvent({type: 'toggleFeatureVisibility', feature: feature })
                         }
                     });
                 }

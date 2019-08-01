@@ -85,6 +85,24 @@
 
         });
 
+
+        schema.layer.getSource().on('toggleFeatureVisibility', function (event) {
+
+            console.log("toogle");
+            var feature = event.feature;
+            var hidden =  !feature.hidden;
+
+            if (hidden) {
+                feature.hidden = true;
+                feature.temporaryStyle2 = feature.getStyle();
+                feature.setStyle(schema.styles.invisible);
+            } else {
+                feature.hidden = false;
+                feature.setStyle(feature.temporaryStyle2);
+            }
+
+        });
+
     };
 
 
@@ -117,6 +135,10 @@
                     fillColor: '#FFD14F',
                     strokeColor: '#F5663C',
                     fillOpacity: 0.5
+                },
+                invisible: {
+                    fillOpacity: 0,
+                    strokeOpacity: 0,
                 },
             };
 
@@ -353,7 +375,9 @@
             feature.on('Digitizer.HoverFeature', function (event) {
 
                 schema.menu.resultTable.hoverInResultTable(feature, event.hover);
-                feature.setStyle(event.hover ? schema.styles.select : feature.temporaryStyle || schema.styles.default);
+                if (!feature.hidden) {
+                    feature.setStyle(event.hover ? schema.styles.select : feature.temporaryStyle || schema.styles.default);
+                }
 
             });
         },

@@ -72,6 +72,8 @@
         newStyle.getImage().getFill().setColor(calculateColor(ol2Style.fillColor,ol2Style.fillOpacity,newStyle.getFill().getColor()));
         newStyle.getImage().setRadius(ol2Style.pointRadius || newStyle.getImage().getRadius());
 
+        Object.freeze(newStyle);
+
         return newStyle;
 
     };
