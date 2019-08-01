@@ -129,8 +129,16 @@
                     buttons.push({
                         title: Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'),
                         className: 'visibility',
-                        onClick: function (feature) {
-                            schema.layer.getSource().dispatchEvent({type: 'toggleFeatureVisibility', feature: feature })
+                        cssClass: 'eyeOff',
+                        onClick: function (feature,$button) {
+                            schema.layer.getSource().dispatchEvent({type: 'toggleFeatureVisibility', feature: feature });
+                            if (feature.hidden) {
+                                $button.addClass('eyeOn').removeClass('eyeOff');
+                                $button.attr('title', Mapbender.DigitizerTranslator.translate('feature.visibility.toggleon'));
+                            } else {
+                                $button.addClass('eyeOff').removeClass('eyeOn');
+                                $button.attr('title', Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'));
+                            }
                         }
                     });
                 }
@@ -231,17 +239,7 @@
                 oLanguage: tableTranslation,
                 drawCallback: function (settings) {
                     this.api().rows(function (idx, feature, row) {
-                        // if (feature.visible) {
-                        //     $(row).removeClass('invisible-feature');
-                        //     $(row).find(".icon-visibility").attr('title', Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'));
-                        // } else {
-                        //     $(row).addClass('invisible-feature');
-                        //     $(row).find(".icon-visibility").attr('title', Mapbender.DigitizerTranslator.translate('feature.visibility.toggleon'));
-                        // }
-
                     });
-
-
                 },
                 // This may be needed to prevent autocomplete in search field / [google chrome]
                 initComplete: function () {

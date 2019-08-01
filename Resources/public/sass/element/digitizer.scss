@@ -84,14 +84,22 @@ $selectColor: #F7F79A;
         word-wrap: break-word;       /* Internet Explorer 5.5+ */
         word-break: break-all;
         white-space: normal;
+
         .icon-style:before{
           font-family: FontAwesome;
           content: "\f1fb";
         }
 
-        .icon-visibility:before{
-          font-family: FontAwesome;
-          content: "\f070";
+        .icon-visibility {
+
+         &.eyeOff:before {
+             font-family: FontAwesome;
+             content: "\f070";
+         }
+          &.eyeOn:before {
+              font-family: FontAwesome;
+              content: "\f06e";
+          }
         }
 
         .icon-printmetadata.active:before{
@@ -111,12 +119,6 @@ $selectColor: #F7F79A;
 
 }
 
-.invisible-feature {
-    .icon-visibility:before{
-        font-family: FontAwesome;
-        content: "\f06e" !important;
-    }
-}
 
 .olHandlerBoxSelectFeature {
   background-color: white;
