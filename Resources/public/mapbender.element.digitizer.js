@@ -331,24 +331,7 @@
             var widget = this;
             var map = widget.map;
 
-            // map.on("moveend",  function () {
-            //     console.log("ME",arguments);
-            //  //   widget.isEnabled() && widget.getCurrentSchema().getData();
-            // });
-            // map.on("zoomend", function () {
-            //     console.log("ZE",arguments);
-            //     widget.isEnabled() && widget.getCurrentSchema().getData({zoom: true});
-            // });
-            //
-            // map.on("mouseover", function () {
-            //     console.log("MOV",arguments);
-            //     widget.isEnabled() && widget.getCurrentSchema().mapContextMenu.enable();
-            // });
-            //
-            // map.on("mouseout", function () {
-            //     console.log("MOT",arguments);
-            //     widget.isEnabled() && widget.getCurrentSchema().mapContextMenu.disable();
-            // });
+
 
 
 

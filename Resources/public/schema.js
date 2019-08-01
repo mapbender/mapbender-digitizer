@@ -11,9 +11,45 @@
 
     Mapbender.Digitizer.Scheme = function (rawScheme, widget, index) {
 
+        var schema = this;
 
         this.index = index;
         this.widget = widget;
+
+        this.sources_ = {
+            'all' : new ol.source.Vector({
+                format: new ol.format.GeoJSON(),
+                loader: schema.getData.bind(schema),
+                strategy: ol.loadingstrategy.all
+            }),
+            'bbox' : new ol.source.Vector({
+                format: new ol.format.GeoJSON(),
+                loader: function(extent,resolution,projection) {
+                    this.resolution = resolution;
+                    schema.getData.bind(schema).apply(this,arguments);
+                },
+                //strategy: ol.loadingstrategy.bbox
+                strategy: function(extent, resolution) {
+                    if(this.resolution && this.resolution != resolution){
+                        this.loadedExtentsRtree_.clear();
+                    }
+                    return [extent];
+                }
+            }),
+
+        };
+
+        // this.sources_['all'].on(ol.events.EventType.CHANGE, function(event){
+        //     schema.menu.resultTable.redrawResultTableFeatures(event.target.getFeatures());
+        //
+        //
+        // });
+        //
+        // this.sources_['bbox'].on(ol.events.EventType.CHANGE, function(event){
+        //     schema.menu.resultTable.redrawResultTableFeatures(event.target.getFeatures());
+        //
+        //
+        // });
         /**
          * @type {boolean}
          */
@@ -24,7 +60,6 @@
          */
         this.allowOpenEditDialog = false;
 
-        var schema = this;
         $.extend(schema, rawScheme);
 
         schema.createPopupConfiguration_();
@@ -122,6 +157,10 @@
         },
 
 
+        getVectorSource: function(strategy) {
+            var schema = this;
+            return schema.sources_[strategy];
+        },
 
         createSchemaFeatureLayer_: function () {
             var schema = this;
@@ -129,14 +168,8 @@
 
 
             var layer = new ol.layer.Vector({
-                source: new ol.source.Vector({
-                    format: new ol.format.GeoJSON(),
-                    loader: schema.getData.bind(schema),
-                    strategy: ol.loadingstrategy.all // ol.loadingstrategy.bbox
-                }),
+                source: schema.getVectorSource(schema.currentExtentSearch ? 'bbox' : 'all'),
                 visible: false,
-                strategy: ol.loadingstrategy.bbox,
-
             });
 
             schema.layer = layer;
@@ -297,22 +330,40 @@
         },
 
 
-        createRequest_: function (projectionCode) {
+        createRequest_: function (extent,projectionCode) {
             var schema = this;
 
-            return {
+            var request = {
                 srid: projectionCode,
                 maxResults: schema.maxResults,
                 schema: schema.schemaName,
+
+            };
+
+            if (schema.layer.getSource().strategy_ !== ol.loadingstrategy.all) {
+                 var extentPolygon = new ol.geom.Polygon.fromExtent(extent);
+                 request['intersectGeometry'] =  new ol.format.WKT().writeGeometryText(extentPolygon);
             }
+
+
+            return request;
 
         },
 
+        reload: function(currentExtent) {
+            var schema = this;
+            var source = currentExtent ? schema.getVectorSource('bbox') : schema.getVectorSource('all');
+            schema.layer.setSource(source);
+            source.clear();
+            source.refresh();
+        },
+
         getData: function (extent, resolution, projection) {
+
             var schema = this;
             var widget = schema.widget;
 
-            var request = schema.createRequest_(projection.getCode().split(":").pop());
+            var request = schema.createRequest_(extent,projection.getCode().split(":").pop());
 
             var selectXHR = widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
 
@@ -341,13 +392,27 @@
                 features: featureCollection.features
             });
 
+            $.each(schema.layer.getSource().getFeatures(),function(key,feature) {
+                schema.layer.getSource().removeFeature(feature);
+            });
+
             newFeatures.forEach(function (feature) {
                 schema.introduceFeature(feature);
             });
+
             schema.layer.getSource().addFeatures(newFeatures);
+            schema.redrawFeaturesInResultTable();
 
-            schema.menu.resultTable.redrawResultTableFeatures(newFeatures);
+        },
 
+        notifyResultTable: function() {
+          var schema = this;
+        },
+
+        redrawFeaturesInResultTable: function() {
+            var schema = this;
+            var features = schema.layer.getSource().getFeatures();
+            schema.menu.resultTable.redrawResultTableFeatures(features);
         },
 
 

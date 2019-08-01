@@ -12,6 +12,8 @@
 
         frame.append('<div style="clear:both;"/>');
 
+        menu.appendCurrentExtentSwitch_();
+
         menu.generateDataTable_();
 
         frame.hide();
@@ -20,6 +22,31 @@
 
     Mapbender.Digitizer.Menu.prototype = {
 
+        appendCurrentExtentSwitch_: function () {
+            var menu = this;
+            var frame = menu.frame;
+            var schema = menu.schema;
+            if (schema.showExtendSearchSwitch) {
+                var $checkbox = $("<input type='checkbox' />");
+                var title = Mapbender.DigitizerTranslator.translate('toolset.current-extent');
+                $checkbox.attr('title', title);
+                if (schema.currentExtentSearch) {
+                    $checkbox.attr("checked", "checked");
+                }
+                $checkbox.change(function (e) {
+                    var currentExtent = !!$(e.originalEvent.target).prop("checked");
+                    schema.reload(currentExtent);
+                });
+                frame.append("<div style='clear:both'>");
+                var $div = $("<div/>");
+                $div.addClass("form-group checkbox onlyExtent");
+                var $label = $("<label/>");
+                $label.append($checkbox);
+                $label.append(title);
+                $div.append($label);
+                frame.append($div);
+            }
+        },
 
         appendToolset_: function () {
             var menu = this;
@@ -149,7 +176,7 @@
 
                 var columns = [];
 
-                var createResultTableDataFunction = function (columnId,fieldSettings) {
+                var createResultTableDataFunction = function (columnId, fieldSettings) {
 
                     return function (feature, type, val, meta) {
 
@@ -176,7 +203,7 @@
 
                 $.each(schema.tableFields || getDefaultTableFields(), function (columnId, fieldSettings) {
                     fieldSettings.title = fieldSettings.label;
-                    fieldSettings.data = fieldSettings.data || createResultTableDataFunction(columnId,fieldSettings);
+                    fieldSettings.data = fieldSettings.data || createResultTableDataFunction(columnId, fieldSettings);
                     columns.push(fieldSettings);
                 });
 
@@ -239,8 +266,6 @@
             frame.append($table);
 
         },
-
-
 
 
     };

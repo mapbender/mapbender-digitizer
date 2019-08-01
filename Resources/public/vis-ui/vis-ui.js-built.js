@@ -2118,8 +2118,7 @@ window.confirmDialog = function(options) {
                     container.closest('.popup-dialog').bind('popupdialogresize', function(e) {
                         map.invalidateSize();
 
-                        console.log("resized")
-                    });
+                     });
 
                 });
 
