@@ -88,9 +88,8 @@
                     buttons.push({
                         title: Mapbender.DigitizerTranslator.translate('feature.save.title'),
                         className: 'save',
-                        cssClass: ' fa fa-floppy-o',
                         disabled: true,
-                        onClick: function (feature, ui) {
+                        onClick: function (feature, $button) {
                             schema.saveFeature(feature);
                         }
                     });
@@ -246,6 +245,7 @@
             var $div = $("<div/>");
             var $table = $div.resultTable(resultTableSettings);
             menu.resultTable = $table.resultTable("instance");
+
 
             menu.resultTable.initializeColumnTitles();
 

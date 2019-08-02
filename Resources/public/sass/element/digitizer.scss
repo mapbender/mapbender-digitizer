@@ -2,8 +2,7 @@
 $selectColor: #F7F79A;
 
 
-.fa.fa-floppy-o:before {
-  content: "\f0c7"; }
+
 
 .mb-element-digitizer {
 
@@ -101,6 +100,11 @@ $selectColor: #F7F79A;
               content: "\f06e";
           }
         }
+
+          .icon-save:before {
+              font-family: FontAwesome;
+              content: "\f0c7";
+          }
 
         .icon-printmetadata.active:before{
             font-family: FontAwesome;

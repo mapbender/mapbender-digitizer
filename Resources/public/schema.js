@@ -49,6 +49,9 @@
             feature.temporaryStyle = schema.styles.unsaved;
             feature.setStyle(feature.temporaryStyle);
 
+            feature.dispatchEvent({ type: 'Digitizer.ModifyFeature', allowSaving : true});
+
+
         });
 
         schema.layer.getSource().on('controlFactory.FeatureModified', function (event) {
@@ -57,6 +60,8 @@
 
             feature.temporaryStyle = schema.styles.unsaved;
             feature.setStyle(feature.temporaryStyle);
+
+            feature.dispatchEvent({ type: 'Digitizer.ModifyFeature', allowSaving : true});
 
         });
 
@@ -69,6 +74,7 @@
             feature.setStyle(feature.temporaryStyle);
 
             schema.openFeatureEditDialog(feature);
+
 
         });
 
@@ -382,6 +388,17 @@
                 }
 
             });
+
+            feature.on('Digitizer.ModifyFeature',function(event) {
+
+                var row = schema.menu.resultTable.getTableRowByFeature(feature);
+                if (event.allowSaving) {
+                    $(row).find('.button.save').removeAttr("disabled");
+                } else {
+                    $(row).find('.button.save').attr("disabled","disabled");
+                }
+
+            });
         },
 
         getData: function (extent, resolution, projection) {
@@ -438,6 +455,8 @@
             var schema = this;
             var features = schema.layer.getSource().getFeatures();
             schema.menu.resultTable.redrawResultTableFeatures(features);
+
+
         },
 
 
@@ -550,12 +569,11 @@
 
             var request = {
                 id: feature.getId(),
-                properties: formData,
+                properties: formData || {},
                 geometry: new ol.format.WKT().writeGeometryText(feature.getGeometry()),
                 srid: widget.getProjectionCode(),
                 type: "Feature"
             };
-
 
             var promise = widget.query('save', {
                 schema: schema.schemaName,
@@ -586,7 +604,9 @@
                     schema.layer.getSource().removeFeature(feature);
                     schema.layer.getSource().addFeature(newFeature);
 
-                    schema.menu.resultTable.redrawResultTableFeatures(schema.layer.getSource().getFeatures());
+                    schema.redrawFeaturesInResultTable();
+
+                    feature.dispatchEvent({ type: 'Digitizer.ModifyFeature', allowSaving : false});
 
                     $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
 

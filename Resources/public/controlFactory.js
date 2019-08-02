@@ -187,6 +187,7 @@
 
         modifyFeature: function (source) {
             var controlFactory = this;
+
             var interaction = new ol.interaction.Modify({
                 source: source
             });
@@ -197,10 +198,36 @@
 
             });
 
+            /** TODO this needs to be improved **/
+            interaction.rBush_.update = function(extent, value) {
+                var item = this.items_[ol.getUid(value)];
+                if (!item) {
+                    console.warn("This is a low-quality bugfix that should be refactored ASAP");
+                    return;
+                }
+                var bbox = [item.minX, item.minY, item.maxX, item.maxY];
+                if (!ol.extent.equals(bbox, extent)) {
+                    this.remove(value);
+                    this.insert(extent, value);
+                }
+            };
+
             interaction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
 
-                // TODO this is so far the only way to obtain the modified Feature
-                source.dispatchEvent({ type: 'controlFactory.FeatureModified', feature: interaction.dragSegments_[0][0].feature || null});
+                /** TODO this needs to be improved **/
+                var feature = null;
+                for (var i = 0, ii = interaction.dragSegments_.length; i < ii; ++i) {
+                    var dragSegment = interaction.dragSegments_[i];
+                    var segmentData = dragSegment[0];
+                    var geometry = segmentData.geometry;
+
+                    interaction.features_.forEach(function(f) {
+                        if (f.getGeometry()==geometry) {
+                            feature = f;
+                        }
+                    });
+                }
+                source.dispatchEvent({ type: 'controlFactory.FeatureModified', feature: feature });
 
 
             });

@@ -579,9 +579,9 @@ window.confirmDialog = function(options) {
                 resultTable.showByRow(domRow);
 
                 if (highlight) {
-                    domRow.addClass('hover');
+                  domRow.addClass('hover');
                 } else {
-                    domRow.removeClass('hover');
+                  domRow.removeClass('hover');
                 }
 
             }
@@ -601,18 +601,6 @@ window.confirmDialog = function(options) {
             tableApi.rows.add(featuresToRedraw);
             tableApi.draw();
 
-            tableApi.rows(function (idx, feature, row) {
-
-                // TODO this is a bad solution. Disabledness etc. should be controlled by buttons themselves, which unfortunately is not possible on behalf of visui result table
-                if (feature.isChanged) {
-                    $(row).find(".save").removeAttr("disabled");
-                }
-                if (feature.printMetadata) {
-                    $(row).find(".printmetadata").addClass("active");
-                }
-                return true;
-            });
-
         },
 
 
@@ -627,8 +615,8 @@ window.confirmDialog = function(options) {
             var resultTable = this;
             var tableApi = resultTable.getApi();
 
-            // TODO check this
-            tableApi.row(resultTable.getDomRowByData(feature)).invalidate();
+            var row = tableApi.row(resultTable.getDomRowByData(feature));
+            row.invalidate();
             tableApi.draw();
         },
 
@@ -652,6 +640,7 @@ window.confirmDialog = function(options) {
         // Allow Button disable
         genNavigation: function (elements) {
             var html = $('<div class="button-navigation"/>');
+
             $.each(elements, function (idx, element) {
 
                 var type = 'button';
