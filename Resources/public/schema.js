@@ -604,7 +604,9 @@
                     schema.layer.getSource().removeFeature(feature);
                     schema.layer.getSource().addFeature(newFeature);
 
-                    schema.redrawFeaturesInResultTable();
+                    schema.menu.resultTable.deleteRow(feature);
+                    schema.menu.resultTable.addRow(newFeature);
+
 
                     feature.dispatchEvent({ type: 'Digitizer.ModifyFeature', allowSaving : false});
 

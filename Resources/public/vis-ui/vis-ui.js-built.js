@@ -512,8 +512,28 @@ window.confirmDialog = function(options) {
             }
         },
 
+        addRow: function(feature) {
+            var resultTable = this;
+            var tableApi = resultTable.getApi();
 
-        initializeResultTableEvents: function (highlightControl) {
+            tableApi.row.add(feature);
+            tableApi.draw();
+
+        },
+
+        deleteRow: function(feature) {
+            var resultTable = this;
+            var tableApi = resultTable.getApi();
+
+            var row = tableApi.rows(function(idx, _feature, row) {
+                return _feature == feature;
+            });
+
+            row.remove().draw();
+        },
+
+
+        initializeResultTableEvents: function () {
             var resultTable = this;
 
             var tableApi = resultTable.getApi();
@@ -530,12 +550,6 @@ window.confirmDialog = function(options) {
                     feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: true});
                 }
 
-
-                // if (feature) {
-                //     highlightControl.getFeatures().push(feature);
-                // } else {
-                //     console.warn("No Feature in row", row);
-                // }
             });
 
             table.delegate("tbody > tr", 'mouseleave', function () {
@@ -546,28 +560,7 @@ window.confirmDialog = function(options) {
                 if (feature) {
                     feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: false});
                 }
-
-
-                // if (feature) {
-                //     highlightControl.getFeatures().remove(feature);
-                // } else {
-                //     console.warn("No Feature in row", row);
-                // }
             });
-
-            // table.delegate("tbody > tr", 'click', function () {
-            //     var tr = this;
-            //     var row = tableApi.row(tr);
-            //     var feature = row.data();
-            //
-            //     if (feature) {
-            //         highlightControl.getFeatures().push(feature);
-            //     } else {
-            //         console.warn("No Feature in row", row);
-            //     }
-            //
-            // });
-
 
         },
 
@@ -595,10 +588,7 @@ window.confirmDialog = function(options) {
 
             tableApi.clear();
 
-            var featuresToRedraw = features.filter(function (feature) {
-                return !feature.isNew && !feature.cluster;
-            });
-            tableApi.rows.add(featuresToRedraw);
+            tableApi.rows.add(features);
             tableApi.draw();
 
         },
