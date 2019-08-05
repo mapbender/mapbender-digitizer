@@ -34,8 +34,8 @@
                     $checkbox.attr("checked", "checked");
                 }
                 $checkbox.change(function (e) {
-                    var currentExtent = !!$(e.originalEvent.target).prop("checked");
-                    schema.switchSourceModificator(currentExtent);
+                    var currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
+                    schema.layer.getSource().dispatchEvent({type: "Digitizer.ChangeCurrentExtentSearch", currentExtentSearch: currentExtentSearch});
                 });
                 frame.append("<div style='clear:both'>");
                 var $div = $("<div/>");
@@ -68,12 +68,47 @@
             var menu = this;
             var frame = menu.frame;
             var schema = menu.schema;
+            var map = schema.widget.map;
 
             var resultTable;
 
 
+            map.on(ol.MapEventType.MOVEEND,  function (event) {
+                if (resultTable.currentExtentSearch) {
+                    schema.layer.getSource().getFeatures().forEach(function(feature){
+                        if (ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent())) {
+                            resultTable.addRow(feature);
+                        } else {
+                            resultTable.deleteRows(function(idx, _feature,row) {
+                                return _feature == feature;
+                            });
+                        }
+                    });
+
+                }
+
+            });
+
+
+            schema.layer.getSource().on("Digitizer.ChangeCurrentExtentSearch",function(event) {
+                resultTable.currentExtentSearch = event.currentExtentSearch;
+                if (event.currentExtentSearch) {
+                    resultTable.deleteRows(function(idx, feature,row) {
+                        return !ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent())
+                    });
+                } else {
+                    schema.layer.getSource().getFeatures().forEach(function(feature){
+                        resultTable.addRow(feature);
+                    });
+                }
+            });
+
             schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE,function(event) {
                 var feature = event.feature;
+
+                if(resultTable.currentExtentSearch && !ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent())) {
+                    return;
+                }
 
                 resultTable.addRow(feature);
 
@@ -98,7 +133,9 @@
             });
 
             schema.layer.getSource().on(ol.source.VectorEventType.REMOVEFEATURE,function(event) {
-                resultTable.deleteRow(event.feature);
+                resultTable.deleteRows(function(idx, _feature,row) {
+                    return _feature == event.feature;
+                });
             });
 
             var generateResultDataTableButtons = function () {

@@ -516,20 +516,22 @@ window.confirmDialog = function(options) {
             var resultTable = this;
             var tableApi = resultTable.getApi();
 
-            tableApi.row.add(feature);
-            tableApi.draw();
+            var row = resultTable.getTableRowByFeature(feature);
+            if (!row) {
+                tableApi.row.add(feature);
+                tableApi.draw();
+
+            }
 
         },
 
-        deleteRow: function(feature) {
+        deleteRows: function(condition) {
             var resultTable = this;
             var tableApi = resultTable.getApi();
 
-            var row = tableApi.rows(function(idx, _feature, row) {
-                return _feature == feature;
-            });
+            var rows = tableApi.rows(condition);
 
-            row.remove().draw();
+            rows.remove().draw();
         },
 
 

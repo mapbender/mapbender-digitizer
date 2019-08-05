@@ -31,7 +31,7 @@
 
         schema.createPopupConfiguration_();
 
-        schema.createSourceModification_();
+        // schema.createSourceModification_();
 
         schema.createSchemaFeatureLayer_();
 
@@ -42,14 +42,13 @@
         schema.initializeWithDefaultStyles_();
 
 
-
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
             var feature = event.feature;
 
             feature.temporaryStyle = schema.styles.unsaved;
             feature.setStyle(feature.temporaryStyle);
 
-            feature.dispatchEvent({ type: 'Digitizer.ModifyFeature', allowSaving : true});
+            feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
 
 
         });
@@ -61,7 +60,7 @@
             feature.temporaryStyle = schema.styles.unsaved;
             feature.setStyle(feature.temporaryStyle);
 
-            feature.dispatchEvent({ type: 'Digitizer.ModifyFeature', allowSaving : true});
+            feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
 
         });
 
@@ -95,7 +94,7 @@
         schema.layer.getSource().on('toggleFeatureVisibility', function (event) {
 
             var feature = event.feature;
-            var hidden =  !feature.hidden;
+            var hidden = !feature.hidden;
 
             if (hidden) {
                 feature.hidden = true;
@@ -107,6 +106,8 @@
             }
 
         });
+
+        schema.layer.getSource().dispatchEvent({type: "Digitizer.ChangeCurrentExtentSearch", currentExtentSearch: schema.currentExtentSearch});
 
     };
 
@@ -157,58 +158,58 @@
         },
 
 
-        createSourceModification_: function () {
-            var schema = this;
-            var widget = schema.widget;
-
-            var createRequest = function (extent) {
-
-                var request = {
-                    srid: widget.getProjectionCode(),
-                    maxResults: schema.maxResults,
-                    schema: schema.schemaName,
-
-                };
-                return request;
-
-            };
-
-            var sourceModificatorGlobal = {
-                strategy: ol.loadingstrategy.all,
-                createRequest: createRequest
-            };
-
-            var sourceModificatorExtent = {
-                strategy: function (extent, resolution) {
-                    if (this.resolution && this.resolution !== resolution) {
-                        this.loadedExtentsRtree_.clear();
-                    }
-                    return [extent];
-                },
-                createRequest: function (extent) {
-                    var request = createRequest(extent);
-                    var extentPolygon = new ol.geom.Polygon.fromExtent(extent);
-                    request['intersectGeometry'] = new ol.format.WKT().writeGeometryText(extentPolygon);
-
-                    return request;
-
-                }
-            };
-
-            schema.currentSourceModificator = schema.currentExtentSearch ? sourceModificatorExtent : sourceModificatorGlobal;
-
-            schema.switchSourceModificator = function (currentExtent) {
-
-                var sourceModificator = currentExtent ? sourceModificatorExtent : sourceModificatorGlobal;
-
-                schema.currentSourceModificator = sourceModificator;
-                schema.layer.getSource().strategy_ = sourceModificator.strategy;
-
-
-                schema.layer.getSource().loadedExtentsRtree_.clear();
-                schema.layer.getSource().refresh();
-            };
-        },
+        // createSourceModification_: function () {
+        //     var schema = this;
+        //     var widget = schema.widget;
+        //
+        //     var createRequest = function (extent) {
+        //
+        //         var request = {
+        //             srid: widget.getProjectionCode(),
+        //             maxResults: schema.maxResults,
+        //             schema: schema.schemaName,
+        //
+        //         };
+        //         return request;
+        //
+        //     };
+        //
+        //     var sourceModificatorGlobal = {
+        //         strategy: ol.loadingstrategy.all,
+        //         createRequest: createRequest
+        //     };
+        //
+        //     var sourceModificatorExtent = {
+        //         strategy: function (extent, resolution) {
+        //             if (this.resolution && this.resolution !== resolution) {
+        //                 this.loadedExtentsRtree_.clear();
+        //             }
+        //             return [extent];
+        //         },
+        //         createRequest: function (extent) {
+        //             var request = createRequest(extent);
+        //             var extentPolygon = new ol.geom.Polygon.fromExtent(extent);
+        //             request['intersectGeometry'] = new ol.format.WKT().writeGeometryText(extentPolygon);
+        //
+        //             return request;
+        //
+        //         }
+        //     };
+        //
+        //     schema.currentSourceModificator = schema.currentExtentSearch ? sourceModificatorExtent : sourceModificatorGlobal;
+        //
+        //     schema.switchSourceModificator = function (currentExtent) {
+        //
+        //         var sourceModificator = currentExtent ? sourceModificatorExtent : sourceModificatorGlobal;
+        //
+        //         schema.currentSourceModificator = sourceModificator;
+        //         schema.layer.getSource().strategy_ = sourceModificator.strategy;
+        //
+        //
+        //         schema.layer.getSource().loadedExtentsRtree_.clear();
+        //         schema.layer.getSource().refresh();
+        //     };
+        // },
 
 
         createPopupConfiguration_: function () {
@@ -226,7 +227,7 @@
                 source: new ol.source.Vector({
                     format: new ol.format.GeoJSON(),
                     loader: schema.getData.bind(schema),
-                    strategy: schema.currentSourceModificator.strategy // ol.loadingstrategy.bbox
+                    strategy: ol.loadingstrategy.all // ol.loadingstrategy.bbox
                 }),
                 visible: false,
             });
@@ -392,12 +393,16 @@
             var schema = this;
             var widget = schema.widget;
 
-            // This is necessary to enable cache deletion in currentExtentSearch when zooming In
-            schema.layer.getSource().resolution = resolution;
+            // // This is necessary to enable cache deletion in currentExtentSearch when zooming In
+            // schema.layer.getSource().resolution = resolution;
 
-            var request = schema.currentSourceModificator.createRequest(extent);
+            var request = {
+                srid: widget.getProjectionCode(),
+                maxResults: schema.maxResults,
+                schema: schema.schemaName,
+            };
 
-            var selectXHR =widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
+            var selectXHR = widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
 
             return selectXHR;
         },
@@ -434,7 +439,6 @@
             schema.layer.getSource().addFeatures(newFeatures);
 
         },
-
 
 
         copyFeature: function (feature) {
@@ -484,7 +488,7 @@
 
             schema.layer.getSource().addFeature(newFeature);
 
-            schema.layer.getSource().dispatchEvent({ type: 'controlFactory.FeatureCopied', feature: newFeature});
+            schema.layer.getSource().dispatchEvent({type: 'controlFactory.FeatureCopied', feature: newFeature});
 
         },
 
@@ -582,8 +586,7 @@
                     schema.layer.getSource().addFeature(newFeature);
 
 
-
-                    feature.dispatchEvent({ type: 'Digitizer.ModifyFeature', allowSaving : false});
+                    feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: false});
 
                     $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
 
