@@ -27,6 +27,8 @@
          */
         this.allowOpenEditDialog = false;
 
+        this.openFormAfterEdit = true;
+
         $.extend(schema, rawScheme);
 
         schema.createPopupConfiguration_();
@@ -72,14 +74,16 @@
             feature.temporaryStyle = schema.styles.unsaved;
             feature.setStyle(feature.temporaryStyle);
 
-            var dialog = schema.openFeatureEditDialog(feature);
+            if (schema.openFormAfterEdit) {
+                var dialog = schema.openFeatureEditDialog(feature);
 
-            dialog.$popup.bind('popupdialogclose',function() {
-                feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
-                if (schema.allowDeleteByCancelNewGeometry) {
-                    schema.removeFeature(feature);
-                }
-            });
+                dialog.$popup.bind('popupdialogclose', function () {
+                    feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+                    if (schema.allowDeleteByCancelNewGeometry) {
+                        schema.removeFeature(feature);
+                    }
+                });
+            }
 
 
         });
@@ -340,6 +344,8 @@
             if (!wholeWidget) {
                 layer.setVisible(true);
             }
+
+           widget.map.dispatchEvent({ type: 'Digitizer.activateSchema', schema: schema});
         },
 
         deactivateSchema: function (wholeWidget) {
@@ -365,6 +371,8 @@
                     layer.setVisible(false);
                 }
             }
+
+            widget.map.dispatchEvent({ type: 'Digitizer.deactivateSchema', schema: schema});
 
         },
 

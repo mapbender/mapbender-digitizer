@@ -9,7 +9,17 @@
         });
         widget.map.addControl(contextmenu);
 
+        widget.map.on('Digitizer.activateSchema',function(event) {
+            var schema = event.schema;
+           if (schema.useContextMenu) {
+                contextmenu.enable();
+           } else {
+               contextmenu.disable();
+           }
+        });
+
         widget.map.getViewport().addEventListener('contextmenu', function (e) {
+            var schema = widget.getCurrentSchema();
             e.preventDefault();
 
             contextmenu.clear();
@@ -22,34 +32,34 @@
 
             if (feature) {
                 var subitems = [];
-                if (widget.getCurrentSchema().allowLocate) {
+                if (schema.allowLocate) {
                     subitems.push({
                         text: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
                         callback: function () {
-                            widget.getCurrentSchema().zoomToFeature(feature);
+                            schema.zoomToFeature(feature);
                         }
                     });
                 }
 
-                if (widget.getCurrentSchema().allowEditData) {
+                if (schema.allowEditData) {
                     subitems.push({
                         text: Mapbender.DigitizerTranslator.translate('feature.edit'),
                         callback: function () {
-                            widget.getCurrentSchema().openFeatureEditDialog(feature);
+                            schema.openFeatureEditDialog(feature);
                         }
                     });
                 }
 
-                if (widget.getCurrentSchema().allowDelete) {
+                if (schema.allowDelete) {
                     subitems.push({
                         text: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
                         callback: function () {
-                            widget.getCurrentSchema().removeFeature(feature);
+                            schema.removeFeature(feature);
                         }
                     });
                 }
                 contextmenu.push({
-                    text: feature.get(widget.getCurrentSchema().featureType.name) || "Feature #" + (feature.getId() || ''),
+                    text: feature.get(schema.featureType.name) || "Feature #" + (feature.getId() || ''),
                     items: subitems,
                 });
             } else {
