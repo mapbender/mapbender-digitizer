@@ -186,6 +186,7 @@
         }, 0);
 
 
+        return dialog;
 
     };
 

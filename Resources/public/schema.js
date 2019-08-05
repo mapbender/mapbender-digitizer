@@ -72,7 +72,12 @@
             feature.temporaryStyle = schema.styles.unsaved;
             feature.setStyle(feature.temporaryStyle);
 
-            schema.openFeatureEditDialog(feature);
+            var dialog = schema.openFeatureEditDialog(feature);
+
+            console.log(dialog.$popup);
+            dialog.$popup.bind('popupdialogclose',function() {
+                feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+            });
 
 
         });
@@ -86,7 +91,7 @@
             feature.temporaryStyle = schema.styles.copy;
             feature.setStyle(feature.temporaryStyle);
 
-            schema.openFeatureEditDialog(feature);
+            var dialog = schema.openFeatureEditDialog(feature);
 
             feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
 
@@ -369,7 +374,7 @@
 
         openFeatureEditDialog: function (feature) {
             var schema = this;
-            schema.popup.createFeatureEditDialog(feature, schema);
+            return schema.popup.createFeatureEditDialog(feature, schema);
         },
 
 
