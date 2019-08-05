@@ -236,7 +236,9 @@
                 source: new ol.source.Vector({
                     format: new ol.format.GeoJSON(),
                     loader: schema.getData.bind(schema),
-                    strategy: ol.loadingstrategy.all // ol.loadingstrategy.bbox
+                    minResolution: schema.minScale ? Mapbender.Digitizer.Utilities.scaleToResolution(schema.minScale) : 0,
+                    maxResolution: schema.maxScale ? Mapbender.Digitizer.Utilities.scaleToResolution(schema.maxScale) : Infinity,
+                    strategy: ol.loadingstrategy.bbox // ol.loadingstrategy.bbox
                 }),
                 visible: false,
             });

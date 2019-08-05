@@ -36,6 +36,11 @@
 
         getAssetsPath: function(path) {
             return Mapbender.configuration.application.urls.asset + (path || '');
+        },
+
+        scaleToResolution: function(scale) {
+            $.notify("minscale / maxscale is not implemented yet");
+            return scale;
         }
 
 
@@ -77,6 +82,8 @@
         return newStyle;
 
     };
+
+
 
 
 })();
