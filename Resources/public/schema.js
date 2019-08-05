@@ -94,7 +94,6 @@
 
         schema.layer.getSource().on('toggleFeatureVisibility', function (event) {
 
-            console.log("toogle");
             var feature = event.feature;
             var hidden =  !feature.hidden;
 
@@ -268,9 +267,7 @@
             highlightControl.on('select', function (e) {
 
                 e.selected.forEach(function (feature) {
-
                     feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: true});
-
                 });
 
                 e.deselected.forEach(function (feature) {
@@ -382,23 +379,12 @@
 
             feature.on('Digitizer.HoverFeature', function (event) {
 
-                schema.menu.resultTable.hoverInResultTable(feature, event.hover);
                 if (!feature.hidden) {
                     feature.setStyle(event.hover ? schema.styles.select : feature.temporaryStyle || schema.styles.default);
                 }
 
             });
 
-            feature.on('Digitizer.ModifyFeature',function(event) {
-
-                var row = schema.menu.resultTable.getTableRowByFeature(feature);
-                if (event.allowSaving) {
-                    $(row).find('.button.save').removeAttr("disabled");
-                } else {
-                    $(row).find('.button.save').attr("disabled","disabled");
-                }
-
-            });
         },
 
         getData: function (extent, resolution, projection) {
@@ -446,18 +432,9 @@
             });
 
             schema.layer.getSource().addFeatures(newFeatures);
-            schema.redrawFeaturesInResultTable();
 
         },
 
-
-        redrawFeaturesInResultTable: function () {
-            var schema = this;
-            var features = schema.layer.getSource().getFeatures();
-            schema.menu.resultTable.redrawResultTableFeatures(features);
-
-
-        },
 
 
         copyFeature: function (feature) {
@@ -604,8 +581,6 @@
                     schema.layer.getSource().removeFeature(feature);
                     schema.layer.getSource().addFeature(newFeature);
 
-                    schema.menu.resultTable.deleteRow(feature);
-                    schema.menu.resultTable.addRow(newFeature);
 
 
                     feature.dispatchEvent({ type: 'Digitizer.ModifyFeature', allowSaving : false});

@@ -69,6 +69,38 @@
             var frame = menu.frame;
             var schema = menu.schema;
 
+            var resultTable;
+
+
+            schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE,function(event) {
+                var feature = event.feature;
+
+                resultTable.addRow(feature);
+
+                feature.on('Digitizer.HoverFeature', function (event) {
+
+                    resultTable.hoverInResultTable(feature, event.hover);
+
+                });
+
+                feature.on('Digitizer.ModifyFeature',function(event) {
+
+                    var row = resultTable.getTableRowByFeature(feature);
+
+                    if (event.allowSaving) {
+                        $(row).find('.button.save').removeAttr("disabled");
+                    } else {
+                        $(row).find('.button.save').attr("disabled","disabled");
+                    }
+
+                });
+
+            });
+
+            schema.layer.getSource().on(ol.source.VectorEventType.REMOVEFEATURE,function(event) {
+                resultTable.deleteRow(event.feature);
+            });
+
             var generateResultDataTableButtons = function () {
 
                 var buttons = [];
@@ -244,12 +276,13 @@
 
             var $div = $("<div/>");
             var $table = $div.resultTable(resultTableSettings);
-            menu.resultTable = $table.resultTable("instance");
+
+            resultTable = $table.resultTable("instance");
 
 
-            menu.resultTable.initializeColumnTitles();
+            resultTable.initializeColumnTitles();
 
-            menu.resultTable.initializeResultTableEvents(schema.highlightControl);
+            resultTable.initializeResultTableEvents(schema.highlightControl);
 
 
             frame.append($table);
