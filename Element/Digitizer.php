@@ -81,6 +81,7 @@ class Digitizer extends BaseElement
             '@MapbenderDigitizerBundle/Resources/public/polyfill/confirmDialog.js',
             '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
             '@MapbenderDigitizerBundle/Resources/public/lib/jsts.min.js',
+            '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.js',
 
         ));
 
@@ -92,7 +93,7 @@ class Digitizer extends BaseElement
             'css'   => array(
                 '/components/select2/select2-built.css',
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
-                '@MapbenderDigitizerBundle/Resources/public/sass/element/context-menu.scss',
+                '@MapbenderDigitizerBundle/Resources/public/sass/element/ol-contextmenu.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/modal.scss',
                 "@MapbenderDigitizerBundle/Resources/public/vis-ui/vis-ui.js-built.css"

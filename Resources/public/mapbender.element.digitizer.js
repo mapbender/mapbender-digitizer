@@ -302,6 +302,10 @@
 
             widget.registerMapEvents();
 
+
+            widget.contextMenu = new Mapbender.Digitizer.MapContextMenu(widget);
+
+
             widget._trigger('ready');
 
             if (widget.displayOnInactive) {
