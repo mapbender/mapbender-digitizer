@@ -13,6 +13,7 @@
         "php": ">=5.3.3",
         "blueimp/jquery-file-upload": "9.*",
         "debugteam/bootstrap-colorpicker": "1.x",
+        "jonataswalker/ol-contextmenu": "*",
         "mapbender/data-manager": "*",
         "mapbender/data-source": "0.*",
         "phayes/geophp": "1.2",
