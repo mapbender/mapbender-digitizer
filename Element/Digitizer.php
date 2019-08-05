@@ -93,12 +93,13 @@ class Digitizer extends BaseElement
             'css'   => array(
                 '/components/select2/select2-built.css',
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
-                '@MapbenderDigitizerBundle/Resources/public/sass/element/ol-contextmenu.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/modal.scss',
-                "@MapbenderDigitizerBundle/Resources/public/vis-ui/vis-ui.js-built.css"
+                "@MapbenderDigitizerBundle/Resources/public/vis-ui/vis-ui.js-built.css",
+                '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.css',
 
-    ),
+
+            ),
             'trans' => array(
                 'MapbenderDigitizerBundle:Element:digitizer.json.twig',
             ),
