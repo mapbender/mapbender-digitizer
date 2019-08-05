@@ -88,6 +88,8 @@
 
             schema.openFeatureEditDialog(feature);
 
+            feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+
         });
 
 
@@ -483,11 +485,12 @@
 
             var name = schema.featureType.name;
             if (name) {
-                newFeature.set(name, "Copy of " + (feature.get(name) || feature.getId()));
+                newFeature.set(name, "Copy of " + (feature.get(name) || '#'+feature.getId()));
             }
 
             schema.layer.getSource().addFeature(newFeature);
 
+            // Watch out - Name "Copy of ..." is not instantly stored
             schema.layer.getSource().dispatchEvent({type: 'controlFactory.FeatureCopied', feature: newFeature});
 
         },

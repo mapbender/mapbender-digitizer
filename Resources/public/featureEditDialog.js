@@ -114,7 +114,7 @@
 
             },
             'Digitizer.FeatureEditDialog.Copy' : function(event) {
-
+                schema.copyFeature(feature);
             },
             'Digitizer.FeatureEditDialog.Style' : function(event) {
                 schema.openChangeStyleDialog(feature);
@@ -145,9 +145,11 @@
             },
             'Digitizer.FeatureEditDialog.Delete' : function(event) {
 
+                schema.removeFeature(feature);
+
             },
             'Digitizer.FeatureEditDialog.Cancel' : function(event) {
-
+                dialog.$popup.popupDialog('close');
             },
 
         };

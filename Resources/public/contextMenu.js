@@ -49,7 +49,7 @@
                     });
                 }
                 contextmenu.push({
-                    text: feature.get(widget.getCurrentSchema().featureType.name) || "Feature #" + feature.getId(),
+                    text: feature.get(widget.getCurrentSchema().featureType.name) || "Feature #" + (feature.getId() || ''),
                     items: subitems,
                 });
             } else {
