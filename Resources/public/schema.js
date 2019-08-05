@@ -521,6 +521,28 @@
         },
 
 
+
+        zoomToFeature: function (feature) {
+            var schema = this;
+            var widget = schema.widget;
+            var map = widget.map;
+
+            if (!feature) {
+                return;
+            }
+
+            var olMap = widget.map;
+            var geometry = feature.getGeometry();
+
+            var extent = schema.layer.getSource().getExtent();
+            map.getView().fit(geometry.getExtent(), map.getSize());
+
+            if (schema.zoomScaleDenominator) {
+               $.notify("zoomScaleDenominator not implemented yet");
+            }
+        },
+
+
         saveFeature: function (feature, formData) {
             var schema = this;
             var widget = schema.widget;

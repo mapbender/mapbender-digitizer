@@ -5,16 +5,16 @@ mb.digitizer:
     allgeometries: 'All Geometries'
   feature:
     remove:
-      title: Remove feature
+      title: 'Remove feature'
       successfully: 'Feature removed.'
       from:
         database: 'Delete feature.'
-    zoomTo: Zoom to
+    zoomTo: 'Zoom to feature'
     edit: 'Edit feature'
     attributes: 'Feature attributes'
     savesave: 'Save feature'
     save:
-      title: Save
+      title: 'Save'
       successfully: 'Feature saved.'
     loading:
       error: 'Features loading error.'
