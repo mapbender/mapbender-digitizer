@@ -74,9 +74,11 @@
 
             var dialog = schema.openFeatureEditDialog(feature);
 
-            console.log(dialog.$popup);
             dialog.$popup.bind('popupdialogclose',function() {
                 feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+                if (schema.allowDeleteByCancelNewGeometry) {
+                    schema.removeFeature(feature);
+                }
             });
 
 
