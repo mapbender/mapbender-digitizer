@@ -138,9 +138,9 @@ class Digitizer extends BaseElement
 
         if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
             foreach ($configuration['schemes'] as $key => &$scheme) {
-               $scheme['featureType'] = (is_string($scheme['featureType'])) ? $this->createFeatureType($scheme['featureType']) : $scheme['featureType'];
+               $scheme['featureType'] = (is_string($scheme['featureType'])) ? ($this->getFeatureTypeDeclarations())[$scheme['featureType']] : $scheme['featureType'];
                 if ($public) {
-                    $this->cleanFromInternConfiguration($scheme['featureType']);
+                   $scheme['featureType'] = $this->cleanFromInternConfiguration($scheme['featureType']);
                 }
                 if (isset($scheme['formItems'])) {
                     $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
@@ -150,9 +150,21 @@ class Digitizer extends BaseElement
         return $configuration;
     }
 
-    public function createFeatureType($featureTypeName) {
-        $featureTypes = $this->getFeatureTypeDeclarations();
-        $featureType = $featureTypes[$featureTypeName];
+    /**
+     * Get schema by name
+     *
+     * @param array $featureType Feature type name
+     * @return FeatureType
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     */
+    protected function createFeatureType($featureType)
+    {
+        if (is_array($featureType)) {
+            $featureType = new FeatureType($this->container, $featureType);
+        } else {
+            throw new Exception('Feature type schema settings not correct', 2);
+        }
+
         return $featureType;
     }
 
@@ -185,25 +197,7 @@ class Digitizer extends BaseElement
         return $feature;
     }
 
-    /**
-     * Get schema by name
-     *
-     * @param string $name Feature type name
-     * @return FeatureType
-     * @throws \Symfony\Component\Config\Definition\Exception\Exception
-     */
-    protected function getFeatureTypeBySchemaName($name)
-    {
-        $schema = $this->getSchemaByName($name);
 
-        if (is_array($schema['featureType'])) {
-            $featureType = new FeatureType($this->container, $schema['featureType']);
-        } else {
-            throw new Exception('Feature type schema settings not correct', 2);
-        }
-
-        return $featureType;
-    }
 
     /**
      * Eval code string
@@ -287,6 +281,53 @@ class Digitizer extends BaseElement
         return array('results' => $results);
     }
 
+    /**
+     * calculate 'where'
+     *
+     * @param FeatureType $featureType
+     * @param array $search
+     * @param array $conditions
+     * @return string
+     * @throws \Exception
+     */
+
+    private function restrictSelectAction($featureType,$search,$conditions) {
+        $connection = $featureType->getConnection();
+        $vars = self::escapeValues($search, $connection);
+
+        $whereConditions = array();
+        foreach ($conditions as $condition) {
+            $condition = new Condition($condition);
+            if ($condition->isSql()) {
+                $whereConditions[] = $condition->getOperator();
+                $whereConditions[] = '(' . static::evalString($condition->getCode(), $vars) . ')';
+            }
+
+            if ($condition->isSqlArray()) {
+                $subConditions = array();
+                $arrayVars = $vars[$condition->getKey()];
+
+                if (!is_array($arrayVars)) {
+                    continue;
+                }
+
+                foreach ($arrayVars as $value) {
+                    $subConditions[] = '(' .
+                        static::evalString(
+                            $condition->getCode(),
+                            array_merge($vars, array('value' => $value)))
+                        . ')';
+                }
+                $whereConditions[] = 'AND';
+                $whereConditions[] = '(' . implode(' ' . $condition->getOperator() . ' ', $subConditions) . ')';
+            }
+        }
+
+        // Remove first operator
+        array_splice($whereConditions, 0, 1);
+
+        return implode(' ', $whereConditions);
+    }
 
     /**
      * Select/search features and return feature collection
@@ -300,49 +341,17 @@ class Digitizer extends BaseElement
     public function selectAction($request)
     {
         $schemaName = $request["schema"];
-        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
+        $configuration = $this->getEntity()->getConfiguration();
+        $schema = $configuration["schemes"][$schemaName];
+        $featureType =  $this->createFeatureType($schema['featureType']);
+
 
         if (isset($request["where"])) {
             unset($request["where"]);
         }
 
         if (isset($request["search"])) {
-            $connection = $featureType->getConnection();
-            $schema = $this->getSchemaByName($schemaName);
-            $vars = $this->escapeValues($request["search"], $connection);
-
-            $whereConditions = array();
-            foreach ($schema['search']['conditions'] as $condition) {
-                $condition = new Condition($condition);
-                if ($condition->isSql()) {
-                    $whereConditions[] = $condition->getOperator();
-                    $whereConditions[] = '(' . static::evalString($condition->getCode(), $vars) . ')';
-                }
-
-                if ($condition->isSqlArray()) {
-                    $subConditions = array();
-                    $arrayVars = $vars[$condition->getKey()];
-
-                    if (!is_array($arrayVars)) {
-                        continue;
-                    }
-
-                    foreach ($arrayVars as $value) {
-                        $subConditions[] = '(' .
-                            static::evalString(
-                                $condition->getCode(),
-                                array_merge($vars, array('value' => $value)))
-                            . ')';
-                    }
-                    $whereConditions[] = 'AND';
-                    $whereConditions[] = '(' . implode(' ' . $condition->getOperator() . ' ', $subConditions) . ')';
-                }
-            }
-
-            // Remove first operator
-            array_splice($whereConditions, 0, 1);
-
-            $request["where"] = implode(' ', $whereConditions);
+            $request["where"] = $this->restrictSelectAction($featureType,$request["search"],$schema['search']['conditions']);
         }
 
 
@@ -369,13 +378,13 @@ class Digitizer extends BaseElement
     public function deleteAction($request)
     {
         $schemaName = $request["schema"];
-        $schema = $this->getSchemaByName($schemaName);
+        $configuration = $this->getEntity()->getConfiguration();
+        $schema = $configuration["schemes"][$schemaName];
+        $featureType =  $this->createFeatureType($schema['featureType']);
 
         if ((isset($schema['allowDelete']) && !$schema['allowDelete']) || (isset($schema["allowEditData"]) && !$schema['allowEditData'])) {
             throw new Exception('It is forbidden to delete objects', 2);
         }
-
-        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
 
         return array(
             'result' => $featureType->remove($request['feature'])
@@ -392,8 +401,10 @@ class Digitizer extends BaseElement
     public function saveAction($request)
     {
         $schemaName = $request["schema"];
-        $schema = $this->getSchemaByName($schemaName);
-        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
+        $configuration = $this->getEntity()->getConfiguration();
+        $schema = $configuration["schemes"][$schemaName];
+        $featureType =  $this->createFeatureType($schema['featureType']);
+
         $connection = $featureType->getDriver()->getConnection();
         $results = array();
 
@@ -455,13 +466,14 @@ class Digitizer extends BaseElement
     public function uploadFileAction($request)
     {
         $schemaName = $request["schema"];
-        $schema = $this->getSchemaByName($schemaName);
+        $configuration = $this->getEntity()->getConfiguration();
+        $schema = $configuration["schemes"][$schemaName];
+        $featureType =  $this->createFeatureType($schema['featureType']);
 
         if (isset($schema['allowEditData']) && !$schema['allowEditData']) {
             throw new Exception("It is forbidden to save objects", 2);
         }
 
-        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
         $fieldName = $request['field'];
         $urlParameters = array('schema' => $schemaName,
             'fid' => $request["fid"],
@@ -499,7 +511,7 @@ class Digitizer extends BaseElement
      * @param array $featureType
      * @return array
      */
-    protected function cleanFromInternConfiguration(array &$featureType)
+    protected function cleanFromInternConfiguration(array $featureType)
     {
         foreach (array(
                      'filter',
@@ -513,25 +525,6 @@ class Digitizer extends BaseElement
         return $featureType;
     }
 
-    /**
-     * Get schema by name
-     *
-     * @param $name
-     * @return mixed
-     * @throws \Symfony\Component\Config\Definition\Exception\Exception
-     */
-    protected function getSchemaByName($name)
-    {
-        $configuration = $this->getConfiguration(false);
-        $schemas = $configuration["schemes"];
-
-        if (!isset($schemas[$name])) {
-            throw new Exception("Feature type schema name '$name' isn't defined", 2);
-        }
-
-        $schema = $schemas[$name];
-        return $schema;
-    }
 
     /**
      * Escape request variables.
@@ -541,7 +534,7 @@ class Digitizer extends BaseElement
      * @param Connection $connection
      * @return array
      */
-    protected function escapeValues($vars, $connection)
+    protected static function escapeValues($vars, $connection)
     {
         $results = array();
         foreach ($vars as $key => $value) {
@@ -549,7 +542,7 @@ class Digitizer extends BaseElement
             if (is_numeric($value)) {
                 $quotedValue = intval($value);
             } elseif (is_array($value)) {
-                $quotedValue = $this->escapeValues($value, $connection);
+                $quotedValue = self::escapeValues($value, $connection);
             } else {
                 $quotedValue = $connection->quote($value);
                 if ($quotedValue[0] === '\'') {
