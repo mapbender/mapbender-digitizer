@@ -548,23 +548,6 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * Get data store by settings or name
-     *
-     * @param ContainerInterface $settings
-     * @return DataStore
-     * @internal param $ajaxSettings
-     */
-    public function getDataStore($settings)
-    {
-        if (is_array($settings)) {
-            $dataStore = new DataStore($settings);
-        } else {
-            $dataStore = $this->getDataStoreById($settings);
-        }
-        return $dataStore;
-    }
-
-    /**
      * Escape request variables.
      * Deny SQL injections.
      *
@@ -592,16 +575,6 @@ class Digitizer extends BaseElement
         return $results;
     }
 
-    /**
-     * @param string $id
-     * @return DataStore
-     */
-    protected function getDataStoreById($id)
-    {
-        /** @var DataStoreService $dataStoreService */
-        $dataStoreService = $this->container->get('data.source');
-        return $dataStoreService->get($id);
-    }
 
 
 }
