@@ -138,38 +138,24 @@ class Digitizer extends BaseElement
 
         if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
             foreach ($configuration['schemes'] as $key => &$scheme) {
-                $this->adjustScheme($scheme, $featureTypes, $public);
+               $scheme['featureType'] = (is_string($scheme['featureType'])) ? $this->createFeatureType($scheme['featureType']) : $scheme['featureType'];
+                if ($public) {
+                    $this->cleanFromInternConfiguration($scheme['featureType']);
+                }
+                if (isset($scheme['formItems'])) {
+                    $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
+                }
             }
         }
         return $configuration;
     }
 
-    public function adjustScheme(&$scheme, &$featureTypes, $public)
-    {
-        if (is_string($scheme['featureType'])) {
-            if ($featureTypes === null) {
-                $featureTypes = $this->getFeatureTypeDeclarations();
-            }
-            $featureTypeName = $scheme['featureType'];
-            $scheme['featureType'] = $featureTypes[$featureTypeName];
-            $scheme['featureTypeName'] = $featureTypeName;
-        }
-
-        if ($public) {
-            $this->cleanFromInternConfiguration($scheme['featureType']);
-        }
-
-        if (isset($scheme['formItems'])) {
-            $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
-        }
-
-
+    public function createFeatureType($featureTypeName) {
+        $featureTypes = $this->getFeatureTypeDeclarations();
+        $featureType = $featureTypes[$featureTypeName];
+        return $featureType;
     }
 
-    public function getConfigurationAction()
-    {
-        return $this->getConfiguration(true);
-    }
 
     /**
      * Prepare request feautre data by the form definition
