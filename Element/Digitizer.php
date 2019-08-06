@@ -3,21 +3,19 @@
 namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
-use Mapbender\CoreBundle\Component\Exception\InvalidElementClassException;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
-use Mapbender\DigitizerBundle\Component\DigitizerStyleManager;
-use Mapbender\DigitizerBundle\Component\Style;
 use Mapbender\DigitizerBundle\Entity\Condition;
+use RuntimeException;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 
 /**
@@ -127,8 +125,8 @@ class Digitizer extends BaseElement
      * Optional: get featureType by name from global context.
      *
      * @inheritdoc
-     * @throws \RuntimeException
-     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @throws RuntimeException
+     * @throws InvalidArgumentException
      */
     public function getConfiguration($public = true)
     {
@@ -252,6 +250,7 @@ class Digitizer extends BaseElement
      *
      * @param $items
      * @param $name
+     * @return array
      */
     public function getFormItemByName($items, $name)
     {
@@ -270,6 +269,7 @@ class Digitizer extends BaseElement
      *
      * @param $request
      * @return array
+     * @throws \Exception
      */
     public function selectFormAction($request)
     {
@@ -307,8 +307,9 @@ class Digitizer extends BaseElement
      *
      * @param array $request
      * @return array Feature collection
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     * @throws \Exception
      */
     public function selectAction($request)
     {
@@ -405,12 +406,10 @@ class Digitizer extends BaseElement
     public function saveAction($request)
     {
         $schemaName = $request["schema"];
-        $configuration = $this->getConfiguration(false);
         $schema = $this->getSchemaByName($schemaName);
         $featureType = $this->getFeatureTypeBySchemaName($schemaName);
         $connection = $featureType->getDriver()->getConnection();
         $results = array();
-        $debugMode = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
 
         if (isset($schema["allowEditData"]) && !$schema["allowEditData"]) {
             throw new Exception("It is forbidden to save objects", 2);
@@ -425,43 +424,37 @@ class Digitizer extends BaseElement
             $request['features'] = array($request['feature']);
         }
 
-        try {
-            // save collection
-            if (isset($request['features']) && is_array($request['features'])) {
-                foreach ($request['features'] as $feature) {
-                    /**
-                     * @var $feature Feature
-                     */
-                    $featureData = $this->prepareQueriedFeatureData($feature, $schema['formItems']);
 
-                    foreach ($featureType->getFileInfo() as $fileConfig) {
-                        if (!isset($fileConfig['field']) || !isset($featureData["properties"][$fileConfig['field']])) {
-                            continue;
-                        }
-                        $url = $featureType->getFileUrl($fileConfig['field']);
-                        $requestUrl = $featureData["properties"][$fileConfig['field']];
-                        $newUrl = str_replace($url . "/", "", $requestUrl);
-                        $featureData["properties"][$fileConfig['field']] = $newUrl;
+        // save collection
+        if (isset($request['features']) && is_array($request['features'])) {
+            foreach ($request['features'] as $feature) {
+                /**
+                 * @var $feature Feature
+                 */
+                $featureData = $this->prepareQueriedFeatureData($feature, $schema['formItems']);
+
+                foreach ($featureType->getFileInfo() as $fileConfig) {
+                    if (!isset($fileConfig['field']) || !isset($featureData["properties"][$fileConfig['field']])) {
+                        continue;
                     }
-
-                    $feature = $featureType->save($featureData);
-                    $results = array_merge($featureType->search(array(
-                        'srid' => $feature->getSrid(),
-                        'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
+                    $url = $featureType->getFileUrl($fileConfig['field']);
+                    $requestUrl = $featureData["properties"][$fileConfig['field']];
+                    $newUrl = str_replace($url . "/", "", $requestUrl);
+                    $featureData["properties"][$fileConfig['field']] = $newUrl;
                 }
 
+                $feature = $featureType->save($featureData);
+                $results = array_merge($featureType->search(array(
+                    'srid' => $feature->getSrid(),
+                    'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
             }
-            foreach ($results as &$result) {
-                $result->setAttributes(array("schemaName" => $schemaName));
-            }
-            $results = $featureType->toFeatureCollection($results);
-        } catch (DBALException $e) {
-            $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
-                "For more information have a look at the webserver log file. \n Error code: " . $e->getCode();
-            $results = array('errors' => array(
-                array('message' => $message, 'code' => $e->getCode())
-            ));
+
         }
+        foreach ($results as &$result) {
+            $result->setAttributes(array("schemaName" => $schemaName));
+        }
+        $results = $featureType->toFeatureCollection($results);
+
 
         return $results;
 
@@ -557,7 +550,7 @@ class Digitizer extends BaseElement
     /**
      * Get data store by settings or name
      *
-     * @param $settings
+     * @param ContainerInterface $settings
      * @return DataStore
      * @internal param $ajaxSettings
      */
@@ -591,7 +584,7 @@ class Digitizer extends BaseElement
             } else {
                 $quotedValue = $connection->quote($value);
                 if ($quotedValue[0] === '\'') {
-                    $quotedValue = preg_replace("/^\'|\'$/", null, $quotedValue);
+                    $quotedValue = preg_replace("/^'|'$/", null, $quotedValue);
                 }
             }
             $results[$key] = $quotedValue;
@@ -610,25 +603,5 @@ class Digitizer extends BaseElement
         return $dataStoreService->get($id);
     }
 
-
-
-    /**
-     * @param Request $request
-     * @param string[]|string $allowedMethods
-     * @throws BadRequestHttpException
-     *
-     */
-    protected static function requireMethod($request, $allowedMethods)
-    {
-        if (!is_array($allowedMethods)) {
-            $allowedMethods = explode(',', strtoupper($allowedMethods));
-        } else {
-            $allowedMethods = array_map('strtoupper', $allowedMethods);
-        }
-        $method = $request->getMethod();
-        if (!in_array($method, $allowedMethods)) {
-            throw new BadRequestHttpException("Unsupported method $method");
-        }
-    }
 
 }
