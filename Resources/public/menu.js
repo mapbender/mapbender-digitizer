@@ -79,7 +79,7 @@
 
     };
 
-    Mapbender.Digitizer.Menu.prototype.registerEvents = function (resultTable) {
+    Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable) {
         var menu = this;
         var schema = menu.schema;
         var map = schema.widget.map;
