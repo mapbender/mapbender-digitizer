@@ -447,9 +447,9 @@
             });
 
             // Actually, this only needs to be done when doing currentExtent Search, but as long as it doesn't hurt performance, it can stay
-            $.each(schema.layer.getSource().getFeatures(), function (key, feature) {
-                schema.layer.getSource().removeFeature(feature);
-            });
+            // $.each(schema.layer.getSource().getFeatures(), function (key, feature) {
+            //     schema.layer.getSource().removeFeature(feature);
+            // });
 
             newFeatures.forEach(function (feature) {
                 schema.introduceFeature(feature);

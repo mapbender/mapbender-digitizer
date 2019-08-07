@@ -266,7 +266,6 @@
 
                 var getDefaultTableFields = function () {
                     var tableFields = this;
-                    var schema = tableFields.schema;
 
                     tableFields[schema.featureType.uniqueId] = {label: 'Nr.', width: '20%'};
                     if (schema.featureType.name) {

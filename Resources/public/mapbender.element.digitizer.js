@@ -73,6 +73,8 @@
             var qe = new Mapbender.Digitizer.QueryEngine(widget);
             widget.query = qe.query;
             widget.getElementURL = qe.getElementURL;
+            widget.disabled = true;
+
 
             widget.createSpinner_();
 
