@@ -65,11 +65,12 @@ class Digitizer extends DataManagerElement
     public function getAssets()
     {
 
+        $dataManagerAssets = parent::getAssets();
+
         $mainFiles = array('mapbender.element.digitizer', 'digitizer', 'toolset', 'schema',
             'menu', 'contextMenu', 'utilities',
             'featureEditDialog', 'controlFactory', 'featureStyleEditor', 'mapbender.layermanager',
-            'mapbender.digitizer-translator',
-            'queryEngine');
+        );
 
 
         $js = array();
@@ -99,7 +100,7 @@ class Digitizer extends DataManagerElement
 
 
         return array(
-            'js' => $js,
+            'js' => array_merge($dataManagerAssets["js"],$js),
             'css' => array(
                 '/components/select2/select2-built.css',
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',

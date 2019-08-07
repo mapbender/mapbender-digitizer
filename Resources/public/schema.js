@@ -117,8 +117,6 @@
 
         });
 
-        schema.layer.getSource().dispatchEvent({type: "Digitizer.ChangeCurrentExtentSearch", currentExtentSearch: schema.currentExtentSearch});
-
     };
 
 
@@ -420,7 +418,7 @@
             var schema = this;
 
             if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
-                Mapbender.error(Mapbender.DigitizerTranslator.translate("features.loading.error"), featureCollection);
+                Mapbender.error(Mapbender.DataManager.Translator.translate("features.loading.error"), featureCollection);
                 return;
             }
 
@@ -465,7 +463,7 @@
                 // });
                 //
                 // if (!allowCopy) {
-                //     $.notify(Mapbender.DigitizerTranslator.translate('feature.clone.on.error'));
+                //     $.notify(Mapbender.DataManager.Translator.translate('feature.clone.on.error'));
                 //     return;
                 // }
 
@@ -512,7 +510,7 @@
                 schema.layer.getSource().removeFeature(feature);
             } else {
                 Mapbender.confirmDialog({
-                    html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
+                    html: Mapbender.DataManager.Translator.translate("feature.remove.from.database"),
 
                     onSuccess: function () {
                         widget.query('delete', {
@@ -520,7 +518,7 @@
                             feature: limitedFeature,
                         }).done(function (fid) {
                             schema.layer.getSource().removeFeature(feature);
-                            $.notify(Mapbender.DigitizerTranslator.translate('feature.remove.successfully'), 'info');
+                            $.notify(Mapbender.DataManager.Translator.translate('feature.remove.successfully'), 'info');
                         });
                     }
                 });
@@ -619,7 +617,7 @@
 
                     feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: false});
 
-                    $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
+                    $.notify(Mapbender.DataManager.Translator.translate("feature.save.successfully"), 'info');
 
                 }
 

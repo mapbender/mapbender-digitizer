@@ -3,8 +3,7 @@
 
     $.fn.dataTable.ext.errMode = 'throw';
 
-
-    $.widget("mapbender.mbDigitizer", {
+    $.widget("mapbender.mbDigitizer", $.mapbender.mbDataManager, {
 
         options: {
             classes: {},
@@ -26,15 +25,6 @@
 
             this._trigger('ready');
 
-        },
-
-
-        reveal: function() {
-            this.widget.activate(true);
-        },
-
-        hide: function() {
-            this.widget.deactivate();
         },
 
 

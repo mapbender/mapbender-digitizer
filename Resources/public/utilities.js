@@ -4,13 +4,6 @@
 
     Mapbender.Digitizer.Utilities = {
 
-
-
-        isAddingToolsetType: function(toolsetType) {
-
-            return ['drawPoint','drawLine','drawPolygon','drawRectangle','drawCircle','drawEllipse'].includes(toolsetType);
-        },
-
         getDefaultToolsetByGeomType: function(geomType) {
 
             var toolset = null;
