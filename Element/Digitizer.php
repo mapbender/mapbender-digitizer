@@ -65,26 +65,18 @@ class Digitizer extends DataManagerElement
     public function getAssets()
     {
 
-        $mainFiles = array('mapbender.element.digitizer', 'digitizer', 'toolset', 'schema', 'schemaAll', 'clustering.mixin',
+        $mainFiles = array('mapbender.element.digitizer', 'digitizer', 'toolset', 'schema',
             'menu', 'contextMenu', 'utilities',
             'featureEditDialog', 'controlFactory', 'featureStyleEditor', 'mapbender.layermanager',
             'mapbender.digitizer-translator',
             'queryEngine');
 
 
-//        $formItemFiles = array("formItem","formItemBreakLine","formItemButton","formItemCheckbox","formItemContainer","formItemDate",
-//            "formItemFieldSet","formItemFile","formItemForm","formItemImage","formItemInput","formItemLabel",
-//            "formItemResultTable","formItemSelect","formItemTabs","formItemTextArea","formItemText");
-
         $js = array();
 
         foreach ($mainFiles as $file) {
             $js[] = "@MapbenderDigitizerBundle/Resources/public/$file.js";
         }
-
-//        foreach($formItemFiles as $file) {
-//            $js[] = "@MapbenderDigitizerBundle/Resources/public/formItems/$file.js";
-//        }
 
         $js[] = "@MapbenderDigitizerBundle/Resources/public/vis-ui/vis-ui.js-built.js";
 
