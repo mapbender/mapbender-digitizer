@@ -16,9 +16,20 @@
             return spinner;
         })();
 
-        widget.spinner = Mapbender.Digitizer.createSpinner_($spinner);
+        var $title = (function(){
+            var title = $('<div class="title"></div>');
+            $element.append(title);
+            return title;
+        })();
 
-        var qe = new Mapbender.Digitizer.QueryEngine(widget.id,widget.spinner);
+        var $selector = (function(){
+            var selector =  $('<select class="selector"></select>');
+            $element.append(selector);
+            return selector;
+        })();
+
+
+        var qe = new Mapbender.Digitizer.QueryEngine(widget.id,Mapbender.Digitizer.createSpinner_($spinner));
         widget.query = qe.query;
         widget.getElementURL = qe.getElementURL;
 
@@ -27,7 +38,7 @@
 
 
         Mapbender.elementRegistry.waitReady(widget.target).then( function() {
-            widget.setup($element);
+            widget.setup($element,$title,$selector);
         });
 
         Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function (printClient) {
@@ -96,28 +107,12 @@
 
     };
 
-    Mapbender.Digitizer.createMenu = function() {
-
-    };
-
     Mapbender.Digitizer.prototype = {
 
-        setup: function ($element) {
+        setup: function ($element,$title,$selector) {
             var widget = this;
 
             widget.map = $('#' + widget.target).data('mapbenderMbMap').map.olMap;
-
-            var $title = (function(){
-                var title = $('<div class="title"></div>');
-                $element.append(title);
-
-            })();
-
-            var $selector = (function(){
-                var selector =  $('<select class="selector"></select>');
-                $element.append(selector);
-                return selector;
-            })();
 
             var rawSchemes = widget.schemes;
             widget.schemes = {};
@@ -164,16 +159,6 @@
         getProjectionCode: function() {
             var widget = this;
             return widget.map.getView().getProjection().getCode().split(':').pop();
-        },
-
-
-        getSchemaByName: function (schemaName) {
-            var widget = this;
-            var scheme = widget.schemes[schemaName];
-            if (!scheme) {
-                throw new Error("No Basic Scheme exists with the name " + schemaName);
-            }
-            return scheme;
         },
 
         getCurrentSchema: function() {
