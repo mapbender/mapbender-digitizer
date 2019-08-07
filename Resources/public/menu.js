@@ -6,25 +6,38 @@
 
         var menu = this;
         menu.schema = schema;
-        var frame = menu.frame = $("<div />").addClass('frame');
+        var frame = $("<div />").addClass('frame');
 
-        menu.appendToolset_();
+        menu.appendToolset_(frame);
 
         frame.append('<div style="clear:both;"/>');
 
-        menu.appendCurrentExtentSwitch_();
+        menu.appendCurrentExtentSwitch_(frame);
 
-        menu.generateDataTable_();
+        menu.generateDataTable_(frame);
 
         frame.hide();
+
+        menu.show = function() {
+            frame.show();
+        };
+
+        menu.hide = function() {
+          frame.hide();
+        };
+
+        menu.appendTo = function($element) {
+            $element.append(frame);
+        };
+
+
     };
 
 
     Mapbender.Digitizer.Menu.prototype = {
 
-        appendCurrentExtentSwitch_: function () {
+        appendCurrentExtentSwitch_: function (frame) {
             var menu = this;
-            var frame = menu.frame;
             var schema = menu.schema;
             if (schema.showExtendSearchSwitch) {
                 var $checkbox = $("<input type='checkbox' />");
@@ -48,9 +61,8 @@
             }
         },
 
-        appendToolset_: function () {
+        appendToolset_: function (frame) {
             var menu = this;
-            var frame = menu.frame;
             var schema = menu.schema;
 
             menu.toolSet = new Mapbender.Digitizer.Toolset(schema);
@@ -64,9 +76,8 @@
         },
 
 
-        generateDataTable_: function () {
+        generateDataTable_: function (frame) {
             var menu = this;
-            var frame = menu.frame;
             var schema = menu.schema;
             var map = schema.widget.map;
 
@@ -340,6 +351,8 @@
             if (schema.hideSearchField) {
                 $table.find(".dataTables_filter").hide();
             }
+
+
 
         },
 

@@ -38,8 +38,6 @@
 
         schema.addSelectControl_();
 
-        schema.createMenu_();
-
         schema.initializeWithDefaultStyles_();
 
 
@@ -252,14 +250,12 @@
 
         },
 
-        createMenu_: function () {
+        createMenu: function ($element) {
             var schema = this;
-            var widget = schema.widget;
-            var element = $(widget.$element);
 
             schema.menu = new Mapbender.Digitizer.Menu(schema);
 
-            element.append(schema.menu.frame);
+            schema.menu.appendTo($element);
 
         },
 
@@ -328,10 +324,9 @@
             var schema = this;
 
             var widget = schema.widget;
-            var frame = schema.menu.frame;
             var layer = schema.layer;
 
-            frame.show();
+            schema.menu.show();
 
             schema.highlightControl.setActive(true);
             schema.selectControl.setActive(true);
@@ -347,10 +342,9 @@
 
             var schema = this;
             var widget = schema.widget;
-            var frame = schema.menu.frame;
             var layer = schema.layer;
 
-            frame.hide();
+            schema.menu.hide();
 
             schema.highlightControl.setActive(false);
             schema.selectControl.setActive(false);

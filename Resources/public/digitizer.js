@@ -9,8 +9,6 @@
 
         widget.id = $element.attr("id");
 
-        widget.$element = $element;
-
         var $spinner = (function() {
             var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell');
             var spinner = $("<div class='spinner' style='display:none'></div>");
@@ -28,7 +26,9 @@
 
 
 
-        Mapbender.elementRegistry.waitReady(widget.target).then(widget.setup.bind(widget));
+        Mapbender.elementRegistry.waitReady(widget.target).then( function() {
+            widget.setup($element);
+        });
 
         Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function (printClient) {
             widget.printClient = printClient;
@@ -65,22 +65,22 @@
         return spinner;
     };
 
-    Mapbender.Digitizer.createSelector_= function($element, schemes) {
+    Mapbender.Digitizer.createSelector_= function($selector, schemes) {
 
         var selector = new function() {
             var selector = this;
 
             selector.getSelectedSchema = function() {
-                var $option = $element.find(":selected") || $element.find("option").first();
+                var $option = $selector.find(":selected") || $selector.find("option").first();
                 return schemes[$option.val()]
             };
 
             $.each(schemes,function(schemaName,schema) {
                 var option = $("<option/>").val(schemaName).html(schemaName);
-                $element.append(option);
+                $selector.append(option);
             });
 
-            $element.on('focus', function () {
+            $selector.on('focus', function () {
                 selector.previousSchema = selector.getSelectedSchema();
             }).on('change', function () {
                 var schema = selector.getSelectedSchema();
@@ -96,30 +96,35 @@
 
     };
 
+    Mapbender.Digitizer.createMenu = function() {
+
+    };
+
     Mapbender.Digitizer.prototype = {
 
-        setup: function () {
+        setup: function ($element) {
             var widget = this;
 
             widget.map = $('#' + widget.target).data('mapbenderMbMap').map.olMap;
 
-            var $title = (function($element){
+            var $title = (function(){
                 var title = $('<div class="title"></div>');
                 $element.append(title);
 
-            })(widget.$element);
+            })();
 
-            var $selector = (function($element){
+            var $selector = (function(){
                 var selector =  $('<select class="selector"></select>');
                 $element.append(selector);
                 return selector;
-            })(widget.$element);
+            })();
 
             var rawSchemes = widget.schemes;
             widget.schemes = {};
             $.each(rawSchemes, function (schemaName,rawScheme) {
                 rawScheme.schemaName = schemaName;
-                widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget);
+                var schema = widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget);
+                schema.createMenu($element);
             });
             Object.freeze(widget.schemes);
 
