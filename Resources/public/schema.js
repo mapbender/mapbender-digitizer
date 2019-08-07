@@ -256,7 +256,7 @@
         createMenu_: function () {
             var schema = this;
             var widget = schema.widget;
-            var element = $(widget.element);
+            var element = $(widget.$element);
 
             schema.menu = new Mapbender.Digitizer.Menu(schema);
 

@@ -1,27 +1,32 @@
 (function () {
     "use strict";
 
-    Mapbender.Digitizer = function(element,options) {
+    Mapbender.Digitizer = function($element,options) {
 
         var widget  = this;
 
         $.extend(widget, options);
 
-        widget.id = element.attr("id");
+        widget.id = $element.attr("id");
 
-        widget.element = element;
+        widget.$element = $element;
 
-        if (!Mapbender.checkTarget("mbDigitizer", widget.target)) {
-            return;
-        }
+        var $spinner = (function() {
+            var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell');
+            $parent.prepend("<div class='spinner' style='display:none'></div>");
+            $spinner = $parent.find(".spinner");
+            return $spinner;
+        })();
 
-        var qe = new Mapbender.Digitizer.QueryEngine(widget);
+        widget.spinner = Mapbender.Digitizer.createSpinner_($spinner);
+
+        var qe = new Mapbender.Digitizer.QueryEngine(widget.id,widget.spinner);
         widget.query = qe.query;
         widget.getElementURL = qe.getElementURL;
+
         widget.disabled = true;
 
 
-        widget.createSpinner_();
 
         Mapbender.elementRegistry.waitReady(widget.target).then(widget.setup.bind(widget));
 
@@ -31,42 +36,41 @@
         });
     };
 
+    Mapbender.Digitizer.createSpinner_ = function ($element) {
+
+        var spinner = new function () {
+            var spinner = this;
+
+            spinner.openRequests = 0;
+
+            spinner.$element = $element;
+
+            spinner.addRequest = function () {
+                spinner.openRequests++;
+                if (spinner.openRequests >= 1) {
+                    spinner.$element.trigger("show");
+                }
+            };
+
+            spinner.removeRequest = function () {
+                spinner.openRequests--;
+                if (spinner.openRequests === 0) {
+                    spinner.$element.trigger("hide");
+                }
+            };
+
+
+        };
+
+        return spinner;
+    };
+
     Mapbender.Digitizer.prototype = {
 
 
-        createSpinner_: function () {
-            var widget = this;
-
-            widget.spinner = new function () {
-                var spinner = this;
-
-                spinner.openRequests = 0;
-
-                var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell');
-                $parent.prepend("<div class='spinner' style='display:none'></div>");
-                spinner.$element = $parent.find(".spinner");
-
-                spinner.addRequest = function () {
-                    spinner.openRequests++;
-                    if (spinner.openRequests >= 1) {
-                        spinner.$element.show();
-                    }
-                };
-
-                spinner.removeRequest = function () {
-                    spinner.openRequests--;
-                    if (spinner.openRequests === 0) {
-                        spinner.$element.hide();
-                    }
-                };
-
-
-            };
-        },
-
         createSelector_: function() {
             var widget = this;
-            var element = $(widget.element);
+            var element = $(widget.$element);
 
             widget.selector = $("select.selector", element);
 
@@ -112,7 +116,7 @@
 
             var initializeSelectorOrTitleElement = function () {
 
-                var element = $(widget.element);
+                var element = $(widget.$element);
                 var titleElement = $("> div.title", element);
 
 
@@ -129,7 +133,7 @@
 
             // TODO this is not the proper implementation - fix that
             var isOpenByDefault = function () {
-                var sidePane = $(widget.element).closest(".sidePane");
+                var sidePane = $(widget.$element).closest(".sidePane");
 
                 var accordion = $(".accordionContainer", sidePane);
                 return accordion.length === 0;

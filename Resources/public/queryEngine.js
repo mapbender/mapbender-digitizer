@@ -1,11 +1,11 @@
 (function () {
     "use strict";
 
-    Mapbender.Digitizer.QueryEngine = function(widget) {
+    Mapbender.Digitizer.QueryEngine = function(id,spinner) {
 
 
         this.getElementURL = function() {
-            return Mapbender.configuration.application.urls.element + '/' + widget.id + '/';
+            return Mapbender.configuration.application.urls.element + '/' + id + '/';
         };
 
         /**
@@ -18,7 +18,7 @@
          */
         this.query = function (uri, request) {
             var elementUrl = this.getElementURL();
-            widget.spinner.addRequest();
+            spinner && spinner.addRequest();
             return $.ajax({
                 url: elementUrl + uri,
                 type: 'POST',
@@ -51,7 +51,7 @@
                     autoHide: false
                 });
             }).always( function() {
-                widget.spinner.removeRequest();
+                spinner.removeRequest();
             });
         };
 
