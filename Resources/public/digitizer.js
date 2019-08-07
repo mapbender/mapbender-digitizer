@@ -13,9 +13,9 @@
 
         var $spinner = (function() {
             var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell');
-            $parent.prepend("<div class='spinner' style='display:none'></div>");
-            $spinner = $parent.find(".spinner");
-            return $spinner;
+            var spinner = $("<div class='spinner' style='display:none'></div>");
+            $parent.prepend(spinner);
+            return spinner;
         })();
 
         widget.spinner = Mapbender.Digitizer.createSpinner_($spinner);
@@ -36,14 +36,14 @@
         });
     };
 
-    Mapbender.Digitizer.createSpinner_ = function ($element) {
+    Mapbender.Digitizer.createSpinner_ = function ($spinner) {
 
         var spinner = new function () {
             var spinner = this;
 
             spinner.openRequests = 0;
 
-            spinner.$element = $element;
+            spinner.$element = $spinner;
 
             spinner.addRequest = function () {
                 spinner.openRequests++;
@@ -65,111 +65,72 @@
         return spinner;
     };
 
-    Mapbender.Digitizer.prototype = {
+    Mapbender.Digitizer.createSelector_= function($element, schemes) {
 
+        var selector = new function() {
+            var selector = this;
 
-        createSelector_: function() {
-            var widget = this;
-            var element = $(widget.$element);
-
-            widget.selector = $("select.selector", element);
-
-            widget.selector.getSelectedSchema = function() {
-                var selector = this;
-                var option = selector.find(":selected");
-                return option.data("schemaSettings");
+            selector.getSelectedSchema = function() {
+                var $option = $element.find(":selected") || $element.find("option").first();
+                return schemes[$option.val()]
             };
 
-            widget.selector.appendSchema = function(schema,prepend) {
-                var selector = this;
-                var option = $("<option/>");
-                option.val(schema.schemaName).html(schema.label);
-                option.data("schemaSettings", schema);
-                prepend ? selector.prepend(option) : selector.append(option);
-            };
+            $.each(schemes,function(schemaName,schema) {
+                var option = $("<option/>").val(schemaName).html(schemaName);
+                $element.append(option);
+            });
 
-            widget.selector.on('focus', function () {
-                var selector = widget.selector;
+            $element.on('focus', function () {
                 selector.previousSchema = selector.getSelectedSchema();
-
             }).on('change', function () {
-
-                var selector = widget.selector;
                 var schema = selector.getSelectedSchema();
-
                 selector.previousSchema.deactivateSchema();
                 schema.activateSchema();
                 selector.previousSchema = schema;
 
             });
-        },
 
+        };
+
+        return selector;
+
+    };
+
+    Mapbender.Digitizer.prototype = {
 
         setup: function () {
             var widget = this;
 
-
-            widget.createSelector_();
-
             widget.map = $('#' + widget.target).data('mapbenderMbMap').map.olMap;
 
+            var $title = (function($element){
+                var title = $('<div class="title"></div>');
+                $element.append(title);
 
-            var initializeSelectorOrTitleElement = function () {
+            })(widget.$element);
 
-                var element = $(widget.$element);
-                var titleElement = $("> div.title", element);
+            var $selector = (function($element){
+                var selector =  $('<select class="selector"></select>');
+                $element.append(selector);
+                return selector;
+            })(widget.$element);
 
-
-                widget.hasOnlyOneScheme = _.size(widget.schemes) === 1;
-
-                if (widget.hasOnlyOneScheme) {
-                    titleElement.html(_.toArray(widget.schemes)[0].label);
-                    widget.selector.hide();
-                } else {
-                    titleElement.hide();
-                }
-            };
-
-
-            // TODO this is not the proper implementation - fix that
-            var isOpenByDefault = function () {
-                var sidePane = $(widget.$element).closest(".sidePane");
-
-                var accordion = $(".accordionContainer", sidePane);
-                return accordion.length === 0;
-            };
-
-            var createSchemes = function () {
+            var rawSchemes = widget.schemes;
+            widget.schemes = {};
+            $.each(rawSchemes, function (schemaName,rawScheme) {
+                rawScheme.schemaName = schemaName;
+                widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget);
+            });
+            Object.freeze(widget.schemes);
 
 
-                var rawSchemes = widget.schemes;
-                widget.schemes = {};
-                var index = 0;
-                _.each(rawSchemes, function (rawScheme, schemaName) {
-                    rawScheme.schemaName = schemaName;
-                    widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget, index++);
-                    widget.selector.appendSchema(widget.schemes[schemaName])
-                });
 
+            widget.selector = Mapbender.Digitizer.createSelector_($selector,widget.schemes);
 
-                var basicScheme = Object.keys(widget.schemes)[0];
-
-
-                widget.selector.val(basicScheme);
-
-                widget.initialScheme = widget.schemes[basicScheme];
-
-                if (isOpenByDefault()) {
-                    widget.activate(true);
-                }
-
-
-            };
-
-
-            initializeSelectorOrTitleElement();
-
-            createSchemes();
+            if (Object.keys(widget.schemes).length === 1) {
+               $selector.hide();
+               $title.html(Object.keys(widget.schemes)[0]);
+            } else { }
 
             widget.contextMenu = new Mapbender.Digitizer.MapContextMenu(widget);
 
@@ -203,7 +164,7 @@
 
         getSchemaByName: function (schemaName) {
             var widget = this;
-            var scheme = widget.getBasicSchemes()[schemaName];
+            var scheme = widget.schemes[schemaName];
             if (!scheme) {
                 throw new Error("No Basic Scheme exists with the name " + schemaName);
             }
@@ -212,7 +173,7 @@
 
         getCurrentSchema: function() {
             var widget = this;
-            return widget.initialScheme;
+            return widget.selector.getSelectedSchema();
         },
 
 
@@ -252,16 +213,16 @@
         },
 
 
-        // TODO muss repariert werden
-        refreshConnectedDigitizerFeatures: function (featureTypeName) {
-            var widget = this;
-            $(".mb-element-digitizer").not(".mb-element-data-manager").each(function (index, element) {
-                var schemes = widget.schemes;
-                schemes[featureTypeName] && schemes[featureTypeName].layer && schemes[featureTypeName].layer.getData();
-            })
-
-
-        },
+        // // TODO muss repariert werden
+        // refreshConnectedDigitizerFeatures: function (featureTypeName) {
+        //     var widget = this;
+        //     $(".mb-element-digitizer").not(".mb-element-data-manager").each(function (index, element) {
+        //         var schemes = widget.schemes;
+        //         schemes[featureTypeName] && schemes[featureTypeName].layer && schemes[featureTypeName].layer.getData();
+        //     })
+        //
+        //
+        // },
     }
 
 

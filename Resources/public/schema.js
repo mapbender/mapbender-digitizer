@@ -9,11 +9,10 @@
      * @constructor
      */
 
-    Mapbender.Digitizer.Scheme = function (rawScheme, widget, index) {
+    Mapbender.Digitizer.Scheme = function (rawScheme, widget) {
 
         var schema = this;
 
-        this.index = index;
         this.widget = widget;
 
 
@@ -331,10 +330,6 @@
             var widget = schema.widget;
             var frame = schema.menu.frame;
             var layer = schema.layer;
-
-            widget.getCurrentSchema = function () {
-                return schema;
-            };
 
             frame.show();
 
