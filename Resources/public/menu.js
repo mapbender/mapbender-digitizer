@@ -256,9 +256,23 @@
 
                     return function (feature, type, val, meta) {
 
+                       var escapeHtml = function (str) {
+
+                            return str.replace(/["&'\/<>]/g, function (a) {
+                                return {
+                                    '"': '&quot;',
+                                    '&': '&amp;',
+                                    "'": '&#39;',
+                                    '/': '&#47;',
+                                    '<': '&lt;',
+                                    '>': '&gt;'
+                                }[a];
+                            });
+                        };
+
                         var data = feature.get(columnId);
                         if (typeof (data) == 'string') {
-                            data = data.escapeHtml();
+                            data = escapeHtml(data);
                         }
                         return data || '';
                     };
