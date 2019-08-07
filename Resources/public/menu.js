@@ -323,6 +323,10 @@
 
             frame.append($table);
 
+            if (schema.hideSearchField) {
+                $table.find(".dataTables_filter").hide();
+            }
+
         },
 
 
