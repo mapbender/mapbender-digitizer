@@ -286,6 +286,11 @@
         return schema.featureType.geomType;
     };
 
+    Mapbender.Digitizer.Scheme.prototype.createPopupConfiguration_ = function () {
+        var schema = this;
+        schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
+    };
+
     Mapbender.Digitizer.Scheme.prototype.activateSchema = function (wholeWidget) {
 
         var schema = this;
