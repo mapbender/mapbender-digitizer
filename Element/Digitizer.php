@@ -79,8 +79,6 @@ class Digitizer extends DataManagerElement
             $js[] = "@MapbenderDigitizerBundle/Resources/public/$file.js";
         }
 
-        $js[] = "@MapbenderDigitizerBundle/Resources/public/vis-ui/vis-ui.js-built.js";
-
         $js = array_merge($js, array(
             '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
             '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
@@ -101,16 +99,15 @@ class Digitizer extends DataManagerElement
 
         return array(
             'js' => array_merge($dataManagerAssets["js"],$js),
-            'css' => array(
+            'css' => array_merge($dataManagerAssets["css"], array(
                 '/components/select2/select2-built.css',
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/modal.scss',
-                "@MapbenderDigitizerBundle/Resources/public/vis-ui/vis-ui.js-built.css",
                 '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.css',
 
 
-            ),
+            )),
             'trans' => array(
                 'MapbenderDigitizerBundle:Element:digitizer.json.twig',
             ),
