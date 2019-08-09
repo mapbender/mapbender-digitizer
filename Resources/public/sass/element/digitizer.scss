@@ -1,9 +1,4 @@
 
-$selectColor: #F7F79A;
-
-
-
-
 .mb-element-digitizer {
 
   padding: 0;
@@ -68,10 +63,10 @@ $selectColor: #F7F79A;
 
       &.odd, &.even {
         &.hover td {
-          background-color: $selectColor;
+          background-color: #47791f;
         }
         &:hover td {
-          background-color: $selectColor;
+          background-color: #47791f;
         }
       }
       td{
