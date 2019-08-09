@@ -32,12 +32,14 @@
 
         tr {
 
+            line-height: 10px;
+
             &.odd, &.even {
                 &.hover td {
-                    background-color: #47791f;
+                    background-color: #F7F79A;
                 }
                 &:hover td {
-                    background-color: #47791f;
+                    background-color: #F7F79A;
                 }
             }
 
@@ -50,6 +52,10 @@
                 white-space: -o-pre-wrap; /* Opera 7 */
                 white-space: pre-wrap; /* css-3 */
                 word-wrap: break-word; /* Internet Explorer 5.5+ */
+
+                button:disabled {
+                    opacity: 0.5;
+                }
 
                 .icon-style:before {
                     font-family: FontAwesome;
@@ -117,10 +123,6 @@
 
     }
 
-}
-
-.modal-body {
-
     .form-group {
         button {
             // TODO: remove it after fixed in vis-ui.js
@@ -167,12 +169,6 @@
             display: table-cell;
             vertical-align: middle;
         }
-
-        //    > img {
-        //      width: 100%;
-        //      height: auto;
-        //      display: inline-block;
-        //    }
     }
 
     .file-container {
@@ -214,26 +210,6 @@
         }
     }
 
-
-    button:disabled {
-        opacity: 0.5;
-    }
-}
-
-
-.invisible-feature {
-    opacity: 0.5 !important;
-}
-
-.save-all-features {
-    opacity: 0.7;
-}
-
-.save-all-features.active {
-    opacity: 1;
-}
-
-.mb-element-digitizer {
     button {
 
         border: 1px solid #ccc !important;
@@ -245,46 +221,48 @@
         }
     }
 
-}
 
+    .digitizing-tool-set, .general-digitizer-buttons {
+        margin-top: 10px;
 
-.digitizing-tool-set, .general-digitizer-buttons {
-    margin-top: 10px;
+        > button {
 
-    > button {
+            &:first-child {
+                margin-left: 0px;
+            }
 
-        &:first-child {
+            width: 26px;
+            margin-left: -1px;
+            padding: 3px 4px;
+
+            &:before {
+                display: inline-block;
+                font-size: 17px;
+                padding-top: 0px;
+            }
+
+            &.active,
+            &.active:focus {
+                background-color: #47791f !important;
+            }
+        }
+
+        > input[type="checkbox"] {
             margin-left: 0px;
         }
 
-        width: 26px;
-        margin-left: -1px;
-        padding: 3px 4px;
-
-        &:before {
-            display: inline-block;
-            font-size: 17px;
-            padding-top: 0px;
-        }
-
-        &.active,
-        &.active:focus {
-            background-color: #47791f !important;
+        > label input[type="checkbox"] {
+            margin-left: 0px;
         }
     }
 
-    > input[type="checkbox"] {
-        margin-left: 0px;
-    }
 
-    > label input[type="checkbox"] {
-        margin-left: 0px;
-    }
 }
 
-.mb-element-digitizer table tr {
-    line-height: 10px;
-}
+
+
+
+/** Q&D Fixes **/
 
 .icon-draw-text:before {
     width: 15px;
