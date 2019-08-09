@@ -57,8 +57,13 @@
                     opacity: 0.5;
                 }
 
+                .icon-edit:before {
+                    font-family: FontAwesome !important;
+                    content: "\e609" !important;
+                }
+
                 .icon-style:before {
-                    font-family: FontAwesome;
+                    font-family: FontAwesome !important;
                     content: "\f1fb";
                 }
 
