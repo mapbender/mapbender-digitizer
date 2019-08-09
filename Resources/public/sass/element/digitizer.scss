@@ -1,290 +1,296 @@
 
-.mb-element-digitizer {
+.mb-element-data-manager {
 
-  padding: 0;
+    padding: 0;
 
-  > .title {
-    margin-bottom: 9px;
-    text-shadow: 0px 1px 0px #fff;
-  }
-
-  > select {
-    background-color: #fff;
-    padding: 4px;
-    width: 100%;
-    display: block;
-    option {
-      font-weight: bold;
+    > .title {
+        margin-bottom: 9px;
+        text-shadow: 0px 1px 0px #fff;
     }
-  }
 
-  > .frame{
-    .fa:before {
-      font-family: FontAwesome;
-    }
-  }
+    > select {
+        background-color: #fff;
+        padding: 4px;
+        width: 100%;
+        display: block;
 
-
-  .mapbender-element-result-table {
-
-    margin-top: 10px;
-
-      tr td {
-          word-break: keep-all !important;
-          overflow:hidden;
-          white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
-          white-space: -webkit-pre-wrap; /*Chrome & Safari */
-          white-space: -pre-wrap;      /* Opera 4-6 */
-          white-space: -o-pre-wrap;    /* Opera 7 */
-          white-space: pre-wrap;       /* css-3 */
-          word-wrap: break-word;       /* Internet Explorer 5.5+ */
-          word-break: break-all;
-          white-space: normal;
-
-          .icon-style:before{
-              font-family: FontAwesome;
-              content: "\f1fb";
-          }
-
-          .icon-visibility {
-
-              &.eyeOff:before {
-                  font-family: FontAwesome;
-                  content: "\f070";
-              }
-              &.eyeOn:before {
-                  font-family: FontAwesome;
-                  content: "\f06e";
-              }
-          }
-
-          .icon-save:before {
-              font-family: FontAwesome;
-              content: "\f0c7";
-          }
-
-          .icon-printmetadata.active:before{
-              font-family: FontAwesome;
-              content: "\f02f";
-              color: black;
-          }
-
-          .icon-printmetadata:before{
-              font-family: FontAwesome;
-              content: "\f02f";
-              color: grey;
-          }
-      }
-
-    > .dataTables_wrapper{
-      > .dataTables_filter {
-        > label {
-          width: 100%;
-          line-height: 14px;
-          > input[type="search"] {
-            display: block;
-            width: 100%;
-            margin-bottom: 8px;
-            border: 1px solid rgb(169, 169, 169);
-            color: #555;
-            font-size: 14px;
-            font-weight: normal;
-            height: 29px;
-            padding: 2px 24px 2px 7px;
-            line-height: 1.42857143;
-          }
+        option {
+            font-weight: bold;
         }
-      }
-      .no-footer{
-        overflow: hidden;
-      }
-
     }
 
-    // Row higlight by feature select
-    table.dataTable > tbody > tr {
+    > .frame {
+        .fa:before {
+            font-family: FontAwesome;
+        }
+    }
 
+
+    .mapbender-element-result-table {
+
+        margin-top: 10px;
+
+        tr {
+
+            &.odd, &.even {
+                &.hover td {
+                    background-color: #47791f;
+                }
+                &:hover td {
+                    background-color: #47791f;
+                }
+            }
+
+            td {
+                word-break: keep-all !important;
+                overflow: hidden;
+                white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+                white-space: -webkit-pre-wrap; /*Chrome & Safari */
+                white-space: -pre-wrap; /* Opera 4-6 */
+                white-space: -o-pre-wrap; /* Opera 7 */
+                white-space: pre-wrap; /* css-3 */
+                word-wrap: break-word; /* Internet Explorer 5.5+ */
+
+                .icon-style:before {
+                    font-family: FontAwesome;
+                    content: "\f1fb";
+                }
+
+                .icon-visibility {
+
+                    &.eyeOff:before {
+                        font-family: FontAwesome;
+                        content: "\f070";
+                    }
+
+                    &.eyeOn:before {
+                        font-family: FontAwesome;
+                        content: "\f06e";
+                    }
+                }
+
+                .icon-save:before {
+                    font-family: FontAwesome;
+                    content: "\f0c7";
+                }
+
+                .icon-printmetadata.active:before {
+                    font-family: FontAwesome;
+                    content: "\f02f";
+                    color: black;
+                }
+
+                .icon-printmetadata:before {
+                    font-family: FontAwesome;
+                    content: "\f02f";
+                    color: grey;
+                }
+            }
+        }
+
+        > .dataTables_wrapper {
+            > .dataTables_filter {
+                > label {
+                    width: 100%;
+                    line-height: 14px;
+
+                    > input[type="search"] {
+                        display: block;
+                        width: 100%;
+                        margin-bottom: 8px;
+                        border: 1px solid rgb(169, 169, 169);
+                        color: #555;
+                        font-size: 14px;
+                        font-weight: normal;
+                        height: 29px;
+                        padding: 2px 24px 2px 7px;
+                        line-height: 1.42857143;
+                    }
+                }
+            }
+
+            .no-footer {
+                overflow: hidden;
+            }
+
+        }
 
     }
-  }
 
 }
 
 .modal-body {
 
-  .form-group {
-    button {
-      // TODO: remove it after fixed in vis-ui.js
-      width: auto;
-      display: inline-block;
-      vertical-align: middle;
-      margin-bottom: 7px;
-      position: relative;
-      height: 24px;
-      margin-left: 5px;
+    .form-group {
+        button {
+            // TODO: remove it after fixed in vis-ui.js
+            width: auto;
+            display: inline-block;
+            vertical-align: middle;
+            margin-bottom: 7px;
+            position: relative;
+            height: 24px;
+            margin-left: 5px;
 
-    }
-  }
-
-  &.popup-dialog {
-    > fieldset.form-group{
-      margin-left: -5px;
-      margin-right: 10px;
-      margin-top: 0px;
-    }
-    > label,
-    > form,
-    > .form-group{
-      margin: 5px 10px 0;
-      &:last-child{
-        margin-bottom: 10px;
-      }
-    }
-  }
-
-  div.notifyjs-container > div.notifyjs-bootstrap-base > span {
-    display: block;
-    width: auto;
-    white-space: pre;
-  }
-  .image-container {
-    position: relative;
-    overflow: hidden;
-    > div.sub-container{
-      display: table-cell;
-      vertical-align: middle;
-    }
-//    > img {
-//      width: 100%;
-//      height: auto;
-//      display: inline-block;
-//    }
-  }
-  .file-container{
-
-    .progress-bar{
-      width: 0;
-      height: 100%;
-      background-color: #00ccaa;
-      float: none;
-      transition: none;
-      padding: 0;
-      margin: 0;
-      position: absolute;
-      top: 0;
-      left: 0;
+        }
     }
 
-    .fileinput-button {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
-      > input {
-        position: absolute;
-        top: 0;
-        right: 0;
-        margin: 0;
-        opacity: 0;
-        -ms-filter: 'alpha(opacity=0)';
-        font-size: 200px;
-        direction: ltr;
-        cursor: pointer;
-
-        &:focus, &hover {
-          box-shadow: inset 0 1px 1px transparent, 0 0 4px #000 !important;
+    &.popup-dialog {
+        > fieldset.form-group {
+            margin-left: -5px;
+            margin-right: 10px;
+            margin-top: 0px;
         }
 
-      }
+        > label,
+        > form,
+        > .form-group {
+            margin: 5px 10px 0;
+
+            &:last-child {
+                margin-bottom: 10px;
+            }
+        }
     }
-  }
 
-
-
-
-  /* Fixes for IE < 8 */
-  @media screen\9 {
-    .fileinput-button > input {
-      filter: alpha(opacity=0);
-      font-size: 100%;
-      height: 100%;
+    div.notifyjs-container > div.notifyjs-bootstrap-base > span {
+        display: block;
+        width: auto;
+        white-space: pre;
     }
-  }
+
+    .image-container {
+        position: relative;
+        overflow: hidden;
+
+        > div.sub-container {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        //    > img {
+        //      width: 100%;
+        //      height: auto;
+        //      display: inline-block;
+        //    }
+    }
+
+    .file-container {
+
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background-color: #00ccaa;
+            float: none;
+            transition: none;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .fileinput-button {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+
+            > input {
+                position: absolute;
+                top: 0;
+                right: 0;
+                margin: 0;
+                opacity: 0;
+                -ms-filter: 'alpha(opacity=0)';
+                font-size: 200px;
+                direction: ltr;
+                cursor: pointer;
+
+                &:focus, &hover {
+                    box-shadow: inset 0 1px 1px transparent, 0 0 4px #000 !important;
+                }
+
+            }
+        }
+    }
 
 
-  button:disabled  {
-    opacity: 0.5;
-  }
+    button:disabled {
+        opacity: 0.5;
+    }
 }
 
 
 .invisible-feature {
-  opacity: 0.5 !important;
+    opacity: 0.5 !important;
 }
 
 .save-all-features {
-  opacity: 0.7;
+    opacity: 0.7;
 }
 
 .save-all-features.active {
-  opacity: 1;
+    opacity: 1;
 }
 
 .mb-element-digitizer {
-  button {
+    button {
 
-    border: 1px solid #ccc !important;
+        border: 1px solid #ccc !important;
 
-    &:focus {
-      outline: thin dotted !important;
-      box-shadow: none !important;
-      border: 1px solid #ccc !important;
+        &:focus {
+            outline: thin dotted !important;
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+        }
     }
-  }
 
 }
 
 
 .digitizing-tool-set, .general-digitizer-buttons {
-  margin-top: 10px;
+    margin-top: 10px;
 
-  > button {
+    > button {
 
-    &:first-child{
-      margin-left: 0px;
+        &:first-child {
+            margin-left: 0px;
+        }
+
+        width: 26px;
+        margin-left: -1px;
+        padding: 3px 4px;
+
+        &:before {
+            display: inline-block;
+            font-size: 17px;
+            padding-top: 0px;
+        }
+
+        &.active,
+        &.active:focus {
+            background-color: #47791f !important;
+        }
     }
 
-    width: 26px;
-    margin-left: -1px;
-    padding: 3px 4px;
-    &:before {
-      display: inline-block;
-      font-size: 17px;
-      padding-top: 0px;
+    > input[type="checkbox"] {
+        margin-left: 0px;
     }
-    &.active,
-    &.active:focus {
-      background-color: #47791f !important;
+
+    > label input[type="checkbox"] {
+        margin-left: 0px;
     }
-  }
-
-  > input[type="checkbox"] {
-    margin-left: 0px;
-  }
-
-  > label input[type="checkbox"] {
-    margin-left: 0px;
-  }
 }
 
 .mb-element-digitizer table tr {
-  line-height: 10px;
+    line-height: 10px;
 }
 
 .icon-draw-text:before {
-  width: 15px;
-  height: 16px;
-  font-family: FontAwesome;
-  content: "\f246";
+    width: 15px;
+    height: 16px;
+    font-family: FontAwesome;
+    content: "\f246";
 }
 
 .colorpicker-saturation {
@@ -305,29 +311,36 @@
 }
 
 .spinner {
-  border: 1px dotted #ccc !important;
-  border-radius: 50% !important;
-  border-top: 1px dotted #555 !important;
-  width: 10px !important;
-  height: 10px !important;
-  animation: spin 1s linear infinite !important;
-  float: right !important;
-  padding: 0 !important;
+    border: 1px dotted #ccc !important;
+    border-radius: 50% !important;
+    border-top: 1px dotted #555 !important;
+    width: 10px !important;
+    height: 10px !important;
+    animation: spin 1s linear infinite !important;
+    float: right !important;
+    padding: 0 !important;
 }
 
 
 .confirm-dialog {
-  text-align: center;
+    text-align: center;
 }
-
 
 
 li.select2-search--inline {
-  width: 100%;
+    width: 100%;
 
-  input {
-    width: 100% !important;
-  }
+    input {
+        width: 100% !important;
+    }
 }
 
 
+/* Fixes for IE < 8 */
+@media screen {
+    .fileinput-button > input {
+        filter: alpha(opacity=0);
+        font-size: 100%;
+        height: 100%;
+    }
+}
