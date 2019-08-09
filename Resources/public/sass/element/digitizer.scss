@@ -26,7 +26,55 @@
 
 
   .mapbender-element-result-table {
+
     margin-top: 10px;
+
+      tr td {
+          word-break: keep-all !important;
+          overflow:hidden;
+          white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+          white-space: -webkit-pre-wrap; /*Chrome & Safari */
+          white-space: -pre-wrap;      /* Opera 4-6 */
+          white-space: -o-pre-wrap;    /* Opera 7 */
+          white-space: pre-wrap;       /* css-3 */
+          word-wrap: break-word;       /* Internet Explorer 5.5+ */
+          word-break: break-all;
+          white-space: normal;
+
+          .icon-style:before{
+              font-family: FontAwesome;
+              content: "\f1fb";
+          }
+
+          .icon-visibility {
+
+              &.eyeOff:before {
+                  font-family: FontAwesome;
+                  content: "\f070";
+              }
+              &.eyeOn:before {
+                  font-family: FontAwesome;
+                  content: "\f06e";
+              }
+          }
+
+          .icon-save:before {
+              font-family: FontAwesome;
+              content: "\f0c7";
+          }
+
+          .icon-printmetadata.active:before{
+              font-family: FontAwesome;
+              content: "\f02f";
+              color: black;
+          }
+
+          .icon-printmetadata:before{
+              font-family: FontAwesome;
+              content: "\f02f";
+              color: grey;
+          }
+      }
 
     > .dataTables_wrapper{
       > .dataTables_filter {
@@ -51,80 +99,15 @@
         overflow: hidden;
       }
 
-      table.dataTable {
-        td {
-          overflow:hidden;
-        }
-      }
     }
 
     // Row higlight by feature select
     table.dataTable > tbody > tr {
 
-      &.odd, &.even {
-        &.hover td {
-          background-color: #47791f;
-        }
-        &:hover td {
-          background-color: #47791f;
-        }
-      }
-      td{
-        white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
-        white-space: -webkit-pre-wrap; /*Chrome & Safari */
-        white-space: -pre-wrap;      /* Opera 4-6 */
-        white-space: -o-pre-wrap;    /* Opera 7 */
-        white-space: pre-wrap;       /* css-3 */
-        word-wrap: break-word;       /* Internet Explorer 5.5+ */
-        word-break: break-all;
-        white-space: normal;
 
-        .icon-style:before{
-          font-family: FontAwesome;
-          content: "\f1fb";
-        }
-
-        .icon-visibility {
-
-         &.eyeOff:before {
-             font-family: FontAwesome;
-             content: "\f070";
-         }
-          &.eyeOn:before {
-              font-family: FontAwesome;
-              content: "\f06e";
-          }
-        }
-
-          .icon-save:before {
-              font-family: FontAwesome;
-              content: "\f0c7";
-          }
-
-        .icon-printmetadata.active:before{
-            font-family: FontAwesome;
-            content: "\f02f";
-            color: black;
-        }
-
-        .icon-printmetadata:before{
-            font-family: FontAwesome;
-            content: "\f02f";
-            color: grey;
-        }
-      }
     }
   }
 
-}
-
-
-.olHandlerBoxSelectFeature {
-  background-color: white;
-  border: 2px solid blue;
-  font-size: 1px;
-  opacity: 0.5;
-  position: absolute;
 }
 
 .modal-body {
@@ -280,7 +263,7 @@
     }
     &.active,
     &.active:focus {
-      background-color: $buttonFirstActiveColor !important;
+      background-color: #47791f !important;
     }
   }
 
@@ -347,9 +330,4 @@ li.select2-search--inline {
   }
 }
 
-.mapbender-element-result-table {
 
-  tr td {
-    word-break: keep-all !important;
-  }
-}
