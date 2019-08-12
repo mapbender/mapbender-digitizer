@@ -62,6 +62,8 @@
         var configuration = this;
         var schema = configuration.schema;
 
+        var feature = dialog.$popup.data("feature");
+
         var eventListeners =
             {
 
