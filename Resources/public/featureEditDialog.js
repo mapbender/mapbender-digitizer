@@ -4,6 +4,8 @@
     Mapbender.Digitizer.PopupConfiguration = function () {
         Mapbender.DataManager.PopupConfiguration.apply(this, arguments);
 
+        this.PREFIX = "Digitizer";
+
     };
 
     Mapbender.Digitizer.PopupConfiguration.prototype = Object.create(Mapbender.DataManager.PopupConfiguration.prototype);
@@ -95,6 +97,7 @@
                     schema.removeFeature(feature);
                 },
                 'Digitizer.FeatureEditDialog.Cancel': function (event) {
+
                     dialog.$popup.popupDialog('close');
                 }
 
