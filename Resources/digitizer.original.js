@@ -688,7 +688,7 @@
                 if (schema.allowLocate) {
                     buttons.push({
                         title: 'Hineinzoomen',
-                        className: 'fa fa-crosshairs',
+                        className: 'zoom',
                         onClick: function (olFeature, ui) {
                             widget.zoomToJsonFeature(olFeature);
                         }

@@ -162,7 +162,6 @@
             buttons.push({
                 title: Mapbender.DataManager.Translator.translate('feature.zoomTo'),
                 className: 'zoom',
-                cssClass: 'fa fa-crosshairs',
                 onClick: function (feature, ui) {
                     schema.zoomToFeature(feature);
                 }
@@ -192,8 +191,7 @@
         if (schema.copy && schema.copy.enable) {
             buttons.push({
                 title: Mapbender.DataManager.Translator.translate('feature.clone.title'),
-                className: 'clone',
-                cssClass: ' fa fa-files-o',
+                className: 'copy',
                 onClick: function (feature, ui) {
                     schema.copyFeature(feature);
                 }
@@ -213,14 +211,14 @@
             buttons.push({
                 title: Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'),
                 className: 'visibility',
-                cssClass: 'eyeOff',
+                cssClass: 'icon-eyeOff',
                 onClick: function (feature, $button) {
                     schema.layer.getSource().dispatchEvent({type: 'toggleFeatureVisibility', feature: feature});
                     if (feature.hidden) {
-                        $button.addClass('eyeOn').removeClass('eyeOff');
+                        $button.addClass('icon-eyeOn').removeClass('icon-eyeOff');
                         $button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleon'));
                     } else {
-                        $button.addClass('eyeOff').removeClass('eyeOn');
+                        $button.addClass('icon-eyeOff').removeClass('icon-eyeOn');
                         $button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'));
                     }
                 }
