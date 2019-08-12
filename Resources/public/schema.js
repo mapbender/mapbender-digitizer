@@ -60,7 +60,9 @@
                 dialog.$popup.bind('popupdialogclose', function () {
                     feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
                     if (schema.allowDeleteByCancelNewGeometry) {
-                        schema.removeFeature(feature);
+                        try {
+                            schema.removeFeature(feature);
+                        } catch(e) { /* Remove feature only if it exists */}
                     }
                 });
             }
@@ -440,6 +442,34 @@
         if (schema.zoomScaleDenominator) {
             $.notify("zoomScaleDenominator not implemented yet");
         }
+    };
+
+
+    Mapbender.Digitizer.Scheme.prototype.removeFeature = function (feature) {
+        var schema = this;
+        var widget = schema.widget;
+
+        var limitedFeature = {};
+        limitedFeature[schema.featureType.uniqueId] = feature.getId();
+        if (!feature.getId()) {
+            schema.layer.getSource().removeFeature(feature);
+        } else {
+            Mapbender.confirmDialog({
+                html: Mapbender.DataManager.Translator.translate("feature.remove.from.database"),
+
+                onSuccess: function () {
+                    widget.query('delete', {
+                        schema: schema.schemaName,
+                        feature: limitedFeature,
+                    }).done(function (fid) {
+                        schema.layer.getSource().removeFeature(feature);
+                        $.notify(Mapbender.DataManager.Translator.translate('feature.remove.successfully'), 'info');
+                    });
+                }
+            });
+        }
+
+        return feature;
     };
 
 

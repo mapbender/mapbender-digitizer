@@ -97,7 +97,6 @@
                     schema.removeFeature(feature);
                 },
                 'Digitizer.FeatureEditDialog.Cancel': function (event) {
-
                     dialog.$popup.popupDialog('close');
                 }
 

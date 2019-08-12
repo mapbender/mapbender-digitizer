@@ -91,9 +91,7 @@
                     if (ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent())) {
                         resultTable.addRow(feature);
                     } else {
-                        resultTable.deleteRows(function (idx, _feature, row) {
-                            return _feature == feature;
-                        });
+                        resultTable.deleteRow(feature);
                     }
                 });
 
@@ -145,9 +143,7 @@
         });
 
         schema.layer.getSource().on(ol.source.VectorEventType.REMOVEFEATURE, function (event) {
-            resultTable.deleteRows(function (idx, _feature, row) {
-                return _feature == event.feature;
-            });
+            resultTable.deleteRow(event.feature);
         });
 
     };
