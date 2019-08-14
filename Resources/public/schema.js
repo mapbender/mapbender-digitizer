@@ -86,7 +86,7 @@
         });
 
 
-        schema.layer.getSource().on('toggleFeatureVisibility', function (event) {
+        schema.layer.getSource().on('Digitizer.toggleFeatureVisibility', function (event) {
 
             var feature = event.feature;
             var hidden = !feature.hidden;
@@ -98,6 +98,21 @@
             } else {
                 feature.hidden = false;
                 feature.setStyle(feature.temporaryStyle2);
+            }
+
+        });
+
+
+        schema.layer.getSource().on('Digitizer.StyleFeature', function (event) {
+
+            var feature = event.feature;
+
+            var jsonStyle = feature.get("style");
+            if (jsonStyle) {
+                var basicStyle = JSON.parse(jsonStyle);
+                var style = ol.style.StyleConverter.convertToOL4Style(basicStyle);
+                feature.set("style",style);
+                feature.setStyle(style);
             }
 
         });
@@ -139,14 +154,13 @@
             invisible: {
                 fillOpacity: 0,
                 strokeOpacity: 0,
-            },
+            }
         };
 
         schema.styles = schema.styles || {};
 
         $.each(styles, function (label, style) {
             schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(schema.styles[label] || style);
-
         });
 
     };
@@ -344,6 +358,11 @@
         schema.menu.appendTo($element);
     };
 
+    Mapbender.Digitizer.Scheme.prototype.getFeatureStyle_ = function(feature){
+      var schema = this;
+
+      return feature.get("style") || schema.styles.default
+    };
 
     Mapbender.Digitizer.Scheme.prototype.introduceFeature = function (feature) {
 
@@ -355,10 +374,12 @@
         feature.on('Digitizer.HoverFeature', function (event) {
 
             if (!feature.hidden) {
-                feature.setStyle(event.hover ? schema.styles.select : feature.temporaryStyle || schema.styles.default);
+                feature.setStyle(event.hover ? schema.styles.select : feature.temporaryStyle ||  schema.getFeatureStyle_(feature));
             }
 
         });
+
+        schema.layer.getSource().dispatchEvent({ type : "Digitizer.StyleFeature", feature: feature });
 
     };
 
@@ -442,6 +463,12 @@
         if (schema.zoomScaleDenominator) {
             $.notify("zoomScaleDenominator not implemented yet");
         }
+    };
+
+    Mapbender.Digitizer.Scheme.prototype.openChangeStyleDialog = function (feature) {
+        var schema = this;
+
+        var styleEditor = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema);
     };
 
 

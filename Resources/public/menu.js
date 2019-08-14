@@ -209,7 +209,7 @@
                 className: 'visibility',
                 cssClass: 'icon-eyeOff',
                 onClick: function (feature, $button) {
-                    schema.layer.getSource().dispatchEvent({type: 'toggleFeatureVisibility', feature: feature});
+                    schema.layer.getSource().dispatchEvent({type: 'Digitizer.toggleFeatureVisibility', feature: feature});
                     if (feature.hidden) {
                         $button.addClass('icon-eyeOn').removeClass('icon-eyeOff');
                         $button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleon'));

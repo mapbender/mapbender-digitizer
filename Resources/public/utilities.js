@@ -53,22 +53,34 @@
             return newColor;
         };
 
+        var convertDashStyle = function(dashStyle) {
+           switch(dashStyle) {
+               case 'solid' : return [];
+               case 'dot'   : return [1,5];
+               case 'dash'      : return [10,10];
+               case 'longdash'      : return [20,20];
+               case 'dashdot'      : return [5,10,1];
+               case 'longdashdot'      : return [5,20,1];
+           }
+        };
+
         newStyle.getStroke().setColor(calculateColor(ol2Style.strokeColor,ol2Style.strokeOpacity, newStyle.getStroke().getColor()));
         newStyle.getStroke().setWidth(ol2Style.strokeWidth || newStyle.getStroke().getWidth());
         newStyle.getStroke().setLineCap(ol2Style.strokeLinecap || newStyle.getStroke().getLineCap());
-        newStyle.getStroke().setLineDash(ol2Style.strokeDashstyle || newStyle.getStroke().getLineDash());
+
+        newStyle.getStroke().setLineDash(convertDashStyle(ol2Style.strokeDashstyle) || newStyle.getStroke().getLineDash());
 
         newStyle.getFill().setColor(calculateColor(ol2Style.fillColor,ol2Style.fillOpacity,newStyle.getFill().getColor()));
 
+        var image = new ol.style.Circle({
+            fill: newStyle.getFill().clone(),
+            stroke: newStyle.getStroke().clone(),
+            radius: ol2Style.pointRadius || newStyle.getImage().getRadius()
+        });
+
+        newStyle.setImage(image);
 
 
-        newStyle.getImage().getStroke().setColor(calculateColor(ol2Style.strokeColor,ol2Style.strokeOpacity, newStyle.getStroke().getColor()));
-        newStyle.getImage().getStroke().setWidth(ol2Style.strokeWidth || newStyle.getStroke().getWidth());
-        newStyle.getImage().getStroke().setLineCap(ol2Style.strokeLinecap || newStyle.getStroke().getLineCap());
-        newStyle.getImage().getStroke().setLineDash(ol2Style.strokeDashstyle || newStyle.getStroke().getLineDash());
-
-        newStyle.getImage().getFill().setColor(calculateColor(ol2Style.fillColor,ol2Style.fillOpacity,newStyle.getFill().getColor()));
-        newStyle.getImage().setRadius(ol2Style.pointRadius || newStyle.getImage().getRadius());
 
         Object.freeze(newStyle);
 
