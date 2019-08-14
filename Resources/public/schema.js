@@ -27,8 +27,8 @@
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
             var feature = event.feature;
 
-            feature.temporaryStyle = schema.styles.unsaved;
-            feature.setStyle(feature.temporaryStyle);
+            feature.set("temporaryStyle",schema.styles.unsaved);
+            feature.setStyle(feature.get("temporaryStyle"));
 
             feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
 
@@ -39,8 +39,8 @@
 
             var feature = event.feature;
 
-            feature.temporaryStyle = schema.styles.unsaved;
-            feature.setStyle(feature.temporaryStyle);
+            feature.set("temporaryStyle",schema.styles.unsaved);
+            feature.setStyle(feature.get("temporaryStyle"));
 
             feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
 
@@ -51,8 +51,8 @@
 
             schema.introduceFeature(feature);
 
-            feature.temporaryStyle = schema.styles.unsaved;
-            feature.setStyle(feature.temporaryStyle);
+            feature.set("temporaryStyle",schema.styles.unsaved);
+            feature.setStyle(feature.get("temporaryStyle"));
 
             if (schema.openFormAfterEdit) {
                 var dialog = schema.openFeatureEditDialog(feature);
@@ -76,8 +76,8 @@
 
             schema.introduceFeature(feature);
 
-            feature.temporaryStyle = schema.styles.copy;
-            feature.setStyle(feature.temporaryStyle);
+            feature.set("temporaryStyle",schema.styles.copy);
+            feature.setStyle(feature.get("temporaryStyle"));
 
             var dialog = schema.openFeatureEditDialog(feature);
 
@@ -89,15 +89,15 @@
         schema.layer.getSource().on('Digitizer.toggleFeatureVisibility', function (event) {
 
             var feature = event.feature;
-            var hidden = !feature.hidden;
+            var hidden = !feature.get("hidden");
 
             if (hidden) {
-                feature.hidden = true;
-                feature.temporaryStyle2 = feature.getStyle();
+                feature.set("hidden",true);
+                feature.set("temporaryStyle2",feature.getStyle());
                 feature.setStyle(schema.styles.invisible);
             } else {
-                feature.hidden = false;
-                feature.setStyle(feature.temporaryStyle2);
+                feature.set("hidden",false);
+                feature.setStyle(feature.get("temporaryStyle2"));
             }
 
         });
@@ -107,10 +107,11 @@
 
             var feature = event.feature;
 
-            var jsonStyle = feature.get("style");
+            var jsonStyle = feature.get("data").get("style");
             if (jsonStyle) {
                 var basicStyle = JSON.parse(jsonStyle);
                 var style = ol.style.StyleConverter.convertToOL4Style(basicStyle);
+                feature.set("basicStyle",style);
                 feature.set("style",style);
                 feature.setStyle(style);
             }
@@ -367,14 +368,14 @@
     Mapbender.Digitizer.Scheme.prototype.introduceFeature = function (feature) {
 
         var schema = this;
-        feature.mbOrigin = 'digitizer';
+        feature.set("mbOrigin","digitizer");
 
         feature.setStyle(schema.styles.default);
 
         feature.on('Digitizer.HoverFeature', function (event) {
 
-            if (!feature.hidden) {
-                feature.setStyle(event.hover ? schema.styles.select : feature.temporaryStyle ||  schema.getFeatureStyle_(feature));
+            if (!feature.get("hidden")) {
+                feature.setStyle(event.hover ? schema.styles.select : feature.get("temporaryStyle") ||  schema.getFeatureStyle_(feature));
             }
 
         });
