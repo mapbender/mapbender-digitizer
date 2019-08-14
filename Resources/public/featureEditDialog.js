@@ -173,6 +173,9 @@
 
         configuration.addFeatureAndDialog(feature, dialog);
 
+        configuration.title = schema.getSchemaByFeature(feature).popup.title;
+        configuration.width = schema.getSchemaByFeature(feature).popup.with;
+
 
         var doFeatureEditDialogBindings = function () {
             var feature = dialog.feature;

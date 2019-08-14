@@ -612,7 +612,7 @@
             row.find('.button.save').removeAttr("disabled");
 
 
-            if (schema.deactivateControlAfterModification) {
+            if (schema.getSchemaByFeature(feature).deactivateControlAfterModification) {
                 control && control.deactivate();
             }
 

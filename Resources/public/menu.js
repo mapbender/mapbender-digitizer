@@ -31,9 +31,9 @@
 
                         console.assert(type === "add" || type === "donut" || type === "modify" || type === "move", "Type "+type+" is wrong in 'openFeatureEditDialog'");
 
-                        if (type === 'add' && schema.openFormAfterEdit) {
+                        if (type === 'add' && schema.getSchemaByFeature(feature).openFormAfterEdit) {
                             schema.openFeatureEditDialog(feature);
-                        } else if (schema.openFormAfterModification) {
+                        } else if (schema.getSchemaByFeature(feature).openFormAfterModification) {
                             schema.openFeatureEditDialog(feature);
                         }
 
