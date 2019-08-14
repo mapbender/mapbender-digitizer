@@ -159,9 +159,11 @@
         };
 
         schema.styles = schema.styles || {};
+        schema.basicStyles =  {};
 
         $.each(styles, function (label, style) {
-            schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(schema.styles[label] || style);
+            schema.basicStyles[label] = schema.styles[label] || style;
+            schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(schema.basicStyles[label]);
         });
 
     };
@@ -473,7 +475,11 @@
     Mapbender.Digitizer.Scheme.prototype.openChangeStyleDialog = function (feature) {
         var schema = this;
 
-        var styleEditor = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema);
+        var styleOptions = {
+            data: feature.get("data").get("basicStyle") || schema.basicStyles.default,
+        };
+
+        var styleEditor = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, styleOptions);
     };
 
 
@@ -523,7 +529,7 @@
 
             var geoJsonReader = new ol.format.GeoJSONWithSeperateData();
 
-            var newFeature = geoJsonReader.readFeatureFromObject(response);
+            var newFeature = geoJsonReader.readFeatureFromObject(response.features[0]);
 
             schema.introduceFeature(newFeature);
 

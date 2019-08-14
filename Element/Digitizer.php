@@ -100,8 +100,11 @@ class Digitizer extends DataManagerElement
         return array(
             'js' => array_merge($dataManagerAssets["js"],$js),
             'css' => array_merge($dataManagerAssets["css"], array(
+                '/components/select2/select2-built.css',
+                '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
                 '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.css',
+                '@MapbenderDigitizerBundle/Resources/public/sass/element/modal.scss',
 
 
             )),

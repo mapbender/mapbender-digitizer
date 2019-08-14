@@ -28,7 +28,6 @@
         };
 
         options = $.extend(defaultOptions, options);
-        console.log(feature.getGeometry());
 
         if (schema.getGeomType()=="LineString") {
             options.fillTab = false;
