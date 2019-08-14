@@ -414,7 +414,7 @@
 
         var newAttributes = _.extend({}, defaultAttributes);
 
-        $.each(feature.getProperties(), function (key, value) {
+        $.each(feature.getProperties().data, function (key, value) {
             if (key === schema.featureType.uniqueId || value === '' || value === null) {
                 return;
             }
@@ -427,15 +427,19 @@
 
         });
 
+        var name = schema.featureType.name;
+        if (name) {
+            newFeature.get("data").set(name, "Copy of " + (feature.get("data").get(name) || '#' + feature.getId()));
+        }
+
+        newFeature.set("data",newAttributes);
+
         // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
         if (schema.copy.moveCopy) {
             newFeature.getGeometry().translate(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
         }
 
-        var name = schema.featureType.name;
-        if (name) {
-            newFeature.set(name, "Copy of " + (feature.get(name) || '#' + feature.getId()));
-        }
+
 
         schema.layer.getSource().addFeature(newFeature);
 
@@ -516,10 +520,9 @@
                 console.warn("More than 1 Feature returned from DB Operation");
             }
 
-            var geoJsonReader = new ol.format.GeoJSON();
+            var geoJsonReader = new ol.format.GeoJSONWithSeperateData();
 
-            var newFeatures = geoJsonReader.readFeaturesFromObject(response);
-            var newFeature = _.first(newFeatures);
+            var newFeature = geoJsonReader.readFeatureFromObject(response);
 
             schema.introduceFeature(newFeature);
 
