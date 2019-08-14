@@ -277,7 +277,10 @@
             }]
         });
 
-        element.formData(options.data);
+        // Unfortunately, vis-ui demands it like this
+        window.setTimeout(function(){
+            element.formData(options.data);
+        },0);
 
         editor.element = element;
 

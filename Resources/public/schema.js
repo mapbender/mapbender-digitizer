@@ -108,6 +108,7 @@
             var feature = event.feature;
 
             var jsonStyle = feature.get("data").get("style");
+
             if (jsonStyle) {
                 var basicStyle = JSON.parse(jsonStyle);
                 var style = ol.style.StyleConverter.convertToOL4Style(basicStyle);
@@ -166,6 +167,7 @@
             schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(schema.basicStyles[label]);
         });
 
+        Object.freeze(schema.styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
     };
 
 
@@ -382,7 +384,7 @@
 
         });
 
-        schema.layer.getSource().dispatchEvent({ type : "Digitizer.StyleFeature", feature: feature });
+       schema.layer.getSource().dispatchEvent({ type : "Digitizer.StyleFeature", feature: feature });
 
     };
 
@@ -570,6 +572,8 @@
                     console.warn("Creation of new Feature failed");
                     return;
                 }
+
+                console.assert(schema.layer.getSource().getFeatures().includes(feature),"Feature is not part of the source");
 
                 schema.layer.getSource().removeFeature(feature);
                 schema.layer.getSource().addFeature(newFeature);

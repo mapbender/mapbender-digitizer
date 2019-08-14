@@ -4,6 +4,23 @@
 
     Mapbender.Digitizer.Utilities = {
 
+        deepFreeze: function (o) {
+            Object.freeze(o);
+            if (o === undefined) {
+                return o;
+            }
+
+            Object.getOwnPropertyNames(o).forEach(function (prop) {
+                if (o[prop] !== null
+                    && (typeof o[prop] === "object" || typeof o[prop] === "function")
+                    && !Object.isFrozen(o[prop])) {
+                    Mapbender.Digitizer.Utilities.deepFreeze(o[prop]);
+                }
+            });
+
+            return o;
+        },
+
         getDefaultToolsetByGeomType: function (geomType) {
 
             var toolset = null;
@@ -102,9 +119,8 @@
 
         /* creates 4 element array with color and opacity */
         var calculateColor = function (color, opacity, originalColor) {
-            var newColor = ol.color.asArray(color !== undefined ? color : originalColor);
+            var newColor = ol.color.asArray(color !== undefined ? color : originalColor).slice(); // it is necessary to clone via slice to prevent unpredictable behaviour
             newColor[3] = opacity !== undefined ? opacity : newColor[3];
-
             return newColor;
         };
 
@@ -140,7 +156,6 @@
         });
 
         newStyle.setImage(image);
-
 
         Object.freeze(newStyle);
 
