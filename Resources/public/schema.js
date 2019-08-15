@@ -112,7 +112,7 @@
             if (jsonStyle) {
                 var basicStyle = JSON.parse(jsonStyle);
                 var style = ol.style.StyleConverter.convertToOL4Style(basicStyle);
-                feature.set("basicStyle",style);
+                feature.set("basicStyle",basicStyle);
                 feature.set("style",style);
                 feature.setStyle(style);
             }
@@ -478,7 +478,7 @@
         var schema = this;
 
         var styleOptions = {
-            data: feature.get("data").get("basicStyle") || schema.basicStyles.default,
+            data: feature.get("basicStyle") || schema.basicStyles.default,
         };
 
         var styleEditor = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, styleOptions);
