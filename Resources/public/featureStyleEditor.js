@@ -301,40 +301,15 @@
             var styleData = featureStyleEditor.element.formData();
             featureStyleEditor.element.disableForm();
 
-            featureStyleEditor.saveStyle(feature, styleData);
+            console.assert(!!schema.featureType.styleField,"Style Field in Feature Type is not specified");
 
-            schema.saveFeature(feature,{
-                style: JSON.stringify(styleData)
-            });
-            // if (feature.fid) {
-            //     featureStyleEditor.saveStyle(feature, styleData);
-            // } else {
-            //     // defer style saving until the feature itself is saved, and has an id to associate with
-            //     feature.saveStyleDataCallback = function (newFeature) {
-            //         return featureStyleEditor.saveStyle(newFeature, styleData);
-            //     }
-            // }
+            var formData = {};
+            formData[schema.featureType.styleField] = JSON.stringify(styleData);
+            // TODO enable defered saving
+            schema.saveFeature(feature,formData);
             featureStyleEditor.close();
 
         },
-
-        saveStyle: function (feature, styleData) {
-            var featureStyleEditor = this;
-            var schema = featureStyleEditor.schema;
-            var widget = schema.widget;
-            // console.assert(!!feature.fid, "Feature has no ID to be assoicated with for style saving");
-
-            console.log(styleData);
-            // return widget.query('style/save', {
-            //     schema: schema.schemaName,
-            //     style: styleData,
-            //     featureId: feature.fid
-            // }).then(function (response) {
-            //     schema.featureStyles[feature.fid] = styleData;
-            //     schema.layer.drawFeature(feature);
-            //     featureStyleEditor.element.enableForm();
-            // });
-        }
 
 
     };
