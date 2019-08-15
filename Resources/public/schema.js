@@ -109,7 +109,7 @@
 
             console.assert(!!schema.featureType.styleField,"Style Field in Feature Type is not specified");
 
-            var jsonStyle = feature.get("data").get(schema.featureType.styleField);
+            var jsonStyle = feature.get("data") && feature.get("data").get(schema.featureType.styleField);
 
             if (jsonStyle) {
                 var basicStyle = JSON.parse(jsonStyle);
