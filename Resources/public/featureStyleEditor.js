@@ -177,16 +177,16 @@
                         value: 'Arial, Helvetica, sans-serif',
                         options: {
                             'Arial, Helvetica, sans-serif': 'Arial, Helvetica, sans-serif',
-                            '"Arial Black", Gadget, sans-serif': 'Arial Black, Gadget, sans-serif',
-                            '"Comic Sans MS", cursive, sans-serif': 'Comic Sans MS, cursive, sans-serif',
+                            'Arial Black, Gadget, sans-serif': 'Arial Black, Gadget, sans-serif',
+                            'Comic Sans MS, cursive, sans-serif': 'Comic Sans MS, cursive, sans-serif',
                             'Impact, Charcoal, sans-serif': 'Impact, Charcoal, sans-serif',
-                            '"Lucida Sans Unicode", "Lucida Grande", sans-serif': 'Lucida Sans Unicode, Lucida Grande, sans-serif',
+                            'Lucida Sans Unicode, Lucida Grande, sans-serif': 'Lucida Sans Unicode, Lucida Grande, sans-serif',
                             'Tahoma, Geneva, sans-serif': 'Tahoma, Geneva, sans-serif',
-                            '"Trebuchet MS", Helvetica, sans-serif': 'Trebuchet MS, Helvetica, sans-serif',
+                            'Trebuchet MS, Helvetica, sans-serif': 'Trebuchet MS, Helvetica, sans-serif',
                             'Verdana, Geneva, sans-serif': 'Verdana, Geneva, sans-serif',
                             'Georgia, serif': 'Georgia, serif (nichtproportionale Schrift)',
-                            '"Palatino Linotype", "Book Antiqua", Palatino, serif': 'Palatino Linotype, "Book Antiqua", Palatino, serif (nichtproportionale Schrift)',
-                            '"Times New Roman", Times, serif': 'Times New Roman, Times, serif (nichtproportionale Schrift)'
+                            'Palatino Linotype, Book Antiqua, Palatino, serif': 'Palatino Linotype, Book Antiqua, Palatino, serif (nichtproportionale Schrift)',
+                            'Times New Roman, Times, serif': 'Times New Roman, Times, serif (nichtproportionale Schrift)'
                         },
                         name: 'fontFamily',
                         infoText: 'The font family for the label, to be provided like in CSS.',
@@ -203,7 +203,9 @@
                             "11": 11,
                             "12": 12,
                             "13": 13,
-                            "14": 14
+                            "14": 14,
+                            "20": 20,
+                            "24": 24
                         },
                         css: {width: "20%"},
                         infoText: 'The font size for the label, to be provided like in CSS'
@@ -276,6 +278,8 @@
                 }
             }]
         });
+
+        console.log(options.data);
 
         // Unfortunately, vis-ui demands it like this
         window.setTimeout(function(){

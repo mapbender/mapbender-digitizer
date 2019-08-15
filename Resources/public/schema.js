@@ -575,7 +575,7 @@
                     return;
                 }
 
-                console.assert(schema.layer.getSource().getFeatures().includes(feature),"Feature is not part of the source");
+                console.assert(schema.layer.getSource().getFeatures().includes(feature),"Feature is not part of the source",schema.layer.getSource().getFeatures());
 
                 schema.layer.getSource().removeFeature(feature);
                 schema.layer.getSource().addFeature(newFeature);

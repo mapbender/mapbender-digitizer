@@ -141,13 +141,33 @@
             }
         };
 
+        var getFontStyleString = function(style) {
+           var fontFamily = style.fontFamily || "sans-serif";
+           var fontSize = style.fontSize ? style.fontSize+"px" : "";
+           var fontWeight = style.fontWeight || "";
+
+           var str = [fontSize,fontWeight,fontFamily].join(" ");
+           return str;
+        };
+
         newStyle.getStroke().setColor(calculateColor(ol2Style.strokeColor, ol2Style.strokeOpacity, newStyle.getStroke().getColor()));
         newStyle.getStroke().setWidth(ol2Style.strokeWidth || newStyle.getStroke().getWidth());
         newStyle.getStroke().setLineCap(ol2Style.strokeLinecap || newStyle.getStroke().getLineCap());
-
         newStyle.getStroke().setLineDash(convertDashStyle(ol2Style.strokeDashstyle) || newStyle.getStroke().getLineDash());
 
         newStyle.getFill().setColor(calculateColor(ol2Style.fillColor, ol2Style.fillOpacity, newStyle.getFill().getColor()));
+
+        if (ol2Style.label) {
+
+            newStyle.setText(new ol.style.Text({
+                text: ol2Style.label || newStyle.getText().getText(),
+                font: getFontStyleString(ol2Style),
+                overflow: true,
+            }));
+
+          newStyle.getText().getFill().setColor(calculateColor(ol2Style.fontColor, ol2Style.fontOpacity, newStyle.getText().getFill().getColor()));
+        }
+
 
         var image = new ol.style.Circle({
             fill: newStyle.getFill().clone(),
