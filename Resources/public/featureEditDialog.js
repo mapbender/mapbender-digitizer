@@ -184,7 +184,7 @@
 
                 if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
                     schema.removeFeature(feature);
-                } else if ((feature.isChanged || feature.isNew) && schema.revertChangedGeometryOnCancel) {
+                } else if ((feature.isChanged || feature.isNew) && schema.getSchemaByFeature(feature).revertChangedGeometryOnCancel) {
 
                     schema.layer.renderer.eraseGeometry(feature.geometry);
                     feature.geometry = feature.oldGeometry;

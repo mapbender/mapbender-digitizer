@@ -155,7 +155,7 @@
                         className: 'zoom',
                         cssClass: 'fa fa-crosshairs',
                         onClick: function (feature, ui) {
-                            schema.zoomToJsonFeature(feature);
+                            schema.zoomToFeature(feature);
                         }
                     });
                 }
