@@ -66,42 +66,19 @@
 
         var feature = dialog.$popup.data("feature");
 
-        var eventListeners =
-            {
+        var eventListeners = {};
 
-                'Digitizer.FeatureEditDialog.Print': function (event) {
 
-                },
-                'Digitizer.FeatureEditDialog.Copy': function (event) {
-                    schema.copyFeature(feature);
-                },
-                'Digitizer.FeatureEditDialog.Style': function (event) {
-                    schema.openChangeStyleDialog(feature);
-                },
-                'Digitizer.FeatureEditDialog.Save': function (event) {
-                    var formData = dialog.$popup.formData();
+        eventListeners[configuration.PREFIX + '.FeatureEditDialog.Copy'] = function (event) {
+            schema.copyFeature(feature);
+        };
 
-                    dialog.$popup.disableForm();
+        eventListeners[configuration.PREFIX + '.FeatureEditDialog.Style'] = function (event) {
+            schema.openChangeStyleDialog(feature);
+        };
 
-                    schema.saveFeature(feature, formData).then(function (response) {
 
-                        if (response.hasOwnProperty('errors')) {
-                            dialog.$popup.enableForm();
-                            return;
-                        }
-                        dialog.$popup.popupDialog('close');
-                    });
-
-                },
-                'Digitizer.FeatureEditDialog.Delete': function (event) {
-                    schema.removeFeature(feature);
-                },
-                'Digitizer.FeatureEditDialog.Cancel': function (event) {
-                    dialog.$popup.popupDialog('close');
-                }
-
-            };
-
+        eventListeners = Object.assign({}, eventListeners, Mapbender.DataManager.PopupConfiguration.prototype.createEventListeners.apply(this, arguments));
 
         return eventListeners;
 
