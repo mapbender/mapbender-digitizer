@@ -1,78 +1,104 @@
 mb.digitizer:
-  useAllScheme: 'Use aggregating Scheme'
-  displayOnInactive: 'Display when not active'
-  schema:
-    allgeometries: 'All Geometries'
-  feature:
-    remove:
-      title: 'Remove feature'
-      successfully: 'Feature removed.'
-      from:
-        database: 'Delete feature.'
-    zoomTo: 'Zoom to feature'
-    edit: 'Edit feature'
-    attributes: 'Feature attributes'
-    savesave: 'Save feature'
-    save:
-      title: 'Save'
-      successfully: 'Feature saved.'
-    loading:
-      error: 'Features loading error.'
-    print: Print
-    style:
-      change: Change style
-    clone:
-      title: Copy
-      on:
-        error: Object coping is denied.
-    visibility:
-      toggleoff: Fade out feature
-      toggleon: Fade in feature
-  toolset:
-    current-extent: 'Select by current extent only.'
-    showAll: Fade out all features
-    hideAll: Fade in all features
-    saveAll: Save all features
-    point:
-      drawPoint: Draw point
-      moveFeature: Move point
-    line:
-      drawLine: Draw line
-      modifyFeature: Modify line
-      moveFeature: Move line
-    polygon:
-      drawPolygon: Draw polygon
-      drawRectangle: Draw rectangle
-      drawCircle: Draw circle
-      drawEllipse: Draw ellipse
-      drawDonut: Draw donut
-      modifyFeature: Modify polygon
-      moveFeature: Move polygone
-    all:
-      drawPoint: Draw point
-      drawLine: Draw line
-      drawPolygon: Draw polygon
-      drawRectangle: Draw rectangle
-      drawCircle: Draw circle
-      drawEllipse: Draw ellipse
-      drawDonut: Draw donut
-      modifyFeature: Modify feature
-      moveFeature: Move feature
-  cancel: Cancel
-  api:
-    query:
-      error-message: 'Feature API query error.'
-  table:
-    fields:
-      not.defined: 'Feature table fields aren''t defined.'
-  search:
-    title: Search
+    useAllScheme: 'Use aggregating Scheme'
+    displayOnInactive: 'Display when not active'
+    feature:
+        remove:
+            title: 'Remove feature'
+            successfully: 'Feature removed.'
+            from: {database: 'Delete feature.'}
+        zoomTo: 'Zoom to feature'
+        edit: 'Edit feature2'
+        attributes: 'Feature attributes'
+        savesave: 'Save feature'
+        save:
+            title: Save
+            successfully: 'Feature saved.'
+        loading:
+            error: 'Features loading error.'
+        print: Print
+        clone:
+            title: Copy
+            on:
+              error: 'Object coping is denied.'
+        style:
+            change: 'Change style'
+        visibility:
+            toggleoff: 'Fade out feature'
+            toggleon: 'Fade in feature'
+    toolset:
+        current-extent: 'Select by current extent only.'
+        showAll: 'Fade out all features'
+        hideAll: 'Fade in all features'
+        saveAll: 'Save all features'
+        point:
+            drawPoint: 'Draw point'
+            moveFeature: 'Move point'
+        line:
+            drawLine: 'Draw line'
+            modifyFeature: 'Modify line'
+            moveFeature: 'Move line'
+        polygon:
+            drawPolygon: 'Draw polygon'
+            drawRectangle: 'Draw rectangle'
+            drawCircle: 'Draw circle'
+            drawEllipse: 'Draw ellipse'
+            drawDonut: 'Draw donut'
+            modifyFeature: 'Modify polygon'
+            moveFeature2: 'Move polygone'
+        all:
+            drawPoint: 'Draw point'
+            drawLine: 'Draw line'
+            drawPolygon: 'Draw polygon'
+            drawRectangle: 'Draw rectangle'
+            drawCircle: 'Draw circle'
+            drawEllipse: 'Draw ellipse'
+            drawDonut: 'Draw donut'
+            modifyFeature: 'Modify feature'
+            moveFeature: 'Move feature'
+    cancel: Cancel
+    api:
+        query:
+            error-message: 'Feature API query error.'
     table:
-      empty: Empty.
-      zerorecords: 'No entries.'
-      info:
-        status: '_START_ to _END_ from _TOTAL_'
-        empty: 'No results'
-        filtered: '(filter from _MAX_ Objects.)'
-  remoteData:
-      error: WMS FeatureInfo request failed
+        fields:
+            not.defined: 'Feature table fields aren''t defined.'
+    search:
+        title: Search
+        table:
+            empty: Empty.
+            zerorecords: 'No entries.'
+            info: {status: '_START_ to _END_ from _TOTAL_', empty: 'No results', filtered: '(filter from _MAX_ Objects.)'}
+    remoteData:
+        error: 'WMS FeatureInfo request failed'
+    style:
+        filling: Filling
+        color: Color
+        chooseColorPicker: 'Choose color picker'
+        opacity: Opacity
+        radius: 'Radius (point)'
+        onlyNumbers: 'Please use only numerical values'
+        activate: Activate
+        stroke: Stroke
+        width: Width
+        lineCap: Smoothing
+        round: round
+        square: square
+        butt: butt
+        style: Style
+        solid: solid
+        dot: dot
+        dash: dash
+        longdash: longdash
+        dashdot: dashdot
+        longdashdot: longdashdot
+        caption: Caption
+        captionInfoText: 'The text for an optional label.  For browsers that use the canvas renderer, this requires either fillText or mozDrawText to be available.'
+        fontname: 'Font name'
+        fontnameInfoText: 'The font family for the label, to be provided like in CSS.'
+        fontsize: Size
+        fontsizeInfoText: 'The font size for the label, to be provided like in CSS'
+        fontweight: Weight
+        regular: regular
+        bold: bold
+        italic: italic
+        fontweightInfoText: 'The font weight for the label, to be provided like in CSS.'

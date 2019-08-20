@@ -1,83 +1,107 @@
 mb.digitizer:
-  useAllScheme: 'Verwende aggregierendes Schema'
-  displayOnInactive: 'Auch anzeigen, wenn nicht aktiv'
-  schema:
-    allgeometries: 'Alle Geometrien'
-  feature:
-    remove:
-      title: Löschen
-      successfully: 'Objekt wurde gelöscht.'
-      from:
-        database: 'Objekt löschen?'
-    zoomTo: Heranzoomen
-    edit: Bearbeiten
-    attributes: Objektinformationen
-    save:
-      title: Speichern
-      successfully: 'Objekt wurde gespeichert.'
-    loading:
-      error: 'Objekte konnten nicht geladen werden!'
-    print: Druck
-    style:
-      change: Stil ändern
-    clone:
-      title: Duplizieren
-      on:
-        error: Duplizieren des Objektes ist nicht erlaubt.
-    visibility:
-      toggleoff: Objekt ausblenden
-      toggleon: Objekt einblenden
-  toolset:
-    current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
-    showAll: Alle Objekte einblenden
-    hideAll: Alle Objekte ausblenden
-    saveAll: Alle Objekte speichern
-    point:
-      drawPoint: Punkt erstellen
-      moveFeature: Punkt verschieben
-      selectFeature: Punkte de-/selektieren
-      removeSelected: Selektierte Punkte löschen
-      createGeometryLessFeature: Punkt ohne initiale Geometrie erstellen
-    line:
-      drawLine: Linie erstellen
-      modifyFeature: Linie bearbeiten
-      moveFeature: Linie verschieben
-      selectFeature: Linien de-/selektieren
-      removeSelected: selektierten Linien löschen
-    polygon:
-      drawPolygon: Fläche erstellen
-      drawRectangle: Rechteck erstellen
-      drawCircle: Kreis erstellen
-      drawEllipse: Ellipse erstellen
-      drawDonut: Enklave in Fläche zeichnen
-      modifyFeature: Fläche bearbeiten
-      moveFeature: Fläche verschieben
-    all:
-      drawPoint: Punkt erstellen
-      drawLine: Linie erstellen
-      drawPolygon: Fläche erstellen
-      drawRectangle: Rechteck erstellen
-      drawCircle: Kreis erstellen
-      drawEllipse: Ellipse erstellen
-      drawDonut: Enklave in Fläche zeichnen
-      modifyFeature: Objekt bearbeiten
-      moveFeature: Objekt verschieben
-
-  cancel: Abbrechen
-  api:
-    query:
-      error-message: 'Feature API - Abfrage fehlgeschlagen.'
-  table:
-    fields:
-      not.defined: 'Felder der Tabelle sind nicht definiert!'
-  search:
-    title: Filter
+    useAllScheme: 'Verwende aggregierendes Schema'
+    displayOnInactive: 'Auch anzeigen, wenn nicht aktiv'
+    feature:
+        remove:
+            title: 'Löschen'
+            successfully: 'Objekt wurde gelöscht.'
+            from: {database: 'Objekt löschen?'}
+        zoomTo: 'Heranzoomen'
+        edit: 'Bearbeiten'
+        attributes: 'Objektinformationen'
+        save:
+            title: 'Speichern'
+            successfully: 'Objekt wurde gespeichert.'
+        loading:
+            error: 'Objekte konnten nicht geladen werden!'
+        print: 'Druck'
+        style:
+            change: 'Stil ändern'
+        clone:
+            title: 'Duplizieren'
+            on: {error: 'Duplizieren des Objektes ist nicht erlaubt.'}
+        visibility:
+            toggleoff: 'Objekt ausblenden'
+            toggleon: 'Objekt einblenden'
+    toolset:
+        current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
+        showAll: 'Alle Objekte einblenden'
+        hideAll: 'Alle Objekte ausblenden'
+        saveAll: 'Alle Objekte speichern'
+        point:
+            drawPoint: 'Punkt erstellen'
+            moveFeature: 'Punkt verschieben'
+            selectFeature: 'Punkte de-/selektieren'
+            removeSelected: 'Selektierte Punkte löschen'
+            createGeometryLessFeature: 'Punkt ohne initiale Geometrie erstellen'
+        line:
+            drawLine: 'Linie erstellen'
+            modifyFeature: 'Linie bearbeiten'
+            moveFeature: 'Linie verschieben'
+            selectFeature: 'Linien de-/selektieren'
+            removeSelected: 'selektierten Linien löschen'
+        polygon:
+            drawPolygon: 'Fläche erstellen'
+            drawRectangle: 'Rechteck erstellen'
+            drawCircle: 'Kreis erstellen'
+            drawEllipse: 'Ellipse erstellen'
+            drawDonut: 'Enklave in Fläche zeichnen'
+            modifyFeature: 'Fläche bearbeiten'
+            moveFeature: 'Fläche verschieben'
+        all:
+            drawPoint: 'Punkt erstellen'
+            drawLine: 'Linie erstellen'
+            drawPolygon: 'Fläche erstellen'
+            drawRectangle: 'Rechteck erstellen'
+            drawCircle: 'Kreis erstellen'
+            drawEllipse: 'Ellipse erstellen'
+            drawDonut: 'Enklave in Fläche zeichnen'
+            modifyFeature: 'Objekt bearbeiten'
+            moveFeature: 'Objekt verschieben'
+    cancel: 'Abbrechen'
+    api:
+        query:
+            error-message: 'Feature API - Abfrage fehlgeschlagen.'
     table:
-      empty: 'Keine Ergebnisse'
-      zerorecords: 'Keine Ergebnisse'
-      info:
-        status: 'Anzeige _START_ bis _END_ von _TOTAL_ Treffern'
-        empty: 'Keine Ergebnisse'
-        filtered: '(gefiltert von _MAX_ Objekte.)'
-  remoteData:
-      error: WMS FeatureInfo Anfrage fehlgeschlagen
+        fields:
+            not.defined: 'Felder der Tabelle sind nicht definiert!'
+    search:
+        title: 'Filter'
+        table:
+            empty: 'Keine Ergebnisse'
+            zerorecords: 'Keine Ergebnisse'
+            info: {status: 'Anzeige _START_ bis _END_ von _TOTAL_ Treffern', empty: 'Keine Ergebnisse', filtered: '(gefiltert von _MAX_ Objekte.)'}
+    remoteData:
+        error: 'WMS FeatureInfo Anfrage fehlgeschlagen'
+    style:
+        filling: Filling
+        color: Color
+        chooseColorPicker: 'Choose color picker'
+        opacity: Opacity
+        radius: 'Radius (point)'
+        onlyNumbers: 'Please use only numerical values'
+        activate: Activate
+        stroke: Stroke
+        width: Width
+        lineCap: smoothing
+        round: round
+        square: square
+        butt: butt
+        style: style
+        solid: solid
+        dot: dot
+        dash: dash
+        longdash: longdash
+        dashdot: dashdot
+        longdashdot: longdashdot
+        caption: caption
+        captionInfoText: 'The text for an optional label.  For browsers that use the canvas renderer, this requires either fillText or mozDrawText to be available.'
+        fontname: 'Font name'
+        fontnameInfoText: 'The font family for the label, to be provided like in CSS.'
+        size: Size
+        sizeInfoText: 'The font size for the label, to be provided like in CSS'
+        weight: Weight
+        regular: regular
+        bold: bold
+        italic: italic
+        fontWeightInfoText: 'The font weight for the label, to be provided like in CSS.'

@@ -1,50 +1,50 @@
 mb.digitizer:
   feature:
     remove:
-      title: Удалить
+      title: 'Удалить'
       successfully: 'Геометрия удалена'
       from:
         database: 'Удалить геометрию с сервера'
-    zoomTo: Zoom to
-    edit: Редактировать
-    attributes: Атрибуты
+    zoomTo: 'Zoom to'
+    edit: 'Редактировать'
+    attributes: 'Атрибуты'
     save:
-      title: Сохранить
+      title: 'Сохранить'
       successfully: 'Геометрия сохранена.'
     loading:
       error: 'Ошибка при загрузке геометрий.'
-    print: Print
+    print: 'Print'
     style:
-      change: Change style
+      change: 'Change style'
     clone:
-      title: Клонировать
+      title: 'Клонировать'
       on:
-        error: Копирование объекта запрещено.
+        error: 'Копирование объекта запрещено.'
   toolset:
     current-extent: 'Ограничить поиск в пределах видимости'
     point:
-      drawPoint: Создать точку
-      moveGeometry: Переместить точку
-      selectFeature: Выбрать точку
-      removeSelected: Удалить точку
+      drawPoint: 'Создать точку'
+      moveGeometry: 'Переместить точку'
+      selectFeature: 'Выбрать точку'
+      removeSelected: 'Удалить точку'
     line:
-      drawLine: Создать линию
-      modifyFeature: Изменить линию
-      moveGeometry: Переместить линию
-      selectFeature: Выбрать линию
-      removeSelected: Удалить линию
+      drawLine: 'Создать линию'
+      modifyFeature: 'Изменить линию'
+      moveGeometry: 'Переместить линию'
+      selectFeature: 'Выбрать линию'
+      removeSelected: 'Удалить линию'
     polygon:
-      drawPolygon: Создать полигон
-      drawRectangle: Создать квадрат
-      drawCircle: Создать круг
-      drawEllipse: Создать эллипс
-      drawDonut: Создать donut
-      modifyFeature: Изменть объект
-      moveGeometry: Переместить объект
-      selectFeature: Выбрать объект
-      removeSelected: Удалить объект
+      drawPolygon: 'Создать полигон'
+      drawRectangle: 'Создать квадрат'
+      drawCircle: 'Создать круг'
+      drawEllipse: 'Создать эллипс'
+      drawDonut: 'Создать donut'
+      modifyFeature: 'Изменть объект'
+      moveGeometry: 'Переместить объект'
+      selectFeature: 'Выбрать объект'
+      removeSelected: 'Удалить объект'
 
-  cancel: Отменить
+  cancel: 'Отменить'
   api:
     query:
       error-message: 'Ошибка коммуникации с сервером геометрий.'
@@ -52,7 +52,7 @@ mb.digitizer:
     fields:
       not.defined: 'Поля таблиц геометрий не настроены.'
   search:
-    title: Поиск
+    title: 'Поиск'
     table:
       empty: 'Пустая таблица'
       zerorecords: 'Без результатов'

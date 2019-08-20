@@ -1,7 +1,7 @@
 mb.digitizer:
   feature:
     remove:
-      remove: Rimuovi      
+      remove: 'Rimuovi      '
       successfully: 'Feature rimossa.'
       from:
         database: 'Elimina la feature.'
@@ -9,16 +9,16 @@ mb.digitizer:
     edit: 'Edita la feature'
     attributes: 'Attributi della feature'
     save:
-      save: Salva
+      save: 'Salva'
       successfully: 'Feature salvata.'
     loading:
       error: 'Errore nel caricamento delle feature.'
-    print: Stampa
+    print: 'Stampa'
     style:
       change: 'Cambia stile'
   toolset:
     current-extent: 'Selezione nell''attuale estensione'
-  cancel: Cancella
+  cancel: 'Cancella'
   api:
     query:
       error-message: 'Errore dovuto a Feature API Query.'
@@ -26,9 +26,9 @@ mb.digitizer:
     fields:
       not.defined: 'I campi della tabella Feature non sono definiti.'
   search:
-    title: Cerca
+    title: 'Cerca'
     table:
-      empty: Vuota
+      empty: 'Vuota'
       zerorecords: 'Nessun risultato.'
       info:
         status: '_START_ to _END_ from _TOTAL_'

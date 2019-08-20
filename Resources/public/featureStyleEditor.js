@@ -9,49 +9,28 @@
         editor.schema = schema;
 
         var defaultOptions = {
-
-            asPopup: true,
-            data: {
-                'id': null,
-                'borderSize': 1
-            },
-            customColors: {
-                '#777777': '#777777',
-                '#337ab7': '#337ab7',
-                '#5cb85c': '#5cb85c',
-                '#5bc0de': '#5bc0de',
-                '#f0ad4e': '#f0ad4e',
-                '#d9534f': '#d9534f'
-            },
-            commonTab: true,
-            fillTab: true
         };
 
         options = $.extend(defaultOptions, options);
 
-        if (schema.getGeomType()=="LineString") {
-            options.fillTab = false;
-        }
-
-
         var element = $("<div/>");
         var customColors = options.customColors;
         var fillTab = {
-            title: "Füllung",
+            title: Mapbender.DataManager.Translator.translate('style.filling'),
             type: "form",
             children: [{
                 type: 'fieldSet',
                 children: [{
-                    title: "Farbe",
+                    title: Mapbender.DataManager.Translator.translate('style.color'),
                     type: "colorPicker",
                     name: "fillColor",
                     value: "#ff0000",
                     mandatory: "/^#{1,1}[abcdefABCDEF0-9]{6,6}$/",
-                    mandatoryText: "Bitte Farbwähler nutzen",
+                    mandatoryText: Mapbender.DataManager.Translator.translate('style.chooseColorPicker'),
                     colorSelectors: customColors,
                     css: {width: "30%"}
                 }, {
-                    title: "Deckkraft",
+                    title: Mapbender.DataManager.Translator.translate('style.opacity'),
                     name: "fillOpacity",
                     type: "slider",
                     range: "max",
@@ -62,11 +41,11 @@
                     css: {width: "35%"}
 
                 }, {
-                    title: "Punkt Radius",
+                    title: Mapbender.DataManager.Translator.translate('style.radius'),
                     name: "pointRadius",
                     type: "slider",
                     mandatory: "/^\\d+$/",
-                    mandatoryText: "Bitte nur Zahlen verwenden",
+                    mandatoryText: Mapbender.DataManager.Translator.translate('style.onlyNumbers'),
                     range: "max",
                     min: 0,
                     max: 20,
@@ -77,7 +56,7 @@
                     }
 
                 }, {
-                    title: "Aktivieren",
+                    title: Mapbender.DataManager.Translator.translate('style.activate'),
                     type: "checkbox",
                     checked: true,
                     name: "fill",
@@ -86,22 +65,22 @@
             }]
         };
         var strokeTab = {
-            title: "Rand",
+            title: Mapbender.DataManager.Translator.translate('style.stroke'),
             type: "form",
             children: [{
                 type: 'fieldSet',
                 children: [{
-                    title: "Farbe",
+                    title: Mapbender.DataManager.Translator.translate('style.color'),
                     type: "colorPicker",
                     name: "strokeColor",
                     value: "#ffffff",
                     horizontal: true,
                     mandatory: "/^\#[A-F0-9]{6}$/i",
-                    mandatoryText: "Bitte Farbwähler nutzen",
+                    mandatoryText: Mapbender.DataManager.Translator.translate('style.chooseColorPicker'),
                     css: {width: "30%"}
 
                 }, {
-                    title: "Deckkraft",
+                    title: Mapbender.DataManager.Translator.translate('style.opacity'),
                     name: "strokeOpacity",
                     type: "slider",
                     range: "max",
@@ -112,7 +91,7 @@
                     css: {width: "35%"}
 
                 }, {
-                    title: "Breite",
+                    title: Mapbender.DataManager.Translator.translate('style.width'),
                     type: "slider",
                     name: "strokeWidth",
                     min: 0,
@@ -124,34 +103,34 @@
             }, {
                 type: 'fieldSet',
                 children: [{
-                    title: "Glättung",
+                    title: Mapbender.DataManager.Translator.translate('style.lineCap'),
                     name: "strokeLinecap",
                     type: "select",
                     options: {
-                        round: "abgerundet",
-                        square: "eckig",
-                        butt: "bündig"
+                        round: Mapbender.DataManager.Translator.translate('style.round'),
+                        square: Mapbender.DataManager.Translator.translate('style.square'),
+                        butt: Mapbender.DataManager.Translator.translate('style.butt')
                     },
                     value: "round",
                     css: {width: "50%"}
                 }, {
-                    title: "Style",
+                    title: Mapbender.DataManager.Translator.translate('style.style'),
                     name: "strokeDashstyle",
                     type: "select",
                     options: {
-                        solid: 'Durchgezogen',
-                        dot: 'Gepunktet',
-                        dash: 'Gestrichelt',
-                        longdash: 'Gestrichelt, lang',
-                        dashdot: 'Strichpunkt',
-                        longdashdot: 'Strichpunktpunkt'
+                        solid: Mapbender.DataManager.Translator.translate('style.solid'),
+                        dot: Mapbender.DataManager.Translator.translate('style.dot'),
+                        dash: Mapbender.DataManager.Translator.translate('style.dash'),
+                        longdash: Mapbender.DataManager.Translator.translate('style.longdash'),
+                        dashdot: Mapbender.DataManager.Translator.translate('style.dashdot'),
+                        longdashdot: Mapbender.DataManager.Translator.translate('style.longdashdot')
                     },
                     value: "solid",
                     css: {width: "50%"}
 
                 }]
             }, {
-                title: "Aktivieren",
+                title: Mapbender.DataManager.Translator.translate('style.activate'),
                 type: "checkbox",
                 checked: true,
                 name: "stroke",
@@ -161,18 +140,18 @@
 
         var labelTab = {
 
-            title: 'Beschriftung',
+            title: Mapbender.DataManager.Translator.translate('style.caption'),
             type: 'form',
             children: [
                 {
                     type: 'textArea',
                     css: {width: "100 %"},
                     name: 'label',
-                    infoText: 'The text for an optional label.  For browsers that use the canvas renderer, this requires either fillText or mozDrawText to be available.'
+                    infoText: Mapbender.DataManager.Translator.translate('style.captionInfoText')
                 }, {
                     type: 'fieldSet',
                     children: [{
-                        title: 'Fontname',
+                        title: Mapbender.DataManager.Translator.translate('style.fontname'),
                         type: 'select',
                         value: 'Arial, Helvetica, sans-serif',
                         options: {
@@ -189,11 +168,11 @@
                             'Times New Roman, Times, serif': 'Times New Roman, Times, serif (nichtproportionale Schrift)'
                         },
                         name: 'fontFamily',
-                        infoText: 'The font family for the label, to be provided like in CSS.',
+                        infoText:  Mapbender.DataManager.Translator.translate('style.fontnameInfoText'),
                         css: {width: "50%"}
 
                     }, {
-                        title: 'Grösse',
+                        title:  Mapbender.DataManager.Translator.translate('style.fontsize'),
                         name: 'fontSize',
                         type: 'select',
                         value: 11,
@@ -208,28 +187,28 @@
                             "24": 24
                         },
                         css: {width: "20%"},
-                        infoText: 'The font size for the label, to be provided like in CSS'
+                        infoText:  Mapbender.DataManager.Translator.translate('style.fontsizeInfoText'),
                     },
                         {
                             title: 'Art',
-                            name: 'fontWeight',
+                            name: Mapbender.DataManager.Translator.translate('style.fontweight'),
                             type: 'select',
                             value: 'regular',
                             options: {
-                                'regular': 'Normal',
-                                'bold': 'Fett',
-                                'italic': 'Kursiv'
+                                'regular':  Mapbender.DataManager.Translator.translate('style.regular'),
+                                'bold':  Mapbender.DataManager.Translator.translate('style.bold'),
+                                'italic':  Mapbender.DataManager.Translator.translate('style.italic')
                             },
                             css: {width: "30%"},
-                            infoText: 'The font weight for the label, to be provided like in CSS.'
+                            infoText:  Mapbender.DataManager.Translator.translate('style.fontweightInfoText')
                         }, {
-                            title: 'Farbe',
+                            title:  Mapbender.DataManager.Translator.translate('style.color'),
                             type: 'colorPicker',
                             name: 'fontColor',
                             // infoText: 'The font color for the label, to be provided like CSS.',
                             css: {width: "50%"}
                         }, {
-                            title: "Deckkraft",
+                            title:  Mapbender.DataManager.Translator.translate('style.opacity'),
                             name: "fontOpacity",
                             type: "slider",
                             range: "max",
@@ -249,7 +228,7 @@
 
         var tabs = [];
 
-        if (options.fillTab) {
+        if (schema.getGeomType()!="LineString") {
             tabs.push(fillTab);
         }
 
@@ -278,8 +257,6 @@
                 }
             }]
         });
-
-        console.log(options.data);
 
         // Unfortunately, vis-ui demands it like this
         window.setTimeout(function(){
