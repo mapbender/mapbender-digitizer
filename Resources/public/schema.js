@@ -38,7 +38,11 @@
         // Deactivated schema.maxResults = options.maxResults || 5000;
         // only in custom bundles - allowPrintMetadata
         // mailManager
-        // minScale, maxScale, group, save
+        schema.minScale = options.minScale || undefined;
+
+        schema.maxScale = options.maxScale || undefined;
+
+        //    group, save
         // hooks
 
         /** TO BE Implemented **/
@@ -90,15 +94,55 @@
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
 
+            feature.set("mbOrigin","digitizer");
+
+            feature.setStyle(schema.styles.default);
+
+            feature.on('Digitizer.HoverFeature', function (event) {
+
+                if (!feature.get("hidden")) {
+                    feature.set("selected", event.hover);
+                }
+
+            });
+
+            schema.layer.getSource().dispatchEvent({ type : "Digitizer.StyleFeature", feature: feature });
+
             feature.set("oldGeometry",feature.getGeometry().clone());
 
             feature.on('Digitizer.ModifyFeature', function (event) {
 
                 /** TODO replace this with event based model **/
                if (schema.deactivateControlAfterModification) {
-                   schema.menu.toolSet.activeInteraction.setActive(false);
+                   schema.menu.toolSet.activeInteraction && schema.menu.toolSet.activeInteraction.setActive(false);
                    schema.menu.toolSet.activeInteraction = null;
                }
+
+            });
+
+            feature.on(ol.ObjectEventType.PROPERTYCHANGE,function(event){
+                if (event.key == "selected" || event.key == "modificationState" || event.key == "hidden") {
+
+                    if (feature.get("hidden")) {
+                        feature.setStyle(schema.styles.invisible);
+                    } else
+                    if (feature.get("selected")) {
+                        feature.setStyle(schema.styles.select);
+                    } else {
+                        switch(feature.get("modificationState")) {
+                            case "isChanged" :
+                            case "isNew" :
+                                feature.setStyle(schema.styles.unsaved);
+                                break;
+                            case "isCopy" :
+                                feature.setStyle(schema.copy);
+                                break;
+                            default:
+                                feature.setStyle(schema.getFeatureStyle_(feature));
+                        }
+                    }
+
+                }
 
             });
         });
@@ -106,10 +150,7 @@
         schema.layer.getSource().on(['controlFactory.FeatureMoved','controlFactory.FeatureModified'], function (event) {
             var feature = event.feature;
 
-            if (schema.markUnsavedFeatures) {
-                feature.set("temporaryStyle", schema.styles.unsaved);
-                feature.setStyle(feature.get("temporaryStyle"));
-            }
+            feature.set("modificationState", "isChanged");
 
             feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
 
@@ -131,12 +172,7 @@
         schema.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
             var feature = event.feature;
 
-            schema.introduceFeature(feature);
-
-            if (schema.markUnsavedFeatures) {
-                feature.set("temporaryStyle", schema.styles.unsaved);
-                feature.setStyle(feature.get("temporaryStyle"));
-            }
+            feature.set("modificationState","isNew");
 
             if (schema.openFormAfterEdit) {
                 var dialog = schema.openFeatureEditDialog(feature);
@@ -158,12 +194,7 @@
         schema.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
             var feature = event.feature;
 
-            schema.introduceFeature(feature);
-
-            if (schema.markUnsavedFeatures) {
-                feature.set("temporaryStyle", schema.styles.copy);
-                feature.setStyle(feature.get("temporaryStyle"));
-            }
+            feature.set("modificationState", "isCopy");
 
             var dialog = schema.openFeatureEditDialog(feature);
 
@@ -188,11 +219,8 @@
 
             if (hidden) {
                 feature.set("hidden",true);
-                feature.set("temporaryStyle2",feature.getStyle());
-                feature.setStyle(schema.styles.invisible);
             } else {
                 feature.set("hidden",false);
-                feature.setStyle(feature.get("temporaryStyle2"));
             }
 
         });
@@ -467,30 +495,8 @@
       return feature.get("style") || schema.styles.default
     };
 
-    Mapbender.Digitizer.Scheme.prototype.introduceFeature = function (feature) {
-
-        var schema = this;
-        feature.set("mbOrigin","digitizer");
-
-        feature.setStyle(schema.styles.default);
-
-        feature.on('Digitizer.HoverFeature', function (event) {
-
-            if (!feature.get("hidden")) {
-                feature.setStyle(event.hover ? schema.styles.select : feature.get("temporaryStyle") ||  schema.getFeatureStyle_(feature));
-            }
-
-        });
-
-       schema.layer.getSource().dispatchEvent({ type : "Digitizer.StyleFeature", feature: feature });
-
-    };
-
     Mapbender.Digitizer.Scheme.prototype.integrateFeatures = function (features) {
         var schema = this;
-        features.forEach(function (feature) {
-            schema.introduceFeature(feature);
-        });
         schema.layer.getSource().addFeatures(features);
     };
 
@@ -632,8 +638,6 @@
             var geoJsonReader = new ol.format.GeoJSONWithSeperateData();
 
             var newFeature = geoJsonReader.readFeatureFromObject(response.features[0]);
-
-            schema.introduceFeature(newFeature);
 
             return newFeature;
 
