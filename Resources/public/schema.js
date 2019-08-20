@@ -3,25 +3,87 @@
 
     /**
      *
-     * @param {Object} rawScheme
+     * @param {Object} options
      * @param widget
-     * @param {number} index
      * @constructor
      */
 
-    Mapbender.Digitizer.Scheme = function (rawScheme, widget) {
+    Mapbender.Digitizer.Scheme = function (options, widget) {
         var schema = this;
 
-        Mapbender.DataManager.Scheme.apply(this, arguments);
+        Mapbender.DataManager.Scheme.apply(schema, arguments);
 
-        this.openFormAfterEdit = true;
+        schema.openFormAfterEdit = options.openFormAfterEdit || false;
 
+        schema.openFormAfterModification = options.openFormAfterModification || false;
+
+        schema.allowCustomStyle = options.allowCustomStyle || false;
+
+        schema.allowDigitize = options.allowDigitize || false;
+
+        schema.allowSaveInResultTable = options.allowSaveInResultTable || false;
+
+        schema.copy = options.copy || { enable: false, overwriteValuesWithDefault: false, moveCopy: 10 };
+
+        schema.useContextMenu = options.useContextMenu || false;
+
+        schema.printable = options.printable || false;
+
+        schema.allowSaveInResultTable = options.allowSaveInResultTable || false;
+
+        schema.allowChangeVisibility = options.allowChangeVisibility || false;
+
+        schema.allowDeleteByCancelNewGeometry = options.allowDeleteByCancelNewGeometry || false;
+
+        schema.allowLocate = options.allowLocate || false;
+
+        // Deactivated schema.maxResults = options.maxResults || 5000;
+        // only in custom bundles - allowPrintMetadata
+        // mailManager
+        // minScale, maxScale, group, save
+        // hooks
+
+        schema.showVisibilityNavigation = options.showVisibilityNavigation || false;
+
+        schema.zoomScaleDenominator = options.zoomScaleDenominator || 500;
+
+        schema.showExtendedSearchSwitch = options.showExtendedSearchSwitch || false;
+
+        schema.currentExtentSearch = options.currentExtentSearch || false;
+
+        schema.displayPermanent = options.displayPermanent || false;
+
+        schema.refreshFeaturesAfterSave = options.refreshFeaturesAfterSave || false;
+
+        schema.refreshLayersAfterFeatureSave = options.refreshLayersAfterFeatureSave || false;
+
+        /** New properties **/
+        schema.revertChangedGeometryOnCancel = options.revertChangedGeometryOnCancel || false;
+
+        schema.deactivateControlAfterModification = options.deactivateControlAfterModification || false;
+
+        schema.allowSaveAll = options.allowSaveAll || false;
+
+        schema.markUnsavedFeatures = options.markUnsavedFeatures || false;
+
+        schema.showLabel = options.showLabel || false;
+
+        schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
+
+        schema.openDialogOnResultTableClick = options.openDialogOnResultTableClick || false;
+
+        schema.zoomOnResultTableClick = options.zoomOnResultTableClick || true;
+
+        schema.basicStyles = Object.assign({},schema.getDefaultStyles_(),options.styles);
+
+        schema.styles = {};
+
+        schema.initializeWithDefaultStyles_();
 
         schema.createSchemaFeatureLayer_();
 
         schema.addSelectControl_();
 
-        schema.initializeWithDefaultStyles_();
 
 
         schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
@@ -126,10 +188,9 @@
     Mapbender.Digitizer.Scheme.prototype = Object.create(Mapbender.DataManager.Scheme.prototype);
     Mapbender.Digitizer.Scheme.prototype.constructor = Mapbender.DataManager.Scheme;
 
-
-    Mapbender.Digitizer.Scheme.prototype.initializeWithDefaultStyles_ = function () {
-        var schema = this;
+    Mapbender.Digitizer.Scheme.prototype.getDefaultStyles_ = function() {
         var styles = {
+
             default: {
                 strokeWidth: 1,
                 strokeColor: '#6fb536',
@@ -161,12 +222,14 @@
             }
         };
 
-        schema.styles = schema.styles || {};
-        schema.basicStyles =  {};
+        return styles;
+    };
 
-        $.each(styles, function (label, style) {
-            schema.basicStyles[label] = schema.styles[label] || style;
-            schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(schema.basicStyles[label]);
+    Mapbender.Digitizer.Scheme.prototype.initializeWithDefaultStyles_ = function () {
+        var schema = this;
+
+        $.each(schema.basicStyles, function (label, style) {
+            schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(style);
         });
 
         Object.freeze(schema.styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
