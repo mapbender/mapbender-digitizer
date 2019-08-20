@@ -6,6 +6,7 @@
 
         var menu = this;
         menu.schema = schema;
+
         var frame = $("<div />").addClass('frame');
 
         menu.appendToolset_(frame);
@@ -99,6 +100,24 @@
 
         });
 
+        resultTable.element.delegate("tbody > tr", 'click', function () {
+            var tr = this;
+            var row = resultTable.getApi().row(tr);
+            var feature = row.data();
+
+            if (feature) {
+
+                if (schema.zoomOnResultTableClick){
+                    schema.zoomToFeature(feature);
+                }
+                if (schema.openDialogOnResultTableClick) {
+                    schema.openFeatureEditDialog(feature);
+                }
+            } else {
+                console.warn("No Feature in row", row);
+            }
+
+        });
 
         schema.layer.getSource().on("Digitizer.ChangeCurrentExtentSearch", function (event) {
             resultTable.currentExtentSearch = event.currentExtentSearch;
@@ -216,22 +235,6 @@
                     } else {
                         $button.addClass('icon-eyeOff').removeClass('icon-eyeOn');
                         $button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'));
-                    }
-                }
-            });
-        }
-
-        if (schema.allowPrintMetadata) {
-            buttons.push({
-                title: 'Sachdaten drucken',
-                className: 'printmetadata',
-                onClick: function (feature, ui, b, c) {
-                    if (!feature.printMetadata) {
-                        feature.printMetadata = true;
-                        ui.addClass("active");
-                    } else {
-                        feature.printMetadata = false;
-                        ui.removeClass("active");
                     }
                 }
             });

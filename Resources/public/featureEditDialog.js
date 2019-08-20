@@ -17,12 +17,6 @@
         var schema = popupConfiguration.schema;
 
         var buttons = {};
-        if (schema.printable) {
-            buttons.printButton = {
-                title: 'feature.print',
-                event: 'Print'
-            };
-        }
         if (schema.copy && schema.copy.enable) {
             buttons.copyButton = {
                 title: 'feature.clone.title',

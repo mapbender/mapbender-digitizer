@@ -23,13 +23,11 @@
 
         schema.allowSaveInResultTable = options.allowSaveInResultTable || false;
 
-        schema.copy = options.copy || { enable: false, overwriteValuesWithDefault: false, moveCopy: 10 };
+        schema.copy = options.copy || { enable: false, overwriteValuesWithDefault: false, moveCopy: { x: 10, y: 10 } };
 
         schema.useContextMenu = options.useContextMenu || false;
 
-        schema.printable = options.printable || false;
-
-        schema.allowSaveInResultTable = options.allowSaveInResultTable || false;
+        // Deactivated schema.printable = options.printable || false;
 
         schema.allowChangeVisibility = options.allowChangeVisibility || false;
 
@@ -43,29 +41,34 @@
         // minScale, maxScale, group, save
         // hooks
 
+        /** TO BE Implemented **/
         schema.showVisibilityNavigation = options.showVisibilityNavigation || false;
 
+        /** TO BE Implemented **/
         schema.zoomScaleDenominator = options.zoomScaleDenominator || 500;
 
-        schema.showExtendedSearchSwitch = options.showExtendedSearchSwitch || false;
+        schema.showExtendSearchSwitch = options.showExtendSearchSwitch || false;
 
         schema.currentExtentSearch = options.currentExtentSearch || false;
 
         schema.displayPermanent = options.displayPermanent || false;
 
-        schema.refreshFeaturesAfterSave = options.refreshFeaturesAfterSave || false;
+        /** To be implemented **/
+       // schema.refreshFeaturesAfterSave = options.refreshFeaturesAfterSave || false;
 
-        schema.refreshLayersAfterFeatureSave = options.refreshLayersAfterFeatureSave || false;
+       //schema.refreshLayersAfterFeatureSave = options.refreshLayersAfterFeatureSave || false;
 
         /** New properties **/
         schema.revertChangedGeometryOnCancel = options.revertChangedGeometryOnCancel || false;
 
-        schema.deactivateControlAfterModification = options.deactivateControlAfterModification || false;
+        schema.deactivateControlAfterModification = options.deactivateControlAfterModification || true;
 
+        /** implement this **/
         schema.allowSaveAll = options.allowSaveAll || false;
 
         schema.markUnsavedFeatures = options.markUnsavedFeatures || false;
 
+        /** implement this **/
         schema.showLabel = options.showLabel || false;
 
         schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
@@ -84,27 +87,44 @@
 
         schema.addSelectControl_();
 
-
-
-        schema.layer.getSource().on('controlFactory.FeatureMoved', function (event) {
+        schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
 
-            feature.set("temporaryStyle",schema.styles.unsaved);
-            feature.setStyle(feature.get("temporaryStyle"));
+            feature.set("oldGeometry",feature.getGeometry().clone());
 
-            feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+            feature.on('Digitizer.ModifyFeature', function (event) {
 
+                /** TODO replace this with event based model **/
+               if (schema.deactivateControlAfterModification) {
+                   schema.menu.toolSet.activeInteraction.setActive(false);
+                   schema.menu.toolSet.activeInteraction = null;
+               }
 
+            });
         });
 
-        schema.layer.getSource().on('controlFactory.FeatureModified', function (event) {
-
+        schema.layer.getSource().on(['controlFactory.FeatureMoved','controlFactory.FeatureModified'], function (event) {
             var feature = event.feature;
 
-            feature.set("temporaryStyle",schema.styles.unsaved);
-            feature.setStyle(feature.get("temporaryStyle"));
+            if (schema.markUnsavedFeatures) {
+                feature.set("temporaryStyle", schema.styles.unsaved);
+                feature.setStyle(feature.get("temporaryStyle"));
+            }
 
             feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+
+            if (schema.openFormAfterModification) {
+                var dialog = schema.openFeatureEditDialog(feature);
+
+                dialog.$popup.bind('popupdialogclose', function () {
+
+                    if (schema.revertChangedGeometryOnCancel) {
+                        feature.setGeometry(feature.get("oldGeometry").clone());
+                        feature.changed();
+                    }
+                })
+            }
+
 
         });
 
@@ -113,8 +133,10 @@
 
             schema.introduceFeature(feature);
 
-            feature.set("temporaryStyle",schema.styles.unsaved);
-            feature.setStyle(feature.get("temporaryStyle"));
+            if (schema.markUnsavedFeatures) {
+                feature.set("temporaryStyle", schema.styles.unsaved);
+                feature.setStyle(feature.get("temporaryStyle"));
+            }
 
             if (schema.openFormAfterEdit) {
                 var dialog = schema.openFeatureEditDialog(feature);
@@ -138,10 +160,21 @@
 
             schema.introduceFeature(feature);
 
-            feature.set("temporaryStyle",schema.styles.copy);
-            feature.setStyle(feature.get("temporaryStyle"));
+            if (schema.markUnsavedFeatures) {
+                feature.set("temporaryStyle", schema.styles.copy);
+                feature.setStyle(feature.get("temporaryStyle"));
+            }
 
             var dialog = schema.openFeatureEditDialog(feature);
+
+            dialog.$popup.bind('popupdialogclose', function () {
+                feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+                if (schema.allowDeleteByCancelNewGeometry) {
+                    try {
+                        schema.removeFeature(feature);
+                    } catch(e) { /* Remove feature only if it exists */}
+                }
+            });
 
             feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
 
@@ -374,7 +407,7 @@
 
     Mapbender.Digitizer.Scheme.prototype.createPopupConfiguration_ = function () {
         var schema = this;
-        schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
+        schema.popupConfiguration = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
     };
 
     Mapbender.Digitizer.Scheme.prototype.activateSchema = function (wholeWidget) {
@@ -520,23 +553,25 @@
 
 
     Mapbender.Digitizer.Scheme.prototype.zoomToFeature = function (feature) {
-        var schema = this;
-        var widget = schema.widget;
-        var map = widget.map;
 
-        if (!feature) {
-            return;
-        }
-
-        var olMap = widget.map;
-        var geometry = feature.getGeometry();
-
-        var extent = schema.layer.getSource().getExtent();
-        map.getView().fit(geometry.getExtent(), map.getSize());
-
-        if (schema.zoomScaleDenominator) {
-            $.notify("zoomScaleDenominator not implemented yet");
-        }
+        Mapbender.Model.zoomToFeature(feature);
+        // var schema = this;
+        // var widget = schema.widget;
+        // var map = widget.map;
+        //
+        // if (!feature) {
+        //     return;
+        // }
+        //
+        // var olMap = widget.map;
+        // var geometry = feature.getGeometry();
+        //
+        // var extent = schema.layer.getSource().getExtent();
+        // map.getView().fit(geometry.getExtent(), map.getSize());
+        //
+        // if (schema.zoomScaleDenominator) {
+        //     $.notify("zoomScaleDenominator not implemented yet");
+        // }
     };
 
     Mapbender.Digitizer.Scheme.prototype.openChangeStyleDialog = function (feature) {

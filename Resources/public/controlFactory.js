@@ -189,13 +189,12 @@
             var controlFactory = this;
 
             var interaction = new ol.interaction.Modify({
-                source: source
+                source: source,
             });
 
             interaction.setActive = controlFactory.createActivator_(interaction);
 
             interaction.on(ol.interaction.ModifyEventType.MODIFYSTART,function(event) {
-
             });
 
             /** TODO this needs to be improved **/
