@@ -13,6 +13,8 @@
 
         frame.append('<div style="clear:both;"/>');
 
+        menu.appendResultTableControlButtons_(frame);
+
         menu.appendCurrentExtentSwitch_(frame);
 
         menu.generateDataTable_(frame);
@@ -36,6 +38,63 @@
 
     Mapbender.Digitizer.Menu.prototype = Object.create(Mapbender.DataManager.Menu.prototype);
     Mapbender.Digitizer.Menu.prototype.constructor = Mapbender.DataManager.Menu;
+
+
+
+    Mapbender.Digitizer.Menu.prototype.appendResultTableControlButtons_ = function(frame) {
+        var menu = this;
+        var schema = menu.schema;
+
+        var buttons = {};
+
+        if (schema.showVisibilityNavigation && schema.allowChangeVisibility) {
+
+            var $button = $("<button class='button' type='button'/>");
+            $button.addClass("icon-eyeOff eyeOff");
+            $button.attr("title", Mapbender.DataManager.Translator.translate('toolset.hideAll'));
+            $button.click(function (event) {
+                schema.layer.getSource().getFeatures().forEach(function(feature){
+                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: true });
+                });
+            });
+            buttons['hideAll'] = $button;
+
+            var $button = $("<button class='button' type='button'/>");
+            $button.addClass("icon-eyeOn eyeOn");
+            $button.attr("title", Mapbender.DataManager.Translator.translate('toolset.showAll'));
+            $button.click(function (event) {
+                schema.layer.getSource().getFeatures().forEach(function(feature){
+                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: false });
+                });
+            });
+            buttons['showAll'] = $button;
+        }
+        if (schema.allowSaveAll) {
+
+            var $button = $("<button class='button' type='button'/>");
+            $button.addClass("icon-save save");
+            $button.attr("title", Mapbender.DataManager.Translator.translate('toolset.saveAll'));
+            $button.attr("disabled","disabled");
+            $button.click(function () {
+                schema.layer.getSource().getFeatures().filter(function(feature) {
+                    return (["isNew","isChanged","isCopy"].includes(feature.get("modificationState")));
+                }).forEach(function(feature){
+                    schema.saveFeature(feature);
+                });
+            });
+            buttons['allowSaveAll'] = $button;
+
+        }
+
+
+
+        var $div = $("<div/>");
+        $div.addClass("resultTableControlButtons");
+        $.each(buttons,function(name,$button) {
+            $div.append($button);
+        });
+        frame.append($div);
+    };
 
 
     Mapbender.Digitizer.Menu.prototype.appendCurrentExtentSwitch_ = function (frame) {
@@ -80,7 +139,7 @@
 
     };
 
-    Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable) {
+    Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable,frame) {
         var menu = this;
         var schema = menu.schema;
         var map = schema.widget.map;
@@ -155,25 +214,40 @@
 
             feature.on('Digitizer.ModifyFeature', function (event) {
 
-                var row = resultTable.getTableRowByFeature(feature);
-                $(row).find('.button.save').removeAttr("disabled");
+                var $button = resultTable.getButtonByFeature('.save',feature);
+                $button.removeAttr("disabled");
+
+                frame.find(".resultTableControlButtons .save").removeAttr("disabled");
 
             });
 
             feature.on('Digitizer.UnmodifyFeature', function (event) {
 
-                var row = resultTable.getTableRowByFeature(feature);
-                $(row).find('.button.save').attr("disabled", "disabled");
+                var $button = resultTable.getButtonByFeature('.save',feature);
+                $button.attr("disabled", "disabled");
+
+                var length = schema.layer.getSource().getFeatures().filter(function(feature){
+                    return ["isNew","isChanged","isCopy"].includes(feature.get("modificationState"));
+                }).length;
+
+
+                if (length === 0) {
+                    frame.find(".resultTableControlButtons .save").attr("disabled","disabled");
+                }
 
             });
 
             feature.on('Digitizer.toggleVisibility', function (event) {
-                if (!event.hidden) {
-                    event.$button.addClass('icon-eyeOn').removeClass('icon-eyeOff');
-                    event.$button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleon'));
+                var $button = resultTable.getButtonByFeature('.visibility',feature);
+                if (!$button) {
+                    return;
+                }
+                if (event.hide) {
+                    $button.addClass('icon-eyeOn').removeClass('icon-eyeOff');
+                    $button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleon'));
                 } else {
-                    event.$button.addClass('icon-eyeOff').removeClass('icon-eyeOn');
-                    event.$button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'));
+                    $button.addClass('icon-eyeOff').removeClass('icon-eyeOn');
+                    $button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'));
                 }
             });
 
@@ -189,71 +263,71 @@
         var menu = this;
         var schema = menu.schema;
 
-        var buttons = [];
+        var buttons = {};
 
         if (schema.allowLocate) {
-            buttons.push({
+            buttons['locate'] = {
                 title: Mapbender.DataManager.Translator.translate('feature.zoomTo'),
                 className: 'zoom',
                 onClick: function (feature, ui) {
                     schema.zoomToFeature(feature);
                 }
-            });
+            };
         }
 
         if (schema.allowEditData && schema.allowSaveInResultTable) {
-            buttons.push({
+            buttons['save'] = {
                 title: Mapbender.DataManager.Translator.translate('feature.save.title'),
                 className: 'save',
                 disabled: true,
                 onClick: function (feature, $button) {
                     schema.saveFeature(feature);
                 }
-            });
+            };
         }
 
         if (schema.allowEditData) {
-            buttons.push({
+            buttons['edit'] = {
                 title: Mapbender.DataManager.Translator.translate('feature.edit'),
                 className: 'edit',
                 onClick: function (feature, ui) {
                     schema.openFeatureEditDialog(feature);
                 }
-            });
+            };
         }
         if (schema.copy && schema.copy.enable) {
-            buttons.push({
+            buttons['copy'] = {
                 title: Mapbender.DataManager.Translator.translate('feature.clone.title'),
                 className: 'copy',
                 onClick: function (feature, ui) {
                     schema.copyFeature(feature);
                 }
-            });
+            };
         }
         if (schema.allowCustomStyle) {
-            buttons.push({
+            buttons['style'] = {
                 title: Mapbender.DataManager.Translator.translate('feature.style.change'),
                 className: 'style',
                 onClick: function (feature, ui) {
                     schema.openChangeStyleDialog(feature);
                 }
-            });
+            };
         }
 
         if (schema.allowChangeVisibility) {
-            buttons.push({
+            buttons['toggleVisibility'] ={
                 title: Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'),
                 className: 'visibility',
                 cssClass: 'icon-eyeOff',
                 onClick: function (feature, $button) {
-                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hidden: feature.get("hidden"), $button: $button });
+                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: !feature.get("hidden") });
                 }
-            });
+            };
         }
 
         if (schema.allowDelete) {
 
-            buttons.push({
+            buttons['delete'] = {
                 title: Mapbender.DataManager.Translator.translate("feature.remove.title"),
                 className: 'remove',
                 cssClass: 'critical',
@@ -264,7 +338,7 @@
                         $.notify("Deletion is not allowed");
                     }
                 }
-            });
+            };
         }
 
         return buttons;

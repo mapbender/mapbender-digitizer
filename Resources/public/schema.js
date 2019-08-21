@@ -42,10 +42,10 @@
 
         schema.maxScale = options.maxScale || undefined;
 
-        //    group, save
-        // hooks
+        //    group // not necessary
+        //    save // deprecated - no code in config
+        // hooks // deprecated - no code in config
 
-        /** TO BE Implemented **/
         schema.showVisibilityNavigation = options.showVisibilityNavigation || false;
 
         /** TO BE Implemented **/
@@ -107,11 +107,7 @@
             });
 
             feature.on('Digitizer.UnhoverFeature', function (event) {
-
-                if (!feature.get("hidden")) {
-                    feature.set("selected", false);
-                }
-
+                feature.set("selected", false);
             });
 
             schema.layer.getSource().dispatchEvent({ type : "Digitizer.StyleFeature", feature: feature });
@@ -155,7 +151,7 @@
                                 feature.setStyle(schema.styles.unsaved);
                                 return;
                             case "isCopy" :
-                                feature.setStyle(schema.copy);
+                                feature.setStyle(schema.styles.copy);
                                 return;
 
                         }
@@ -169,7 +165,7 @@
 
             feature.on('Digitizer.toggleVisibility', function (event) {
 
-                feature.set("hidden",!event.hidden);
+                feature.set("hidden",event.hide);
 
             });
         });
@@ -699,7 +695,7 @@
                 schema.layer.getSource().addFeature(newFeature);
 
 
-                feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
+                // feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
 
                 $.notify(Mapbender.DataManager.Translator.translate("feature.save.successfully"), 'info');
 

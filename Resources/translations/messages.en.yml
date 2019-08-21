@@ -27,8 +27,8 @@ mb.digitizer:
             toggleon: 'Fade in feature'
     toolset:
         current-extent: 'Select by current extent only.'
-        showAll: 'Fade out all features'
-        hideAll: 'Fade in all features'
+        showAll: 'Show all features'
+        hideAll: 'Hide all features'
         saveAll: 'Save all features'
         point:
             drawPoint: 'Draw point'

@@ -1,6 +1,13 @@
 
 .mb-element-digitizer {
-    .digitizing-tool-set, .general-digitizer-buttons {
+
+    .resultTableControlButtons {
+        .save:not(:disabled) {
+            background-color: darken($buttonFirstColor, 10%);
+        }
+    }
+
+    .digitizing-tool-set, .resultTableControlButtons {
         margin-top: 10px;
 
         > button {
