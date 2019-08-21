@@ -23,7 +23,7 @@
 
         schema.allowSaveInResultTable = options.allowSaveInResultTable || false;
 
-        schema.copy = options.copy || { enable: false, overwriteValuesWithDefault: false, moveCopy: { x: 10, y: 10 } };
+        schema.copy = options.copy || {enable: false, overwriteValuesWithDefault: false, moveCopy: {x: 10, y: 10}};
 
         schema.useContextMenu = options.useContextMenu || false;
 
@@ -58,9 +58,9 @@
         schema.displayPermanent = options.displayPermanent || false;
 
         /** To be implemented **/
-       // schema.refreshFeaturesAfterSave = options.refreshFeaturesAfterSave || false;
+        // schema.refreshFeaturesAfterSave = options.refreshFeaturesAfterSave || false;
 
-       //schema.refreshLayersAfterFeatureSave = options.refreshLayersAfterFeatureSave || false;
+        //schema.refreshLayersAfterFeatureSave = options.refreshLayersAfterFeatureSave || false;
 
         /** New properties **/
         schema.revertChangedGeometryOnCancel = options.revertChangedGeometryOnCancel || false;
@@ -81,7 +81,7 @@
 
         schema.zoomOnResultTableClick = options.zoomOnResultTableClick || true;
 
-        schema.basicStyles = Object.assign({},schema.getDefaultStyles_(),options.styles);
+        schema.basicStyles = Object.assign({}, schema.getDefaultStyles_(), options.styles);
 
         schema.styles = {};
 
@@ -94,7 +94,7 @@
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
 
-            feature.set("mbOrigin","digitizer");
+            feature.set("mbOrigin", "digitizer");
 
             feature.setStyle(schema.styles.default);
 
@@ -113,35 +113,33 @@
             feature.on('Digitizer.ModifyFeature', function (event) {
 
                 /** TODO replace this with event based model **/
-               if (schema.deactivateControlAfterModification) {
-                   schema.menu.toolSet.activeInteraction && schema.menu.toolSet.activeInteraction.setActive(false);
-                   schema.menu.toolSet.activeInteraction = null;
-               }
+                if (schema.deactivateControlAfterModification) {
+                    schema.menu.toolSet.activeInteraction && schema.menu.toolSet.activeInteraction.setActive(false);
+                    schema.menu.toolSet.activeInteraction = null;
+                }
 
-               feature.changed();
+                feature.changed();
 
             });
 
             feature.on('Digitizer.UnmodifyFeature', function (event) {
 
-                feature.set("modificationState",undefined);
+                feature.set("modificationState", undefined);
                 feature.changed();
 
             });
 
-            feature.on(ol.ObjectEventType.PROPERTYCHANGE,function(event){
+            feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
                 if (event.key == "selected" || event.key == "modificationState" || event.key == "hidden") {
 
                     if (feature.get("hidden")) {
                         feature.setStyle(schema.styles.invisible);
                         return;
-                    } else
-                    if (feature.get("selected")) {
+                    } else if (feature.get("selected")) {
                         feature.setStyle(schema.styles.select);
                         return;
-                    } else
-                    if (feature.get("modificationState") && schema.markUnsavedFeatures)    {
-                        switch(feature.get("modificationState")) {
+                    } else if (feature.get("modificationState") && schema.markUnsavedFeatures) {
+                        switch (feature.get("modificationState")) {
                             case "isChanged" :
                             case "isNew" :
                                 feature.setStyle(schema.styles.unsaved);
@@ -161,17 +159,18 @@
 
             feature.on('Digitizer.toggleVisibility', function (event) {
 
-                feature.set("hidden",event.hide);
+                feature.set("hidden", event.hide);
 
             });
 
+            if (schema.allowCustomStyle) {
+                schema.customStyleFeature_(feature);
+            }
 
-            schema.layer.getSource().dispatchEvent({ type : "Digitizer.StyleFeature", feature: feature });
-
-            feature.set("oldGeometry",feature.getGeometry().clone());
+            feature.set("oldGeometry", feature.getGeometry().clone());
         });
 
-        schema.layer.getSource().on(['controlFactory.FeatureMoved','controlFactory.FeatureModified'], function (event) {
+        schema.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
             var feature = event.feature;
 
             feature.set("modificationState", "isChanged");
@@ -196,7 +195,7 @@
         schema.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
             var feature = event.feature;
 
-            feature.set("modificationState","isNew");
+            feature.set("modificationState", "isNew");
 
             if (schema.openFormAfterEdit) {
                 var dialog = schema.openFeatureEditDialog(feature);
@@ -206,7 +205,8 @@
                     if (schema.allowDeleteByCancelNewGeometry) {
                         try {
                             schema.removeFeature(feature);
-                        } catch(e) { /* Remove feature only if it exists */}
+                        } catch (e) { /* Remove feature only if it exists */
+                        }
                     }
                 });
             }
@@ -227,7 +227,8 @@
                 if (schema.allowDeleteByCancelNewGeometry) {
                     try {
                         schema.removeFeature(feature);
-                    } catch(e) { /* Remove feature only if it exists */}
+                    } catch (e) { /* Remove feature only if it exists */
+                    }
                 }
             });
 
@@ -236,33 +237,12 @@
         });
 
 
-
-
-
-        schema.layer.getSource().on('Digitizer.StyleFeature', function (event) {
-
-            var feature = event.feature;
-
-            console.assert(!!schema.featureType.styleField,"Style Field in Feature Type is not specified");
-
-            var jsonStyle = feature.get("data") && feature.get("data").get(schema.featureType.styleField);
-
-            if (jsonStyle) {
-                var basicStyle = JSON.parse(jsonStyle);
-                var style = ol.style.StyleConverter.convertToOL4Style(basicStyle);
-                feature.set("basicStyle",basicStyle);
-                feature.set("style",style);
-                feature.setStyle(style);
-            }
-
-        });
-
     };
 
     Mapbender.Digitizer.Scheme.prototype = Object.create(Mapbender.DataManager.Scheme.prototype);
     Mapbender.Digitizer.Scheme.prototype.constructor = Mapbender.DataManager.Scheme;
 
-    Mapbender.Digitizer.Scheme.prototype.getDefaultStyles_ = function() {
+    Mapbender.Digitizer.Scheme.prototype.getDefaultStyles_ = function () {
         var styles = {
 
             default: {
@@ -299,7 +279,7 @@
         return styles;
     };
 
-    Mapbender.Digitizer.Scheme.prototype.featureExists_ = function(feature) {
+    Mapbender.Digitizer.Scheme.prototype.featureExists_ = function (feature) {
         var schema = this;
         return schema.layer.getSource().getFeatures().includes(feature);
     };
@@ -388,6 +368,22 @@
 
         widget.map.addLayer(schema.layer);
 
+    };
+
+    Mapbender.Digitizer.Scheme.prototype.customStyleFeature_ = function (feature) {
+        var schema = this;
+
+        console.assert(!!schema.featureType.styleField, "Style Field in Feature Type is not specified");
+
+        var jsonStyle = feature.get("data") && feature.get("data").get(schema.featureType.styleField);
+
+        if (jsonStyle) {
+            var basicStyle = JSON.parse(jsonStyle);
+            var style = ol.style.StyleConverter.convertToOL4Style(basicStyle);
+            feature.set("basicStyle", basicStyle);
+            feature.set("style", style);
+            feature.setStyle(style);
+        }
     };
 
 
@@ -507,10 +503,10 @@
         schema.menu.appendTo($element);
     };
 
-    Mapbender.Digitizer.Scheme.prototype.getFeatureStyle_ = function(feature){
-      var schema = this;
+    Mapbender.Digitizer.Scheme.prototype.getFeatureStyle_ = function (feature) {
+        var schema = this;
 
-      return feature.get("style") || schema.styles.default
+        return feature.get("style") || schema.styles.default
     };
 
     Mapbender.Digitizer.Scheme.prototype.integrateFeatures = function (features) {
@@ -559,13 +555,12 @@
             newFeature.get("data").set(name, "Copy of " + (feature.get("data").get(name) || '#' + feature.getId()));
         }
 
-        newFeature.set("data",newAttributes);
+        newFeature.set("data", newAttributes);
 
         // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
         if (schema.copy.moveCopy) {
             newFeature.getGeometry().translate(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
         }
-
 
 
         schema.layer.getSource().addFeature(newFeature);
@@ -705,11 +700,10 @@
                 feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
 
 
-                console.assert(schema.layer.getSource().getFeatures().includes(feature),"Feature is not part of the source",schema.layer.getSource().getFeatures());
+                console.assert(schema.layer.getSource().getFeatures().includes(feature), "Feature is not part of the source", schema.layer.getSource().getFeatures());
 
                 schema.layer.getSource().removeFeature(feature);
                 schema.layer.getSource().addFeature(newFeature);
-
 
 
                 $.notify(Mapbender.DataManager.Translator.translate("feature.save.successfully"), 'info');
