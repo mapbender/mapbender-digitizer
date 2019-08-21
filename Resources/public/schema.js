@@ -166,6 +166,12 @@
                 }
 
             });
+
+            feature.on('Digitizer.toggleVisibility', function (event) {
+
+                feature.set("hidden",!event.hidden);
+
+            });
         });
 
         schema.layer.getSource().on(['controlFactory.FeatureMoved','controlFactory.FeatureModified'], function (event) {
@@ -233,18 +239,7 @@
         });
 
 
-        schema.layer.getSource().on('Digitizer.toggleFeatureVisibility', function (event) {
 
-            var feature = event.feature;
-            var hidden = !feature.get("hidden");
-
-            if (hidden) {
-                feature.set("hidden",true);
-            } else {
-                feature.set("hidden",false);
-            }
-
-        });
 
 
         schema.layer.getSource().on('Digitizer.StyleFeature', function (event) {

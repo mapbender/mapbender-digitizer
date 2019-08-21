@@ -167,6 +167,16 @@
 
             });
 
+            feature.on('Digitizer.toggleVisibility', function (event) {
+                if (!event.hidden) {
+                    event.$button.addClass('icon-eyeOn').removeClass('icon-eyeOff');
+                    event.$button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleon'));
+                } else {
+                    event.$button.addClass('icon-eyeOff').removeClass('icon-eyeOn');
+                    event.$button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'));
+                }
+            });
+
         });
 
         schema.layer.getSource().on(ol.source.VectorEventType.REMOVEFEATURE, function (event) {
@@ -236,14 +246,7 @@
                 className: 'visibility',
                 cssClass: 'icon-eyeOff',
                 onClick: function (feature, $button) {
-                    schema.layer.getSource().dispatchEvent({type: 'Digitizer.toggleFeatureVisibility', feature: feature});
-                    if (feature.hidden) {
-                        $button.addClass('icon-eyeOn').removeClass('icon-eyeOff');
-                        $button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleon'));
-                    } else {
-                        $button.addClass('icon-eyeOff').removeClass('icon-eyeOn');
-                        $button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'));
-                    }
+                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hidden: feature.get("hidden"), $button: $button });
                 }
             });
         }
