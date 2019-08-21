@@ -689,13 +689,15 @@
                     return;
                 }
 
+                feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
+
+
                 console.assert(schema.layer.getSource().getFeatures().includes(feature),"Feature is not part of the source",schema.layer.getSource().getFeatures());
 
                 schema.layer.getSource().removeFeature(feature);
                 schema.layer.getSource().addFeature(newFeature);
 
 
-                // feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
 
                 $.notify(Mapbender.DataManager.Translator.translate("feature.save.successfully"), 'info');
 
