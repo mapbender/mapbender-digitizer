@@ -143,7 +143,13 @@
 
             feature.on('Digitizer.HoverFeature', function (event) {
 
-                resultTable.hoverInResultTable(feature, event.hover);
+                resultTable.hoverInResultTable(feature, true);
+
+            });
+
+            feature.on('Digitizer.UnhoverFeature', function (event) {
+
+                resultTable.hoverInResultTable(feature, false);
 
             });
 

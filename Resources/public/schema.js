@@ -101,7 +101,15 @@
             feature.on('Digitizer.HoverFeature', function (event) {
 
                 if (!feature.get("hidden")) {
-                    feature.set("selected", event.hover);
+                    feature.set("selected", true);
+                }
+
+            });
+
+            feature.on('Digitizer.UnhoverFeature', function (event) {
+
+                if (!feature.get("hidden")) {
+                    feature.set("selected", false);
                 }
 
             });
@@ -405,11 +413,11 @@
         highlightControl.on('select', function (e) {
 
             e.selected.forEach(function (feature) {
-                feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: true});
+                feature.dispatchEvent({type: 'Digitizer.HoverFeature'});
             });
 
             e.deselected.forEach(function (feature) {
-                feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: false});
+                feature.dispatchEvent({type: 'Digitizer.UnhoverFeature'});
             });
 
         });
