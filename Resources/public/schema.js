@@ -118,6 +118,15 @@
                    schema.menu.toolSet.activeInteraction = null;
                }
 
+               feature.changed();
+
+            });
+
+            feature.on('Digitizer.UnmodifyFeature', function (event) {
+
+                feature.set("modificationState",undefined);
+                feature.changed();
+
             });
 
             feature.on(ol.ObjectEventType.PROPERTYCHANGE,function(event){
@@ -125,22 +134,26 @@
 
                     if (feature.get("hidden")) {
                         feature.setStyle(schema.styles.invisible);
+                        return;
                     } else
                     if (feature.get("selected")) {
                         feature.setStyle(schema.styles.select);
-                    } else {
+                        return;
+                    } else
+                    if (feature.get("modificationState") && schema.markUnsavedFeatures)    {
                         switch(feature.get("modificationState")) {
                             case "isChanged" :
                             case "isNew" :
                                 feature.setStyle(schema.styles.unsaved);
-                                break;
+                                return;
                             case "isCopy" :
                                 feature.setStyle(schema.copy);
-                                break;
-                            default:
-                                feature.setStyle(schema.getFeatureStyle_(feature));
+                                return;
+
                         }
                     }
+
+                    feature.setStyle(schema.getFeatureStyle_(feature));
 
                 }
 
@@ -152,7 +165,7 @@
 
             feature.set("modificationState", "isChanged");
 
-            feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+            feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
 
             if (schema.openFormAfterModification) {
                 var dialog = schema.openFeatureEditDialog(feature);
@@ -161,7 +174,7 @@
 
                     if (schema.revertChangedGeometryOnCancel) {
                         feature.setGeometry(feature.get("oldGeometry").clone());
-                        feature.changed();
+                        feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
                     }
                 })
             }
@@ -178,7 +191,7 @@
                 var dialog = schema.openFeatureEditDialog(feature);
 
                 dialog.$popup.bind('popupdialogclose', function () {
-                    feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+                    feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
                     if (schema.allowDeleteByCancelNewGeometry) {
                         try {
                             schema.removeFeature(feature);
@@ -199,7 +212,7 @@
             var dialog = schema.openFeatureEditDialog(feature);
 
             dialog.$popup.bind('popupdialogclose', function () {
-                feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+                feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
                 if (schema.allowDeleteByCancelNewGeometry) {
                     try {
                         schema.removeFeature(feature);
@@ -207,7 +220,7 @@
                 }
             });
 
-            feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: true});
+            feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
 
         });
 
@@ -683,7 +696,7 @@
                 schema.layer.getSource().addFeature(newFeature);
 
 
-                feature.dispatchEvent({type: 'Digitizer.ModifyFeature', allowSaving: false});
+                feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
 
                 $.notify(Mapbender.DataManager.Translator.translate("feature.save.successfully"), 'info');
 

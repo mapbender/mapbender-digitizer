@@ -150,12 +150,14 @@
             feature.on('Digitizer.ModifyFeature', function (event) {
 
                 var row = resultTable.getTableRowByFeature(feature);
+                $(row).find('.button.save').removeAttr("disabled");
 
-                if (event.allowSaving) {
-                    $(row).find('.button.save').removeAttr("disabled");
-                } else {
-                    $(row).find('.button.save').attr("disabled", "disabled");
-                }
+            });
+
+            feature.on('Digitizer.UnmodifyFeature', function (event) {
+
+                var row = resultTable.getTableRowByFeature(feature);
+                $(row).find('.button.save').attr("disabled", "disabled");
 
             });
 
