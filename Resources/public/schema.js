@@ -110,10 +110,6 @@
                 feature.set("selected", false);
             });
 
-            schema.layer.getSource().dispatchEvent({ type : "Digitizer.StyleFeature", feature: feature });
-
-            feature.set("oldGeometry",feature.getGeometry().clone());
-
             feature.on('Digitizer.ModifyFeature', function (event) {
 
                 /** TODO replace this with event based model **/
@@ -168,6 +164,11 @@
                 feature.set("hidden",event.hide);
 
             });
+
+
+            schema.layer.getSource().dispatchEvent({ type : "Digitizer.StyleFeature", feature: feature });
+
+            feature.set("oldGeometry",feature.getGeometry().clone());
         });
 
         schema.layer.getSource().on(['controlFactory.FeatureMoved','controlFactory.FeatureModified'], function (event) {
@@ -296,6 +297,11 @@
         };
 
         return styles;
+    };
+
+    Mapbender.Digitizer.Scheme.prototype.featureExists_ = function(feature) {
+        var schema = this;
+        return schema.layer.getSource().getFeatures().includes(feature);
     };
 
     Mapbender.Digitizer.Scheme.prototype.initializeWithDefaultStyles_ = function () {
@@ -634,6 +640,13 @@
     Mapbender.Digitizer.Scheme.prototype.saveFeature = function (feature, formData) {
         var schema = this;
         var widget = schema.widget;
+
+        if (!schema.featureExists_(feature)) {
+            $.notify('Feature doesn\'t exist');
+            widget.currentPopup && widget.currentPopup.popupDialog('close');
+
+            return;
+        }
 
         var createNewFeatureWithDBFeature = function (feature, response) {
 
