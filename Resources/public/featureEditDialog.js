@@ -42,12 +42,11 @@
                 event: 'Delete',
             };
         }
-        if (schema.allowCancelButton) {
-            buttons.cancelButton = {
-                title: 'cancel',
-                event: 'Cancel',
-            };
-        }
+
+        buttons.cancelButton = {
+            title: 'cancel',
+            event: 'Cancel',
+        };
 
         return buttons;
 
