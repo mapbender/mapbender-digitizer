@@ -602,7 +602,7 @@
         if (!feature.getId()) {
             schema.layer.getSource().removeFeature(feature);
         } else {
-            Mapbender.confirmDialog({
+            confirmDialog({
                 html: Mapbender.DataManager.Translator.translate("feature.remove.from.database"),
 
                 onSuccess: function () {
