@@ -67,7 +67,6 @@
 
         schema.deactivateControlAfterModification = options.deactivateControlAfterModification || true;
 
-        /** implement this **/
         schema.allowSaveAll = options.allowSaveAll || false;
 
         schema.markUnsavedFeatures = options.markUnsavedFeatures || false;
@@ -111,22 +110,12 @@
             });
 
             feature.on('Digitizer.ModifyFeature', function (event) {
-
-                /** TODO replace this with event based model **/
-                if (schema.deactivateControlAfterModification) {
-                    schema.menu.toolSet.activeInteraction && schema.menu.toolSet.activeInteraction.setActive(false);
-                    schema.menu.toolSet.activeInteraction = null;
-                }
-
-                feature.changed();
-
+                //feature.changed();
             });
 
             feature.on('Digitizer.UnmodifyFeature', function (event) {
-
                 feature.set("modificationState", undefined);
-                feature.changed();
-
+                //feature.changed();
             });
 
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
@@ -640,7 +629,7 @@
             $.notify('Feature doesn\'t exist');
             widget.currentPopup && widget.currentPopup.popupDialog('close');
 
-            return;
+            return $.Deferred().reject();
         }
 
         var createNewFeatureWithDBFeature = function (feature, response) {

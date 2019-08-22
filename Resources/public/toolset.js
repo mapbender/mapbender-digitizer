@@ -13,6 +13,21 @@
         toolSet.element = $("<div />").addClass('digitizing-tool-set').addClass('left');
         toolSet.createToolbar();
 
+        schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
+            var feature = event.feature;
+
+            feature.on('Digitizer.ModifyFeature', function (event) {
+
+                if (schema.deactivateControlAfterModification) {
+                    toolSet.activeInteraction && schema.menu.toolSet.activeInteraction.setActive(false);
+                    toolSet.activeInteraction = null;
+                }
+
+                feature.changed();
+
+            });
+        });
+
     };
 
     Mapbender.Digitizer.Toolset.prototype = {
