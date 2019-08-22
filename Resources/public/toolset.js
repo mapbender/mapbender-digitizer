@@ -6,7 +6,7 @@
         var toolSet = this;
         toolSet.schema = schema;
 
-        toolSet.buttons = schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
+        toolSet.buttons = schema.toolset;
 
         toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(schema.widget.map);
 

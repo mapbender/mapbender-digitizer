@@ -13,6 +13,8 @@
 
         options = $.extend(defaultOptions, options);
 
+        var geomType = feature.getGeometry().getType();
+
         var element = $("<div/>");
         var customColors = options.customColors;
         var fillTab = {
@@ -52,7 +54,7 @@
                     value: 0,
                     css: {
                         width: "35%",
-                        visibility: schema.getGeomType() == "Point" ? "visible" : "hidden"
+                        visibility: geomType == "Point" ? "visible" : "hidden"
                     }
 
                 }, {
@@ -228,7 +230,7 @@
 
         var tabs = [];
 
-        if (schema.getGeomType()!="LineString") {
+        if (geomType!="LineString") {
             tabs.push(fillTab);
         }
 
