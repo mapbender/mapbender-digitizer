@@ -180,7 +180,7 @@
             if (schema.openFormAfterModification) {
                 var dialog = schema.openFeatureEditDialog(feature);
 
-                dialog.$popup.bind('popupdialogclose', function () {
+                dialog.$popup.bind('popupdialogcancel', function () {
 
                     if (schema.revertChangedGeometryOnCancel) {
                         feature.setGeometry(feature.get("oldGeometry").clone());
@@ -200,7 +200,7 @@
             if (schema.openFormAfterEdit) {
                 var dialog = schema.openFeatureEditDialog(feature);
 
-                dialog.$popup.bind('popupdialogclose', function () {
+                dialog.$popup.bind('popupdialogcancel', function () {
                     feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
                     if (schema.allowDeleteByCancelNewGeometry) {
                         try {
@@ -222,7 +222,7 @@
 
             var dialog = schema.openFeatureEditDialog(feature);
 
-            dialog.$popup.bind('popupdialogclose', function () {
+            dialog.$popup.bind('popupdialogcancel', function () {
                 feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
                 if (schema.allowDeleteByCancelNewGeometry) {
                     try {
