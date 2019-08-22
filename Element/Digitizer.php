@@ -69,7 +69,7 @@ class Digitizer extends DataManagerElement
 
         $mainFiles = array('mapbender.element.digitizer', 'digitizer', 'toolset', 'schema',
             'menu', 'contextMenu', 'utilities',
-            'featureEditDialog', 'controlFactory', 'featureStyleEditor', 'mapbender.layermanager',
+            'featureEditDialog', 'controlFactory', 'featureStyleEditor',
         );
 
 

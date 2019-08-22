@@ -7,7 +7,7 @@ mb.digitizer:
             successfully: 'Feature removed.'
             from: {database: 'Delete feature.'}
         zoomTo: 'Zoom to feature'
-        edit: 'Edit feature2'
+        edit: 'Edit feature'
         attributes: 'Feature attributes'
         savesave: 'Save feature'
         save:
@@ -44,7 +44,7 @@ mb.digitizer:
             drawEllipse: 'Draw ellipse'
             drawDonut: 'Draw donut'
             modifyFeature: 'Modify polygon'
-            moveFeature2: 'Move polygone'
+            moveFeature: 'Move polygone'
         all:
             drawPoint: 'Draw point'
             drawLine: 'Draw line'
