@@ -21,18 +21,13 @@
 
         frame.hide();
 
-        menu.show = function () {
-            frame.show();
-        };
-
-        menu.hide = function () {
-            frame.hide();
-        };
-
         menu.appendTo = function ($element) {
             $element.append(frame);
         };
 
+        menu.registerEvents_(frame);
+
+        // TODO check if this is the right place for that
         schema.layer.getSource().dispatchEvent({type: "Digitizer.ChangeCurrentExtentSearch", currentExtentSearch: schema.currentExtentSearch});
     };
 
