@@ -503,6 +503,10 @@
     Mapbender.Digitizer.Scheme.prototype.integrateFeatures = function (features) {
         var schema = this;
         schema.layer.getSource().addFeatures(features);
+
+        // TODO find a scheme-specific, more appropriate element to store triggers than map
+        schema.widget.map.dispatchEvent({type: "Digitizer.FeaturesLoaded", schema: schema, features: features});
+
     };
 
 

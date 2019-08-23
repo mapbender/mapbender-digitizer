@@ -139,17 +139,27 @@
         var schema = menu.schema;
         var map = schema.widget.map;
 
+        map.on("Digitizer.FeaturesLoaded", function (event) {
+            var features = event.features;
+
+            if (event.schema == schema) {
+
+                resultTable.getApi().clear();
+                resultTable.getApi().rows.add(features);
+                resultTable.getApi().draw();
+            }
+
+        });
+
         map.on(ol.MapEventType.MOVEEND, function (event) {
 
             if (resultTable.currentExtentSearch) {
-                schema.layer.getSource().getFeatures().forEach(function (feature) {
-                    if (ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent())) {
-                        resultTable.addRow(feature);
-                    } else {
-                        resultTable.deleteRow(feature);
-                    }
+                var features = schema.layer.getSource().getFeatures().filter(function(feature){
+                   return  ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent());
                 });
-
+                resultTable.getApi().clear();
+                resultTable.getApi().rows.add(features);
+                resultTable.getApi().draw();
             }
 
         });
@@ -193,7 +203,6 @@
                 return;
             }
 
-            resultTable.addRow(feature);
 
             feature.on('Digitizer.HoverFeature', function (event) {
 
