@@ -17,7 +17,7 @@
 
         menu.appendCurrentExtentSwitch_(frame);
 
-        menu.generateDataTable_(frame);
+        menu.generateResultTable_(frame);
 
         frame.hide();
 
@@ -27,11 +27,8 @@
 
         menu.registerEvents_(frame);
 
-        // TODO check if this is the right place for that
-        schema.layer.getSource().dispatchEvent({
-            type: "Digitizer.ChangeCurrentExtentSearch",
-            currentExtentSearch: schema.currentExtentSearch
-        });
+        menu.changeCurrentExtentSearch_(schema.currentExtentSearch);
+
     };
 
     Mapbender.Digitizer.Menu.prototype = Object.create(Mapbender.DataManager.Menu.prototype);
@@ -105,10 +102,7 @@
             }
             $checkbox.change(function (e) {
                 var currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
-                schema.layer.getSource().dispatchEvent({
-                    type: "Digitizer.ChangeCurrentExtentSearch",
-                    currentExtentSearch: currentExtentSearch
-                });
+                menu.changeCurrentExtentSearch_(currentExtentSearch)
             });
             frame.append("<div style='clear:both'>");
             var $div = $("<div/>");
@@ -135,10 +129,28 @@
 
     };
 
+
     Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable, frame) {
         var menu = this;
         var schema = menu.schema;
         var map = schema.widget.map;
+
+        menu.changeCurrentExtentSearch_ = function(currentExtentSearch) {
+            var menu = this;
+            resultTable.currentExtentSearch = currentExtentSearch;
+            if (currentExtentSearch) {
+                var features = schema.layer.getSource().getFeatures().filter(function (feature) {
+                    return ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent());
+                });
+                resultTable.getApi().clear();
+                resultTable.getApi().rows.add(features);
+                resultTable.getApi().draw();
+            } else {
+                resultTable.getApi().clear();
+                resultTable.getApi().rows.add(schema.layer.getSource().getFeatures());
+                resultTable.getApi().draw();
+            }
+        };
 
         $(schema).on("Digitizer.FeaturesLoaded", function (event) {
             var features = event.features;
@@ -181,18 +193,7 @@
 
         });
 
-        schema.layer.getSource().on("Digitizer.ChangeCurrentExtentSearch", function (event) {
-            resultTable.currentExtentSearch = event.currentExtentSearch;
-            if (event.currentExtentSearch) {
-                resultTable.deleteRows(function (idx, feature, row) {
-                    return !ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent())
-                });
-            } else {
-                schema.layer.getSource().getFeatures().forEach(function (feature) {
-                    resultTable.addRow(feature);
-                });
-            }
-        });
+
 
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;

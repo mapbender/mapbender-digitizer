@@ -161,7 +161,7 @@
             feature.set("oldGeometry", feature.getGeometry().clone());
         });
 
-        schema.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
+        $(schema).on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
             var feature = event.feature;
 
             feature.set("modificationState", "isChanged");
@@ -183,7 +183,7 @@
 
         });
 
-        schema.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
+        $(schema).on('controlFactory.FeatureAdded', function (event) {
             var feature = event.feature;
 
             feature.set("modificationState", "isNew");
@@ -206,7 +206,7 @@
         });
 
 
-        schema.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
+        $(schema).on('controlFactory.FeatureCopied', function (event) {
             var feature = event.feature;
 
             feature.set("modificationState", "isCopy");
@@ -561,7 +561,7 @@
         schema.layer.getSource().addFeature(newFeature);
 
         // Watch out - Name "Copy of ..." is not instantly stored
-        schema.layer.getSource().dispatchEvent({type: 'controlFactory.FeatureCopied', feature: newFeature});
+        $(schema).trigger({type: 'controlFactory.FeatureCopied', feature: newFeature});
 
     };
 
