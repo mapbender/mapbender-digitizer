@@ -9,7 +9,7 @@
         });
         widget.map.addControl(contextmenu);
 
-        widget.map.on('Digitizer.activateSchema',function(event) {
+        $(widget).on('Digitizer.activateSchema',function(event) {
             var schema = event.schema;
            if (schema.useContextMenu) {
                 contextmenu.enable();

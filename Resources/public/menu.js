@@ -28,15 +28,17 @@
         menu.registerEvents_(frame);
 
         // TODO check if this is the right place for that
-        schema.layer.getSource().dispatchEvent({type: "Digitizer.ChangeCurrentExtentSearch", currentExtentSearch: schema.currentExtentSearch});
+        schema.layer.getSource().dispatchEvent({
+            type: "Digitizer.ChangeCurrentExtentSearch",
+            currentExtentSearch: schema.currentExtentSearch
+        });
     };
 
     Mapbender.Digitizer.Menu.prototype = Object.create(Mapbender.DataManager.Menu.prototype);
     Mapbender.Digitizer.Menu.prototype.constructor = Mapbender.DataManager.Menu;
 
 
-
-    Mapbender.Digitizer.Menu.prototype.appendResultTableControlButtons_ = function(frame) {
+    Mapbender.Digitizer.Menu.prototype.appendResultTableControlButtons_ = function (frame) {
         var menu = this;
         var schema = menu.schema;
 
@@ -48,8 +50,8 @@
             $button.addClass("icon-eyeOff eyeOff");
             $button.attr("title", Mapbender.DataManager.Translator.translate('toolset.hideAll'));
             $button.click(function (event) {
-                schema.layer.getSource().getFeatures().forEach(function(feature){
-                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: true });
+                schema.layer.getSource().getFeatures().forEach(function (feature) {
+                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: true});
                 });
             });
             buttons['hideAll'] = $button;
@@ -58,8 +60,8 @@
             $button.addClass("icon-eyeOn eyeOn");
             $button.attr("title", Mapbender.DataManager.Translator.translate('toolset.showAll'));
             $button.click(function (event) {
-                schema.layer.getSource().getFeatures().forEach(function(feature){
-                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: false });
+                schema.layer.getSource().getFeatures().forEach(function (feature) {
+                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: false});
                 });
             });
             buttons['showAll'] = $button;
@@ -69,11 +71,11 @@
             var $button = $("<button class='button' type='button'/>");
             $button.addClass("icon-save save");
             $button.attr("title", Mapbender.DataManager.Translator.translate('toolset.saveAll'));
-            $button.attr("disabled","disabled");
+            $button.attr("disabled", "disabled");
             $button.click(function () {
-                schema.layer.getSource().getFeatures().filter(function(feature) {
-                    return (["isNew","isChanged","isCopy"].includes(feature.get("modificationState")));
-                }).forEach(function(feature){
+                schema.layer.getSource().getFeatures().filter(function (feature) {
+                    return (["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState")));
+                }).forEach(function (feature) {
                     schema.saveFeature(feature);
                 });
             });
@@ -82,10 +84,9 @@
         }
 
 
-
         var $div = $("<div/>");
         $div.addClass("resultTableControlButtons");
-        $.each(buttons,function(name,$button) {
+        $.each(buttons, function (name, $button) {
             $div.append($button);
         });
         frame.append($div);
@@ -134,28 +135,25 @@
 
     };
 
-    Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable,frame) {
+    Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable, frame) {
         var menu = this;
         var schema = menu.schema;
         var map = schema.widget.map;
 
-        map.on("Digitizer.FeaturesLoaded", function (event) {
+        $(schema).on("Digitizer.FeaturesLoaded", function (event) {
             var features = event.features;
 
-            if (event.schema == schema) {
-
-                resultTable.getApi().clear();
-                resultTable.getApi().rows.add(features);
-                resultTable.getApi().draw();
-            }
+            resultTable.getApi().clear();
+            resultTable.getApi().rows.add(features);
+            resultTable.getApi().draw();
 
         });
 
         map.on(ol.MapEventType.MOVEEND, function (event) {
 
             if (resultTable.currentExtentSearch) {
-                var features = schema.layer.getSource().getFeatures().filter(function(feature){
-                   return  ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent());
+                var features = schema.layer.getSource().getFeatures().filter(function (feature) {
+                    return ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent());
                 });
                 resultTable.getApi().clear();
                 resultTable.getApi().rows.add(features);
@@ -171,7 +169,7 @@
 
             if (feature) {
 
-                if (schema.zoomOnResultTableClick){
+                if (schema.zoomOnResultTableClick) {
                     schema.zoomToFeature(feature);
                 }
                 if (schema.openDialogOnResultTableClick) {
@@ -218,7 +216,7 @@
 
             feature.on('Digitizer.ModifyFeature', function (event) {
 
-                var $button = resultTable.getButtonByFeature('.save',feature);
+                var $button = resultTable.getButtonByFeature('.save', feature);
                 $button.removeAttr("disabled");
 
                 frame.find(".resultTableControlButtons .save").removeAttr("disabled");
@@ -227,22 +225,22 @@
 
             feature.on('Digitizer.UnmodifyFeature', function (event) {
 
-                var $button = resultTable.getButtonByFeature('.save',feature);
+                var $button = resultTable.getButtonByFeature('.save', feature);
                 $button.attr("disabled", "disabled");
 
-                var length = schema.layer.getSource().getFeatures().filter(function(feature){
-                    return ["isNew","isChanged","isCopy"].includes(feature.get("modificationState"));
+                var length = schema.layer.getSource().getFeatures().filter(function (feature) {
+                    return ["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState"));
                 }).length;
 
 
                 if (length === 0) {
-                    frame.find(".resultTableControlButtons .save").attr("disabled","disabled");
+                    frame.find(".resultTableControlButtons .save").attr("disabled", "disabled");
                 }
 
             });
 
             feature.on('Digitizer.toggleVisibility', function (event) {
-                var $button = resultTable.getButtonByFeature('.visibility',feature);
+                var $button = resultTable.getButtonByFeature('.visibility', feature);
                 if (!$button) {
                     return;
                 }
@@ -319,12 +317,12 @@
         }
 
         if (schema.allowChangeVisibility) {
-            buttons['toggleVisibility'] ={
+            buttons['toggleVisibility'] = {
                 title: Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'),
                 className: 'visibility',
                 cssClass: 'icon-eyeOff',
                 onClick: function (feature, $button) {
-                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: !feature.get("hidden") });
+                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: !feature.get("hidden")});
                 }
             };
         }
@@ -349,7 +347,6 @@
 
 
     };
-
 
 
 })();

@@ -447,7 +447,7 @@
 
         var schema = this;
 
-        Object.getPrototypeOf(Mapbender.Digitizer.Scheme.prototype).activateSchema.apply(this, arguments);
+        Mapbender.DataManager.Scheme.prototype.activateSchema.apply(this, arguments);
 
 
         schema.highlightControl.setActive(true);
@@ -505,7 +505,7 @@
         schema.layer.getSource().addFeatures(features);
 
         // TODO find a scheme-specific, more appropriate element to store triggers than map
-        schema.widget.map.dispatchEvent({type: "Digitizer.FeaturesLoaded", schema: schema, features: features});
+        $(schema).trigger({type: "Digitizer.FeaturesLoaded", features: features});
 
     };
 
