@@ -86,7 +86,7 @@
 
         schema.styles = {};
 
-        schema.initializeWithDefaultStyles_();
+        schema.initializeStyles_();
 
         schema.createSchemaFeatureLayer_();
 
@@ -96,6 +96,8 @@
             var feature = event.feature;
 
             feature.set("mbOrigin", "digitizer");
+
+            feature.setStyle = feature.setStyleWithLabel
 
             feature.setStyle(schema.styles.default);
 
@@ -275,7 +277,7 @@
         return schema.layer.getSource().getFeatures().includes(feature);
     };
 
-    Mapbender.Digitizer.Scheme.prototype.initializeWithDefaultStyles_ = function () {
+    Mapbender.Digitizer.Scheme.prototype.initializeStyles_ = function () {
         var schema = this;
 
         $.each(schema.basicStyles, function (label, style) {
