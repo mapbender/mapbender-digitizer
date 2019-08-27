@@ -156,6 +156,12 @@
 
         });
 
+        $(schema).on("Digitizer.FeatureAddedManually", function (event) {
+            var feature = event.feature;
+            resultTable.addRow(feature);
+
+        });
+
         map.on(ol.MapEventType.MOVEEND, function (event) {
 
             if (resultTable.currentExtentSearch) {
@@ -220,7 +226,9 @@
             feature.on('Digitizer.UnmodifyFeature', function (event) {
 
                 var $button = resultTable.getButtonByFeature('.save', feature);
-                $button.attr("disabled", "disabled");
+                if ($button) {
+                    $button.attr("disabled", "disabled");
+                }
 
                 var length = schema.layer.getSource().getFeatures().filter(function (feature) {
                     return ["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState"));

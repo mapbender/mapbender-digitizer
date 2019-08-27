@@ -190,6 +190,8 @@
 
             feature.set("modificationState", "isNew");
 
+            $(schema).trigger({ type: "Digitizer.FeatureAddedManually", feature: feature });
+
             if (schema.openFormAfterEdit) {
                 var dialog = schema.openFeatureEditDialog(feature);
 
@@ -203,7 +205,6 @@
                     }
                 });
             }
-
         });
 
 
@@ -211,6 +212,8 @@
             var feature = event.feature;
 
             feature.set("modificationState", "isCopy");
+
+            $(schema).trigger({ type: "Digitizer.FeatureAddedManually", feature: feature });
 
             var dialog = schema.openFeatureEditDialog(feature);
 
@@ -698,6 +701,9 @@
 
                 schema.layer.getSource().removeFeature(feature);
                 schema.layer.getSource().addFeature(newFeature);
+
+                $(schema).trigger({ type: "Digitizer.FeatureAddedManually", feature: newFeature });
+
 
                 $.notify(Mapbender.DataManager.Translator.translate("feature.save.successfully"), 'info');
 
