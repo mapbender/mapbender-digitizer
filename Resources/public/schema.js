@@ -82,7 +82,7 @@
 
         schema.zoomOnResultTableClick = options.zoomOnResultTableClick || true;
 
-        schema.basicStyles = Object.assign({}, schema.getDefaultStyles_(), options.styles);
+        schema.basicStyles = Object.assign({}, schema.getDefaultStyles_(), options.styles, { copy: options.copy.style });
 
         schema.styles = {};
 
@@ -506,7 +506,6 @@
         var schema = this;
         schema.layer.getSource().addFeatures(features);
 
-        // TODO find a scheme-specific, more appropriate element to store triggers than map
         $(schema).trigger({type: "Digitizer.FeaturesLoaded", features: features});
 
     };

@@ -136,28 +136,23 @@
         var map = schema.widget.map;
 
         menu.changeCurrentExtentSearch_ = function(currentExtentSearch) {
-            var menu = this;
+            var menu = this, features = null;
             resultTable.currentExtentSearch = currentExtentSearch;
             if (currentExtentSearch) {
-                var features = schema.layer.getSource().getFeatures().filter(function (feature) {
+                features = schema.layer.getSource().getFeatures().filter(function (feature) {
                     return ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent());
                 });
-                resultTable.getApi().clear();
-                resultTable.getApi().rows.add(features);
-                resultTable.getApi().draw();
             } else {
-                resultTable.getApi().clear();
-                resultTable.getApi().rows.add(schema.layer.getSource().getFeatures());
-                resultTable.getApi().draw();
+                features = schema.layer.getSource().getFeatures();
             }
+            resultTable.redraw(features);
+
         };
 
         $(schema).on("Digitizer.FeaturesLoaded", function (event) {
             var features = event.features;
+            resultTable.redraw(features);
 
-            resultTable.getApi().clear();
-            resultTable.getApi().rows.add(features);
-            resultTable.getApi().draw();
 
         });
 
@@ -167,9 +162,7 @@
                 var features = schema.layer.getSource().getFeatures().filter(function (feature) {
                     return ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent());
                 });
-                resultTable.getApi().clear();
-                resultTable.getApi().rows.add(features);
-                resultTable.getApi().draw();
+                resultTable.redraw(features);
             }
 
         });
@@ -202,7 +195,6 @@
                 return;
             }
 
-
             feature.on('Digitizer.HoverFeature', function (event) {
 
                 resultTable.hoverInResultTable(feature, true);
@@ -218,7 +210,9 @@
             feature.on('Digitizer.ModifyFeature', function (event) {
 
                 var $button = resultTable.getButtonByFeature('.save', feature);
-                $button.removeAttr("disabled");
+                if ($button) {
+                    $button.removeAttr("disabled");
+                }
 
                 frame.find(".resultTableControlButtons .save").removeAttr("disabled");
 
