@@ -97,7 +97,7 @@
 
             feature.set("mbOrigin", "digitizer");
 
-            feature.setStyle = feature.setStyleWithLabel
+            //feature.setStyle = feature.setStyleWithLabel;
 
             feature.setStyle(schema.styles.default);
 
@@ -281,10 +281,11 @@
         var schema = this;
 
         $.each(schema.basicStyles, function (label, style) {
-            schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(style);
+            schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(style,true);
+            console.log(label, schema.styles[label]);
         });
 
-        Object.freeze(schema.styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
+        //Object.freeze(schema.styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
     };
 
 
@@ -372,7 +373,7 @@
 
         if (jsonStyle) {
             var basicStyle = JSON.parse(jsonStyle);
-            var style = ol.style.StyleConverter.convertToOL4Style(basicStyle);
+            var style = ol.style.StyleConverter.convertToOL4Style(basicStyle,true);
             feature.set("basicStyle", basicStyle);
             feature.set("style", style);
             feature.setStyle(style);
