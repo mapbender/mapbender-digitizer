@@ -731,7 +731,7 @@
 
            widget.options.schemes = newSchemes;
 
-           
+
 
             widget._createElementContextMenu();
 
@@ -792,7 +792,7 @@
                     widget._trigger('schemaChanged');
                     widget._getData();
                 }
-                
+
                 if (widget.currentSettings.schemaName != schema.schemaName || schema.displayOnInactive || schema.displayPermanent) {
 
                     widget.query('getConfiguration').done(function (response) {
@@ -1150,9 +1150,14 @@
                         var hasCoordinatesInput = !!$('.-fn-coordinates',dialog).length;
                         if(hasCoordinatesInput){
 
-                            var x = $('.-fn-coordinates',dialog).find("[name=x]").val();
-                            var y = $('.-fn-coordinates',dialog).find("[name=y]").val();
+                            var inputX = $('.-fn-coordinates',dialog).find("[name=x]");
+                            var inputY = $('.-fn-coordinates',dialog).find("[name=y]");
+
+                            var x = Mapbender.Transformation.isDegree(inputX.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputX.val()) : inputX.val();
+                            var y = Mapbender.Transformation.isDegree(inputY.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputY.val()) : inputY.val();
+
                             var activeEPSG = $('.-fn-active-epsgCode',dialog).find("select").val();
+
                             var coords = Mapbender.Transformation.transformToMapProj(x,y,activeEPSG);
 
                             if(!Mapbender.Transformation.areCoordinatesValid(coords)){
@@ -1467,7 +1472,7 @@
                         css : { width: '33.33%' },
 
                     };
-                    
+
                     // set default ordering, if the coordinatesFieldsOrder is not set in the digitizer YML
                     if (!item.coordinatesFieldsOrder) {
                         item.coordinatesFieldsOrder = ['x','y','epsg'];

@@ -1,0 +1,1032 @@
+obstacle_hull_edit:
+    label: Luftfahrthindernis
+    printable: false
+    featureType: zlhr_hull_edit
+    maxResults: 50
+    minScale: 200000
+    refreshFeaturesAfterSave:
+        - alldata_zlhr
+        - obstacle_zlhr
+        - curvesegmaxheightedit_zlhr
+        - point_zlhr
+    copy:
+        enable: false
+    allowLocate: false
+    allowDigitize: false
+    allowEditData: true
+    allowDelete: false
+    allowChangeVisibility: false
+    allowCustomerStyle: false
+    showVisibilityNavigation: false
+    allowDeleteByCancelNewGeometry: true
+    allowGeometrylessfeatureBtn: true
+    toolset:
+        -
+            type: selectFeature
+        -
+            type: removeSelected
+    useContextMenu: true
+    displayPermanent: false
+    displayOnInactive: false
+    zoomScaleDenominator: 1000
+    displayOnSelect: true
+    inlineSearch: true
+    searchType: currentExtent
+    showExtendSearchSwitch: true
+    popup:
+        title: 'Luftfahrthindernis Anlegen / Bearbeiten'
+        width: 850
+        height: 560
+    oneInstanceEdit: true
+    view:
+        type: table
+        settings:
+            info: true
+            processing: false
+            ordering: true
+            paging: true
+            selectable: false
+            autoWidth: false
+            order:
+                -
+                    - 0
+                    - asc
+    tableFields:
+        obstacle_id:
+            label: HindernisID
+        name_location:
+            label: Name
+    styles:
+        default:
+            strokeWidth: 1
+            fillColor: '#FF0000'
+            strokeColor: '#b30000'
+            fillOpacity: 0.7
+            pointRadius: 10
+            label: '${obstacle_id}'
+            labelOutlineColor: '#ffcccc'
+        select:
+            strokeWidth: 3
+            fillColor: '#e60000'
+            strokeColor: '#330000'
+            fillOpacity: 1
+            pointRadius: 12
+            label: '${obstacle_id}'
+            labelOutlineColor: '#ffffff'
+    formItems:
+        -
+            type: tabs
+            children:
+                -
+                    type: form
+                    title: 'Verpflichtende Angaben'
+                    css:
+                        font-size: 16px
+                        margin-bottom: 10px
+                    children:
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: text
+                                    title: Hindernis-ID
+                                    name: obstacle_id
+                                    text: data.obstacle_id
+                                    css: { width: 15% }
+                                -
+                                    type: input
+                                    title: 'Name / Ort des Hindernisses'
+                                    name: name_location
+                                    mandatory: true
+                                    mandatoryText: 'Pflichtfeld: Bitte geben Sie den Namen oder den Ort des Hindernisses an.'
+                                    infoText: 'Hilfe: Bitte geben Sie den Namen oder den Ort des Hindernisses an.'
+                                    css: { width: 35% }
+                                -
+                                    type: select
+                                    title: '(4b) Hindernistyp'
+                                    name: obstacle_type_id
+                                    infoText: 'Hilfe: Bitte geben Sie den Hindernistyp an.'
+                                    connection: zlhr
+                                    mandatory: true
+                                    sql: 'SELECT DISTINCT obstacle_type_id, obstacle_type_ger FROM data.ref_obstacle_type WHERE valid = TRUE order by obstacle_type_id asc;'
+                                    css: { width: 25% }
+                                -
+                                    type: select
+                                    title: '(39) Hindernisdefinition'
+                                    name: obstacle_definition_id
+                                    mandatory: true
+                                    mandatoryText: 'Bitte geben Sie die Hindernisdefinition gemäß Luftfahrtgesetz an.'
+                                    infoText: 'Hilfe: Bitte geben Sie die Hindernisdefinition gemäß Luftfahrtgesetz an.'
+                                    connection: zlhr
+                                    sql: 'SELECT DISTINCT obstacle_definition_id, obstacle_definition_code FROM data.ref_obstacle_definition WHERE valid = TRUE order by obstacle_definition_id asc;'
+                                    css: { width: 25% }
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: select
+                                    title: '(42) Bewilligende Behörde'
+                                    name: authority_id
+                                    mandatory: true
+                                    mandatoryText: 'Bitte geben Sie die bewilligende Behörde an.'
+                                    infoText: 'Hilfe: Bitte geben Sie die Behörde an, die die luftfahrbehördliche Ausnahme zur Errichtung eines Luftfahrthindernisses ausstellt.'
+                                    connection: zlhr
+                                    sql: 'SELECT DISTINCT authority_id, authority_name FROM data.ref_authority order by authority_id asc;'
+                                    css: { width: 45% }
+                                -
+                                    type: input
+                                    title: '(43) Geschäftszahl'
+                                    name: reference_number
+                                    mandatory: true
+                                    mandatoryText: 'Bitte geben Sie die Geschäftszahl an.'
+                                    infoText: 'Hilfe: Bitte geben Sie die Geschäftszahl des Bescheids an.'
+                                    css: { width: 25% }
+                                -
+                                    type: date
+                                    title: '(44) Bescheidausstellungsdatum'
+                                    mandatory: true
+                                    name: reference_issue_date
+                                    format: d/m/y
+                                    dateFormat: yy-mm-dd
+                                    mandatoryText: 'Bitte geben Sie das Bescheidausstellungsdatum an.'
+                                    infoText: 'Hilfe: Bitte geben Sie das Bescheidausstellungsdatum an.'
+                                    css: { width: 30% }
+                        -
+                            type: breakLine
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: select
+                                    title: '(55) Eigentümer'
+                                    name: owner_owner_id
+                                    mandatory: true
+                                    mandatoryText: 'Bitte geben Sie den Eigentümer an.'
+                                    infoText: 'Hilfe: Bitte geben Sie den Eigentümer an.'
+                                    connection: zlhr
+                                    sql: 'SELECT DISTINCT owner_id, CONCAT( owner_name, '', '', fn_number, '' '', telephone) FROM data.owner order by CONCAT( owner_name, '', '', fn_number, '' '', telephone);'
+                                -
+                                    type: select
+                                    title: '(41) Betreiber'
+                                    name: operator_owner_id
+                                    mandatory: true
+                                    mandatoryText: 'Bitte geben Sie den Betreiber an.'
+                                    infoText: 'Hilfe: Bitte geben Sie den Betreiber an.'
+                                    connection: zlhr
+                                    sql: 'SELECT DISTINCT owner_id, CONCAT( owner_name, '', '', fn_number, '' '', telephone) FROM data.owner order by CONCAT( owner_name, '', '', fn_number, '' '', telephone);'
+                        -
+                            type: breakLine
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: select
+                                    title: '(34) Flugplatz'
+                                    namdatory: true
+                                    name: airport_id
+                                    infoText: 'Hilfe: Bitte geben Sie den Flugplatz oder den Militärflugplatz an. Die Angabe des Location Indicator des Flugplatzes mit einer Sicherheitszone ist verpflichtend, wenn die Hindernisdefinition gemäß Luftfahrtgesetzt LFG 85/1 zutreffend ist.'
+                                    connection: zlhr
+                                    sql: 'SELECT DISTINCT airport_id, airport_location_indicator FROM data.ref_airport WHERE valid = TRUE order by airport_id asc;'
+                                    css: { width: 15% }
+                                -
+                                    type: select
+                                    title: '(6) Geometrietyp des Hindernisses'
+                                    name: geometry_type_id
+                                    mandatory: true
+                                    mandatoryText: 'Bitte geben Sie den Geometrietyp des Hindernisses an.'
+                                    infoText: 'Hilfe: Bitte geben Sie den Geometrietyp des Hindernisses an.'
+                                    connection: zlhr
+                                    sql: 'SELECT DISTINCT geometry_type_id, geometry_type_ger FROM data.ref_geometry_type WHERE valid = TRUE order by geometry_type_ger asc;'
+                                    css: { width: 30% }
+                                -
+                                    type: select
+                                    title: '(5) Hindernis gruppiert?'
+                                    name: obstacle_grouped
+                                    options: { 'true': Ja, 'false': Nein, '': '' }
+                                    mandatory: true
+                                    css: { width: 22% }
+                                -
+                                    type: select
+                                    title: '(19c) Synchrone Hindernisbefeuerung?'
+                                    name: synchron_lighting
+                                    options: { 'true': Ja, 'false': Nein, '': '' }
+                                    mandatory: true
+                                    mandatoryText: 'Pflichtfeld: Bitte geben Sie an, ob eine synchrone Hindernisbefeuerung zutrifft.'
+                                    css: { width: 33% }
+                -
+                    type: form
+                    title: 'Optionale Daten'
+                    css:
+                        font-size: 12px
+                        margin-bottom: 10px
+                    children:
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: date
+                                    title: '(23) Aufbau des Hindernisses (Datum)'
+                                    name: construction_date
+                                    dateFormat: yy-mm-dd
+                                    css: { width: 35% }
+                                -
+                                    type: select
+                                    title: (Uhrzeit)
+                                    name: construction_time
+                                    options: { '': '', '00:00': 'ab 00:00 UHR', '01:00': 'ab 01:00 UHR', '02:00': 'ab 02:00 UHR', '03:00': 'ab 03:00 UHR', '04:00': 'ab 04:00 UHR', '05:00': 'ab 05:00 UHR', '06:00': 'ab 06:00 UHR', '07:00': 'ab 07:00 UHR', '08:00': 'ab 08:00 UHR', '09:00': 'ab 09:00 UHR', '10:00': 'ab 10:00 UHR', '11:00': 'ab 11:00 UHR', '12:00': 'ab 12:00 UHR', '13:00': 'ab 13:00 UHR', '14:00': 'ab 14:00 UHR', '15:00': 'ab 15:00 UHR', '16:00': 'ab 16:00 UHR', '17:00': 'ab 17:00 UHR', '18:00': 'ab 18:00 UHR', '19:00': 'ab 19:00 UHR', '20:00': 'ab 20:00 UHR', '21:00': 'ab 21:00 UHR', '22:00': 'ab 22:00 UHR', '23:00': 'ab 23:00 UHR' }
+                                    css: { width: 15% }
+                                -
+                                    type: date
+                                    title: '(24) Abbau des Hindernisses (Datum)'
+                                    name: dismantling_date
+                                    dateFormat: yy-mm-dd
+                                    css: { width: 35% }
+                                -
+                                    type: select
+                                    title: (Uhrzeit)
+                                    name: dismantling_time
+                                    options: { '': '', '00:00': 'ab 00:00 UHR', '01:00': 'ab 01:00 UHR', '02:00': 'ab 02:00 UHR', '03:00': 'ab 03:00 UHR', '04:00': 'ab 04:00 UHR', '05:00': 'ab 05:00 UHR', '06:00': 'ab 06:00 UHR', '07:00': 'ab 07:00 UHR', '08:00': 'ab 08:00 UHR', '09:00': 'ab 09:00 UHR', '10:00': 'ab 10:00 UHR', '11:00': 'ab 11:00 UHR', '12:00': 'ab 12:00 UHR', '13:00': 'ab 13:00 UHR', '14:00': 'ab 14:00 UHR', '15:00': 'ab 15:00 UHR', '16:00': 'ab 16:00 UHR', '17:00': 'ab 17:00 UHR', '18:00': 'ab 18:00 UHR', '19:00': 'ab 19:00 UHR', '20:00': 'ab 20:00 UHR', '21:00': 'ab 21:00 UHR', '22:00': 'ab 22:00 UHR', '23:00': 'ab 23:00 UHR' }
+                                    css: { width: 15% }
+                        -
+                            type: breakLine
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: input
+                                    title: '(M18d) Behördliche Prüfung - Details'
+                                    name: audit_detail
+                                    infoText: 'Hilfe: Die Felder für die behördliche Prüfung werden nur von der Behörde ausgefüllt.'
+                                    css: { width: 33% }
+                                -
+                                    type: input
+                                    title: Antragsteller
+                                    name: applicant
+                                    infoText: 'Hilfe: Bitte geben Sie den Antragsteller an.'
+                                    css: { width: 34% }
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: input
+                                    title: 'Nutzungsbeschränkung der Daten'
+                                    name: use_restriction
+                                    infoText: 'Hilfe: Bitte geben Sie Details zu der Nutzungsbeschränkung der Hindernisdaten an.'
+                                    css: { width: 50% }
+                                -
+                                    type: input
+                                    title: 'Bestandszeiten eines temporären Hindernisses'
+                                    name: temporary_duration_period
+                                    infoText: 'Hilfe: Bitte geben Sie die Bestandszeiten eines temporären Hindernisses an.'
+                                    css: { width: 50% }
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: select
+                                    title: 'Hindernisbefeuerung gemäß ICAO-Standards'
+                                    name: lighting_icao
+                                    options: { 'true': Ja, 'false': Nein, '': '' }
+                                    css: { width: 50% }
+                                -
+                                    type: select
+                                    title: 'Tageskenneichung gemäß ICAO-Standards'
+                                    name: marking_icao
+                                    options: { 'true': Ja, 'false': Nein, '': '' }
+                                    css: { width: 50% }
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: textArea
+                                    title: 'Beschreibung des Hindernisbetriebes'
+                                    name: description_obstacle_operation
+                                    infoText: 'Hilfe: Bitte geben Sie die Beschreibung des Hindernisbetriebes an.'
+                                    rows: 2
+                                    placeholder: 'Hier können Sie eine Beschreibung des Hindernisbetriebes eingeben.'
+                                    css: { width: 50% }
+                                -
+                                    type: textArea
+                                    title: Anmerkung
+                                    name: remark
+                                    infoText: 'Hilfe: Bitte geben Sie Anmerkungen an.'
+                                    rows: 2
+                                    placeholder: 'Hier können Sie Anmerkungen eingeben.'
+                                    css: { width: 50% }
+                        -
+                            type: breakLine
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: input
+                                    title: Gesamtlänge
+                                    name: total_length
+                                    infoText: 'Hilfe: Bitte geben Sie die Gesamtlänge des Hindernisses an.'
+                                    css: { width: 33% }
+                                -
+                                    type: input
+                                    title: Gesamtbreite
+                                    name: total_width
+                                    infoText: 'Hilfe: Bitte geben Sie die Gesamtbreite des Hindernisses an.'
+                                    css: { width: 33% }
+                                -
+                                    type: input
+                                    title: Gesamtradius
+                                    name: total_radius
+                                    infoText: 'Hilfe: Bitte geben Sie den Gesamtradius des Hindernisses an.'
+                                    css: { width: 34% }
+                -
+                    type: form
+                    title: 'Zugeordnete Stützpunkte (Info)'
+                    children:
+                        -
+                            type: resultTable
+                            title: 'Liste der zum Hindernis zugeordneten Stützpunkte'
+                            dataStore:
+                                uniqueId: obstacle_id
+                                fields:
+                                    - obstacle_id
+                                    - point_id
+                                    - vertex_name
+                            editable: true
+                            dataStoreLink:
+                                name: points
+                                fieldName: obstacle_id
+                                uniqueId: point_id
+                            columns:
+                                -
+                                    data: point_id
+                                    title: 'Stützpunkt ID'
+                                -
+                                    data: vertex_name
+                                    title: 'Stützpunkt Name'
+                                -
+                                    data: height
+                                    title: Höhe
+                                -
+                                    data: editor
+                                    title: Bearbeiter
+point_zlhr:
+    label: Stützpunkte
+    printable: false
+    featureType: zlhr
+    maxResults: 100
+    minScale: 200000
+    refreshFeaturesAfterSave:
+        - alldata_zlhr
+        - obstacle_zlhr
+        - curvesegmaxheightedit_zlhr
+        - obstacle_hull_edit
+    refreshLayersAfterFeatureSave:
+        - 29
+        - 47
+    copy:
+        enable: true
+        default: null
+        style:
+            label: 'Dupliziertes Hindernis'
+            fillColor: '#ff0000'
+            fillOpacity: 1
+            strokeWidth: 4
+            strokeColor: '#660033'
+    allowLocate: false
+    allowDigitize: true
+    allowEditData: true
+    allowDelete: false
+    allowChangeVisibility: false
+    allowCustomerStyle: false
+    showVisibilityNavigation: false
+    allowDeleteByCancelNewGeometry: true
+    geometrylessfeatureBtn: true
+    dataSourceImportHandler:
+        url: 'http://localhost:8983/solr/zlhr/dataimport?command=full-import&clean=true&commit=true'
+    toolset:
+        -
+            type: selectFeature
+        -
+            type: drawPoint
+        -
+            type: moveFeature
+        -
+            type: removeSelected
+    useContextMenu: true
+    displayPermanent: false
+    displayOnInactive: false
+    zoomScaleDenominator: 1000
+    displayOnSelect: true
+    inlineSearch: true
+    searchType: currentExtent
+    showExtendSearchSwitch: true
+    popup:
+        title: 'Stützpunkt Anlegen / Bearbeiten'
+        width: 850
+        height: 620
+        remoteData:
+            - 'http://10.6.8.61:8080/geoserver/internal/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&QUERY_LAYERS=internal:hoehenAustriaEVRF&LAYERS=internal:hoehenAustriaEVRF&INFO_FORMAT=text/html&X=1&Y=1&SRS=EPSG:{srid}&WIDTH=2&HEIGHT=2&BBOX={bbox}'
+            - 'http://10.6.7.201/EGA_GeoServices/services/GeoServices/ZLHR_AU/MapServer/WMSServer?VERSION=1.3.0&BBOX={bbox}&LAYERS=1&QUERY_LAYERS=1&EXCEPTIONS=application/vnd.ogc.se_xml&CRS=EPSG:{srid}&BGCOLOR=0xFFFFFF&HEIGHT=781&REQUEST=GetFeatureInfo&INFO_FORMAT=application/geojson&STYLES=&WIDTH=939&FORMAT=image/png&TRANSPARENT=TRUE'
+    oneInstanceEdit: true
+    view:
+        type: table
+        settings:
+            info: true
+            processing: false
+            ordering: true
+            paging: true
+            selectable: false
+            autoWidth: false
+            order:
+                -
+                    - 0
+                    - asc
+    tableFields:
+        point_id:
+            label: PunktID
+        obstacle_id:
+            label: HindernisID
+        vertex_name:
+            label: Name
+    styles:
+        default:
+            strokeWidth: 1
+            fillColor: '#FF0000'
+            strokeColor: '#b30000'
+            fillOpacity: 0.7
+            pointRadius: 10
+            label: '${point_id} (${obstacle_id})'
+            labelOutlineColor: '#ffcccc'
+        select:
+            strokeWidth: 3
+            fillColor: '#e60000'
+            strokeColor: '#330000'
+            fillOpacity: 1
+            pointRadius: 12
+            label: '${point_id} (${obstacle_id})'
+            labelOutlineColor: '#ffffff'
+    formItems:
+        -
+            type: tabs
+            children:
+                -
+                    type: form
+                    title: 'Verpflichtende Daten'
+                    css:
+                        font-size: 12px
+                        margin-bottom: 10px
+                    children:
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: text
+                                    title: Stützpunkt-ID
+                                    name: point_id
+                                    text: 'data.point_id || "wird automatisch vergeben"'
+                                    mandatory: true
+                                    css: { width: 25% }
+                                -
+                                    type: text
+                                    title: 'Letzter Bearbeiter'
+                                    name: editor
+                                    text: 'data.editor || "-"'
+                                    css: { width: 25% }
+                                -
+                                    type: text
+                                    title: 'Zeitpunkt der letzten Bearbeitung'
+                                    name: modified
+                                    text: 'data.modified || "-"'
+                                    css: { width: 25% }
+                        -
+                            type: breakLine
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: input
+                                    title: '(30a) Fortlaufende Nr. des Stützpunktes'
+                                    name: vertex_number
+                                    value: 1
+                                    mandatory: true
+                                    css: { width: 30% }
+                                -
+                                    type: select
+                                    title: 'Zugeordnetes Luftfahrthindernis'
+                                    name: obstacle_id
+                                    connection: zlhr
+                                    sql: 'SELECT obstacle_id, obstacle_id || '': '' || name_location FROM data.obstacle order by obstacle_id;'
+                                    mandatory: true
+                                    css: { width: 70% }
+                        -
+                            type: breakLine
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: coordinates
+                                    title_epsg: 'Koordinatensystem der Koordinaten'
+                                    title_longitude: '(7a) Geographische Breite/y'
+                                    title_latitude: '(7b) Geographische Länge/x'
+                                    title: ''
+                                    css: { width: 100% }
+                                    epsgCodes: [['EPSG:3857', 'EPSG:3857 (Pseudo Mercator)'], ['EPSG:4326', 'EPSG:4326 (WGS84)'], ['EPSG:31255', 'EPSG:31255 (GK M31)']]
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: select
+                                    title: 'Katastralgemeinde: Nummer - Name / Gemeinde / Bezirk (Land)'
+                                    name: KG_NUMMER
+                                    mandatory: true
+                                    automatic_detection: true
+                                    connection: zlhr
+                                    sql: 'SELECT cadastral_zoning_number, (cadastral_zoning_number || '' - '' || cadastral_zoning_name || '' / '' || municipality || '' / '' || district || '' ('' || federal_state|| '')'') FROM data.ref_admin_unit order by cadastral_zoning_number asc;'
+                                    css: { width: 100% }
+                        -
+                            type: breakLine
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: input
+                                    title: '(31) Fußpunkthöhe über See (m)'
+                                    name: elevation_base
+                                    mandatory: true
+                                    infoText: 'Hilfe: Bitte geben Sie den Namen oder den Ort des Hindernisses an.'
+                                    automatic_detection: true
+                                    css: { width: 37% }
+                                    keyup: "console.log(\"keyup on (31)\");\nvar field31 = el;\nvar form = field31.closest(\".modal-body\");\nvar field10 = form.find(\"[name='height']\");\nvar field9 = form.find(\"[name='elevation_top']\");\nif ( (field9.val() == \"\") && (field10.val() == \"\") ) {}\nelse if (field10.val() != \"\") {\n  field9.val(parseFloat( field31.val() ) + parseFloat( field10.val() ) );\n} else if (field9.val() != \"\") {\n  field10.val(parseFloat( field9.val() ) - parseFloat( field31.val() ) );\n}\n"
+                                -
+                                    type: input
+                                    title: '(10) Hindernishöhe über Grund (m)'
+                                    name: height
+                                    mandatory: true
+                                    infoText: 'Hilfe: Bitte geben Sie den Namen oder den Ort des Hindernisses an.'
+                                    css: { width: 28% }
+                                    keyup: "console.log(\"keyup on (10)\");\nvar field10 = el;\nvar form = field10.closest(\".modal-body\");\nvar field31 = form.find(\"[name='elevation_base']\");\nvar field9 = form.find(\"[name='elevation_top']\");\nif (field31.val() != '') {\n  var height_result = parseFloat(field31.val()) + parseFloat(field10.val())\n  console.log(\"height_result=\" + height_result);\n  if ( ! isNaN(height_result) ) {\n    field9.val(height_result);\n  } else {\n    field9.val('');\n  }\n}\n"
+                                -
+                                    type: input
+                                    title: '(9) (Max.) Hindernishöhe über See (m)'
+                                    name: elevation_top
+                                    mandatory: true
+                                    infoText: 'Hilfe: Bitte geben Sie den Namen oder den Ort des Hindernisses an.'
+                                    css: { width: 35% }
+                                    keyup: "console.log(\"keyup on (9)\");\nvar field9 = el;\nvar form = field9.closest(\".modal-body\");\nvar field31 = form.find(\"[name='elevation_base']\");\nvar field10 = form.find(\"[name='height']\");\nif (field31.val() != '') {\n  var height_result = parseFloat(field9.val()) - parseFloat(field31.val())\n  console.log(\"height_result=\" + height_result);\n  if ( ! isNaN(height_result) ) {\n    field10.val(height_result);\n  } else {\n    field10.val('');\n  }\n}\n"
+                        -
+                            type: breakLine
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: input
+                                    title: '(12/13) Messgenauigkeit der Lagekoordinaten (Konfidenzintervall 90%)'
+                                    name: horizontal_convidence_interval_90
+                                    mandatory: true
+                                    css: { width: 25% }
+                                -
+                                    type: input
+                                    title: '(12/13) Messgenauigkeit der Lagekoordinaten (Konfidenzintervall 95%)'
+                                    name: horizontal_convidence_interval_95
+                                    mandatory: true
+                                    css: { width: 25% }
+                                -
+                                    type: input
+                                    title: 'Messgenauigkeit der Höhenangaben (Konfidenzintervall 90%)'
+                                    name: vertical_convidence_interval_90
+                                    mandatory: true
+                                    css: { width: 25% }
+                                -
+                                    type: input
+                                    title: 'Messgenauigkeit der Höhenangaben (Konfidenzintervall 95%)'
+                                    name: vertical_convidence_interval_95
+                                    mandatory: true
+                                    css: { width: 25% }
+                -
+                    type: form
+                    title: 'Optionale Angaben'
+                    css:
+                        font-size: 12px
+                        margin-bottom: 10px
+                    children:
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: input
+                                    title: '(30b) Stützpunktname'
+                                    name: vertex_name
+                                    css: { width: 33% }
+                                -
+                                    type: select
+                                    title: '(46b) Materialtyp'
+                                    name: material_type_id
+                                    infoText: 'Wählen Sie bitte aus der Liste den Materialtyp aus.'
+                                    connection: zlhr
+                                    sql: 'SELECT material_type_id, material_type_ger FROM data.ref_material_type WHERE valid = TRUE UNION SELECT NULL AS material_type_id, NULL AS material_type_ger ORDER by material_type_ger asc;'
+                                    css: { width: 33% }
+                                -
+                                    type: select
+                                    title: '(4d) Hindernistyp des (Stütz-)Punktes'
+                                    name: obstacle_type_id
+                                    infoText: 'Wählen Sie bitte aus der Liste den Hindernistyp des (Stütz-)Punktes aus.'
+                                    connection: zlhr
+                                    sql: 'SELECT obstacle_type_id, obstacle_type_ger FROM data.ref_obstacle_type WHERE valid = TRUE UNION SELECT NULL AS obstacle_type_id, NULL AS obstacle_type_ger order by obstacle_type_id asc;'
+                                    css: { width: 33% }
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: select
+                                    title: '(47) Bewegliches Hindernis'
+                                    name: mobile
+                                    options: { 'true': Ja, 'false': Nein, '': '' }
+                                    css: { width: 20% }
+                                -
+                                    type: select
+                                    title: '(48) Hindernis mit Sollbruchstelle'
+                                    name: frangible
+                                    options: { 'true': Ja, 'false': Nein, '': '' }
+                                    css: { width: 25% }
+                                -
+                                    type: input
+                                    title: '(11) Geoidundulation'
+                                    name: geoid_undulation
+                                    css: { width: 20% }
+                                -
+                                    type: select
+                                    title: '(29a / 29b) Baustatus des Stützpunktes'
+                                    name: construction_status_id
+                                    connection: zlhr
+                                    sql: 'SELECT construction_status_id, construction_status_ger FROM data.ref_construction_status WHERE valid = TRUE UNION SELECT NULL AS construction_status_id, NULL AS construction_status_ger order by construction_status_id asc;'
+                                    mandatoryText: 'Bitte geben Sie den Stützpunkt-Status des Hindernisses an.'
+                                    css: { width: 35% }
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: textArea
+                                    title: '(33b) Anmerkung'
+                                    name: remark
+                                    rows: 2
+                                    placeholder: 'Hier können Sie Anmerkungen eingeben.'
+                                    css: { width: 100% }
+                        -
+                            type: breakLine
+                        -
+                            type: label
+                            title: 'Hindernisbefeuerung & Tageskennzeichnung (Tkz.)'
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: select
+                                    title: '(19a) Hindernisbefeuerung'
+                                    name: lighting_id
+                                    connection: zlhr
+                                    sql: 'SELECT lighting_id, lighting_ger FROM data.ref_lighting where valid = TRUE UNION SELECT NULL AS lighting_id, NULL AS lighting_ger;'
+                                    css: { width: 25% }
+                                -
+                                    type: select
+                                    title: '(21d) Ausführung der Tkz.'
+                                    name: marking_pattern_id
+                                    connection: zlhr
+                                    sql: 'SELECT marking_pattern_id, marking_pattern_ger FROM data.ref_marking_pattern where valid = TRUE UNION SELECT NULL AS marking_pattern_id, NULL AS marking_pattern_ger;'
+                                    css: { width: 25% }
+                                -
+                                    type: select
+                                    title: '(21f) Erste Farbe der Tkz.'
+                                    name: colour1_marking_colour_id
+                                    connection: zlhr
+                                    sql: 'SELECT marking_colour_id, colour_ger FROM data.ref_marking_colour WHERE valid = TRUE UNION SELECT NULL AS marking_colour_id, NULL AS colour_ger;'
+                                    css: { width: 25% }
+                                -
+                                    type: select
+                                    title: '(21h) Zweite Farbe der Tkz.'
+                                    name: colour2_marking_colour_id
+                                    connection: zlhr
+                                    sql: 'SELECT marking_colour_id, colour_ger FROM data.ref_marking_colour WHERE valid = TRUE UNION SELECT NULL AS marking_colour_id, NULL AS colour_ger;'
+                                    css: { width: 25% }
+                        -
+                            type: breakLine
+                        -
+                            type: label
+                            title: 'Informationen des Ziviltechnikers'
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: input
+                                    title: '(12) Messgenauigkeit der Lagekoordinaten (Mittlere Fehler)'
+                                    name: horizontal_mean_error
+                                    css: { width: 33% }
+                                -
+                                    type: select
+                                    title: '(16) Einheit der Lagekoordinatengenauigkeit'
+                                    name: horizontal_error_unit_id
+                                    connection: zlhr
+                                    sql: 'SELECT unit_id, unit_name FROM data.ref_unit WHERE valid = TRUE UNION SELECT NULL AS unit_id, NULL AS unit_name ORDER BY unit_id'
+                                    value: 1
+                                    css: { width: 33% }
+                                -
+                                    type: select
+                                    title: '(M17a) Erfassungsmethode für Lagekoordinaten'
+                                    name: horizontal_method_of_observation_id
+                                    connection: zlhr
+                                    sql: 'SELECT method_of_observation_id, method_of_observation_ger FROM data.ref_method_of_observation WHERE valid_horizontal = TRUE UNION SELECT NULL AS method_of_observation_id, NULL AS method_of_observation_ger order by method_of_observation_ger asc;'
+                                    css: { width: 33% }
+                        -
+                            type: fieldSet
+                            children:
+                                -
+                                    type: input
+                                    title: '(14) Messgenauigkeit der Höhenangaben (Mittlere Fehler)'
+                                    name: vertical_mean_error
+                                    css: { width: 33% }
+                                -
+                                    type: select
+                                    title: '(18) Einheit der Höhengenauigkeit'
+                                    name: vertical_error_unit_id
+                                    connection: zlhr
+                                    sql: 'SELECT unit_id, unit_name FROM data.ref_unit WHERE valid = TRUE UNION SELECT NULL AS unit_id, NULL AS unit_name ORDER BY unit_id'
+                                    value: 1
+                                    css: { width: 33% }
+                                -
+                                    type: select
+                                    title: '(M17b) Erfassungsmethode für Höhenangaben'
+                                    name: vertical_method_of_observation_id
+                                    connection: zlhr
+                                    sql: 'SELECT method_of_observation_id, method_of_observation_ger FROM data.ref_method_of_observation WHERE valid_vertical = TRUE UNION SELECT NULL AS method_of_observation_id, NULL AS method_of_observation_ger order by method_of_observation_ger asc;'
+                                    css: { width: 33% }
+curveseg_edit:
+    label: Verbindungselement
+    printable: false
+    featureType: zlhr_curveseg_line
+    maxResults: 50
+    minScale: 200000
+    refreshFeaturesAfterSave:
+        - alldata_zlhr
+        - obstacle_zlhr
+        - curvesegmaxheightedit_zlhr
+    refreshLayersAfterFeatureSave:
+        - 29
+    copy:
+        enable: false
+    allowLocate: false
+    allowDigitize: false
+    allowEditData: true
+    allowDelete: false
+    allowChangeVisibility: false
+    allowCustomerStyle: false
+    showVisibilityNavigation: false
+    allowDeleteByCancelNewGeometry: true
+    geometrylessfeatureBtn: true
+    dataSourceImportHandler:
+        url: 'http://localhost:8983/solr/zlhr/dataimport?command=full-import&clean=true&commit=true'
+    toolset:
+        -
+            type: selectFeature
+        -
+            type: removeSelected
+    useContextMenu: true
+    displayPermanent: false
+    displayOnInactive: false
+    zoomScaleDenominator: 1000
+    displayOnSelect: true
+    inlineSearch: true
+    searchType: currentExtent
+    showExtendSearchSwitch: true
+    popup:
+        title: 'Verbindunselement Anlegen / Bearbeiten'
+        width: 850
+        height: 400
+    oneInstanceEdit: true
+    view:
+        type: table
+        settings:
+            info: true
+            processing: false
+            ordering: true
+            paging: true
+            selectable: false
+            autoWidth: false
+            order:
+                -
+                    - 0
+                    - asc
+    tableFields:
+        curveseg_id:
+            label: VerbindungsID
+    styles:
+        default:
+            strokeWidth: 4
+            fillColor: '#FF0000'
+            strokeColor: '#b30000'
+            fillOpacity: 0.7
+            pointRadius: 10
+            label: '${curveseg_id}: (${vertex1_point_id})-(${vertex2_point_id})'
+            labelOutlineColor: '#ffcccc'
+        select:
+            strokeWidth: 5
+            fillColor: '#e60000'
+            strokeColor: '#00FF00'
+            fillOpacity: 1
+            pointRadius: 12
+            label: '${curveseg_id}: (${vertex1_point_id})-(${vertex2_point_id})'
+            labelOutlineColor: '#ffffff'
+    formItems:
+        -
+            type: fieldSet
+            children:
+                -
+                    type: text
+                    title: 'Verbindungselement ID'
+                    name: curveseg_id
+                    mandatory: true
+                    text: 'data.curveseg_id || "automatisch vergeben"'
+                    css:
+                        width: 35%
+                -
+                    type: select
+                    title: 'Stützpunkt Anfang'
+                    name: vertex1_point_id
+                    connection: zlhr
+                    mandatory: true
+                    sql: 'SELECT DISTINCT point_id, CONCAT( point_id , '' '' , vertex_name) FROM data.point order by point_id asc;'
+                    css:
+                        width: 25%
+                -
+                    type: select
+                    title: 'Stützpunkt Ende'
+                    name: vertex2_point_id
+                    connection: zlhr
+                    mandatory: true
+                    sql: 'SELECT DISTINCT point_id, CONCAT( point_id , '' '' , vertex_name) FROM data.point order by point_id asc;'
+                    css:
+                        width: 25%
+        -
+            type: fieldSet
+            children:
+                -
+                    type: select
+                    title: '(29c) Baustatus'
+                    name: construction_status_id
+                    connection: zlhr
+                    sql: 'SELECT DISTINCT construction_status_id, construction_status_ger FROM data.ref_construction_status UNION SELECT NULL AS construction_status_id, NULL AS construction_status_ger order by construction_status_id asc;'
+                    css:
+                        width: 25%
+                -
+                    type: select
+                    title: '(19b) Hindernisbefeuerung'
+                    name: lighting_id
+                    connection: zlhr
+                    sql: 'SELECT DISTINCT lighting_id, lighting_ger FROM data.ref_lighting UNION SELECT NULL AS lighting_id, NULL AS lighting_ger order by lighting_id asc;'
+                    css:
+                        width: 25%
+        -
+            type: fieldSet
+            children:
+                -
+                    type: select
+                    title: '(21j) Ausführung der Tkz.'
+                    name: marking_pattern_id
+                    connection: zlhr
+                    sql: 'SELECT DISTINCT marking_pattern_id, marking_pattern_ger FROM data.ref_marking_pattern UNION SELECT NULL AS marking_pattern_id, NULL AS marking_pattern_ger order by marking_pattern_id asc;'
+                    css:
+                        width: 25%
+                -
+                    type: select
+                    title: '(21l) Erste Farbe der Tkz.'
+                    name: colour1_marking_colour_id
+                    connection: zlhr
+                    sql: 'SELECT DISTINCT marking_colour_id, colour_ger FROM data.ref_marking_colour UNION SELECT NULL AS marking_colour_id, NULL AS colour_ger order by marking_colour_id asc;'
+                    css:
+                        width: 25%
+                -
+                    type: select
+                    title: '(21n) Zweite Farbe der Tkz.'
+                    name: colour2_marking_colour_id
+                    connection: zlhr
+                    sql: 'SELECT DISTINCT marking_colour_id, colour_ger FROM data.ref_marking_colour UNION SELECT NULL AS marking_colour_id, NULL AS colour_ger order by marking_colour_id asc;'
+                    css:
+                        width: 25%
+curvesegmaxheightedit_zlhr:
+    label: Zwischenpunkte
+    printable: false
+    featureType: zlhr_curvesegmaxheight
+    maxResults: 50
+    minScale: 200000
+    refreshFeaturesAfterSave:
+        - alldata_zlhr
+        - obstacle_zlhr
+        - curvesegmaxheightedit_zlhr
+    refreshLayersAfterFeatureSave:
+        - 29
+    copy:
+        enable: true
+        default: null
+        style:
+            label: 'Duplizierter Zwischenpunkt'
+            fillColor: '#ff0000'
+            fillOpacity: 1
+            strokeWidth: 4
+            strokeColor: '#660033'
+    allowLocate: false
+    allowDigitize: true
+    allowEditData: true
+    allowDelete: false
+    allowChangeVisibility: false
+    allowCustomerStyle: false
+    showVisibilityNavigation: false
+    allowDeleteByCancelNewGeometry: true
+    toolset:
+        -
+            type: selectFeature
+        -
+            type: drawPoint
+        -
+            type: moveFeature
+        -
+            type: removeSelected
+    useContextMenu: true
+    displayPermanent: false
+    displayOnInactive: false
+    zoomScaleDenominator: 1000
+    displayOnSelect: true
+    inlineSearch: true
+    searchType: currentExtent
+    showExtendSearchSwitch: true
+    popup:
+        title: 'Zwischenpunkt Anlegen / Bearbeiten'
+        width: 400
+        height: 300
+        remoteData:
+            - 'http://10.6.8.61:8080/geoserver1/internal/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&FORMAT=image/png&TRANSPARENT=true&QUERY_LAYERS=internal:curveseg_line&LAYERS=internal:curveseg_line&INFO_FORMAT=text/html&FEATURE_COUNT=1&X=50&Y=50&SRS=EPSG:{srid}&WIDTH=101&HEIGHT=101&BBOX={bbox}'
+    oneInstanceEdit: true
+    view:
+        type: table
+        settings:
+            info: true
+            processing: false
+            ordering: true
+            paging: true
+            selectable: false
+            autoWidth: false
+            order:
+                -
+                    - 0
+                    - asc
+    tableFields:
+        max_curveseg_height_id:
+            label: 'Zwischenpunkt ID'
+        curveseg_id:
+            label: 'Zugehöriges Verbindungselement'
+    styles:
+        default:
+            strokeWidth: 1
+            fillColor: '#ffe98d'
+            strokeColor: '#b30000'
+            fillOpacity: 0.7
+            pointRadius: 10
+            label: '${max_curveseg_height_id} (${curveseg_id})'
+            labelOutlineColor: '#ffcccc'
+        select:
+            strokeWidth: 3
+            fillColor: '#ffe98d'
+            strokeColor: '#330000'
+            fillOpacity: 1
+            pointRadius: 12
+            label: '${max_curveseg_height_id} (${curveseg_id})'
+            labelOutlineColor: '#ffffff'
+    formItems:
+        -
+            type: fieldSet
+            children:
+                -
+                    type: text
+                    title: Zwischenpunkt-ID
+                    name: max_curveseg_height_id
+                    text: 'data.max_curveseg_height_id || "wird automatisch vergeben"'
+                    mandatory: true
+                    css:
+                        width: 100%
+        -
+            type: fieldSet
+            children:
+                -
+                    type: input
+                    title: '(32) Maximale Höhe über Grund des Verbindungselements'
+                    name: height_max_curveseg
+                    mandatory: true
+                    css:
+                        width: 100%
+        -
+            type: fieldSet
+            children:
+                -
+                    type: select
+                    title: 'Zugehöriges Verbindungselement'
+                    name: curveseg_id
+                    mandatory: true
+                    connection: zlhr
+                    sql: 'SELECT curveseg_id, (curveseg_id || '': ('' || vertex1_point_id || '' - '' || vertex2_point_id || '')'') FROM data.curveseg order by curveseg_id asc;'
+                    css:
+                        width: 100%
