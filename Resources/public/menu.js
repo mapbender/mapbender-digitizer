@@ -135,7 +135,7 @@
         var schema = menu.schema;
         var map = schema.widget.map;
 
-        menu.changeCurrentExtentSearch_ = function(currentExtentSearch) {
+        menu.changeCurrentExtentSearch_ = function (currentExtentSearch) {
             var menu = this, features = null;
             resultTable.currentExtentSearch = currentExtentSearch;
             if (currentExtentSearch) {
@@ -185,7 +185,6 @@
             }
 
         });
-
 
 
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {

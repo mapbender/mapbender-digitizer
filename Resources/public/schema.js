@@ -163,7 +163,7 @@
             feature.set("oldGeometry", feature.getGeometry().clone());
         });
 
-        $(schema).on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
+        schema.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
             var feature = event.feature;
 
             feature.set("modificationState", "isChanged");
@@ -185,7 +185,7 @@
 
         });
 
-        $(schema).on('controlFactory.FeatureAdded', function (event) {
+        schema.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
             var feature = event.feature;
 
             feature.set("modificationState", "isNew");
@@ -204,11 +204,10 @@
                 });
             }
 
-
         });
 
 
-        $(schema).on('controlFactory.FeatureCopied', function (event) {
+        schema.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
             var feature = event.feature;
 
             feature.set("modificationState", "isCopy");
@@ -225,7 +224,6 @@
                 }
             });
 
-            feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
 
         });
 
@@ -507,7 +505,6 @@
         schema.layer.getSource().addFeatures(features);
 
         $(schema).trigger({type: "Digitizer.FeaturesLoaded", features: features});
-
     };
 
 
@@ -562,7 +559,8 @@
         schema.layer.getSource().addFeature(newFeature);
 
         // Watch out - Name "Copy of ..." is not instantly stored
-        $(schema).trigger({type: 'controlFactory.FeatureCopied', feature: newFeature});
+        // Control Factory namespace can be misleading and is used for congruence onl<
+        schema.layer.getSource().dispatchEvent({type: 'controlFactory.FeatureCopied', feature: newFeature});
 
     };
 
@@ -700,7 +698,6 @@
 
                 schema.layer.getSource().removeFeature(feature);
                 schema.layer.getSource().addFeature(newFeature);
-
 
                 $.notify(Mapbender.DataManager.Translator.translate("feature.save.successfully"), 'info');
 
