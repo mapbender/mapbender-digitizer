@@ -282,7 +282,6 @@
 
         $.each(schema.basicStyles, function (label, style) {
             schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(style,true);
-            console.log(label, schema.styles[label]);
         });
 
         //Object.freeze(schema.styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
