@@ -867,7 +867,12 @@ class Digitizer extends BaseElement
     protected function getCurrentUserId()
     {
         if (method_exists($this,"getUser")) {
-            return $this->getUser()->getId();
+            $user = $this->getUser();
+            if (is_string($user)) {
+                return $user;
+            } else {
+                return $user->getId();    
+            }
         } else {
             return $this->getUserId();
         }
