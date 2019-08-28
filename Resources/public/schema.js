@@ -1262,7 +1262,8 @@
                 copy: schema.copy,
                 openFormAfterEdit: schema.openFormAfterEdit,
                 openFormAfterModification: schema.openFormAfterModification,
-                revertChangedGeometryOnCancel: schema.revertChangedGeometryOnCancel
+                revertChangedGeometryOnCancel: schema.revertChangedGeometryOnCancel,
+                deactivateControlAfterModification: schema.deactivateControlAfterModification
 
 
             };
