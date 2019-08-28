@@ -1260,6 +1260,7 @@
                 allowPrintMetadata: schema.allowPrintMetadata,
                 allowDeleteByCancelNewGeometry: schema.allowDeleteByCancelNewGeometry,
                 copy: schema.copy,
+                openFormAfterEdit: schema.openFormAfterEdit
 
             };
 
