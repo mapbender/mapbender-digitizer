@@ -378,7 +378,7 @@
         tableTranslation: null,
         save: {}, // pop a confirmation dialog when deactivating, to ask the user to save or discard current in-memory changes
         openFormAfterEdit: true,
-        openFormAfterModification: true,
+        openFormAfterModification: false,
         pageLength: 10,
         currentExtentSearch: false,
         inlineSearch: true,
@@ -1261,6 +1261,7 @@
                 allowDeleteByCancelNewGeometry: schema.allowDeleteByCancelNewGeometry,
                 copy: schema.copy,
                 openFormAfterEdit: schema.openFormAfterEdit,
+                openFormAfterModification: schema.openFormAfterModification,
                 revertChangedGeometryOnCancel: schema.revertChangedGeometryOnCancel
 
 
