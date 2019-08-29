@@ -25,7 +25,7 @@
 
         schema.allowSaveInResultTable = options.allowSaveInResultTable || false;
 
-        schema.copy = options.copy || {enable: false, overwriteValuesWithDefault: false, moveCopy: {x: 10, y: 10}};
+        schema.copy = options.copy || {enable: false, overwriteValuesWithDefault: false, moveCopy: {x: 10, y: 10}, style: null};
 
         schema.useContextMenu = options.useContextMenu || false;
 
@@ -82,7 +82,11 @@
 
         schema.zoomOnResultTableClick = options.zoomOnResultTableClick || true;
 
-        schema.basicStyles = Object.assign({}, schema.getDefaultStyles_(), options.styles, { copy: options.copy.style });
+        var otherStyles =  {};
+        if (schema.copy && schema.copy.style) {
+            otherStyles.copy = schema.copy.style;
+        }
+        schema.basicStyles = Object.assign({}, schema.getDefaultStyles_(), options.styles || {}, otherStyles);
 
         schema.styles = {};
 
@@ -351,10 +355,11 @@
             source: new ol.source.Vector({
                 format: new ol.format.GeoJSON(),
                 loader: schema.getData.bind(schema),
-                minResolution: schema.minScale ? Mapbender.Digitizer.Utilities.scaleToResolution(schema.minScale) : 0,
-                maxResolution: schema.maxScale ? Mapbender.Digitizer.Utilities.scaleToResolution(schema.maxScale) : Infinity,
+
                 strategy: ol.loadingstrategy.all // ol.loadingstrategy.bbox
             }),
+            minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
+            maxResolution: Mapbender.Model.scaleToResolution( schema.minScale || Infinity),
             visible: false,
         });
 
