@@ -614,6 +614,9 @@
 
             if (schema.getSchemaByFeature(feature).deactivateControlAfterModification) {
                 control && control.deactivate();
+            } else if (control instanceof OpenLayers.Control.ModifyFeature) {
+                control.deactivate();
+                schema.temporarilyDeactivatedControl = control;
             }
 
         },
@@ -1089,6 +1092,11 @@
 
                 schema.removeFeatureFromUI(feature);
                 schema.layer.addFeatures([newFeature]);
+
+                if (schema.temporarilyDeactivatedControl) {
+                    schema.temporarilyDeactivatedControl.activate();
+                    schema.temporarilyDeactivatedControl = null;
+                }
 
                 schema.reloadFeatures();
 
