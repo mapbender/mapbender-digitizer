@@ -237,7 +237,7 @@
 
         });
 
-        $(schema).on('Digitizer.FeatureUpdatedOnServer', function (event) {
+        $(widget.map).on('Digitizer.FeatureUpdatedOnServer', function (event) {
 
             if (schema.refreshLayersAfterFeatureSave) {
 
@@ -632,6 +632,7 @@
     Mapbender.Digitizer.Scheme.prototype.removeFeature = function (feature) {
         var schema = this;
         var widget = schema.widget;
+        var map = widget.map;
 
         var limitedFeature = {};
         limitedFeature[schema.featureType.uniqueId] = feature.getId();
@@ -647,7 +648,7 @@
                         feature: limitedFeature,
                     }).done(function (fid) {
                         schema.layer.getSource().removeFeature(feature);
-                        $(schema).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
+                        $(map).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
                         $.notify(Mapbender.DataManager.Translator.translate('feature.remove.successfully'), 'info');
                     });
                 }
@@ -729,7 +730,7 @@
                 console.assert(schema.layer.getSource().getFeatures().includes(feature), "Feature is not part of the source", schema.layer.getSource().getFeatures());
 
                 schema.layer.getSource().removeFeature(feature);
-                $(schema).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
+                $(map).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
 
 
                 schema.layer.getSource().addFeature(newFeature);
