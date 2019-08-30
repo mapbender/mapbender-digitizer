@@ -53,5 +53,19 @@
         return ol.extent.intersects(widget.map.getView().calculateExtent(), feature.getGeometry().getExtent());
     };
 
+    Mapbender.Digitizer.prototype.refreshConnectedDigitizerFeatures = function(schemaName){
+        $(".mb-element-digitizer").not(".mb-element-data-manager").each(function(index,element){
+            var foreignDigitizer = $(element).data("mapbenderMbDigitizer");
+
+            try {
+                foreignDigitizer.schemes[schemaName].layer.getSource().refresh();
+            } catch(e) {
+                console.error("No active Digitizer Scheme '"+schemaName+"'",e);
+            }
+        });
+
+
+    };
+
 
 })();

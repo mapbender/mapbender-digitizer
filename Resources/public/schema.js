@@ -64,8 +64,7 @@
 
         schema.displayPermanent = options.displayPermanent || false;
 
-        /** To be implemented **/
-        // schema.refreshFeaturesAfterSave = options.refreshFeaturesAfterSave || false;
+        schema.refreshFeaturesAfterSave = options.refreshFeaturesAfterSave || false;
 
         schema.refreshLayersAfterFeatureSave = options.refreshLayersAfterFeatureSave || false;
 
@@ -248,6 +247,12 @@
                         Mapbender.layerManager.refreshLayer(layer);
                     });
                 });
+            }
+
+            if(schema.refreshFeaturesAfterSave){
+                $.each(schema.refreshFeaturesAfterSave, function(key,schemaName){
+                    schema.widget.refreshConnectedDigitizerFeatures(schemaName);
+                })
             }
 
 
