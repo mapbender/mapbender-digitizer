@@ -133,14 +133,15 @@
     Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable, frame) {
         var menu = this;
         var schema = menu.schema;
-        var map = schema.widget.map;
+        var widget = schema.widget;
+        var map = widget.map;
 
         menu.changeCurrentExtentSearch_ = function (currentExtentSearch) {
             var menu = this, features = null;
             resultTable.currentExtentSearch = currentExtentSearch;
             if (currentExtentSearch) {
                 features = schema.layer.getSource().getFeatures().filter(function (feature) {
-                    return ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent());
+                    return widget.isInExtent(feature);
                 });
             } else {
                 features = schema.layer.getSource().getFeatures();
@@ -166,7 +167,7 @@
 
             if (resultTable.currentExtentSearch) {
                 var features = schema.layer.getSource().getFeatures().filter(function (feature) {
-                    return ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent());
+                    return widget.isInExtent(feature);
                 });
                 resultTable.redraw(features);
             }
@@ -196,7 +197,7 @@
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
 
-            if (resultTable.currentExtentSearch && !ol.extent.intersects(schema.widget.map.getView().calculateExtent(), feature.getGeometry().getExtent())) {
+            if (resultTable.currentExtentSearch && !widget.isInExtent(feature)) {
                 return;
             }
 
