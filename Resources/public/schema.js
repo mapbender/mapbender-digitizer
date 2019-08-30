@@ -25,7 +25,12 @@
 
         schema.allowSaveInResultTable = options.allowSaveInResultTable || false;
 
-        schema.copy = options.copy || {enable: false, overwriteValuesWithDefault: false, moveCopy: {x: 10, y: 10}, style: null};
+        schema.copy = options.copy || {
+            enable: false,
+            overwriteValuesWithDefault: false,
+            moveCopy: {x: 10, y: 10},
+            style: null
+        };
 
         schema.useContextMenu = options.useContextMenu || false;
 
@@ -62,7 +67,7 @@
         /** To be implemented **/
         // schema.refreshFeaturesAfterSave = options.refreshFeaturesAfterSave || false;
 
-        //schema.refreshLayersAfterFeatureSave = options.refreshLayersAfterFeatureSave || false;
+        schema.refreshLayersAfterFeatureSave = options.refreshLayersAfterFeatureSave || false;
 
         /** New properties **/
         schema.revertChangedGeometryOnCancel = options.revertChangedGeometryOnCancel || false;
@@ -82,7 +87,7 @@
 
         schema.zoomOnResultTableClick = options.zoomOnResultTableClick || true;
 
-        var otherStyles =  {};
+        var otherStyles = {};
         if (schema.copy && schema.copy.style) {
             otherStyles.copy = schema.copy.style;
         }
@@ -194,7 +199,7 @@
 
             feature.set("modificationState", "isNew");
 
-            $(schema).trigger({ type: "Digitizer.FeatureAddedManually", feature: feature });
+            $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: feature});
 
             if (schema.openFormAfterEdit) {
                 var dialog = schema.openFeatureEditDialog(feature);
@@ -211,13 +216,12 @@
             }
         });
 
-
         schema.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
             var feature = event.feature;
 
             feature.set("modificationState", "isCopy");
 
-            $(schema).trigger({ type: "Digitizer.FeatureAddedManually", feature: feature });
+            $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: feature});
 
             var dialog = schema.openFeatureEditDialog(feature);
 
@@ -234,6 +238,20 @@
 
         });
 
+        $(schema).on('Digitizer.FeatureUpdatedOnServer', function (event) {
+
+            if (schema.refreshLayersAfterFeatureSave) {
+
+                $.each(schema.refreshLayersAfterFeatureSave, function (k1, layerInstanceId) {
+                    var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
+                    $.each(layers, function (k2, layer) {
+                        Mapbender.layerManager.refreshLayer(layer);
+                    });
+                });
+            }
+
+
+        });
 
     };
 
@@ -359,7 +377,7 @@
                 strategy: ol.loadingstrategy.all // ol.loadingstrategy.bbox
             }),
             minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
-            maxResolution: Mapbender.Model.scaleToResolution( schema.minScale || Infinity),
+            maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity),
             visible: false,
         });
 
@@ -624,6 +642,7 @@
                         feature: limitedFeature,
                     }).done(function (fid) {
                         schema.layer.getSource().removeFeature(feature);
+                        $(schema).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
                         $.notify(Mapbender.DataManager.Translator.translate('feature.remove.successfully'), 'info');
                     });
                 }
@@ -705,9 +724,11 @@
                 console.assert(schema.layer.getSource().getFeatures().includes(feature), "Feature is not part of the source", schema.layer.getSource().getFeatures());
 
                 schema.layer.getSource().removeFeature(feature);
-                schema.layer.getSource().addFeature(newFeature);
+                $(schema).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
 
-                $(schema).trigger({ type: "Digitizer.FeatureAddedManually", feature: newFeature });
+
+                schema.layer.getSource().addFeature(newFeature);
+                $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: newFeature});
 
 
                 $.notify(Mapbender.DataManager.Translator.translate("feature.save.successfully"), 'info');

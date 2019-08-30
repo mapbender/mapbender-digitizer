@@ -95,6 +95,7 @@ class Digitizer extends DataManagerElement
             '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
             '@MapbenderDigitizerBundle/Resources/public/lib/jsts.min.js',
             '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.js',
+            '@MapbenderDigitizerBundle/Resources/public/lib/layerManager.js',
 
         ));
 
