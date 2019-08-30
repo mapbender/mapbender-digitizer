@@ -30,11 +30,6 @@
         },
 
 
-        scaleToResolution: function (scale) {
-            $.notify("minscale / maxscale is not implemented yet");
-            return scale;
-        }
-
 
     };
 

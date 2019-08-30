@@ -165,11 +165,23 @@
 
         map.on(ol.MapEventType.MOVEEND, function (event) {
 
-            if (resultTable.currentExtentSearch) {
-                var features = schema.layer.getSource().getFeatures().filter(function (feature) {
-                    return widget.isInExtent(feature);
-                });
-                resultTable.redraw(features);
+            var resolution = map.getView().getResolution();
+
+            if (resolution > schema.layer.getMaxResolution() || resolution < schema.layer.getMinResolution()) {
+
+                resultTable.clear();
+
+            } else {
+
+                if (resultTable.currentExtentSearch) {
+                    var features = schema.layer.getSource().getFeatures().filter(function (feature) {
+                        return widget.isInExtent(feature);
+                    });
+                    resultTable.redraw(features);
+                } else {
+                    resultTable.redraw(schema.layer.getSource().getFeatures());
+                }
+
             }
 
         });
