@@ -647,6 +647,7 @@
     Mapbender.Digitizer.Scheme.prototype.saveFeature = function (feature, formData) {
         var schema = this;
         var widget = schema.widget;
+        var map = widget.map;
 
         if (!schema.featureExists_(feature)) {
             $.notify('Feature doesn\'t exist');
