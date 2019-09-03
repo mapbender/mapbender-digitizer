@@ -185,53 +185,126 @@
             return interaction;
         },
 
-        modifyFeature: function (source) {
+        modifyFeature: function (source,defaultStyle) {
             var controlFactory = this;
 
-            var interaction = new ol.interaction.Modify({
-                source: source,
+            var verticesStyle = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 3,
+                    fill: new ol.style.Fill({
+                        color: "#ffcc33"
+                    })
+                })
             });
 
-            interaction.setActive = controlFactory.createActivator_(interaction);
-
-            interaction.on(ol.interaction.ModifyEventType.MODIFYSTART,function(event) {
+            var edgesStyle = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 3,
+                    stroke: new ol.style.Stroke({
+                        color: "#ffcc33",
+                        width: 4
+                    })
+                })
             });
 
-            /** TODO this needs to be improved **/
-            interaction.rBush_.update = function(extent, value) {
-                var item = this.items_[ol.getUid(value)];
-                if (!item) {
-                    console.warn("This is a low-quality bugfix that should be refactored ASAP");
-                    return;
-                }
-                var bbox = [item.minX, item.minY, item.maxX, item.maxY];
-                if (!ol.extent.equals(bbox, extent)) {
-                    this.remove(value);
-                    this.insert(extent, value);
+            var vertices;
+            var edges;
+
+
+            var Modify = {
+                init: function() {
+
+                    this.select = new ol.interaction.Select({
+                        style: function(feature) {
+                            var styles = [defaultStyle];
+                            if (feature.getGeometry().getType() == "Polygon") {
+                                var coords = feature.getGeometry().getCoordinates()[0];
+                                vertices = new ol.geom.MultiPoint(coords.slice(0, -1));
+                                verticesStyle.setGeometry(vertices);
+                                styles.push(verticesStyle);
+                                var line = new ol.geom.LineString(coords);
+                                var midpoints = [];
+                                line.forEachSegment(function(start, end) {
+                                    midpoints.push([(start[0] + end[0]) / 2, (start[1] + end[1]) / 2]);
+                                });
+                                edges = new ol.geom.MultiPoint(midpoints);
+                                edgesStyle.setGeometry(edges);
+                                styles.push(edgesStyle);
+                            } else {
+                                vertices = undefined;
+                                edges = undefined;
+                            }
+                            return styles;
+                        }
+                    });
+                    controlFactory.map.addInteraction(this.select);
+
+                    this.select.on('select',function(event) {
+                        var features = event.selected;
+
+                        features.forEach(function(feature){
+                            feature.setStyle(null);
+                        });
+                    });
+                    var selectedFeatures = this.select.getFeatures();
+
+
+                    this.modify = new ol.interaction.Modify({
+                        condition: function(event) {
+                            if (event.type == "pointerdown") {
+                                if (edges) {
+                                    var point = controlFactory.map.getPixelFromCoordinate(
+                                        new ol.geom.GeometryCollection([edges, vertices]).getClosestPoint(
+                                            event.coordinate
+                                        )
+                                    );
+                                    var dx = point[0] - event.pixel[0];
+                                    var dy = point[1] - event.pixel[1];
+                                    var ds = dx * dx + dy * dy;
+                                    return ds < 100;
+                                } else {
+                                    return true;
+                                }
+                            }
+                        },
+
+
+                        features: selectedFeatures
+                    });
+
+                    this.modify.setActive = controlFactory.createActivator_(this.modify);
+
+                    controlFactory.map.addInteraction(this.modify);
+
+                    this.select.on("change:active", function() {
+                        selectedFeatures.forEach(function(each) {
+                            selectedFeatures.remove(each);
+                        });
+                    });
+                },
+
+                on: function() {
+                    return this.modify.on.apply(this.modify,arguments);
+                },
+
+                dispatchEvent: function() {
+                    return this.modify.dispatchEvent.apply(this.modify,arguments);
+                },
+
+                setActive: function(active) {
+                    this.select.setActive.apply(this.modify,arguments);
+                    return this.modify.setActive.apply(this.modify,arguments);
+                },
+
+                getActive: function() {
+                    return this.modify.getActive.apply(this.modify,arguments);
                 }
             };
 
-            interaction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
+            Modify.init();
 
-                /** TODO this needs to be improved **/
-                var feature = null;
-                for (var i = 0, ii = interaction.dragSegments_.length; i < ii; ++i) {
-                    var dragSegment = interaction.dragSegments_[i];
-                    var segmentData = dragSegment[0];
-                    var geometry = segmentData.geometry;
+            return Modify;
 
-                    interaction.features_.forEach(function(f) {
-                        if (f.getGeometry()==geometry) {
-                            feature = f;
-                        }
-                    });
-                }
-                source.dispatchEvent({ type: 'controlFactory.FeatureModified', feature: feature });
-
-
-            });
-
-            return interaction;
         },
 
         moveFeature: function (source) {

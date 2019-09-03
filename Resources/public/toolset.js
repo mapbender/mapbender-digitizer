@@ -65,7 +65,7 @@
 
                 var type = rawButton.type;
 
-                var interaction = controlFactory[type] && controlFactory[type](toolSet.schema.layer.getSource());
+                var interaction = controlFactory[type] && controlFactory[type](schema.layer.getSource(), schema.styles.default);
                 if (!interaction) {
                     console.warn("interaction " + type + " does not exist");
                     return;
@@ -75,7 +75,11 @@
 
                 interaction.setActive(false);
 
-                schema.widget.map.addInteraction(interaction);
+                if (interaction instanceof ol.interaction.Interaction) {
+                    schema.widget.map.addInteraction(interaction);
+                } else {
+                    console.log("****");
+                }
 
 
                 $button.on('click',null,function (e) {
