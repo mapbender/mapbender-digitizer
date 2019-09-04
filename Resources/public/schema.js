@@ -614,9 +614,6 @@
 
             if (schema.getSchemaByFeature(feature).deactivateControlAfterModification) {
                 control && control.deactivate();
-            } else if (control instanceof OpenLayers.Control.ModifyFeature) {
-                control.deactivate();
-                schema.temporarilyDeactivatedControl = control;
             }
 
         },
@@ -1002,6 +999,10 @@
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
 
+            if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
+                schema.menu.toolSet.activeControl.deactivate();
+            }
+
             var createNewFeatureWithDBFeature = function (feature, response) {
 
                 var features = response.features;
@@ -1093,11 +1094,6 @@
                 schema.removeFeatureFromUI(feature);
                 schema.layer.addFeatures([newFeature]);
 
-                if (schema.temporarilyDeactivatedControl) {
-                    schema.temporarilyDeactivatedControl.activate();
-                    schema.temporarilyDeactivatedControl = null;
-                }
-
                 schema.reloadFeatures();
 
 
@@ -1123,6 +1119,10 @@
                 schema.refreshOtherLayersAfterFeatureSave(feature);
 
                 schema.refreshConnectedDigitizerFeatures();
+
+                if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
+                    schema.menu.toolSet.activeControl.activate();
+                }
 
                 return response;
 
