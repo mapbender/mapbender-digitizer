@@ -28,6 +28,14 @@
             });
         });
 
+        $(schema).on("Digitizer.StartFeatureSave",function(event){
+            toolSet.activeInteraction.setActive(false);
+        });
+
+        $(schema).on("Digitizer.EndFeatureSave",function(event){
+            toolSet.activeInteraction.setActive(true);
+        });
+
     };
 
     Mapbender.Digitizer.Toolset.prototype = {
@@ -65,7 +73,7 @@
 
                 var type = rawButton.type;
 
-                var interaction = controlFactory[type] && controlFactory[type](schema.layer.getSource(), schema.styles.default);
+                var interaction = controlFactory[type] && controlFactory[type](schema.layer.getSource());
                 if (!interaction) {
                     console.warn("interaction " + type + " does not exist");
                     return;
@@ -75,11 +83,8 @@
 
                 interaction.setActive(false);
 
-                if (interaction instanceof ol.interaction.Interaction) {
-                    schema.widget.map.addInteraction(interaction);
-                } else {
-                    console.log("****");
-                }
+                schema.widget.map.addInteraction(interaction);
+
 
 
                 $button.on('click',null,function (e) {

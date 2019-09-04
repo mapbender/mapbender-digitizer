@@ -87,6 +87,7 @@ class Digitizer extends DataManagerElement
             '../../vendor/mapbender/ol4-extensions/styleConverter.js',
             '../../vendor/mapbender/ol4-extensions/geoJSONWithSeperateData.js',
             '../../vendor/mapbender/ol4-extensions/setStyleWithLabel.js',
+            '../../vendor/mapbender/ol4-extensions/selectableModify.js',
             '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
             '/components/jquery-context-menu/jquery-context-menu-built.js',
             '/components/select2/select2-built.js',

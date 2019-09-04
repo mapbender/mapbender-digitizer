@@ -185,125 +185,31 @@
             return interaction;
         },
 
-        modifyFeature: function (source,defaultStyle) {
+        modifyFeature: function (source) {
             var controlFactory = this;
 
-            var verticesStyle = new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 3,
-                    fill: new ol.style.Fill({
-                        color: "#ffcc33"
-                    })
-                })
+            var interaction = new ol.interaction.SelectableModify({
             });
 
-            var edgesStyle = new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 3,
-                    stroke: new ol.style.Stroke({
-                        color: "#ffcc33",
-                        width: 4
-                    })
-                })
-            });
+            var setActiveOriginal = ol.interaction.SelectableModify.prototype.setActive;
 
-            var vertices;
-            var edges;
-
-
-            var Modify = {
-                init: function() {
-
-                    this.select = new ol.interaction.Select({
-                        style: function(feature) {
-                            var styles = [defaultStyle];
-                            if (feature.getGeometry().getType() == "Polygon") {
-                                var coords = feature.getGeometry().getCoordinates()[0];
-                                vertices = new ol.geom.MultiPoint(coords.slice(0, -1));
-                                verticesStyle.setGeometry(vertices);
-                                styles.push(verticesStyle);
-                                var line = new ol.geom.LineString(coords);
-                                var midpoints = [];
-                                line.forEachSegment(function(start, end) {
-                                    midpoints.push([(start[0] + end[0]) / 2, (start[1] + end[1]) / 2]);
-                                });
-                                edges = new ol.geom.MultiPoint(midpoints);
-                                edgesStyle.setGeometry(edges);
-                                styles.push(edgesStyle);
-                            } else {
-                                vertices = undefined;
-                                edges = undefined;
-                            }
-                            return styles;
-                        }
-                    });
-                    controlFactory.map.addInteraction(this.select);
-
-                    this.select.on('select',function(event) {
-                        var features = event.selected;
-
-                        features.forEach(function(feature){
-                            feature.setStyle(null);
-                        });
-                    });
-                    var selectedFeatures = this.select.getFeatures();
-
-
-                    this.modify = new ol.interaction.Modify({
-                        condition: function(event) {
-                            if (event.type == "pointerdown") {
-                                if (edges) {
-                                    var point = controlFactory.map.getPixelFromCoordinate(
-                                        new ol.geom.GeometryCollection([edges, vertices]).getClosestPoint(
-                                            event.coordinate
-                                        )
-                                    );
-                                    var dx = point[0] - event.pixel[0];
-                                    var dy = point[1] - event.pixel[1];
-                                    var ds = dx * dx + dy * dy;
-                                    return ds < 100;
-                                } else {
-                                    return true;
-                                }
-                            }
-                        },
-
-
-                        features: selectedFeatures
-                    });
-
-                    this.modify.setActive = controlFactory.createActivator_(this.modify);
-
-                    controlFactory.map.addInteraction(this.modify);
-
-                    this.select.on("change:active", function() {
-                        selectedFeatures.forEach(function(each) {
-                            selectedFeatures.remove(each);
-                        });
-                    });
-                },
-
-                on: function() {
-                    return this.modify.on.apply(this.modify,arguments);
-                },
-
-                dispatchEvent: function() {
-                    return this.modify.dispatchEvent.apply(this.modify,arguments);
-                },
-
-                setActive: function(active) {
-                    this.select.setActive.apply(this.modify,arguments);
-                    return this.modify.setActive.apply(this.modify,arguments);
-                },
-
-                getActive: function() {
-                    return this.modify.getActive.apply(this.modify,arguments);
+            interaction.setActive = function(active) {
+                setActiveOriginal.apply(this,arguments);
+                interaction.dispatchEvent({ type: 'controlFactory.Activation', active: active});
+                if (active) {
+                    interaction.addSelectToMap(controlFactory.map);
+                } else {
+                    interaction.removeSelectFromMap(controlFactory.map);
                 }
             };
 
-            Modify.init();
 
-            return Modify;
+
+            interaction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
+                source.dispatchEvent({ type: 'controlFactory.FeatureModified', features: interaction.getFeatures() });
+            });
+
+            return interaction;
 
         },
 

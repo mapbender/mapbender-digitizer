@@ -39,7 +39,6 @@
         try {
             RBushUpdateOrig.apply(this, arguments);
         } catch (e) {
-            console.warn('RBushUpdateOrig', e);
         }
     };
 

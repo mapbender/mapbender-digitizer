@@ -71,7 +71,7 @@
         /** New properties **/
         schema.revertChangedGeometryOnCancel = options.revertChangedGeometryOnCancel || false;
 
-        schema.deactivateControlAfterModification = options.deactivateControlAfterModification || true;
+        schema.deactivateControlAfterModification = options.deactivateControlAfterModification || false;
 
         schema.allowSaveAll = options.allowSaveAll || false;
 
@@ -131,28 +131,38 @@
             });
 
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
-                if (event.key == "selected" || event.key == "modificationState" || event.key == "hidden") {
 
+
+
+                if (event.key == "selected" || event.key == "modificationState" || event.key == "hidden" || event.key == "featureStyleDisabled") {
+
+                    var style;
+
+
+                    if (feature.get("featureStyleDisabled")) {
+                        style = null;
+                    } else
                     if (feature.get("hidden")) {
-                        feature.setStyle(schema.styles.invisible);
-                        return;
+                        style = schema.styles.invisible;
                     } else if (feature.get("selected")) {
-                        feature.setStyle(schema.styles.select);
-                        return;
+                        style = schema.styles.select;
                     } else if (feature.get("modificationState") && schema.markUnsavedFeatures) {
                         switch (feature.get("modificationState")) {
                             case "isChanged" :
                             case "isNew" :
-                                feature.setStyle(schema.styles.unsaved);
-                                return;
+                                style = schema.styles.unsaved;
+                                break;
                             case "isCopy" :
-                                feature.setStyle(schema.styles.copy);
-                                return;
+                                style = schema.styles.copy;
 
                         }
+                    } else {
+                        style = schema.getFeatureStyle_(feature);
                     }
 
-                    feature.setStyle(schema.getFeatureStyle_(feature));
+                    feature.setStyle(style);
+
+
 
                 }
 
@@ -172,7 +182,7 @@
         });
 
         schema.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
-            var feature = event.feature;
+            var feature = event.feature || event.features.item(0);
 
             feature.set("modificationState", "isChanged");
 
@@ -649,6 +659,8 @@
         var widget = schema.widget;
         var map = widget.map;
 
+        $(schema).trigger({type: "Digitizer.StartFeatureSave", feature: feature });
+
         if (!schema.featureExists_(feature)) {
             $.notify('Feature doesn\'t exist');
             widget.currentPopup && widget.currentPopup.popupDialog('close');
@@ -667,6 +679,7 @@
             } else if (features.length > 1) {
                 console.warn("More than 1 Feature returned from DB Operation");
             }
+
 
             var geoJsonReader = new ol.format.GeoJSONWithSeperateData();
 
@@ -687,6 +700,8 @@
         var promise = widget.query('save', {
             schema: schema.schemaName,
             feature: request
+        }).always(function() {
+            $(schema).trigger({type: "Digitizer.EndFeatureSave"});
         }).then(function (response) {
 
             if (response.errors) {
