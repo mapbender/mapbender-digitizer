@@ -96,6 +96,11 @@
 
                     if (control.active) {
                         control.deactivate();
+
+                        /*
+                         * JH 10.09.2019: deactivate also the control for the digitizer
+                         */
+                        toolSet.activeControl = null;
                     } else {
                         toolSet.activeControl && toolSet.activeControl.deactivate();
                         control.activate();
