@@ -86,7 +86,8 @@
                         });
                     }
                     $.each(widget.schemes,function(schemaName,scheme){
-                        scheme.getData();
+                        scheme.lastRequest = null; // force reload
+                        scheme.getData({ reloadNew: true });
                     });
                     $.each(Mapbender.Model.map.olMap.layers.filter(function(layer) { return layer.mbConfig && layer.mbConfig.type === "wms"; }), function(id,layer)  {
                         layer.redraw(true);
