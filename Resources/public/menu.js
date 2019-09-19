@@ -72,6 +72,28 @@
         var appendGeneralDigitizerButtons = function () {
 
             var buttons = {};
+
+            if (schema.allowRefresh) {
+                var $button = $("<button class='button' type='button'/>");
+                $button.addClass("fa fa-refresh");
+                $button.attr("title", Mapbender.DigitizerTranslator.translate('refresh'));
+                $button.click(function () {
+                    var widget = schema.widget;
+                    var dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                    if (dataManager) {
+                        $.each(dataManager.options.schemes, function (schemaName, scheme) {
+                            dataManager._getData(scheme);
+                        });
+                    }
+                    $.each(widget.schemes,function(schemaName,scheme){
+                        scheme.getData();
+                    });
+                    $.each(Mapbender.Model.map.olMap.layers.filter(function(layer) { return layer.mbConfig && layer.mbConfig.type === "wms"; }), function(id,layer)  {
+                        layer.redraw(true);
+                    });
+                });
+                buttons['refresh'] = $button;
+            }
             if (schema.showVisibilityNavigation && schema.allowChangeVisibility) {
 
                 var $button = $("<button class='button' type='button'/>");

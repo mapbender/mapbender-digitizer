@@ -325,6 +325,7 @@
         allowOpenEditDialog: false,
         openDialogOnResultTableClick: false,
         zoomOnResultTableClick: true,
+        allowRefresh: true,
 
         displayOnSelect: true, // BEV only, no implementation
 
@@ -722,7 +723,6 @@
             if (schema.selectXHR && schema.selectXHR.abort) {
                 schema.selectXHR.abort();
             }
-
 
             schema.selectXHR = widget.query('select', request).then(function (featureCollection) {
                 var xhr = this;
