@@ -105,7 +105,7 @@
 
         printClient: null,
 
-        useAllScheme: true,
+        useAllScheme: false,
 
         displayOnInactive: false,
 
