@@ -7,6 +7,7 @@ mb.digitizer:
         database: 'Objekt löschen?'
     zoomTo: Heranzoomen
     edit: Bearbeiten
+    create: Hinzufügen
     attributes: Objektinformationen
     save:
       title: Speichern

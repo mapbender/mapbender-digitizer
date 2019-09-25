@@ -1333,15 +1333,14 @@
                             var item = $(this).next().data("item");
                             var popup = item.popupItems;
                             var table = $(this).siblings(".mapbender-element-result-table")
-                            var uniqueIdKey = item.dataStore.uniqueId;
 
                             var feature = table.data('olFeature');
                             var data = {};
 
                             item.allowRemove = false;
-                            data['linkId'] = feature.attributes[item.dataStoreLink.uniqueId];
+                            data[item.dataStoreLink.fieldName] = data['linkId'] = feature.attributes[item.dataStoreLink.uniqueId];
+                            data[item.dataStore.uniqueId] = null;
                             data.item = item;
-                            data[uniqueIdKey] = null;
                             widget._openEditDialog(data, popup, item, table);
                             return false;
                         };
@@ -1356,7 +1355,8 @@
                             var feature = table.data('olFeature');
 
                             item.allowRemove = true;
-                            rowData.externalId = feature.attributes[item.dataStoreLink.uniqueId];
+                            rowData.externalId = rowData[item.dataStoreLink.uniqueId];//feature.attributes[item.dataStoreLink.uniqueId];
+
 
                             widget._openEditDialog(rowData, popup, item, table);
 
@@ -1401,7 +1401,8 @@
                     var button = {
                         type: "button",
                         title: "",
-                        cssClass: "fa fa-plus",
+                        hover: Mapbender.digitizer_translate('feature.create'),
+                        cssClass: "icon-create",
                         click: onCreateClick
                     };
 
@@ -1616,7 +1617,8 @@
                         {
                             type: "button",
                             title: "",
-                            cssClass: "fa fa-plus",
+                            hover: Mapbender.digitizer_translate('feature.create'),
+                            cssClass: "icon-create",
                             click: onCreateClick
                         }
                     ];
@@ -2578,7 +2580,6 @@
          * @private
          */
        _openEditDialog: function (dataItem, formItems, schema, ref) {
-            var widget = this;
 
             var schemaName = this.schemaName;
             var widget = this;
@@ -2592,7 +2593,7 @@
             }
 
             var saveButton = {
-                text: Mapbender.digitizer_translate("feature.save", false),
+                text: Mapbender.digitizer_translate("feature.save.title", false),
                 click: function () {
                     widget.saveForeignDataStoreItem(dataItem);
                 }
@@ -2605,56 +2606,64 @@
                 class: 'critical',
                 click: function () {
 
-                    var uniqueIdKey = schema.dataStore.uniqueId;
-                    widget.query('datastore/remove', {
-                        schema: dataItem.item.dataStoreLink.name,
-                        dataItemId: dataItem[uniqueIdKey],
-                        dataStoreLinkFieldName: schema.dataStoreLink.fieldName,
-                        linkId: dataItem[dataItem.item.dataStoreLink.fieldName]
+                    Mapbender.confirmDialog({
 
-                    }).done(function (response) {
+                        html: Mapbender.digitizer_translate("feature.remove.from.database"),
+                        onSuccess: function () {
 
-                        if (response.processedItem.hasOwnProperty('errors')) {
-                            $(dialog).enableForm();
-                            $.each(response.errors, function (i, error) {
-                                $.notify(error.message, {
-                                    title: 'API Error',
-                                    autoHide: false,
-                                    className: 'error'
-                                });
-                                console.error(error.message);
-                            });
-                            return;
-                        }
-                        var data = response.dataItems;
-                        var tableApi = $(dialog).data('table').resultTable('getApi');
-                        var item = $(dialog).data('table').data('item');
-                        if (Object.prototype.toString.call(data) === '[object Array]') {
-                            var a = [];
-                            _.each(data, function (e, i) {
-                                if (e.hasOwnProperty('attributes')) {
-                                    e.attributes.item = item;
-                                    a.push(e.attributes);
+                            var uniqueIdKey = schema.dataStore.uniqueId;
+                            widget.query('datastore/remove', {
+                                schema: dataItem.item.dataStoreLink.name,
+                                dataItemId: dataItem[uniqueIdKey],
+                                dataStoreLinkFieldName: schema.dataStoreLink.fieldName,
+                                linkId: dataItem[dataItem.item.dataStoreLink.fieldName]
+
+                            }).done(function (response) {
+
+                                if (response.processedItem.hasOwnProperty('errors')) {
+                                    $(dialog).enableForm();
+                                    $.each(response.errors, function (i, error) {
+                                        $.notify(error.message, {
+                                            title: 'API Error',
+                                            autoHide: false,
+                                            className: 'error'
+                                        });
+                                        console.error(error.message);
+                                    });
+                                    return;
                                 }
-                            });
+                                var data = response.dataItems;
+                                var tableApi = $(dialog).data('table').resultTable('getApi');
+                                var item = $(dialog).data('table').data('item');
+                                if (Object.prototype.toString.call(data) === '[object Array]') {
+                                    var a = [];
+                                    _.each(data, function (e, i) {
+                                        if (e.hasOwnProperty('attributes')) {
+                                            e.attributes.item = item;
+                                            a.push(e.attributes);
+                                        }
+                                    });
 
-                            data = a;
+                                    data = a;
 
-                        } else {
-                            if (data.hasOwnProperty('attributes')) {
-                                data = [data.attributes];
+                                } else {
+                                    if (data.hasOwnProperty('attributes')) {
+                                        data = [data.attributes];
 
-                            }
+                                    }
+
+                                }
+                                tableApi.clear();
+                                tableApi.rows.add(data);
+                                tableApi.draw();
+                                widget.currentPopup.currentPopup.popupDialog('close');
+                                widget.currentPopup.currentPopup = null;
+                                $.notify(Mapbender.digitizer_translate("feature.remove.successfully", false), 'info');
+
+                            })
 
                         }
-                        tableApi.clear();
-                        tableApi.rows.add(data);
-                        tableApi.draw();
-                        widget.currentPopup.currentPopup.popupDialog('close');
-                        widget.currentPopup.currentPopup = null;
-                        $.notify(Mapbender.digitizer_translate("feature.remove.successfully", false), 'info');
-
-                    })
+                    });
                 }
             });
 
@@ -2732,7 +2741,7 @@
              } */
             var popupConfig = _.extend({
 
-                title: Mapbender.digitizer_translate("feature.attributes"),
+                title: dataItem.item.title, //Mapbender.digitizer_translate("feature.attributes"),
 
                 width: widget.featureEditDialogWidth,
             }, schema.popup);
