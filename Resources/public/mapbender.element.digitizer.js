@@ -1355,7 +1355,7 @@
                             var feature = table.data('olFeature');
 
                             item.allowRemove = true;
-                            rowData.externalId = rowData[item.dataStoreLink.uniqueId];//feature.attributes[item.dataStoreLink.uniqueId];
+                            //rowData.externalId = rowData[item.dataStoreLink.uniqueId];//feature.attributes[item.dataStoreLink.uniqueId];
 
 
                             widget._openEditDialog(rowData, popup, item, table);
