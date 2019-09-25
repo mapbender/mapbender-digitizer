@@ -2592,10 +2592,23 @@
                 widget.currentPopup.currentPopup = null;
             }
 
+            var refreshConnectedDataManager = function() {
+                $('.mb-element').filter(function(i,el) { return !!$(el).data()["mapbenderMbDataManager"]}).each(function(i,el) {
+
+                    var widget = $(el).data()["mapbenderMbDataManager"];
+
+                    if (!!widget.options.schemes[schema.connectedDataManager]) {
+                        console.log(widget._getData(widget.currentSettings));
+                        console.log("Data Manager refreshed");
+                    }
+                });
+
+            };
+
             var saveButton = {
                 text: Mapbender.digitizer_translate("feature.save.title", false),
                 click: function () {
-                    widget.saveForeignDataStoreItem(dataItem);
+                    widget.saveForeignDataStoreItem(dataItem).then(refreshConnectedDataManager);
                 }
             };
             buttons.push(saveButton);
@@ -2660,6 +2673,7 @@
                                 widget.currentPopup.currentPopup = null;
                                 $.notify(Mapbender.digitizer_translate("feature.remove.successfully", false), 'info');
 
+                                refreshConnectedDataManager();
                             })
 
                         }
@@ -2794,7 +2808,7 @@
 
             $(dialog).disableForm();
 
-            widget.query('datastore/save', {
+            return widget.query('datastore/save', {
                 schema: dataItem.item.dataStoreLink.name,
                 dataItem: formData,
                 dataItemId: dataItem[uniqueIdKey],
