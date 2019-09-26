@@ -173,6 +173,8 @@
 
         configuration.addFeatureAndDialog(feature, dialog);
 
+
+        dialog.schema = schema;
         configuration.title = schema.getSchemaByFeature(feature).popup.title;
         configuration.width = schema.getSchemaByFeature(feature).popup.with;
 
@@ -219,12 +221,64 @@
 
         doFeatureEditDialogBindings();
 
+        dialog.initResultTables(feature);
+
         configuration.augment(feature, $popup);
 
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
         setTimeout(function () {
             $popup.formData(feature.data);
         },0);
+
+    };
+
+    FeatureEditDialog.prototype.initResultTables = function(feature) {
+        var dialog = this;
+        var $popup = dialog.$popup;
+        var widget = dialog.schema.widget;
+
+        var tables = $popup.find(".mapbender-element-result-table");
+        _.each(tables, function (table, index) {
+
+            var item = $(table).data('item');
+            $(table).data('olFeature', feature);
+            if (item.editable) {
+                item.columns.pop();
+            }
+
+            var dataStoreLinkName = item.dataStoreLink.name;
+            if (dataStoreLinkName) {
+                var requestData = {
+                    dataStoreLinkName: dataStoreLinkName,
+                    fid: feature.fid,
+                    fieldName: item.dataStoreLink.fieldName
+                };
+
+                widget.query('dataStore/get', requestData).done(function (data) {
+                    var dataItems = [];
+
+                    if (Object.prototype.toString.call(data) === '[object Array]') {
+                        _.each(data, function (el, i) {
+                            el.attributes.item = item;
+                            dataItems.push(el.attributes)
+
+                        });
+
+                    } else {
+                        console.error("invalid return",data);
+                        // data.item = item;
+                        // data = [data];
+                    }
+
+                    var tableApi = $(table).resultTable('getApi');
+                    tableApi.clear();
+                    tableApi.rows.add(dataItems);
+                    tableApi.draw();
+
+                });
+            }
+
+        });
 
     };
 
