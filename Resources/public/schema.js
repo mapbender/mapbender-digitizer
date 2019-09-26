@@ -542,15 +542,6 @@
 
         },
 
-        processFormItems: function (feature, dialog) {
-            var schema = this;
-
-            var scheme = schema.getSchemaByFeature(feature);
-
-            return scheme.formItems;
-        },
-
-
         openFeatureEditDialog: function (feature) {
             var schema = this;
             schema.popup.createFeatureEditDialog(feature, schema);

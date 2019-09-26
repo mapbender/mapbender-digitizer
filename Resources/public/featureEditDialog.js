@@ -211,9 +211,7 @@
 
         $popup.data('feature', feature);
 
-        var processedFormItems = schema.processFormItems(feature, $popup);
-
-        $popup.generateElements({children: processedFormItems});
+        $popup.generateElements({children: schema.formItems});
 
 
         $popup.popupDialog(configuration);
