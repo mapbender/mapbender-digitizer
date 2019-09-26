@@ -49,6 +49,7 @@
                 if (item.type === "resultTable" && item.editable && !item.isProcessed) {
                     var onCreateClick;
                     var onEditClick;
+                    var onRemoveClick;
 
                     if (!item.hasOwnProperty('dataManagerLink')) {
                         onCreateClick = function (e) {
@@ -78,6 +79,73 @@
                             //rowData.externalId = rowData[formItem.dataStoreLink.uniqueId];//feature.attributes[formItem.dataStoreLink.uniqueId];
 
                             var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(rowData,formItem,table,dialog);
+
+                            return false;
+                        };
+
+                        onRemoveClick = function (rowData, ui, e) {
+                            e.defaultPrevented && e.defaultPrevented();
+                            e.preventDefault && e.preventDefault();
+
+                            var table = ui.parents('.mapbender-element-result-table');
+                            var formItem = table.data('item');
+
+                            Mapbender.confirmDialog({
+
+                                html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
+                                onSuccess: function () {
+
+                                    var uniqueIdKey = formItem.dataStore.uniqueId;
+                                    widget.query('datastore/remove', {
+                                        schema: formItem.dataStoreLink.name,
+                                        dataItemId: rowData[uniqueIdKey],
+                                        dataStoreLinkFieldName: formItem.dataStoreLink.fieldName,
+                                        linkId: rowData[rowData.item.dataStoreLink.fieldName]
+
+                                    }).done(function (response) {
+
+                                        if (response.processedItem.hasOwnProperty('errors')) {
+                                            $.each(response.errors, function (i, error) {
+                                                $.notify(error.message, {
+                                                    title: 'API Error',
+                                                    autoHide: false,
+                                                    className: 'error'
+                                                });
+                                                console.error(error.message);
+                                            });
+                                            return;
+                                        }
+
+                                        var tableApi = table.resultTable('getApi');
+                                        var processedData = [];
+
+                                        if (Array.isArray(response.dataItems)) {
+                                            $.each(response.dataItems, function (i,e) {
+                                                if (e.hasOwnProperty('attributes')) {
+                                                    e.attributes.item = dialog.formItem;
+                                                    processedData.push(e.attributes);
+                                                }
+                                            });
+
+                                        } else {
+                                            if (response.dataItems.hasOwnProperty('attributes')) {
+                                                response.dataItems.attributes.item = dialog.formItem;
+                                                processedData = [response.dataItems.attributes];
+
+                                            }
+                                        }
+                                        tableApi.clear();
+                                        tableApi.rows.add(processedData);
+                                        tableApi.draw();
+
+                                        $.notify(Mapbender.DigitizerTranslator.translate("feature.remove.successfully", false), 'info');
+
+                                    });
+
+                                }
+                            });
+
+
 
                             return false;
                         };
@@ -133,6 +201,12 @@
                         title: Mapbender.DigitizerTranslator.translate('feature.edit'),
                         className: 'edit',
                         onClick: onEditClick
+                    });
+
+                    buttons.push({
+                        title: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                        className: 'remove',
+                        onClick: onRemoveClick
                     });
 
                     cloneItem.buttons = buttons;

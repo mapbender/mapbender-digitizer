@@ -239,28 +239,24 @@
         var widget = dialog.schema.widget;
 
         var tables = $popup.find(".mapbender-element-result-table");
-        _.each(tables, function (table, index) {
+        $.each(tables, function (i,table) {
 
-            var item = $(table).data('item');
-            $(table).data('olFeature', feature);
-            if (item.editable) {
-                item.columns.pop();
-            }
+            var formItem = $(table).data('item');
 
-            var dataStoreLinkName = item.dataStoreLink.name;
+            var dataStoreLinkName = formItem.dataStoreLink.name;
             if (dataStoreLinkName) {
                 var requestData = {
                     dataStoreLinkName: dataStoreLinkName,
                     fid: feature.fid,
-                    fieldName: item.dataStoreLink.fieldName
+                    fieldName: formItem.dataStoreLink.fieldName
                 };
 
                 widget.query('dataStore/get', requestData).done(function (data) {
                     var dataItems = [];
 
-                    if (Object.prototype.toString.call(data) === '[object Array]') {
-                        _.each(data, function (el, i) {
-                            el.attributes.item = item;
+                    if (Array.isArray(data)) {
+                        $.each(data, function (i,el) {
+                            el.attributes.item = formItem;
                             dataItems.push(el.attributes)
 
                         });

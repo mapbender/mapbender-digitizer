@@ -38,7 +38,7 @@
 
                 if (!!dataManager.options.schemes[formItem.connectedDataManager]) {
                     dataManager._getData(dataManager.currentSettings);
-                    console.log("Data Manager refreshed");
+                    console.log("Data Manager "+formItem.connectedDataManager+" refreshed");
                 }
             });
 
@@ -137,15 +137,13 @@
         var widget = schema.widget;
         var $popup = dialog.$popup;
 
-        var promise = $.Deferred();
-
         Mapbender.confirmDialog({
 
             html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
             onSuccess: function () {
 
                 var uniqueIdKey = formItem.dataStore.uniqueId;
-                promise = widget.query('datastore/remove', {
+                widget.query('datastore/remove', {
                     schema: formItem.dataStoreLink.name,
                     dataItemId: dataItem[uniqueIdKey],
                     dataStoreLinkFieldName: formItem.dataStoreLink.fieldName,
@@ -177,11 +175,6 @@
 
             }
         });
-
-
-
-
-        return promise;
 
     };
 
