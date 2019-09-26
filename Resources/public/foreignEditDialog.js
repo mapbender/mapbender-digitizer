@@ -17,7 +17,7 @@
         var buttons = [];
         dialog.schema = schema;
         var widget = schema.widget;
-        var formItems = subschema.popupItems;
+        var formItems = JSON.parse(JSON.stringify(subschema.popupItems));
 
         var $popup = dialog.$popup = $("<div/>");
 
@@ -108,62 +108,12 @@
         $popup.on("popupdialogopen", function (event, ui) {
             setTimeout(function () {
                 $popup.formData(dataItem);
-
-            }, 1);
+            }, 0);
         });
 
 
-        DataUtil.eachItem(formItems, function (item) {
-            if (item.type === "file") {
-                item.uploadHanderUrl = widget.elementUrl + "file-upload?schema=" + subschema.schemaName + "&fid=" + dataItem.fid + "&field=" + item.name;
-                if (item.hasOwnProperty("name") && dataItem.data.hasOwnProperty(item.name) && dataItem.data[item.name]) {
-                    item.dbSrc = dataItem.data[item.name];
-                    if (subschema.featureType.files) {
-                        $.each(subschema.featureType.files, function (k, fileInfo) {
-                            if (fileInfo.field && fileInfo.field == item.name) {
-                                if (fileInfo.formats) {
-                                    item.accept = fileInfo.formats;
-                                }
-                            }
-                        });
-                    }
-                }
+        var processedFormItems = Mapbender.Digitizer.Utilities.processFormItems(dataItem,formItems,dialog);
 
-            }
-
-            if (item.type === 'image') {
-
-                if (!item.origSrc) {
-                    item.origSrc = item.src;
-                }
-
-                if (item.hasOwnProperty("name") && dataItem.data.hasOwnProperty(item.name) && dataItem.data[item.name]) {
-                    item.dbSrc = dataItem.data[item.name];
-                    if (subschema.featureType.files) {
-                        $.each(subschema.featureType.files, function (k, fileInfo) {
-                            if (fileInfo.field && fileInfo.field === item.name) {
-
-                                if (fileInfo.uri) {
-                                    item.dbSrc = fileInfo.uri + "/" + item.dbSrc;
-                                } else {
-                                }
-                            }
-                        });
-                    }
-                }
-
-                var src = item.dbSrc ? item.dbSrc : item.origSrc;
-                if (item.relative) {
-                    item.src = src.match(/^(http[s]?\:|\/{2})/) ? src : Mapbender.configuration.application.urls.asset + src;
-                } else {
-                    item.src = src;
-                }
-            }
-
-        });
-        /*  if(schema.popup.buttons) {
-         buttons = _.union(schema.popup.buttons, buttons);
-         } */
         var popupConfig = _.extend({
 
             title: dataItem.item.title, //Mapbender.DigitizerTranslator.translate("feature.attributes"),
@@ -173,7 +123,7 @@
 
         popupConfig.buttons = buttons;
 
-        $popup.generateElements({children: formItems});
+        $popup.generateElements({children: processedFormItems});
         $popup.popupDialog(popupConfig);
         $popup.addClass("data-store-edit-data");
         widget.currentPopup.currentPopup = $popup;
