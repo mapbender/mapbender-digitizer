@@ -47,23 +47,15 @@ class Digitizer extends BaseElement
 
         $mainFiles = array('mapbender.element.digitizer','toolset','schema','schemaAll','clustering.mixin',
                            'menu','contextMenu', 'utilities',
-                           'featureEditDialog','controlFactory','featureStyleEditor','mapbender.layermanager','formItemsCollection',
+                           'featureEditDialog','controlFactory','featureStyleEditor','mapbender.layermanager',
                            'mapbender.digitizer-translator',
                            'queryEngine','openlayers.extension','vis-ui.extension');
 
-
-        $formItemFiles = array("formItem","formItemBreakLine","formItemButton","formItemCheckbox","formItemContainer","formItemDate",
-            "formItemFieldSet","formItemFile","formItemForm","formItemImage","formItemInput","formItemLabel",
-            "formItemResultTable","formItemSelect","formItemTabs","formItemTextArea","formItemText");
 
         $js = array();
 
         foreach($mainFiles as $file) {
             $js[] = "@MapbenderDigitizerBundle/Resources/public/$file.js";
-        }
-
-        foreach($formItemFiles as $file) {
-            $js[] = "@MapbenderDigitizerBundle/Resources/public/formItems/$file.js";
         }
 
         $js = array_merge($js,array(
@@ -871,7 +863,7 @@ class Digitizer extends BaseElement
             if (is_string($user)) {
                 return $user;
             } else {
-                return $user->getId();    
+                return $user->getId();
             }
         } else {
             return $this->getUserId();

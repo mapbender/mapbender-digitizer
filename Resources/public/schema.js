@@ -222,8 +222,6 @@
 
         schema.initTableFields();
 
-        schema.createFormItemsCollection();
-
         createPopupConfiguration();
 
         schema.toolset = schema.createToolset(); // Is overwritten and must therefore be implemented in the prototype
@@ -455,20 +453,6 @@
             });
         },
 
-
-        createFormItemsCollection: function (formItems) {
-            var schema = this;
-            schema.formItems = new Mapbender.Digitizer.FormItemsCollection(formItems || schema.formItems, schema);
-
-        },
-
-
-        updateConfigurationAfterSwitching: function (updatedSchemes) {
-            var schema = this;
-            schema.createFormItemsCollection(updatedSchemes[schema.schemaName].formItems); // Update formItems Of Schema when switiching
-        },
-
-
         activateSchema: function (activateWidget) {
 
             var schema = this;
@@ -497,7 +481,6 @@
                 return widget.query('getConfiguration');
             }).done(function (response) {
 
-                schema.updateConfigurationAfterSwitching(response.schemes);
                 layer.setVisibility(true);
                 frame.show();
                 if (schema.widget.isFullyActive) {
@@ -564,9 +547,7 @@
 
             var scheme = schema.getSchemaByFeature(feature);
 
-            var processedFormItems = scheme.formItems.process(feature, dialog, schema);
-
-            return processedFormItems;
+            return scheme.formItems;
         },
 
 
@@ -1036,7 +1017,7 @@
 
             feature.disabled = true;
 
-            formData = formData || schema.getSchemaByFeature(feature).formItems.createHeadlessFormData(feature);
+            //formData = formData || schema.getSchemaByFeature(feature).formItems.createHeadlessFormData(feature);
 
             var request = {
                 id: feature.isNew ? null : feature.fid,
