@@ -53,17 +53,17 @@
                     if (!item.hasOwnProperty('dataManagerLink')) {
                         onCreateClick = function (e) {
                             e.preventDefault();
-                            var item = $(this).next().data("item");
-                            var table = $(this).siblings(".mapbender-element-result-table")
+                            var table = $(this).siblings(".mapbender-element-result-table");
+                            var formItem = table.data('item');
 
-                            var feature = table.data('olFeature');
-                            var data = {};
+                            var rowData = {};
 
-                            item.allowRemove = false;
-                            data[item.dataStoreLink.fieldName] = data['linkId'] = feature.attributes[item.dataStoreLink.uniqueId];
-                            data[item.dataStore.uniqueId] = null;
-                            data.item = item;
-                            var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(data,item,table,schema);
+                            formItem.allowRemove = false;
+                            rowData[formItem.dataStoreLink.fieldName] = rowData['linkId'] = feature.attributes[formItem.dataStoreLink.uniqueId];
+                            rowData[formItem.dataStore.uniqueId] = null;
+                            rowData.item = formItem;
+
+                            var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(rowData,formItem,table,dialog);
                             return false;
                         };
 
@@ -72,12 +72,12 @@
                             e.preventDefault && e.preventDefault();
 
                             var table = ui.parents('.mapbender-element-result-table');
-                            var item = table.data('item');
+                            var formItem = table.data('item');
 
-                            item.allowRemove = true;
-                            rowData.externalId = rowData[item.dataStoreLink.uniqueId];//feature.attributes[item.dataStoreLink.uniqueId];
+                            formItem.allowRemove = true;
+                            //rowData.externalId = rowData[formItem.dataStoreLink.uniqueId];//feature.attributes[formItem.dataStoreLink.uniqueId];
 
-                            var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(rowData,item,table,schema);
+                            var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(rowData,formItem,table,dialog);
 
                             return false;
                         };
