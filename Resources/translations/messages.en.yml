@@ -12,6 +12,7 @@ mb.digitizer:
         database: 'Delete feature.'
     zoomTo: Zoom to
     edit: 'Edit feature'
+    create: 'Add feature'
     attributes: 'Feature attributes'
     savesave: 'Save feature'
     save:

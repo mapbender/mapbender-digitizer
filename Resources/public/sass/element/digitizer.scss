@@ -134,7 +134,8 @@ $selectColor: #F7F79A;
       width: auto;
       display: inline-block;
       vertical-align: middle;
-      margin-bottom: 7px;
+      margin-bottom: 2px;
+      margin-top: 2px;
       position: relative;
       height: 24px;
       margin-left: 5px;
@@ -345,4 +346,29 @@ li.select2-search--inline {
   tr td {
     word-break: keep-all !important;
   }
+}
+
+.mb-element-popup-dialog {
+
+    .icon-create:before {
+        font-family: FontAwesome;
+        content: "\f067";
+    }
+
+    .modal-header {
+        a {
+            min-width: 15px !important;
+            height: 20px !important;
+        }
+    }
+
+    .form-group > button.btn {
+        &:first-child{
+            margin-left: 0px !important;
+            margin-bottom: 2px !important;
+        }
+        &:last-child{
+            margin-right: 15px;
+        }
+    }
 }

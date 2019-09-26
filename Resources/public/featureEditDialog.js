@@ -173,9 +173,10 @@
 
         configuration.addFeatureAndDialog(feature, dialog);
 
-        configuration.title = schema.getSchemaByFeature(feature).popup.title;
-        configuration.width = schema.getSchemaByFeature(feature).popup.with;
 
+        dialog.schema = schema;
+        configuration.title = schema.getSchemaByFeature(feature).popup.title;
+        configuration.width = schema.getSchemaByFeature(feature).popup.width;
 
         var doFeatureEditDialogBindings = function () {
             var feature = dialog.feature;
@@ -209,7 +210,9 @@
 
         $popup.data('feature', feature);
 
-        var processedFormItems = schema.processFormItems(feature, $popup);
+        var formItems = JSON.parse(JSON.stringify(schema.formItems)); // Deep clone hack!
+
+        var processedFormItems = Mapbender.Digitizer.Utilities.processFormItems(feature,formItems,dialog);
 
         $popup.generateElements({children: processedFormItems});
 
@@ -219,6 +222,8 @@
 
         doFeatureEditDialogBindings();
 
+        dialog.initResultTables(feature);
+
         configuration.augment(feature, $popup);
 
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
@@ -227,6 +232,55 @@
         },0);
 
     };
+
+    FeatureEditDialog.prototype.initResultTables = function(feature) {
+        var dialog = this;
+        var $popup = dialog.$popup;
+        var widget = dialog.schema.widget;
+
+        var tables = $popup.find(".mapbender-element-result-table");
+        $.each(tables, function (i,table) {
+
+            var formItem = $(table).data('item');
+
+            var dataStoreLinkName = formItem.dataStoreLink.name;
+            if (dataStoreLinkName) {
+                var requestData = {
+                    dataStoreLinkName: dataStoreLinkName,
+                    fid: feature.fid,
+                    fieldName: formItem.dataStoreLink.fieldName
+                };
+
+                widget.query('dataStore/get', requestData).done(function (data) {
+                    var dataItems = [];
+
+                    if (Array.isArray(data)) {
+                        $.each(data, function (i,el) {
+                            el.attributes.item = formItem;
+                            dataItems.push(el.attributes)
+
+                        });
+
+                    } else {
+                        console.error("invalid return",data);
+                        // data.item = item;
+                        // data = [data];
+                    }
+
+                    var tableApi = $(table).resultTable('getApi');
+                    tableApi.clear();
+                    tableApi.rows.add(dataItems);
+                    tableApi.draw();
+
+                });
+            }
+
+        });
+
+    };
+
+
+
 
 
 })();
