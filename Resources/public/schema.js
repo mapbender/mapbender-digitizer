@@ -1008,7 +1008,7 @@
 
             feature.disabled = true;
 
-            //formData = formData || schema.getSchemaByFeature(feature).formItems.createHeadlessFormData(feature);
+            formData = formData || Mapbender.Digitizer.Utilities.createHeadlessFormData(feature,schema.formItems);
 
             var request = {
                 id: feature.isNew ? null : feature.fid,

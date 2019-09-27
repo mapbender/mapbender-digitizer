@@ -468,6 +468,33 @@
 
 
             return formItems;
+        },
+
+
+        createHeadlessFormData: function (feature,formItems) {
+            var formData = {};
+
+            var extractFormData = function (definition) {
+                definition.forEach(function (item) {
+                    if (_.isArray(item)) {
+                        // recurse into lists
+                        extractFormData(item);
+                    } else if (item.name) {
+                        var currentValue = (feature.data || {})[item.name];
+                        // keep empty string, but replace undefined => null
+                        if (typeof (currentValue) === 'undefined') {
+                            currentValue = null;
+                        }
+                        formData[item.name] = currentValue;
+                    } else if (item.children) {
+                        // recurse into child property (should be a list)
+                        extractFormData(item.children);
+                    }
+                });
+            };
+
+            extractFormData(formItems);
+            return formData;
         }
 
 
