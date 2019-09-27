@@ -360,6 +360,18 @@ li.select2-search--inline {
             min-width: 15px !important;
             height: 20px !important;
         }
+
+        span {
+            &:after {
+                margin-top: -6px !important;
+            }
+        }
+
+        button {
+            &.close {
+                padding-left: 4px;
+            }
+        }
     }
 
     .form-group > button.btn {
@@ -371,4 +383,7 @@ li.select2-search--inline {
             margin-right: 15px;
         }
     }
+
+
+
 }
