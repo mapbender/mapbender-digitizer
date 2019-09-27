@@ -5,6 +5,7 @@
         var schema = this;
         schema.index = index;
         schema.widget = widget;
+
         $.extend(schema, rawScheme);
 
         /**
@@ -475,6 +476,7 @@
                     schema.featureStyles = data.featureStyles;
                 });
             } else {
+                schema.featureStyles = {};
                 promise = $.Deferred().resolve();
             }
 
@@ -953,7 +955,7 @@
 
         getSchemaByFeature: function () {
             var schema = this;
-            return schema.getRestrictedVersion();
+            return schema;
         },
 
         introduceFeature: function (feature) {
@@ -965,6 +967,7 @@
 
         // TODO feature / option formData parameters are not pretty -> keep data in feature directly
         saveFeature: function (feature, formData) {
+
             var schema = this;
             var widget = schema.widget;
             var tableApi = schema.menu.resultTable.getApi();
@@ -1227,28 +1230,28 @@
             });
         },
 
-        getRestrictedVersion: function () {
-            var schema = this;
-
-            return { // This is a narrowed version of Scheme when accessed by Feature. Helpful for Debugging
-                schemaName: schema.schemaName,
-                formItems: schema.formItems,
-                allowDelete: schema.allowDelete,
-                featureType: schema.featureType,
-                index: schema.index,
-                popup: schema.popup,
-                allowPrintMetadata: schema.allowPrintMetadata,
-                allowDeleteByCancelNewGeometry: schema.allowDeleteByCancelNewGeometry,
-                copy: schema.copy,
-                openFormAfterEdit: schema.openFormAfterEdit,
-                openFormAfterModification: schema.openFormAfterModification,
-                revertChangedGeometryOnCancel: schema.revertChangedGeometryOnCancel,
-                deactivateControlAfterModification: schema.deactivateControlAfterModification
-
-
-            };
-
-        },
+        // getRestrictedVersion: function () {
+        //     var schema = this;
+        //
+        //     return { // This is a narrowed version of Scheme when accessed by Feature. Helpful for Debugging
+        //         schemaName: schema.schemaName,
+        //         formItems: schema.formItems,
+        //         allowDelete: schema.allowDelete,
+        //         featureType: schema.featureType,
+        //         index: schema.index,
+        //         popup: schema.popup,
+        //         allowPrintMetadata: schema.allowPrintMetadata,
+        //         allowDeleteByCancelNewGeometry: schema.allowDeleteByCancelNewGeometry,
+        //         copy: schema.copy,
+        //         openFormAfterEdit: schema.openFormAfterEdit,
+        //         openFormAfterModification: schema.openFormAfterModification,
+        //         revertChangedGeometryOnCancel: schema.revertChangedGeometryOnCancel,
+        //         deactivateControlAfterModification: schema.deactivateControlAfterModification
+        //
+        //
+        //     };
+        //
+        // },
 
 
     };

@@ -102,7 +102,7 @@
             var schema = this;
             var widget = schema.widget;
             var scheme = widget.getSchemaByName(feature.attributes.schemaName);
-            return scheme.getRestrictedVersion();
+            return scheme;
 
         },
 

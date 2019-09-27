@@ -174,7 +174,7 @@
         configuration.addFeatureAndDialog(feature, dialog);
 
 
-        dialog.schema = schema;
+        dialog.schema = schema.getSchemaByFeature(feature);
         configuration.title = schema.getSchemaByFeature(feature).popup.title;
         configuration.width = schema.getSchemaByFeature(feature).popup.width;
 
@@ -210,7 +210,7 @@
 
         $popup.data('feature', feature);
 
-        var formItems = JSON.parse(JSON.stringify(schema.formItems)); // Deep clone hack!
+        var formItems = JSON.parse(JSON.stringify(dialog.schema.formItems)); // Deep clone hack!
 
         var processedFormItems = Mapbender.Digitizer.Utilities.processFormItems(feature,formItems,dialog);
 
