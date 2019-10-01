@@ -16,7 +16,7 @@
 
         var styleLabels = ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
 
-        schema.inject();
+        schema.prepareSearchForm();
 
         var initializeHooksForControlPrevention = function () {
             _.each(schema.hooks, function (value, name) {
@@ -392,10 +392,74 @@
         featureVisibility: true,
 
 
-        /**
-         *  Can be overriden in specific digitizer instances
-         */
-        inject: function() {
+        prepareSearchForm: function () {
+
+            var schema = this;
+            var widget = schema.widget;
+
+            schema.search = schema.search || {
+                form: null,
+                mapping: null,
+                zoomScale: null
+            };
+
+            if (schema.search.form) {
+
+                _.each(schema.search.form, function (item) {
+
+                    if (item.mapping) {
+                        var value = item.mapping[item.name];
+
+                        if (value && item.options) {
+                            var option = item.options.find(function (option) {
+                                return option[0].toLowerCase() === value.toLowerCase()
+                            });
+                            if (option) {
+                                item.value = option;
+                            } else {
+                                $.notify(value + " is not a valid value for " + item.name);
+                            }
+                        }
+
+                    }
+
+                    item.change = function (options) {
+
+                        schema.getData().done({
+                            //callback: function () {
+                                // if (schema.search.zoomScale) {
+                                //     widget.map.zoomToScale(schema.search.zoomScale, true);
+                                // } else {
+                                //     widget.map.zoomToExtent(schema.layer.getDataExtent());
+                                // }
+                            //}
+                        });
+                    };
+
+                    if (item.type === 'select' && item.ajax) {
+
+                        item.ajax.dataType = 'json';
+                        item.ajax.url = widget.getElementURL() + 'form/select';
+                        item.ajax.data = function (params) {
+
+                            if (params && params.term) {
+                                // Save last given term to get highlighted in templateResult
+                                item.ajax.lastTerm = params.term;
+                            }
+                            var ret = {
+                                schema: schema.schemaName,
+                                item: item,
+                                form: schema.menu.getSearchData(),
+                                params: params
+                            };
+
+                            return ret;
+                        };
+
+                    }
+                });
+            }
+
 
         },
 
@@ -641,15 +705,11 @@
         },
 
 
-        /** override **/
-        doReload: function() {
-          return false;
-        },
 
 
         repopulateWithReloadedFeatures: function (forcedReload, zoom) {
             var schema = this;
-            var doReload = (schema.doReload() || schema.group === "all") && (!zoom);
+            var doReload = (schema.search.form || schema.group === "all") && (!zoom);
             return doReload || forcedReload;
         },
 
@@ -663,6 +723,7 @@
                 srid: projection.proj.srsProjNumber,
                 maxResults: schema.maxResults,
                 schema: schema.schemaName,
+                search: schema.search.form ?  schema.menu.getSearchData() : null
             }
 
         },
@@ -684,7 +745,7 @@
                 request.intersectGeometry = extent.toGeometry().toString();
             }
 
-            if (!options.forceReload) {
+            if (!schema.search.form) {
 
                 if (!schema.currentExtentSearch && schema.lastRequest === JSON.stringify(request)) {
                     return $.Deferred().reject();
@@ -1252,94 +1313,6 @@
             };
 
         },
-
-
-    };
-
-    Mapbender.Digitizer.Scheme.prototype.search = {
-        form: null,
-        mapping: null,
-        zoomScale: null,
-    };
-
-    Mapbender.Digitizer.Scheme.prototype.doReload = function() {
-        return true;
-    };
-
-    var originalCreateRequest = Mapbender.Digitizer.Scheme.prototype.createRequest;
-    Mapbender.Digitizer.Scheme.prototype.createRequest = function() {
-        var schema = this;
-        var request =   originalCreateRequest.apply(this,arguments);
-        request.search = schema.menu.getSearchData();
-        return request;
-
-    };
-
-
-
-    Mapbender.Digitizer.Scheme.prototype.inject = function () {
-
-        var schema = this;
-        var widget = schema.widget;
-
-        if (schema.search.form) {
-
-            _.each(schema.search.form, function (item) {
-
-                if (item.mapping) {
-                    var value = item.mapping[item.name];
-
-                    if (value && item.options) {
-                        var option = item.options.find(function (option) {
-                            return option[0].toLowerCase() === value.toLowerCase()
-                        });
-                        if (option) {
-                            item.value = option;
-                        } else {
-                            $.notify(value + " is not a valid value for " + item.name);
-                        }
-                    }
-
-                }
-
-                item.change = function (options) {
-
-                    console.log("change");
-
-                    schema.getData({forceReload: true }).done({
-                        callback: function () {
-                            // if (schema.search.zoomScale) {
-                            //     widget.map.zoomToScale(schema.search.zoomScale, true);
-                            // } else {
-                            //     widget.map.zoomToExtent(schema.layer.getDataExtent());
-                            // }
-                        }
-                    });
-                };
-
-                if (item.type === 'select' && item.ajax) {
-
-                    item.ajax.dataType = 'json';
-                    item.ajax.url = widget.getElementURL() + 'form/select';
-                    item.ajax.data = function (params) {
-
-                        if (params && params.term) {
-                            // Save last given term to get highlighted in templateResult
-                            item.ajax.lastTerm = params.term;
-                        }
-                        var ret = {
-                            schema: schema.schemaName,
-                            item: item,
-                            form: schema.menu.getSearchData(),
-                            params: params
-                        };
-
-                        return ret;
-                    };
-
-                }
-            });
-        }
 
 
     };

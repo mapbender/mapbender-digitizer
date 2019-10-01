@@ -361,8 +361,14 @@
 
         appendGeneralDigitizerButtons();
 
+        if (schema.search.form) {
 
-        menu.augment();
+            menu.frame.generateElements({
+                type: 'form',
+                cssClass: 'search',
+                children: schema.search.form
+            });
+        }
 
         frame.append('<div style="clear:both;"/>');
 
@@ -374,11 +380,6 @@
 
     Mapbender.Digitizer.Menu.prototype = {
 
-        /** Override **/
-        augment: function() {
-
-        },
-
         deactivateControls: function () {
             var menu = this;
 
@@ -386,29 +387,15 @@
 
         },
 
+        getSearchData: function() {
+            var menu = this;
+            return $('form.search', menu.frame).length > 0 ? $('form.search', menu.frame).formData() : void 0;
+        }
 
-
-    };
-
-
-    Mapbender.Digitizer.Menu.prototype.augment = function () {
-        var menu = this;
-        var schema = menu.schema;
-
-
-        menu.frame.generateElements({
-            type: 'form',
-            cssClass: 'search',
-            children: schema.search.form
-        });
 
 
     };
 
 
-    Mapbender.Digitizer.Menu.prototype.getSearchData = function() {
-        var menu = this;
-        return $('form.search', menu.frame).length > 0 ? $('form.search', menu.frame).formData() : void 0;
-    };
 
 })();
