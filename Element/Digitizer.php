@@ -155,6 +155,20 @@ class Digitizer extends BaseElement
             $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
         }
 
+        if (isset($scheme['search']) && isset($scheme['search']["form"])) {
+            $scheme['search']["form"] = $this->prepareItems($scheme['search']["form"]);
+            foreach($scheme['search']["form"] as &$form) {
+                $URLParamSet = isset($form["URLParam"]) && $form["URLParam"]==true;
+                if ($URLParamSet) {
+                    $URLParam = $form["name"];
+                    $formValue = $this->container->get('request')->get($URLParam);
+                    if ($formValue) {
+                        $form["mapping"][$URLParam] = $formValue;
+                    }
+                }
+            }
+        }
+
 
     }
 
@@ -228,7 +242,11 @@ class Digitizer extends BaseElement
     protected static function evalString($code, $args)
     {
         foreach ($args as $key => &$value) {
-            ${$key} = &$value;
+            if (is_array($value)) {
+                ${$key} = implode(",",$value);
+            } else {
+                ${$key} = &$value ?: "NULL";
+            }
         }
 
         $_return = null;
