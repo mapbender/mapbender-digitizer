@@ -588,7 +588,7 @@
         createToolset: function () {
             var schema = this;
 
-            return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
+            return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : [];// Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
         },
 
 
