@@ -7,7 +7,6 @@ mb.digitizer:
         database: 'Objekt löschen?'
     zoomTo: Heranzoomen
     edit: Bearbeiten
-    create: Hinzufügen
     attributes: Objektinformationen
     save:
       title: Speichern
@@ -21,11 +20,8 @@ mb.digitizer:
       title: Duplizieren
       on:
         error: Duplizieren des Objektes ist nicht erlaubt.
-    solrImportStatus:
-      successfully: 'Indizierung wurde erfolgreich ausgeführt.'
-      error: 'Indizierung ist fehlgeschlagen.'
+      cancel: 'Soll das ungespeicherte duplizierte Objekt wirklich nicht gespeichert werden?'
   toolset:
-    geometryless: 'Objekt mit manueller Koordinateneingabe hinzufügen'
     current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
     point:
       drawPoint: Punkt erstellen
@@ -52,7 +48,6 @@ mb.digitizer:
   api:
     query:
       error-message: 'Feature API - Abfrage fehlgeschlagen.'
-      toomuch: 'Es sind mehr Objekte verfügbar als auf einmal geladen werden können'
   table:
     fields:
       not.defined: 'Felder der Tabelle sind nicht definiert!'
@@ -67,4 +62,3 @@ mb.digitizer:
         filtered: '(gefiltert von _MAX_ Objekte.)'
   remoteData:
       error: WMS FeatureInfo Anfrage fehlgeschlagen
-  notReady: Digitizer ist noch nicht bereit. Bitte wiederholen Sie ihre Aktion in wenigen Sekungen noch einmal.

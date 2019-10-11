@@ -7,9 +7,7 @@ mb.digitizer:
         database: 'Delete feature.'
     zoomTo: Zoom to
     edit: 'Edit feature'
-    create: 'Add feature'
     attributes: 'Feature attributes'
-    savesave: 'Save feature'
     save:
       title: Save
       successfully: 'Feature saved.'
@@ -22,12 +20,9 @@ mb.digitizer:
       title: Copy
       on:
         error: Object coping is denied.
-    solrImportStatus:
-      successfully: 'Indexing has been successfully completed.'
-      error: 'Indexing failed.'
+      cancel: 'Should the unsaved cloned object really not be saved?'
   toolset:
     current-extent: 'Select by current extent only.'
-    geometryless: Add object with manual entry of coordinates
     point:
       drawPoint: Draw point
       moveGeometry: Move feature
@@ -53,7 +48,6 @@ mb.digitizer:
   api:
     query:
       error-message: 'Feature API query error.'
-      toomuch: 'It is requested more than the maximal available number of results'
   table:
     fields:
       not.defined: 'Feature table fields aren''t defined.'

@@ -76,7 +76,6 @@ $selectColor: #F7F79A;
         word-wrap: break-word;       /* Internet Explorer 5.5+ */
         word-break: break-all;
         white-space: normal;
-
         .icon-style:before{
           font-family: FontAwesome;
           content: "\f1fb";
@@ -117,12 +116,6 @@ $selectColor: #F7F79A;
   position: absolute;
 }
 
-
-.icon-create:before {
-    font-family: FontAwesome;
-    content: "\f067";
-}
-
 .modal-body {
 
   .form-group {
@@ -131,8 +124,7 @@ $selectColor: #F7F79A;
       width: auto;
       display: inline-block;
       vertical-align: middle;
-      margin-bottom: 2px;
-      margin-top: 2px;
+      margin-bottom: 7px;
       position: relative;
       height: 24px;
       margin-left: 5px;
@@ -222,61 +214,4 @@ $selectColor: #F7F79A;
       height: 100%;
     }
   }
-
-
-}
-
-.ui-dialog.remoteDataConfirmationDialog {
-  z-index: 9999 !important;
-  background-color: #FAF9F1;
-  border: 1px solid #b3b3b3;
-  .ui-dialog-titlebar {
-    background-color: #e9e9e9;
-    border-bottom: 1px solid #b3b3b3;
-  }
-  .ui-dialog-titlebar-close { display: none; }
-  .ui-button { width: 33.3%; font-size: 10px; };
-  p {
-    text-align: center;
-    float: right;
-    margin: 20px;
-    margin-top: 0px;
-  }
-}
-
-.ui-widget-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #aaaaaa;
-  opacity: 0.5;
-}
-
-.coordinates-container, .automatic-detection-fieldset {
-  box-sizing: content-box;
-}
-
-
-
-
-.mb-element-popup-dialog {
-
-    .modal-header {
-        a {
-            min-width: 15px !important;
-            height: 20px !important;
-        }
-    }
-
-    .form-group > button.btn {
-        &:first-child{
-            margin-left: 0px !important;
-            margin-bottom: 2px !important;
-        }
-        &:last-child{
-            margin-right: 15px;
-        }
-    }
 }

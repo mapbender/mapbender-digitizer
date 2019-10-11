@@ -17,6 +17,9 @@
         "phayes/geophp": "1.2",
         "mapbender/vis-ui.js": "*"
     },
+    "require-dev": {
+        "mapbender/data-source": "@dev"
+    },
     "minimum-stability": "dev",
     "config": {
         "bin-dir": "bin"

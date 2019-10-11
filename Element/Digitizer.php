@@ -46,13 +46,9 @@ class Digitizer extends BaseElement
                 '/components/select2/select2-built.js',
                 '/components/select2/dist/js/i18n/de.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizingToolset.js',
-                '@MapbenderDigitizerBundle/Resources/public/digitizerSchema.js',
                 '@MapbenderDigitizerBundle/Resources/public/digitizingControlFactory.js',
                 '@MapbenderDigitizerBundle/Resources/public/feature-style-editor.js',
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
-                '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
-                '@MapbenderDigitizerBundle/Resources/public/plugins/coordinatesTransformation.js',
-                '@MapbenderDigitizerBundle/Resources/public/plugins/geometrylessFeatureAdd.js'
             ),
             'css'   => array(
                 '/components/select2/select2-built.css',
@@ -440,7 +436,6 @@ class Digitizer extends BaseElement
 
             }
             $results = $featureType->toFeatureCollection($results);
-            $results['solrImportStatus'] = $this->solrImport($request);
         } catch (DBALException $e) {
             $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
                 "For more information have a look at the webserver log file. \n Error code: " . $e->getCode();
@@ -451,23 +446,6 @@ class Digitizer extends BaseElement
 
         return $results;
 
-    }
-
-    /**
-     * Updates the index of solr (full import) and returns the status 
-     * @param $request
-     * @return int status
-     */
-    public function solrImport($request) {
-        $configuration = $this->getConfiguration(false);
-        $schemas       = $configuration["schemes"];
-        $schemaName  = $request["schema"];
-        $schema = $this->getSchemaByName($schemaName);
-        if (isset($schema['dataSourceImportHandler'])  && isset($schema['dataSourceImportHandler']['url'])) {
-            $data = json_decode(file_get_contents($schema['dataSourceImportHandler']['url']));
-            return $data->responseHeader->status;
-        }
-        return null;
     }
 
     /**
@@ -628,16 +606,13 @@ class Digitizer extends BaseElement
                     }
                 }
                 if($head["reponse_code"] !== 200){
-                    $responseArray['error'][] = array('response' => $response, 'code' => $head['reponse_code']);
-                } else if (!!(json_decode($response))) {
-                   
-                    $dataSets[] = $response;
+                    $responseArray['error'][] = array('rsponse' => $response, 'code' => $head['reponse_code']);
                 } else {
-                    $responseArray['error'][]  = array('response' => $response, 'code' => "Response of url: {$url} is not a JSON");
+                    $dataSets[] = $response;
                 }
                 
             } else  {
-                $responseArray['error'][]  = "Unknown error for url: {$url}";
+                $responseArray['error'][]  = "Unkown error for url: {$url}";
             }
 
         }
@@ -660,6 +635,7 @@ class Digitizer extends BaseElement
                      'filter',
                      'geomField',
                      'connection',
+                     'uniqueId',
                      'sql',
                      'events'
                  ) as $keyName) {
