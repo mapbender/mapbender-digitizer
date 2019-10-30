@@ -1162,7 +1162,7 @@
                 if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
                     schema.menu.toolSet.activeControl.activate();
                 }
-q
+
                 return response;
 
             });
