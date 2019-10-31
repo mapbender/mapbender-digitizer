@@ -1038,9 +1038,9 @@
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
 
-            if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
+            //if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
                 schema.menu.toolSet.activeControl.deactivate();
-            }
+            //}
 
             var createNewFeatureWithDBFeature = function (feature, response) {
 
@@ -1158,11 +1158,12 @@
                 schema.refreshOtherLayersAfterFeatureSave(feature);
 
                 schema.refreshConnectedDigitizerFeatures();
-
-                if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
-                    schema.menu.toolSet.activeControl.activate();
-                }
-
+                
+                // Funktionalität nicht erwünscht
+                // if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
+                //     schema.menu.toolSet.activeControl.activate();
+                // }
+                
                 return response;
 
             });
