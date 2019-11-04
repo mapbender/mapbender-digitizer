@@ -243,7 +243,7 @@
 
             var formItem = $(table).data('item');
 
-            var dataStoreLinkName = formItem.dataStoreLink.name;
+            var dataStoreLinkName = formItem.dataStoreLink && formItem.dataStoreLink.name;
             if (dataStoreLinkName) {
                 var requestData = {
                     dataStoreLinkName: dataStoreLinkName,
@@ -263,8 +263,6 @@
 
                     } else {
                         console.error("invalid return",data);
-                        // data.item = item;
-                        // data = [data];
                     }
 
                     var tableApi = $(table).resultTable('getApi');
@@ -272,6 +270,16 @@
                     tableApi.rows.add(dataItems);
                     tableApi.draw();
 
+                });
+            } else if (formItem.dataManagerLink) {
+                var schemaName = formItem.dataManagerLink.schema;
+                var fieldName = formItem.dataManagerLink.fieldName;
+                var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                dm.withSchema(schemaName, function (schema) {
+                    var tableApi = $(table).resultTable('getApi');
+                    tableApi.clear();
+                    tableApi.rows.add(schema.dataItems.filter(function(dataItem) { return dataItem[fieldName] == feature.fid}));
+                    tableApi.draw();
                 });
             }
 

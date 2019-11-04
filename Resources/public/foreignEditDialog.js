@@ -108,6 +108,7 @@
         var tableApi = dialog.parentTable.resultTable('getApi');
         var processedData = [];
 
+
         if (Array.isArray(data)) {
             $.each(data, function (i,e) {
                 if (e.hasOwnProperty('attributes')) {
