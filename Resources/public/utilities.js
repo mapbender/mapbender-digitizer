@@ -148,9 +148,26 @@
 
                         return false;
                     };
-                } else if (item.hasOwnProperty('dataManagerLink')) {
+                }
+                else if (item.hasOwnProperty('dataManagerLink')) {
                     var fieldName = item.dataManagerLink.fieldName;
                     var schemaName = item.dataManagerLink.schema;
+
+                    var getRowId = function(tableApi,rowData) {
+                        var rowId = null;
+
+                        tableApi.rows(function(idx,data) {
+                            if (data == rowData) {
+                                rowId = idx;
+                            }
+                        });
+
+                        if (rowId == null) {
+                            throw new Error();
+                        }
+                        return rowId;
+                    }
+
 
                     onCreateClick = function (e) {
                         e.preventDefault && e.preventDefault();
@@ -158,7 +175,7 @@
                         var tableApi = table.resultTable('getApi');
 
 
-                        var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                        var dm = widget.getConnectedDataManager();
                         var dataItem = dm.getSchemaByName(schemaName).create();
                         dataItem[fieldName] = feature.fid;
                         var dialog = dm._openEditDialog(dataItem);
@@ -180,25 +197,14 @@
                         var tableApi = table.resultTable('getApi');
 
 
-                        var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                        var dm = widget.getConnectedDataManager();
                         var dialog = dm._openEditDialog(rowData);
                         dialog.parentTable = table;
 
-                        var rowId = null;
-
-                        tableApi.rows(function(idx,data) {
-                            if (data == rowData) {
-                                rowId = idx;
-                            }
-                        });
-
-                        if (rowId == null) {
-                            throw new Error();
-                        }
+                        var rowId = getRowId(tableApi,rowData);
 
                         $(dialog).find("select[name=" + fieldName + "]").attr("disabled", "true");
                         $(dialog).bind('data.manager.item.saved', function (event, data) {
-                            var tableApi = dialog.parentTable.resultTable('getApi');
                             tableApi.row(rowId).data(data.item);
                             tableApi.draw();
                         });
@@ -214,19 +220,9 @@
                         var tableApi = table.resultTable('getApi');
 
 
-                        var rowId = null;
+                        var rowId = getRowId(tableApi,rowData);
 
-                        tableApi.rows(function(idx,data) {
-                            if (data == rowData) {
-                                rowId = idx;
-                            }
-                        });
-
-                        if (rowId == null) {
-                            throw new Error();
-                        }
-
-                        var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                        var dm = widget.getConnectedDataManager();
 
                         dm.removeData(rowData, function () {
                             tableApi.row(rowId).remove();
@@ -397,7 +393,7 @@
                     onCreateClick = function (e) {
                         e.preventDefault && e.preventDefault();
 
-                        var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                        var dm = widget.getConnectedDataManager();
                         dm.withSchema(schemaName, function (schema) {
                             dm._openEditDialog(schema.create());
 
@@ -416,7 +412,7 @@
                         e.preventDefault && e.preventDefault();
 
                         var val = $(this).siblings().find('select').val();
-                        var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                        var dm = widget.getConnectedDataManager();
                         dm.withSchema(schemaName, function (schema) {
                             var dataItem = _.find(schema.dataItems, function (d) {
                                 return d[schemaFieldName].toString() === val;

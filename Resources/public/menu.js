@@ -79,7 +79,7 @@
                 $button.attr("title", Mapbender.DigitizerTranslator.translate('refresh'));
                 $button.click(function () {
                     var widget = schema.widget;
-                    var dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                    var dataManager = widget.getConnectedDataManager();
                     if (dataManager) {
                         $.each(dataManager.options.schemes, function (schemaName, scheme) {
                             dataManager._getData(scheme);

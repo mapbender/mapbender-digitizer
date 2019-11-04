@@ -131,7 +131,7 @@
 
             widget.displayOnInactive = widget.options.displayOnInactive;
 
-            widget.dataManager = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+            widget.dataManager = widget.getConnectedDataManager();
 
             var qe = new Mapbender.Digitizer.QueryEngine(widget);
             widget.query = qe.query;
@@ -449,6 +449,11 @@
             widget.disable();
             widget.isFullyActive = false;
             widget.getCurrentSchema().deactivateSchema(true);
+        },
+
+
+        getConnectedDataManager: function() {
+            return Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
         },
 
 
