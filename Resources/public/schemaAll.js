@@ -1,9 +1,17 @@
 (function () {
     "use strict";
-    Mapbender.Digitizer.AllScheme = function () {
+    Mapbender.Digitizer.AllScheme = function (rawScheme, widget, index) {
 
+
+        var allowCustomStyle = false;
+         _.each(widget.getBasicSchemes(), function (scheme) {
+            allowCustomStyle = scheme.allowCustomStyle || allowCustomStyle;
+        });
+
+        this.allowCustomStyle = allowCustomStyle;
 
         Mapbender.Digitizer.Scheme.apply(this, arguments);
+
 
 
 
@@ -18,8 +26,6 @@
 
             geomType: '-'
         },
-
-        allowCustomStyle: true,
 
 
         getGeomType: function() {

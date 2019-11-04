@@ -1075,7 +1075,7 @@
 
             feature.disabled = true;
 
-            formData = formData || Mapbender.Digitizer.Utilities.createHeadlessFormData(feature,schema.formItems);
+            formData = formData || Mapbender.Digitizer.Utilities.createHeadlessFormData(feature,schema.getSchemaByFeature(feature).formItems);
 
             var request = {
                 id: feature.isNew ? null : feature.fid,
@@ -1158,12 +1158,12 @@
                 schema.refreshOtherLayersAfterFeatureSave(feature);
 
                 schema.refreshConnectedDigitizerFeatures();
-                
+
                 // Funktionalität nicht erwünscht
                 // if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
                 //     schema.menu.toolSet.activeControl.activate();
                 // }
-                
+
                 return response;
 
             });
