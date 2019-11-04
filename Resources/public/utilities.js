@@ -5,40 +5,42 @@
     Mapbender.Digitizer.Utilities = {
 
 
-        isAddingToolsetType: function(toolsetType) {
+        isAddingToolsetType: function (toolsetType) {
 
-            return ['drawPoint','drawLine','drawPolygon','drawRectangle','drawCircle','drawEllipse'].includes(toolsetType);
+            return ['drawPoint', 'drawLine', 'drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse'].includes(toolsetType);
         },
 
-        getDefaultToolsetByGeomType: function(geomType) {
+        getDefaultToolsetByGeomType: function (geomType) {
 
             var toolset = null;
 
-            switch(geomType) {
+            switch (geomType) {
                 case 'point':
-                    toolset = ['drawPoint','moveFeature'];
+                    toolset = ['drawPoint', 'moveFeature'];
                     break;
                 case 'line':
-                    toolset = ['drawLine','modifyFeature','moveFeature'];
+                    toolset = ['drawLine', 'modifyFeature', 'moveFeature'];
                     break;
                 case 'polygon':
-                    toolset = ['drawPolygon','drawRectangle','drawCircle','drawEllipse','drawDonut','modifyFeature','moveFeature'];
+                    toolset = ['drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'modifyFeature', 'moveFeature'];
             }
 
             if (!toolset) {
-                console.error("No valid geom type",geomType)
+                console.error("No valid geom type", geomType)
             }
-            return toolset.map(function(type) { return { 'type' : type }});
+            return toolset.map(function (type) {
+                return {'type': type}
+            });
 
 
         },
 
-        getAssetsPath: function(path) {
+        getAssetsPath: function (path) {
             return Mapbender.configuration.application.urls.asset + (path || '');
         },
 
 
-        processFormItem: function(feature,item,dialog) {
+        processFormItem: function (feature, item, dialog) {
 
             var schema = dialog.schema;
             var widget = schema.widget;
@@ -49,6 +51,7 @@
                 var onRemoveClick;
 
                 if (!item.hasOwnProperty('dataManagerLink')) {
+
                     onCreateClick = function (e) {
                         e.preventDefault();
                         var table = $(this).siblings(".mapbender-element-result-table");
@@ -61,7 +64,7 @@
                         rowData[formItem.dataStore.uniqueId] = null;
                         rowData.item = formItem;
 
-                        var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(rowData,formItem,table,dialog);
+                        var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(rowData, formItem, table, dialog);
                         return false;
                     };
 
@@ -75,16 +78,16 @@
                         formItem.allowRemove = true;
                         //rowData.externalId = rowData[formItem.dataStoreLink.uniqueId];//feature.attributes[formItem.dataStoreLink.uniqueId];
 
-                        var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(rowData,formItem,table,dialog);
+                        var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(rowData, formItem, table, dialog);
 
                         return false;
                     };
 
-                    onRemoveClick = function (rowData, ui, e) {
+                    onRemoveClick = function (rowData, button, e) {
                         e.defaultPrevented && e.defaultPrevented();
                         e.preventDefault && e.preventDefault();
 
-                        var table = ui.parents('.mapbender-element-result-table');
+                        var table = button.parents('.mapbender-element-result-table');
                         var formItem = table.data('item');
 
                         Mapbender.confirmDialog({
@@ -117,7 +120,7 @@
                                     var processedData = [];
 
                                     if (Array.isArray(response.dataItems)) {
-                                        $.each(response.dataItems, function (i,e) {
+                                        $.each(response.dataItems, function (i, e) {
                                             if (e.hasOwnProperty('attributes')) {
                                                 e.attributes.item = dialog.formItem;
                                                 processedData.push(e.attributes);
@@ -143,40 +146,98 @@
                         });
 
 
-
                         return false;
                     };
                 } else if (item.hasOwnProperty('dataManagerLink')) {
-                    var schemaName = item.dataManagerLink.schema;
                     var fieldName = item.dataManagerLink.fieldName;
-                    var schemaFieldName = item.dataManagerLink.schemaFieldName;
+                    var schemaName = item.dataManagerLink.schema;
 
                     onCreateClick = function (e) {
                         e.preventDefault && e.preventDefault();
+                        var table = $(this).siblings(".mapbender-element-result-table");
+                        var tableApi = table.resultTable('getApi');
+
 
                         var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
-                        dm.withSchema(schemaName, function (schema) {
-                            dm._openEditDialog(schema.create());
+                        var dataItem = dm.getSchemaByName(schemaName).create();
+                        dataItem[fieldName] = feature.fid;
+                        var dialog = dm._openEditDialog(dataItem);
+                        dialog.parentTable = table;
+                        $(dialog).find("select[name=" + fieldName + "]").attr("disabled", "true");
+                        $(dialog).bind('data.manager.item.saved', function (event, data) {
+                            tableApi.rows.add([data.item]);
+                            tableApi.draw();
+
                         });
 
                         return false;
                     };
 
-                    onEditClick = function (rowData, ui, e) {
+                    onEditClick = function (rowData, button, e) {
                         e.defaultPrevented && e.defaultPrevented();
                         e.preventDefault && e.preventDefault();
+                        var table = button.parents('.mapbender-element-result-table');
+                        var tableApi = table.resultTable('getApi');
+
 
                         var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                        var dialog = dm._openEditDialog(rowData);
+                        dialog.parentTable = table;
 
-                        dm.withSchema(schemaName, function (schema) {
-                            var dataItem = _.find(schema.dataItems, function (d) {
-                                return d[schemaFieldName] === rowData[fieldName];
-                            });
-                            dm._openEditDialog(dataItem);
+                        var rowId = null;
+
+                        tableApi.rows(function(idx,data) {
+                            if (data == rowData) {
+                                rowId = idx;
+                            }
+                        });
+
+                        if (rowId == null) {
+                            throw new Error();
+                        }
+
+                        $(dialog).find("select[name=" + fieldName + "]").attr("disabled", "true");
+                        $(dialog).bind('data.manager.item.saved', function (event, data) {
+                            var tableApi = dialog.parentTable.resultTable('getApi');
+                            tableApi.row(rowId).data(data.item);
+                            tableApi.draw();
                         });
 
                         return false;
                     };
+
+
+                    onRemoveClick = function (rowData, button, e) {
+                        e.defaultPrevented && e.defaultPrevented();
+                        e.preventDefault && e.preventDefault();
+                        var table = button.parents('.mapbender-element-result-table');
+                        var tableApi = table.resultTable('getApi');
+
+
+                        var rowId = null;
+
+                        tableApi.rows(function(idx,data) {
+                            if (data == rowData) {
+                                rowId = idx;
+                            }
+                        });
+
+                        if (rowId == null) {
+                            throw new Error();
+                        }
+
+                        var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+
+                        dm.removeData(rowData, function () {
+                            tableApi.row(rowId).remove();
+                            tableApi.draw();
+                        });
+
+                        return false;
+
+
+                    }
+
                 }
 
                 var cloneItem = $.extend({}, item);
@@ -463,17 +524,17 @@
         },
 
 
-        processFormItems: function(feature,formItems,dialog) {
+        processFormItems: function (feature, formItems, dialog) {
 
             DataUtil.eachItem(formItems, function (item) {
-                Mapbender.Digitizer.Utilities.processFormItem(feature,item,dialog);
+                Mapbender.Digitizer.Utilities.processFormItem(feature, item, dialog);
             });
 
             return formItems;
         },
 
 
-        createHeadlessFormData: function (feature,formItems) {
+        createHeadlessFormData: function (feature, formItems) {
             var formData = {};
 
             var extractFormData = function (definition) {
@@ -498,8 +559,6 @@
             extractFormData(formItems);
             return formData;
         }
-
-
 
 
     }
