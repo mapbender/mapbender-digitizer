@@ -23,7 +23,7 @@ class Digitizer extends BaseElement
     /**
      * @inheritdoc
      */
-    static public function getClassTitle()
+    public static function getClassTitle()
     {
         return "Digitizer";
     }
@@ -31,17 +31,9 @@ class Digitizer extends BaseElement
     /**
      * @inheritdoc
      */
-    static public function getClassDescription()
+    public static function getClassDescription()
     {
         return "Georeferencing and Digitizing";
-    }
-
-    /**
-     * @inheritdoc
-     */
-    static public function getTags()
-    {
-        return array();
     }
 
     /**
