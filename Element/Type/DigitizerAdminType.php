@@ -27,9 +27,6 @@ class DigitizerAdminType extends AbstractType
             ))
             ->add('schemes', 'Mapbender\ManagerBundle\Form\Type\YAMLConfigurationType', array(
                 'required' => false,
-                'attr' => array(
-                    'class' => 'code-yaml',
-                ),
             ))
         ;
     }
