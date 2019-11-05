@@ -33,7 +33,7 @@ class Digitizer extends BaseElement
      */
     static public function getClassDescription()
     {
-        return "Digitizer";
+        return "Georeferencing and Digitizing";
     }
 
     /**
