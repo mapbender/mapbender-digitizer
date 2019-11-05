@@ -24,7 +24,6 @@ class DigitizerAdminType extends AbstractType
         $builder->add('target', 'Mapbender\CoreBundle\Element\Type\TargetElementType', array(
                 'element_class' => 'Mapbender\CoreBundle\Element\Map',
                 'application'   => $options['application'],
-                'required'      => false,
             ))
             ->add('schemes', 'Mapbender\ManagerBundle\Form\Type\YAMLConfigurationType', array(
                 'required' => false,
