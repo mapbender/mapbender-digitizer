@@ -141,7 +141,7 @@ class Digitizer extends BaseElement
 
     public function getFrontendTemplatePath($suffix = '.html.twig')
     {
-        return 'MapbenderDigitizerBundle:Element:digitizer.html.twig';
+        return 'MapbenderDigitizerBundle:Element:digitizeradmin.html.twig';
     }
 
     /**
