@@ -132,9 +132,11 @@
             widget.displayOnInactive = widget.options.displayOnInactive;
 
             var dataManagerId = widget.options.dataManager;
-            Mapbender.elementRegistry.waitReady(dataManagerId).then(function(dataManager) {
-                widget.dataManager = dataManager;
-            });
+            if (dataManagerId) {
+                Mapbender.elementRegistry.waitReady(dataManagerId).then(function (dataManager) {
+                    widget.dataManager = dataManager;
+                });
+            }
 
             var qe = new Mapbender.Digitizer.QueryEngine(widget);
             widget.query = qe.query;
@@ -457,6 +459,9 @@
 
         getConnectedDataManager: function() {
             var widget = this;
+            if (!widget.dataManager) {
+                throw new Error("Data Manager is not activated");
+            }
             return widget.dataManager;
         },
 
