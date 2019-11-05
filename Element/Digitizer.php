@@ -146,18 +146,9 @@ class Digitizer extends BaseElement
         return 'MapbenderDigitizerBundle:ElementAdmin:digitizeradmin.html.twig';
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function render()
+    public function getFrontendTemplatePath($suffix = '.html.twig')
     {
-        return $this->container->get('templating')
-            ->render('MapbenderDigitizerBundle:Element:digitizer.html.twig',
-                array(
-                    'id'            => $this->getId(),
-                    'title'         => $this->getTitle(),
-                    'configuration' => $this->getConfiguration()
-                ));
+        return 'MapbenderDigitizerBundle:Element:digitizer.html.twig';
     }
 
     /**
