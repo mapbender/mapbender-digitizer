@@ -184,6 +184,7 @@
                         $(dialog).bind('data.manager.item.saved', function (event, data) {
                             tableApi.rows.add([data.item]);
                             tableApi.draw();
+                            dm._getData();
 
                         });
 
@@ -207,6 +208,8 @@
                         $(dialog).bind('data.manager.item.saved', function (event, data) {
                             tableApi.row(rowId).data(data.item);
                             tableApi.draw();
+                            dm._getData();
+
                         });
 
                         return false;
@@ -227,6 +230,9 @@
                         dm.removeData(rowData, function () {
                             tableApi.row(rowId).remove();
                             tableApi.draw();
+                            dm._getData();
+
+
                         });
 
                         return false;
