@@ -1,4 +1,4 @@
-<div class="elementForm defaultForm elementFormDigitizer">
+<div class="elementForm elementFormDigitizer">
     <style media="all">
         .elementFormDigitizer label.labelInput {
             display: block;
@@ -144,9 +144,11 @@
                 $(textarea).val(value);
             });
 
-            // Resize popup dand elements
-            var popupContainer = $(".popupContainer.modal > .popup");
-            var yamlEditorElement = $("#elementForm > div > div.inputWrapper.code-yaml > div");
+
+            // Resize, but only if rendered in popup
+            var $popupForm = $('.popup form');
+            var popupContainer = $popupForm.closest('.popup');
+            var yamlEditorElement = $(".code-yaml > div", $popupForm);
 
             popupContainer.animate({
                 width:  '100%'
@@ -157,9 +159,6 @@
             }, 350);
         })
     </script>
-    {{ form_label(form.title) }}{{ form_widget(form.title) }}
-    <div class="clearContainer"></div>
-    {{ form_label(form.configuration.target) }}{{ form_widget(form.configuration.target) }}
-    <div class="clearContainer"></div>
-    {{ form_label(form.configuration.schemes) }}{{ form_widget(form.configuration.schemes) }}
+    {{ form_row(form.title) }}
+    {{ form_rest(form.configuration) }}
 </div>
