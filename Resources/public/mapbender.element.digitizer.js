@@ -131,7 +131,10 @@
 
             widget.displayOnInactive = widget.options.displayOnInactive;
 
-            widget.dataManager = widget.getConnectedDataManager();
+            var dataManagerId = widget.options.dataManager;
+            Mapbender.elementRegistry.waitReady(dataManagerId).then(function(dataManager) {
+                widget.dataManager = dataManager;
+            });
 
             var qe = new Mapbender.Digitizer.QueryEngine(widget);
             widget.query = qe.query;
@@ -453,7 +456,8 @@
 
 
         getConnectedDataManager: function() {
-            return Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+            var widget = this;
+            return widget.dataManager;
         },
 
 

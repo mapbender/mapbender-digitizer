@@ -4,6 +4,7 @@
             display: block;
             margin: 0;
             height: 23px;
+            width:150px;
         }
 
         .elementFormDigitizer .inputWrapper {
@@ -170,6 +171,8 @@
     <div class="clearContainer"></div>
     {{ form_label(form.configuration.target) }}{{ form_widget(form.configuration.target) }}
     <div class="clearContainer"></div>
+    {{ form_label(form.configuration.dataManager) }}{{ form_widget(form.configuration.dataManager) }}
+    <div class="clearContainer"></div>
     {{ form_widget(form.configuration.useAllScheme) }}
     <div class="checkboxLabel">
     {{ form_label(form.configuration.useAllScheme) }}
@@ -181,4 +184,5 @@
     </div>
     <div class="clearContainer"></div>
     {{ form_label(form.configuration.schemes) }}{{ form_widget(form.configuration.schemes) }}
+
 </div>
