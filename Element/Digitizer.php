@@ -19,8 +19,38 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class Digitizer extends BaseElement
 {
-    protected static $title                = "Digitizer";
-    protected static $description          = "Georeferencing and Digitizing";
+
+    /**
+     * @inheritdoc
+     */
+    static public function getClassTitle()
+    {
+        return "Digitizer";
+    }
+
+    /**
+     * @inheritdoc
+     */
+    static public function getClassDescription()
+    {
+        return "Digitizer";
+    }
+
+    /**
+     * @inheritdoc
+     */
+    static public function getTags()
+    {
+        return array();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getWidgetName()
+    {
+        return 'mapbender.mbDigitizer';
+    }
 
     /**
      * @inheritdoc
@@ -99,6 +129,37 @@ class Digitizer extends BaseElement
         }
         return $configuration;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public static function getType()
+    {
+        return 'Mapbender\DigitizerBundle\Element\Type\DigitizerAdminType';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function getFormTemplate()
+    {
+        return 'MapbenderDigitizerBundle:ElementAdmin:digitizeradmin.html.twig';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function render()
+    {
+        return $this->container->get('templating')
+            ->render('MapbenderDigitizerBundle:Element:digitizer.html.twig',
+                array(
+                    'id'            => $this->getId(),
+                    'title'         => $this->getTitle(),
+                    'configuration' => $this->getConfiguration()
+                ));
+    }
+
     /**
      * Prepare request feautre data by the form definition
      *
