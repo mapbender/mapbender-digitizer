@@ -1,0 +1,334 @@
+[1mdiff --git a/Element/Digitizer.php b/Element/Digitizer.php[m
+[1mindex be9e2b9..9e6a8e4 100644[m
+[1m--- a/Element/Digitizer.php[m
+[1m+++ b/Element/Digitizer.php[m
+[36m@@ -47,7 +47,7 @@[m [mclass Digitizer extends BaseElement[m
+ [m
+         $mainFiles = array('mapbender.element.digitizer','toolset','schema','schemaAll','clustering.mixin',[m
+                            'menu','contextMenu', 'utilities',[m
+[31m-                           'featureEditDialog','foreignEditDialog','controlFactory','featureStyleEditor','mapbender.layermanager',[m
+[32m+[m[32m                           'featureEditDialog','controlFactory','featureStyleEditor','mapbender.layermanager',[m
+                            'mapbender.digitizer-translator',[m
+                            'queryEngine','openlayers.extension','vis-ui.extension');[m
+ [m
+[1mdiff --git a/Resources/public/featureEditDialog.js b/Resources/public/featureEditDialog.js[m
+[1mindex 6c15c34..c37a9a3 100644[m
+[1m--- a/Resources/public/featureEditDialog.js[m
+[1m+++ b/Resources/public/featureEditDialog.js[m
+[36m@@ -278,7 +278,7 @@[m
+                 dm.withSchema(schemaName, function (schema) {[m
+                     var tableApi = $(table).resultTable('getApi');[m
+                     tableApi.clear();[m
+[31m-                    tableApi.rows.add(schema.dataItems.filter(function(dataItem) { return dataItem[fieldName] == feature.fid}));[m
+[32m+[m[32m                    tableApi.rows.add(schema.dataItems.filter(function(dataItem) { return dataItem[fieldName] == feature.fid }));[m
+                     tableApi.draw();[m
+                 });[m
+             }[m
+[1mdiff --git a/Resources/public/utilities.js b/Resources/public/utilities.js[m
+[1mindex d81944c..dd13102 100644[m
+[1m--- a/Resources/public/utilities.js[m
+[1m+++ b/Resources/public/utilities.js[m
+[36m@@ -50,106 +50,7 @@[m
+                 var onEditClick;[m
+                 var onRemoveClick;[m
+ [m
+[31m-                if (!item.hasOwnProperty('dataManagerLink')) {[m
+[31m-[m
+[31m-                    onCreateClick = function (e) {[m
+[31m-                        e.preventDefault();[m
+[31m-                        var table = $(this).siblings(".mapbender-element-result-table");[m
+[31m-                        var formItem = table.data('item');[m
+[31m-[m
+[31m-                        var rowData = {};[m
+[31m-[m
+[31m-                        formItem.allowRemove = false;[m
+[31m-                        rowData[formItem.dataStoreLink.fieldName] = rowData['linkId'] = feature.attributes[formItem.dataStoreLink.uniqueId];[m
+[31m-                        rowData[formItem.dataStore.uniqueId] = null;[m
+[31m-                        rowData.item = formItem;[m
+[31m-[m
+[31m-                        var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(rowData, formItem, table, dialog);[m
+[31m-                        return false;[m
+[31m-                    };[m
+[31m-[m
+[31m-                    onEditClick = function (rowData, ui, e) {[m
+[31m-                        e.defaultPrevented && e.defaultPrevented();[m
+[31m-                        e.preventDefault && e.preventDefault();[m
+[31m-[m
+[31m-                        var table = ui.parents('.mapbender-element-result-table');[m
+[31m-                        var formItem = table.data('item');[m
+[31m-[m
+[31m-                        formItem.allowRemove = true;[m
+[31m-                        //rowData.externalId = rowData[formItem.dataStoreLink.uniqueId];//feature.attributes[formItem.dataStoreLink.uniqueId];[m
+[31m-[m
+[31m-                        var foreignEditDialog = new Mapbender.Digitizer.ForeignEditDialog(rowData, formItem, table, dialog);[m
+[31m-[m
+[31m-                        return false;[m
+[31m-                    };[m
+[31m-[m
+[31m-                    onRemoveClick = function (rowData, button, e) {[m
+[31m-                        e.defaultPrevented && e.defaultPrevented();[m
+[31m-                        e.preventDefault && e.preventDefault();[m
+[31m-[m
+[31m-                        var table = button.parents('.mapbender-element-result-table');[m
+[31m-                        var formItem = table.data('item');[m
+[31m-[m
+[31m-                        Mapbender.confirmDialog({[m
+[31m-[m
+[31m-                            html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),[m
+[31m-                            onSuccess: function () {[m
+[31m-[m
+[31m-                                var uniqueIdKey = formItem.dataStore.uniqueId;[m
+[31m-                                widget.query('datastore/remove', {[m
+[31m-                                    schema: formItem.dataStoreLink.name,[m
+[31m-                                    dataItemId: rowData[uniqueIdKey],[m
+[31m-                                    dataStoreLinkFieldName: formItem.dataStoreLink.fieldName,[m
+[31m-                                    linkId: rowData[rowData.item.dataStoreLink.fieldName][m
+[31m-[m
+[31m-                                }).done(function (response) {[m
+[31m-[m
+[31m-                                    if (response.processedItem.hasOwnProperty('errors')) {[m
+[31m-                                        $.each(response.errors, function (i, error) {[m
+[31m-                                            $.notify(error.message, {[m
+[31m-                                                title: 'API Error',[m
+[31m-                                                autoHide: false,[m
+[31m-                                                className: 'error'[m
+[31m-                                            });[m
+[31m-                                            console.error(error.message);[m
+[31m-                                        });[m
+[31m-                                        return;[m
+[31m-                                    }[m
+[31m-[m
+[31m-                                    var tableApi = table.resultTable('getApi');[m
+[31m-                                    var processedData = [];[m
+[31m-[m
+[31m-                                    if (Array.isArray(response.dataItems)) {[m
+[31m-                                        $.each(response.dataItems, function (i, e) {[m
+[31m-                                            if (e.hasOwnProperty('attributes')) {[m
+[31m-                                                e.attributes.item = dialog.formItem;[m
+[31m-                                                processedData.push(e.attributes);[m
+[31m-                                            }[m
+[31m-                                        });[m
+[31m-[m
+[31m-                                    } else {[m
+[31m-                                        if (response.dataItems.hasOwnProperty('attributes')) {[m
+[31m-                                            response.dataItems.attributes.item = dialog.formItem;[m
+[31m-                                            processedData = [response.dataItems.attributes];[m
+[31m-[m
+[31m-                                        }[m
+[31m-                                    }[m
+[31m-                                    tableApi.clear();[m
+[31m-                                    tableApi.rows.add(processedData);[m
+[31m-                                    tableApi.draw();[m
+[31m-[m
+[31m-                                    $.notify(Mapbender.DigitizerTranslator.translate("feature.remove.successfully", false), 'info');[m
+[31m-[m
+[31m-                                });[m
+[31m-[m
+[31m-                            }[m
+[31m-                        });[m
+[31m-[m
+[31m-[m
+[31m-                        return false;[m
+[31m-                    };[m
+[31m-                }[m
+[31m-                else if (item.hasOwnProperty('dataManagerLink')) {[m
+[32m+[m[32m              if (item.dataManagerLink) {[m
+                     var fieldName = item.dataManagerLink.fieldName;[m
+                     var schemaName = item.dataManagerLink.schema;[m
+ [m
+[36m@@ -274,120 +175,7 @@[m
+             }[m
+ [m
+ [m
+[31m-            // if(item.type === 'coordinates'){[m
+[31m-            //     var children = [];[m
+[31m-            //     var mapProjection = widget.getMap().getProjectionObject().projCode;[m
+[31m-            //     var epsgCodes = item.epsgCodes;[m
+[31m-            //[m
+[31m-            //     // Add Map Projection to EPSG codes, only if it is not already there[m
+[31m-            //     var mapProjectionInEpsgCodes = false;[m
+[31m-            //     epsgCodes.forEach(function(code){[m
+[31m-            //         if (code[0]===mapProjection) {[m
+[31m-            //             mapProjectionInEpsgCodes = true;[m
+[31m-            //         }[m
+[31m-            //     });[m
+[31m-            //     if (!mapProjectionInEpsgCodes) {[m
+[31m-            //         epsgCodes.unshift([mapProjection,mapProjection]);[m
+[31m-            //     }[m
+[31m-            //[m
+[31m-            //     var EPSGSelection = {[m
+[31m-            //         title: item.title_epsg || 'EPSG:',[m
+[31m-            //         type: 'select',[m
+[31m-            //         options: epsgCodes,[m
+[31m-            //         value: mapProjection,[m
+[31m-            //         css : { width: '33.33%' },[m
+[31m-            //         cssClass: '-fn-active-epsgCode',[m
+[31m-            //         change: function(event){[m
+[31m-            //[m
+[31m-            //             var oldEpsgCode = $('.-fn-coordinates-container').data('activeEpsgCode');[m
+[31m-            //             var oldProjection;[m
+[31m-            //             if (oldEpsgCode) {[m
+[31m-            //                 oldProjection = new OpenLayers.Projection(oldEpsgCode);[m
+[31m-            //             }[m
+[31m-            //             var activeProj =  oldProjection || widget.getMap().getProjectionObject();[m
+[31m-            //             var epsgCode = $(event.currentTarget).find('select').val();[m
+[31m-            //             var inputX = $('.-fn-coordinates.x > input', widget.currentPopup);[m
+[31m-            //             var inputY = $('.-fn-coordinates.y > input', widget.currentPopup);[m
+[31m-            //             var x = Mapbender.Transformation.isDegree(inputX.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputX.val()) : inputX.val();[m
+[31m-            //             var y = Mapbender.Transformation.isDegree(inputY.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputY.val()) : inputY.val();[m
+[31m-            //[m
+[31m-            //             var projectionToTransform = new OpenLayers.Projection(epsgCode);[m
+[31m-            //             var lonlat = Mapbender.Transformation.transFromFromTo(new OpenLayers.LonLat(x, y),activeProj, projectionToTransform);[m
+[31m-            //             inputX.val(lonlat.x || '');[m
+[31m-            //             inputY.val(lonlat.y || '');[m
+[31m-            //             $('.-fn-coordinates-container').data('activeEpsgCode',epsgCode);[m
+[31m-            //[m
+[31m-            //         }[m
+[31m-            //     };[m
+[31m-            //[m
+[31m-            //     var input = {[m
+[31m-            //         type : 'input',[m
+[31m-            //         label: '',[m
+[31m-            //         css : { width: '33.33%' },[m
+[31m-            //[m
+[31m-            //     };[m
+[31m-            //[m
+[31m-            //     // set default ordering, if the coordinatesFieldsOrder is not set in the digitizer YML[m
+[31m-            //     if (!item.coordinatesFieldsOrder) {[m
+[31m-            //         item.coordinatesFieldsOrder = ['x','y','epsg'];[m
+[31m-            //     }[m
+[31m-            //     _.each(item.coordinatesFieldsOrder, function(direction,i){[m
+[31m-            //         if (direction != 'epsg') {[m
+[31m-            //             var child  = {[m
+[31m-            //                 cssClass : '-fn-coordinates ' + direction,[m
+[31m-            //                 tile: direction + ': ',[m
+[31m-            //                 title: (direction==='x' ? item.title_longitude || 'longitude' : item.title_latitude || 'latitude' ) + ': ',[m
+[31m-            //                 name: direction,[m
+[31m-            //                 css: " { width: 33%; }",[m
+[31m-            //                 change : function(){[m
+[31m-            //[m
+[31m-            //                     var dialog = widget.currentPopup;[m
+[31m-            //                     var feature = dialog.data('feature');[m
+[31m-            //                     var layer = widget.currentSettings.layer;[m
+[31m-            //[m
+[31m-            //                     var inputX = $('.-fn-coordinates.x > input', widget.currentPopup);[m
+[31m-            //                     var inputY = $('.-fn-coordinates.y > input', widget.currentPopup);[m
+[31m-            //                     var x = Mapbender.Transformation.isDegree(inputX.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputX.val()) : inputX.val();[m
+[31m-            //                     var y = Mapbender.Transformation.isDegree(inputY.val()) ? Mapbender.Transformation.transformDegreeToDecimal(inputY.val()) : inputY.val();[m
+[31m-            //[m
+[31m-            //                     var activeProjection = $('.-fn-active-epsgCode', widget.currentPopup).find('select').val();[m
+[31m-            //[m
+[31m-            //                     var projection = Mapbender.Transformation.transformToMapProj(x,y,activeProjection);[m
+[31m-            //[m
+[31m-            //                     var oldGeometry = feature.geometry;[m
+[31m-            //                     feature.geometry = new OpenLayers.Geometry.Point(projection.x,projection.y);[m
+[31m-            //[m
+[31m-            //                     //var currentBounds = widget.map.calculateBounds();[m
+[31m-            //                     //if (currentBounds.contains(projection.x,projection.y)) {[m
+[31m-            //[m
+[31m-            //                     if (oldGeometry.x && oldGeometry.y) {[m
+[31m-            //                         layer.renderer.eraseGeometry(oldGeometry);[m
+[31m-            //                     }[m
+[31m-            //                     layer.drawFeature(feature);[m
+[31m-            //                     widget._getData(widget.currentSettings); // Triggered in order to have new Feature in resultTable[m
+[31m-            //                     // } else {[m
+[31m-            //                     //[m
+[31m-            //                     //     var transformedGeometry = Mapbender.Transformation.transformFromMapProj(oldGeometry.x, oldGeometry.y, activeProjection);[m
+[31m-            //                     //     $('.-fn-coordinates.x > input', widget.currentPopup).val(transformedGeometry.x || '');[m
+[31m-            //                     //     $('.-fn-coordinates.y > input', widget.currentPopup).val(transformedGeometry.y || '');[m
+[31m-            //                     //[m
+[31m-            //                     //     feature.geometry = oldGeometry;[m
+[31m-            //                     //[m
+[31m-            //                     //     $.notify('Coordinates are not in current viewport. Please zoom to a greater extent.');[m
+[31m-            //                     // }[m
+[31m-            //[m
+[31m-            //                 }[m
+[31m-            //             };[m
+[31m-            //             children.push($.extend(child,input));[m
+[31m-            //         } else {[m
+[31m-            //             children.push(EPSGSelection);[m
+[31m-            //         }[m
+[31m-            //     });[m
+[31m-            //     item.type = "fieldSet";[m
+[31m-            //     item.children=  children;[m
+[31m-            //     item.cssClass =  '-fn-coordinates-container coordinates-container';[m
+[31m-            //[m
+[31m-            // }[m
+[32m+[m
+             if (item.type === "select" && !item.isProcessed && ((item.dataStore && item.dataStore.editable && item.dataStore.popupItems) || item.dataManagerLink)) {[m
+                 var onCreateClick;[m
+                 var onEditClick;[m
+[36m@@ -427,30 +215,6 @@[m
+ [m
+                         });[m
+ [m
+[31m-                        return false;[m
+[31m-                    };[m
+[31m-                } else {[m
+[31m-                    onCreateClick = function () {[m
+[31m-                        var dataItemId = $(this).siblings().find('select').val();[m
+[31m-                        var selectRef = $(this).siblings().find('select');[m
+[31m-[m
+[31m-                        var dataStoreId = item.dataStore.id;[m
+[31m-                        widget.query("datastore/get", {[m
+[31m-                            schema: schema.schemaName,[m
+[31m-                            id: dataStoreId,[m
+[31m-                            dataItemId: dataItemId[m
+[31m-                        }).done(function (data) {[m
+[31m-                            widget._openEditDialog(data, item.dataStore.popupItems, item, selectRef);[m
+[31m-[m
+[31m-                        });[m
+[31m-[m
+[31m-                        return false;[m
+[31m-                    };[m
+[31m-[m
+[31m-                    onEditClick = function () {[m
+[31m-                        var selectRef = $(this).siblings().find('select');[m
+[31m-                        widget._openEditDialog({}, item.dataStore.popupItems, item, selectRef);[m
+[31m-[m
+                         return false;[m
+                     };[m
+                 }[m
+[1mdiff --git a/Resources/translations/messages.de.yml b/Resources/translations/messages.de.yml[m
+[1mindex b9a8296..6f6b1d4 100644[m
+[1m--- a/Resources/translations/messages.de.yml[m
+[1m+++ b/Resources/translations/messages.de.yml[m
+[36m@@ -2,6 +2,7 @@[m [mmb.digitizer:[m
+   useAllScheme: 'Verwende aggregierendes Schema'[m
+   displayOnInactive: 'Auch anzeigen, wenn nicht aktiv'[m
+   dataManager: 'Data Manager'[m
+[32m+[m[32m  connectedDataManager: 'verbundener Data Manager'[m
+   refresh: 'aktualisieren'[m
+   schema:[m
+     allgeometries: 'Alle Geometrien'[m
+[1mdiff --git a/Resources/translations/messages.en.yml b/Resources/translations/messages.en.yml[m
+[1mindex 2107dd5..92cef26 100644[m
+[1m--- a/Resources/translations/messages.en.yml[m
+[1m+++ b/Resources/translations/messages.en.yml[m
+[36m@@ -2,6 +2,7 @@[m [mmb.digitizer:[m
+   useAllScheme: 'Use aggregating Scheme'[m
+   displayOnInactive: 'Display when not active'[m
+   dataManager: 'Data Manager'[m
+[32m+[m[32m  connectedDataManager: 'connected Data Manager'[m
+   refresh: 'refresh'[m
+   schema:[m
+     allgeometries: 'All Geometries'[m
+[1mdiff --git a/composer.json b/composer.json[m
+[1mindex 31d1c48..55341f7 100644[m
+[1m--- a/composer.json[m
+[1m+++ b/composer.json[m
+[36m@@ -13,14 +13,10 @@[m
+         "php": ">=5.3.3",[m
+         "blueimp/jquery-file-upload": "9.*",[m
+         "debugteam/bootstrap-colorpicker": "1.x",[m
+[31m-        "mapbender/data-manager": "*",[m
+         "mapbender/data-source": "0.*",[m
+         "phayes/geophp": "1.2",[m
+         "mapbender/vis-ui.js": "*"[m
+     },[m
+[31m-    "require-dev": {[m
+[31m-        "mapbender/data-source": "@dev"[m
+[31m-    },[m
+     "minimum-stability": "dev",[m
+     "config": {[m
+         "bin-dir": "bin"[m

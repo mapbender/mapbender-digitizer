@@ -278,7 +278,7 @@
                 dm.withSchema(schemaName, function (schema) {
                     var tableApi = $(table).resultTable('getApi');
                     tableApi.clear();
-                    tableApi.rows.add(schema.dataItems.filter(function(dataItem) { return dataItem[fieldName] == feature.fid}));
+                    tableApi.rows.add(schema.dataItems.filter(function(dataItem) { return dataItem[fieldName] == feature.fid }));
                     tableApi.draw();
                 });
             }
