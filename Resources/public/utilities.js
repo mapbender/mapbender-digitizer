@@ -45,19 +45,18 @@
             var schema = dialog.schema;
             var widget = schema.widget;
 
-            if (item.type === "resultTable" && item.editable && !item.isProcessed) {
+            if (item.type === "resultTable" && item.editable && !item.isProcessed && item.dataManagerLink) {
                 var onCreateClick;
                 var onEditClick;
                 var onRemoveClick;
 
-              if (item.dataManagerLink) {
                     var fieldName = item.dataManagerLink.fieldName;
                     var schemaName = item.dataManagerLink.schema;
 
-                    var getRowId = function(tableApi,rowData) {
+                    var getRowId = function (tableApi, rowData) {
                         var rowId = null;
 
-                        tableApi.rows(function(idx,data) {
+                        tableApi.rows(function (idx, data) {
                             if (data == rowData) {
                                 rowId = idx;
                             }
@@ -67,7 +66,7 @@
                             throw new Error();
                         }
                         return rowId;
-                    }
+                    };
 
 
                     onCreateClick = function (e) {
@@ -103,7 +102,7 @@
                         var dialog = dm._openEditDialog(rowData);
                         dialog.parentTable = table;
 
-                        var rowId = getRowId(tableApi,rowData);
+                        var rowId = getRowId(tableApi, rowData);
 
                         $(dialog).find("select[name=" + fieldName + "]").attr("disabled", "true");
                         $(dialog).bind('data.manager.item.saved', function (event, data) {
@@ -124,7 +123,7 @@
                         var tableApi = table.resultTable('getApi');
 
 
-                        var rowId = getRowId(tableApi,rowData);
+                        var rowId = getRowId(tableApi, rowData);
 
                         var dm = widget.getConnectedDataManager();
 
@@ -141,7 +140,7 @@
 
                     }
 
-                }
+
 
                 var cloneItem = $.extend({}, item);
                 cloneItem.isProcessed = true;
@@ -175,49 +174,47 @@
             }
 
 
-
-            if (item.type === "select" && !item.isProcessed && ((item.dataStore && item.dataStore.editable && item.dataStore.popupItems) || item.dataManagerLink)) {
+            if (item.type === "select" && !item.isProcessed && (item.dataManagerLink)) {
                 var onCreateClick;
                 var onEditClick;
 
-                if (item.dataManagerLink) {
-                    var schemaName = item.dataManagerLink.schema;
-                    var schemaFieldName = item.dataManagerLink.schemaFieldName;
+                var schemaName = item.dataManagerLink.schema;
+                var schemaFieldName = item.dataManagerLink.schemaFieldName;
 
-                    onCreateClick = function (e) {
-                        e.preventDefault && e.preventDefault();
+                onCreateClick = function (e) {
+                    e.preventDefault && e.preventDefault();
 
-                        var dm = widget.getConnectedDataManager();
-                        dm.withSchema(schemaName, function (schema) {
-                            dm._openEditDialog(schema.create());
+                    var dm = widget.getConnectedDataManager();
+                    dm.withSchema(schemaName, function (schema) {
+                        dm._openEditDialog(schema.create());
 
+                    });
+                    $(dm.element).on('data.manager.item.saved', function (event, eventData) {
+                        var uniqueIdKey = eventData.uniqueIdKey;
+                        var text = item.itemPattern.replace('{id}', eventData.item[uniqueIdKey]).replace('{name}', eventData.item[item.itemName]);
+                        var $option = $('<option />').val(eventData.item[uniqueIdKey]).text(text);
+                        var $select = $('select[name=' + item.name + ']').append($option);
+                        $select.val(eventData.item[uniqueIdKey]);
+                    });
+                    return false;
+                };
+
+                onEditClick = function (e) {
+                    e.preventDefault && e.preventDefault();
+
+                    var val = $(this).siblings().find('select').val();
+                    var dm = widget.getConnectedDataManager();
+                    dm.withSchema(schemaName, function (schema) {
+                        var dataItem = _.find(schema.dataItems, function (d) {
+                            return d[schemaFieldName].toString() === val;
                         });
-                        $(dm.element).on('data.manager.item.saved', function (event, eventData) {
-                            var uniqueIdKey = eventData.uniqueIdKey;
-                            var text = item.itemPattern.replace('{id}', eventData.item[uniqueIdKey]).replace('{name}', eventData.item[item.itemName]);
-                            var $option = $('<option />').val(eventData.item[uniqueIdKey]).text(text);
-                            var $select = $('select[name=' + item.name + ']').append($option);
-                            $select.val(eventData.item[uniqueIdKey]);
-                        });
-                        return false;
-                    };
+                        var dialog = dm._openEditDialog(dataItem);
 
-                    onEditClick = function (e) {
-                        e.preventDefault && e.preventDefault();
+                    });
 
-                        var val = $(this).siblings().find('select').val();
-                        var dm = widget.getConnectedDataManager();
-                        dm.withSchema(schemaName, function (schema) {
-                            var dataItem = _.find(schema.dataItems, function (d) {
-                                return d[schemaFieldName].toString() === val;
-                            });
-                            var dialog = dm._openEditDialog(dataItem);
+                    return false;
+                };
 
-                        });
-
-                        return false;
-                    };
-                }
 
                 var cloneItem = $.extend({}, item);
                 cloneItem.isProcessed = true;
