@@ -1039,7 +1039,7 @@
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
 
             //if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
-                schema.menu.toolSet.activeControl.deactivate();
+            schema.menu.toolSet.activeControl && schema.menu.toolSet.activeControl.deactivate();
             //}
 
             var createNewFeatureWithDBFeature = function (feature, response) {
