@@ -36,7 +36,7 @@ class DigitizerAdminType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('target', 'target_element',
+        $builder->add('target', 'Mapbender\\CoreBundle\\Element\Type\\TargetElementType',
             array(
                 'element_class' => 'Mapbender\\CoreBundle\\Element\\Map',
                 'application'   => $options['application'],
@@ -45,6 +45,14 @@ class DigitizerAdminType extends AbstractType
            ->add('useAllScheme','checkbox',array('required' => false, 'label' => 'mb.digitizer.useAllScheme'))
             ->add('displayOnInactive','checkbox',array('required' => false, 'label' => 'mb.digitizer.displayOnInactive'))
             ->add('schemes', new YAMLConfigurationType(),
-                array('required' => false, 'attr' => array('class' => 'code-yaml')));
+                array('required' => false, 'attr' => array('class' => 'code-yaml')))
+            ->add('dataManager', 'Mapbender\\CoreBundle\\Element\Type\\TargetElementType',
+                array(
+                    'element_class' => 'Mapbender\\DataManagerBundle\\Element\\DataManagerElement',
+                    'application'   => $options['application'],
+                    'property_path' => '[dataManager]',
+                    'required'      => false));
+
+
     }
 }

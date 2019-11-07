@@ -274,11 +274,11 @@
             } else if (formItem.dataManagerLink) {
                 var schemaName = formItem.dataManagerLink.schema;
                 var fieldName = formItem.dataManagerLink.fieldName;
-                var dm = Mapbender.elementRegistry.listWidgets()['mapbenderMbDataManager'];
+                var dm = widget.getConnectedDataManager();
                 dm.withSchema(schemaName, function (schema) {
                     var tableApi = $(table).resultTable('getApi');
                     tableApi.clear();
-                    tableApi.rows.add(schema.dataItems.filter(function(dataItem) { return dataItem[fieldName] == feature.fid}));
+                    tableApi.rows.add(schema.dataItems.filter(function(dataItem) { return dataItem[fieldName] == feature.fid }));
                     tableApi.draw();
                 });
             }

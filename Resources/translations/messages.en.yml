@@ -1,6 +1,8 @@
 mb.digitizer:
   useAllScheme: 'Use aggregating Scheme'
   displayOnInactive: 'Display when not active'
+  dataManager: 'Data Manager'
+  connectedDataManager: 'connected Data Manager'
   refresh: 'refresh'
   schema:
     allgeometries: 'All Geometries'
