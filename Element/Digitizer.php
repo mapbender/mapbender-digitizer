@@ -173,13 +173,26 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * @inheritdoc
+     * Request handling adapter for old Mapbender < 3.0.8-beta1
+     * @param string $action ignored
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function httpAction($action)
     {
         /** @var $requestService Request */
-        $configuration   = $this->getConfiguration(false);
-        $requestService  = $this->container->get('request');
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        return $this->handleHttpRequest($request);
+    }
+
+    /**
+     * @param Request $requestService
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function handleHttpRequest(Request $requestService)
+    {
+        $action = $requestService->attributes->get('action');
+        $configuration = $this->getConfiguration(false);
         $request         = json_decode($requestService->getContent(), true);
         $schemas         = $configuration["schemes"];
         $debugMode       = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
