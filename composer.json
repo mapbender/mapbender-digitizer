@@ -18,6 +18,9 @@
         "mapbender/vis-ui.js": "*"
     },
     "minimum-stability": "dev",
+    "conflict": {
+        "mapbender/mapbender": "<3.0.8"
+    },
     "config": {
         "bin-dir": "bin"
     },

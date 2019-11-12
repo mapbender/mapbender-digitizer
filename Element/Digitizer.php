@@ -22,14 +22,32 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class Digitizer extends BaseElement
 {
-    /** @var string Digitizer element title */
-    protected static $title = 'Digitizer';
-
-    /** @var string Digitizer element description */
-    protected static $description = 'Georeferencing and Digitizing';
-
     /** @var int Default maximal search results number */
     protected $maxResults = 2500;
+
+    /**
+     * @inheritdoc
+     */
+    public static function getClassTitle()
+    {
+        return "Digitizer";
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function getClassDescription()
+    {
+        return "Georeferencing and Digitizing";
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getWidgetName()
+    {
+        return 'mapbender.mbDigitizer';
+    }
 
     /**
      * @inheritdoc
@@ -72,7 +90,8 @@ class Digitizer extends BaseElement
     public static function getDefaultConfiguration()
     {
         return array(
-            "target" => null
+            "target" => null,
+            'schemes' => null,
         );
     }
 
@@ -128,6 +147,27 @@ class Digitizer extends BaseElement
 
     public function getConfigurationAction(){
         return $this->getConfiguration(true);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function getType()
+    {
+        return 'Mapbender\DigitizerBundle\Element\Type\DigitizerAdminType';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function getFormTemplate()
+    {
+        return 'MapbenderDigitizerBundle:ElementAdmin:digitizeradmin.html.twig';
+    }
+
+    public function getFrontendTemplatePath($suffix = '.html.twig')
+    {
+        return 'MapbenderDigitizerBundle:Element:digitizer.html.twig';
     }
 
     /**
