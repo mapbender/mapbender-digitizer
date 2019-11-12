@@ -214,6 +214,9 @@
 
         var processedFormItems = Mapbender.Digitizer.Utilities.processFormItems(feature,formItems,dialog);
 
+        console.log(processedFormItems[0].children[1].children[0].children[1]);
+
+
         $popup.generateElements({children: processedFormItems});
 
 
@@ -243,35 +246,40 @@
 
             var formItem = $(table).data('item');
 
-            var dataStoreLinkName = formItem.dataStoreLink && formItem.dataStoreLink.name;
-            if (dataStoreLinkName) {
-                var requestData = {
-                    dataStoreLinkName: dataStoreLinkName,
-                    fid: feature.fid,
-                    fieldName: formItem.dataStoreLink.fieldName
-                };
+            // var dataStoreLinkName = formItem.dataStoreLink && formItem.dataStoreLink.name;
+            // if (dataStoreLinkName) {
+            //     var requestData = {
+            //         dataStoreLinkName: dataStoreLinkName,
+            //         fid: feature.fid,
+            //         fieldName: formItem.dataStoreLink.fieldName
+            //     };
+            //
+            //     widget.query('dataStore/get', requestData).done(function (data) {
+            //         var dataItems = [];
+            //
+            //         if (Array.isArray(data)) {
+            //             $.each(data, function (i,el) {
+            //                 el.attributes.item = formItem;
+            //                 dataItems.push(el.attributes)
+            //
+            //             });
+            //
+            //         } else {
+            //             console.error("invalid return",data);
+            //         }
+            //
+            //         var tableApi = $(table).resultTable('getApi');
+            //         tableApi.clear();
+            //         tableApi.rows.add(dataItems);
+            //         tableApi.draw();
+            //
+            //     });
+            // } else
+            if (formItem.dataManagerLink) {
 
-                widget.query('dataStore/get', requestData).done(function (data) {
-                    var dataItems = [];
-
-                    if (Array.isArray(data)) {
-                        $.each(data, function (i,el) {
-                            el.attributes.item = formItem;
-                            dataItems.push(el.attributes)
-
-                        });
-
-                    } else {
-                        console.error("invalid return",data);
-                    }
-
-                    var tableApi = $(table).resultTable('getApi');
-                    tableApi.clear();
-                    tableApi.rows.add(dataItems);
-                    tableApi.draw();
-
-                });
-            } else if (formItem.dataManagerLink) {
+                if (!feature.fid) {
+                    $(table).siblings(".button").attr("disabled","disabled");
+                }
                 var schemaName = formItem.dataManagerLink.schema;
                 var fieldName = formItem.dataManagerLink.fieldName;
                 var dm = widget.getConnectedDataManager();
