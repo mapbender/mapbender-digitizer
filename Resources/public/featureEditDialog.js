@@ -214,9 +214,6 @@
 
         var processedFormItems = Mapbender.Digitizer.Utilities.processFormItems(feature,formItems,dialog);
 
-        console.log(processedFormItems[0].children[1].children[0].children[1]);
-
-
         $popup.generateElements({children: processedFormItems});
 
 
