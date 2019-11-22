@@ -242,36 +242,7 @@
         $.each(tables, function (i,table) {
 
             var formItem = $(table).data('item');
-
-            // var dataStoreLinkName = formItem.dataStoreLink && formItem.dataStoreLink.name;
-            // if (dataStoreLinkName) {
-            //     var requestData = {
-            //         dataStoreLinkName: dataStoreLinkName,
-            //         fid: feature.fid,
-            //         fieldName: formItem.dataStoreLink.fieldName
-            //     };
-            //
-            //     widget.query('dataStore/get', requestData).done(function (data) {
-            //         var dataItems = [];
-            //
-            //         if (Array.isArray(data)) {
-            //             $.each(data, function (i,el) {
-            //                 el.attributes.item = formItem;
-            //                 dataItems.push(el.attributes)
-            //
-            //             });
-            //
-            //         } else {
-            //             console.error("invalid return",data);
-            //         }
-            //
-            //         var tableApi = $(table).resultTable('getApi');
-            //         tableApi.clear();
-            //         tableApi.rows.add(dataItems);
-            //         tableApi.draw();
-            //
-            //     });
-            // } else
+            
             if (formItem.dataManagerLink) {
 
                 if (!feature.fid) {
