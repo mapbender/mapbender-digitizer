@@ -352,6 +352,7 @@ class Digitizer extends BaseElement
      *
      * @param array $featureType
      * @return array
+     * @todo: remove reference abuse, callers should use the return value
      */
     protected function cleanFromInternConfiguration(array &$featureType)
     {
