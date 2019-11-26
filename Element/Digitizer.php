@@ -205,13 +205,25 @@ class Digitizer extends BaseElement
                 return new JsonResponse($this->saveAction($request));
             case 'delete':
                 return new JsonResponse($this->deleteAction($requestService));
-            case 'file-upload':
+            case 'uploadFile':
+            case 'file/upload':
+            case 'file-upload': // super legacy mode
+                // @todo: all '*Action' methods should return responses
                 return new JsonResponse($this->uploadFileAction($requestService));
             case 'datastore/get':
+            case 'getDatastore':
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
                 return new JsonResponse($this->getDatastoreAction($request));
             case 'datastore/save':
+            case 'saveDatastore':
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
                 return new JsonResponse($this->saveDatastoreAction($request));
+            case 'removeDatastore':
             case 'datastore/remove':
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
                 return new JsonResponse($this->removeDatastoreAction($request));
             default:
                 $results = array(
