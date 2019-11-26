@@ -515,23 +515,25 @@ class Digitizer extends BaseElement
                 'schemes' => array(),
             );
             foreach (array_keys($entityConfig['schemes'] ?: array()) as $schemaName) {
-                $this->getSchemaConfig($schemaName);
+                $this->getSchemaConfig($schemaName, false);
             }
         }
         return $this->schemaConfigs;
     }
 
     /**
-     * Get a single (transformed) schema configuration. Transformed means
+     * Get a single (default: transformed) schema configuration. Transformed means
      * * formItems prepared
      * * featureType string reference resolved to full featureType configuration + featureTypeName entry
-     * NOTE: the getSchemaByName method (introduced on newer branches) only returns the RAW config
+     *
+     * Pass $raw = true to skip prepareItems / featureType resolution
      *
      * @param string $schemaName
+     * @param bool $raw
      * @return mixed[]
      * @throws \RuntimeException for unknown $schemaName
      */
-    protected function getSchemaConfig($schemaName)
+    protected function getSchemaConfig($schemaName, $raw = false)
     {
         if (!array_key_exists($schemaName, $this->schemaConfigs)) {
             $entityConfig = $this->entity->getConfiguration() + array(
@@ -541,6 +543,10 @@ class Digitizer extends BaseElement
                 throw new \RuntimeException("No such schema " . print_r($schemaName));
             }
             $schemaConfig = $entityConfig['schemes'][$schemaName];
+            if ($raw) {
+                // no point "caching" this
+                return $schemaConfig;
+            }
             if (is_string($schemaConfig['featureType'])) {
                 $schemaConfig['featureTypeName'] = $schemaConfig['featureType'];
                 $schemaConfig['featureType'] = $this->getFeatureTypeConfig($schemaConfig['featureType']);
@@ -551,6 +557,31 @@ class Digitizer extends BaseElement
             $this->schemaConfigs[$schemaName] = $schemaConfig;
             $this->schemaConfigsComplete = !array_diff(array_keys($entityConfig['schemes']), array_keys($this->schemaConfigs));
         }
+        // NOTE: this may return a prepared config with $raw = true, if it was already prepared fully. This should be
+        //       transparent to callers.
         return $this->schemaConfigs[$schemaName];
+    }
+
+    /**
+     * @param string $schemaName
+     * @return mixed[]
+     * @throws \RuntimeException for missing featureType configuration
+     * @throws \LogicException for invalid featureType configuration
+     */
+    protected function getFeatureTypeConfigForSchema($schemaName)
+    {
+        $schemaConfig = $this->getSchemaConfig($schemaName, true);
+        if (empty($schemaConfig['featureType'])) {
+            throw new \RuntimeException("No featureType configuration in schema " . print_r($schemaName, true));
+        }
+        $spec = $schemaConfig['featureType'];
+        if (is_string($spec)) {
+            return $this->getFeatureTypeConfig($spec);
+        } else {
+            if (!is_array($spec)) {
+                throw new \LogicException("Invalid featureType configuration in schema " . print_r($schemaName, true) . ". Expected string or array, got " . \gettype($spec));
+            }
+            return $spec;
+        }
     }
 }
