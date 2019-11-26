@@ -360,9 +360,9 @@ class Digitizer extends BaseElement
             throw new \Exception("FeatureType settings not correct");
         }
 
-        $fieldName     = $request->get('field');
+        $fieldName     = $requestService->get('field');
         $urlParameters = array('schema' => $schemaName,
-                               'fid'    => $request->get('fid'),
+                               'fid'    => $requestService->get('fid'),
                                'field'  => $fieldName);
         $serverUrl     = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
         $uploadDir     = $featureType->getFilePath($fieldName);
