@@ -6,6 +6,7 @@ use Doctrine\DBAL\DBALException;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
+use Mapbender\DataSourceBundle\Component\FeatureTypeService;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
@@ -370,8 +371,30 @@ class Digitizer extends BaseElement
      */
     protected function getDataStoreById($id)
     {
-        /** @var DataStoreService $dataStoreService */
-        $dataStoreService = $this->container->get('data.source');
-        return $dataStoreService->get($id);
+        return $this->getDataStoreService()->get($id);
+    }
+
+    /**
+     * Override hook for child classes
+     *
+     * @return DataStoreService
+     */
+    protected function getDataStoreService()
+    {
+        /** @var DataStoreService $service */
+        $service = $this->container->get('data.source');
+        return $service;
+    }
+
+    /**
+     * Override hook for child classes
+     *
+     * @return FeatureTypeService
+     */
+    protected function getFeatureTypeService()
+    {
+        /** @var FeatureTypeService $service */
+        $service = $this->container->get('features');
+        return $service;
     }
 }
