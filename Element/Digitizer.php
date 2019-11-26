@@ -20,6 +20,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class Digitizer extends BaseElement
 {
+    /** @var mixed[]|null lazy-initialized */
+    protected $featureTypeConfigs;
 
     /**
      * @inheritdoc
@@ -89,6 +91,18 @@ class Digitizer extends BaseElement
     }
 
     /**
+     * @param string $name
+     * @return mixed[]
+     */
+    protected function getFeatureTypeConfig($name)
+    {
+        if (null === $this->featureTypeConfigs) {
+            $this->featureTypeConfigs = $this->getFeatureTypeDeclarations() ?: array();
+        }
+        return $this->featureTypeConfigs[$name];
+    }
+
+    /**
      * Prepare form items for each scheme definition
      * Optional: get featureType by name from global context.
      *
@@ -99,17 +113,12 @@ class Digitizer extends BaseElement
         $configuration            = parent::getConfiguration();
         $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
         $configuration['fileUri'] = $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
-        $featureTypes = null;
 
         if ($configuration["schemes"] && is_array($configuration["schemes"])) {
             foreach ($configuration["schemes"] as $key => &$scheme) {
                 if (is_string($scheme['featureType'])) {
-                    if ($featureTypes === null) {
-                        $featureTypes = $this->getFeatureTypeDeclarations();
-                    }
-                    $featureTypeName           = $scheme['featureType'];
-                    $scheme['featureType']     = $featureTypes[ $featureTypeName ];
-                    $scheme['featureTypeName'] = $featureTypeName;
+                    $scheme['featureTypeName'] = $scheme['featureType'];
+                    $scheme['featureType'] = $this->getFeatureTypeConfig($scheme['featureType']);
                 }
 
                 if ($public) {
