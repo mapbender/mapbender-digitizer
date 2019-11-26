@@ -246,17 +246,8 @@ class Digitizer extends BaseElement
         $request = json_decode($requestService->getContent(), true);
         $defaultCriteria = array('returnType' => 'FeatureCollection',
                                  'maxResults' => 2500);
-
-        $configuration = $this->getConfiguration(false);
-        $schemas         = $configuration["schemes"];
-        $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
-        $schema     = $schemas[$schemaName];
-
-        if (is_array($schema['featureType'])) {
-            $featureType = new FeatureType($this->container, $schema['featureType']);
-        } else {
-            throw new \Exception("FeatureType settings not correct");
-        }
+        $schemaName = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
+        $featureType = $this->getFeatureTypeForSchema($schemaName);
         return $featureType->search(array_merge($defaultCriteria, $request));
     }
 
@@ -270,16 +261,8 @@ class Digitizer extends BaseElement
     public function deleteAction(Request $requestService)
     {
         $request = json_decode($requestService->getContent(), true);
-        $configuration = $this->getConfiguration(false);
-        $schemas         = $configuration["schemes"];
-        $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
-        $schema     = $schemas[$schemaName];
-
-        if (is_array($schema['featureType'])) {
-            $featureType = new FeatureType($this->container, $schema['featureType']);
-        } else {
-            throw new \Exception("FeatureType settings not correct");
-        }
+        $schemaName = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
+        $featureType = $this->getFeatureTypeForSchema($schemaName);
         return $featureType->remove($request['feature']);
     }
 
@@ -293,12 +276,8 @@ class Digitizer extends BaseElement
     {
         $schemaName = $request["schema"];
         $configuration = $this->getConfiguration(false);
-        $schema = $configuration['schemes'][$schemaName];
-        if (is_array($schema['featureType'])) {
-            $featureType = new FeatureType($this->container, $schema['featureType']);
-        } else {
-            throw new \Exception("FeatureType settings not correct");
-        }
+        $featureType = $this->getFeatureTypeForSchema($schemaName);
+        $schema = $this->getSchemaConfig($schemaName, true);
         $results       = array();
         $debugMode     = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
 
@@ -348,17 +327,9 @@ class Digitizer extends BaseElement
 
     public function uploadFileAction(Request $requestService)
     {
-        $configuration = $this->getConfiguration(false);
         $request         = json_decode($requestService->getContent(), true);
-        $schemas         = $configuration["schemes"];
         $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
-        $schema     = $schemas[$schemaName];
-
-        if (is_array($schema['featureType'])) {
-            $featureType = new FeatureType($this->container, $schema['featureType']);
-        } else {
-            throw new \Exception("FeatureType settings not correct");
-        }
+        $featureType = $this->getFeatureTypeForSchema($schemaName);
 
         $fieldName     = $requestService->get('field');
         $urlParameters = array('schema' => $schemaName,
@@ -564,9 +535,29 @@ class Digitizer extends BaseElement
 
     /**
      * @param string $schemaName
+     * @return FeatureType
+     * @throws \RuntimeException for missing featureType configuration
+     * @throws \LogicException for invalid featureType configuration
+     * @throws \RuntimeException for unknown $schemaName
+     */
+    protected function getFeatureTypeForSchema($schemaName)
+    {
+        $config = $this->getFeatureTypeConfigForSchema($schemaName);
+        $featureTypeService = $this->getFeatureTypeService();
+        if (\method_exists($featureTypeService, 'featureTypeFactory')) {
+            // data-source >= 0.1.15
+            return $featureTypeService->featureTypeFactory($config);
+        } else {
+            return new FeatureType($this->container, $config);
+        }
+    }
+
+    /**
+     * @param string $schemaName
      * @return mixed[]
      * @throws \RuntimeException for missing featureType configuration
      * @throws \LogicException for invalid featureType configuration
+     * @throws \RuntimeException for unknown $schemaName
      */
     protected function getFeatureTypeConfigForSchema($schemaName)
     {
