@@ -22,6 +22,10 @@ class Digitizer extends BaseElement
 {
     /** @var mixed[]|null lazy-initialized */
     protected $featureTypeConfigs;
+    /** @var mixed[] lazy-initialized entries */
+    protected $schemaConfigs = array();
+    /** @var bool */
+    protected $schemaConfigsComplete = false;
 
     /**
      * @inheritdoc
@@ -114,22 +118,12 @@ class Digitizer extends BaseElement
             'debug' => false,
             'fileUri' => $this->getFileUri(),
         );
-
-        if ($configuration["schemes"] && is_array($configuration["schemes"])) {
-            foreach ($configuration["schemes"] as $key => &$scheme) {
-                if (is_string($scheme['featureType'])) {
-                    $scheme['featureTypeName'] = $scheme['featureType'];
-                    $scheme['featureType'] = $this->getFeatureTypeConfig($scheme['featureType']);
-                }
-
-                if ($public) {
-                    $this->cleanFromInternConfiguration($scheme['featureType']);
-                }
-
-                if (isset($scheme['formItems'])) {
-                    $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
-                }
+        $configuration['schemes'] = array();
+        foreach ($this->getSchemaConfigs() as $schemaName => $schemaConfig) {
+            if ($public && !empty($schemaConfig['featureType'])) {
+                $schemaConfig['featureType'] = $this->cleanFromInternConfiguration($schemaConfig['featureType']);
             }
+            $configuration['schemes'][$schemaName] = $schemaConfig;
         }
         return $configuration;
     }
@@ -414,5 +408,56 @@ class Digitizer extends BaseElement
         /** @var FeatureTypeService $service */
         $service = $this->container->get('features');
         return $service;
+    }
+
+    /**
+     * Get a mapping of ALL schema configurations
+     *
+     * @return mixed[] with schema names as string keys
+     */
+    protected function getSchemaConfigs()
+    {
+        if (!$this->schemaConfigsComplete) {
+            $entityConfig = $this->entity->getConfiguration() + array(
+                'schemes' => array(),
+            );
+            foreach (array_keys($entityConfig['schemes'] ?: array()) as $schemaName) {
+                $this->getSchemaConfig($schemaName);
+            }
+        }
+        return $this->schemaConfigs;
+    }
+
+    /**
+     * Get a single (transformed) schema configuration. Transformed means
+     * * formItems prepared
+     * * featureType string reference resolved to full featureType configuration + featureTypeName entry
+     * NOTE: the getSchemaByName method (introduced on newer branches) only returns the RAW config
+     *
+     * @param string $schemaName
+     * @return mixed[]
+     * @throws \RuntimeException for unknown $schemaName
+     */
+    protected function getSchemaConfig($schemaName)
+    {
+        if (!array_key_exists($schemaName, $this->schemaConfigs)) {
+            $entityConfig = $this->entity->getConfiguration() + array(
+                'schemes' => array(),
+            );
+            if (empty($entityConfig['schemes'][$schemaName])) {
+                throw new \RuntimeException("No such schema " . print_r($schemaName));
+            }
+            $schemaConfig = $entityConfig['schemes'][$schemaName];
+            if (is_string($schemaConfig['featureType'])) {
+                $schemaConfig['featureTypeName'] = $schemaConfig['featureType'];
+                $schemaConfig['featureType'] = $this->getFeatureTypeConfig($schemaConfig['featureType']);
+            }
+            if (isset($schemaConfig['formItems'])) {
+                $schemaConfig['formItems'] = $this->prepareItems($schemaConfig['formItems']);
+            }
+            $this->schemaConfigs[$schemaName] = $schemaConfig;
+            $this->schemaConfigsComplete = !array_diff(array_keys($entityConfig['schemes']), array_keys($this->schemaConfigs));
+        }
+        return $this->schemaConfigs[$schemaName];
     }
 }
