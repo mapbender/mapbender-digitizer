@@ -226,6 +226,7 @@ class Digitizer extends BaseElement
                 // @todo: all '*Action' methods should deal with the framework's Request object directly
                 return new JsonResponse($this->removeDatastoreAction($request));
             default:
+                // @todo: 404 please!
                 $results = array(
                     array('errors' => array(
                         array('message' => $action . " not defined!")
@@ -475,7 +476,9 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * Get a mapping of ALL schema configurations
+     * Get a mapping of ALL schema configurations, transformed. Transformed means
+     * * formItems prepared
+     * * featureType string reference resolved to full featureType configuration + featureTypeName entry
      *
      * @return mixed[] with schema names as string keys
      */
