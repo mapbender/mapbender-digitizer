@@ -10,7 +10,6 @@ use Mapbender\DataSourceBundle\Component\FeatureTypeService;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -197,145 +196,23 @@ class Digitizer extends BaseElement
     public function handleHttpRequest(Request $requestService)
     {
         $action = $requestService->attributes->get('action');
-        $configuration = $this->getConfiguration(false);
         $request         = json_decode($requestService->getContent(), true);
-        $schemas         = $configuration["schemes"];
-        $debugMode       = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
-        $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
-        $defaultCriteria = array('returnType' => 'FeatureCollection',
-                                 'maxResults' => 2500);
-        if (empty($schemaName)) {
-            throw new Exception('For initialization there is no name of the declared scheme');
-        }
-
-        $schema     = $schemas[$schemaName];
-
-        if (is_array($schema['featureType'])) {
-            $featureType = new FeatureType($this->container, $schema['featureType']);
-        } else {
-            throw new Exception("FeatureType settings not correct");
-        }
-
-        $results = array();
 
         switch ($action) {
             case 'select':
-
-                $results         = $featureType->search(array_merge($defaultCriteria, $request));
-                break;
-
+                return new JsonResponse($this->selectAction($requestService));
             case 'save':
-                // save once
-                if (isset($request['feature'])) {
-                    $request['features'] = array($request['feature']);
-                }
-
-                $connection = $featureType->getDriver()->getConnection();
-
-                try {
-                    // save collection
-                    if (isset($request['features']) && is_array($request['features'])) {
-                        foreach ($request['features'] as $feature) {
-                            /**
-                             * @var $feature Feature
-                             */
-                            $featureData = $this->prepareQueriedFeatureData($feature, $schema['formItems']);
-
-                            foreach ($featureType->getFileInfo() as $fileConfig) {
-                                if (!isset($fileConfig['field']) || !isset($featureData["properties"][$fileConfig['field']])) {
-                                    continue;
-                                }
-                                $url                                             = $featureType->getFileUrl($fileConfig['field']);
-                                $requestUrl                                      = $featureData["properties"][$fileConfig['field']];
-                                $newUrl                                          = str_replace($url . "/", "", $requestUrl);
-                                $featureData["properties"][$fileConfig['field']] = $newUrl;
-                            }
-
-                            $feature = $featureType->save($featureData);
-                            $results = array_merge($featureType->search(array(
-                                'srid'  => $feature->getSrid(),
-                                'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
-                        }
-                    }
-                    $results = $featureType->toFeatureCollection($results);
-                } catch (DBALException $e) {
-                    $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
-                        "For more information have a look at the webserver log file. \n Error code: " .$e->getCode();
-                    $results = array('errors' => array(
-                        array('message' => $message, 'code' => $e->getCode())
-                    ));
-                }
-
-                break;
-
+                return new JsonResponse($this->saveAction($request));
             case 'delete':
-                $results = $featureType->remove($request['feature']);
-                break;
-
+                return new JsonResponse($this->deleteAction($requestService));
             case 'file-upload':
-                $fieldName     = $requestService->get('field');
-                $urlParameters = array('schema' => $schemaName,
-                                       'fid'    => $requestService->get('fid'),
-                                       'field'  => $fieldName);
-                $serverUrl     = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
-                $uploadDir     = $featureType->getFilePath($fieldName);
-                $uploadUrl = $featureType->getFileUrl($fieldName) . "/";
-                $urlParameters['uploadUrl'] = $uploadUrl;
-                $uploadHandler = new Uploader(array(
-                    'upload_dir'                   => $uploadDir . "/",
-                    'script_url'                   => $serverUrl,
-                    'upload_url'                   => $uploadUrl,
-                    'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
-                    'print_response'               => false,
-                    'access_control_allow_methods' => array(
-                        'OPTIONS',
-                        'HEAD',
-                        'GET',
-                        'POST',
-                        'PUT',
-                        'PATCH',
-//                        'DELETE'
-                    ),
-                ));
-                $results       = array_merge($uploadHandler->get_response(), $urlParameters);
-
-                break;
-
+                return new JsonResponse($this->uploadFileAction($requestService));
             case 'datastore/get':
-                $id           = $request['id'];
-                $dataItemId   = $request['dataItemId'];
-                $dataStore = $this->getDataStoreById($id);
-                if (!$dataStore) {
-                    throw new NotFoundHttpException("No such datastore");
-                }
-                $entity = $dataStore->get($dataItemId);
-                if (!$entity) {
-                    throw new NotFoundHttpException("No such entity");
-                }
-                $results = $entity->toArray();
-                break;
-
+                return new JsonResponse($this->getDatastoreAction($request));
             case 'datastore/save':
-
-                $id          = $request['id'];
-                $dataItem    = $request['dataItem'];
-                $dataStore = $this->getDataStoreById($id);
-                $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
-                if (empty($request['dataItem'][ $uniqueIdKey ])) {
-                    unset($request['dataItem'][ $uniqueIdKey ]);
-                }
-
-                $dataIems = $dataStore->save($dataItem);
-                $results = ($dataIems->toArray());
-
-                break;
+                return new JsonResponse($this->saveDatastoreAction($request));
             case 'datastore/remove':
-                $id          = $request['id'];
-                $dataStore = $this->getDataStoreById($id);
-                $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
-                $dataItemId  = $request['dataItem'][ $uniqueIdKey ];
-                $dataStore->remove($dataItemId);
-                break;
+                return new JsonResponse($this->removeDatastoreAction($request));
             default:
                 $results = array(
                     array('errors' => array(
@@ -343,8 +220,211 @@ class Digitizer extends BaseElement
                     ))
                 );
         }
-
         return new JsonResponse($results);
+    }
+
+    /**
+     * Select/search features and return feature collection
+     *
+     * @param Request $requestService
+     * @return array
+     */
+    public function selectAction(Request $requestService)
+    {
+        $request = json_decode($requestService->getContent(), true);
+        $defaultCriteria = array('returnType' => 'FeatureCollection',
+                                 'maxResults' => 2500);
+
+        $configuration = $this->getConfiguration(false);
+        $schemas         = $configuration["schemes"];
+        $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
+        $schema     = $schemas[$schemaName];
+
+        if (is_array($schema['featureType'])) {
+            $featureType = new FeatureType($this->container, $schema['featureType']);
+        } else {
+            throw new \Exception("FeatureType settings not correct");
+        }
+        return $featureType->search(array_merge($defaultCriteria, $request));
+    }
+
+    /**
+     * Remove feature
+     *
+     * @param Request $requestService
+     * @return int
+     * @throws \Exception
+     */
+    public function deleteAction(Request $requestService)
+    {
+        $request = json_decode($requestService->getContent(), true);
+        $configuration = $this->getConfiguration(false);
+        $schemas         = $configuration["schemes"];
+        $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
+        $schema     = $schemas[$schemaName];
+
+        if (is_array($schema['featureType'])) {
+            $featureType = new FeatureType($this->container, $schema['featureType']);
+        } else {
+            throw new \Exception("FeatureType settings not correct");
+        }
+        return $featureType->remove($request['feature']);
+    }
+
+    /**
+     * Save feature by request data
+     *
+     * @param array $request
+     * @return array
+     */
+    public function saveAction($request)
+    {
+        $schemaName = $request["schema"];
+        $configuration = $this->getConfiguration(false);
+        $schema = $configuration['schemes'][$schemaName];
+        if (is_array($schema['featureType'])) {
+            $featureType = new FeatureType($this->container, $schema['featureType']);
+        } else {
+            throw new \Exception("FeatureType settings not correct");
+        }
+        $results       = array();
+        $debugMode     = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
+
+        // save once
+        if (isset($request['feature'])) {
+            $request['features'] = array($request['feature']);
+        }
+
+        $connection = $featureType->getDriver()->getConnection();
+
+        try {
+            // save collection
+            if (isset($request['features']) && is_array($request['features'])) {
+                foreach ($request['features'] as $feature) {
+                    /**
+                     * @var $feature Feature
+                     */
+                    $featureData = $this->prepareQueriedFeatureData($feature, $schema['formItems']);
+
+                    foreach ($featureType->getFileInfo() as $fileConfig) {
+                        if (!isset($fileConfig['field']) || !isset($featureData["properties"][$fileConfig['field']])) {
+                            continue;
+                        }
+                        $url                                             = $featureType->getFileUrl($fileConfig['field']);
+                        $requestUrl                                      = $featureData["properties"][$fileConfig['field']];
+                        $newUrl                                          = str_replace($url . "/", "", $requestUrl);
+                        $featureData["properties"][$fileConfig['field']] = $newUrl;
+                    }
+
+                    $feature = $featureType->save($featureData);
+                    $results = array_merge($featureType->search(array(
+                        'srid'  => $feature->getSrid(),
+                        'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
+                }
+            }
+            $results = $featureType->toFeatureCollection($results);
+        } catch (DBALException $e) {
+            $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
+                "For more information have a look at the webserver log file. \n Error code: " .$e->getCode();
+            $results = array('errors' => array(
+                array('message' => $message, 'code' => $e->getCode())
+            ));
+        }
+
+        return $results;
+    }
+
+    public function uploadFileAction(Request $requestService)
+    {
+        $configuration = $this->getConfiguration(false);
+        $request         = json_decode($requestService->getContent(), true);
+        $schemas         = $configuration["schemes"];
+        $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
+        $schema     = $schemas[$schemaName];
+
+        if (is_array($schema['featureType'])) {
+            $featureType = new FeatureType($this->container, $schema['featureType']);
+        } else {
+            throw new \Exception("FeatureType settings not correct");
+        }
+
+        $fieldName     = $request->get('field');
+        $urlParameters = array('schema' => $schemaName,
+                               'fid'    => $request->get('fid'),
+                               'field'  => $fieldName);
+        $serverUrl     = preg_replace('/\\?.+$/', "", $_SERVER["REQUEST_URI"]) . "?" . http_build_query($urlParameters);
+        $uploadDir     = $featureType->getFilePath($fieldName);
+        $uploadUrl = $featureType->getFileUrl($fieldName) . "/";
+        $urlParameters['uploadUrl'] = $uploadUrl;
+        $uploadHandler = new Uploader(array(
+            'upload_dir'                   => $uploadDir . "/",
+            'script_url'                   => $serverUrl,
+            'upload_url'                   => $uploadUrl,
+            'accept_file_types'            => '/\.(gif|jpe?g|png)$/i',
+            'print_response'               => false,
+            'access_control_allow_methods' => array(
+                'OPTIONS',
+                'HEAD',
+                'GET',
+                'POST',
+                'PUT',
+                'PATCH',
+//                        'DELETE'
+            ),
+        ));
+        return array_merge($uploadHandler->get_response(), $urlParameters);
+    }
+
+    /**
+     * @param array $request
+     * @return array
+     */
+    public function saveDatastoreAction($request)
+    {
+        $id          = $request['id'];
+        $dataItem    = $request['dataItem'];
+        $dataStore = $this->getDataStoreById($id);
+        $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
+        if (empty($request['dataItem'][ $uniqueIdKey ])) {
+            unset($request['dataItem'][ $uniqueIdKey ]);
+        }
+
+        $dataIems = $dataStore->save($dataItem);
+        return $dataIems->toArray();
+    }
+
+    /**
+     * @param array $request
+     * @return array
+     * @throws NotFoundHttpException
+     */
+    public function getDatastoreAction($request)
+    {
+        $id           = $request['id'];
+        $dataItemId   = $request['dataItemId'];
+        $dataStore = $this->getDataStoreById($id);
+        if (!$dataStore) {
+            throw new NotFoundHttpException("No such datastore");
+        }
+        $entity = $dataStore->get($dataItemId);
+        if (!$entity) {
+            throw new NotFoundHttpException("No such entity");
+        }
+        return $entity->toArray();
+    }
+
+    /**
+     * @param array $request
+     * @return array
+     */
+    public function removeDatastoreAction($request)
+    {
+        $id          = $request['id'];
+        $dataStore = $this->getDataStoreById($id);
+        $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
+        $dataItemId  = $request['dataItem'][ $uniqueIdKey ];
+        $dataStore->remove($dataItemId);
+        return array(); // really?
     }
 
     /**
