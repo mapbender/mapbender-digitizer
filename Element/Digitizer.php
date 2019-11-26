@@ -213,25 +213,74 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * @param Request $requestService
+     * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function handleHttpRequest(Request $requestService)
+    public function handleHttpRequest(Request $request)
     {
-        $action = $requestService->attributes->get('action');
-        $configuration = $this->getConfiguration(false);
-        $request         = json_decode($requestService->getContent(), true);
-        $schemas         = $configuration["schemes"];
-        $debugMode       = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
-        $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
-        $defaultCriteria = array('returnType' => 'FeatureCollection',
-                                 'maxResults' => 2500);
-        if (empty($schemaName)) {
-            throw new Exception('For initialization there is no name of the declared scheme');
+        $action = $request->attributes->get('action');
+        switch ($action) {
+            case 'getConfiguration':
+            case 'configuration/get':
+                // @todo: all '*Action' methods should return responses
+                return new JsonResponse($this->getConfigurationAction());
+            case 'select':
+                return new JsonResponse($this->selectAction($this->getRequestData()));
+            case 'save':
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
+                return new JsonResponse($this->saveAction($this->getRequestData()));
+            case 'delete':
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
+                return new JsonResponse($this->deleteAction($this->getRequestData()));
+            case 'selectForm':
+            case 'form/select':
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
+                return new JsonResponse($this->selectFormAction($this->getRequestData()));
+            case 'uploadFile':
+            case 'file/upload':
+            case 'file-upload': // super legacy mode
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
+                return new JsonResponse($this->uploadFileAction($this->getRequestData()));
+            case 'datastore/save':
+            case 'saveDatastore':
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
+                return new JsonResponse($this->saveDatastoreAction($this->getRequestData()));
+            case 'datastore/get':
+            case 'getDatastore':
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
+                return new JsonResponse($this->getDatastoreAction($this->getRequestData()));
+            case 'removeDatastore':
+            case 'datastore/remove':
+            // @todo: all '*Action' methods should return responses
+            // @todo: all '*Action' methods should deal with the framework's Request object directly
+                return new JsonResponse($this->removeDatastoreAction($this->getRequestData()));
+            case 'listStyle':
+            case 'style/list':
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
+                return new JsonResponse($this->listStyleAction($this->getRequestData()));
+            case 'saveStyle':
+            case 'style/save':
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
+                return new JsonResponse($this->saveStyleAction($this->getRequestData()));
+            case 'getFeatureInfo':
+            case 'featureInfo/get':
+            case 'info/getFeature':     // srsly (emulating BaseElement magic)
+            case 'info/feature/get':    // ...
+                // @todo: all '*Action' methods should return responses
+                // @todo: all '*Action' methods should deal with the framework's Request object directly
+                return new JsonResponse($this->getFeatureInfoAction($this->getRequestData()));
+            default:
+                throw new NotFoundHttpException("No such action " . print_r($action, true));
         }
-
-        $schema     = $schemas[$schemaName];
     }
 
     /**
