@@ -110,9 +110,10 @@ class Digitizer extends BaseElement
      */
     public function getConfiguration($public = true)
     {
-        $configuration            = parent::getConfiguration();
-        $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
-        $configuration['fileUri'] = $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
+        $configuration = $this->entity->getConfiguration() + array(
+            'debug' => false,
+            'fileUri' => $this->getFileUri(),
+        );
 
         if ($configuration["schemes"] && is_array($configuration["schemes"])) {
             foreach ($configuration["schemes"] as $key => &$scheme) {
@@ -372,6 +373,14 @@ class Digitizer extends BaseElement
             unset($featureType[ $keyName ]);
         }
         return $featureType;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getFileUri()
+    {
+        return $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
     }
 
     /**
