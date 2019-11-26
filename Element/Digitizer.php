@@ -7,6 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
+use Mapbender\DataSourceBundle\Component\FeatureTypeService;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
@@ -22,8 +23,15 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class Digitizer extends BaseElement
 {
+
     /** @var int Default maximal search results number */
     protected $maxResults = 2500;
+    /** @var mixed[]|null lazy-initialized */
+    protected $featureTypeConfigs;
+    /** @var mixed[] lazy-initialized entries */
+    protected $schemaConfigs = array();
+    /** @var bool */
+    protected $schemaConfigsComplete = false;
 
     /**
      * @inheritdoc
@@ -104,6 +112,18 @@ class Digitizer extends BaseElement
     }
 
     /**
+     * @param string $name
+     * @return mixed[]
+     */
+    protected function getFeatureTypeConfig($name)
+    {
+        if (null === $this->featureTypeConfigs) {
+            $this->featureTypeConfigs = $this->getFeatureTypeDeclarations() ?: array();
+        }
+        return $this->featureTypeConfigs[$name];
+    }
+
+    /**
      * Prepare form items for each scheme definition
      * Optional: get featureType by name from global context.
      *
@@ -113,34 +133,16 @@ class Digitizer extends BaseElement
      */
     public function getConfiguration($public = true)
     {
-        $configuration            = parent::getConfiguration();
-        $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
-        $configuration['fileUri'] = $this->container->getParameter('mapbender.uploads_dir') . "/" . FeatureType::UPLOAD_DIR_NAME;
-        $featureTypes = null;
-
-        if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
-            foreach ($configuration['schemes'] as $key => &$scheme) {
-                if (is_string($scheme['featureType'])) {
-                    if ($featureTypes === null) {
-                        $featureTypes = $this->getFeatureTypeDeclarations();
-                    }
-                    $featureTypeName           = $scheme['featureType'];
-                    $scheme['featureType']     = $featureTypes[ $featureTypeName ];
-                    $scheme['featureTypeName'] = $featureTypeName;
-                }
-
-                if ($public) {
-                    $this->cleanFromInternConfiguration($scheme['featureType']);
-                }
-
-                if (isset($scheme['formItems'])) {
-                    $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
-                }
-
-                if (isset($scheme['search']) && isset($scheme['search']["form"])) {
-                    $scheme['search']["form"] = $this->prepareItems($scheme['search']["form"]);
-                }
+        $configuration = $this->entity->getConfiguration() + array(
+            'debug' => false,
+            'fileUri' => $this->getFileUri(),
+        );
+        $configuration['schemes'] = array();
+        foreach ($this->getSchemaConfigs() as $schemaName => $schemaConfig) {
+            if ($public && !empty($schemaConfig['featureType'])) {
+                $schemaConfig['featureType'] = $this->cleanFromInternConfiguration($schemaConfig['featureType']);
             }
+            $configuration['schemes'][$schemaName] = $schemaConfig;
         }
         return $configuration;
     }
@@ -196,6 +198,40 @@ class Digitizer extends BaseElement
             }
         }
         return $feature;
+    }
+
+    /**
+     * Request handling adapter for old Mapbender < 3.0.8-beta1
+     * @param string $action ignored
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function httpAction($action)
+    {
+        /** @var $requestService Request */
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        return $this->handleHttpRequest($request);
+    }
+
+    /**
+     * @param Request $requestService
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function handleHttpRequest(Request $requestService)
+    {
+        $action = $requestService->attributes->get('action');
+        $configuration = $this->getConfiguration(false);
+        $request         = json_decode($requestService->getContent(), true);
+        $schemas         = $configuration["schemes"];
+        $debugMode       = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
+        $schemaName      = isset($request["schema"]) ? $request["schema"] : $requestService->get("schema");
+        $defaultCriteria = array('returnType' => 'FeatureCollection',
+                                 'maxResults' => 2500);
+        if (empty($schemaName)) {
+            throw new Exception('For initialization there is no name of the declared scheme');
+        }
+
+        $schema     = $schemas[$schemaName];
     }
 
     /**
@@ -693,6 +729,7 @@ class Digitizer extends BaseElement
      *
      * @param array $featureType
      * @return array
+     * @todo: remove reference abuse, callers should use the return value
      */
     protected function cleanFromInternConfiguration(array &$featureType)
     {
@@ -795,13 +832,98 @@ class Digitizer extends BaseElement
     }
 
     /**
+     * @return string
+     */
+    protected function getFileUri()
+    {
+        return $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
+    }
+
+    /**
      * @param string $id
      * @return DataStore
      */
     protected function getDataStoreById($id)
     {
-        /** @var DataStoreService $dataStoreService */
-        $dataStoreService = $this->container->get('data.source');
-        return $dataStoreService->get($id);
+        return $this->getDataStoreService()->get($id);
+    }
+
+    /**
+     * Override hook for child classes
+     *
+     * @return DataStoreService
+     */
+    protected function getDataStoreService()
+    {
+        /** @var DataStoreService $service */
+        $service = $this->container->get('data.source');
+        return $service;
+    }
+
+    /**
+     * Override hook for child classes
+     *
+     * @return FeatureTypeService
+     */
+    protected function getFeatureTypeService()
+    {
+        /** @var FeatureTypeService $service */
+        $service = $this->container->get('features');
+        return $service;
+    }
+
+    /**
+     * Get a mapping of ALL schema configurations
+     *
+     * @return mixed[] with schema names as string keys
+     */
+    protected function getSchemaConfigs()
+    {
+        if (!$this->schemaConfigsComplete) {
+            $entityConfig = $this->entity->getConfiguration() + array(
+                'schemes' => array(),
+            );
+            foreach (array_keys($entityConfig['schemes'] ?: array()) as $schemaName) {
+                $this->getSchemaConfig($schemaName);
+            }
+        }
+        return $this->schemaConfigs;
+    }
+
+    /**
+     * Get a single (transformed) schema configuration. Transformed means
+     * * formItems prepared
+     * * featureType string reference resolved to full featureType configuration + featureTypeName entry
+     * NOTE: the getSchemaByName method (introduced on newer branches) only returns the RAW config
+     *
+     * @param string $schemaName
+     * @return mixed[]
+     * @throws \RuntimeException for unknown $schemaName
+     */
+    protected function getSchemaConfig($schemaName)
+    {
+        if (!array_key_exists($schemaName, $this->schemaConfigs)) {
+            $entityConfig = $this->entity->getConfiguration() + array(
+                'schemes' => array(),
+            );
+            if (empty($entityConfig['schemes'][$schemaName])) {
+                throw new \RuntimeException("No such schema " . print_r($schemaName));
+            }
+            $schemaConfig = $entityConfig['schemes'][$schemaName];
+            if (is_string($schemaConfig['featureType'])) {
+                $schemaConfig['featureTypeName'] = $schemaConfig['featureType'];
+                $schemaConfig['featureType'] = $this->getFeatureTypeConfig($schemaConfig['featureType']);
+            }
+            if (isset($schemaConfig['formItems'])) {
+                $schemaConfig['formItems'] = $this->prepareItems($schemaConfig['formItems']);
+            }
+            if (isset($schemaConfig['search']) && isset($schemaConfig['search']['form'])) {
+                $schemaConfig['search']["form"] = $this->prepareItems($schemaConfig['search']['form']);
+            }
+
+            $this->schemaConfigs[$schemaName] = $schemaConfig;
+            $this->schemaConfigsComplete = !array_diff(array_keys($entityConfig['schemes']), array_keys($this->schemaConfigs));
+        }
+        return $this->schemaConfigs[$schemaName];
     }
 }
