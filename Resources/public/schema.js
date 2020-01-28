@@ -426,15 +426,15 @@
 
                     item.change = function (options) {
 
-                        schema.getData().done({
-                            //callback: function () {
-                                // if (schema.search.zoomScale) {
-                                //     widget.map.zoomToScale(schema.search.zoomScale, true);
-                                // } else {
-                                //     widget.map.zoomToExtent(schema.layer.getDataExtent());
-                                // }
-                            //}
-                        });
+                        schema.getData({
+                            callback: function () {
+                                if (schema.search.zoomScale) {
+                                    widget.map.zoomToScale(schema.search.zoomScale, true);
+                                } else {
+                                    widget.map.zoomToExtent(schema.layer.getDataExtent());
+                                }
+                            }
+                        }).done();
                     };
 
                     if (item.type === 'select' && item.ajax) {
