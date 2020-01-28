@@ -76,7 +76,6 @@
         };
 
 
-
         var createMenu = function () {
             var widget = schema.widget;
             var element = $(widget.element);
@@ -461,7 +460,6 @@
                 });
             }
 
-
         },
 
         getGeomType: function () {
@@ -480,7 +478,7 @@
 
         },
 
-        getStyleLabel: function(feature) {
+        getStyleLabel: function (feature) {
             var schema = this;
             var label = schema.getSchemaByFeature(feature).featureType.name;
             return feature.attributes[label] || '';
@@ -686,7 +684,7 @@
         },
 
         // Overwrite
-        extendFeatureStyleOptions: function(styleOptions) {
+        extendFeatureStyleOptions: function (styleOptions) {
         },
 
 
@@ -701,12 +699,10 @@
                 data: schema.getFeatureStyle(feature.fid) || createDefaultSymbolizer(feature),
             };
 
-            schema.extendFeatureStyleOptions(feature,styleOptions);
+            schema.extendFeatureStyleOptions(feature, styleOptions);
 
             var styleEditor = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, styleOptions);
         },
-
-
 
 
         repopulateWithReloadedFeatures: function (forcedReload, zoom) {
@@ -715,7 +711,7 @@
             return doReload || forcedReload;
         },
 
-        createRequest: function() {
+        createRequest: function () {
             var schema = this;
             var widget = schema.widget;
 
@@ -725,9 +721,30 @@
                 srid: projection.proj.srsProjNumber,
                 maxResults: schema.maxResults,
                 schema: schema.schemaName,
-                search: schema.search.form ?  schema.menu.getSearchData() : null
+                search: schema.search.form ? schema.menu.getSearchData() : null
             }
 
+        },
+
+        rejectSearchWhenMandatoryAttributesAreMissing: function(request) {
+            var schema = this;
+            var mandatory = schema.search.mandatory;
+            var req = request.search;
+            var errors = [];
+
+            _.each(mandatory, function (expression, key) {
+                if (!req[key]) {
+                    errors.push(key);
+                    return;
+                }
+                var reg = new RegExp(expression, "mg");
+                if (!(req[key]).toString().match(reg)) {
+                    errors.push(key);
+                    return;
+                }
+            });
+
+            return _.size(errors) > 0;
         },
 
         getData: function (options) {
@@ -750,6 +767,16 @@
             if (!schema.search.form) {
 
                 if (!schema.currentExtentSearch && schema.lastRequest === JSON.stringify(request)) {
+                    return $.Deferred().reject();
+                }
+            }
+
+
+            if (schema.search.mandatory) {
+                if (schema.rejectSearchWhenMandatoryAttributesAreMissing(request)) {
+                    schema.removeAllFeatures();
+                    schema.lastRequest = null;
+                    widget.map.zoomToExtent(schema.layer.getExtent());
                     return $.Deferred().reject();
                 }
             }
@@ -1075,7 +1102,7 @@
 
             feature.disabled = true;
 
-            formData = formData || Mapbender.Digitizer.Utilities.createHeadlessFormData(feature,schema.getSchemaByFeature(feature).formItems);
+            formData = formData || Mapbender.Digitizer.Utilities.createHeadlessFormData(feature, schema.getSchemaByFeature(feature).formItems);
 
             var request = {
                 id: feature.isNew ? null : feature.fid,
@@ -1230,7 +1257,7 @@
         doDefaultClickAction: function (feature) {
             var schema = this;
 
-            if (schema.zoomOnResultTableClick){
+            if (schema.zoomOnResultTableClick) {
                 schema.zoomToFeature(feature);
             }
             if (schema.openDialogOnResultTableClick) {
@@ -1267,7 +1294,7 @@
         },
 
         /** Override **/
-        updateAfterMove: function() {
+        updateAfterMove: function () {
 
         },
 
@@ -1320,9 +1347,6 @@
 
 
     };
-
-
-
 
 
 })();
