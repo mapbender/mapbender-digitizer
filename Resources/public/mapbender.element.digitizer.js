@@ -1123,7 +1123,7 @@
                         this.digitizerPrintLayer.features[0].renderIntent = 'select'
                         this.digitizerPrintLayer.redraw();
 
-                        widget.printClient.printDigitizerFeature(olFeature, olFeature.schema.featureTypeName || olFeature.schema.schemaName).always(function() {
+                        widget.printClient.printDigitizerFeature(feature, feature.schema.featureTypeName || feature.schema.schemaName).always(function() {
                             this.digitizerPrintLayer.removeAllFeatures();
                         }.bind(this));
                         // TODO
