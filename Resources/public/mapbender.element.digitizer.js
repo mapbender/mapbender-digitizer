@@ -998,7 +998,9 @@
                 schema.elementsTranslated = true;
             }
 
-            DataUtil.eachItem(widget.currentSettings.formItems, function(item) {
+            var formItems = JSON.parse(JSON.stringify(widget.currentSettings.formItems)); // Deep clone
+
+            DataUtil.eachItem(formItems, function(item) {
 
                 if(item.type == "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
 
@@ -1089,7 +1091,7 @@
             });
 
             dialog.data('feature', olFeature);
-            dialog.generateElements({children: widget.currentSettings.formItems});
+            dialog.generateElements({children: formItems});
             dialog.popupDialog(popupConfiguration);
             schema.editDialog = dialog;
             widget.currentPopup = dialog;
