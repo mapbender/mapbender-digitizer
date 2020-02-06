@@ -998,7 +998,7 @@
                 schema.elementsTranslated = true;
             }
 
-            var formItems = JSON.parse(JSON.stringify(widget.currentSettings.formItems)); // Deep clone
+            var formItems = $.extend(true,{},widget.currentSettings.formItems);// Deep clone
 
             DataUtil.eachItem(formItems, function(item) {
 
