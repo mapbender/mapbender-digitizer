@@ -998,8 +998,8 @@
                 schema.elementsTranslated = true;
             }
 
-            var formItems = $.extend(true,{},widget.currentSettings.formItems);// Deep clone
-
+            var formItems = [ $.extend(true,{},widget.currentSettings.formItems)[0]]; // Deep clone
+            
             DataUtil.eachItem(formItems, function(item) {
 
                 if(item.type == "select" && item.dataStore && item.dataStore.editable && item.dataStore.popupItems) {
