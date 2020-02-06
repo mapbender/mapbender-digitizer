@@ -414,7 +414,20 @@
                             css: {
                                 width: '50%'
                             }
-                        }
+                        },  {
+                            title: "Textrandfarbe",
+                            name: "labelOutlineColor",
+                            type: 'colorPicker',
+                            value: '#ffffff',
+                            css: {width: "50%"},
+                        },  {
+                            title: "Textrandbreite",
+                            name: "labelOutlineWidth",
+                            type: 'select',
+                            value: 0,
+                            options: scale(0,5),
+                            css: {width: "25%"},
+                        },
                         // ,
                         // {
                         //     title:    "Selektierbar?",
