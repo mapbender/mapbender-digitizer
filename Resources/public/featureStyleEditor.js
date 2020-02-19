@@ -427,11 +427,11 @@
                             name: "labelOutlineWidth",
                             type: 'select',
                             value: 0,
-                            options: scale(0,5),
+                            options: scale(0,10),
                             css: {width: "20%"},
                         }, {
                             title: "-Deckkraft",
-                            name: "fontOpacity",
+                            name: "labelOutlineOpacity",
                             type: "slider",
                             range: "max",
                             min: 0,
@@ -571,7 +571,6 @@
             var featureStyleEditor = this;
             var feature = featureStyleEditor.feature;
             var styleData = $.extend({},featureStyleEditor.element.formData(),featureStyleEditor.defaultFieldValues);
-            console.log(styleData);
             featureStyleEditor.element.disableForm();
             if (feature.fid) {
                 featureStyleEditor.saveStyle(feature,styleData);
