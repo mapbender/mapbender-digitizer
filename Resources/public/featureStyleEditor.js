@@ -592,7 +592,7 @@
             schema.featureStyles[feature.fid] = styleData;
             schema.layer.drawFeature(feature);
             return widget.query('style/save', {
-                schema: schema.schemaName,
+                schemaName: schema.getSchemaByFeature(feature).schemaName,
                 style: styleData,
                 featureId: feature.fid
             });

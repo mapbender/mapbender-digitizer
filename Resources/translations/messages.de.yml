@@ -24,6 +24,8 @@ mb.digitizer:
     print: Druck
     style:
       change: Stil ändern
+      load:
+        error: 'Es konnte keine Style Datenbank für das aggregierende Schema geladen werden. Überprüfen Sie die Konfiguration'
     clone:
       title: Duplizieren
       on:
@@ -67,6 +69,8 @@ mb.digitizer:
       modifyFeature: Objekt bearbeiten
       moveFeature: Objekt verschieben
 
+  move:
+    denied: 'Verschieben des Objekts nicht erlaubt'
   cancel: Abbrechen
   api:
     query:

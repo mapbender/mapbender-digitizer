@@ -2,6 +2,7 @@
     "use strict";
 
     Mapbender.Digitizer.PopupConfiguration = function (configuration, schema) {
+
         var popupConfiguration = this;
         popupConfiguration.schema = schema;
 
@@ -242,7 +243,7 @@
         $.each(tables, function (i,table) {
 
             var formItem = $(table).data('item');
-            
+
             if (formItem.dataManagerLink) {
 
                 if (!feature.fid) {

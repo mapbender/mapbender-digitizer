@@ -50,7 +50,7 @@ class SqliteExtended extends \SQLite3
         $statement  = $this->query($sql);
         $isCallable = is_callable($callback);
         while ($row = $statement->fetchArray(SQLITE3_ASSOC)) {
-            $result[] = $isCallable ? $callback($row) : $row;
+            $result[] = $isCallable && is_callable($callback) ? $callback($row) : $row;
         }
         return $result;
     }

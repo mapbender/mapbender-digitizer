@@ -276,7 +276,9 @@
                 _.each(rawSchemes, function (rawScheme, schemaName) {
                     rawScheme.schemaName = schemaName;
                     widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget, index++);
-                    widget.selector.appendSchema(widget.schemes[schemaName])
+                    if (!widget.schemes[schemaName].disableAggregation) {
+                        widget.selector.appendSchema(widget.schemes[schemaName])
+                    }
                 });
 
 
@@ -420,7 +422,7 @@
         getBasicSchemes: function () {
             var widget = this;
 
-            return _.pick(widget.schemes, function (value, key) {
+            return _.pick(widget.schemes, function (schema, key) {
                 return key !== "all";
             });
         },

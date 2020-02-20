@@ -24,7 +24,8 @@
 
         featureType: {
 
-            geomType: '-'
+            geomType: '-',
+            fields: [],
         },
 
 
@@ -73,11 +74,14 @@
             _.each(widget.getBasicSchemes(), function (scheme) {
                 $.each(scheme.toolset, function (i, rawButton) {
 
+                    if (scheme.disableAggregation) {
+                        return;
+                    }
                     // Avoid duplicates, i.e. elements with same 'type' property
                     if (toolset.filter(function (t) {
                         return t.type === rawButton.type && !Mapbender.Digitizer.Utilities.isAddingToolsetType(t.type);
                     }).length === 0) {
-                        rawButton.schemaName = scheme.schemaName; // This is necessary for some Client configurations
+                        rawButton.schema = scheme; // This is necessary for some Client configurations
                         toolset.push(rawButton);
                     }
 
@@ -97,9 +101,17 @@
            return toolset;
         },
 
-        initTableFields: function() {
+
+        /**
+         * It is highly recommended to overwrite this method in a custom digitizer bundle,
+         * since it is not possible to generalize table fields available to the aggregating scheme
+         */
+
+        getDefaultTableFields: function () {
+
             var schemes = this.widget.schemes;
-            this.tableFields = schemes[Object.keys(schemes)[0]].tableFields; // TODO Only solvable when Data of different Features is already aggregated in the database query
+            return schemes[Object.keys(schemes)[0]].tableFields; // TODO Only solvable when Data of different Features is already aggregated in the database query
+
 
         },
 
@@ -110,6 +122,21 @@
             var scheme = widget.getSchemaByName(feature.attributes.schemaName);
             return scheme;
 
+        },
+
+
+        loadCustomStyle: function() {
+            var schema = this;
+            var widget = schema.widget;
+            return widget.query('style/list', {
+                schemaName: Object.values(widget.getBasicSchemes()).map(function(scheme){ return scheme.schemaName;  })
+            }).then(function (data) {
+                schema.featureStyles = data.featureStyles;
+                if (schema.featureStyles["error"]) {
+                    schema.featureStyles = [];
+                    $.notify(Mapbender.DigitizerTranslator.translate('feature.style.load.error'));
+                }
+            });
         },
 
     };

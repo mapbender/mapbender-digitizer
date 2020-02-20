@@ -43,13 +43,13 @@
                     },
                     preventModification: function (feature) {
 
-                        return schema.evaluatedHooksForControlPrevention.onModificationStart && schema.evaluatedHooksForControlPrevention.onModificationStart(feature);
+                        var preventedByHooks = schema.evaluatedHooksForControlPrevention.onModificationStart && schema.evaluatedHooksForControlPrevention.onModificationStart(feature);
+                        return preventedByHooks || !schema.getSchemaByFeature(feature).allowEditData;
 
                     },
                     preventMove: function (feature) {
-
-                        return schema.evaluatedHooksForControlPrevention.onStart && schema.evaluatedHooksForControlPrevention.onStart(feature);
-
+                        var preventedByHooks =  schema.evaluatedHooksForControlPrevention.onStart && schema.evaluatedHooksForControlPrevention.onStart(feature);
+                        return preventedByHooks || !schema.getSchemaByFeature(feature).allowEditData;
                     },
 
                     introduceFeature: schema.introduceFeature.bind(schema),

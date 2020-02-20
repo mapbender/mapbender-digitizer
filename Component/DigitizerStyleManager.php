@@ -12,20 +12,22 @@ class DigitizerStyleManager
     /** @var  SqliteExtended */
     public $db;
     /** @var string Table name */
-    protected $tableName = "digitizer-styles";
+    protected $tableName;
 
     /**
      * DigizerStyleManager constructor.
      *
      * @param ContainerInterface|null $container
+     * @param $tableName
      */
-    public function __construct(ContainerInterface $container = null)
+    public function __construct($tableName,ContainerInterface $container = null)
     {
         try {
             $root = $container->getParameter('mapbender.digitizer.sqlite.storage_root');
         } catch(\InvalidArgumentException $e) {
             $root = $container->getParameter('kernel.root_dir')."/db";
         }
+        $this->tableName = $tableName;
         $sqlitePath =  $root. "/{$this->tableName}.sqlite";
         $this->db = $this->createDB($sqlitePath, $this->tableName);
     }
@@ -67,12 +69,13 @@ class DigitizerStyleManager
      *
      * @param Style $style
      * @param mixed $userId
+     * @param bool $public
      * @return Style
      */
-    public function save(Style $style, $userId)
+    public function save(Style $style, $userId, $public = false)
     {
         $styleData = $style->toArray();
-        $this->removePreviousStyles($style, $userId);
+        $this->removePreviousStyles($style, $userId,$public);
         $id = $this->db->insert($this->tableName, $styleData);
         $style->setId($id);
 
@@ -80,12 +83,12 @@ class DigitizerStyleManager
     }
 
 
-    public function getSchemaStyles($schema, $userId)
+    public function getStyles($userId = null,$public = false)
     {
         $styles = array();
         $userId = SqliteExtended::escapeValue($userId);
-
-        $sql = "SELECT * FROM {$this->db->quote($this->tableName)} WHERE {$this->db->quote("userId")} = {$userId}";
+        $userSpecificSql = $public ? "true" : $this->db->quote("userId") . "=" . SqliteExtended::escapeValue($userId);
+        $sql = "SELECT * FROM {$this->db->quote($this->tableName)} WHERE $userSpecificSql";
 
         foreach ($this->db->queryAndFetch($sql) as $styleData) {
             $style  = new Style($styleData);
@@ -98,14 +101,15 @@ class DigitizerStyleManager
     /**
      * @param Style $style
      * @param mixed $userId
+     * @param bool $public
      * @internal param $db
      */
-    private function removePreviousStyles(Style $style, $userId)
+    private function removePreviousStyles(Style $style, $userId, $public = false)
     {
         $db = $this->db;
+        $userSpecificSql = $public ? "true" : $db->quote("userId") . "=" . SqliteExtended::escapeValue($userId);
         $db->fetchColumn("DELETE FROM " . $db->quote($this->tableName)
-            . " WHERE " . $db->quote("userId") . "=" . SqliteExtended::escapeValue($userId)
-            . " AND " . $db->quote("schemaName") . " LIKE " . SqliteExtended::escapeValue($style->schemaName)
+            . " WHERE " . $userSpecificSql
             . " AND " . $db->quote("featureId") . "=" . SqliteExtended::escapeValue($style->featureId)
         );
     }
