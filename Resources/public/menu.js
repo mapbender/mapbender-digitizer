@@ -204,7 +204,7 @@
                         }
                     });
                 }
-                if (schema.copy.enable) {
+                if (schema.allowEditData && schema.copy.enable) {
                     buttons.push({
                         title: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
                         className: 'clone',
