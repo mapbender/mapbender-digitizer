@@ -390,7 +390,7 @@ class Digitizer extends BaseElement
         if (!$dataStore) {
             throw new NotFoundHttpException("No such datastore");
         }
-        $entity = $dataStore->get($dataItemId);
+        $entity = $dataStore->getById($dataItemId);
         if (!$entity) {
             throw new NotFoundHttpException("No such entity");
         }
