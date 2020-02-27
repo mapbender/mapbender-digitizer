@@ -363,11 +363,11 @@
 
         if (schema.search.form) {
 
-            menu.frame.generateElements({
+            menu.frame.generateElements([{
                 type: 'form',
                 cssClass: 'search',
                 children: schema.search.form
-            });
+            }]);
         }
 
         frame.append('<div style="clear:both;"/>');
