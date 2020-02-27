@@ -70,7 +70,7 @@
         },
 
 
-        redrawResultTableFeatures: function (features) {
+        redrawResultTableFeatures: function (features, callback) {
             var resultTable = this;
             var tableApi = resultTable.getApi();
 
@@ -84,13 +84,8 @@
 
             tableApi.rows(function (idx, feature, row) {
 
-                // TODO this is a bad solution. Disabledness etc. should be controlled by buttons themselves, which unfortunately is not possible on behalf of visui result table
-                if (feature.isChanged) {
-                    $(row).find(".save").removeAttr("disabled");
-                }
-                if (feature.printMetadata) {
-                    $(row).find(".printmetadata").addClass("active");
-                }
+                callback(idx,feature,row);
+
                 return true;
             });
 

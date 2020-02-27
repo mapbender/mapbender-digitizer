@@ -324,6 +324,7 @@
         openDialogOnResultTableClick: false,
         zoomOnResultTableClick: true,
         allowRefresh: true,
+        disableAggregation: false,
 
         displayOnSelect: true, // BEV only, no implementation
 
@@ -534,9 +535,7 @@
             var promise;
 
             if (schema.allowCustomStyle) {
-                promise = widget.query('style/list', {schema: schema.schemaName}).then(function (data) {
-                    schema.featureStyles = data.featureStyles;
-                });
+                promise = schema.loadCustomStyle();
             } else {
                 schema.featureStyles = {};
                 promise = $.Deferred().resolve();
@@ -589,6 +588,14 @@
             return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : [];// Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
         },
 
+        loadCustomStyle: function() {
+            var schema = this;
+            var widget = schema.widget;
+            return widget.query('style/list', {schemaName: schema.schemaName}).then(function (data) {
+                schema.featureStyles = data.featureStyles;
+            });
+        },
+
 
         refreshOtherLayersAfterFeatureSave: function (feature) {
             var schema = this;
@@ -609,7 +616,9 @@
 
         openFeatureEditDialog: function (feature) {
             var schema = this;
-            schema.popup.createFeatureEditDialog(feature, schema);
+            if (schema.getSchemaByFeature(feature).allowEditData) {
+                schema.popup.createFeatureEditDialog(feature, schema);
+            }
         },
 
 
@@ -630,7 +639,34 @@
             layer.removeAllFeatures();
             layer.addFeatures(features);
 
-            schema.menu.resultTable.redrawResultTableFeatures(features);
+            schema.menu.resultTable.redrawResultTableFeatures(features, function(idx,feature,row) {
+
+                // TODO this is a bad solution. Disabledness etc. should be controlled by buttons themselves, which unfortunately is not possible on behalf of visui result table
+                if (feature.isChanged) {
+                    $(row).find(".save").removeAttr("disabled");
+                }
+                if (feature.printMetadata) {
+                    $(row).find(".printmetadata").addClass("active");
+                }
+
+                if (!schema.getSchemaByFeature(feature).allowEditData) {
+                    $(row).find(".edit").attr("disabled","disabled");
+                    $(row).find(".clone").attr("disabled","disabled");
+                    $(row).find(".remove").attr("disabled","disabled");
+                }
+
+                if (!schema.getSchemaByFeature(feature).copy.enable) {
+                    $(row).find(".clone").attr("disabled","disabled");
+                }
+
+                if (!schema.getSchemaByFeature(feature).allowDelete) {
+                    $(row).find(".remove").attr("disabled","disabled");
+                }
+
+                if (!schema.getSchemaByFeature(feature).allowCustomStyle) {
+                    $(row).find(".style").attr("disabled","disabled");
+                }
+            });
 
         },
 

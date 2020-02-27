@@ -815,10 +815,11 @@ class Digitizer extends BaseElement
      */
     protected function saveStyleAction($postData)
     {
-        $this->styleManager = new DigitizerStyleManager($this->container);
+        $featureType = $this->getFeatureTypeBySchemaName($postData["schemaName"]);
+        $configuration = $featureType->getConfiguration("style");
+        $this->styleManager = new DigitizerStyleManager($configuration["db"],$this->container);
         $userId = $this->getCurrentUserId();
         $parameters = array(
-            //'schemaName' => $postData['schema'],
             'featureId'  => $postData['featureId'],
             'userId'     => $userId,
         );
@@ -826,7 +827,7 @@ class Digitizer extends BaseElement
         $styleParameters = array_merge($newStyle, $parameters);
 
         $style  = new Style($styleParameters);
-        $styleData = $this->styleManager->save($style, $userId)->toArray();
+        $styleData = $this->styleManager->save($style, $userId, $configuration["public"])->toArray();
         unset($styleData['userId']);
         unset($styleData['name']);
         unset($styleData['styleMaps']);
@@ -845,8 +846,31 @@ class Digitizer extends BaseElement
     protected function listStyleAction($postData)
     {
 
-        $this->styleManager = new DigitizerStyleManager($this->container);
-        $results['featureStyles'] = $this->styleManager->getSchemaStyles($postData["schema"], $this->getCurrentUserId());
+        if (is_array($postData["schemaName"]))  {
+
+            $db = null;
+            $public =  null;
+
+            // Ensure, that all schemes access the same style db
+            foreach ($postData["schemaName"] as $schemaName) {
+                $featureType = $this->getFeatureTypeBySchemaName($schemaName);
+                $configuration = $featureType->getConfiguration("style");
+                if ($db && $db != $configuration["db"] && $public && $public != $configuration["public"]) {
+                    return array("featureStyles" => [ "error" => true]);
+                }
+                $db = $configuration["db"];
+                $public = $configuration["public"];
+            }
+
+            $featureType = $this->getFeatureTypeBySchemaName($postData["schemaName"][0]);
+        } else {
+            $featureType = $this->getFeatureTypeBySchemaName($postData["schemaName"]);
+        }
+        $configuration = $featureType->getConfiguration("style");
+        $db = $configuration["db"];
+        $public = $configuration["public"];
+        $this->styleManager = new DigitizerStyleManager($db,$this->container);
+        $results['featureStyles'] = $this->styleManager->getStyles($this->getCurrentUserId(),$public);
 
         return $results;
     }

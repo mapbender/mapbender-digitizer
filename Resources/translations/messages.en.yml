@@ -62,6 +62,8 @@ mb.digitizer:
       drawDonut: Draw donut
       modifyFeature: Modify feature
       moveFeature: Move feature
+  move:
+      denied: 'Moving Feature not allowed'
   cancel: Cancel
   api:
     query:

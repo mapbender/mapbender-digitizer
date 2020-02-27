@@ -8,6 +8,8 @@
         editor.feature = feature;
         editor.schema = schema;
 
+        editor.defaultFieldValues = options.defaultFieldValues || {};
+
         var defaultOptions = {
 
             asPopup: true,
@@ -415,19 +417,29 @@
                                 width: '50%'
                             }
                         },  {
-                            title: "Textrandfarbe",
+                            title: "Textrand-Farbe",
                             name: "labelOutlineColor",
                             type: 'colorPicker',
                             value: '#ffffff',
                             css: {width: "50%"},
                         },  {
-                            title: "Textrandbreite",
+                            title: "-Breite",
                             name: "labelOutlineWidth",
                             type: 'select',
                             value: 0,
-                            options: scale(0,5),
-                            css: {width: "25%"},
-                        },
+                            options: scale(0,10),
+                            css: {width: "20%"},
+                        }, {
+                            title: "-Deckkraft",
+                            name: "labelOutlineOpacity",
+                            type: "slider",
+                            range: "max",
+                            min: 0,
+                            max: 1,
+                            value: 1,
+                            step: 0.1,
+                            css: {width: '30%'}
+                        }
                         // ,
                         // {
                         //     title:    "Selektierbar?",
@@ -558,7 +570,7 @@
         submit: function () {
             var featureStyleEditor = this;
             var feature = featureStyleEditor.feature;
-            var styleData = featureStyleEditor.element.formData();
+            var styleData = $.extend({},featureStyleEditor.element.formData(),featureStyleEditor.defaultFieldValues);
             featureStyleEditor.element.disableForm();
             if (feature.fid) {
                 featureStyleEditor.saveStyle(feature,styleData);
@@ -580,7 +592,7 @@
             schema.featureStyles[feature.fid] = styleData;
             schema.layer.drawFeature(feature);
             return widget.query('style/save', {
-                schema: schema.schemaName,
+                schemaName: schema.getSchemaByFeature(feature).schemaName,
                 style: styleData,
                 featureId: feature.fid
             });
