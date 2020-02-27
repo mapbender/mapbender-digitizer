@@ -526,10 +526,10 @@
         // tabs.push(backGroundTab);
         // tabs.push(miscTab);
 
-        element.generateElements([{
+        element.generateElements({
             type: "tabs",
             children: tabs
-        }]);
+        ]);
 
         element.popupDialog({
             title: "Stylemanager",
