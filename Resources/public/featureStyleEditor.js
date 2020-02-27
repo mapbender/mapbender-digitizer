@@ -529,7 +529,7 @@
         element.generateElements({
             type: "tabs",
             children: tabs
-        ]);
+        });
 
         element.popupDialog({
             title: "Stylemanager",
