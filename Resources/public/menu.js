@@ -361,14 +361,7 @@
 
         appendGeneralDigitizerButtons();
 
-        if (schema.search.form) {
-
-            menu.frame.generateElements({
-                type: 'form',
-                cssClass: 'search',
-                children: schema.search.form
-            });
-        }
+        menu.generateSearchForm();
 
         frame.append('<div style="clear:both;"/>');
 
@@ -390,7 +383,20 @@
         getSearchData: function() {
             var menu = this;
             return $('form.search', menu.frame).length > 0 ? $('form.search', menu.frame).formData() : void 0;
-        }
+        },
+
+        generateSearchForm: function () {
+            var menu = this;
+            var schema = menu.schema;
+            if (schema.search.form) {
+                menu.frame.generateElements({
+                    type: 'form',
+                    cssClass: 'search',
+                    children: schema.search.form,
+                });
+            }
+        },
+
 
 
 
