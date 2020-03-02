@@ -100,3 +100,19 @@
     text-decoration: underline;
   }
 }
+
+
+.modal-body {
+    input[type="date"] {
+        color: #555;
+        font-size: 11px;
+        border-radius: 0;
+        height: 29px;
+        display: block;
+        width: 100%;
+        padding: 2px 24px 2px 7px;
+        &.mandatory {
+            background-color: #f2b17f;
+        }
+    }
+}
