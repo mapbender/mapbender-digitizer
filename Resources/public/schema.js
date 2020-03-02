@@ -406,7 +406,7 @@
 
             if (schema.search.form) {
 
-                _.each(schema.search.form, function (item) {
+                DataUtil.eachItem(schema.search.form, function (item) {
 
                     if (item.mapping) {
                         var value = item.mapping[item.name];
