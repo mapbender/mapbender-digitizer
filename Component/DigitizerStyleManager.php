@@ -86,7 +86,6 @@ class DigitizerStyleManager
     public function getStyles($userId = null,$public = false)
     {
         $styles = array();
-        $userId = SqliteExtended::escapeValue($userId);
         $userSpecificSql = $public ? "true" : $this->db->quote("userId") . "=" . SqliteExtended::escapeValue($userId);
         $sql = "SELECT * FROM {$this->db->quote($this->tableName)} WHERE $userSpecificSql";
 
