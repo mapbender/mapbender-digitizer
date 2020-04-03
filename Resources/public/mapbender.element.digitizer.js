@@ -1116,7 +1116,7 @@
         _queryIntersect: function(request, bbox, debug) {
             var widget = this;
             var geometry = bbox.toGeometry();
-            var _request = $.extend(true, {intersectGeometry: geometry.toString()}, request);
+            var _request = $.extend(true, {intersect: geometry.toString()}, request);
 
             if(debug){
                 if(!widget._boundLayer) {
