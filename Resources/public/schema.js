@@ -11,8 +11,9 @@
         /**
          *  Backward Compatibility
          */
+
         if (!rawScheme.currentExtentSearch && rawScheme.searchType) {
-            schema.currentExtentSearch = rawScheme.searchType === "current";
+            schema.currentExtentSearch = rawScheme.searchType === "currentExtent";
         }
 
         var styleLabels = ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
@@ -881,7 +882,7 @@
                 return;
             }
 
-            if (featureCollection.features && featureCollection.features.length === parseInt(schema.maxResults)) {
+            if (featureCollection.features && featureCollection.features.length === parseInt(schema.maxResults) && schema.notifyOnFeatureOverflow) {
                 Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
             }
             var geoJsonReader = new OpenLayers.Format.GeoJSON();
