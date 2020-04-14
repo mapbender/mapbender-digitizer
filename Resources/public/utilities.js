@@ -78,7 +78,10 @@
                         var dm = widget.getConnectedDataManager();
                         var dataItem = dm.getSchemaByName(schemaName).create();
                         dataItem[fieldName] = feature.fid;
-                        var dialog = dm._openEditDialog(dataItem);
+                        var dialog = dm._openEditDialog(dataItem, function(){
+                            var id = dataItem[fieldName];
+                            $(dialog).find("select[name=" + fieldName + "]").find("option[value!="+id+"]").attr("disabled",true).hide();
+                        });
                         dialog.parentTable = table;
                         $(dialog).find("select[name=" + fieldName + "]").attr("disabled", "true");
                         $(dialog).bind('data.manager.item.saved', function (event, data) {
@@ -99,7 +102,10 @@
 
 
                         var dm = widget.getConnectedDataManager();
-                        var dialog = dm._openEditDialog(rowData);
+                        var dialog = dm._openEditDialog(rowData, function(){
+                            var id = rowData[fieldName];
+                            $(dialog).find("select[name=" + fieldName + "]").find("option[value!="+id+"]").attr("disabled",true).hide();
+                        });
                         dialog.parentTable = table;
 
                         var rowId = getRowId(tableApi, rowData);

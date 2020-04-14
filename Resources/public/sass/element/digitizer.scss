@@ -385,5 +385,8 @@ li.select2-search--inline {
     }
 
 
+    // This is important in order to avoid the second open dialog to "jump" on resizing
+    position: absolute !important;
+    z-index: 5;
 
 }
