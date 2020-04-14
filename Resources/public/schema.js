@@ -798,7 +798,7 @@
             var request = schema.createRequest();
 
             if (schema.currentExtentSearch) {
-                request.intersectGeometry = extent.toGeometry().toString();
+                request.intersect = extent.toGeometry().toString();
             }
 
             if (!schema.search.form) {
