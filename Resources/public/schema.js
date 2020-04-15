@@ -326,6 +326,7 @@
         zoomOnResultTableClick: true,
         allowRefresh: true,
         disableAggregation: false,
+        notifyOnFeatureOverflow: false,
 
         displayOnSelect: true, // BEV only, no implementation
 
@@ -371,7 +372,7 @@
         printable: false,
         maxScale: null,
         minScale: null,
-        group: null,
+        // group: null,
         // oneInstanceEdit: true,
         //zoomDependentVisibility: [{max: 10000}],
         refreshFeaturesAfterSave: null,
@@ -551,9 +552,7 @@
                 if (schema.widget.isFullyActive) {
                     schema.selectControl.activate();
                 }
-                schema.getData({
-                    reloadNew: true
-                });
+                schema.getData();
 
             });
 
@@ -742,12 +741,6 @@
         },
 
 
-        repopulateWithReloadedFeatures: function (forcedReload, zoom) {
-            var schema = this;
-            var doReload = (schema.search.form || schema.group === "all") && (!zoom);
-            return doReload || forcedReload;
-        },
-
         createRequest: function () {
             var schema = this;
             var widget = schema.widget;
@@ -793,8 +786,6 @@
 
             var callback = options && options.callback;
 
-            var reloadNew = schema.repopulateWithReloadedFeatures(options && options.reloadNew, options && options.zoom);
-
             var request = schema.createRequest();
 
             if (schema.currentExtentSearch) {
@@ -828,7 +819,7 @@
 
             schema.selectXHR = widget.query('select', request).then(function (featureCollection) {
                 var xhr = this;
-                schema.onFeatureCollectionLoaded(featureCollection, reloadNew, xhr);
+                schema.onFeatureCollectionLoaded(featureCollection, xhr);
                 if (typeof callback === "function") {
                     callback.apply();
                 }
@@ -839,42 +830,8 @@
         },
 
 
-        getVisibleFeatures: function () {
-            var schema = this;
-            var layer = schema.layer;
-            var map = layer.map;
-            var extent = map.getExtent();
-            var bbox = extent.toGeometry().getBounds();
-            var currentExtentOnly = schema.currentExtentSearch;
 
-
-            var visibleFeatures = currentExtentOnly ? _.filter(schema.getLayerFeatures(), function (feature) {
-                return feature && (feature.isNew || feature.geometry.getBounds().intersectsBounds(bbox));
-            }) : layer.features;
-
-            return visibleFeatures;
-        },
-
-
-        mergeExistingFeaturesWithLoadedFeatures: function (newFeatures) {
-            var schema = this;
-
-            var existingFeatures = schema.getVisibleFeatures();
-
-
-            var newFeaturesFiltered = _.filter(newFeatures, function (nFeature) {
-                return !existingFeatures.some(function (oFeature) {
-                    return nFeature.equals(oFeature);
-                });
-            });
-
-            var features = _.union(newFeaturesFiltered, existingFeatures);
-            return features;
-
-        },
-
-
-        onFeatureCollectionLoaded: function (featureCollection, newFeaturesOnly, xhr) {
+        onFeatureCollectionLoaded: function (featureCollection, xhr) {
             var schema = this;
 
             if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
@@ -891,12 +848,9 @@
                 features: featureCollection.features
             });
 
-            if (newFeaturesOnly) {
-                schema.removeAllFeatures();
-                schema.layer.features = newFeatures;
-            } else {
-                schema.layer.features = schema.mergeExistingFeaturesWithLoadedFeatures(newFeatures);
-            }
+            schema.removeAllFeatures();
+            schema.layer.features = newFeatures;
+
 
 
             schema.layer.features.forEach(function (feature) {

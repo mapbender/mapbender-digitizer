@@ -87,7 +87,7 @@
                     }
                     $.each(widget.schemes,function(schemaName,scheme){
                         scheme.lastRequest = null; // force reload
-                        scheme.getData({ reloadNew: true });
+                        scheme.getData();
                     });
                     $.each(Mapbender.Model.map.olMap.layers.filter(function(layer) { return layer.mbConfig && layer.mbConfig.type === "wms"; }), function(id,layer)  {
                         layer.redraw(true);
