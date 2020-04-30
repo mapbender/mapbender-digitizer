@@ -327,6 +327,8 @@
         allowRefresh: true,
         disableAggregation: false,
         notifyOnFeatureOverflow: false,
+        allowViewData: true,
+
 
         displayOnSelect: true, // BEV only, no implementation
 
@@ -616,7 +618,7 @@
 
         openFeatureEditDialog: function (feature) {
             var schema = this;
-            if (schema.getSchemaByFeature(feature).allowEditData) {
+            if (schema.getSchemaByFeature(feature).allowEditData || schema.getSchemaByFeature(feature).allowViewData) {
                 schema.popup.createFeatureEditDialog(feature, schema);
             }
         },
