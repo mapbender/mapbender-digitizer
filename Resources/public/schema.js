@@ -417,10 +417,10 @@
 
                         if (value && item.options) {
                             var option = item.options.find(function (option) {
-                                return option[0].toLowerCase() === value.toLowerCase()
+                                return option.___value && option.___value.toLowerCase() === value.toLowerCase()
                             });
                             if (option) {
-                                item.value = option;
+                                item.value = option.___value;
                             } else {
                                 $.notify(value + " is not a valid value for " + item.name);
                             }
