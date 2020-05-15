@@ -431,7 +431,8 @@
                     item.change = function (options) {
 
                         schema.getData({
-                            callback: function () {
+                            ommitIntersect: true,
+                            callback: function (features) {
                                 if (schema.search.zoomScale) {
                                     widget.map.zoomToScale(schema.search.zoomScale, true);
                                 } else {
@@ -786,11 +787,13 @@
             var map = widget.map;
             var extent = map.getExtent();
 
-            var callback = options && options.callback;
+            options = options || {};
+
+            var callback =  options.callback;
 
             var request = schema.createRequest();
 
-            if (schema.currentExtentSearch) {
+            if (schema.currentExtentSearch && !options.ommitIntersect) {
                 request.intersect = extent.toGeometry().toString();
             }
 
@@ -823,7 +826,7 @@
                 var xhr = this;
                 schema.onFeatureCollectionLoaded(featureCollection, xhr);
                 if (typeof callback === "function") {
-                    callback.apply();
+                    callback.apply(schema,[featureCollection.features]);
                 }
                 schema.selectXHR = null;
             });
