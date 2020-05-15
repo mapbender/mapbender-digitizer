@@ -433,11 +433,13 @@
                         schema.getData({
                             ommitIntersect: true,
                             callback: function (features) {
+                                widget.disable();
                                 if (schema.search.zoomScale) {
                                     widget.map.zoomToScale(schema.search.zoomScale, true);
                                 } else {
                                     widget.map.zoomToExtent(schema.layer.getDataExtent());
                                 }
+                                widget.enable();
                             }
                         }).done();
                     };

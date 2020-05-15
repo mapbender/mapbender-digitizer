@@ -298,7 +298,7 @@
 
                 widget.initialScheme = widget.schemes[basicScheme];
 
-                if (isOpenByDefault()) {
+                if (isOpenByDefault() && !widget.isFullyActive) {
                     widget.activate();
                 }
 
@@ -405,9 +405,11 @@
             map.events.register("moveend", this, function () {
                 widget.isEnabled() && widget.getCurrentSchema().getData();
             });
-            map.events.register("zoomend", this, function () {
-                widget.isEnabled() && widget.getCurrentSchema().getData({zoom: true});
-            });
+
+            // Zoomend implies Moveend
+            // map.events.register("zoomend", this, function () {
+            //     widget.isEnabled() && widget.getCurrentSchema().getData({zoom: true});
+            // });
 
             map.events.register("mouseover", this, function () {
                 widget.isEnabled() && widget.getCurrentSchema().mapContextMenu.enable();
