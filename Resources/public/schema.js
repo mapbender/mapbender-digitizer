@@ -795,11 +795,7 @@
                 features: featureCollection.features
             });
 
-            schema.removeAllFeatures();
             schema.layer.features = newFeatures;
-
-
-
             schema.layer.features.forEach(function (feature) {
                 schema.introduceFeature(feature);
             });
