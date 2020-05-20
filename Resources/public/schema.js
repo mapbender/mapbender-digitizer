@@ -694,14 +694,11 @@
             var extent = map.getExtent();
             var projection = map.getProjectionObject();
 
-            if (schema.currentExtentSearch) {
-                request.intersect = extent.toGeometry().toString();
-            }
-
             return {
                 srid: projection.proj.srsProjNumber,
                 maxResults: schema.maxResults,
                 schema: schema.schemaName,
+                intersect: schema.currentExtentSearch ? extent.toGeometry().toString() : null,
                 search: schema.search.form ? schema.menu.getSearchData() : null
             }
 
