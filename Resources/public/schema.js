@@ -692,6 +692,11 @@
 
             var map = widget.map;
             var projection = map.getProjectionObject();
+
+            if (schema.currentExtentSearch) {
+                request.intersect = extent.toGeometry().toString();
+            }
+
             return {
                 srid: projection.proj.srsProjNumber,
                 maxResults: schema.maxResults,
@@ -734,10 +739,6 @@
             var callback =  options.callback;
 
             var request = schema.createRequest();
-
-            if (schema.currentExtentSearch && !options.ommitIntersect) {
-                request.intersect = extent.toGeometry().toString();
-            }
 
             if (!schema.search.form) {
 
