@@ -691,6 +691,7 @@
             var widget = schema.widget;
 
             var map = widget.map;
+            var extent = map.getExtent();
             var projection = map.getProjectionObject();
 
             if (schema.currentExtentSearch) {
@@ -732,7 +733,6 @@
             var widget = schema.widget;
 
             var map = widget.map;
-            var extent = map.getExtent();
 
             options = options || {};
 
