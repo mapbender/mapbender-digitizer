@@ -52,7 +52,8 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
                 '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
                 '@MapbenderDigitizerBundle/Resources/public/plugins/coordinatesTransformation.js',
-                '@MapbenderDigitizerBundle/Resources/public/plugins/geometrylessFeatureAdd.js'
+                '@MapbenderDigitizerBundle/Resources/public/plugins/geometrylessFeatureAdd.js',
+                '@MapbenderDigitizerBundle/Resources/public/plugins/generateElements.js',
             ),
             'css'   => array(
                 '/components/select2/select2-built.css',
@@ -454,7 +455,7 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * Updates the index of solr (full import) and returns the status 
+     * Updates the index of solr (full import) and returns the status
      * @param $request
      * @return int status
      */
@@ -630,19 +631,19 @@ class Digitizer extends BaseElement
                 if($head["reponse_code"] !== 200){
                     $responseArray['error'][] = array('response' => $response, 'code' => $head['reponse_code']);
                 } else if (!!(json_decode($response))) {
-                   
+
                     $dataSets[] = $response;
                 } else {
                     $responseArray['error'][]  = array('response' => $response, 'code' => "Response of url: {$url} is not a JSON");
                 }
-                
+
             } else  {
                 $responseArray['error'][]  = "Unknown error for url: {$url}";
             }
 
         }
-    
-       
+
+
 
         $responseArray['dataSets'] = $dataSets;
         return $responseArray;
