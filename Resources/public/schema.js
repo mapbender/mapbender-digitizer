@@ -164,12 +164,12 @@
                 },
 
                 overFeature: function (feature) {
-                    this.highlight(feature);
+                    !schema.disableFeatureHighlight && this.highlight(feature);
 
 
                 },
                 outFeature: function (feature) {
-                    this.unhighlight(feature);
+                    !schema.disableFeatureHighlight && this.unhighlight(feature);
                 },
 
                 highlight: function (feature) {
@@ -316,6 +316,7 @@
 
 
         //* Newly added properties
+        disableFeatureHighlight: false,
         revertChangedGeometryOnCancel: false,
         deactivateControlAfterModification: true,
         allowSaveAll: false,
