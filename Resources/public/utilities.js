@@ -307,7 +307,7 @@
             var formData = {};
 
             var extractFormData = function (definition) {
-                definition.forEach(function (item) {
+                (definition || []).forEach(function (item) {
                     if (_.isArray(item)) {
                         // recurse into lists
                         extractFormData(item);

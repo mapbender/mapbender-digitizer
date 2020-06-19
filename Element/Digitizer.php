@@ -460,7 +460,7 @@ class Digitizer extends BaseElement
                     /**
                      * @var $feature Feature
                      */
-                    $featureData = $this->prepareQueriedFeatureData($feature, $schema['formItems']);
+                    $featureData = $this->prepareQueriedFeatureData($feature, isset($schema['formItems']) ? $schema['formItems'] : []);
 
                     foreach ($featureType->getFileInfo() as $fileConfig) {
                         if (!isset($fileConfig['field']) || !isset($featureData["properties"][ $fileConfig['field'] ])) {
