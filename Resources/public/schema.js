@@ -164,12 +164,10 @@
                 },
 
                 overFeature: function (feature) {
-                    !schema.disableFeatureHighlight && this.highlight(feature);
-
-
+                    this.highlight(feature);
                 },
                 outFeature: function (feature) {
-                    !schema.disableFeatureHighlight && this.unhighlight(feature);
+                    this.unhighlight(feature);
                 },
 
                 highlight: function (feature) {
@@ -179,9 +177,12 @@
                     if (!schema.layer.features.includes(feature)) {
                         return;
                     }
-                    schema.processFeature(feature, function (feature) {
-                        schema.menu.resultTable.hoverInResultTable(feature, true);
-                    });
+
+                    if (!schema.disableFeatureHighlightInResultTable) {
+                        schema.processFeature(feature, function (feature) {
+                            schema.menu.resultTable.hoverInResultTable(feature, true);
+                        });
+                    }
 
                     layer.drawFeature(feature);
                     this.events.triggerEvent("featurehighlighted", {feature: feature});
@@ -194,9 +195,11 @@
                     if (!schema.layer.features.includes(feature)) {
                         return;
                     }
-                    schema.processFeature(feature, function (feature) {
-                        schema.menu.resultTable.hoverInResultTable(feature, false);
-                    });
+                    if (!schema.disableFeatureHighlightInResultTable) {
+                        schema.processFeature(feature, function (feature) {
+                            schema.menu.resultTable.hoverInResultTable(feature, false);
+                        });
+                    }
 
 
                     schema.layer.drawFeature(feature);
@@ -316,7 +319,7 @@
 
 
         //* Newly added properties
-        disableFeatureHighlight: false,
+        disableFeatureHighlightInResultTable: false,
         revertChangedGeometryOnCancel: false,
         deactivateControlAfterModification: true,
         allowSaveAll: false,
