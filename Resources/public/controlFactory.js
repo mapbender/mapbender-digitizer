@@ -1,53 +1,7 @@
 (function () {
     "use strict";
 
-    var createFeatureAddedMethod = function (injectedMethods) { // injectedMethods is actually not much more than a restricted Version of Scheme
 
-        var func = function (feature) {
-            var control = this;
-
-            _.each(injectedMethods.getDefaultAttributes(), function (prop) {
-                feature.attributes[prop] = "";
-            });
-
-            feature.attributes.schemaName = control.schemaName;
-
-            feature.isNew = true;
-            injectedMethods.introduceFeature(feature);
-
-
-            injectedMethods.setModifiedState(feature, this);
-
-            injectedMethods.openFeatureEditDialog(feature,'add');
-            feature.layer.drawFeature(feature);
-
-            control.deactivate();
-        };
-
-        return func;
-
-    };
-
-    var finalizeDrawFeatureWithValidityTest = function (cancel) {
-        if (this.polygon) {
-            var wkt = this.polygon.geometry.toString();
-            var reader = new jsts.io.WKTReader();
-            try {
-                var geom = reader.read(wkt);
-
-                if (!geom.isValid()) {
-                    $.notify("Geometry not valid");
-                    this.destroyActiveComponent(cancel);
-                    this.control.deactivate();
-                    return;
-                }
-            } catch (e) {
-                console.warn("error in validation of geometry", e);
-            } //In case of Error thrown in read, because there is no complete linear ring in the geometry
-        }
-
-        return OpenLayers.Handler.Polygon.prototype.finalize.apply(this, arguments);
-    };
 
 
     Mapbender.Digitizer.DigitizingControlFactory = function (layer, injectedMethods, controlEvents) {
@@ -60,10 +14,52 @@
 
     Mapbender.Digitizer.DigitizingControlFactory.prototype = {
 
+        _featureAdded: function (feature) { // injectedMethods is actually not much more than a restricted Version of Scheme
+
+                var control = this;
+                var controlFactory = control.controlFactory;
+
+                _.each(controlFactory.injectedMethods.getDefaultAttributes(), function (prop) {
+                    feature.attributes[prop] = "";
+                });
+
+                feature.attributes.schemaName = control.schemaName;
+                feature.isNew = true;
+                controlFactory.injectedMethods.introduceFeature(feature);
+                controlFactory.injectedMethods.setModifiedState(feature, this);
+                controlFactory.injectedMethods.openFeatureEditDialog(feature,'add');
+                feature.layer.drawFeature(feature);
+
+                control.deactivate();
+
+        },
+
+        _finalizeDrawFeatureWithValidityTest: function (cancel) {
+            if (this.polygon) {
+                var wkt = this.polygon.geometry.toString();
+                var reader = new jsts.io.WKTReader();
+                try {
+                    var geom = reader.read(wkt);
+
+                    if (!geom.isValid()) {
+                        $.notify("Geometry not valid");
+                        this.destroyActiveComponent(cancel);
+                        this.control.deactivate();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn("error in validation of geometry", e);
+                } //In case of Error thrown in read, because there is no complete linear ring in the geometry
+            }
+
+            return OpenLayers.Handler.Polygon.prototype.finalize.apply(this, arguments);
+        },
+
         drawPoint: function (schemaName) {
             var controlFactory = this;
             return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Point, {
-                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
+                controlFactory: controlFactory,
+                featureAdded: controlFactory._featureAdded,
                 eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             });
@@ -73,7 +69,8 @@
         drawLine: function (schemaName) {
             var controlFactory = this;
             return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Path, {
-                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
+                controlFactory: controlFactory,
+                featureAdded: controlFactory._featureAdded,
                 eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             })
@@ -83,9 +80,10 @@
         drawPolygon: function (schemaName) {
             var controlFactory = this;
             return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Polygon, {
-                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
+                controlFactory: controlFactory,
+                featureAdded: controlFactory._featureAdded,
                 handlerOptions: {
-                    finalize: finalizeDrawFeatureWithValidityTest,
+                    finalize: controlFactory._finalizeDrawFeatureWithValidityTest,
 
                     destroyActiveComponent: function (cancel) {
                         this.destroyFeature(cancel);
@@ -100,7 +98,8 @@
         drawRectangle: function (schemaName) {
             var controlFactory = this;
             return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.RegularPolygon, {
-                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
+                controlFactory: controlFactory,
+                featureAdded: controlFactory._featureAdded,
                 handlerOptions: {
                     sides: 4,
                     irregular: true
@@ -113,7 +112,8 @@
         drawCircle: function (schemaName) {
             var controlFactory = this;
             return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.RegularPolygon, {
-                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
+                controlFactory: controlFactory,
+                featureAdded: controlFactory._featureAdded,
                 handlerOptions: {
                     sides: 40
                 },
@@ -125,7 +125,8 @@
         drawEllipse: function (schemaName) {
             var controlFactory = this;
             return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.RegularPolygon, {
-                featureAdded: createFeatureAddedMethod(controlFactory.injectedMethods),
+                controlFactory: controlFactory,
+                featureAdded: controlFactory._featureAdded,
                 handlerOptions: {
                     sides: 40,
                     irregular: true
@@ -138,6 +139,7 @@
         drawDonut: function () {
             var controlFactory = this;
             return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Polygon, {
+                controlFactory: controlFactory,
 
                 eventListeners: controlFactory.controlEvents,
 
@@ -182,7 +184,7 @@
                         }
                         OpenLayers.Handler.Path.prototype.addPoint.apply(this, arguments);
                     },
-                    finalize: finalizeDrawFeatureWithValidityTest,
+                    finalize: controlFactory._finalizeDrawFeatureWithValidityTest,
                     destroyActiveComponent: function (cancel) {
                         this.polygon.geometry.removeComponent(this.line.geometry);
                     },
@@ -221,6 +223,7 @@
         modifyFeature: function () {
             var controlFactory = this;
             return new OpenLayers.Control.ModifyFeature(controlFactory.layer, {
+                controlFactory: controlFactory,
 
                 eventListeners: controlFactory.controlEvents,
 
@@ -263,6 +266,7 @@
         moveFeature: function () {
             var controlFactory = this;
             return new OpenLayers.Control.DragFeature(controlFactory.layer, {
+                controlFactory: controlFactory,
 
                 eventListeners: controlFactory.controlEvents,
 
