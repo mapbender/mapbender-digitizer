@@ -4,9 +4,10 @@
 
 
 
-    Mapbender.Digitizer.DigitizingControlFactory = function (layer, injectedMethods, controlEvents) {
+    Mapbender.Digitizer.DigitizingControlFactory = function (schema, injectedMethods, controlEvents) {
 
-        this.layer = layer;
+        this.schema = schema;
+        this.layer = schema.layer;
         this.injectedMethods = injectedMethods;
         this.controlEvents = controlEvents;
 
