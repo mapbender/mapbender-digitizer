@@ -18,7 +18,7 @@
                 var row = tableApi.row(tr);
                 var feature = row.data();
                 if (feature) {
-                    selectControl.highlight(feature);
+                    selectControl.highlight(feature,true);
                 } else {
                     console.warn("No Feature in row", row);
                 }
@@ -29,7 +29,7 @@
                 var row = tableApi.row(tr);
                 var feature = row.data();
                 if (feature) {
-                    selectControl.unhighlight(feature);
+                    selectControl.unhighlight(feature,true);
                 } else {
                     console.warn("No Feature in row", row);
                 }

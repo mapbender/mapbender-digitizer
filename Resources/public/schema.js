@@ -170,7 +170,7 @@
                     this.unhighlight(feature);
                 },
 
-                highlight: function (feature) {
+                highlight: function (feature,ommitResultTable) {
                     feature.isHighlighted = true;
 
                     console.assert(!!feature, "Feature must be set");
@@ -178,7 +178,7 @@
                         return;
                     }
 
-                    if (!schema.disableFeatureHighlightInResultTable) {
+                    if (!schema.disableFeatureHighlightInResultTable && !ommitResultTable) {
                         schema.processFeature(feature, function (feature) {
                             schema.menu.resultTable.hoverInResultTable(feature, true);
                         });
@@ -188,14 +188,14 @@
                     this.events.triggerEvent("featurehighlighted", {feature: feature});
 
                 },
-                unhighlight: function (feature) {
+                unhighlight: function (feature,ommitResultTable) {
 
                     feature.isHighlighted = false;
 
                     if (!schema.layer.features.includes(feature)) {
                         return;
                     }
-                    if (!schema.disableFeatureHighlightInResultTable) {
+                    if (!schema.disableFeatureHighlightInResultTable && !ommitResultTable) {
                         schema.processFeature(feature, function (feature) {
                             schema.menu.resultTable.hoverInResultTable(feature, false);
                         });
