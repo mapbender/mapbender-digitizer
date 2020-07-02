@@ -28,7 +28,7 @@
                 feature.isNew = true;
                 controlFactory.injectedMethods.introduceFeature(feature);
                 controlFactory.injectedMethods.setModifiedState(feature, this);
-                controlFactory.injectedMethods.openFeatureEditDialog(feature,'add');
+                controlFactory.injectedMethods.onFeatureChange(feature,'add');
                 feature.layer.drawFeature(feature);
 
                 control.deactivate();
@@ -194,7 +194,7 @@
                         var fir = OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
                         var feature = this.polygon;
                         controlFactory.injectedMethods.setModifiedState(feature, this.control);
-                        controlFactory.injectedMethods.openFeatureEditDialog(feature,'donut');
+                        controlFactory.injectedMethods.onFeatureChange(feature,'donut');
                         return fir;
                     },
                 },
@@ -248,7 +248,7 @@
                     var geom = reader.read(wkt);
                     if (geom.isValid()) {
                         controlFactory.injectedMethods.setModifiedState(feature, this);
-                        controlFactory.injectedMethods.openFeatureEditDialog(feature,'modify');
+                        controlFactory.injectedMethods.onFeatureChange(feature,'modify');
                     } else {
                         // TODO there might be a better way to revert feature
                         controlFactory.layer.removeFeatures([feature]);
@@ -284,7 +284,7 @@
 
                 onComplete: function (feature) {
                     controlFactory.injectedMethods.setModifiedState(feature, this);
-                    controlFactory.injectedMethods.openFeatureEditDialog(feature,'move');
+                    controlFactory.injectedMethods.onFeatureChange(feature,'move');
                     controlFactory.injectedMethods.updateAfterMove(feature);
 
 

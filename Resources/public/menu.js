@@ -27,7 +27,7 @@
                     // Override
                     updateAfterMove: schema.updateAfterMove.bind(schema),
 
-                    openFeatureEditDialog: function (feature,type) {
+                    onFeatureChange: function (feature,type) {
 
                         console.assert(type === "add" || type === "donut" || type === "modify" || type === "move", "Type "+type+" is wrong in 'openFeatureEditDialog'");
 
