@@ -1,6 +1,5 @@
 (function ($) {
 
-
     $.widget("digitizer.resultTable", $["vis-ui-js"].resultTable, {
 
 
@@ -52,7 +51,7 @@
 
             onSearch && tableApi.on("search.dt",function() {
                 var features = tableApi.rows( { search : 'applied'} ).data();
-                typeof onSearch === "function" && onSearch(features);
+                !resultTable.disableSearchTriggering && typeof onSearch === "function" && onSearch(features);
             });
 
 
@@ -76,6 +75,8 @@
         },
 
 
+
+
         redrawResultTableFeatures: function (features, callback) {
             var resultTable = this;
             var tableApi = resultTable.getApi();
@@ -86,7 +87,7 @@
                 return !feature.isNew && !feature.cluster;
             });
             tableApi.rows.add(featuresToRedraw);
-            tableApi.draw();
+            resultTable.drawWithoutTriggering();
 
             tableApi.rows(function (idx, feature, row) {
 
@@ -104,6 +105,13 @@
             return row;
         },
 
+        drawWithoutTriggering: function() {
+            var resultTable = this;
+            var tableApi = resultTable.getApi();
+            resultTable.disableSearchTriggering = true;
+            tableApi.draw();
+            resultTable.disableSearchTriggering = false;
+        },
 
         refreshFeatureRowInDataTable: function (feature) {
             var resultTable = this;
@@ -111,7 +119,7 @@
 
             // TODO check this
             tableApi.row(resultTable.getDomRowByData(feature)).invalidate();
-            tableApi.draw();
+            resultTable.drawWithoutTriggering();
         },
 
         initializeColumnTitles: function () {
