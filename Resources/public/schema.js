@@ -584,7 +584,6 @@
                 return matches.length > 0;
             });
             schema.reloadFeatures(true);
-            console.log("x");
         },
 
 
