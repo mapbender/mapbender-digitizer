@@ -247,7 +247,8 @@
 
         addSelectControls();
 
-        var onSearch = schema.limitDisplayedFeaturesToSearchResults ? schema.repopulateLayerWithFeatures.bind(schema) : null;
+        // dont use static bind in order to allow overriding
+        var onSearch = schema.limitDisplayedFeaturesToSearchResults ?  function(features) { schema.repopulateLayerWithFeatures(features) } : null;
         schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.doDefaultClickAction.bind(schema), onSearch);
 
         schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
@@ -583,6 +584,7 @@
                 return matches.length > 0;
             });
             schema.reloadFeatures(true);
+            console.log("x");
         },
 
 
