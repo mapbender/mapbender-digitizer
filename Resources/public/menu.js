@@ -27,17 +27,8 @@
                     // Override
                     updateAfterMove: schema.updateAfterMove.bind(schema),
 
-                    onFeatureChange: function (feature,type) {
+                    onFeatureChange: schema.onFeatureChange.bind(schema),
 
-                        console.assert(type === "add" || type === "donut" || type === "modify" || type === "move", "Type "+type+" is wrong in 'openFeatureEditDialog'");
-
-                        if (type === 'add' && schema.getSchemaByFeature(feature).openFormAfterEdit) {
-                            schema.openFeatureEditDialog(feature);
-                        } else if (schema.getSchemaByFeature(feature).openFormAfterModification) {
-                            schema.openFeatureEditDialog(feature);
-                        }
-
-                    },
                     getDefaultAttributes: function () {
                         return schema.getDefaultProperties();
                     },

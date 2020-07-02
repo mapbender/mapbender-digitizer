@@ -1234,6 +1234,17 @@
 
         },
 
+        onFeatureChange: function (feature,type) {
+            var schema = this;
+
+            console.assert(type === "add" || type === "donut" || type === "modify" || type === "move", "Type "+type+" is wrong in 'openFeatureEditDialog'");
+
+            if ((type === 'add' && schema.getSchemaByFeature(feature).openFormAfterEdit) || schema.getSchemaByFeature(feature).openFormAfterModification) {
+                schema.openFeatureEditDialog(feature);
+            }
+
+        },
+
 
         getDefaultProperties: function () {
             var schema = this;
