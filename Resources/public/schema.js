@@ -247,7 +247,7 @@
 
         addSelectControls();
 
-        var onSearch = schema.limitDisplayedFeaturesToSearchResults ? schema.schema.repopulateLayerWithFeatures.bind(schema) : null;
+        var onSearch = schema.limitDisplayedFeaturesToSearchResults ? schema.repopulateLayerWithFeatures.bind(schema) : null;
         schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.doDefaultClickAction.bind(schema), onSearch);
 
         schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
@@ -320,7 +320,7 @@
 
 
         //* Newly added properties
-        limitDisplayedFeaturesToSearchResults: false,
+        limitDisplayedFeaturesToSearchResults: false, // be careful, this may rapidly slow the application down
         disableFeatureHighlightInResultTable: false,
         revertChangedGeometryOnCancel: false,
         deactivateControlAfterModification: true,
@@ -823,7 +823,9 @@
             });
 
             // This is needed for repopluating when layer thinned out -> repopulateLayerWithFeatures
-            schema.features = schema.layer.features.slice(0);
+            if (schema.limitDisplayedFeaturesToSearchResults) {
+                schema.features = schema.layer.features.slice(0);
+            }
 
             schema.reloadFeatures();
 
