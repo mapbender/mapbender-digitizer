@@ -4,7 +4,7 @@
     $.widget("digitizer.resultTable", $["vis-ui-js"].resultTable, {
 
 
-        initializeResultTableEvents: function (selectControl, processFeature) {
+        initializeResultTableEvents: function (selectControl, processFeature, onSearch) {
             var resultTable = this;
 
             var tableApi = resultTable.getApi();
@@ -47,6 +47,12 @@
                     console.warn("No Feature in row", row);
                 }
 
+            });
+
+
+            onSearch && tableApi.on("search.dt",function() {
+                var features = tableApi.rows( { search : 'applied'} ).data();
+                typeof onSearch === "function" && onSearch(features);
             });
 
 

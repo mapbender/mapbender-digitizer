@@ -247,7 +247,8 @@
 
         addSelectControls();
 
-        schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.doDefaultClickAction.bind(schema));
+        var onSearch = schema.limitDisplayedFeaturesToSearchResults ? schema.schema.repopulateLayerWithFeatures.bind(schema) : null;
+        schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.doDefaultClickAction.bind(schema), onSearch);
 
         schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
         schema.elementContextMenu = new Mapbender.Digitizer.ElementContextMenu(schema);
@@ -319,6 +320,7 @@
 
 
         //* Newly added properties
+        limitDisplayedFeaturesToSearchResults: false,
         disableFeatureHighlightInResultTable: false,
         revertChangedGeometryOnCancel: false,
         deactivateControlAfterModification: true,
@@ -570,6 +572,19 @@
             }
         },
 
+        repopulateLayerWithFeatures: function(features) {
+            var schema = this;
+            // filter on schema.features, which keeps all features retrieved on 'getData'
+            // unfortunately, the parameter-'features' themselves cannot be simply added to the layer
+            schema.layer.features = schema.features.filter(function(feature){
+                var matches = features.filter(function(f) {
+                    return f.id == feature.id;
+                })
+                return matches.length > 0;
+            });
+            schema.reloadFeatures(true);
+        },
+
 
         mapHasActiveControlThatBlocksSelectControl: function () {
             var schema = this;
@@ -580,13 +595,18 @@
         },
 
 
-        reloadFeatures: function () {
+        reloadFeatures: function (ommitResultTable) {
             var schema = this;
             var layer = schema.layer;
             var features = schema.getLayerFeatures();
 
             layer.removeAllFeatures();
             layer.addFeatures(features);
+
+
+            if(ommitResultTable) {
+                return;
+            }
 
             schema.menu.resultTable.redrawResultTableFeatures(features, function(idx,feature,row) {
 
@@ -801,6 +821,9 @@
             schema.layer.features.forEach(function (feature) {
                 schema.introduceFeature(feature);
             });
+
+            // This is needed for repopluating when layer thinned out -> repopulateLayerWithFeatures
+            schema.features = schema.layer.features.slice(0);
 
             schema.reloadFeatures();
 
