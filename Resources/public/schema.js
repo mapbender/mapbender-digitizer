@@ -247,9 +247,7 @@
 
         addSelectControls();
 
-        // dont use static bind in order to allow overriding
-        var onSearch = schema.limitDisplayedFeaturesToSearchResults ?  function(features) { schema.repopulateLayerWithFeatures(features) } : null;
-        schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.doDefaultClickAction.bind(schema), onSearch);
+        schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.doDefaultClickAction.bind(schema));
 
         schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
         schema.elementContextMenu = new Mapbender.Digitizer.ElementContextMenu(schema);
@@ -321,7 +319,6 @@
 
 
         //* Newly added properties
-        limitDisplayedFeaturesToSearchResults: false, // be careful, this may rapidly slow the application down
         disableFeatureHighlightInResultTable: false,
         revertChangedGeometryOnCancel: false,
         deactivateControlAfterModification: true,
@@ -573,19 +570,6 @@
             }
         },
 
-        repopulateLayerWithFeatures: function(features) {
-            var schema = this;
-            // filter on schema.features, which keeps all features retrieved on 'getData'
-            // unfortunately, the parameter-'features' themselves cannot be simply added to the layer
-            schema.layer.features = schema.features.filter(function(feature){
-                var matches = features.filter(function(f) {
-                    return f.id == feature.id;
-                })
-                return matches.length > 0;
-            });
-            schema.reloadFeatures(true);
-        },
-
 
         mapHasActiveControlThatBlocksSelectControl: function () {
             var schema = this;
@@ -822,11 +806,6 @@
             schema.layer.features.forEach(function (feature) {
                 schema.introduceFeature(feature);
             });
-
-            // This is needed for repopluating when layer thinned out -> repopulateLayerWithFeatures
-            if (schema.limitDisplayedFeaturesToSearchResults) {
-                schema.features = schema.layer.features.slice(0);
-            }
 
             schema.reloadFeatures();
 

@@ -3,7 +3,7 @@
     $.widget("digitizer.resultTable", $["vis-ui-js"].resultTable, {
 
 
-        initializeResultTableEvents: function (selectControl, processFeature, onSearch) {
+        initializeResultTableEvents: function (selectControl, processFeature) {
             var resultTable = this;
 
             var tableApi = resultTable.getApi();
@@ -48,13 +48,6 @@
 
             });
 
-
-            onSearch && tableApi.on("search.dt",function() {
-                var features = tableApi.rows( { search : 'applied'} ).data();
-                !resultTable.disableSearchTriggering && typeof onSearch === "function" && onSearch(features);
-            });
-
-
         },
 
         hoverInResultTable: function (feature, highlight) {
@@ -87,7 +80,7 @@
                 return !feature.isNew && !feature.cluster;
             });
             tableApi.rows.add(featuresToRedraw);
-            resultTable.drawWithoutTriggering();
+            tableApi.draw();
 
             tableApi.rows(function (idx, feature, row) {
 
@@ -105,13 +98,6 @@
             return row;
         },
 
-        drawWithoutTriggering: function() {
-            var resultTable = this;
-            var tableApi = resultTable.getApi();
-            resultTable.disableSearchTriggering = true;
-            tableApi.draw();
-            resultTable.disableSearchTriggering = false;
-        },
 
         refreshFeatureRowInDataTable: function (feature) {
             var resultTable = this;
@@ -119,7 +105,8 @@
 
             // TODO check this
             tableApi.row(resultTable.getDomRowByData(feature)).invalidate();
-            resultTable.drawWithoutTriggering();
+            tableApi.draw();
+
         },
 
         initializeColumnTitles: function () {
