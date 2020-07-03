@@ -6,7 +6,7 @@
 
         var menu = this;
         menu.schema = schema;
-        var frame = menu.frame = $("<div />").addClass('frame');
+        var frame = menu.frame = $("<div />").addClass('frame').addClass('schema-'+schema.schemaName);
 
 
         var appendToolset = function () {
