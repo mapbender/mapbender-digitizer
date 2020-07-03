@@ -109,6 +109,16 @@
 
         },
 
+        deleteFeatureRowInDataTable: function (feature) {
+            var resultTable = this;
+            var tableApi = resultTable.getApi();
+
+            var row = tableApi.row(resultTable.getDomRowByData(feature));
+            row.remove();
+            tableApi.draw();
+
+        },
+
         initializeColumnTitles: function () {
             var resultTable = this;
 
