@@ -3,10 +3,53 @@
         return typeof obj[key] !== 'undefined';
     }
 
+    var eventNameList = [
+        'load',
+        'focus', 'blur',
+        'input', 'change', 'paste',
+        'click', 'dblclick', 'contextmenu',
+        'keydown', 'keypress', 'keyup',
+        'dragstart','ondrag','dragover','drop',
+        'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
+        'touchstart', 'touchmove', 'touchend','touchcancel'
+    ];
+
+    function addEvents(element, declaration) {
+        $.each(declaration, function(k, value) {
+            if(typeof value == 'function') {
+                element.on(k, value);
+            } else if(typeof value == "string" && _.contains(eventNameList, k)) {
+                var elm = element;
+                if(elm.hasClass("form-group")) {
+                    elm = elm.find("input,.form-control");
+                }
+                if(k === 'load'){
+                    setTimeout(function(){
+                        $(elm).ready(function(e) {
+                            var el = elm;
+                            var result = false;
+                            eval(value);
+                            result && e.preventDefault();
+                            return result;
+                        });
+                    },1);
+                }else{
+                    elm.on(k, function(e) {
+                        var el = $(this);
+                        var result = false;
+                        eval(value);
+                        result && e.preventDefault();
+                        return result;
+                    });
+                }
+            }
+        });
+    }
+
     function copyToClipboard(text) {
         if (window.clipboardData && window.clipboardData.setData) {
             // IE specific code path to prevent textarea being shown while dialog is visible.
-            return clipboardData.setData("Text", text);
+            return window.clipboardData.setData("Text", text);
 
         } else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
             var textarea = document.createElement("textarea");
@@ -68,8 +111,8 @@
                             var evaluated = eval(item.mandatory);
                             var isFunction = evaluated instanceof Function;
                             if (isFunction) {
-                                hasValue = evaluated.apply(inputField, []);
-                                console.log(hasValue, "!");
+                                var isMandatory = evaluated.apply(inputField, []);
+                                hasValue = (isMandatory && hasValue) || !isMandatory;
                             } else {
                                 hasValue = evaluated.exec(value) != null;
                             }
@@ -119,7 +162,60 @@
 
                 return container;
             },
-        }
+
+
+
+        },
+
+
+        genElement: function(item) {
+
+            var widget = this;
+            var type = has(widget.declarations, item.type) ? item.type : 'html';
+            var declaration = widget.declarations[type];
+            var element = declaration(item, widget.declarations, widget);
+
+            if(has(item, 'cssClass')) {
+                element.addClass(item.cssClass);
+            }
+
+            if(has(item, 'attr')) {
+                $.each(item.attr, function(key, val) {
+                    element.attr(key,val);
+                });
+            }
+
+            if(typeof item == "object") {
+                addEvents(element, item);
+            }
+
+            if(has(item, 'css')) {
+
+                element.css(item.css);
+            }
+
+            element.data('item', item);
+
+            if(has(item, 'mandatory')){
+                // ** This is injected code
+                if (typeof item.mandatory == "string") {
+                    var func =  eval(item.mandatory);
+                    if (typeof func != "function") {
+                        return;
+                    }
+                    if (func.apply()) {
+                        element.addClass('has-warning');
+                        console.log("applied",func,2123);
+                    }
+                } else {
+                    //**
+                    element.addClass('has-warning');
+                }
+
+            }
+
+            return element;
+        },
 
     });
 
