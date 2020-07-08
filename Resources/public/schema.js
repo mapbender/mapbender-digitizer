@@ -459,11 +459,19 @@
 
             schema.tableFields = schema.tableFields || schema.getDefaultTableFields();
 
-            _.each(schema.tableFields, function (tableField) {
+            _.each(schema.tableFields, function (tableField,index) {
 
                 if (tableField.type === "image") {
                     tableField.render = function (imgName, renderType, feature, x) {
                         return $("<img style='width: 20px'/>").attr('src', Mapbender.Digitizer.Utilities.getAssetsPath(tableField.path + imgName))[0].outerHTML;
+                    }
+                }
+
+                if (tableField.type == "datetime") {
+                    tableField.data = function(feature) {
+                        var d = new Date(feature.data[index]);
+                        return d.getDate()  + "." + (d.getMonth()+1) + "." + d.getFullYear() + " " +
+                            d.getHours() + ":" + d.getMinutes()+":"+d.getSeconds();
                     }
                 }
             });
