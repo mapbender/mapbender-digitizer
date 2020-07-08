@@ -40,7 +40,7 @@
                 var feature = row.data();
 
                 if (feature) {
-                    selectControl.highlight(feature);
+                    selectControl.highlight(feature,true);
                     processFeature(feature);
                 } else {
                     console.warn("No Feature in row", row);
