@@ -25,7 +25,9 @@
                 injectedMethods: {
 
                     // Override
-                    updateAfterMove: schema.updateAfterMove.bind(schema),
+                    updateAfterMove: function(feature) {
+                        return schema.updateAfterMove(feature);
+                    },
 
                     onFeatureChange: schema.onFeatureChange.bind(schema),
 
