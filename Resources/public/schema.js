@@ -1243,7 +1243,12 @@
         },
 
         /** Override **/
-        updateAfterMove: function () {
+        updateAfterMove: function (feature) {
+
+        },
+
+        /** Override **/
+        updateOnMove: function (feature,px) {
 
         },
 

@@ -24,6 +24,11 @@
 
                 injectedMethods: {
 
+
+                    updateOnMove: function(feature,px)  {
+                        return schema.updateOnMove(feature,px);
+                    },
+
                     // Override
                     updateAfterMove: function(feature) {
                         return schema.updateAfterMove(feature);

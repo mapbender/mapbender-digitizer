@@ -282,6 +282,10 @@
 
                 },
 
+                onDrag: function(feature,px) {
+                    return controlFactory.injectedMethods.updateOnMove(feature,px);
+                },
+
                 onComplete: function (feature) {
                     controlFactory.injectedMethods.setModifiedState(feature, this);
                     controlFactory.injectedMethods.onFeatureChange(feature,'move');
