@@ -313,9 +313,53 @@ class Digitizer extends BaseElement
 
     protected function injectFormSearch(&$request) {
 
+        $schemaName  = $request["schema"];
+        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
 
         if (isset($request["where"])) {
             unset($request["where"]);
+        }
+
+        if (isset($request["search"])) {
+            $connection = $featureType->getConnection();
+            $schema = $this->getSchemaByName($schemaName);
+            $vars = $this->escapeValues($request["search"], $connection);
+
+            $whereConditions = array();
+            foreach ($schema['search']['conditions'] as $condition) {
+                $condition = new Condition($condition);
+                if ($condition->isSql()) {
+                    $whereConditions[] = $condition->getOperator();
+                    $whereConditions[] = '(' . static::evalString($condition->getCode(), $vars) . ')';
+                }
+
+                if ($condition->isSqlArray()) {
+                    $subConditions = array();
+                    $arrayVars     = $vars[ $condition->getKey() ];
+
+                    if (!is_array($arrayVars)) {
+                        if ($arrayVars == null) {
+                            continue;
+                        }
+                        $arrayVars = array($arrayVars);
+                    }
+
+                    foreach ($arrayVars as $value) {
+                        $subConditions[] = '(' .
+                            static::evalString(
+                                $condition->getCode(),
+                                array_merge($vars, array('value' => $value)))
+                            . ')';
+                    }
+                    $whereConditions[] = 'AND';
+                    $whereConditions[] = '(' . implode(' ' . $condition->getOperator() . ' ', $subConditions) . ')';
+                }
+            }
+
+            // Remove first operator
+            array_splice($whereConditions, 0, 1);
+
+            $request["where"] = implode(' ', $whereConditions);
         }
 
     }

@@ -419,6 +419,63 @@
                 zoomScale: null
             };
 
+            if (schema.search.form) {
+
+                DataUtil.eachItem(schema.search.form, function (item) {
+
+                    if (item.mapping) {
+                        var value = item.mapping[item.name];
+
+                        if (value && item.options) {
+                            var option = item.options.find(function (option) {
+                                return option.___value && option.___value.toLowerCase() === value.toLowerCase()
+                            });
+                            if (option) {
+                                item.value = option.___value;
+                            } else {
+                                $.notify(value + " is not a valid value for " + item.name);
+                            }
+                        }
+
+                    }
+
+                    item.change = function (options) {
+
+                        schema.getData({
+                            //ommitIntersect: true,
+
+                        }).done();
+                    };
+
+                    item.keyup = function()  {
+                        item.change.apply(this,arguments);
+                    }
+
+                    if (item.type === 'select' && item.ajax) {
+
+                        item.ajax.dataType = 'json';
+                        item.ajax.url = widget.getElementURL() + 'form/select';
+                        item.ajax.data = function (params) {
+
+                            if (params && params.term) {
+                                // Save last given term to get highlighted in templateResult
+                                item.ajax.lastTerm = params.term;
+                            }
+                            var ret = {
+                                schema: schema.schemaName,
+                                item: item,
+                                form: schema.menu.getSearchData(),
+                                params: params
+                            };
+
+                            return ret;
+                        };
+
+                    }
+                });
+            }
+
+
         },
 
         getGeomType: function () {
