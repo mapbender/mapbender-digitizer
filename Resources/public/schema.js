@@ -171,6 +171,12 @@
                 },
 
                 highlight: function (feature,ommitResultTable) {
+
+                    if (schema.selectControl.highlightedFeature) {
+                        schema.selectControl.unhighlight(schema.selectControl.highlightedFeature);
+                    }
+                    schema.selectControl.highlightedFeature = feature;
+
                     feature.isHighlighted = true;
 
                     console.assert(!!feature, "Feature must be set");
@@ -190,6 +196,7 @@
                 },
                 unhighlight: function (feature,ommitResultTable) {
 
+                    schema.selectControl.highlightedFeature = null;
                     feature.isHighlighted = false;
 
                     if (!schema.layer.features.includes(feature)) {
