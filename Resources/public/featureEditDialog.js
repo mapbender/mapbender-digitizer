@@ -29,7 +29,12 @@
                 event: 'Style'
             };
         }
-
+        if (schema.printable && this.printClient) {
+            buttons.printButton = {
+                title: 'feature.print',
+                event: 'Print'
+            };
+        }
         if (schema.allowEditData) {
             buttons.saveButton = {
                 title: 'feature.save.title',
@@ -68,6 +73,11 @@
 
         eventListeners[configuration.PREFIX + '.FeatureEditDialog.Style'] = function (event) {
             schema.openChangeStyleDialog(feature);
+        };
+
+        eventListeners[configuration.PREFIX + '.FeatureEditDialog.Print'] = function (event) {
+            var printClient = schema.widget.printClient;
+            printClient.printDigitizerFeature(feature, schema);
         };
 
 
