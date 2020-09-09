@@ -67,11 +67,6 @@ class Digitizer extends DataManagerElement
 
     public function getFrontendTemplatePath($suffix = '.html.twig')
     {
-        return "MapbenderDigitizerBundle:Element:digitizer{$suffix}";
-    }
-
-    public function getFrontendTemplatePath($suffix = '.html.twig')
-    {
         return 'MapbenderDigitizerBundle:Element:digitizer.html.twig';
     }
 
