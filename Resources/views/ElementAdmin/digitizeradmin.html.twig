@@ -1,35 +1,15 @@
 <div class="elementForm elementFormDigitizer">
     <style media="all">
-        .elementFormDigitizer label.labelInput {
+        .elementFormDigitizer label.block {
             display: block;
             margin: 0;
-            height: 23px;
         }
 
-        .elementFormDigitizer .inputWrapper {
+        .elementFormDigitizer .code-yaml {
             width: 100%;
         }
-
-        .elementFormDigitizer .inputWrapper.code-yaml textarea {
-            height: 325px;
-        }
-
-        .elementFormDigitizer .dropdown {
-            min-width: auto;
-            width: 100%;
-        }
-
-        .iconCheckbox {
-            margin-top:3px;
-        }
-
-        .checkboxLabel {
-            white-space: nowrap;
-            margin-left: 20px;
-        }
-
     </style>
-    <script language="JavaScript">
+    <script type="text/javascript">
         $(function(){
             CodeMirror.defineMode("yaml", function() {
 
@@ -160,14 +140,16 @@
             var yamlEditorElement = $(".code-yaml > div", $popupForm);
 
             popupContainer.animate({
-                width:  '100%'
+                width:  '100%',
+                height: '100%'
             }, 350);
 
             yamlEditorElement.animate({
-                height: $(window).height() - 375
+                height: $(window).height() - 382
             }, 350);
         })
     </script>
     {{ form_row(form.title) }}
-    {{ form_rest(form.configuration) }}
+    {{ form_row(form.configuration.target) }}
+    {{ form_row(form.configuration.schemes, {'label_attr': {'class': 'block'}}) }}
 </div>
