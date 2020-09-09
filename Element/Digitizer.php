@@ -70,6 +70,12 @@ class Digitizer extends DataManagerElement
         return 'MapbenderDigitizerBundle:Element:digitizer.html.twig';
     }
 
+    public static function getDefaultConfiguration()
+    {
+        return array(
+            "target" => null
+        );
+    }
 
     /**
      * @inheritdoc
