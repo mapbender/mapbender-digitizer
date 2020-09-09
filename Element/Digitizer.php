@@ -28,7 +28,7 @@ class Digitizer extends DataManagerElement
     /**
      * @inheritdoc
      */
-    static public function getClassTitle()
+    public static function getClassTitle()
     {
         return "Digitizer";
     }
@@ -36,17 +36,9 @@ class Digitizer extends DataManagerElement
     /**
      * @inheritdoc
      */
-    static public function getClassDescription()
+    public static function getClassDescription()
     {
-        return "Digitizer";
-    }
-
-    /**
-     * @inheritdoc
-     */
-    static public function getTags()
-    {
-        return array();
+        return "Georeferencing and Digitizing";
     }
 
     /**
@@ -78,18 +70,9 @@ class Digitizer extends DataManagerElement
         return "MapbenderDigitizerBundle:Element:digitizer{$suffix}";
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function render()
+    public function getFrontendTemplatePath($suffix = '.html.twig')
     {
-        return $this->container->get('templating')
-            ->render('MapbenderDigitizerBundle:Element:digitizer.html.twig',
-                array(
-                    'id'            => $this->getId(),
-                    'title'         => $this->getTitle(),
-                    'configuration' => $this->getConfiguration()
-                ));
+        return 'MapbenderDigitizerBundle:Element:digitizer.html.twig';
     }
 
 
