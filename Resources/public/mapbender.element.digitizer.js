@@ -22,7 +22,7 @@
             }
 
             this.widget = new Mapbender.Digitizer(this.element,this.options);
-
+            Mapbender.elementRegistry.waitReady(widget.options.target).then(widget.setup.bind(widget));
             this._trigger('ready');
 
         },

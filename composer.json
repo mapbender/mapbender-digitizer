@@ -22,6 +22,9 @@
         "mapbender/data-source": "@dev"
     },
     "minimum-stability": "dev",
+    "conflict": {
+        "mapbender/mapbender": "<3.0.8"
+    },
     "config": {
         "bin-dir": "bin"
     },

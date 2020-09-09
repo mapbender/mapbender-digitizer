@@ -3,40 +3,32 @@
 
     Mapbender.Digitizer.printPlugin = {
 
-        printDigitizerFeature: function (schemaName, featureId) {
+        printDigitizerFeature: function (feature, schema) {
             var d = $.Deferred();
             this.digitizerData = {
-                digitizer_feature: {
-                    id: featureId,
-                    schemaName: schemaName
-                }
+                digitizer_feature: Object.assign({}, feature, {
+                    schemaName: schema.schemaName
+                })
             };
 
-            this._getDigitizerTemplates(schemaName, d);
+            var self = this;
+            this._getDigitizerTemplates(schema.schemaName, d).then(function() {
+                self.open();
+            });
             return d;
         },
 
         _getDigitizerTemplates: function (schemaName, defered) {
-
             var self = this;
 
-            var url = this.elementUrl + 'getDigitizerTemplates';
-            $.ajax({
+            var url =  this.elementUrl + 'getDigitizerTemplates';
+            return $.ajax({
                 url: url,
                 type: 'GET',
                 data: {schemaName: schemaName},
-                success: function (data) {
+                success: function(data) {
                     self._overwriteTemplateSelect(data);
-                    // open changed dialog
-                    self.open();
-                    self.popup.$element.one('close', function () {
-                        defered.resolve();
-                    });
-                },
-                error: function() {
-                  console.error("Print Request failed");
-                  defered.resolve();
-                },
+                }
             });
         },
 
