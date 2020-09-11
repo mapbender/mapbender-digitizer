@@ -13,7 +13,7 @@
 
         Mapbender.DataManager.Scheme.apply(schema, arguments);
 
-        schema.toolset = options.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.getGeomType());
+        schema.toolset = options.toolset;
 
         schema.openFormAfterEdit = options.openFormAfterEdit || false;
 

@@ -67,7 +67,7 @@
             var schema = toolSet.schema;
             var element = $(toolSet.element);
             var controlFactory = toolSet.controlFactory;
-            var buttons = toolSet.buttons;
+            var buttons = toolSet.buttons || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.getGeomType());
 
             buttons.forEach(function (rawButton) {
 
