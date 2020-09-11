@@ -71,6 +71,13 @@
             }
         },
 
+        _buildTableRowButtons: function(schema) {
+            var schema_ = this.widget.createScheme_(schema);
+            var menu = schema_.menu;
+            return menu.generateResultDataTableButtons();
+        },
+
+
         __formatting_dummy: null
     });
 
