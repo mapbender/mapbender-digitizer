@@ -32,16 +32,4 @@
 
 
     };
-
-    var RBushUpdateOrig = ol.structs.RBush.prototype.update;
-
-    ol.structs.RBush.prototype.update = function () {
-        try {
-            RBushUpdateOrig.apply(this, arguments);
-        } catch (e) {
-        }
-    };
-
-
-
 })();
