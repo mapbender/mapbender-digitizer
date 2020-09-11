@@ -146,6 +146,14 @@ class Digitizer extends DataManagerElement
     }
 
 
+    /**
+     * Digitizer renames "dataStore" to "featureType" in schema configs.
+     * @return string
+     */
+    protected function getDataStoreKeyInSchemaConfig()
+    {
+        return 'featureType';
+    }
 
 
 }
