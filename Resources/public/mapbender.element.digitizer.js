@@ -27,9 +27,14 @@
 
         },
 
+        reveal: function() {
+            this.widget.activate(true);
+        },
 
-
-
+        hide: function() {
+            this.widget.deactivate();
+        },
+        __formatting_dummy: null
     });
 
 })(jQuery);
