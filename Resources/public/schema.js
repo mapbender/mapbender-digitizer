@@ -273,6 +273,56 @@
     Mapbender.Digitizer.Scheme.prototype = Object.create(Mapbender.DataManager.Scheme.prototype);
     Mapbender.Digitizer.Scheme.prototype.constructor = Mapbender.DataManager.Scheme;
 
+    Object.assign(Mapbender.Digitizer.Scheme.prototype, {
+        getData: function (extent, resolution, projection) {
+
+            var schema = this;
+            var widget = schema.widget;
+
+            var request = {
+                srid: widget.getProjectionCode(),
+                maxResults: schema.maxResults,
+                schema: schema.schemaName
+            };
+
+            var selectXHR = widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
+
+            return selectXHR;
+        },
+
+
+        onFeatureCollectionLoaded: function (featureCollection) {
+            var schema = this;
+
+            if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
+                Mapbender.error(Mapbender.trans("mb.digitizer.features.loading.error"), featureCollection);
+                return;
+            }
+
+            var geoJsonReader = new ol.format.GeoJSONWithSeperateData();
+
+            var newFeatures = geoJsonReader.readFeaturesFromObject({
+                type: "FeatureCollection",
+                features: featureCollection.features
+            });
+
+            schema.integrateFeatures(newFeatures);
+
+
+        },
+
+        integrateFeatures: function (features) {
+            var schema = this;
+
+            // TODO find a scheme-specific, more appropriate element to store triggers than map
+           $(schema).trigger({type: schema.widget.type+".FeaturesLoaded", features: features});
+
+        }
+    });
+
+
+
+
     Mapbender.Digitizer.Scheme.prototype.getDefaultStyles_ = function () {
         var styles = {
 
