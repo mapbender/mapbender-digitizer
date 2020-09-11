@@ -315,6 +315,27 @@
         return schema.layer.getSource().getFeatures().includes(feature);
     };
 
+    Mapbender.Digitizer.Scheme.prototype.createDefaultTableFields_ = function () {
+        var schema = this;
+        var tableFields = [];
+
+        tableFields.push({
+            data: schema.featureType.uniqueId,
+            label: 'Nr.',
+            width: '20%'
+        });
+        if (schema.featureType.name) {
+            tableFields.push({
+                data: schema.featureType.name,
+                label: 'Name',
+                width: '80%'
+            });
+        }
+        return tableFields;
+    };
+
+
+
     Mapbender.Digitizer.Scheme.prototype.initializeStyles_ = function () {
         var schema = this;
 
