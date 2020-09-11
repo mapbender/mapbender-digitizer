@@ -121,9 +121,9 @@ class Digitizer extends DataManagerElement
 
 
             )),
-            'trans' => array(
-                'MapbenderDigitizerBundle:Element:digitizer.json.twig',
-            ),
+            'trans' => array_merge($dataManagerAssets['trans'], array(
+                'mb.digitizer.*',
+            )),
         );
     }
 
