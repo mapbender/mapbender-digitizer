@@ -360,11 +360,6 @@
         return styles;
     };
 
-    Mapbender.Digitizer.Scheme.prototype.featureExists_ = function (feature) {
-        var schema = this;
-        return schema.layer.getSource().getFeatures().includes(feature);
-    };
-
     Mapbender.Digitizer.Scheme.prototype.createDefaultTableFields_ = function () {
         var schema = this;
         var tableFields = [];
@@ -686,13 +681,6 @@
         var map = widget.map;
 
         $(schema).trigger({type: "Digitizer.StartFeatureSave", feature: feature });
-
-        if (!schema.featureExists_(feature)) {
-            $.notify('Feature doesn\'t exist');
-            widget.currentPopup && widget.currentPopup.popupDialog('close');
-
-            return $.Deferred().reject();
-        }
 
         var createNewFeatureWithDBFeature = function (feature, response) {
 
