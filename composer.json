@@ -14,7 +14,7 @@
         "blueimp/jquery-file-upload": "9.*",
         "debugteam/bootstrap-colorpicker": "1.x",
         "mapbender/data-manager": "dev-ol4",
-        "mapbender/data-source": "0.*",
+        "mapbender/data-source": "~0.0.35 || ~0.1",
         "mapbender/ol4-extensions" : "dev-master"
     },
     "conflict": {
