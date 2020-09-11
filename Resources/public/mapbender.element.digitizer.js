@@ -11,29 +11,43 @@
             debug: false,
             fileURI: "uploads/featureTypes",
             schemes: {},
-            target: null,
+            target: null
         },
+        mbMap: null,
+        active: false,
 
 
         _create: function () {
-
-            if (!Mapbender.checkTarget("mbDigitizer", this.options.target)) {
-                return;
-            }
-
-            this.widget = new Mapbender.Digitizer(this.element,this.options);
-            Mapbender.elementRegistry.waitReady(widget.options.target).then(widget.setup.bind(widget));
-            this._trigger('ready');
-
+            var widget = this;
+            var target = this.options.target;
+            Mapbender.elementRegistry.waitReady(target).then(function(mbMap) {
+                // Call DataManager constructor (ends with triggering ready...)
+                widget._super();
+                widget.widget = new Mapbender.Digitizer(widget.element, widget.options);
+                if (widget.options.displayOnInactive) {
+                    widget.activate();
+                }
+            }, function() {
+                Mapbender.checkTarget("mbDigitizer", target);
+            });
         },
-
         reveal: function() {
-            this.widget.activate(true);
+            this.activate();
+        },
+        hide: function() {
+            this.deactivate();
+        },
+        activate: function() {
+            if (!this.active) {
+                this.widget.getCurrentSchema().activateSchema(true);
+                this.active = true;
+            }
+        },
+        deactivate: function() {
+            this.widget.getCurrentSchema().deactivateSchema(true);
+            this.active = false;
         },
 
-        hide: function() {
-            this.widget.deactivate();
-        },
         __formatting_dummy: null
     });
 
