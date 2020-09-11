@@ -54,21 +54,24 @@
             this._super(schema);
             var schema_ = this.widget.createScheme_(schema);
             schema_.activateSchema(); // triggers schema event
-            schema_.highlightControl.setActive(true);    // ???
-            schema_.selectControl.setActive(true);       // ???
+            this._toggleSchemaInteractions(schema_, true);
             schema_.layer.setVisible(true);
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
             var schema_ = this.widget.createScheme_(schema);
             schema_.deactivateSchema();    // triggers schema event
-            schema_.highlightControl.setActive(false);
-            schema_.selectControl.setActive(false);
-
-            schema_.deactivateInteractions();
+            this._toggleSchemaInteractions(schema_, false);
             if (!(this.options.displayOnInactive || !schema_.displayPermanent)) {
                 schema_.layer.setVisible(false);
             }
+        },
+        _toggleSchemaInteractions: function(schema, state) {
+            if (schema.menu.toolSet.activeInteraction) {
+                schema.menu.toolSet.activeInteraction.setActive(state);
+            }
+            schema.highlightControl.setActive(state);
+            schema.selectControl.setActive(state);
         },
 
         _buildTableRowButtons: function(schema) {

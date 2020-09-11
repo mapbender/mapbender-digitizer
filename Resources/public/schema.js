@@ -484,13 +484,6 @@
         schema.popupConfiguration = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
     };
 
-    Mapbender.Digitizer.Scheme.prototype.deactivateInteractions = function () {
-        var schema = this;
-        schema.menu.toolSet.activeInteraction && schema.menu.toolSet.activeInteraction.setActive(false);
-        schema.highlightControl.setActive(false);
-        schema.selectControl.setActive(false);
-    };
-
     Mapbender.Digitizer.Scheme.prototype.createMenu = function ($element) {
         var schema = this;
         schema.menu = new Mapbender.Digitizer.Menu(schema);
