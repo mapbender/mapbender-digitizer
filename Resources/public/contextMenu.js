@@ -9,15 +9,6 @@
         });
         widget.map.addControl(contextmenu);
 
-        $(widget).on('Digitizer.activateSchema',function(event) {
-            var schema = event.schema;
-           if (schema.useContextMenu) {
-                contextmenu.enable();
-           } else {
-               contextmenu.disable();
-           }
-        });
-
         widget.map.getViewport().addEventListener('contextmenu', function (e) {
             var schema = widget.getCurrentSchema();
             e.preventDefault();

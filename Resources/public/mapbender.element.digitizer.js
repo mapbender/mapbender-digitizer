@@ -41,7 +41,7 @@
                 $.extend(self.printClient, Mapbender.Digitizer.printPlugin);
             });
             this.widget = new Mapbender.Digitizer(self.element, self.options);
-            this.widget.setup()
+            this.contextMenu = new Mapbender.Digitizer.MapContextMenu({map: this.mbMap.model.olMap});
             if (this.options.displayOnInactive) {
                 this.activate();
             }
@@ -87,6 +87,11 @@
             }
             schema.highlightControl.setActive(state);
             schema.selectControl.setActive(state);
+            if (state && schema.useContextMenu) {
+                this.contextMenu.enable();
+            } else {
+                this.contextMenu.disable();
+            }
         },
         _updateToolset: function($container, schema) {
             this._super($container, schema);
