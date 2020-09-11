@@ -15,18 +15,10 @@
         "debugteam/bootstrap-colorpicker": "1.x",
         "mapbender/data-manager": "dev-ol4",
         "mapbender/data-source": "0.*",
-        "phayes/geophp": "1.2",
         "mapbender/ol4-extensions" : "dev-master"
     },
-    "require-dev": {
-        "mapbender/data-source": "@dev"
-    },
-    "minimum-stability": "dev",
     "conflict": {
         "mapbender/mapbender": "<3.0.8"
-    },
-    "config": {
-        "bin-dir": "bin"
     },
     "autoload": {
         "psr-4": {"Mapbender\\DigitizerBundle\\": "."}
