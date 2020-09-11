@@ -14,8 +14,8 @@
             target: null
         },
         mbMap: null,
+        printClient: null,
         active: false,
-
 
         _create: function () {
             this._super();
