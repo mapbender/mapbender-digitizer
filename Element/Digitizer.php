@@ -85,40 +85,34 @@ class Digitizer extends DataManagerElement
 
         $dataManagerAssets = parent::getAssets();
 
-        $mainFiles = array('mapbender.element.digitizer', 'digitizer', 'toolset', 'schema',
-            'menu', 'contextMenu', 'utilities',
-            'featureEditDialog', 'controlFactory', 'featureStyleEditor',
-        );
-
-
-        $js = array();
-
-        foreach ($mainFiles as $file) {
-            $js[] = "@MapbenderDigitizerBundle/Resources/public/$file.js";
-        }
-
-        $js = array_merge($js, array(
-            '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
-            '../../vendor/mapbender/ol4-extensions/drawdonut.js',
-            '../../vendor/mapbender/ol4-extensions/styleConverter.js',
-            '../../vendor/mapbender/ol4-extensions/geoJSONWithSeperateData.js',
-            '../../vendor/mapbender/ol4-extensions/setStyleWithLabel.js',
-            '../../vendor/mapbender/ol4-extensions/selectableModify.js',
-            '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
-            '/components/jquery-context-menu/jquery-context-menu-built.js',
-            '/components/select2/select2-built.js',
-            '/components/select2/dist/js/i18n/de.js',
-            '@MapbenderDigitizerBundle/Resources/public/polyfill/setprototype.polyfill.js',
-            '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
-            '@MapbenderDigitizerBundle/Resources/public/lib/jsts.min.js',
-            '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.js',
-            '@MapbenderDigitizerBundle/Resources/public/lib/layerManager.js',
-
-        ));
-
-
         return array(
-            'js' => array_merge($dataManagerAssets["js"],$js),
+            'js' => array_merge($dataManagerAssets["js"], array(
+                "@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js",
+                "@MapbenderDigitizerBundle/Resources/public/digitizer.js",
+                "@MapbenderDigitizerBundle/Resources/public/toolset.js",
+                "@MapbenderDigitizerBundle/Resources/public/schema.js",
+                "@MapbenderDigitizerBundle/Resources/public/menu.js",
+                "@MapbenderDigitizerBundle/Resources/public/contextMenu.js",
+                "@MapbenderDigitizerBundle/Resources/public/utilities.js",
+                "@MapbenderDigitizerBundle/Resources/public/featureEditDialog.js",
+                "@MapbenderDigitizerBundle/Resources/public/controlFactory.js",
+                "@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js",
+                '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
+                '../../vendor/mapbender/ol4-extensions/drawdonut.js',
+                '../../vendor/mapbender/ol4-extensions/styleConverter.js',
+                '../../vendor/mapbender/ol4-extensions/geoJSONWithSeperateData.js',
+                '../../vendor/mapbender/ol4-extensions/setStyleWithLabel.js',
+                '../../vendor/mapbender/ol4-extensions/selectableModify.js',
+                '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
+                '/components/jquery-context-menu/jquery-context-menu-built.js',
+                '/components/select2/select2-built.js',
+                '/components/select2/dist/js/i18n/de.js',
+                '@MapbenderDigitizerBundle/Resources/public/polyfill/setprototype.polyfill.js',
+                '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
+                '@MapbenderDigitizerBundle/Resources/public/lib/jsts.min.js',
+                '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.js',
+                '@MapbenderDigitizerBundle/Resources/public/lib/layerManager.js',
+            )),
             'css' => array_merge($dataManagerAssets["css"], array(
                 '/components/select2/select2-built.css',
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
