@@ -140,7 +140,7 @@ class Digitizer extends DataManagerElement
     /**
      * @return string
      */
-    protected function getFileUri()
+    protected function getDefaultUploadsPath()
     {
         return $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
     }
