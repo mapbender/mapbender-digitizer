@@ -25,6 +25,9 @@ class DigitizerAdminType extends AbstractType
                 'element_class' => 'Mapbender\CoreBundle\Element\Map',
                 'application'   => $options['application'],
                 'required'      => false,
+                // dummy property path required for compatibility for TargetElementType
+                // on Mapbender <=3.0.8.4 (no longer required on 3.0.8.5 RC and higher)
+                'property_path' => '[target]',
             ))
            ->add('useAllScheme','checkbox',array('required' => false, 'label' => 'mb.digitizer.useAllScheme'))
             ->add('displayOnInactive','checkbox',array('required' => false, 'label' => 'mb.digitizer.displayOnInactive'))
