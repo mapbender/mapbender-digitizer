@@ -97,7 +97,6 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/featureEditDialog.js",
                 "@MapbenderDigitizerBundle/Resources/public/controlFactory.js",
                 "@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js",
-                '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
                 '../../vendor/mapbender/ol4-extensions/drawdonut.js',
                 '../../vendor/mapbender/ol4-extensions/styleConverter.js',
                 '../../vendor/mapbender/ol4-extensions/geoJSONWithSeperateData.js',
