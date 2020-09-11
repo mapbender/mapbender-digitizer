@@ -73,7 +73,35 @@
             schema.highlightControl.setActive(state);
             schema.selectControl.setActive(state);
         },
-
+        _updateToolset: function($container, schema) {
+            this._super($container, schema);
+            var geomType = schema.featureType.geomType;
+            var toolButtonConfigs = schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);
+            for (var i = 0; i < toolButtonConfigs.length; ++i) {
+                var rawButton = toolButtonConfigs[i];
+                var toolName = rawButton.type;
+                var toolExists = typeof (Mapbender.Digitizer.DigitizingControlFactory.prototype[toolName]) === 'function';
+                if (!toolExists) {
+                    console.warn("interaction " + toolName + " does not exist");
+                    continue;
+                }
+                var iconClass = "icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1').toLowerCase(); // @todo: use font awesome css
+                var tooltip = Mapbender.trans('mb.digitizer.toolset.' + geomType + '.' + rawButton.type);
+                var $button = $(document.createElement('button'))
+                    .attr({
+                        type: 'button',
+                        'data-toolname': toolName,
+                        title: tooltip
+                    })
+                    .addClass('-fn-toggle-tool')
+                    .addClass(iconClass)    // @todo: icon inside, not on button
+                    .data({
+                        schema: schema
+                    })
+                ;
+                $container.append($button);
+           }
+        },
         _buildTableRowButtons: function(schema) {
             var schema_ = this.widget.createScheme_(schema);
             var menu = schema_.menu;
