@@ -99,8 +99,6 @@ class Digitizer extends DataManagerElement
 
         $js = array_merge($js, array(
             '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
-            '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
-            '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
             '../../vendor/mapbender/ol4-extensions/drawdonut.js',
             '../../vendor/mapbender/ol4-extensions/styleConverter.js',
             '../../vendor/mapbender/ol4-extensions/geoJSONWithSeperateData.js',
