@@ -83,7 +83,12 @@ class Digitizer extends DataManagerElement
     public function getAssets()
     {
 
-        $dataManagerAssets = parent::getAssets();
+        $dataManagerAssets = parent::getAssets() + array(
+            // provide empty array stubs for missing upstream entries
+            'js' => array(),
+            'css' => array(),
+            'trans' => array(),
+        );
 
         return array(
             'js' => array_merge($dataManagerAssets["js"], array(
