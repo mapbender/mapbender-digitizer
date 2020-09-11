@@ -51,9 +51,9 @@
 
             $button.addClass(rawButton.type);
 
-            $button.attr('title', interaction.title || Mapbender.DataManager.Translator.translate('toolset.' + geomType + '.' + rawButton.type));
+            $button.attr('title', Mapbender.DataManager.Translator.translate('toolset.' + geomType + '.' + rawButton.type));
             // add icon css class
-            $button.addClass(interaction.className || "icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
+            $button.addClass("icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
 
             return $button;
         },
