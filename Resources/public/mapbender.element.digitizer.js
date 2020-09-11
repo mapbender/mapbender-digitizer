@@ -18,18 +18,33 @@
 
 
         _create: function () {
+            this._super();
             var widget = this;
             var target = this.options.target;
             Mapbender.elementRegistry.waitReady(target).then(function(mbMap) {
-                // Call DataManager constructor (ends with triggering ready...)
-                widget._super();
-                widget.widget = new Mapbender.Digitizer(widget.element, widget.options);
-                if (widget.options.displayOnInactive) {
-                    widget.activate();
-                }
+                widget.mbMap = mbMap;
+                widget.setup();
+                // Let data manager base method trigger "ready" event and start loading data
+                widget._start();
             }, function() {
                 Mapbender.checkTarget("mbDigitizer", target);
             });
+        },
+        _afterCreate: function() {
+            // Invoked only by data manager _create
+            // do nothing; deliberately do NOT call parent method
+        },
+        setup: function() {
+            var self = this;
+            Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function (printClient) {
+                self.printClient = printClient;
+                $.extend(self.printClient, Mapbender.Digitizer.printPlugin);
+            });
+            this.widget = new Mapbender.Digitizer(self.element, self.options);
+            this.widget.setup()
+            if (this.options.displayOnInactive) {
+                this.activate();
+            }
         },
         reveal: function() {
             this.activate();
