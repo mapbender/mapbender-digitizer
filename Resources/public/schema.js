@@ -484,44 +484,6 @@
         schema.popupConfiguration = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
     };
 
-    Mapbender.Digitizer.Scheme.prototype.activateSchema = function (wholeWidget) {
-
-        var schema = this;
-
-        Mapbender.DataManager.Scheme.prototype.activateSchema.apply(this, arguments);
-
-
-        schema.highlightControl.setActive(true);
-        schema.selectControl.setActive(true);
-
-        if (!wholeWidget) {
-            schema.layer.setVisible(true);
-        }
-
-        schema.widget.recalculateLayerVisibility_(true);
-    };
-
-    Mapbender.Digitizer.Scheme.prototype.deactivateSchema = function (wholeWidget) {
-
-        var schema = this;
-
-        Object.getPrototypeOf(Mapbender.Digitizer.Scheme.prototype).deactivateSchema.apply(this, arguments);
-
-        schema.highlightControl.setActive(false);
-        schema.selectControl.setActive(false);
-
-        schema.deactivateInteractions();
-
-        if (!wholeWidget) {
-            if (!schema.displayPermanent) {
-                schema.layer.setVisible(false);
-            }
-        }
-
-        schema.widget.recalculateLayerVisibility_(false);
-
-    };
-
     Mapbender.Digitizer.Scheme.prototype.deactivateInteractions = function () {
         var schema = this;
         schema.menu.toolSet.activeInteraction && schema.menu.toolSet.activeInteraction.setActive(false);

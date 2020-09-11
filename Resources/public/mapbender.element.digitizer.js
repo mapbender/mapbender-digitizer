@@ -39,13 +39,36 @@
         },
         activate: function() {
             if (!this.active) {
-                this.widget.getCurrentSchema().activateSchema(true);
+                this.activateSchema(this.widget.getCurrentSchema());
                 this.active = true;
             }
         },
         deactivate: function() {
-            this.widget.getCurrentSchema().deactivateSchema(true);
+            var schema = this.widget.getCurrentSchema();
+            if (schema) {
+                this.deactivateSchema(schema);
+            }
             this.active = false;
+        },
+        _activateSchema: function(schema) {
+            this._super(schema);
+            var schema_ = this.widget.createScheme_(schema);
+            schema_.activateSchema(); // triggers schema event
+            schema_.highlightControl.setActive(true);    // ???
+            schema_.selectControl.setActive(true);       // ???
+            schema_.layer.setVisible(true);
+        },
+        _deactivateSchema: function(schema) {
+            this._super(schema);
+            var schema_ = this.widget.createScheme_(schema);
+            schema_.deactivateSchema();    // triggers schema event
+            schema_.highlightControl.setActive(false);
+            schema_.selectControl.setActive(false);
+
+            schema_.deactivateInteractions();
+            if (!(this.options.displayOnInactive || !schema_.displayPermanent)) {
+                schema_.layer.setVisible(false);
+            }
         },
 
         __formatting_dummy: null

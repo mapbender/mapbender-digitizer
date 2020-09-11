@@ -31,23 +31,6 @@
 
     };
 
-    Mapbender.Digitizer.prototype.recalculateLayerVisibility_ = function (activateWidget) {
-        var widget = this;
-
-        $.each(widget.schemes, function (schemaName, schema) {
-            if (activateWidget) {
-                if (schema === widget.getCurrentSchema() || schema.displayPermanent) {
-                    schema.layer.setVisible(true);
-                }
-            } else {
-                if (!widget.displayOnInactive) {
-                    schema.layer.setVisible(false);
-                }
-            }
-        });
-
-    };
-
     Mapbender.Digitizer.prototype.isInExtent = function(feature) {
         var widget = this;
         return ol.extent.intersects(widget.map.getView().calculateExtent(), feature.getGeometry().getExtent());
