@@ -34,7 +34,7 @@
                 var subitems = [];
                 if (schema.allowLocate) {
                     subitems.push({
-                        text: Mapbender.DataManager.Translator.translate('feature.zoomTo'),
+                        text: Mapbender.trans('mb.digitizer.feature.zoomTo'),
                         callback: function () {
                             schema.zoomToFeature(feature);
                         }
@@ -43,7 +43,7 @@
 
                 if (schema.allowEditData) {
                     subitems.push({
-                        text: Mapbender.DataManager.Translator.translate('feature.edit'),
+                        text: Mapbender.trans('mb.digitizer.feature.edit'),
                         callback: function () {
                             schema.openFeatureEditDialog(feature);
                         }
@@ -52,7 +52,7 @@
 
                 if (schema.allowDelete) {
                     subitems.push({
-                        text: Mapbender.DataManager.Translator.translate('feature.remove.title'),
+                        text: Mapbender.trans('mb.digitizer.feature.remove.title'),
                         callback: function () {
                             schema.removeFeature(feature);
                         }

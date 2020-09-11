@@ -18,21 +18,21 @@
         var element = $("<div/>");
         var customColors = options.customColors;
         var fillTab = {
-            title: Mapbender.DataManager.Translator.translate('style.filling'),
+            title: Mapbender.trans('mb.digitizer.style.filling'),
             type: "form",
             children: [{
                 type: 'fieldSet',
                 children: [{
-                    title: Mapbender.DataManager.Translator.translate('style.color'),
+                    title: Mapbender.trans('mb.digitizer.style.color'),
                     type: "colorPicker",
                     name: "fillColor",
                     value: "#ff0000",
                     mandatory: "/^#{1,1}[abcdefABCDEF0-9]{6,6}$/",
-                    mandatoryText: Mapbender.DataManager.Translator.translate('style.chooseColorPicker'),
+                    mandatoryText: Mapbender.trans('mb.digitizer.style.chooseColorPicker'),
                     colorSelectors: customColors,
                     css: {width: "30%"}
                 }, {
-                    title: Mapbender.DataManager.Translator.translate('style.opacity'),
+                    title: Mapbender.trans('mb.digitizer.style.opacity'),
                     name: "fillOpacity",
                     type: "slider",
                     range: "max",
@@ -43,11 +43,11 @@
                     css: {width: "35%"}
 
                 }, {
-                    title: Mapbender.DataManager.Translator.translate('style.radius'),
+                    title: Mapbender.trans('mb.digitizer.style.radius'),
                     name: "pointRadius",
                     type: "slider",
                     mandatory: "/^\\d+$/",
-                    mandatoryText: Mapbender.DataManager.Translator.translate('style.onlyNumbers'),
+                    mandatoryText: Mapbender.trans('mb.digitizer.style.onlyNumbers'),
                     range: "max",
                     min: 0,
                     max: 20,
@@ -58,7 +58,7 @@
                     }
 
                 }, {
-                    title: Mapbender.DataManager.Translator.translate('style.activate'),
+                    title: Mapbender.trans('mb.digitizer.style.activate'),
                     type: "checkbox",
                     checked: true,
                     name: "fill",
@@ -67,22 +67,22 @@
             }]
         };
         var strokeTab = {
-            title: Mapbender.DataManager.Translator.translate('style.stroke'),
+            title: Mapbender.trans('mb.digitizer.style.stroke'),
             type: "form",
             children: [{
                 type: 'fieldSet',
                 children: [{
-                    title: Mapbender.DataManager.Translator.translate('style.color'),
+                    title: Mapbender.trans('mb.digitizer.style.color'),
                     type: "colorPicker",
                     name: "strokeColor",
                     value: "#ffffff",
                     horizontal: true,
                     mandatory: "/^\#[A-F0-9]{6}$/i",
-                    mandatoryText: Mapbender.DataManager.Translator.translate('style.chooseColorPicker'),
+                    mandatoryText: Mapbender.trans('mb.digitizer.style.chooseColorPicker'),
                     css: {width: "30%"}
 
                 }, {
-                    title: Mapbender.DataManager.Translator.translate('style.opacity'),
+                    title: Mapbender.trans('mb.digitizer.style.opacity'),
                     name: "strokeOpacity",
                     type: "slider",
                     range: "max",
@@ -93,7 +93,7 @@
                     css: {width: "35%"}
 
                 }, {
-                    title: Mapbender.DataManager.Translator.translate('style.width'),
+                    title: Mapbender.trans('mb.digitizer.style.width'),
                     type: "slider",
                     name: "strokeWidth",
                     min: 0,
@@ -105,34 +105,34 @@
             }, {
                 type: 'fieldSet',
                 children: [{
-                    title: Mapbender.DataManager.Translator.translate('style.lineCap'),
+                    title: Mapbender.trans('mb.digitizer.style.lineCap'),
                     name: "strokeLinecap",
                     type: "select",
                     options: {
-                        round: Mapbender.DataManager.Translator.translate('style.round'),
-                        square: Mapbender.DataManager.Translator.translate('style.square'),
-                        butt: Mapbender.DataManager.Translator.translate('style.butt')
+                        round: Mapbender.trans('mb.digitizer.style.round'),
+                        square: Mapbender.trans('mb.digitizer.style.square'),
+                        butt: Mapbender.trans('mb.digitizer.style.butt')
                     },
                     value: "round",
                     css: {width: "50%"}
                 }, {
-                    title: Mapbender.DataManager.Translator.translate('style.style'),
+                    title: Mapbender.trans('mb.digitizer.style.style'),
                     name: "strokeDashstyle",
                     type: "select",
                     options: {
-                        solid: Mapbender.DataManager.Translator.translate('style.solid'),
-                        dot: Mapbender.DataManager.Translator.translate('style.dot'),
-                        dash: Mapbender.DataManager.Translator.translate('style.dash'),
-                        longdash: Mapbender.DataManager.Translator.translate('style.longdash'),
-                        dashdot: Mapbender.DataManager.Translator.translate('style.dashdot'),
-                        longdashdot: Mapbender.DataManager.Translator.translate('style.longdashdot')
+                        solid: Mapbender.trans('mb.digitizer.style.solid'),
+                        dot: Mapbender.trans('mb.digitizer.style.dot'),
+                        dash: Mapbender.trans('mb.digitizer.style.dash'),
+                        longdash: Mapbender.trans('mb.digitizer.style.longdash'),
+                        dashdot: Mapbender.trans('mb.digitizer.style.dashdot'),
+                        longdashdot: Mapbender.trans('mb.digitizer.style.longdashdot')
                     },
                     value: "solid",
                     css: {width: "50%"}
 
                 }]
             }, {
-                title: Mapbender.DataManager.Translator.translate('style.activate'),
+                title: Mapbender.trans('mb.digitizer.style.activate'),
                 type: "checkbox",
                 checked: true,
                 name: "stroke",
@@ -142,18 +142,18 @@
 
         var labelTab = {
 
-            title: Mapbender.DataManager.Translator.translate('style.caption'),
+            title: Mapbender.trans('mb.digitizer.style.caption'),
             type: 'form',
             children: [
                 {
                     type: 'textArea',
                     css: {width: "100 %"},
                     name: 'label',
-                    infoText: Mapbender.DataManager.Translator.translate('style.captionInfoText')
+                    infoText: Mapbender.trans('mb.digitizer.style.captionInfoText')
                 }, {
                     type: 'fieldSet',
                     children: [{
-                        title: Mapbender.DataManager.Translator.translate('style.fontname'),
+                        title: Mapbender.trans('mb.digitizer.style.fontname'),
                         type: 'select',
                         value: 'Arial, Helvetica, sans-serif',
                         options: {
@@ -170,11 +170,11 @@
                             'Times New Roman, Times, serif': 'Times New Roman, Times, serif (nichtproportionale Schrift)'
                         },
                         name: 'fontFamily',
-                        infoText:  Mapbender.DataManager.Translator.translate('style.fontnameInfoText'),
+                        infoText:  Mapbender.trans('mb.digitizer.style.fontnameInfoText'),
                         css: {width: "50%"}
 
                     }, {
-                        title:  Mapbender.DataManager.Translator.translate('style.fontsize'),
+                        title:  Mapbender.trans('mb.digitizer.style.fontsize'),
                         name: 'fontSize',
                         type: 'select',
                         value: 11,
@@ -189,28 +189,28 @@
                             "24": 24
                         },
                         css: {width: "20%"},
-                        infoText:  Mapbender.DataManager.Translator.translate('style.fontsizeInfoText'),
+                        infoText:  Mapbender.trans('mb.digitizer.style.fontsizeInfoText')
                     },
                         {
                             title: 'Art',
-                            name: Mapbender.DataManager.Translator.translate('style.fontweight'),
+                            name: Mapbender.trans('mb.digitizer.style.fontweight'),
                             type: 'select',
                             value: 'regular',
                             options: {
-                                'regular':  Mapbender.DataManager.Translator.translate('style.regular'),
-                                'bold':  Mapbender.DataManager.Translator.translate('style.bold'),
-                                'italic':  Mapbender.DataManager.Translator.translate('style.italic')
+                                'regular':  Mapbender.trans('mb.digitizer.style.regular'),
+                                'bold':  Mapbender.trans('mb.digitizer.style.bold'),
+                                'italic':  Mapbender.trans('mb.digitizer.style.italic')
                             },
                             css: {width: "30%"},
-                            infoText:  Mapbender.DataManager.Translator.translate('style.fontweightInfoText')
+                            infoText:  Mapbender.trans('mb.digitizer.style.fontweightInfoText')
                         }, {
-                            title:  Mapbender.DataManager.Translator.translate('style.color'),
+                            title:  Mapbender.trans('mb.digitizer.style.color'),
                             type: 'colorPicker',
                             name: 'fontColor',
                             // infoText: 'The font color for the label, to be provided like CSS.',
                             css: {width: "50%"}
                         }, {
-                            title:  Mapbender.DataManager.Translator.translate('style.opacity'),
+                            title:  Mapbender.trans('mb.digitizer.style.opacity'),
                             name: "fontOpacity",
                             type: "slider",
                             range: "max",

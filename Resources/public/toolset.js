@@ -51,7 +51,7 @@
 
             $button.addClass(rawButton.type);
 
-            $button.attr('title', Mapbender.DataManager.Translator.translate('toolset.' + geomType + '.' + rawButton.type));
+            $button.attr('title', Mapbender.trans('mb.digitizer.toolset.' + geomType + '.' + rawButton.type));
             // add icon css class
             $button.addClass("icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
 

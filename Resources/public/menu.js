@@ -45,7 +45,7 @@
 
             var $button = $("<button class='button' type='button'/>");
             $button.addClass("icon-eyeOff eyeOff");
-            $button.attr("title", Mapbender.DataManager.Translator.translate('toolset.hideAll'));
+            $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
             $button.click(function (event) {
                 schema.layer.getSource().getFeatures().forEach(function (feature) {
                     feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: true});
@@ -55,7 +55,7 @@
 
             var $button = $("<button class='button' type='button'/>");
             $button.addClass("icon-eyeOn eyeOn");
-            $button.attr("title", Mapbender.DataManager.Translator.translate('toolset.showAll'));
+            $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
             $button.click(function (event) {
                 schema.layer.getSource().getFeatures().forEach(function (feature) {
                     feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: false});
@@ -67,7 +67,7 @@
 
             var $button = $("<button class='button' type='button'/>");
             $button.addClass("icon-save save");
-            $button.attr("title", Mapbender.DataManager.Translator.translate('toolset.saveAll'));
+            $button.attr("title", Mapbender.trans('mb.digitizer.toolset.saveAll'));
             $button.attr("disabled", "disabled");
             $button.click(function () {
                 schema.layer.getSource().getFeatures().filter(function (feature) {
@@ -95,7 +95,7 @@
         var schema = menu.schema;
         if (schema.showExtendSearchSwitch) {
             var $checkbox = $("<input type='checkbox' />");
-            var title = Mapbender.DataManager.Translator.translate('toolset.current-extent');
+            var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
             $checkbox.attr('title', title);
             if (schema.currentExtentSearch) {
                 $checkbox.attr("checked", "checked");
@@ -261,10 +261,10 @@
                 }
                 if (event.hide) {
                     $button.addClass('icon-eyeOn').removeClass('icon-eyeOff');
-                    $button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleon'));
+                    $button.attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleon'));
                 } else {
                     $button.addClass('icon-eyeOff').removeClass('icon-eyeOn');
-                    $button.attr('title', Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'));
+                    $button.attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'));
                 }
             });
 
@@ -284,7 +284,7 @@
 
         if (schema.allowLocate) {
             buttons['locate'] = {
-                title: Mapbender.DataManager.Translator.translate('feature.zoomTo'),
+                title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
                 className: 'zoom',
                 onClick: function (feature, ui) {
                     schema.zoomToFeature(feature);
@@ -294,7 +294,7 @@
 
         if (schema.allowEditData && schema.allowSaveInResultTable) {
             buttons['save'] = {
-                title: Mapbender.DataManager.Translator.translate('feature.save.title'),
+                title: Mapbender.trans('mb.digitizer.feature.save.title'),
                 className: 'save',
                 disabled: true,
                 onClick: function (feature, $button) {
@@ -305,7 +305,7 @@
 
         if (schema.allowEditData) {
             buttons['edit'] = {
-                title: Mapbender.DataManager.Translator.translate('feature.edit'),
+                title: Mapbender.trans('mb.digitizer.feature.edit'),
                 className: 'edit',
                 onClick: function (feature, ui) {
                     schema.openFeatureEditDialog(feature);
@@ -314,7 +314,7 @@
         }
         if (schema.copy && schema.copy.enable) {
             buttons['copy'] = {
-                title: Mapbender.DataManager.Translator.translate('feature.clone.title'),
+                title: Mapbender.trans('mb.digitizer.feature.clone.title'),
                 className: 'copy',
                 onClick: function (feature, ui) {
                     schema.copyFeature(feature);
@@ -323,7 +323,7 @@
         }
         if (schema.allowCustomStyle) {
             buttons['style'] = {
-                title: Mapbender.DataManager.Translator.translate('feature.style.change'),
+                title: Mapbender.trans('mb.digitizer.feature.style.change'),
                 className: 'style',
                 onClick: function (feature, ui) {
                     schema.openChangeStyleDialog(feature);
@@ -333,7 +333,7 @@
 
         if (schema.allowChangeVisibility) {
             buttons['toggleVisibility'] = {
-                title: Mapbender.DataManager.Translator.translate('feature.visibility.toggleoff'),
+                title: Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'),
                 className: 'visibility',
                 cssClass: 'icon-eyeOff',
                 onClick: function (feature, $button) {
@@ -345,7 +345,7 @@
         if (schema.allowDelete) {
 
             buttons['delete'] = {
-                title: Mapbender.DataManager.Translator.translate("feature.remove.title"),
+                title: Mapbender.trans("mb.digitizer.feature.remove.title"),
                 className: 'remove',
                 cssClass: 'critical',
                 onClick: function (feature, ui) {

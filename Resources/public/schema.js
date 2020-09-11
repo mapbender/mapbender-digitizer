@@ -520,7 +520,7 @@
             // });
             //
             // if (!allowCopy) {
-            //     $.notify(Mapbender.DataManager.Translator.translate('feature.clone.on.error'));
+            //     $.notify(Mapbender.trans('mb.digitizer.feature.clone.on.error'));
             //     return;
             // }
 
@@ -590,7 +590,7 @@
             schema.layer.getSource().removeFeature(feature);
         } else {
             confirmDialog({
-                html: Mapbender.DataManager.Translator.translate("feature.remove.from.database"),
+                html: Mapbender.trans("mb.digitizer.feature.remove.from.database"),
 
                 onSuccess: function () {
                     widget.query('delete', {
@@ -599,7 +599,7 @@
                     }).done(function (fid) {
                         schema.layer.getSource().removeFeature(feature);
                         $(map).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
-                        $.notify(Mapbender.DataManager.Translator.translate('feature.remove.successfully'), 'info');
+                        $.notify(Mapbender.trans('mb.digitizer.feature.remove.successfully'), 'info');
                     });
                 }
             });
@@ -693,7 +693,7 @@
                 $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: newFeature});
 
 
-                $.notify(Mapbender.DataManager.Translator.translate("feature.save.successfully"), 'info');
+                $.notify(Mapbender.trans("mb.digitizer.feature.save.successfully"), 'info');
 
             }
 
