@@ -130,6 +130,7 @@
                     continue;
                 }
                 var iconClass = "icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1').toLowerCase(); // @todo: use font awesome css
+                var $icon = $(document.createElement('span')).addClass(iconClass);
                 var tooltip = Mapbender.trans('mb.digitizer.toolset.' + geomType + '.' + rawButton.type);
                 var $button = $(document.createElement('button'))
                     .attr({
@@ -138,7 +139,8 @@
                         title: tooltip
                     })
                     .addClass('-fn-toggle-tool')
-                    .addClass(iconClass)    // @todo: icon inside, not on button
+                    .addClass('btn btn-sm') // match DataManager
+                    .append($icon)
                     .data({
                         schema: schema
                     })
