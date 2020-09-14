@@ -93,16 +93,16 @@
         },
         _activateSchema: function(schema) {
             this._super(schema);
-            schema_.activateSchema(); // triggers schema event
+            schema.activateSchema(); // triggers schema event
             this._toggleSchemaInteractions(schema_, true);
-            schema_.layer.setVisible(true);
+            schema.layer.setVisible(true);
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
-            schema_.deactivateSchema();    // triggers schema event
+            schema.deactivateSchema();    // triggers schema event
             this._toggleSchemaInteractions(schema_, false);
-            if (!(this.options.displayOnInactive || !schema_.displayPermanent)) {
-                schema_.layer.setVisible(false);
+            if (!(this.options.displayOnInactive || !schema.displayPermanent)) {
+                schema.layer.setVisible(false);
             }
         },
         _toggleSchemaInteractions: function(schema, state) {
