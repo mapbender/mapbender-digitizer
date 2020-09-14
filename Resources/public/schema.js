@@ -384,7 +384,9 @@
         return tableFields;
     };
 
-
+    Mapbender.Digitizer.FeatureRenderer.prototype.getLayer = function() {
+        return this.layer;
+    };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.initializeStyles_ = function () {
         var keys = Object.keys(this.basicStyles);

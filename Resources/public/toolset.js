@@ -14,6 +14,16 @@
     };
 
     Object.assign(Mapbender.Digitizer.FeatureEditor.prototype, {
+        /**
+         * @param {boolean} state
+         */
+        setActive: function(state) {
+            if (this.activeInteraction) {
+                this.activeInteraction.setActive(state);
+            }
+            // cannot resume from this
+            this.paused_ = false;
+        },
         pause: function() {
             if (!this.paused_ && this.activeInteraction && this.activeInteraction.getActive()) {
                 this.activeInteraction.setActive(false);
