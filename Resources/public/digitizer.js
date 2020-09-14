@@ -18,10 +18,6 @@
         var qe = new Mapbender.DataManager.QueryEngine(widget.id,Mapbender.DataManager.createSpinner_($spinner));
         widget.query = qe.query;
         widget.getElementURL = qe.getElementURL;
-
-        Mapbender.elementRegistry.waitReady(widget.target).then( function() {
-            widget.setup($element,$title,$selector);
-        });
     };
 
     Mapbender.Digitizer.prototype.TYPE = "Digitizer";
