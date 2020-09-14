@@ -41,7 +41,7 @@
     Mapbender.Digitizer.Toolset.prototype = {
 
 
-        createPlainControlButton_: function (rawButton,interaction) {
+        createPlainControlButton_: function (rawButton) {
             var toolSet = this;
 
             var schema = toolSet.schema;
@@ -79,7 +79,7 @@
                     return;
                 }
 
-                var $button = toolSet.createPlainControlButton_(rawButton,interaction);
+                var $button = toolSet.createPlainControlButton_(rawButton);
 
                 interaction.setActive(false);
 
