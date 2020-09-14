@@ -34,6 +34,10 @@
             // Invoked only by data manager _create
             // do nothing; deliberately do NOT call parent method
         },
+        _schemaFactory: function(schemaConfig) {
+            var schemaConfig_ = this._super(schemaConfig);
+            return new Mapbender.Digitizer.Scheme(schemaConfig_);
+        },
         setup: function() {
             var self = this;
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function (printClient) {
@@ -67,14 +71,12 @@
         },
         _activateSchema: function(schema) {
             this._super(schema);
-            var schema_ = this.widget.createScheme_(schema);
             schema_.activateSchema(); // triggers schema event
             this._toggleSchemaInteractions(schema_, true);
             schema_.layer.setVisible(true);
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
-            var schema_ = this.widget.createScheme_(schema);
             schema_.deactivateSchema();    // triggers schema event
             this._toggleSchemaInteractions(schema_, false);
             if (!(this.options.displayOnInactive || !schema_.displayPermanent)) {
