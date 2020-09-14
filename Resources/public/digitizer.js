@@ -2,24 +2,46 @@
     "use strict";
 
     Mapbender.Digitizer = function () {
-        Mapbender.DataManager.apply(this, arguments);
+        var widget  = this;
+
+        $.extend(widget, options);
+
+        widget.id = $element.attr("id");
+
+        var $spinner = (function() {
+            var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell');
+            var spinner = $("<div class='spinner' style='display:none'></div>");
+            $parent.prepend(spinner);
+            return spinner;
+        })();
+
+        var qe = new Mapbender.DataManager.QueryEngine(widget.id,Mapbender.DataManager.createSpinner_($spinner));
+        widget.query = qe.query;
+        widget.getElementURL = qe.getElementURL;
+
+        Mapbender.elementRegistry.waitReady(widget.target).then( function() {
+            widget.setup($element,$title,$selector);
+        });
     };
-
-
-    Mapbender.Digitizer.prototype = Object.create(Mapbender.DataManager.prototype);
-    Mapbender.Digitizer.prototype.constructor = Mapbender.DataManager;
 
     Mapbender.Digitizer.prototype.TYPE = "Digitizer";
 
-    Mapbender.Digitizer.prototype.createScheme_ = function (rawScheme) {
-        return new Mapbender.Digitizer.Scheme(rawScheme, this);
-    };
-
     Mapbender.Digitizer.prototype.setup = function () {
         var widget = this;
-        Object.getPrototypeOf(Mapbender.Digitizer.prototype).setup.apply(this, arguments);
         widget.contextMenu = new Mapbender.Digitizer.MapContextMenu(widget);
 
+        var rawSchemes = widget.schemes;
+        widget.schemes = {};
+        $.each(rawSchemes, function (schemaName,options) {
+            options.schemaName = schemaName;
+            var schema = widget.schemes[schemaName] = widget.createScheme_(options);
+            schema.createMenu($element);
+        });
+        Object.freeze(widget.schemes);
+
+        if (widget.displayOnInactive) {
+            widget.activate(false);
+        }
     };
 
     Mapbender.Digitizer.prototype.isInExtent = function(feature) {
@@ -41,5 +63,41 @@
 
     };
 
+    Mapbender.Digitizer.prototype.getProjectionCode = function() {
+        var widget = this;
+        return widget.map.getView().getProjection().getCode().split(':').pop();
+    };
+    Mapbender.Digitizer.prototype.getCurrentSchema = function() {
+        var widget = this;
+        return widget.selector.getSelectedSchema();
+    }
+
+    Mapbender.Digitizer.prototype.createSpinner_ = function ($spinner) {
+        var spinner = new function () {
+            var spinner = this;
+
+            spinner.openRequests = 0;
+
+            spinner.$element = $spinner;
+
+            spinner.addRequest = function () {
+                spinner.openRequests++;
+                if (spinner.openRequests >= 1) {
+                    spinner.$element.trigger("show");
+                }
+            };
+
+            spinner.removeRequest = function () {
+                spinner.openRequests--;
+                if (spinner.openRequests === 0) {
+                    spinner.$element.trigger("hide");
+                }
+            };
+
+
+        };
+
+        return spinner;
+    };
 
 })();
