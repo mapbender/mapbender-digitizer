@@ -58,6 +58,26 @@
         hide: function() {
             this.deactivate();
         },
+        _initializeEvents: function() {
+            this._super();
+            var self = this;
+            this.element.on('click', '.-fn-toggle-tool[data-toolname]', function() {
+                var $button = $(this);
+                var toolName = $button.attr('data-toolname');
+                var schema = $button.data('schema');
+                var oldState = $button.hasClass('active');
+                if (!oldState) {
+                    var $activeOthers = $('.-fn-toggle-tool.active', $button.siblings()).not($button);
+                    $activeOthers.each(function() {
+                        var $other = $(this);
+                        self.toggleTool(schema, $other.attr('data-toolname'), false);
+                    });
+                    $activeOthers.removeClass('active');
+                }
+                $button.toggleClass('active', !oldState);
+                self._toggleTool(schema, toolName, true);
+            });
+        },
         activate: function() {
             if (!this.active) {
                 this.activateSchema(this.widget.getCurrentSchema());
