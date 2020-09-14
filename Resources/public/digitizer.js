@@ -1,17 +1,8 @@
 (function () {
     "use strict";
 
-    Mapbender.Digitizer = function ($element, options) {
-
-        var widget = this;
-
-        Mapbender.DataManager.apply(this, [$element, options]);
-
-        Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function (printClient) {
-            widget.printClient = printClient;
-            $.extend(widget.printClient, Mapbender.Digitizer.printPlugin);
-        });
-
+    Mapbender.Digitizer = function () {
+        Mapbender.DataManager.apply(this, arguments);
     };
 
 
