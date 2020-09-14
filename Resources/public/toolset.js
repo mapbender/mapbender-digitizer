@@ -10,10 +10,24 @@
         this.layer = layer;
         this.controlFactory = controlFactory;
         this.activeInteraction = null;
+        this.paused_ = false;
     };
 
     Object.assign(Mapbender.Digitizer.FeatureEditor.prototype, {
+        pause: function() {
+            if (!this.paused_ && this.activeInteraction && this.activeInteraction.getActive()) {
+                this.activeInteraction.setActive(false);
+                this.paused_ = true;
+            }
+        },
+        resume: function() {
+            if (this.paused_ && this.activeInteraction) {
+                this.activeInteraction.setActive(true);
+            }
+            this.paused_ = false;
+        },
         registerSchemaEvents: function(schema) {
+            var editor = this;
             this.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
                 var feature = event.feature;
 
@@ -30,11 +44,11 @@
             });
 
             $(schema).on("Digitizer.StartFeatureSave",function(event){
-                toolSet.activeInteraction.setActive(false);
+                editor.pause();
             });
 
             $(schema).on("Digitizer.EndFeatureSave",function(event){
-                toolSet.activeInteraction.setActive(true);
+                editor.resume();
             });
         }
     });
