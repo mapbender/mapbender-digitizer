@@ -92,6 +92,7 @@ class Digitizer extends DataManagerElement
 
         return array(
             'js' => array_merge($dataManagerAssets["js"], array(
+                "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
                 "@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js",
                 "@MapbenderDigitizerBundle/Resources/public/digitizer.js",
                 "@MapbenderDigitizerBundle/Resources/public/toolset.js",
