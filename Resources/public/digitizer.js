@@ -34,10 +34,6 @@
             schema.createMenu($element);
         });
         Object.freeze(widget.schemes);
-
-        if (widget.displayOnInactive) {
-            widget.activate(false);
-        }
     };
 
     Mapbender.Digitizer.prototype.isInExtent = function(feature) {
