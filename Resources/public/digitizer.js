@@ -15,7 +15,7 @@
             return spinner;
         })();
 
-        var qe = new Mapbender.DataManager.QueryEngine(widget.id,Mapbender.DataManager.createSpinner_($spinner));
+        var qe = new Mapbender.DataManager.QueryEngine(widget.id, this.createSpinner_($spinner));
         widget.query = qe.query;
         widget.getElementURL = qe.getElementURL;
     };
