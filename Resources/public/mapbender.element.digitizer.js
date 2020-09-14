@@ -16,6 +16,7 @@
         mbMap: null,
         printClient: null,
         active: false,
+        controlFactory: null,
 
         _create: function () {
             this._super();
@@ -46,6 +47,7 @@
             });
             this.widget = new Mapbender.Digitizer(self.element, self.options);
             this.contextMenu = new Mapbender.Digitizer.MapContextMenu({map: this.mbMap.model.olMap});
+            this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(this.mbMap.getModel().olMap);
             if (this.options.displayOnInactive) {
                 this.activate();
             }
