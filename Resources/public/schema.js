@@ -85,22 +85,25 @@
         schema.openDialogOnResultTableClick = options.openDialogOnResultTableClick || false;
 
         schema.zoomOnResultTableClick = options.zoomOnResultTableClick || true;
+    };
 
+    Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(olMap, schema) {
+        this.olMap = olMap;
         var otherStyles = {};
         if (schema.copy && schema.copy.style) {
             otherStyles.copy = schema.copy.style;
         }
-        schema.basicStyles = Object.assign({}, schema.getDefaultStyles_(), options.styles || {}, otherStyles);
+        this.basicStyles = Object.assign({}, schema.getDefaultStyles(), schema.styles || {}, otherStyles);
 
-        schema.styles = {};
+        this.styles = {};
 
-        schema.initializeStyles_();
+        this.initializeStyles_();
 
-        schema.createSchemaFeatureLayer_();
+        this.layer = this.createSchemaFeatureLayer_(schema);
 
-        schema.addSelectControl_();
+        this.addSelectControl_();
 
-        schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
+        this.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
 
             feature.set("mbOrigin", "digitizer");
@@ -181,7 +184,7 @@
             feature.set("oldGeometry", feature.getGeometry().clone());
         });
 
-        schema.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
+        this.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
             var feature = event.feature || event.features.item(0);
 
             feature.set("modificationState", "isChanged");
@@ -203,7 +206,7 @@
 
         });
 
-        schema.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
+        this.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
             var feature = event.feature;
 
             feature.set("modificationState", "isNew");
@@ -225,7 +228,7 @@
             }
         });
 
-        schema.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
+        this.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
             var feature = event.feature;
 
             feature.set("modificationState", "isCopy");
@@ -247,7 +250,7 @@
 
         });
 
-        $(widget.map).on('Digitizer.FeatureUpdatedOnServer', function (event) {
+        $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
 
             if (schema.refreshLayersAfterFeatureSave) {
 
@@ -323,7 +326,7 @@
 
 
 
-    Mapbender.Digitizer.Scheme.prototype.getDefaultStyles_ = function () {
+    Mapbender.Digitizer.Scheme.prototype.getDefaultStyles = function () {
         var styles = {
 
             default: {
@@ -381,75 +384,18 @@
 
 
 
-    Mapbender.Digitizer.Scheme.prototype.initializeStyles_ = function () {
-        var schema = this;
-
-        $.each(schema.basicStyles, function (label, style) {
-            schema.styles[label] = ol.style.StyleConverter.convertToOL4Style(style);
-        });
-
-        Object.freeze(schema.styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
+    Mapbender.Digitizer.FeatureRenderer.prototype.initializeStyles_ = function () {
+        var keys = Object.keys(this.basicStyles);
+        for (var i = 0; i < keys.length; ++ i) {
+            var key = keys[i];
+            var style = this.basicStyles[key];
+            this.styles[key] = ol.style.StyleConverter.convertToOL4Style(style);
+        }
+        Object.freeze(this.styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
     };
 
 
-    // createSourceModification_: function () {
-    //     var schema = this;
-    //     var widget = schema.widget;
-    //
-    //     var createRequest = function (extent) {
-    //
-    //         var request = {
-    //             srid: widget.getProjectionCode(),
-    //             maxResults: schema.maxResults,
-    //             schema: schema.schemaName,
-    //
-    //         };
-    //         return request;
-    //
-    //     };
-    //
-    //     var sourceModificatorGlobal = {
-    //         strategy: ol.loadingstrategy.all,
-    //         createRequest: createRequest
-    //     };
-    //
-    //     var sourceModificatorExtent = {
-    //         strategy: function (extent, resolution) {
-    //             if (this.resolution && this.resolution !== resolution) {
-    //                 this.loadedExtentsRtree_.clear();
-    //             }
-    //             return [extent];
-    //         },
-    //         createRequest: function (extent) {
-    //             var request = createRequest(extent);
-    //             var extentPolygon = new ol.geom.Polygon.fromExtent(extent);
-    //             request['intersectGeometry'] = new ol.format.WKT().writeGeometryText(extentPolygon);
-    //
-    //             return request;
-    //
-    //         }
-    //     };
-    //
-    //     schema.currentSourceModificator = schema.currentExtentSearch ? sourceModificatorExtent : sourceModificatorGlobal;
-    //
-    //     schema.switchSourceModificator = function (currentExtent) {
-    //
-    //         var sourceModificator = currentExtent ? sourceModificatorExtent : sourceModificatorGlobal;
-    //
-    //         schema.currentSourceModificator = sourceModificator;
-    //         schema.layer.getSource().strategy_ = sourceModificator.strategy;
-    //
-    //
-    //         schema.layer.getSource().loadedExtentsRtree_.clear();
-    //         schema.layer.getSource().refresh();
-    //     };
-    // },
-
-
-    Mapbender.Digitizer.Scheme.prototype.createSchemaFeatureLayer_ = function () {
-        var schema = this;
-        var widget = schema.widget;
-
+    Mapbender.Digitizer.FeatureRenderer.prototype.createSchemaFeatureLayer_ = function (schema) {
         var layer = new ol.layer.Vector({
             source: new ol.source.Vector({
                 format: new ol.format.GeoJSON(),
@@ -459,16 +405,12 @@
             }),
             minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
             maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity),
-            visible: false,
+            visible: false
         });
-
-        schema.layer = layer;
-
-        widget.map.addLayer(schema.layer);
-
+        return layer;
     };
 
-    Mapbender.Digitizer.Scheme.prototype.customStyleFeature_ = function (feature) {
+    Mapbender.Digitizer.FeatureRenderer.prototype.customStyleFeature_ = function (feature) {
         var schema = this;
 
         console.assert(!!schema.featureType.styleField, "Style Field in Feature Type is not specified");
@@ -485,7 +427,7 @@
     };
 
 
-    Mapbender.Digitizer.Scheme.prototype.addSelectControl_ = function () {
+    Mapbender.Digitizer.FeatureRenderer.prototype.addSelectControl_ = function () {
         var schema = this;
         var widget = schema.widget;
 
@@ -493,13 +435,13 @@
         var highlightControl = new ol.interaction.Select({
 
             condition: ol.events.condition.pointerMove,
-            layers: [schema.layer]
+            layers: [this.layer]
 
         });
 
 
-        schema.highlightControl = highlightControl;
-        widget.map.addInteraction(schema.highlightControl);
+        this.highlightControl = highlightControl;
+        this.olMap.addInteraction(this.highlightControl);
 
         highlightControl.on('select', function (e) {
 
@@ -526,8 +468,7 @@
         });
 
         schema.selectControl = selectControl;
-
-        widget.map.addInteraction(schema.selectControl);
+        this.olMap.addInteraction(schema.selectControl);
 
         selectControl.on('select', function (event) {
             if (schema.allowEditData || schema.allowOpenEditDialog) {
@@ -648,6 +589,7 @@
     Mapbender.Digitizer.Scheme.prototype.removeFeature = function (feature) {
         var schema = this;
         var widget = schema.widget;
+        // @todo: fix breakage in map access
         var map = widget.map;
 
         var limitedFeature = {};
@@ -678,6 +620,7 @@
     Mapbender.Digitizer.Scheme.prototype.saveFeature = function (feature, formData) {
         var schema = this;
         var widget = schema.widget;
+        // @todo: fix breakage in map access
         var map = widget.map;
 
         $(schema).trigger({type: "Digitizer.StartFeatureSave", feature: feature });
