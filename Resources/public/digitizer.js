@@ -31,7 +31,6 @@
         $.each(rawSchemes, function (schemaName,options) {
             options.schemaName = schemaName;
             var schema = widget.schemes[schemaName] = widget.createScheme_(options);
-            schema.createMenu($element);
         });
         Object.freeze(widget.schemes);
     };

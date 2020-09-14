@@ -85,6 +85,8 @@
         schema.openDialogOnResultTableClick = options.openDialogOnResultTableClick || false;
 
         schema.zoomOnResultTableClick = options.zoomOnResultTableClick || true;
+
+        schema.menu = schema.createMenu(schema);
     };
 
     Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(olMap, schema) {
@@ -491,10 +493,9 @@
         schema.popupConfiguration = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
     };
 
-    Mapbender.Digitizer.Scheme.prototype.createMenu = function ($element) {
+    Mapbender.Digitizer.Scheme.prototype.createMenu = function() {
         var schema = this;
-        schema.menu = new Mapbender.Digitizer.Menu(schema);
-        schema.menu.appendTo($element);
+        return new Mapbender.Digitizer.Menu(schema);
     };
 
     Mapbender.Digitizer.Scheme.prototype.getFeatureStyle_ = function (feature) {
