@@ -36,7 +36,7 @@
         },
         _schemaFactory: function(schemaConfig) {
             var schemaConfig_ = this._super(schemaConfig);
-            return new Mapbender.Digitizer.Scheme(schemaConfig_);
+            return new Mapbender.Digitizer.Scheme(schemaConfig_, this);
         },
         setup: function() {
             var self = this;
