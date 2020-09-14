@@ -25,10 +25,7 @@
             $element.append(frame);
         };
 
-        menu.registerEvents_(frame);
-
-        menu.changeCurrentExtentSearch_(schema.currentExtentSearch);
-
+        menu.currentExtentSearch = schema.currentExtentSearch;
     };
 
     Mapbender.Digitizer.Menu.prototype = Object.create(Mapbender.DataManager.Menu.prototype);
@@ -130,37 +127,35 @@
     };
 
 
+    Mapbender.Digitizer.Menu.prototype.changeCurrentExtentSearch_ = function(currentExtentSearch) {
+        var widget = this.widget;
+        this.currentExtentSearch = !!currentExtentSearch;
+        if (this.resultTable) {
+            var features = this.schema.layer.getSource().getFeatures();
+            if (this.currentExtentSearch) {
+                features = features.filter(function(feature) {
+                    return widget.isInExtent(feature);
+                });
+            }
+            this.resultTable.redraw(features);
+        }
+    };
+
     Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable, frame) {
         var menu = this;
         var schema = menu.schema;
         var widget = schema.widget;
         var map = widget.map;
-
-        menu.changeCurrentExtentSearch_ = function (currentExtentSearch) {
-            var menu = this, features = null;
-            resultTable.currentExtentSearch = currentExtentSearch;
-            if (currentExtentSearch) {
-                features = schema.layer.getSource().getFeatures().filter(function (feature) {
-                    return widget.isInExtent(feature);
-                });
-            } else {
-                features = schema.layer.getSource().getFeatures();
-            }
-            resultTable.redraw(features);
-
-        };
+        menu.resultTable = resultTable;
 
         $(schema).on("Digitizer.FeaturesLoaded", function (event) {
             var features = event.features;
             resultTable.redraw(features);
-
-
         });
 
         $(schema).on("Digitizer.FeatureAddedManually", function (event) {
             var feature = event.feature;
             resultTable.addRow(feature);
-
         });
 
         map.on(ol.MapEventType.MOVEEND, function (event) {
