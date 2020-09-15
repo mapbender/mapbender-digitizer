@@ -81,15 +81,12 @@
         },
         activate: function() {
             if (!this.active) {
-                this.activateSchema(this.widget.getCurrentSchema());
+                this._activateSchema(this._getCurrentSchema());
                 this.active = true;
             }
         },
         deactivate: function() {
-            var schema = this.widget.getCurrentSchema();
-            if (schema) {
-                this.deactivateSchema(schema);
-            }
+            this._deactivateSchema(this._getCurrentSchema());
             this.active = false;
         },
         _activateSchema: function(schema) {
