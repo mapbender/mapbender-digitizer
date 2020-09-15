@@ -5,7 +5,15 @@
     Mapbender.Digitizer.MapContextMenu = function (widget) {
 
         var contextmenu = new ContextMenu({
-            defaultItems: false,
+            defaultItems: false
+        });
+        Object.assign(this, {
+            enable: function() {
+                return contextmenu.enable.apply(contextmenu, arguments);
+            },
+            disable: function() {
+                return contextmenu.disable.apply(contextmenu, arguments);
+            }
         });
         widget.map.addControl(contextmenu);
 
