@@ -17,4 +17,12 @@
             PROPERTYCHANGE: 'propertychange'
         };
     }
+    if (window.ol && ol.interaction && !ol.interaction.ModifyEventType) {
+        // HACK: monkey patch event types not present in current OL6 repackage build
+        // @see https://github.com/openlayers/openlayers/blob/main/src/ol/interaction/Modify.js#L64
+        ol.interaction.ModifyEventType = {
+            MODIFYSTART: 'modifystart',
+            MODIFYEND: 'modifyend'
+        };
+    }
 })();
