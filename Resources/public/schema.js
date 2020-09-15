@@ -11,7 +11,43 @@
     Mapbender.Digitizer.Scheme = function (options, widget) {
         var schema = this;
 
-        Mapbender.DataManager.Scheme.apply(schema, arguments);
+        schema.widget = widget;
+
+        schema.featureType = options.featureType || {
+            connection: null,
+            table: null,
+            uniqueId: null,
+            geomType: null,
+            geomField: null,
+            name: null,
+            styleField: null,
+            srid: 4326
+        };
+
+        if (!schema.featureType.connection || !schema.featureType.table, !schema.featureType.geomType) {
+            throw new Error("Feature Type not correctly specified in Configuration of scheme")
+        }
+
+        schema.schemaName = options.schemaName;
+        if (!schema.featureType) {
+            throw new Error("No proper Schema Name specified in Configuration of scheme")
+        }
+
+        schema.label = options.label;
+        schema.view = options.view = { settings: { }};
+        schema.popup = options.popup || {title: schema.schemaName, width: '500px'};
+        schema.tableFields = options.tableFields || schema.createDefaultTableFields_();
+        schema.formItems = options.formItems || {};
+        schema.allowEditData = options.allowEditData || false;
+        schema.allowSave = options.allowSave || false;
+        schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
+        schema.allowDelete = options.allowDelete || false;
+        schema.inlineSearch = options.inlineSearch || true;
+        schema.pageLength = options.pageLength || 10;
+        schema.inlineSearch = options.inlineSearch || false;
+        schema.tableTranslation = options.tableTranslation || undefined;
+
+        schema.createPopupConfiguration_();
 
         // alias different config keys "allowEditData", "allowOpenEditDialog" to upstream-compatible "allowEdit"
         schema.allowEdit = options.allowEditData || options.allowOpenEditDialog || false;
@@ -278,9 +314,6 @@
 
     };
 
-    Mapbender.Digitizer.Scheme.prototype = Object.create(Mapbender.DataManager.Scheme.prototype);
-    Mapbender.Digitizer.Scheme.prototype.constructor = Mapbender.DataManager.Scheme;
-
     Object.assign(Mapbender.Digitizer.Scheme.prototype, {
         getData: function (extent, resolution, projection) {
 
@@ -325,6 +358,11 @@
             // TODO find a scheme-specific, more appropriate element to store triggers than map
            $(schema).trigger({type: schema.widget.type+".FeaturesLoaded", features: features});
 
+        },
+        openFeatureEditDialog: function (feature) {
+            var schema = this;
+            var dialog = schema.popupConfiguration.createFeatureEditDialog(feature, schema);
+            return dialog;
         }
     });
 
