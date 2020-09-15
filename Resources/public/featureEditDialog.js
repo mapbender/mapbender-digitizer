@@ -180,7 +180,9 @@
             var configuration = this;
 
             $.each(configuration.buttons, function (name, button) {
-                button.text = button.title = Mapbender.DataManager.Translator.translate(button.title);
+                // @todo: decide on one attribute for title
+                // @todo: avoid self-modification (also saves clone method implementation)
+                button.text = button.title = Mapbender.trans('mb.digitizer.' + button.title);
                 button.click = function (event) {
                     feature.dispatchEvent({type: configuration.PREFIX + '.FeatureEditDialog.' + button.event});
                 }
