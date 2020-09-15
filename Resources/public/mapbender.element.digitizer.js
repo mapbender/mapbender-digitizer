@@ -102,7 +102,7 @@
             }
 
             this._toggleSchemaInteractions(schema, true);
-            schema.layer.setVisible(true);
+            schema.renderer.layer.setVisible(true);
         },
         _toggleDrawingTool: function(schema, toolName, state) {
             var interaction = schema.geometryEditor.getDrawingTool(toolName, schema);
@@ -114,7 +114,7 @@
             this._super(schema);
             this._toggleSchemaInteractions(schema, false);
             if (!(this.options.displayOnInactive || !schema.displayPermanent)) {
-                schema.layer.setVisible(false);
+                schema.renderer.layer.setVisible(false);
             }
         },
         _toggleSchemaInteractions: function(schema, state) {
