@@ -31,14 +31,12 @@
         },
 
         createActivator_: function(interaction) {
+            var setActiveOriginal = interaction.setActive;
 
             return function(active) {
-                var setActive = ol.interaction.Interaction.prototype.setActive;
-                setActive.apply(this,arguments);
+                setActiveOriginal.apply(this, arguments);
                 interaction.dispatchEvent({ type: 'controlFactory.Activation', active: active});
             };
-
-
         },
 
         drawPoint: function (source) {
@@ -190,20 +188,7 @@
 
             var interaction = new ol.interaction.SelectableModify({
             });
-
-            var setActiveOriginal = ol.interaction.SelectableModify.prototype.setActive;
-
-            interaction.setActive = function(active) {
-                setActiveOriginal.apply(this,arguments);
-                interaction.dispatchEvent({ type: 'controlFactory.Activation', active: active});
-                if (active) {
-                    interaction.addSelectToMap(controlFactory.map);
-                } else {
-                    interaction.removeSelectFromMap(controlFactory.map);
-                }
-            };
-
-
+            interaction.setActive = controlFactory.createActivator_(interaction);
 
             interaction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
                 source.dispatchEvent({ type: 'controlFactory.FeatureModified', features: interaction.getFeatures() });
