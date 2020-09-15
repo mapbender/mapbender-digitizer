@@ -121,8 +121,8 @@
             if (schema.geometryEditor) {
                 schema.geometryEditor.setActive(state);
             }
-            schema.highlightControl.setActive(state);
-            schema.selectControl.setActive(state);
+            schema.renderer.highlightControl.setActive(state);
+            schema.renderer.selectControl.setActive(state);
             if (state && schema.useContextMenu) {
                 this.contextMenu.enable();
             } else {
