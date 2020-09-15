@@ -52,6 +52,7 @@
                 this.activate();
             }
         },
+        // reveal / hide = automatic sidepane integration API
         reveal: function() {
             this.activate();
         },
@@ -130,6 +131,15 @@
             } else {
                 this.contextMenu.disable();
             }
+        },
+        _getDataStoreFromSchema: function(schema) {
+            // Digitizer schema config aliases "dataStore" (upstream) as "featureType"
+            return schema.featureType;
+        },
+        _allowDirectItemCreation: function(schema) {
+            // Digitizer never allows item creation directly through a form. Creation can only happen with a drawing tool.
+            // Returning constant false suppresses the data-manager upstream direct-to-form creation tool
+            return false;
         },
         _updateToolset: function($container, schema) {
             this._super($container, schema);
