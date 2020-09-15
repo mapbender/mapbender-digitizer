@@ -90,6 +90,7 @@
     };
 
     Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(olMap, schema) {
+        this.schema = schema;
         this.olMap = olMap;
         var otherStyles = {};
         if (schema.copy && schema.copy.style) {
@@ -433,7 +434,6 @@
 
     Mapbender.Digitizer.FeatureRenderer.prototype.addSelectControl_ = function () {
         var schema = this;
-        var widget = schema.widget;
 
 
         var highlightControl = new ol.interaction.Select({
@@ -464,19 +464,19 @@
         var selectControl = new ol.interaction.Select({
 
             condition: ol.events.condition.singleClick,
-            layers: [schema.layer],
+            layers: [this.layer],
             style: function () {
                 return null;
             }
 
         });
 
-        schema.selectControl = selectControl;
-        this.olMap.addInteraction(schema.selectControl);
+        this.selectControl = selectControl;
+        this.olMap.addInteraction(this.selectControl);
 
         selectControl.on('select', function (event) {
-            if (schema.allowEditData || schema.allowOpenEditDialog) {
-                schema.openFeatureEditDialog(event.selected[0]);
+            if (this.schema.allowEditData || this.schema.allowOpenEditDialog) {
+                this.schema.openFeatureEditDialog(event.selected[0]);
                 selectControl.getFeatures().clear();
             }
         });
