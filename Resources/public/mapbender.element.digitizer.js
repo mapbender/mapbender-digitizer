@@ -70,12 +70,12 @@
                     var $activeOthers = $('.-fn-toggle-tool.active', $button.siblings()).not($button);
                     $activeOthers.each(function() {
                         var $other = $(this);
-                        self.toggleTool(schema, $other.attr('data-toolname'), false);
+                        self._toggleDrawingTool(schema, $other.attr('data-toolname'), false);
                     });
                     $activeOthers.removeClass('active');
                 }
                 $button.toggleClass('active', !oldState);
-                self._toggleTool(schema, toolName, true);
+                self._toggleDrawingTool(schema, toolName, true);
             });
         },
         activate: function() {
@@ -94,20 +94,36 @@
         _activateSchema: function(schema) {
             this._super(schema);
             schema.activateSchema(); // triggers schema event
-            this._toggleSchemaInteractions(schema_, true);
+            // HACK: externally patch renderer onto schema post-construction
+            if (!schema.renderer) {
+                schema.renderer = new Mapbender.Digitizer.FeatureRenderer(this.mbMap.getModel().olMap, schema);
+            }
+            // HACK: externally patch editor onto schema post-construction
+            if (schema.allowDigitize && !schema.geometryEditor) {
+                var layer = schema.renderer.getLayer();
+                schema.geometryEditor = new Mapbender.Digitizer.FeatureEditor(layer, this.controlFactory);
+            }
+
+            this._toggleSchemaInteractions(schema, true);
             schema.layer.setVisible(true);
+        },
+        _toggleDrawingTool: function(schema, toolName, state) {
+            var interaction = schema.geometryEditor.getDrawingTool(toolName, schema);
+            // @todo: disable selectControl if drawing active and vice-versa
+            interaction.setActive(!!state);
+
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
             schema.deactivateSchema();    // triggers schema event
-            this._toggleSchemaInteractions(schema_, false);
+            this._toggleSchemaInteractions(schema, false);
             if (!(this.options.displayOnInactive || !schema.displayPermanent)) {
                 schema.layer.setVisible(false);
             }
         },
         _toggleSchemaInteractions: function(schema, state) {
-            if (schema.menu.toolSet.activeInteraction) {
-                schema.menu.toolSet.activeInteraction.setActive(state);
+            if (schema.geometryEditor) {
+                schema.geometryEditor.setActive(state);
             }
             schema.highlightControl.setActive(state);
             schema.selectControl.setActive(state);
