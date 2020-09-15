@@ -98,9 +98,8 @@
         }
         this.basicStyles = Object.assign({}, schema.getDefaultStyles(), schema.styles || {}, otherStyles);
 
-        this.styles = {};
-
-        this.initializeStyles_();
+        var nativeStyles = this.initializeStyles_(this.basicStyles);
+        this.styles = nativeStyles; // NOTE: accessed only in event handlers currently inlined here
 
         this.layer = this.createSchemaFeatureLayer_(schema);
 
@@ -113,7 +112,7 @@
 
             feature.setStyle = feature.setStyleWithLabel;
 
-            feature.setStyle(schema.styles.default);
+            feature.setStyle(nativeStyles.default);
 
             feature.on('Digitizer.HoverFeature', function (event) {
 
@@ -149,17 +148,17 @@
                         style = null;
                     } else
                     if (feature.get("hidden")) {
-                        style = schema.styles.invisible;
+                        style = nativeStyles.invisible;
                     } else if (feature.get("selected")) {
-                        style = schema.styles.select;
+                        style = nativeStyles.select;
                     } else if (feature.get("modificationState") && schema.markUnsavedFeatures) {
                         switch (feature.get("modificationState")) {
                             case "isChanged" :
                             case "isNew" :
-                                style = schema.styles.unsaved;
+                                style = nativeStyles.unsaved;
                                 break;
                             case "isCopy" :
-                                style = schema.styles.copy;
+                                style = nativeStyles.copy;
 
                         }
                     } else {
@@ -389,14 +388,16 @@
         return this.layer;
     };
 
-    Mapbender.Digitizer.FeatureRenderer.prototype.initializeStyles_ = function () {
-        var keys = Object.keys(this.basicStyles);
+    Mapbender.Digitizer.FeatureRenderer.prototype.initializeStyles_ = function (styleConfigs) {
+        var styles = {};
+        var keys = Object.keys(styleConfigs);
         for (var i = 0; i < keys.length; ++ i) {
             var key = keys[i];
-            var style = this.basicStyles[key];
-            this.styles[key] = ol.style.StyleConverter.convertToOL4Style(style);
+            var styleConfig = styleConfigs;
+            styles[key] = ol.style.StyleConverter.convertToOL4Style(styleConfig);
         }
-        Object.freeze(this.styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
+        Object.freeze(styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
+        return styles;
     };
 
 
