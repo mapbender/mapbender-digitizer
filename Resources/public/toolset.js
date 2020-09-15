@@ -11,6 +11,7 @@
         this.controlFactory = controlFactory;
         this.activeInteraction = null;
         this.paused_ = false;
+        this.tools_ = {};
     };
 
     Object.assign(Mapbender.Digitizer.FeatureEditor.prototype, {
@@ -115,47 +116,34 @@
         }
     };
     Object.assign(Mapbender.Digitizer.FeatureEditor.prototype, {
+        getDrawingTool: function(type, schema) {
+            if (!this.tools_[schema.schemaName]) {
+                this.tools_[schema.schemaName] = {};
+            }
+            if (!this.tools_[schema.schemaName][type]) {
+                this.tools_[schema.schemaName][type] = this.createDrawingTool(type, schema);
+            }
+            return this.tools_[schema.schemaName][type];
+        },
         /**
          * @param {String} type
+         * @param {Object} schema
          */
-        getDrawingTool: function(type) {
-            var interaction = this.controlFactory[type] && this.controlFactory[type](schema.layer.getSource());
+        createDrawingTool: function(type, schema) {
+            var interaction = this.controlFactory[type] && this.controlFactory[type](this.layer.getSource());
             if (!interaction) {
                 console.warn("interaction " + type + " does not exist");
                 return;
             }
-
             interaction.setActive(false);
-
-            schema.widget.map.addInteraction(interaction);
-
-
-
-            $button.on('click',null,function (e) {
-
-                if (interaction.getActive()) {
-                    interaction.setActive(false);
-                    toolSet.activeInteraction = null;
-                } else {
-                    toolSet.activeInteraction && toolSet.activeInteraction.setActive(false);
-                    interaction.setActive(true);
-                    toolSet.activeInteraction = interaction;
-                }
-
-            });
-
-            // Keep activation status of buttons in sync with active control
+            // @todo: replace event triggered on interaction with simple method call to toggle selectControl
+            //        on renderer
             interaction.on('controlFactory.Activation', function (event) {
-                if (event.active) {
-                    $button.addClass('active');
-                    // @todo: move selectControl property Schema => FeatureEdit
-                    schema.selectControl.setActive(false);
-                } else {
-                    $button.removeClass('active');
-                    // @todo: move selectControl property Schema => FeatureEdit
-                    schema.selectControl.setActive(true);
-                }
+                schema.renderer.selectControl.setActive(!event.active);
             });
+
+            schema.widget.mbMap.getModel().olMap.addInteraction(interaction);
+            return interaction;
         }
     });
 
