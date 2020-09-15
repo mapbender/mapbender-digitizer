@@ -93,7 +93,6 @@
         },
         _activateSchema: function(schema) {
             this._super(schema);
-            schema.activateSchema(); // triggers schema event
             // HACK: externally patch renderer onto schema post-construction
             if (!schema.renderer) {
                 schema.renderer = new Mapbender.Digitizer.FeatureRenderer(this.mbMap.getModel().olMap, schema);
@@ -115,7 +114,6 @@
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
-            schema.deactivateSchema();    // triggers schema event
             this._toggleSchemaInteractions(schema, false);
             if (!(this.options.displayOnInactive || !schema.displayPermanent)) {
                 schema.layer.setVisible(false);
@@ -135,6 +133,9 @@
         },
         _updateToolset: function($container, schema) {
             this._super($container, schema);
+            if (!schema.allowDigitize) {
+                return;
+            }
             var geomType = schema.featureType.geomType;
             var toolButtonConfigs = schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);
             for (var i = 0; i < toolButtonConfigs.length; ++i) {
