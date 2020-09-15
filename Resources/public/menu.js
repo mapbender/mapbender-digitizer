@@ -9,8 +9,6 @@
 
         var frame = $("<div />").addClass('frame');
 
-        menu.appendToolset_(frame);
-
         frame.append('<div style="clear:both;"/>');
 
         menu.appendResultTableControlButtons_(frame);
@@ -20,10 +18,6 @@
         menu.generateResultTable_(frame);
 
         frame.hide();
-
-        menu.appendTo = function ($element) {
-            $element.append(frame);
-        };
 
         menu.currentExtentSearch = schema.currentExtentSearch;
     };
@@ -111,21 +105,6 @@
             frame.append($div);
         }
     };
-
-    Mapbender.Digitizer.Menu.prototype.appendToolset_ = function (frame) {
-        var menu = this;
-        var schema = menu.schema;
-
-        menu.toolSet = new Mapbender.Digitizer.Toolset(schema);
-
-
-        if (schema.allowDigitize) {
-            frame.append(menu.toolSet.element);
-        }
-
-
-    };
-
 
     Mapbender.Digitizer.Menu.prototype.changeCurrentExtentSearch_ = function(currentExtentSearch) {
         var widget = this.widget;
