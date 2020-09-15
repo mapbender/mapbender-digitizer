@@ -13,6 +13,9 @@
 
         Mapbender.DataManager.Scheme.apply(schema, arguments);
 
+        // alias different config keys "allowEditData", "allowOpenEditDialog" to upstream-compatible "allowEdit"
+        schema.allowEdit = options.allowEditData || options.allowOpenEditDialog || false;
+
         schema.toolset = options.toolset;
 
         schema.openFormAfterEdit = options.openFormAfterEdit || false;
