@@ -279,9 +279,17 @@
         });
 
         $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
+            renderer.onFeatureUpdatedOnServer(renderer.schema);
+        });
 
+
+
+        });
+    });
+
+    Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
+        onFeatureUpdatedOnServer: function(schema) {
             if (schema.refreshLayersAfterFeatureSave) {
-
                 $.each(schema.refreshLayersAfterFeatureSave, function (k1, layerInstanceId) {
                     var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
                     $.each(layers, function (k2, layer) {
@@ -295,11 +303,8 @@
                     schema.widget.refreshConnectedDigitizerFeatures(schemaName);
                 })
             }
-
-
-        });
-
-    };
+        }
+    });
 
     Object.assign(Mapbender.Digitizer.Scheme.prototype, {
         getData: function (extent, resolution, projection) {
