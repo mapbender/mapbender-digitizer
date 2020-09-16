@@ -134,6 +134,7 @@
 
         this.addSelectControl_();
 
+        var renderer = this;
         this.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
 
@@ -191,15 +192,11 @@
 
                         }
                     } else {
-                        style = schema.getFeatureStyle_(feature);
+                        style = renderer.getFeatureStyle_(feature);
                     }
 
                     feature.setStyle(style);
-
-
-
                 }
-
             });
 
             feature.on('Digitizer.toggleVisibility', function (event) {
@@ -532,10 +529,8 @@
         return new Mapbender.Digitizer.Menu(schema);
     };
 
-    Mapbender.Digitizer.Scheme.prototype.getFeatureStyle_ = function (feature) {
-        var schema = this;
-
-        return feature.get("style") || schema.styles.default
+    Mapbender.Digitizer.FeatureRenderer.prototype.getFeatureStyle_ = function (feature) {
+        return feature.get("style") || this.styles.default
     };
 
     Mapbender.Digitizer.Scheme.prototype.integrateFeatures = function (features) {
