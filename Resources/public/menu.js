@@ -22,10 +22,6 @@
         menu.currentExtentSearch = schema.currentExtentSearch;
     };
 
-    Mapbender.Digitizer.Menu.prototype = Object.create(Mapbender.DataManager.Menu.prototype);
-    Mapbender.Digitizer.Menu.prototype.constructor = Mapbender.DataManager.Menu;
-
-
     Mapbender.Digitizer.Menu.prototype.appendResultTableControlButtons_ = function (frame) {
         var menu = this;
         var schema = menu.schema;
@@ -337,5 +333,126 @@
 
     };
 
+    Object.assign(Mapbender.Digitizer.Menu.prototype, {
+        generateResultTable_: function (frame) {
+            var menu = this;
+            var schema = menu.schema;
+            var widget = schema.widget;
+
+            var resultTable;
+
+
+            var generateResultDataTableColumns = function () {
+
+                var columns = [];
+
+                var createResultTableDataFunction = function (columnId, fieldSettings) {
+
+                    return function (feature, type, val, meta) {
+
+                        var escapeHtml = function (str) {
+
+                            return str.replace(/["&'\/<>]/g, function (a) {
+                                return {
+                                    '"': '&quot;',
+                                    '&': '&amp;',
+                                    "'": '&#39;',
+                                    '/': '&#47;',
+                                    '<': '&lt;',
+                                    '>': '&gt;'
+                                }[a];
+                            });
+                        };
+
+                        var data = feature.get('data') && feature.get('data').get(columnId);
+                        if (typeof (data) == 'string') {
+                            data = escapeHtml(data);
+                        }
+                        return data || '';
+                    };
+                };
+
+
+                $.each(schema.tableFields, function (columnId, fieldSettings) {
+                    fieldSettings.title = fieldSettings.label;
+                    fieldSettings.data = fieldSettings.data || createResultTableDataFunction(columnId, fieldSettings);
+                    columns.push(fieldSettings);
+                });
+
+                return columns;
+
+            };
+
+
+            var tableTranslation;
+            if (schema.tableTranslation) {
+                tableTranslation = Mapbender.DataManager.Translator.translateObject(schema.tableTranslation);
+            } else {
+                // @todo: defaults should extend missing entries in custom configuration
+                // @todo: this is done server-side in DataManager, compare
+                tableTranslation = {
+                    sSearch: Mapbender.trans("mb.digitizer.search.title") + ':',
+                    sEmptyTable: Mapbender.trans("mb.digitizer.search.table.empty"),
+                    sZeroRecords: Mapbender.trans("mb.digitizer.search.table.zerorecords"),
+                    sInfo: Mapbender.trans("mb.digitizer.search.table.info.status"),
+                    sInfoEmpty: Mapbender.trans("mb.digitizer.search.table.info.empty"),
+                    sInfoFiltered: Mapbender.trans("mb.digitizer.search.table.info.filtered")
+                }
+            }
+
+            var buttons = menu.generateResultDataTableButtons();
+
+            var resultTableSettings = {
+                lengthChange: false,
+                pageLength: schema.pageLength,
+                searching: schema.inlineSearch,
+                info: true,
+                processing: false,
+                ordering: true,
+                paging: true,
+                selectable: false,
+                autoWidth: false,
+                columns: generateResultDataTableColumns(),
+                buttons: buttons,
+                oLanguage: tableTranslation,
+            };
+
+            if (schema.view && schema.view.settings) {
+                resultTableSettings = Object.assign({},resultTableSettings,schema.view.settings);
+            }
+
+            var $div = $("<div/>");
+            var $table = $div.resultTable(resultTableSettings);
+
+            resultTable = $table.resultTable("instance");
+
+
+            // ??? function does not exist
+            // resultTable.initializeColumnTitles();
+
+            resultTable.element.delegate("tbody > tr", 'mouseenter', function () {
+                var tr = this;
+                var row = resultTable.getApi().row(tr);
+                var feature = row.data();
+                if (feature) {
+                    feature.dispatchEvent({type: widget.TYPE + '.HoverFeature'});
+                }
+
+            });
+
+            resultTable.element.delegate("tbody > tr", 'mouseleave', function () {
+                var tr = this;
+                var row = resultTable.getApi().row(tr);
+                var feature = row.data();
+                if (feature) {
+                    feature.dispatchEvent({type: widget.TYPE + '.UnhoverFeature'});
+                }
+            });
+
+            // menu.registerResultTableEvents(resultTable, frame);
+
+            frame.append($table);
+        }
+    });
 
 })();
