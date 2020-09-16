@@ -71,21 +71,19 @@
 
             spinner.$element = $("<div class='spinner' style='display:none'></div>");
 
+            spinner.update_ = function() {
+                spinner.$element.toggle(spinner.openRequests >= 1);
+            }
+
             spinner.addRequest = function () {
                 spinner.openRequests++;
-                if (spinner.openRequests >= 1) {
-                    spinner.$element.trigger("show");
-                }
+                spinner.update_();
             };
 
             spinner.removeRequest = function () {
                 spinner.openRequests--;
-                if (spinner.openRequests === 0) {
-                    spinner.$element.trigger("hide");
-                }
+                spinner.update_();
             };
-
-
         };
 
         return spinner;
