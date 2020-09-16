@@ -214,24 +214,7 @@
 
         this.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
             var feature = event.feature || event.features.item(0);
-
-            feature.set("modificationState", "isChanged");
-
-            feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
-
-            if (schema.openFormAfterModification) {
-                var dialog = schema.openFeatureEditDialog(feature);
-
-                dialog.$popup.bind('popupdialogcancel', function () {
-
-                    if (schema.revertChangedGeometryOnCancel) {
-                        feature.setGeometry(feature.get("oldGeometry").clone());
-                        feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
-                    }
-                })
-            }
-
-
+            renderer.onFeatureModified(renderer.schema, feature);
         });
 
         this.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
@@ -248,6 +231,22 @@
     });
 
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
+        onFeatureModified: function(schema, feature) {
+            feature.set("modificationState", "isChanged");
+
+            feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
+
+            if (schema.openFormAfterModification) {
+                var dialog = schema.openFeatureEditDialog(feature);
+
+                dialog.$popup.bind('popupdialogcancel', function () {
+                    if (schema.revertChangedGeometryOnCancel) {
+                        feature.setGeometry(feature.get("oldGeometry").clone());
+                        feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
+                    }
+                })
+            }
+        },
         onFeatureAdded: function(schema, feature) {
             feature.set("modificationState", "isNew");
 
