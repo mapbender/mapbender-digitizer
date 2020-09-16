@@ -137,8 +137,8 @@
         var renderer = this;
         this.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
-            renderer.initializeFeature(feature);
-            renderer.registerFeatureEvents(feature);
+            renderer.initializeFeature(schema, feature);
+            renderer.registerFeatureEvents(schema, feature);
         });
         this.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
             var feature = event.feature || event.features.item(0);
@@ -168,13 +168,11 @@
 
             feature.set("oldGeometry", feature.getGeometry().clone());
         },
-        registerFeatureEvents: function(feature) {
+        registerFeatureEvents: function(schema, feature) {
             feature.on('Digitizer.HoverFeature', function (event) {
-
                 if (!feature.get("hidden")) {
                     feature.set("selected", true);
                 }
-
             });
 
             feature.on('Digitizer.UnhoverFeature', function (event) {
