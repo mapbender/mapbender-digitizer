@@ -2,32 +2,49 @@
     "use strict";
 
 
-    Mapbender.Digitizer.MapContextMenu = function (widget) {
-
-        var contextmenu = new ContextMenu({
+    Mapbender.Digitizer.MapContextMenu = function(olMap, widget) {
+        this.widget = widget;
+        this.olMap = olMap;
+        this.contextmenu = new ContextMenu({
             defaultItems: false
         });
-        Object.assign(this, {
-            enable: function() {
-                return contextmenu.enable.apply(contextmenu, arguments);
-            },
-            disable: function() {
-                return contextmenu.disable.apply(contextmenu, arguments);
+        this.onMap_ = false;
+    };
+    Object.assign(Mapbender.Digitizer.MapContextMenu.prototype, {
+        enable: function() {
+            if (!this.onMap_) {
+                this.olMap.addControl(this.contextmenu);
+                this.registerEvents(this.olMap);
+                this.onMap_ = true;
             }
-        });
-        widget.map.addControl(contextmenu);
-
-        widget.map.getViewport().addEventListener('contextmenu', function (e) {
-            var schema = widget.getCurrentSchema();
+            return this.contextmenu.enable.apply(this.contextmenu, arguments);
+        },
+        disable: function() {
+            return this.contextmenu.disable.apply(this.contextmenu, arguments);
+        },
+        /**
+         * @param {ol.PluggableMap} olMap
+         */
+        registerEvents: function(olMap) {
+            var self = this;
+            olMap.getViewPort().addEventListener('contextmenu', function (e) {
+                self._handleContextMenu(e);
+            });
+        },
+        _handleContextMenu: function(e) {
+            var schema = this.widget.getCurrentSchema();
             e.preventDefault();
 
-            contextmenu.clear();
+            this.contextmenu.clear();
 
+            // @todo: figure out if this works. The result here is likely a list of features (plural),
+            //        but following logic treats it as a single feature
             var feature = widget.map.forEachFeatureAtPixel(widget.map.getEventPixel(e),
                 function (feature, layer) {
                     return feature;
                 }
             );
+            var contextmenu = this.contextmenu; // @todo: disambiguate
 
             if (feature) {
                 var subitems = [];
@@ -59,14 +76,12 @@
                 }
                 contextmenu.push({
                     text: feature.get(schema.featureType.name) || "Feature #" + (feature.getId() || ''),
-                    items: subitems,
+                    items: subitems
                 });
             } else {
                 contextmenu.push({text: "Nothing selected!"});
             }
-        });
-
-    };
-
+        }
+    });
 
 })();
