@@ -137,13 +137,38 @@
         var renderer = this;
         this.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
+            renderer.initializeFeature(feature);
+            renderer.registerFeatureEvents(feature);
+        });
+        this.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
+            var feature = event.feature || event.features.item(0);
+            renderer.onFeatureModified(renderer.schema, feature);
+        });
 
+        this.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
+            renderer.onFeatureAdded(renderer.schema, event.feature);
+        });
+
+        this.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
+            renderer.onFeatureCopied(renderer.schema, event.feature);
+        });
+
+        $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
+            renderer.onFeatureUpdatedOnServer(renderer.schema);
+        });
+    }
+    Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
+        initializeFeature: function(schema, feature) {
             feature.set("mbOrigin", "digitizer");
-
             feature.setStyle = feature.setStyleWithLabel;
+            feature.setStyle(this.styles.default);
+            if (schema.allowCustomStyle) {
+                schema.customStyleFeature_(feature);
+            }
 
-            feature.setStyle(nativeStyles.default);
-
+            feature.set("oldGeometry", feature.getGeometry().clone());
+        },
+        registerFeatureEvents: function(feature) {
             feature.on('Digitizer.HoverFeature', function (event) {
 
                 if (!feature.get("hidden")) {
@@ -204,30 +229,7 @@
                 feature.set("hidden", event.hide);
 
             });
-
-            if (schema.allowCustomStyle) {
-                schema.customStyleFeature_(feature);
-            }
-
-            feature.set("oldGeometry", feature.getGeometry().clone());
-        });
-
-        this.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
-            var feature = event.feature || event.features.item(0);
-            renderer.onFeatureModified(renderer.schema, feature);
-        });
-
-        this.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
-            renderer.onFeatureAdded(renderer.schema, event.feature);
-        });
-
-        this.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
-            renderer.onFeatureCopied(renderer.schema, event.feature);
-        });
-
-        $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
-            renderer.onFeatureUpdatedOnServer(renderer.schema);
-        });
+        }
     });
 
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
