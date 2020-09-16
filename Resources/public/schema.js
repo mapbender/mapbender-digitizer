@@ -24,14 +24,11 @@
             srid: 4326
         };
 
-        if (!schema.featureType.connection || !schema.featureType.table, !schema.featureType.geomType) {
+        if (!schema.featureType || !schema.featureType.connection || !schema.featureType.table || !schema.featureType.geomType) {
             throw new Error("Feature Type not correctly specified in Configuration of scheme")
         }
 
         schema.schemaName = options.schemaName;
-        if (!schema.featureType) {
-            throw new Error("No proper Schema Name specified in Configuration of scheme")
-        }
 
         schema.label = options.label;
         schema.view = options.view = { settings: { }};
