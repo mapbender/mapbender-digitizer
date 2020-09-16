@@ -24,7 +24,6 @@
 
     Mapbender.Digitizer.prototype.setup = function () {
         var widget = this;
-        widget.contextMenu = new Mapbender.Digitizer.MapContextMenu(widget);
 
         var rawSchemes = widget.schemes;
         widget.schemes = {};
@@ -58,10 +57,6 @@
         var widget = this;
         return widget.map.getView().getProjection().getCode().split(':').pop();
     };
-    Mapbender.Digitizer.prototype.getCurrentSchema = function() {
-        var widget = this;
-        return widget.selector.getSelectedSchema();
-    }
 
     Mapbender.Digitizer.prototype.createSpinner_ = function () {
         var spinner = new function () {

@@ -46,7 +46,13 @@
                 $.extend(self.printClient, Mapbender.Digitizer.printPlugin);
             });
             this.widget = new Mapbender.Digitizer(self.element, self.options);
-            this.contextMenu = new Mapbender.Digitizer.MapContextMenu({map: this.mbMap.model.olMap});
+            this.contextMenu = new Mapbender.Digitizer.MapContextMenu({
+                // HACK: pretend to be a Digitizer object (MapContextMenu only needs map property and getCurrentSchema method)
+                map: this.mbMap.model.olMap,
+                getCurrentSchema: function() {
+                    return self._getCurrentSchema();
+                }
+            });
             this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(this.mbMap.getModel().olMap);
             if (this.options.displayOnInactive) {
                 this.activate();
