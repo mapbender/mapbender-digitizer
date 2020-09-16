@@ -188,45 +188,42 @@
                 //feature.changed();
             });
 
+            var renderer = this;
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
-
-
-
                 if (event.key == "selected" || event.key == "modificationState" || event.key == "hidden" || event.key == "featureStyleDisabled") {
-
-                    var style;
-
-
-                    if (feature.get("featureStyleDisabled")) {
-                        style = null;
-                    } else
-                    if (feature.get("hidden")) {
-                        style = nativeStyles.invisible;
-                    } else if (feature.get("selected")) {
-                        style = nativeStyles.select;
-                    } else if (feature.get("modificationState") && schema.markUnsavedFeatures) {
-                        switch (feature.get("modificationState")) {
-                            case "isChanged" :
-                            case "isNew" :
-                                style = nativeStyles.unsaved;
-                                break;
-                            case "isCopy" :
-                                style = nativeStyles.copy;
-
-                        }
-                    } else {
-                        style = renderer.getFeatureStyle_(feature);
-                    }
-
-                    feature.setStyle(style);
+                    renderer.updateFeatureStyle(feature);
                 }
             });
 
             feature.on('Digitizer.toggleVisibility', function (event) {
-
                 feature.set("hidden", event.hide);
 
             });
+        },
+        updateFeatureStyle: function(schema, feature) {
+            var style;
+            if (feature.get("featureStyleDisabled")) {
+                style = null;
+            } else
+            if (feature.get("hidden")) {
+                style = nativeStyles.invisible;
+            } else if (feature.get("selected")) {
+                style = nativeStyles.select;
+            } else if (feature.get("modificationState") && schema.markUnsavedFeatures) {
+                switch (feature.get("modificationState")) {
+                    case "isChanged" :
+                    case "isNew" :
+                        style = nativeStyles.unsaved;
+                        break;
+                    case "isCopy" :
+                        style = nativeStyles.copy;
+
+                }
+            } else {
+                style = renderer.getFeatureStyle_(feature);
+            }
+
+            feature.setStyle(style);
         }
     });
 
