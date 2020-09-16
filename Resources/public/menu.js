@@ -383,23 +383,6 @@
 
             };
 
-
-            var tableTranslation;
-            if (schema.tableTranslation) {
-                tableTranslation = Mapbender.DataManager.Translator.translateObject(schema.tableTranslation);
-            } else {
-                // @todo: defaults should extend missing entries in custom configuration
-                // @todo: this is done server-side in DataManager, compare
-                tableTranslation = {
-                    sSearch: Mapbender.trans("mb.digitizer.search.title") + ':',
-                    sEmptyTable: Mapbender.trans("mb.digitizer.search.table.empty"),
-                    sZeroRecords: Mapbender.trans("mb.digitizer.search.table.zerorecords"),
-                    sInfo: Mapbender.trans("mb.digitizer.search.table.info.status"),
-                    sInfoEmpty: Mapbender.trans("mb.digitizer.search.table.info.empty"),
-                    sInfoFiltered: Mapbender.trans("mb.digitizer.search.table.info.filtered")
-                }
-            }
-
             var buttons = menu.generateResultDataTableButtons();
 
             var resultTableSettings = {
@@ -414,7 +397,7 @@
                 autoWidth: false,
                 columns: generateResultDataTableColumns(),
                 buttons: buttons,
-                oLanguage: tableTranslation,
+                oLanguage: widget.options.tableTranslation
             };
 
             if (schema.view && schema.view.settings) {

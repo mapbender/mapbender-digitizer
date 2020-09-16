@@ -24,6 +24,11 @@ use Mapbender\DataManagerBundle\Element\DataManagerElement;
  */
 class Digitizer extends DataManagerElement
 {
+    /**
+     * @var array
+     * Nested string mapping structure, ultimately passed to dataTables JavaScript widget as "oLanguage" option
+     */
+    protected $defaultTableTranslation = array();
 
     /**
      * @inheritdoc
@@ -152,5 +157,32 @@ class Digitizer extends DataManagerElement
         return 'featureType';
     }
 
+    public function getConfiguration()
+    {
+        $config = parent::getConfiguration();
+        $tableTranslation = $this->getDefaultTableTranslation();
+        if (empty($config['tableTranslation'])) {
+            $config['tableTranslation'] = $tableTranslation;
+        } else {
+            $config['tableTranslation'] = array_replace_recursive($tableTranslation, $config['tableTranslation']);
+        }
+        return $config;
+    }
 
+    protected function getDefaultTableTranslation()
+    {
+        if (!$this->defaultTableTranslation) {
+            $translator = $this->getTranslator();
+            $this->defaultTableTranslation = array(
+                // @see https://legacy.datatables.net/usage/i18n
+                'sSearch' => $translator->trans("mb.digitizer.search.title") . ':',
+                'sEmptyTable' => $translator->trans("mb.digitizer.search.table.empty"),
+                'sZeroRecords' => $translator->trans("mb.digitizer.search.table.zerorecords"),
+                'sInfo' => $translator->trans("mb.digitizer.search.table.info.status"),
+                'sInfoEmpty' => $translator->trans("mb.digitizer.search.table.info.empty"),
+                'sInfoFilter' => $translator->trans("mb.digitizer.search.table.info.filtered"),
+            );
+        }
+        return $this->defaultTableTranslation;
+    }
 }
