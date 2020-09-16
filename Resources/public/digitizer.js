@@ -7,15 +7,15 @@
         $.extend(widget, options);
 
         widget.id = $element.attr("id");
+        var spinner = this.createSpinner_();
+        // @todo: this doesn't work in Mapbender 3.2 (no tableCell class on accordions)
+        // @todo: loading indicator should not depend on sidepane style (accordion vs tabs), should live
+        //        completely inside element DOM
+        // @todo: loading indicator should go upstream into data-manager
+        var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell');
+        $parent.prepend(spinner.$element);
 
-        var $spinner = (function() {
-            var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell');
-            var spinner = $("<div class='spinner' style='display:none'></div>");
-            $parent.prepend(spinner);
-            return spinner;
-        })();
-
-        var qe = new Mapbender.DataManager.QueryEngine(widget.id, this.createSpinner_($spinner));
+        var qe = new Mapbender.DataManager.QueryEngine(widget.id, spinner);
         widget.query = qe.query;
         widget.getElementURL = qe.getElementURL;
     };
@@ -63,13 +63,13 @@
         return widget.selector.getSelectedSchema();
     }
 
-    Mapbender.Digitizer.prototype.createSpinner_ = function ($spinner) {
+    Mapbender.Digitizer.prototype.createSpinner_ = function () {
         var spinner = new function () {
             var spinner = this;
 
             spinner.openRequests = 0;
 
-            spinner.$element = $spinner;
+            spinner.$element = $("<div class='spinner' style='display:none'></div>");
 
             spinner.addRequest = function () {
                 spinner.openRequests++;
