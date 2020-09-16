@@ -235,8 +235,20 @@
         });
 
         this.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
-            var feature = event.feature;
+            renderer.onFeatureAdded(renderer.schema, event.feature);
+        });
 
+        this.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
+            renderer.onFeatureCopied(renderer.schema, event.feature);
+        });
+
+        $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
+            renderer.onFeatureUpdatedOnServer(renderer.schema);
+        });
+    });
+
+    Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
+        onFeatureAdded: function(schema, feature) {
             feature.set("modificationState", "isNew");
 
             $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: feature});
@@ -254,18 +266,7 @@
                     }
                 });
             }
-        });
-
-        this.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
-            renderer.onFeatureCopied(renderer.schema, event.feature);
-        });
-
-        $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
-            renderer.onFeatureUpdatedOnServer(renderer.schema);
-        });
-    });
-
-    Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
+        },
         onFeatureCopied: function(schema, feature) {
             feature.set("modificationState", "isCopy");
 
