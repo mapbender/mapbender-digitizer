@@ -37,6 +37,9 @@
         },
         _schemaFactory: function(schemaConfig) {
             var schemaConfig_ = this._super(schemaConfig);
+            if (!schemaConfig_.featureType || !schemaConfig_.featureType.connection || !schemaConfig_.featureType.table || !schemaConfig_.featureType.geomType) {
+                throw new Error("Feature Type not correctly specified in Configuration of scheme")
+            }
             return new Mapbender.Digitizer.Scheme(schemaConfig_, this);
         },
         setup: function() {

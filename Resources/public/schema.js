@@ -14,19 +14,12 @@
         schema.widget = widget;
 
         schema.featureType = options.featureType || {
-            connection: null,
-            table: null,
             uniqueId: null,
-            geomType: null,
             geomField: null,
             name: null,
             styleField: null,
             srid: 4326
         };
-
-        if (!schema.featureType || !schema.featureType.connection || !schema.featureType.table || !schema.featureType.geomType) {
-            throw new Error("Feature Type not correctly specified in Configuration of scheme")
-        }
 
         schema.schemaName = options.schemaName;
 
