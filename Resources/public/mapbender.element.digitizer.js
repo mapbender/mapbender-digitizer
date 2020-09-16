@@ -108,7 +108,6 @@
             var interaction = schema.geometryEditor.getDrawingTool(toolName, schema);
             // @todo: disable selectControl if drawing active and vice-versa
             interaction.setActive(!!state);
-
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
@@ -172,13 +171,15 @@
                 $container.append($button);
            }
         },
+        // Support method for custom Scheme class
+        getProjectionCode: function() {
+            return this.mbMap.getModel().getCurrentProjectionCode();
+        },
         _buildTableRowButtons: function(schema) {
             var schema_ = this.widget.createScheme_(schema);
             var menu = schema_.menu;
             return menu.generateResultDataTableButtons();
         },
-
-
         __formatting_dummy: null
     });
 
