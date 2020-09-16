@@ -136,17 +136,23 @@
 
         eventListeners[configuration.PREFIX + '.FeatureEditDialog.Save'] = function (event) {
             var formData = dialog.$popup.formData();
-
-            // @todo: there is no method defectiveInputs :\
-            if (formData.defectiveInputs().length > 0) {
-                console.warn("Error", formData.defectiveInputs());
+            var $allNamedInputs = $(':input[name]', dialog.$popup);
+            var $invalidInputs = $allNamedInputs.filter(function() {
+                // NOTE: jQuery pseudo-selector :valid can not be chained into a single .find (or snytactic variant)
+                return $(this).is(':not(:valid)');
+            });
+            // @todo vis-ui: some inputs (with ".mandatory") are made invalid only visually when
+            //               empty, but do not have the HTML required or pattern property to
+            //               support selector detection. Work around that here.
+            $invalidInputs = $invalidInputs.add($('.has-error :input', dialog.$popup));
+            if ($invalidInputs.length) {
+                console.warn("Error", $invalidInputs.get());
                 return;
             }
 
             dialog.$popup.disableForm();
 
             schema.saveFeature(feature, formData).then(function (response) {
-
                 if (response.hasOwnProperty('errors')) {
                     dialog.$popup.enableForm();
                     return;
