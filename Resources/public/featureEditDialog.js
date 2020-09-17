@@ -4,34 +4,6 @@
     Mapbender.Digitizer = Mapbender.Digitizer || {};
 
     Mapbender.Digitizer.FeatureEditDialog = {};
-    /**
-     * @param {ol.Feature} feature
-     * @param {Mapbender.Digitizer.Scheme} schema
-     * @returns {FeatureEditDialog}
-     * @static
-     */
-    Mapbender.Digitizer.FeatureEditDialog.open = function(feature, schema) {
-        var dialog = this;
-        var widget = schema.widget;
-        var $popup = dialog.$popup = $("<div/>");
-
-        $popup.data('feature', feature);
-
-        $popup.generateElements({children: schema.formItems});
-        var popupConfiguration = this.getPopupConfiguration(feature, schema);
-        $popup.popupDialog(popupConfiguration);
-
-        /** This is evil, but filling of input fields currently relies on that (see select field) **/
-        setTimeout(function () {
-            $popup.formData(feature.get('data'));
-        }, 0);
-
-        $popup.parent().bind("mouseenter",function(){
-            feature.dispatchEvent({type: widget.TYPE+'.UnhoverFeature'});
-        });
-
-        return dialog;
-    };
 
     Mapbender.Digitizer.FeatureEditDialog.getPopupConfiguration = function(feature, schema) {
         return Object.assign({}, schema.popup, {

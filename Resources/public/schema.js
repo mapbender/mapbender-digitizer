@@ -340,15 +340,15 @@
             return Mapbender.Digitizer.FeatureEditDialog;
         },
         openFeatureEditDialog: function (feature) {
+            // inflect via inherited data-manager widget method
             var schema = this;
             var widget = schema.widget;
-            widget.currentPopup && widget.currentPopup.popupDialog('close');
-
-            var dialogImplementation = schema.getFeatureEditDialogHandler(feature, schema);
-            var dialog = dialogImplementation.open(feature, schema);
-            widget.currentPopup = dialog;
-
-            return dialog;
+            var $dialog = widget._openEditDialog(schema, feature);
+            // Fake previous internal structure of FeatureEditDialog class
+            // @todo: resolve popup access errors in renderer event registration, then unroll this hack
+            return {
+                '$popup': $dialog
+            };
         }
     });
 

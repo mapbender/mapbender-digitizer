@@ -182,6 +182,20 @@
                 $container.append($button);
            }
         },
+        _openEditDialog: function(schema, feature) {
+            var $dialog = this._super(schema, feature);
+            $dialog.data('feature', feature);
+            $dialog.parent().on("mouseenter",function(){
+                feature.dispatchEvent({type: 'Digitizer.UnhoverFeature'});
+            });
+
+            return $dialog;
+
+        },
+        _getEditDialogButtons: function(schema, feature) {
+            var dialogImplementation = schema.getFeatureEditDialogHandler(feature, schema);
+            return dialogImplementation.getButtonConfiguration(feature, schema);
+        },
         // Support method for custom Scheme class
         getProjectionCode: function() {
             return this.mbMap.getModel().getCurrentProjectionCode();
