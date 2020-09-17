@@ -194,7 +194,9 @@
         },
         _getEditDialogButtons: function(schema, feature) {
             var dialogImplementation = schema.getFeatureEditDialogHandler(feature, schema);
-            return dialogImplementation.getButtonConfiguration(feature, schema);
+            var ownButtons = dialogImplementation.getButtonConfiguration(feature, schema);
+            var upstreamButtons = this._super(schema, feature);
+            return _.union(ownButtons, upstreamButtons);
         },
         _getItemData: function(schema, feature) {
             return this._super(schema, feature.get('data'));
