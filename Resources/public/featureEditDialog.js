@@ -18,13 +18,6 @@
 
         $popup.data('feature', feature);
 
-        configuration.initButtons(feature);
-        var eventListeners = configuration.createEventListeners(dialog);
-
-        $.each(eventListeners, function (type, listener) {
-            feature.on(type, listener);
-        });
-
         widget.currentPopup && widget.currentPopup.popupDialog('close');
         widget.currentPopup = $popup;
         $popup.generateElements({children: schema.formItems});
@@ -73,37 +66,72 @@
         if (schema.copy && schema.copy.enable) {
             buttons.copyButton = {
                 text: Mapbender.trans('mb.digitizer.feature.clone.title'),
-                event: 'Copy'
+                click: function() {
+                    schema.copyFeature(feature);
+                }
             };
         }
         if (schema.allowCustomStyle) {
             buttons.styleButton = {
                 text: Mapbender.trans('mb.digitizer.feature.style.change'),
-                event: 'Style'
+                click: function() {
+                    schema.openChangeStyleDialog(feature);
+                }
             };
         }
         if (schema.printable && this.printClient) {
             buttons.printButton = {
                 text: Mapbender.trans('mb.digitizer.feature.print'),
-                event: 'Print'
+                click: function() {
+                    schema.widget.printClient.printDigitizerFeauture(feature, schema);
+                }
             };
         }
         if (schema.allowEditData) {
             buttons.saveButton = {
                 text: Mapbender.trans('mb.digitizer.feature.save.title'),
-                event: 'Save',
+                click: function() {
+                    var formData = dialog.$popup.formData();
+                    var $allNamedInputs = $(':input[name]', dialog.$popup);
+                    var $invalidInputs = $allNamedInputs.filter(function() {
+                        // NOTE: jQuery pseudo-selector :valid can not be chained into a single .find (or snytactic variant)
+                        return $(this).is(':not(:valid)');
+                    });
+                    // @todo vis-ui: some inputs (with ".mandatory") are made invalid only visually when
+                    //               empty, but do not have the HTML required or pattern property to
+                    //               support selector detection. Work around that here.
+                    $invalidInputs = $invalidInputs.add($('.has-error :input', dialog.$popup));
+                    if ($invalidInputs.length) {
+                        console.warn("Error", $invalidInputs.get());
+                        return;
+                    }
+
+                    dialog.$popup.disableForm();
+
+                    schema.saveFeature(feature, formData).then(function (response) {
+                        if (response.hasOwnProperty('errors')) {
+                            dialog.$popup.enableForm();
+                            return;
+                        }
+                        dialog.$popup.popupDialog('instance').close();
+                    });
+                }
             };
         }
         if (schema.allowDelete) {
             buttons.deleteButton = {
                 text: Mapbender.trans('mb.digitizer.feature.remove.title'),
-                event: 'Delete',
+                click: function() {
+                    schema.removeFeature(feature);
+                }
             };
         }
 
         buttons.cancelButton = {
             text: Mapbender.trans('mb.digitizer.cancel'),
-            event: 'Cancel',
+            click: function() {
+                dialog.$popup.popupDialog('instance').cancel();
+            }
         };
 
         return buttons;
@@ -118,55 +146,6 @@
 
         var eventListeners = {};
 
-
-        eventListeners['FeatureEditDialog.Copy'] = function (event) {
-            schema.copyFeature(feature);
-        };
-
-        eventListeners['FeatureEditDialog.Style'] = function (event) {
-            schema.openChangeStyleDialog(feature);
-        };
-
-        eventListeners['FeatureEditDialog.Print'] = function (event) {
-            var printClient = schema.widget.printClient;
-            printClient.printDigitizerFeature(feature, schema);
-        };
-
-        eventListeners['FeatureEditDialog.Save'] = function (event) {
-            var formData = dialog.$popup.formData();
-            var $allNamedInputs = $(':input[name]', dialog.$popup);
-            var $invalidInputs = $allNamedInputs.filter(function() {
-                // NOTE: jQuery pseudo-selector :valid can not be chained into a single .find (or snytactic variant)
-                return $(this).is(':not(:valid)');
-            });
-            // @todo vis-ui: some inputs (with ".mandatory") are made invalid only visually when
-            //               empty, but do not have the HTML required or pattern property to
-            //               support selector detection. Work around that here.
-            $invalidInputs = $invalidInputs.add($('.has-error :input', dialog.$popup));
-            if ($invalidInputs.length) {
-                console.warn("Error", $invalidInputs.get());
-                return;
-            }
-
-            dialog.$popup.disableForm();
-
-            schema.saveFeature(feature, formData).then(function (response) {
-                if (response.hasOwnProperty('errors')) {
-                    dialog.$popup.enableForm();
-                    return;
-                }
-                dialog.$popup.popupDialog('instance').close();
-            });
-
-        };
-
-        eventListeners['FeatureEditDialog.Delete'] = function (event) {
-            schema.removeFeature(feature);
-        };
-        eventListeners['FeatureEditDialog.Cancel'] = function (event) {
-            dialog.$popup.popupDialog('instance').cancel();
-        };
-
         return eventListeners;
     };
 
@@ -180,20 +159,9 @@
         clone: function () {
             return $.extend(true, {}, this)
         },
-        initButtons: function (feature) {
-            var configuration = this;
-
-            $.each(configuration.buttons, function (name, button) {
-                // @todo: avoid self-modification (also saves clone method implementation)
-                button.click = function (event) {
-                    feature.dispatchEvent({type: 'FeatureEditDialog.' + button.event});
-                }
-            });
-        },
         createFeatureEditDialog: function (feature, schema) {
             var configuration = this;
-
-            return new FeatureEditDialog(feature, schema,configuration.clone())
+            return new FeatureEditDialog(feature, schema, configuration.clone())
         }
     });
 
