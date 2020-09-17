@@ -72,37 +72,37 @@
         var buttons = {};
         if (schema.copy && schema.copy.enable) {
             buttons.copyButton = {
-                title: 'feature.clone.title',
+                text: Mapbender.trans('mb.digitizer.feature.clone.title'),
                 event: 'Copy'
             };
         }
         if (schema.allowCustomStyle) {
             buttons.styleButton = {
-                title: 'feature.style.change',
+                text: Mapbender.trans('mb.digitizer.feature.style.change'),
                 event: 'Style'
             };
         }
         if (schema.printable && this.printClient) {
             buttons.printButton = {
-                title: 'feature.print',
+                text: Mapbender.trans('mb.digitizer.feature.print'),
                 event: 'Print'
             };
         }
         if (schema.allowEditData) {
             buttons.saveButton = {
-                title: 'feature.save.title',
+                text: Mapbender.trans('mb.digitizer.feature.save.title'),
                 event: 'Save',
             };
         }
         if (schema.allowDelete) {
             buttons.deleteButton = {
-                title: 'feature.remove.title',
+                text: Mapbender.trans('mb.digitizer.feature.remove.title'),
                 event: 'Delete',
             };
         }
 
         buttons.cancelButton = {
-            title: 'cancel',
+            text: Mapbender.trans('mb.digitizer.cancel'),
             event: 'Cancel',
         };
 
@@ -184,9 +184,7 @@
             var configuration = this;
 
             $.each(configuration.buttons, function (name, button) {
-                // @todo: decide on one attribute for title
                 // @todo: avoid self-modification (also saves clone method implementation)
-                button.text = button.title = Mapbender.trans('mb.digitizer.' + button.title);
                 button.click = function (event) {
                     feature.dispatchEvent({type: 'FeatureEditDialog.' + button.event});
                 }
