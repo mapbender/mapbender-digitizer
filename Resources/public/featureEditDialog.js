@@ -34,7 +34,7 @@
             buttons.push({
                 text: Mapbender.trans('mb.digitizer.feature.print'),
                 click: function() {
-                    schema.widget.printClient.printDigitizerFeauture(feature, schema);
+                    schema.widget.printClient.printDigitizerFeature(feature, schema);
                 }
             });
         }
