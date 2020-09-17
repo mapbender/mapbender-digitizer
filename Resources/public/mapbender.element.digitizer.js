@@ -116,9 +116,8 @@
             schema.renderer.layer.setVisible(true);
         },
         _toggleDrawingTool: function(schema, toolName, state) {
-            var interaction = schema.geometryEditor.getDrawingTool(toolName, schema);
+            schema.geometryEditor.toggleTool(toolName, schema, state);
             // @todo: disable selectControl if drawing active and vice-versa
-            interaction.setActive(!!state);
         },
         _deactivateSchema: function(schema) {
             this._super(schema);

@@ -37,6 +37,16 @@
             }
             this.paused_ = false;
         },
+        toggleTool: function(toolName, schema, state) {
+            var tool = this.getDrawingTool(toolName, schema);
+            if (state) {
+                if (this.activeInteraction && this.activeInteraction !== tool) {
+                    console.warn("WARNING: enabling multiple drawing tools at the same time", toolName, this.activeInteraction);
+                }
+                this.activeInteraction = tool;
+            }
+            tool.setActive(!!state);
+        },
         registerSchemaEvents: function(schema) {
             var editor = this;
             this.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
