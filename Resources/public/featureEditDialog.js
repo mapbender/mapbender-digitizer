@@ -40,15 +40,6 @@
 
 
     Mapbender.Digitizer.PopupConfiguration = function (schema) {
-        var popupConfiguration = this;
-        popupConfiguration.schema = schema;
-
-        $.extend(popupConfiguration, schema.popup);
-
-        popupConfiguration.checkForDeprecatedUsageOfButtons_();
-        popupConfiguration.buttons = popupConfiguration.createButtons_();
-
-        Object.freeze(popupConfiguration.buttons);
     };
 
     Mapbender.Digitizer.PopupConfiguration.prototype.createButtons_ = function () {
