@@ -179,13 +179,8 @@
                 feature.set("selected", false);
             });
 
-            feature.on('Digitizer.ModifyFeature', function (event) {
-                //feature.changed();
-            });
-
             feature.on('Digitizer.UnmodifyFeature', function (event) {
                 feature.set("modificationState", undefined);
-                //feature.changed();
             });
 
             var renderer = this;
