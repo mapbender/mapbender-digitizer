@@ -56,33 +56,33 @@
         var popupConfiguration = this;
         var schema = popupConfiguration.schema;
 
-        var buttons = {};
+        var buttons = [];
         if (schema.copy && schema.copy.enable) {
-            buttons.copyButton = {
+            buttons.push({
                 text: Mapbender.trans('mb.digitizer.feature.clone.title'),
                 click: function() {
                     schema.copyFeature(feature);
                 }
-            };
+            });
         }
         if (schema.allowCustomStyle) {
-            buttons.styleButton = {
+            buttons.push({
                 text: Mapbender.trans('mb.digitizer.feature.style.change'),
                 click: function() {
                     schema.openChangeStyleDialog(feature);
                 }
-            };
+            });
         }
         if (schema.printable && this.printClient) {
-            buttons.printButton = {
+            buttons.push({
                 text: Mapbender.trans('mb.digitizer.feature.print'),
                 click: function() {
                     schema.widget.printClient.printDigitizerFeauture(feature, schema);
                 }
-            };
+            });
         }
         if (schema.allowEditData) {
-            buttons.saveButton = {
+            buttons.push({
                 text: Mapbender.trans('mb.digitizer.feature.save.title'),
                 click: function() {
                     var formData = dialog.$popup.formData();
@@ -110,23 +110,23 @@
                         dialog.$popup.popupDialog('instance').close();
                     });
                 }
-            };
+            });
         }
         if (schema.allowDelete) {
-            buttons.deleteButton = {
+            buttons.push({
                 text: Mapbender.trans('mb.digitizer.feature.remove.title'),
                 click: function() {
                     schema.removeFeature(feature);
                 }
-            };
+            });
         }
 
-        buttons.cancelButton = {
+        buttons.push({
             text: Mapbender.trans('mb.digitizer.cancel'),
             click: function() {
                 dialog.$popup.popupDialog('instance').cancel();
             }
-        };
+        });
 
         return buttons;
     };
