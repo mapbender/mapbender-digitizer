@@ -613,31 +613,12 @@
     Mapbender.Digitizer.Scheme.prototype.removeFeature = function (feature) {
         var schema = this;
         var widget = schema.widget;
-        // @todo: fix breakage in map access
-        var map = widget.map;
-
-        var limitedFeature = {};
-        limitedFeature[schema.featureType.uniqueId] = feature.getId();
         if (!feature.getId()) {
-            schema.layer.getSource().removeFeature(feature);
+            // HACK: renderer property is monkey-patched onto schema externally by jqui widget
+            schema.renderer.getLayer().getSource().removeFeature(feature);
         } else {
-            confirmDialog({
-                html: Mapbender.trans("mb.digitizer.feature.remove.from.database"),
-
-                onSuccess: function () {
-                    widget.query('delete', {
-                        schema: schema.schemaName,
-                        feature: limitedFeature,
-                    }).done(function (fid) {
-                        schema.layer.getSource().removeFeature(feature);
-                        $(map).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
-                        $.notify(Mapbender.trans('mb.digitizer.feature.remove.successfully'), 'info');
-                    });
-                }
-            });
+            widget.removeData(this, feature);
         }
-
-        return feature;
     };
 
 

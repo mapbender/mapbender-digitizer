@@ -198,8 +198,17 @@
             var upstreamButtons = this._super(schema, feature);
             return _.union(ownButtons, upstreamButtons);
         },
+        _getUniqueItemId: function(schema, feature) {
+            return feature.getId();
+        },
         _getItemData: function(schema, feature) {
             return this._super(schema, feature.get('data'));
+        },
+        _afterRemove: function(schema, feature, id) {
+            var olMap = this.mbMap.getModel().olMap;
+            schema.renderer.getLayer().getSource().removeFeature(feature);
+            // Multi-Digitizer sync support
+            $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
         },
         _replaceItemData: function(schema, feature, newValues) {
             this._super(schema.feature.get('data'), newValues);
