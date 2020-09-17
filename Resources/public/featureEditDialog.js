@@ -31,12 +31,6 @@
             $popup.formData(feature.get('data'));
         }, 0);
 
-        $popup.bind('popupdialogclose', function () {
-             $.each(eventListeners, function (type, listener) {
-                feature.un(type, listener);
-            });
-        });
-
         $popup.parent().bind("mouseenter",function(){
             feature.dispatchEvent({type: widget.TYPE+'.UnhoverFeature'});
         });
