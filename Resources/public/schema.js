@@ -518,11 +518,6 @@
         return schema.featureType.geomType;
     };
 
-    Mapbender.Digitizer.Scheme.prototype.createPopupConfiguration_ = function () {
-        var schema = this;
-        return new Mapbender.Digitizer.PopupConfiguration(schema);
-    };
-
     Mapbender.Digitizer.Scheme.prototype.createMenu = function() {
         var schema = this;
         return new Mapbender.Digitizer.Menu(schema);

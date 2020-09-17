@@ -116,13 +116,4 @@
 
         return buttons;
     };
-
-
-    Object.assign(Mapbender.Digitizer.PopupConfiguration.prototype, {
-        createFeatureEditDialog: function (feature, schema) {
-            var configuration = this;
-            return new FeatureEditDialog(feature, schema, configuration)
-        }
-    });
-
 })();
