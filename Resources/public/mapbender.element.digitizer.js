@@ -196,6 +196,12 @@
             var dialogImplementation = schema.getFeatureEditDialogHandler(feature, schema);
             return dialogImplementation.getButtonConfiguration(feature, schema);
         },
+        _getItemData: function(schema, feature) {
+            return this._super(schema, feature.get('data'));
+        },
+        _replaceItemData: function(schema, feature, newValues) {
+            this._super(schema.feature.get('data'), newValues);
+        },
         // Support method for custom Scheme class
         getProjectionCode: function() {
             return this.mbMap.getModel().getCurrentProjectionCode();
