@@ -132,17 +132,6 @@
     };
 
 
-    Mapbender.Digitizer.PopupConfiguration.prototype.createEventListeners = function (dialog) {
-        var configuration = this;
-        var schema = configuration.schema;
-
-        var feature = dialog.$popup.data("feature");
-
-        var eventListeners = {};
-
-        return eventListeners;
-    };
-
     Object.assign(Mapbender.Digitizer.PopupConfiguration.prototype, {
         checkForDeprecatedUsageOfButtons_: function () {
             var configuration = this;
@@ -150,12 +139,9 @@
                 console.error("Using Javascript code in the configuration is deprecated:", button);
             });
         },
-        clone: function () {
-            return $.extend(true, {}, this)
-        },
         createFeatureEditDialog: function (feature, schema) {
             var configuration = this;
-            return new FeatureEditDialog(feature, schema, configuration.clone())
+            return new FeatureEditDialog(feature, schema, configuration)
         }
     });
 
