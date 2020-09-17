@@ -79,7 +79,7 @@
                 var schema = $button.data('schema');
                 var oldState = $button.hasClass('active');
                 if (!oldState) {
-                    var $activeOthers = $('.-fn-toggle-tool.active', $button.siblings()).not($button);
+                    var $activeOthers = $button.siblings('.-fn-toggle-tool.active').not($button);
                     $activeOthers.each(function() {
                         var $other = $(this);
                         self._toggleDrawingTool(schema, $other.attr('data-toolname'), false);
@@ -87,7 +87,7 @@
                     $activeOthers.removeClass('active');
                 }
                 $button.toggleClass('active', !oldState);
-                self._toggleDrawingTool(schema, toolName, true);
+                self._toggleDrawingTool(schema, toolName, !oldState);
             });
         },
         activate: function() {
