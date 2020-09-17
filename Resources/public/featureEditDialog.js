@@ -52,11 +52,11 @@
     };
 
 
-    Mapbender.Digitizer.PopupConfiguration = function (configuration, schema) {
+    Mapbender.Digitizer.PopupConfiguration = function (schema) {
         var popupConfiguration = this;
         popupConfiguration.schema = schema;
 
-        $.extend(popupConfiguration, configuration);
+        $.extend(popupConfiguration, schema.popup);
 
         popupConfiguration.checkForDeprecatedUsageOfButtons_();
         popupConfiguration.buttons = popupConfiguration.createButtons_();

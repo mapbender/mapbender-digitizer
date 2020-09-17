@@ -513,7 +513,7 @@
 
     Mapbender.Digitizer.Scheme.prototype.createPopupConfiguration_ = function () {
         var schema = this;
-        return new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
+        return new Mapbender.Digitizer.PopupConfiguration(schema);
     };
 
     Mapbender.Digitizer.Scheme.prototype.createMenu = function() {
