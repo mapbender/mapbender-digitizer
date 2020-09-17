@@ -18,10 +18,7 @@
         $popup.data('feature', feature);
 
         $popup.generateElements({children: schema.formItems});
-        var popupConfiguration = Object.assign({}, schema.popup, {
-            // @todo: merge createButtons_ with this object
-            buttons: Mapbender.Digitizer.PopupConfiguration.prototype.createButtons_.call(null, feature, schema)
-        });
+        var popupConfiguration = this.getPopupConfiguration(feature, schema);
         $popup.popupDialog(popupConfiguration);
 
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
@@ -36,11 +33,13 @@
         return dialog;
     };
 
-
-    Mapbender.Digitizer.PopupConfiguration = function (schema) {
+    Mapbender.Digitizer.FeatureEditDialog.getPopupConfiguration = function(feature, schema) {
+        return Object.assign({}, schema.popup, {
+            buttons: this.getButtonConfiguration(feature, schema)
+        });
     };
 
-    Mapbender.Digitizer.PopupConfiguration.prototype.createButtons_ = function (feature, schema) {
+    Mapbender.Digitizer.FeatureEditDialog.getButtonConfiguration = function(feature, schema) {
         var buttons = [];
         if (schema.copy && schema.copy.enable) {
             buttons.push({
