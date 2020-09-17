@@ -37,7 +37,7 @@
         schema.inlineSearch = options.inlineSearch || false;
         schema.tableTranslation = options.tableTranslation || undefined;
 
-        schema.createPopupConfiguration_();
+        schema.popupConfiguration = schema.createPopupConfiguration_();
 
         // alias different config keys "allowEditData", "allowOpenEditDialog" to upstream-compatible "allowEdit"
         schema.allowEdit = options.allowEditData || options.allowOpenEditDialog || false;
@@ -513,7 +513,7 @@
 
     Mapbender.Digitizer.Scheme.prototype.createPopupConfiguration_ = function () {
         var schema = this;
-        schema.popupConfiguration = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
+        return new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
     };
 
     Mapbender.Digitizer.Scheme.prototype.createMenu = function() {
