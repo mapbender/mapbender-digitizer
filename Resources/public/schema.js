@@ -338,6 +338,9 @@
         },
         openFeatureEditDialog: function (feature) {
             var schema = this;
+            var widget = schema.widget;
+            widget.currentPopup && widget.currentPopup.popupDialog('close');
+
             var popupConfiguration = schema.createPopupConfiguration_();
             // HACK: ignore the class, use only the prototype
             popupConfiguration.checkForDeprecatedUsageOfButtons_.call(schema.popup);
@@ -348,6 +351,7 @@
             });
 
             var dialog = popupConfiguration.createFeatureEditDialog.call(popupConfigWithButtons, feature, schema);
+            widget.currentPopup = dialog;
 
             return dialog;
         }

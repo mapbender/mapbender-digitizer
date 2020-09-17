@@ -18,8 +18,6 @@
 
         $popup.data('feature', feature);
 
-        widget.currentPopup && widget.currentPopup.popupDialog('close');
-        widget.currentPopup = $popup;
         $popup.generateElements({children: schema.formItems});
 
         console.warn("Creating dm edit dialog", configuration);
