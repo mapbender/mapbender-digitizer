@@ -122,12 +122,6 @@
 
 
     Object.assign(Mapbender.Digitizer.PopupConfiguration.prototype, {
-        checkForDeprecatedUsageOfButtons_: function () {
-            var configuration = this;
-            _.each(configuration.buttons, function (button) {
-                console.error("Using Javascript code in the configuration is deprecated:", button);
-            });
-        },
         createFeatureEditDialog: function (feature, schema) {
             var configuration = this;
             return new FeatureEditDialog(feature, schema, configuration)

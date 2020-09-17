@@ -343,7 +343,6 @@
 
             var popupConfiguration = schema.createPopupConfiguration_();
             // HACK: ignore the class, use only the prototype
-            popupConfiguration.checkForDeprecatedUsageOfButtons_.call(schema.popup);
             var popupConfigWithButtons = Object.assign({}, schema.popup, {
                 buttons: popupConfiguration.createButtons_.call({
                     schema: schema

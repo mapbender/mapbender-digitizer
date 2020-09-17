@@ -40,6 +40,11 @@
             if (!schemaConfig_.featureType || !schemaConfig_.featureType.connection || !schemaConfig_.featureType.table || !schemaConfig_.featureType.geomType) {
                 throw new Error("Feature Type not correctly specified in Configuration of scheme")
             }
+            if (schemaConfig_.popup && schemaConfig_.popup.buttons) {
+                _.each(schemaConfig_.popup.buttons, function (button) {
+                    console.error("Using Javascript code in the configuration is deprecated:", button);
+                });
+            }
             return new Mapbender.Digitizer.Scheme(schemaConfig_, this);
         },
         setup: function() {
