@@ -56,8 +56,6 @@
         var popupConfiguration = this;
         popupConfiguration.schema = schema;
 
-        this.PREFIX = "Digitizer";
-
         $.extend(popupConfiguration, configuration);
 
         popupConfiguration.checkForDeprecatedUsageOfButtons_();
@@ -121,20 +119,20 @@
         var eventListeners = {};
 
 
-        eventListeners[configuration.PREFIX + '.FeatureEditDialog.Copy'] = function (event) {
+        eventListeners['FeatureEditDialog.Copy'] = function (event) {
             schema.copyFeature(feature);
         };
 
-        eventListeners[configuration.PREFIX + '.FeatureEditDialog.Style'] = function (event) {
+        eventListeners['FeatureEditDialog.Style'] = function (event) {
             schema.openChangeStyleDialog(feature);
         };
 
-        eventListeners[configuration.PREFIX + '.FeatureEditDialog.Print'] = function (event) {
+        eventListeners['FeatureEditDialog.Print'] = function (event) {
             var printClient = schema.widget.printClient;
             printClient.printDigitizerFeature(feature, schema);
         };
 
-        eventListeners[configuration.PREFIX + '.FeatureEditDialog.Save'] = function (event) {
+        eventListeners['FeatureEditDialog.Save'] = function (event) {
             var formData = dialog.$popup.formData();
             var $allNamedInputs = $(':input[name]', dialog.$popup);
             var $invalidInputs = $allNamedInputs.filter(function() {
@@ -162,10 +160,10 @@
 
         };
 
-        eventListeners[configuration.PREFIX + '.FeatureEditDialog.Delete'] = function (event) {
+        eventListeners['FeatureEditDialog.Delete'] = function (event) {
             schema.removeFeature(feature);
         };
-        eventListeners[configuration.PREFIX + '.FeatureEditDialog.Cancel'] = function (event) {
+        eventListeners['FeatureEditDialog.Cancel'] = function (event) {
             dialog.$popup.popupDialog('instance').cancel();
         };
 
@@ -190,7 +188,7 @@
                 // @todo: avoid self-modification (also saves clone method implementation)
                 button.text = button.title = Mapbender.trans('mb.digitizer.' + button.title);
                 button.click = function (event) {
-                    feature.dispatchEvent({type: configuration.PREFIX + '.FeatureEditDialog.' + button.event});
+                    feature.dispatchEvent({type: 'FeatureEditDialog.' + button.event});
                 }
             });
         },
