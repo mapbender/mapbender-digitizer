@@ -1,28 +1,28 @@
 (function () {
     "use strict";
 
+    Mapbender.Digitizer = Mapbender.Digitizer || {};
+
+    Mapbender.Digitizer.FeatureEditDialog = {};
     /**
-     *
      * @param {ol.Feature} feature
      * @param {Mapbender.Digitizer.Scheme} schema
-     * @param {Mapbender.Digitizer.PopupConfiguration} configuration
      * @returns {FeatureEditDialog}
-     * @constructor
+     * @static
      */
-    var FeatureEditDialog = function (feature, schema,configuration) {
-
+    Mapbender.Digitizer.FeatureEditDialog.open = function(feature, schema) {
         var dialog = this;
-
         var widget = schema.widget;
         var $popup = dialog.$popup = $("<div/>");
 
         $popup.data('feature', feature);
 
         $popup.generateElements({children: schema.formItems});
-
-        console.warn("Creating dm edit dialog", configuration);
-        $popup.popupDialog(configuration);
-
+        var popupConfiguration = Object.assign({}, schema.popup, {
+            // @todo: merge createButtons_ with this object
+            buttons: Mapbender.Digitizer.PopupConfiguration.prototype.createButtons_.call(null, feature, schema)
+        });
+        $popup.popupDialog(popupConfiguration);
 
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
         setTimeout(function () {
@@ -40,11 +40,7 @@
     Mapbender.Digitizer.PopupConfiguration = function (schema) {
     };
 
-    Mapbender.Digitizer.PopupConfiguration.prototype.createButtons_ = function () {
-
-        var popupConfiguration = this;
-        var schema = popupConfiguration.schema;
-
+    Mapbender.Digitizer.PopupConfiguration.prototype.createButtons_ = function (feature, schema) {
         var buttons = [];
         if (schema.copy && schema.copy.enable) {
             buttons.push({
@@ -62,6 +58,7 @@
                 }
             });
         }
+        // @todo: .printClient access broken (not passed through from widget)
         if (schema.printable && this.printClient) {
             buttons.push({
                 text: Mapbender.trans('mb.digitizer.feature.print'),

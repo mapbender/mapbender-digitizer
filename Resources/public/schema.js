@@ -336,20 +336,16 @@
            $(schema).trigger({type: schema.widget.type+".FeaturesLoaded", features: features});
 
         },
+        getFeatureEditDialogHandler: function(feature, schema) {
+            return Mapbender.Digitizer.FeatureEditDialog;
+        },
         openFeatureEditDialog: function (feature) {
             var schema = this;
             var widget = schema.widget;
             widget.currentPopup && widget.currentPopup.popupDialog('close');
 
-            var popupConfiguration = schema.createPopupConfiguration_();
-            // HACK: ignore the class, use only the prototype
-            var popupConfigWithButtons = Object.assign({}, schema.popup, {
-                buttons: popupConfiguration.createButtons_.call({
-                    schema: schema
-                })
-            });
-
-            var dialog = popupConfiguration.createFeatureEditDialog.call(popupConfigWithButtons, feature, schema);
+            var dialogImplementation = schema.getFeatureEditDialogHandler(feature, schema);
+            var dialog = dialogImplementation.open(feature, schema);
             widget.currentPopup = dialog;
 
             return dialog;
