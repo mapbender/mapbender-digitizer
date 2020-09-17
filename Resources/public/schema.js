@@ -37,8 +37,6 @@
         schema.inlineSearch = options.inlineSearch || false;
         schema.tableTranslation = options.tableTranslation || undefined;
 
-        schema.popupConfiguration = schema.createPopupConfiguration_();
-
         // alias different config keys "allowEditData", "allowOpenEditDialog" to upstream-compatible "allowEdit"
         schema.allowEdit = options.allowEditData || options.allowOpenEditDialog || false;
 
@@ -340,7 +338,17 @@
         },
         openFeatureEditDialog: function (feature) {
             var schema = this;
-            var dialog = schema.popupConfiguration.createFeatureEditDialog(feature, schema);
+            var popupConfiguration = schema.createPopupConfiguration_();
+            // HACK: ignore the class, use only the prototype
+            popupConfiguration.checkForDeprecatedUsageOfButtons_.call(schema.popup);
+            var popupConfigWithButtons = Object.assign({}, schema.popup, {
+                buttons: popupConfiguration.createButtons_.call({
+                    schema: schema
+                })
+            });
+
+            var dialog = popupConfiguration.createFeatureEditDialog.call(popupConfigWithButtons, feature, schema);
+
             return dialog;
         }
     });
