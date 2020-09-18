@@ -28,27 +28,27 @@
         schema.popup = options.popup || {title: schema.schemaName, width: '500px'};
         schema.tableFields = options.tableFields || schema.createDefaultTableFields_();
         schema.formItems = options.formItems || {};
-        schema.allowEditData = options.allowEditData || false;
+        schema.allowEditData = options.allowEditData || (typeof options.allowEditData === 'undefined');  //default true
         schema.allowSave = options.allowSave || false;
         schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
-        schema.allowDelete = options.allowDelete || false;
+        schema.allowDelete = options.allowDelete || (typeof options.allowDelete === 'undefined');  //default true;
         schema.inlineSearch = options.inlineSearch || true;
         schema.pageLength = options.pageLength || 10;
         schema.inlineSearch = options.inlineSearch || false;
         schema.tableTranslation = options.tableTranslation || undefined;
 
         // alias different config keys "allowEditData", "allowOpenEditDialog" to upstream-compatible "allowEdit"
-        schema.allowEdit = options.allowEditData || options.allowOpenEditDialog || false;
+        schema.allowEdit = options.allowEditData || options.allowOpenEditDialog || schema.allowEdit || false;
 
         schema.toolset = options.toolset;
 
-        schema.openFormAfterEdit = options.openFormAfterEdit || false;
+        schema.openFormAfterEdit = options.openFormAfterEdit || (typeof options.openFormAfterEdit === 'undefined');  // default true
 
         schema.openFormAfterModification = options.openFormAfterModification || false;
 
         schema.allowCustomStyle = options.allowCustomStyle || false;
 
-        schema.allowDigitize = options.allowDigitize || false;
+        schema.allowDigitize = options.allowDigitize || (typeof options.allowEditData === 'undefined');  // default true
 
         schema.allowSaveInResultTable = options.allowSaveInResultTable || false;
 
