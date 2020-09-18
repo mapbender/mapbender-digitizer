@@ -194,6 +194,22 @@ class Digitizer extends DataManagerElement
         return $config;
     }
 
+    protected function getSchemaBaseConfig($schemaName)
+    {
+        $values = parent::getSchemaBaseConfig($schemaName);
+        // resolve aliasing DM "allowEdit" vs historical Digitizer "allowEditData"
+        if (isset($values['allowEditData'])) {
+            $values['allowEdit'] = !!$values['allowEditData'];
+        } else {
+            $values['allowEdit'] = true;
+        }
+        // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
+        $values['allowCreate'] = $values['allowEdit'];
+
+        return $values;
+    }
+
+
     protected function getDefaultTableTranslation()
     {
         if (!$this->defaultTableTranslation) {
