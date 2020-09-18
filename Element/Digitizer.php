@@ -3,9 +3,11 @@
 namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\Connection;
+use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
+use Mapbender\DataSourceBundle\Component\FeatureTypeService;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
@@ -138,6 +140,29 @@ class Digitizer extends DataManagerElement
         );
     }
 
+    /**
+     * @param string $schemaName
+     * @return FeatureType
+     * @throws ConfigurationErrorException
+     */
+    protected function getDataStoreBySchemaName($schemaName)
+    {
+        return $this->getDataStoreService()->featureTypeFactory($this->getDataStoreConfigForSchema($schemaName));
+    }
+
+    /**
+     * @return FeatureTypeService
+     */
+    protected function getDataStoreService()
+    {
+        // HACK: instantiate for temp decoupling from DataSourceBundle services config (not available if bundle not
+        //       registered)
+        // @todo: bring your own service definition
+        /** @var FeatureTypeService $service */
+        // $service = $this->container->get('features');
+        $service = new FeatureTypeService($this->container);
+        return $service;
+    }
 
     /**
      * @return string
