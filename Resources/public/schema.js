@@ -38,7 +38,7 @@
         schema.tableTranslation = options.tableTranslation || undefined;
 
         // alias different config keys "allowEditData", "allowOpenEditDialog" to upstream-compatible "allowEdit"
-        schema.allowEdit = options.allowEditData || options.allowOpenEditDialog || schema.allowEdit || false;
+        schema.allowEdit = schema.allowEditData || options.allowOpenEditDialog || options.allowEdit || false;
 
         schema.toolset = options.toolset;
 
