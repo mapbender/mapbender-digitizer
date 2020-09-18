@@ -184,7 +184,7 @@
             var renderer = this;
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
                 if (event.key == "selected" || event.key == "modificationState" || event.key == "hidden" || event.key == "featureStyleDisabled") {
-                    renderer.updateFeatureStyle(feature);
+                    renderer.updateFeatureStyle(schema, feature);
                 }
             });
 
@@ -213,7 +213,7 @@
 
                 }
             } else {
-                style = renderer.getFeatureStyle_(feature);
+                style = this.getFeatureStyle_(feature);
             }
 
             feature.setStyle(style);
