@@ -183,7 +183,7 @@
 
             var renderer = this;
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
-                if (event.key == "selected" || event.key == "modificationState" || event.key == "hidden" || event.key == "featureStyleDisabled") {
+                if (event.key == "selected" || event.key == "modificationState" || event.key == "hidden") {
                     renderer.updateFeatureStyle(schema, feature);
                 }
             });
@@ -195,9 +195,6 @@
         },
         updateFeatureStyle: function(schema, feature) {
             var style;
-            if (feature.get("featureStyleDisabled")) {
-                style = null;
-            } else
             if (feature.get("hidden")) {
                 style = nativeStyles.invisible;
             } else if (feature.get("selected")) {
@@ -216,7 +213,11 @@
                 style = this.getFeatureStyle_(feature);
             }
 
-            feature.setStyle(style);
+            // See selectableModify interaction (ol4 extensions)
+            // @todo: selectableModify should deal with pausing style updates itself
+            if (!feature.get("featureStyleDisabled")) {
+                feature.setStyle(style);
+            }
         }
     });
 
