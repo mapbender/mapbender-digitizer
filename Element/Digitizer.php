@@ -19,6 +19,7 @@ use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Mapbender\DataManagerBundle\Element\DataManagerElement;
+use Symfony\Component\HttpFoundation\Request;
 
 
 /**
@@ -162,6 +163,32 @@ class Digitizer extends DataManagerElement
         // $service = $this->container->get('features');
         $service = new FeatureTypeService($this->container);
         return $service;
+    }
+
+    protected function getSaveActionResponseData(Request $request)
+    {
+        $itemId = $request->query->get('id', null);
+        $schemaName = $request->query->get('schema');
+        $repository = $this->getDataStoreBySchemaName($schemaName);
+        // NOTE: Client always sends geometry as a separate "geometry" attribute, while
+        //       Feature creation expects an attribute matching the (configured) geometry
+        //       column name. Adapt incoming data.
+        if ($itemId) {
+            $dataItem = $repository->getById($itemId);
+        } else {
+            $dataItem = $repository->itemFactory();
+        }
+        $requestData = json_decode($request->getContent(), true);
+        if (!empty($requestData['geometry'])) {
+            $dataItem->setGeom($requestData['geometry']);
+        }
+        if (!empty($requestData['properties'])) {
+            $dataItem->setAttributes($requestData['properties']);
+        }
+        $updatedItem = $repository->save($dataItem);
+        return array(
+            'dataItem' => $updatedItem->toArray(),
+        );
     }
 
     /**
