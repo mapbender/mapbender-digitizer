@@ -210,7 +210,14 @@
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
         },
         _replaceItemData: function(schema, feature, newValues) {
-            this._super(schema.feature.get('data'), newValues);
+            this._super(schema, feature.get('data'), newValues);
+        },
+        _getSaveRequestData: function(schema, dataItem, newValues) {
+            return {
+                properties: Object.assign({}, this._getItemData(schema, dataItem), newValues || {}),
+                geometry: new ol.format.WKT().writeGeometryText(dataItem.getGeometry()),
+                srid: this.getProjectionCode()
+            };
         },
         // Support method for custom Scheme class
         getProjectionCode: function() {
