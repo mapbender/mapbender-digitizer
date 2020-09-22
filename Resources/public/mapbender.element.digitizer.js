@@ -198,6 +198,10 @@
             return _.union(ownButtons, upstreamButtons);
         },
         _getItemData: function(schema, feature) {
+            // NOTE: 'data' property may not exist if feature has just been newly created by an editing tool
+            if (!feature.get('data')) {
+                feature.set('data', {});
+            }
             return this._super(schema, feature.get('data'));
         },
         _afterRemove: function(schema, feature, id) {
