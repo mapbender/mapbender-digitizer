@@ -129,6 +129,7 @@
         this.styles = nativeStyles; // NOTE: accessed only in event handlers currently inlined here
 
         this.layer = this.createSchemaFeatureLayer_(schema);
+        this.olMap.addLayer(this.layer);
 
         this.addSelectControl_();
 
