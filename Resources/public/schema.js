@@ -125,8 +125,7 @@
         }
         this.basicStyles = Object.assign({}, schema.getDefaultStyles(), schema.styles || {}, otherStyles);
 
-        var nativeStyles = this.initializeStyles_(this.basicStyles);
-        this.styles = nativeStyles; // NOTE: accessed only in event handlers currently inlined here
+        this.styles = this.initializeStyles_(this.basicStyles); // NOTE: accessed only in event handlers currently inlined here
 
         this.layer = this.createSchemaFeatureLayer_(schema);
         this.olMap.addLayer(this.layer);
@@ -197,17 +196,17 @@
         updateFeatureStyle: function(schema, feature) {
             var style;
             if (feature.get("hidden")) {
-                style = nativeStyles.invisible;
+                style = this.styles.invisible;
             } else if (feature.get("selected")) {
-                style = nativeStyles.select;
+                style = this.styles.select;
             } else if (feature.get("modificationState") && schema.markUnsavedFeatures) {
                 switch (feature.get("modificationState")) {
                     case "isChanged" :
                     case "isNew" :
-                        style = nativeStyles.unsaved;
+                        style = this.styles.unsaved;
                         break;
                     case "isCopy" :
-                        style = nativeStyles.copy;
+                        style = this.styles.copy;
 
                 }
             } else {
@@ -241,6 +240,7 @@
         },
         onFeatureAdded: function(schema, feature) {
             feature.set("modificationState", "isNew");
+            this.updateFeatureStyle(schema, feature);
 
             $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: feature});
 
