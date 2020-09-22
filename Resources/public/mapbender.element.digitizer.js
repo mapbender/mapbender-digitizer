@@ -217,6 +217,16 @@
             renderer.initializeFeature(schema, feature);
             return feature;
         },
+        _afterSave: function(schema, feature, originalId, responseData) {
+            // unravel dm-incompatible response format
+            // @todo: should we or should we not replace feature geometry?
+            // var geometry = (new ol.format.WKT()).readGeometryFromText(responseData.dataItem.geometry);
+            // feature.setGEometry(geometry);
+
+            return this._super(schema, feature, originalId, {
+                dataItem: responseData.dataItem.properties
+            });
+        },
         _getData: function(schema) {
             var renderer = schema.renderer;
             return this._super(schema).then(function(features) {
