@@ -334,58 +334,49 @@
     };
 
     Object.assign(Mapbender.Digitizer.Menu.prototype, {
-        generateResultTable_: function (frame) {
-            var menu = this;
-            var schema = menu.schema;
-            var widget = schema.widget;
+        generateResultDataTableColumns: function (schema) {
 
-            var resultTable;
+            var columns = [];
 
+            var createResultTableDataFunction = function (columnId, fieldSettings) {
 
-            var generateResultDataTableColumns = function () {
+                return function (feature, type, val, meta) {
 
-                var columns = [];
+                    var escapeHtml = function (str) {
 
-                var createResultTableDataFunction = function (columnId, fieldSettings) {
-
-                    return function (feature, type, val, meta) {
-
-                        var escapeHtml = function (str) {
-
-                            return str.replace(/["&'\/<>]/g, function (a) {
-                                return {
-                                    '"': '&quot;',
-                                    '&': '&amp;',
-                                    "'": '&#39;',
-                                    '/': '&#47;',
-                                    '<': '&lt;',
-                                    '>': '&gt;'
-                                }[a];
-                            });
-                        };
-
-                        var data = feature.get('data') && feature.get('data').get(columnId);
-                        if (typeof (data) == 'string') {
-                            data = escapeHtml(data);
-                        }
-                        return data || '';
+                        return str.replace(/["&'\/<>]/g, function (a) {
+                            return {
+                                '"': '&quot;',
+                                '&': '&amp;',
+                                "'": '&#39;',
+                                '/': '&#47;',
+                                '<': '&lt;',
+                                '>': '&gt;'
+                            }[a];
+                        });
                     };
+
+                    var data = feature.get('data') && feature.get('data').get(columnId);
+                    if (typeof (data) == 'string') {
+                        data = escapeHtml(data);
+                    }
+                    return data || '';
                 };
-
-
-                $.each(schema.tableFields, function (columnId, fieldSettings) {
-                    fieldSettings.title = fieldSettings.label;
-                    fieldSettings.data = fieldSettings.data || createResultTableDataFunction(columnId, fieldSettings);
-                    columns.push(fieldSettings);
-                });
-
-                return columns;
-
             };
 
-            var buttons = menu.generateResultDataTableButtons();
 
-            var resultTableSettings = {
+            $.each(schema.tableFields, function (columnId, fieldSettings) {
+                fieldSettings.title = fieldSettings.label;
+                fieldSettings.data = fieldSettings.data || createResultTableDataFunction(columnId, fieldSettings);
+                columns.push(fieldSettings);
+            });
+
+            return columns;
+        },
+        getResultTableOptions: function(schema) {
+            var menu = this;
+            var widget = schema.widget;
+            return {
                 lengthChange: false,
                 pageLength: schema.pageLength,
                 searching: schema.inlineSearch,
@@ -395,15 +386,22 @@
                 paging: true,
                 selectable: false,
                 autoWidth: false,
-                columns: generateResultDataTableColumns(),
-                buttons: buttons,
+                columns: menu.generateResultDataTableColumns(schema),
+                buttons: menu.generateResultDataTableButtons(),
                 oLanguage: widget.options.tableTranslation
             };
+        },
+        generateResultTable_: function (frame) {
+            var menu = this;
+            var schema = menu.schema;
+            var widget = schema.widget;
+
+            var resultTableSettings = this.getResultTableOptions(schema);
 
             var $div = $("<div/>");
             var $table = $div.resultTable(resultTableSettings);
 
-            resultTable = $table.resultTable("instance");
+            var resultTable = $table.resultTable("instance");
 
 
             // ??? function does not exist
