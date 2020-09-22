@@ -400,10 +400,6 @@
                 oLanguage: widget.options.tableTranslation
             };
 
-            if (schema.view && schema.view.settings) {
-                resultTableSettings = Object.assign({},resultTableSettings,schema.view.settings);
-            }
-
             var $div = $("<div/>");
             var $table = $div.resultTable(resultTableSettings);
 
