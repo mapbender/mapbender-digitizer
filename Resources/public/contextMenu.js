@@ -75,7 +75,7 @@
                     });
                 }
                 contextmenu.push({
-                    text: feature.get(schema.featureType.name) || "Feature #" + (feature.getId() || ''),
+                    text: "Feature #" + (feature.getId() || ''),
                     items: subitems
                 });
             } else {

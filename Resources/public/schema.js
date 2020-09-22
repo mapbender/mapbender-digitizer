@@ -16,7 +16,6 @@
         schema.featureType = options.featureType || {
             uniqueId: null,
             geomField: null,
-            name: null,
             styleField: null,
             srid: 4326
         };
@@ -403,13 +402,6 @@
             label: 'Nr.',
             width: '20%'
         });
-        if (schema.featureType.name) {
-            tableFields.push({
-                data: schema.featureType.name,
-                label: 'Name',
-                width: '80%'
-            });
-        }
         return tableFields;
     };
 
@@ -571,11 +563,6 @@
 
 
         });
-
-        var name = schema.featureType.name;
-        if (name) {
-            newFeature.get("data").set(name, "Copy of " + (feature.get("data").get(name) || '#' + feature.getId()));
-        }
 
         newFeature.set("data", newAttributes);
 
