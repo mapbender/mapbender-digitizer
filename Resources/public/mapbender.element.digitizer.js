@@ -197,9 +197,6 @@
             var upstreamButtons = this._super(schema, feature);
             return _.union(ownButtons, upstreamButtons);
         },
-        _getUniqueItemId: function(schema, feature) {
-            return feature.getId();
-        },
         _getItemData: function(schema, feature) {
             return this._super(schema, feature.get('data'));
         },
