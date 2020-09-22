@@ -330,13 +330,6 @@
 
         },
 
-        integrateFeatures: function (features) {
-            var schema = this;
-
-            // TODO find a scheme-specific, more appropriate element to store triggers than map
-           $(schema).trigger({type: schema.widget.type+".FeaturesLoaded", features: features});
-
-        },
         getFeatureEditDialogHandler: function(feature, schema) {
             return Mapbender.Digitizer.FeatureEditDialog;
         },
