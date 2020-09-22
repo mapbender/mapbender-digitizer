@@ -165,6 +165,24 @@ class Digitizer extends DataManagerElement
         return $service;
     }
 
+    protected function getSelectActionResponseData(Request $request)
+    {
+        // @todo: implement current extent search
+        // @todo data-source: allow disabling maxResults completely (only makes sense for text term search)
+        $maxResults = 100000000;
+
+        $schemaName = $request->query->get('schema');
+        $repository = $this->getDataStoreBySchemaName($schemaName);
+        $results = array();
+        $criteria = array(
+            'maxResults' => $maxResults,
+        );
+        foreach ($repository->search($criteria) as $feature) {
+            $results[] = $this->formatResponseFeature($repository, $feature);
+        }
+        return $results;
+    }
+
     protected function getSaveActionResponseData(Request $request)
     {
         $itemId = $request->query->get('id', null);
@@ -187,7 +205,25 @@ class Digitizer extends DataManagerElement
         }
         $updatedItem = $repository->save($dataItem);
         return array(
-            'dataItem' => $updatedItem->toArray(),
+            'dataItem' => $this->formatResponseFeature($repository, $updatedItem),
+        );
+    }
+
+    /**
+     * Convert feature back into serializable and client-consumable form.
+     *
+     * @param FeatureType $repository
+     * @param Feature $feature
+     * @return array
+     */
+    protected function formatResponseFeature(FeatureType $repository, Feature $feature)
+    {
+        $properties = $feature->toArray();
+        $geometryField = $repository->getGeomField();
+        unset($properties[$geometryField]);
+        return array(
+            'properties' => $properties,
+            'geometry' => $feature->getGeom(),
         );
     }
 

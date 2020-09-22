@@ -206,6 +206,21 @@
             // Multi-Digitizer sync support
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
         },
+        _prepareDataItem: function(schema, itemData) {
+            var renderer = schema.renderer;
+            var feature = (new ol.format.WKT()).readFeatureFromText(itemData.geometry);
+            feature.set('data', itemData.properties || {});
+            renderer.initializeFeature(schema, feature);
+            return feature;
+        },
+        _getData: function(schema) {
+            var renderer = schema.renderer;
+            return this._super(schema).then(function(features) {
+                renderer.getLayer().getSource().clear();
+                renderer.getLayer().getSource().addFeatures(features);
+                return features;
+            });
+        },
         _replaceItemData: function(schema, feature, newValues) {
             this._super(schema, feature.get('data'), newValues);
         },
