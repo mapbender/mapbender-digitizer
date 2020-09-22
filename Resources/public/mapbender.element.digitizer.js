@@ -222,6 +222,7 @@
             });
         },
         _replaceItemData: function(schema, feature, newValues) {
+            // NOTE: 'data' is a regular mutable data Object (see _prpareDataItem)
             this._super(schema, feature.get('data'), newValues);
         },
         _getSaveRequestData: function(schema, dataItem, newValues) {
