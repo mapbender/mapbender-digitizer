@@ -274,7 +274,7 @@
         if (schema.allowLocate) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
-                className: 'zoom',
+                cssClass: 'icon-zoom zoom', // NOTE: "zoom" class required for getButtonByFeature ...
                 onClick: function (feature, ui) {
                     schema.zoomToFeature(feature);
                 }
@@ -284,7 +284,7 @@
         if (schema.allowEditData && schema.allowSaveInResultTable) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.save.title'),
-                className: 'save',
+                cssClass: 'icon-save save', // NOTE: "save" class required for getButtonByFeature ...
                 disabled: true,
                 onClick: function (feature, $button) {
                     schema.saveFeature(feature);
@@ -295,7 +295,7 @@
         if (schema.allowEditData) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.edit'),
-                className: 'edit',
+                cssClass: 'icon-edit edit',  // NOTE: "edit" class required for getButtonByFeature ...
                 onClick: function (feature, ui) {
                     schema.openFeatureEditDialog(feature);
                 }
@@ -304,7 +304,7 @@
         if (schema.copy && schema.copy.enable) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.clone.title'),
-                className: 'copy',
+                cssClass: 'icon-copy copy', // NOTE: "copy" class required for getButtonByFeature ...
                 onClick: function (feature, ui) {
                     schema.copyFeature(feature);
                 }
@@ -313,7 +313,7 @@
         if (schema.allowCustomStyle) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.style.change'),
-                className: 'style',
+                cssClass: 'icon-style style', // NOTE: "style" class required for getButtonByFeature ...
                 onClick: function (feature, ui) {
                     schema.openChangeStyleDialog(feature);
                 }
@@ -323,8 +323,7 @@
         if (schema.allowChangeVisibility) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'),
-                className: 'visibility',
-                cssClass: 'icon-eyeOff',
+                cssClass: 'icon-eyeOff visibility', // NOTE: "visibility" class required for getButtonByFeature ...
                 onClick: function (feature, $button) {
                     feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: !feature.get("hidden")});
                 }
@@ -335,8 +334,7 @@
 
             buttons.push({
                 title: Mapbender.trans("mb.digitizer.feature.remove.title"),
-                className: 'remove',
-                cssClass: 'critical',
+                cssClass: 'icon-remove remove critical', // NOTE: "remove" class required for getButtonByFeature ...
                 onClick: function (feature, ui) {
                     if (schema.allowDelete) {
                         schema.removeFeature(feature);
