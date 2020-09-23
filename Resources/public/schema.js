@@ -227,50 +227,26 @@
             feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
 
             if (schema.openFormAfterModification) {
-                var dialog = schema.openFeatureEditDialog(feature);
-
-                dialog.$popup.bind('popupdialogcancel', function () {
-                    if (schema.revertChangedGeometryOnCancel) {
-                        feature.setGeometry(feature.get("oldGeometry").clone());
-                        feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
-                    }
-                })
+                schema.openFeatureEditDialog(feature);
             }
         },
         onFeatureAdded: function(schema, feature) {
             feature.set("modificationState", "isNew");
             this.updateFeatureStyle(schema, feature);
 
+            feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});   // why?
             if (schema.openFormAfterEdit) {
-                var dialog = schema.openFeatureEditDialog(feature);
-
-                dialog.$popup.bind('popupdialogcancel', function () {
-                    feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
-                    if (schema.allowDeleteByCancelNewGeometry) {
-                        try {
-                            schema.removeFeature(feature);
-                        } catch (e) { /* Remove feature only if it exists */
-                        }
-                    }
-                });
+                schema.openFeatureEditDialog(feature);
             }
         },
         onFeatureCopied: function(schema, feature) {
             feature.set("modificationState", "isCopy");
 
+            // add to table...
             $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: feature});
 
-            var dialog = schema.openFeatureEditDialog(feature);
-
-            dialog.$popup.bind('popupdialogcancel', function () {
-                feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
-                if (schema.allowDeleteByCancelNewGeometry) {
-                    try {
-                        schema.removeFeature(feature);
-                    } catch (e) { /* Remove feature only if it exists */
-                    }
-                }
-            });
+            feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});   // why?
+            schema.openFeatureEditDialog(feature);
         },
         onFeatureUpdatedOnServer: function(schema) {
             if (schema.refreshLayersAfterFeatureSave) {

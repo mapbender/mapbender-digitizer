@@ -249,6 +249,20 @@
                 return features;
             });
         },
+        _cancelForm: function(schema, feature) {
+            this._super(schema, feature);
+            // NOTE: this also detects cloned features (via new copy functionality) as new
+            var isNew = !this._getUniqueItemId(schema, feature);
+            // @todo: why should this be configurable?
+            if (isNew /** && schema.allowDeleteByCancelNewGeometry */) {
+                schema.renderer.getLayer().getSource().removeFeature(feature);
+            }
+            // @todo: document new schema config value
+            if (!isNew && schema.revertChangedGeometryOnCancel) {
+                feature.setGeometry(feature.get("oldGeometry").clone());
+                feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
+            }
+        },
         _replaceItemData: function(schema, feature, newValues) {
             // NOTE: 'data' is a regular mutable data Object (see _prpareDataItem)
             this._super(schema, feature.get('data'), newValues);
