@@ -272,11 +272,6 @@
 
     };
 
-    // @todo: remove transient adapter stub
-    Mapbender.Digitizer.Menu.prototype.generateResultDataTableButtons = function () {
-        return Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption.call(null, this.schema);
-    };
-
     Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
         var buttons = [];
 
@@ -334,41 +329,18 @@
     };
 
     Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
+        getCustomOptions: function(schema) {
+            // Unlike upstream DM, we DO NOT want to forward any random value from schema config
+            // into the dataTables / resultTable widget constructor
+            return undefined;
+        },
         getOptions: function(schema) {
-            var widget = this.owner;
-            return {
-                lengthChange: false,
-                pageLength: schema.pageLength,
-                searching: schema.inlineSearch,
-                info: true,
-                processing: false,
-                ordering: true,
-                paging: true,
-                selectable: false,
-                autoWidth: false,
-                columns: this.getColumnsOption(schema),
-                buttons: this.getButtonsOption(schema),
-                oLanguage: widget.options.tableTranslation
-            };
+            var options = Mapbender.DataManager.TableRenderer.prototype.getOptions.call(this, schema);
+            if (typeof (schema.pageLength) !== 'undefined') {
+                options.pageLength = schema.pageLength;
+            }
+            options.searching = !!schema.inlineSearch || (typeof (schema.inlineSearch) === 'undefined');
+            return options;
         }
     });
-    Object.assign(Mapbender.Digitizer.Menu.prototype, {
-        generateResultTable_: function (frame) {
-            var menu = this;
-            var schema = menu.schema;
-            var widget = schema.widget;
-            var $table = (new Mapbender.Digitizer.TableRenderer(widget)).render(schema);
-
-            var resultTable = $table.resultTable("instance");
-
-
-            // ??? function does not exist
-            // resultTable.initializeColumnTitles();
-
-            menu.registerResultTableEvents(resultTable, frame);
-
-            frame.append($table);
-        }
-    });
-
 })();

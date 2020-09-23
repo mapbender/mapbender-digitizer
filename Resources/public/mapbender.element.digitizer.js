@@ -99,13 +99,6 @@
                 this.active = true;
             }
         },
-        // Menu => TableRenderer refactor testing hack
-        _renderTable: function(schema) {
-            var fakeFrame = $('<div class="testing-hack">');
-            schema.menu.generateResultTable_(fakeFrame);
-            return $('> div', fakeFrame);
-
-        },
         deactivate: function() {
             this._deactivateSchema(this._getCurrentSchema());
             this.active = false;
@@ -259,14 +252,6 @@
         // Support method for custom Scheme class
         getProjectionCode: function() {
             return this.mbMap.getModel().getCurrentProjectionCode();
-        },
-        // @todo: move to TableRenderer
-        _buildTableRowButtons: function(schema) {
-            return schema.menu.generateResultDataTableButtons();
-            return this.tableRenderer.getButtonsOption(schema);
-            // return this._super(schema);
-            // var menu = schema_.menu;
-            // return schema.menu.generateResultDataTableButtons();
         },
         // @todo: move to TableRenderer
         _getTableColumnsConfiguration: function(schema) {
