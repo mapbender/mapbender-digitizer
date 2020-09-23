@@ -130,11 +130,6 @@
         var map = widget.map;
         menu.resultTable = resultTable;
 
-        $(schema).on("Digitizer.FeatureAddedManually", function (event) {
-            var feature = event.feature;
-            resultTable.addRow(feature);
-        });
-
         map.on(ol.MapEventType.MOVEEND, function (event) {
 
             var resolution = map.getView().getResolution();
@@ -308,6 +303,19 @@
                         schema.openFeatureEditDialog(feature);
                     }
                 }
+            });
+            // @todo: DO NOT use events on non-DOM Objects; they cannot be listened to from anyone without access to the exact object
+            var self = this;
+            $(schema).on("Digitizer.FeatureAddedManually", function (event) {
+                var feature = event.feature;
+                if (!feature.get('data')) {
+                    console.warn("Ignoring event for feature without table-displayable data");
+                    return;
+                }
+                var dt = self.getDatatablesInstance_(schema);
+                console.log("Hello", event);
+                dt.row.add(event.feature);
+                dt.draw();
             });
         },
         getCustomOptions: function(schema) {
