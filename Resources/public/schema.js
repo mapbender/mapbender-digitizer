@@ -293,43 +293,6 @@
     });
 
     Object.assign(Mapbender.Digitizer.Scheme.prototype, {
-        getData: function (extent, resolution, projection) {
-
-            var schema = this;
-            var widget = schema.widget;
-
-            var request = {
-                srid: widget.getProjectionCode(),
-                maxResults: schema.maxResults,
-                schema: schema.schemaName
-            };
-
-            var selectXHR = widget.query('select', request).then(schema.onFeatureCollectionLoaded.bind(schema));
-
-            return selectXHR;
-        },
-
-
-        onFeatureCollectionLoaded: function (featureCollection) {
-            var schema = this;
-
-            if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
-                Mapbender.error(Mapbender.trans("mb.digitizer.features.loading.error"), featureCollection);
-                return;
-            }
-
-            var geoJsonReader = new ol.format.GeoJSONWithSeperateData();
-
-            var newFeatures = geoJsonReader.readFeaturesFromObject({
-                type: "FeatureCollection",
-                features: featureCollection.features
-            });
-
-            schema.integrateFeatures(newFeatures);
-
-
-        },
-
         getFeatureEditDialogHandler: function(feature, schema) {
             return Mapbender.Digitizer.FeatureEditDialog;
         },
@@ -405,15 +368,13 @@
 
     Mapbender.Digitizer.FeatureRenderer.prototype.createSchemaFeatureLayer_ = function (schema) {
         var layer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                format: new ol.format.GeoJSON(),
-                loader: schema.getData.bind(schema),
-
-                strategy: ol.loadingstrategy.all // ol.loadingstrategy.bbox
-            }),
-            minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
-            maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity),
-            visible: false
+            source: new ol.source.Vector(),
+            visible: true
+            // HACK: disable min / max resolution and initial visibility while testing
+            // @todo: reenable minScale / maxScale config evaluation
+//            minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
+//            maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity),
+//            visible: false
         });
         return layer;
     };
@@ -501,14 +462,6 @@
     Mapbender.Digitizer.FeatureRenderer.prototype.getFeatureStyle_ = function (feature) {
         return feature.get("style") || this.styles.default
     };
-
-    Mapbender.Digitizer.Scheme.prototype.integrateFeatures = function (features) {
-        var schema = this;
-        schema.layer.getSource().addFeatures(features);
-
-        $(schema).trigger({type: "Digitizer.FeaturesLoaded", features: features});
-    };
-
 
     Mapbender.Digitizer.Scheme.prototype.copyFeature = function (feature) {
         var schema = this;

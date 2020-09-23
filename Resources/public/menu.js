@@ -130,11 +130,6 @@
         var map = widget.map;
         menu.resultTable = resultTable;
 
-        $(schema).on("Digitizer.FeaturesLoaded", function (event) {
-            var features = event.features;
-            resultTable.redraw(features);
-        });
-
         $(schema).on("Digitizer.FeatureAddedManually", function (event) {
             var feature = event.feature;
             resultTable.addRow(feature);
@@ -226,7 +221,6 @@
         schema.layer.getSource().on(ol.source.VectorEventType.REMOVEFEATURE, function (event) {
             resultTable.deleteRow(event.feature);
         });
-
     };
 
     Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
