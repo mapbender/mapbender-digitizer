@@ -186,10 +186,6 @@
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
 
-            if (resultTable.currentExtentSearch && !widget.isInExtent(feature)) {
-                return;
-            }
-
             feature.on('Digitizer.HoverFeature', function (event) {
 
                 resultTable.hoverInResultTable(feature, true);
