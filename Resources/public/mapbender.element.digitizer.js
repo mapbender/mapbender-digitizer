@@ -251,9 +251,30 @@
             return this.mbMap.getModel().getCurrentProjectionCode();
         },
         _buildTableRowButtons: function(schema) {
+            // return this._super(schema);
+            // var menu = schema_.menu;
+            return schema.menu.generateResultDataTableButtons();
+        },
+        _buildTableRowButtons: function(schema) {
             var schema_ = this.widget.createScheme_(schema);
             var menu = schema_.menu;
             return menu.generateResultDataTableButtons();
+        },
+        _getTableColumnsConfiguration: function(schema) {
+            var fieldConfigs = schema.tableFields || [];
+            if (!Array.isArray(fieldConfigs)) {
+                // Digitizer vs DM quirk: digitizer uses a PHP-style mapping of attribute name to other config values
+                // Adapt by unravelling object-to-object mapping to list of object; add the top-level key as the "data" property
+                fieldConfigs = _.map(fieldConfigs, function(value, key) {
+                    return Object.assign({}, value, {
+                        data: key
+                    });
+                });
+            }
+            if (!fieldConfigs.length) {
+                fieldConfigs = Mapbender.Digitizer.Scheme.prototype.createDefaultTableFields_.call(schema);
+            }
+            return fieldConfigs;
         },
         __formatting_dummy: null
     });
