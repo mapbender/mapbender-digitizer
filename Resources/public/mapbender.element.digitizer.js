@@ -279,6 +279,18 @@
                     feature.dispatchEvent({type: 'Digitizer.UnhoverFeature'});
                 }
             });
+            $(table).on('click', 'tbody > tr', function () {
+                var feature = $(this).data().item;
+                if (feature) {
+                    if (schema.zoomOnResultTableClick) {
+                        schema.zoomToFeature(feature);
+                    }
+                    if (schema.openDialogOnResultTableClick) {
+                        schema.openFeatureEditDialog(feature);
+                    }
+                }
+            });
+
         },
         // Support method for custom Scheme class
         getProjectionCode: function() {

@@ -163,26 +163,6 @@
 
         });
 
-        resultTable.element.delegate("tbody > tr", 'click', function () {
-            var tr = this;
-            var row = resultTable.getApi().row(tr);
-            var feature = row.data();
-
-            if (feature) {
-
-                if (schema.zoomOnResultTableClick) {
-                    schema.zoomToFeature(feature);
-                }
-                if (schema.openDialogOnResultTableClick) {
-                    schema.openFeatureEditDialog(feature);
-                }
-            } else {
-                console.warn("No Feature in row", row);
-            }
-
-        });
-
-
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
 
