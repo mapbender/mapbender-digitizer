@@ -395,7 +395,7 @@
         var keys = Object.keys(styleConfigs);
         for (var i = 0; i < keys.length; ++ i) {
             var key = keys[i];
-            var styleConfig = styleConfigs;
+            var styleConfig = styleConfigs[key];
             styles[key] = ol.style.StyleConverter.convertToOL4Style(styleConfig);
         }
         Object.freeze(styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
