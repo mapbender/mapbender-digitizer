@@ -31,6 +31,9 @@
                 Mapbender.checkTarget("mbDigitizer", target);
             });
         },
+        _createTableRenderer: function() {
+            return new Mapbender.Digitizer.TableRenderer(this);
+        },
         _afterCreate: function() {
             // Invoked only by data manager _create
             // do nothing; deliberately do NOT call parent method
@@ -95,6 +98,13 @@
                 this._activateSchema(this._getCurrentSchema());
                 this.active = true;
             }
+        },
+        // Menu => TableRenderer refactor testing hack
+        _renderTable: function(schema) {
+            var fakeFrame = $('<div class="testing-hack">');
+            schema.menu.generateResultTable_(fakeFrame);
+            return $('> div', fakeFrame);
+
         },
         deactivate: function() {
             this._deactivateSchema(this._getCurrentSchema());
@@ -250,16 +260,15 @@
         getProjectionCode: function() {
             return this.mbMap.getModel().getCurrentProjectionCode();
         },
+        // @todo: move to TableRenderer
         _buildTableRowButtons: function(schema) {
+            return schema.menu.generateResultDataTableButtons();
+            return this.tableRenderer.getButtonsOption(schema);
             // return this._super(schema);
             // var menu = schema_.menu;
-            return schema.menu.generateResultDataTableButtons();
+            // return schema.menu.generateResultDataTableButtons();
         },
-        _buildTableRowButtons: function(schema) {
-            var schema_ = this.widget.createScheme_(schema);
-            var menu = schema_.menu;
-            return menu.generateResultDataTableButtons();
-        },
+        // @todo: move to TableRenderer
         _getTableColumnsConfiguration: function(schema) {
             var fieldConfigs = schema.tableFields || [];
             if (!Array.isArray(fieldConfigs)) {

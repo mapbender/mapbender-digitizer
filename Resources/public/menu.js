@@ -1,6 +1,15 @@
 (function () {
     "use strict";
 
+    Mapbender.Digitizer = Mapbender.Digitizer || {};
+    Mapbender.Digitizer.TableRenderer = function() {
+        Mapbender.DataManager.TableRenderer.apply(this, arguments);
+    };
+    Mapbender.Digitizer.TableRenderer.prototype = Object.create(Mapbender.DataManager.TableRenderer.prototype);
+    Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
+        constructor: Mapbender.Digitizer.TableRenderer
+    });
+
 
     Mapbender.Digitizer.Menu = function (schema) {
 
@@ -14,8 +23,6 @@
         menu.appendResultTableControlButtons_(frame);
 
         menu.appendCurrentExtentSwitch_(frame);
-
-        menu.generateResultTable_(frame);
 
         frame.hide();
 
@@ -265,10 +272,12 @@
 
     };
 
+    // @todo: remove transient adapter stub
     Mapbender.Digitizer.Menu.prototype.generateResultDataTableButtons = function () {
-        var menu = this;
-        var schema = menu.schema;
+        return Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption.call(null, this.schema);
+    };
 
+    Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
         var buttons = [];
 
         if (schema.allowLocate) {
@@ -350,7 +359,7 @@
 
     };
 
-    Object.assign(Mapbender.Digitizer.Menu.prototype, {
+    Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
         generateResultDataTableColumns: function (schema) {
 
             var columns = [];
@@ -390,9 +399,8 @@
 
             return columns;
         },
-        getResultTableOptions: function(schema) {
-            var menu = this;
-            var widget = schema.widget;
+        getOptions: function(schema) {
+            var widget = this.owner;
             return {
                 lengthChange: false,
                 pageLength: schema.pageLength,
@@ -403,20 +411,18 @@
                 paging: true,
                 selectable: false,
                 autoWidth: false,
-                columns: menu.generateResultDataTableColumns(schema),
-                buttons: menu.generateResultDataTableButtons(),
+                columns: this.generateResultDataTableColumns(schema),
+                buttons: this.getButtonsOption(schema),
                 oLanguage: widget.options.tableTranslation
             };
-        },
+        }
+    });
+    Object.assign(Mapbender.Digitizer.Menu.prototype, {
         generateResultTable_: function (frame) {
             var menu = this;
             var schema = menu.schema;
             var widget = schema.widget;
-
-            var resultTableSettings = this.getResultTableOptions(schema);
-
-            var $div = $("<div/>");
-            var $table = $div.resultTable(resultTableSettings);
+            var $table = (new Mapbender.Digitizer.TableRenderer(widget)).render(schema);
 
             var resultTable = $table.resultTable("instance");
 
