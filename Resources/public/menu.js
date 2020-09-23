@@ -130,25 +130,6 @@
         var map = widget.map;
         menu.resultTable = resultTable;
 
-        resultTable.element.delegate("tbody > tr", 'mouseenter', function () {
-            var tr = this;
-            var row = resultTable.getApi().row(tr);
-            var feature = row.data();
-            if (feature) {
-                feature.dispatchEvent({type: widget.TYPE + '.HoverFeature'});
-            }
-
-        });
-
-        resultTable.element.delegate("tbody > tr", 'mouseleave', function () {
-            var tr = this;
-            var row = resultTable.getApi().row(tr);
-            var feature = row.data();
-            if (feature) {
-                feature.dispatchEvent({type: widget.TYPE + '.UnhoverFeature'});
-            }
-        });
-
         $(schema).on("Digitizer.FeaturesLoaded", function (event) {
             var features = event.features;
             resultTable.redraw(features);

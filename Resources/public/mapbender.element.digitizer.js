@@ -261,6 +261,25 @@
                 srid: this.getProjectionCode()
             };
         },
+        _renderTable: function(schema) {
+            var table = this._super(schema);
+            this._addTableEvents(schema, table);
+            return table;
+        },
+        _addTableEvents: function(schema, table) {
+            $(table).on('mouseenter', 'tbody > tr', function () {
+                var feature = $(this).data().item;
+                if (feature) {
+                    feature.dispatchEvent({type: 'Digitizer.HoverFeature'});
+                }
+            });
+            $(table).on('mouseleave', 'tbody > tr', function () {
+                var feature = $(this).data().item;
+                if (feature) {
+                    feature.dispatchEvent({type: 'Digitizer.UnhoverFeature'});
+                }
+            });
+        },
         // Support method for custom Scheme class
         getProjectionCode: function() {
             return this.mbMap.getModel().getCurrentProjectionCode();
