@@ -25,7 +25,7 @@
         schema.label = options.label;
         schema.view = options.view = { settings: { }};
         schema.popup = options.popup || {title: schema.schemaName, width: '500px'};
-        schema.tableFields = options.tableFields || schema.createDefaultTableFields_();
+        schema.tableFields = options.tableFields;
         schema.formItems = options.formItems || {};
         schema.allowEditData = options.allowEditData || (typeof options.allowEditData === 'undefined');  //default true
         schema.allowSave = options.allowSave || false;
@@ -384,18 +384,6 @@
         };
 
         return styles;
-    };
-
-    Mapbender.Digitizer.Scheme.prototype.createDefaultTableFields_ = function () {
-        var schema = this;
-        var tableFields = [];
-
-        tableFields.push({
-            data: schema.featureType.uniqueId,
-            label: 'Nr.',
-            width: '20%'
-        });
-        return tableFields;
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.getLayer = function() {

@@ -341,6 +341,34 @@
             }
             options.searching = !!schema.inlineSearch || (typeof (schema.inlineSearch) === 'undefined');
             return options;
+        },
+        getDefaultColumnConfigs: function(schema) {
+            // @todo DataManager: data manager does not use default columns, but it should; without
+            //                    columns, dataTables crashes immediately.
+            var tableFields = [];
+
+            tableFields.push({
+                data: schema.featureType.uniqueId,
+                label: 'Nr.',
+                width: '20%'
+            });
+            return tableFields;
+        },
+        getColumnsConfigs: function(schema) {
+            var fieldConfigs = schema.tableFields || [];
+            if (!Array.isArray(fieldConfigs)) {
+                // Digitizer vs DM quirk: digitizer uses a PHP-style mapping of attribute name to other config values
+                // Adapt by unravelling object-to-object mapping to list of object; add the top-level key as the "data" property
+                fieldConfigs = _.map(fieldConfigs, function(value, key) {
+                    return Object.assign({}, value, {
+                        data: key
+                    });
+                });
+            }
+            if (!fieldConfigs.length) {
+                fieldConfigs = this.getDefaultColumnConfigs(schema);
+            }
+            return fieldConfigs;
         }
     });
 })();
