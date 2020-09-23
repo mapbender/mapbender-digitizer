@@ -259,7 +259,10 @@
             }
             // @todo: document new schema config value
             if (!isNew && schema.revertChangedGeometryOnCancel) {
-                feature.setGeometry(feature.get("oldGeometry").clone());
+                var oldGeometry = feature.get('oldGeometry');
+                if (oldGeometry) {
+                    feature.setGeometry(oldGeometry.clone());
+                }
                 feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
             }
         },
