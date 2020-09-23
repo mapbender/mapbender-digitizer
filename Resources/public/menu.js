@@ -360,45 +360,6 @@
     };
 
     Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
-        generateResultDataTableColumns: function (schema) {
-
-            var columns = [];
-
-            var createResultTableDataFunction = function (columnId, fieldSettings) {
-
-                return function (feature, type, val, meta) {
-
-                    var escapeHtml = function (str) {
-
-                        return str.replace(/["&'\/<>]/g, function (a) {
-                            return {
-                                '"': '&quot;',
-                                '&': '&amp;',
-                                "'": '&#39;',
-                                '/': '&#47;',
-                                '<': '&lt;',
-                                '>': '&gt;'
-                            }[a];
-                        });
-                    };
-
-                    var data = feature.get('data') && feature.get('data').get(columnId);
-                    if (typeof (data) == 'string') {
-                        data = escapeHtml(data);
-                    }
-                    return data || '';
-                };
-            };
-
-
-            $.each(schema.tableFields, function (columnId, fieldSettings) {
-                fieldSettings.title = fieldSettings.label;
-                fieldSettings.data = fieldSettings.data || createResultTableDataFunction(columnId, fieldSettings);
-                columns.push(fieldSettings);
-            });
-
-            return columns;
-        },
         getOptions: function(schema) {
             var widget = this.owner;
             return {
@@ -411,7 +372,7 @@
                 paging: true,
                 selectable: false,
                 autoWidth: false,
-                columns: this.generateResultDataTableColumns(schema),
+                columns: this.getColumnsOption(schema),
                 buttons: this.getButtonsOption(schema),
                 oLanguage: widget.options.tableTranslation
             };
