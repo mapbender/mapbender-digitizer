@@ -280,6 +280,36 @@
     };
 
     Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
+        render: function(schema) {
+            var table = Mapbender.DataManager.TableRenderer.prototype.render.call(this, schema);
+            this.registerEvents(schema, $(table));
+            return table;
+        },
+        registerEvents: function(schema, $table) {
+            $table.on('mouseenter', 'tbody > tr', function () {
+                var feature = $(this).data().item;
+                if (feature) {
+                    feature.dispatchEvent({type: 'Digitizer.HoverFeature'});
+                }
+            });
+            $table.on('mouseleave', 'tbody > tr', function () {
+                var feature = $(this).data().item;
+                if (feature) {
+                    feature.dispatchEvent({type: 'Digitizer.UnhoverFeature'});
+                }
+            });
+            $table.on('click', 'tbody > tr', function () {
+                var feature = $(this).data().item;
+                if (feature) {
+                    if (schema.zoomOnResultTableClick) {
+                        schema.zoomToFeature(feature);
+                    }
+                    if (schema.openDialogOnResultTableClick) {
+                        schema.openFeatureEditDialog(feature);
+                    }
+                }
+            });
+        },
         getCustomOptions: function(schema) {
             // Unlike upstream DM, we DO NOT want to forward any random value from schema config
             // into the dataTables / resultTable widget constructor
