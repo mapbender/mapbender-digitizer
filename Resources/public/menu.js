@@ -301,15 +301,6 @@
             });
         }
 
-        if (schema.allowEditData) {
-            buttons.push({
-                title: Mapbender.trans('mb.digitizer.feature.edit'),
-                cssClass: 'icon-edit edit',  // NOTE: "edit" class required for getButtonByFeature ...
-                onClick: function (feature, ui) {
-                    schema.openFeatureEditDialog(feature);
-                }
-            });
-        }
         if (schema.copy && schema.copy.enable) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.clone.title'),
@@ -338,25 +329,8 @@
                 }
             });
         }
-
-        if (schema.allowDelete) {
-
-            buttons.push({
-                title: Mapbender.trans("mb.digitizer.feature.remove.title"),
-                cssClass: 'icon-remove remove critical', // NOTE: "remove" class required for getButtonByFeature ...
-                onClick: function (feature, ui) {
-                    if (schema.allowDelete) {
-                        schema.removeFeature(feature);
-                    } else {
-                        $.notify("Deletion is not allowed");
-                    }
-                }
-            });
-        }
-
-        return buttons;
-
-
+        var upstreamButtons = Mapbender.DataManager.TableRenderer.prototype.getButtonsOption.call(this, schema);
+        return _.union(buttons, upstreamButtons);
     };
 
     Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
