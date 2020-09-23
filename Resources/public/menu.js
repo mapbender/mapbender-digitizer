@@ -269,71 +269,71 @@
         var menu = this;
         var schema = menu.schema;
 
-        var buttons = {};
+        var buttons = [];
 
         if (schema.allowLocate) {
-            buttons['locate'] = {
+            buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
                 className: 'zoom',
                 onClick: function (feature, ui) {
                     schema.zoomToFeature(feature);
                 }
-            };
+            });
         }
 
         if (schema.allowEditData && schema.allowSaveInResultTable) {
-            buttons['save'] = {
+            buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.save.title'),
                 className: 'save',
                 disabled: true,
                 onClick: function (feature, $button) {
                     schema.saveFeature(feature);
                 }
-            };
+            });
         }
 
         if (schema.allowEditData) {
-            buttons['edit'] = {
+            buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.edit'),
                 className: 'edit',
                 onClick: function (feature, ui) {
                     schema.openFeatureEditDialog(feature);
                 }
-            };
+            });
         }
         if (schema.copy && schema.copy.enable) {
-            buttons['copy'] = {
+            buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.clone.title'),
                 className: 'copy',
                 onClick: function (feature, ui) {
                     schema.copyFeature(feature);
                 }
-            };
+            });
         }
         if (schema.allowCustomStyle) {
-            buttons['style'] = {
+            buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.style.change'),
                 className: 'style',
                 onClick: function (feature, ui) {
                     schema.openChangeStyleDialog(feature);
                 }
-            };
+            });
         }
 
         if (schema.allowChangeVisibility) {
-            buttons['toggleVisibility'] = {
+            buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'),
                 className: 'visibility',
                 cssClass: 'icon-eyeOff',
                 onClick: function (feature, $button) {
                     feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: !feature.get("hidden")});
                 }
-            };
+            });
         }
 
         if (schema.allowDelete) {
 
-            buttons['delete'] = {
+            buttons.push({
                 title: Mapbender.trans("mb.digitizer.feature.remove.title"),
                 className: 'remove',
                 cssClass: 'critical',
@@ -344,7 +344,7 @@
                         $.notify("Deletion is not allowed");
                     }
                 }
-            };
+            });
         }
 
         return buttons;
