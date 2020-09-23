@@ -241,8 +241,6 @@
             feature.set("modificationState", "isNew");
             this.updateFeatureStyle(schema, feature);
 
-            $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: feature});
-
             if (schema.openFormAfterEdit) {
                 var dialog = schema.openFeatureEditDialog(feature);
 
