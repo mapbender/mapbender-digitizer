@@ -220,15 +220,27 @@
             renderer.initializeFeature(schema, feature);
             return feature;
         },
+        _saveItem: function(schema, id, feature, newValues) {
+            $(schema).trigger({type: "Digitizer.StartFeatureSave", feature: feature });
+            return this._super(schema, id, feature, newValues)
+                .always(function() {
+                    $(schema).trigger({type: "Digitizer.EndFeatureSave"})
+                })
+            ;
+        },
         _afterSave: function(schema, feature, originalId, responseData) {
             // unravel dm-incompatible response format
             // @todo: should we or should we not replace feature geometry?
             // var geometry = (new ol.format.WKT()).readGeometryFromText(responseData.dataItem.geometry);
             // feature.setGEometry(geometry);
 
-            return this._super(schema, feature, originalId, {
+            this._super(schema, feature, originalId, {
                 dataItem: responseData.dataItem.properties
             });
+            feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'}); // why?
+            var olMap = this.mbMap.getModel().olMap;
+            $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
+            $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: feature});  // why?
         },
         _getData: function(schema) {
             var renderer = schema.renderer;
