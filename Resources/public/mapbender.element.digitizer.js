@@ -240,7 +240,6 @@
             feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'}); // why?
             var olMap = this.mbMap.getModel().olMap;
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
-            $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: feature});  // why?
         },
         _getData: function(schema) {
             var renderer = schema.renderer;
