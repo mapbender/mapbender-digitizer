@@ -239,7 +239,8 @@
             this._super(schema, feature, originalId, {
                 dataItem: responseData.dataItem.properties
             });
-            feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'}); // why?
+            feature.set('dirty', false);
+            feature.set("modificationState", undefined);
             var olMap = this.mbMap.getModel().olMap;
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
         },
@@ -265,7 +266,7 @@
                 if (oldGeometry) {
                     feature.setGeometry(oldGeometry.clone());
                 }
-                feature.dispatchEvent({type: 'Digitizer.UnmodifyFeature'});
+                feature.set('dirty', false);
             }
         },
         _replaceItemData: function(schema, feature, newValues) {

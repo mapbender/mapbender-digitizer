@@ -155,17 +155,16 @@
 
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
+            feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
+                if (event.key === 'dirty' || event.key === 'modificationState') {
+                    var length = schema.layer.getSource().getFeatures().filter(function (feature) {
+                        return ["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState"));
+                    }).length;
 
-            feature.on('Digitizer.UnmodifyFeature', function (event) {
-                var length = schema.layer.getSource().getFeatures().filter(function (feature) {
-                    return ["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState"));
-                }).length;
-
-
-                if (length === 0) {
-                    frame.find(".resultTableControlButtons .save").attr("disabled", "disabled");
+                    if (length === 0) {
+                        frame.find(".resultTableControlButtons .save").attr("disabled", "disabled");
+                    }
                 }
-
             });
 
         });
@@ -329,16 +328,13 @@
             // Place table row into feature data for quick access (synchronized highlighting etc)
             feature.set('table-row', tr);
             // Inline save buttons start out disabled
-            $('.-fn-save', tr).prop('disabled', true);
+            $('.-fn-save', tr).prop('disabled', !feature.get('dirty'));
             this.registerFeatureEvents(schema, feature);
         },
         registerFeatureEvents: function(schema, feature) {
             var self = this;
-            feature.on([
-                'Digitizer.ModifyFeature',
-                'Digitizer.UnmodifyFeature',
-                ol.ObjectEventType.PROPERTYCHANGE   // to detecte "hidden" value change
-                ], function(event) {
+            // Update interaction buttons when "hidden" and "dirty" values change
+            feature.on(ol.ObjectEventType.PROPERTYCHANGE, function(event) {
                 var feature = event.target;
                 var tr = feature && feature.get('table-row');
                 if (tr) {
@@ -379,13 +375,10 @@
                 .toggleClass('icon-eyeOn', !hidden)
                 .attr('title', tooltip)
             ;
-            var activateSave = event && ['Digitizer.UnmodifyFeature', 'Digitizer.ModifyFeature'].indexOf(event.type);
-            if (event && activateSave !== -1) {
-                $('.-fn-save', tr).prop('disabled', !activateSave);
-                // @todo: integrate with "save all" button (outside table)?
-                // activate (trivial): frame.find(".resultTableControlButtons .save").removeAttr("disabled");
-                // @todo: deactivation requires counting of modified features...
-            }
+            $('.-fn-save', tr).prop('disabled', !feature.get('dirty'));
+            // @todo: integrate with "save all" button (outside table)?
+            // activate (trivial): frame.find(".resultTableControlButtons .save").removeAttr("disabled");
+            // @todo: deactivation requires counting of modified features...
         }
     });
 })();

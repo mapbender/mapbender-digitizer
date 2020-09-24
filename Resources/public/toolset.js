@@ -49,19 +49,13 @@
         },
         registerSchemaEvents: function(schema) {
             var editor = this;
-            this.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
-                var feature = event.feature;
-
-                feature.on('Digitizer.ModifyFeature', function (event) {
-
-                    if (schema.deactivateControlAfterModification) {
-                        toolSet.activeInteraction && toolSet.activeInteraction.setActive(false);
-                        toolSet.activeInteraction = null;
-                    }
-
-                    feature.changed();
-
-                });
+            // @todo: should not trigger / listen on source
+            var source = schema.renderer.getLayer().getSource();
+            source.on('controlFactory.FeatureModified', function (event) {
+                if (schema.deactivateControlAfterModification) {
+                    editor.activeInteraction && editor.activeInteraction.setActive(false);
+                    editor.activeInteraction = null;
+                }
             });
 
             $(schema).on("Digitizer.StartFeatureSave",function(event){

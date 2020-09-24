@@ -171,10 +171,6 @@
                 feature.set('selected', hover && !feature.get('hidden'));
             });
 
-            feature.on('Digitizer.UnmodifyFeature', function (event) {
-                feature.set("modificationState", undefined);
-            });
-
             var renderer = this;
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
                 if (event.key == "selected" || event.key == "modificationState" || event.key == "hidden") {
@@ -214,29 +210,28 @@
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
         onFeatureModified: function(schema, feature) {
             feature.set("modificationState", "isChanged");
-
-            feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});
+            feature.set('dirty', true);
 
             if (schema.openFormAfterModification) {
                 schema.openFeatureEditDialog(feature);
             }
         },
         onFeatureAdded: function(schema, feature) {
-            feature.set("modificationState", "isNew");
             this.updateFeatureStyle(schema, feature);
+            feature.set("modificationState", "isNew");
+            feature.set('dirty', true);
 
-            feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});   // why?
             if (schema.openFormAfterEdit) {
                 schema.openFeatureEditDialog(feature);
             }
         },
         onFeatureCopied: function(schema, feature) {
+            feature.set('dirty', true);
             feature.set("modificationState", "isCopy");
 
             // add to table...
             $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: feature});
 
-            feature.dispatchEvent({type: 'Digitizer.ModifyFeature'});   // why?
             schema.openFeatureEditDialog(feature);
         },
         onFeatureUpdatedOnServer: function(schema) {
