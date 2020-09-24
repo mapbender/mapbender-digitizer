@@ -359,22 +359,17 @@
 
 
     Mapbender.Digitizer.FeatureRenderer.prototype.addSelectControl_ = function () {
-        var schema = this;
-
-
+        this.highlightControl = this.initializeHighlightControl_();
+        this.selectControl = this.initializeSelectControl_();
+        this.olMap.addInteraction(this.selectControl);
+        this.olMap.addInteraction(this.highlightControl);
+    };
+    Mapbender.Digitizer.FeatureRenderer.prototype.initializeHighlightControl_ = function () {
         var highlightControl = new ol.interaction.Select({
-
             condition: ol.events.condition.pointerMove,
             layers: [this.layer]
-
         });
-
-
-        this.highlightControl = highlightControl;
-        this.olMap.addInteraction(this.highlightControl);
-
         highlightControl.on('select', function (e) {
-
             e.selected.forEach(function (feature) {
                 feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: true});
             });
@@ -382,33 +377,29 @@
             e.deselected.forEach(function (feature) {
                 feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: false});
             });
-
         });
 
         highlightControl.setActive(false);
-
+        return highlightControl;
+    };
+    Mapbender.Digitizer.FeatureRenderer.prototype.initializeSelectControl_ = function () {
         var selectControl = new ol.interaction.Select({
-
             condition: ol.events.condition.singleClick,
             layers: [this.layer],
             style: function () {
                 return null;
             }
-
         });
 
-        this.selectControl = selectControl;
-        this.olMap.addInteraction(this.selectControl);
-
-        selectControl.on('select', function (event) {
-            if (this.schema.allowEditData || this.schema.allowOpenEditDialog) {
-                this.schema.openFeatureEditDialog(event.selected[0]);
+        var schema = this.schema;
+        if (schema.allowEditData || this.schema.allowOpenEditDialog) {
+            selectControl.on('select', function (event) {
+                schema.openFeatureEditDialog(event.selected[0]);
                 selectControl.getFeatures().clear();
-            }
-        });
-
+            });
+        }
         selectControl.setActive(false);
-
+        return selectControl;
     };
 
     Mapbender.Digitizer.Scheme.prototype.getGeomType = function () {
