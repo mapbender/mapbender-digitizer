@@ -264,8 +264,8 @@
                 // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
                 event.stopPropagation();
                 var data = $(this).closest('tr').data();
-                if (data.schema && data.feature) {
-                    schema.saveFeature(data.feature);
+                if (data.schema && data.item) {
+                    data.schema.saveFeature(data.item);
                 }
             });
             $table.on('click', 'tbody > tr .-fn-toggle-visibility', function(event) {
