@@ -267,20 +267,15 @@
             $table.on('click', 'tbody > tr .-fn-save', function(event) {
                 // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
                 event.stopPropagation();
-                var $tr = $(this).closest('tr');
-                var data = $tr.data();
-                var schema = data.schema;
-                var feature = data.item;
-                if (schema && feature) {
-                    schema.saveFeature(feature);
+                var data = $(this).closest('tr').data();
+                if (data.schema && data.feature) {
+                    schema.saveFeature(data.feature);
                 }
             });
             $table.on('click', 'tbody > tr .-fn-toggle-visibility', function(event) {
                 // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
                 event.stopPropagation();
-                var $tr = $(this).closest('tr');
-                var data = $tr.data();
-                var feature = data.item;
+                var feature = $(this).closest('tr').data().item;
                 feature.set('hidden', !feature.get('hidden'));
                 // @todo: resolve self-pollination via events (we listen to this ourselves)
                 feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: feature.get("hidden")});
@@ -288,9 +283,7 @@
             $table.on('click', 'tbody > tr .-fn-zoom-to-feature', function(event) {
                 // Avoid calling row click handlers (may already try to zoom to feature, or open the edit dialog, depending on schema config)
                 event.stopPropagation();
-                var $tr = $(this).closest('tr');
-                var data = $tr.data();
-                var feature = data.item;
+                var feature = $(this).closest('tr').data().item;
                 schema.zoomToFeature(feature);
             })
         },
