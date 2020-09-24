@@ -242,17 +242,7 @@
                     }
                 }
             });
-            this.registerSchemaEvents(schema);
             this.registerButtonEvents(schema, $table);
-        },
-        registerSchemaEvents: function(schema) {
-            // @todo: DO NOT use events on non-DOM Objects; they cannot be listened to from anyone without access to the exact object
-            var self = this;
-            $(schema).on("Digitizer.FeatureAddedManually", function (event) {
-                var dt = self.getDatatablesInstance_(schema);
-                dt.row.add(event.feature);
-                dt.draw();
-            });
         },
         registerButtonEvents: function(schema, $table) {
             var self = this;
