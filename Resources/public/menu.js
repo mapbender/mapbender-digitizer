@@ -181,10 +181,7 @@
         if (schema.allowLocate) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
-                cssClass: 'icon-zoom zoom', // NOTE: "zoom" class required for getButtonByFeature ...
-                onClick: function (feature, ui) {
-                    schema.zoomToFeature(feature);
-                }
+                cssClass: 'icon-zoom -fn-zoom-to-feature'
             });
         }
 
@@ -288,6 +285,14 @@
                 // @todo: resolve self-pollination via events (we listen to this ourselves)
                 feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: feature.get("hidden")});
             });
+            $table.on('click', 'tbody > tr .-fn-zoom-to-feature', function(event) {
+                // Avoid calling row click handlers (may already try to zoom to feature, or open the edit dialog, depending on schema config)
+                event.stopPropagation();
+                var $tr = $(this).closest('tr');
+                var data = $tr.data();
+                var feature = data.item;
+                schema.zoomToFeature(feature);
+            })
         },
         getCustomOptions: function(schema) {
             // Unlike upstream DM, we DO NOT want to forward any random value from schema config
