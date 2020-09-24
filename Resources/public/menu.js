@@ -358,7 +358,7 @@
                     // @todo: this behaviour is highly irritating. It should be configurable and off by default
                     var dt = self.getDatatablesInstance_(schema);
                     // NOTE: current dataTables versions could just do dt.row(tr).show().draw(false)
-                    var rowIndex = dt.row(tr).index();
+                    var rowIndex = dt.rows({order: 'current'}).nodes().indexOf(tr);
                     var pageLength = dt.page.len();
                     var rowPage = Math.floor(rowIndex / pageLength);
                     dt.page(rowPage);
