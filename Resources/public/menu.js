@@ -168,20 +168,6 @@
 
             });
 
-            feature.on('Digitizer.toggleVisibility', function (event) {
-                var $button = resultTable.getButtonByFeature('.visibility', feature);
-                if (!$button) {
-                    return;
-                }
-                if (event.hide) {
-                    $button.addClass('icon-eyeOn').removeClass('icon-eyeOff');
-                    $button.attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleon'));
-                } else {
-                    $button.addClass('icon-eyeOff').removeClass('icon-eyeOn');
-                    $button.attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'));
-                }
-            });
-
         });
 
         schema.layer.getSource().on(ol.source.VectorEventType.REMOVEFEATURE, function (event) {
@@ -231,10 +217,7 @@
         if (schema.allowChangeVisibility) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'),
-                cssClass: 'icon-eyeOff visibility', // NOTE: "visibility" class required for getButtonByFeature ...
-                onClick: function (feature, $button) {
-                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: !feature.get("hidden")});
-                }
+                cssClass: 'icon-eyeOn -fn-toggle-visibility'
             });
         }
         var upstreamButtons = Mapbender.DataManager.TableRenderer.prototype.getButtonsOption.call(this, schema);
@@ -294,6 +277,16 @@
                 if (schema && feature) {
                     schema.saveFeature(feature);
                 }
+            });
+            $table.on('click', 'tbody > tr .-fn-toggle-visibility', function(event) {
+                // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
+                event.stopPropagation();
+                var $tr = $(this).closest('tr');
+                var data = $tr.data();
+                var feature = data.item;
+                feature.set('hidden', !feature.get('hidden'));
+                // @todo: resolve self-pollination via events (we listen to this ourselves)
+                feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: feature.get("hidden")});
             });
         },
         getCustomOptions: function(schema) {
@@ -388,6 +381,24 @@
                     $('.-fn-save', tr).prop('disabled', true);
                 }
                 // @todo: integrate with "save all" button (outside table)?
+            });
+            feature.on('Digitizer.toggleVisibility', function (event) {
+                var feature = event.target;
+                var tr = feature && feature.get('table-row');
+                if (tr) {
+                    var hidden = event.hide;
+                    var tooltip;
+                    if (hidden) {
+                        tooltip = Mapbender.trans('mb.digitizer.feature.visibility.toggleon')
+                    } else {
+                        tooltip = Mapbender.trans('mb.digitizer.feature.visibility.toggleoff')
+                    }
+                    $('.-fn-toggle-visibility', tr)
+                        .toggleClass('icon-eyeOff', hidden)
+                        .toggleClass('icon-eyeOn', !hidden)
+                        .attr('title', tooltip)
+                    ;
+                }
             });
         }
     });
