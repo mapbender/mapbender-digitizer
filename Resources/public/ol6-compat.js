@@ -25,4 +25,13 @@
             MODIFYEND: 'modifyend'
         };
     }
+    if (window.ol && ol.interaction && !ol.interaction.TranslateEventType) {
+        // HACK: monkey patch event types not present in current OL6 repackage build
+        // @see https://github.com/openlayers/openlayers/blob/main/src/ol/interaction/Translate.js#L12
+        ol.interaction.TranslateEventType = {
+            TRANSLATESTART: 'translatestart',
+            TRANSLATING: 'translating',
+            TRANSLATEEND: 'translateend'
+        };
+    }
 })();
