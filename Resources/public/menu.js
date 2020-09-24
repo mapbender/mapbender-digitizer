@@ -292,6 +292,10 @@
                     }
                 }
             });
+            this.registerSchemaEvents(schema);
+            this.registerButtonEvents(schema, $table);
+        },
+        registerSchemaEvents: function(schema) {
             // @todo: DO NOT use events on non-DOM Objects; they cannot be listened to from anyone without access to the exact object
             var self = this;
             $(schema).on("Digitizer.FeatureAddedManually", function (event) {
@@ -299,6 +303,10 @@
                 dt.row.add(event.feature);
                 dt.draw();
             });
+        },
+        registerButtonEvents: function(schema, $table) {
+            // @ŧodo: button click handlers go here
+
         },
         getCustomOptions: function(schema) {
             // Unlike upstream DM, we DO NOT want to forward any random value from schema config
