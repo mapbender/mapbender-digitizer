@@ -54,6 +54,11 @@
         }
       }
     }
+
+    // disabled buttons (Mapbenderish / Bootstrappy)
+    button[disabled] {
+        opacity: 0.75;
+    }
 }
 
 .colorpicker-saturation {
