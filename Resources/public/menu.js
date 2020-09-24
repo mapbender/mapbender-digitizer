@@ -273,7 +273,7 @@
                 var $tr = $(this).closest('tr');
                 var feature = $tr.data().item;
                 feature.set('hidden', !feature.get('hidden'));
-                self.updateButtonStates_($tr.get(0));
+                self.updateButtonStates_($tr.get(0), feature);
             });
             $table.on('click', 'tbody > tr .-fn-zoom-to-feature', function(event) {
                 // Avoid calling row click handlers (may already try to zoom to feature, or open the edit dialog, depending on schema config)
@@ -338,7 +338,7 @@
                 var feature = event.target;
                 var tr = feature && feature.get('table-row');
                 if (tr) {
-                    self.updateButtonStates_(tr, event);
+                    self.updateButtonStates_(tr, feature);
                 }
             });
             feature.on('Digitizer.HoverFeature', function (event) {
@@ -361,8 +361,7 @@
                 }
             });
         },
-        updateButtonStates_: function(tr, event) {
-            var feature = event && event.target || $(tr).data('item');
+        updateButtonStates_: function(tr, feature) {
             var hidden = !!feature.get('hidden');
             var tooltip;
             if (hidden) {
