@@ -156,24 +156,7 @@
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
 
-            feature.on('Digitizer.ModifyFeature', function (event) {
-
-                var $button = resultTable.getButtonByFeature('.save', feature);
-                if ($button) {
-                    $button.removeAttr("disabled");
-                }
-
-                frame.find(".resultTableControlButtons .save").removeAttr("disabled");
-
-            });
-
             feature.on('Digitizer.UnmodifyFeature', function (event) {
-
-                var $button = resultTable.getButtonByFeature('.save', feature);
-                if ($button) {
-                    $button.attr("disabled", "disabled");
-                }
-
                 var length = schema.layer.getSource().getFeatures().filter(function (feature) {
                     return ["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState"));
                 }).length;
@@ -222,11 +205,7 @@
         if (schema.allowEditData && schema.allowSaveInResultTable) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.save.title'),
-                cssClass: 'icon-save save', // NOTE: "save" class required for getButtonByFeature ...
-                disabled: true,
-                onClick: function (feature, $button) {
-                    schema.saveFeature(feature);
-                }
+                cssClass: '-fn-save icon-save'
             });
         }
 
@@ -305,8 +284,17 @@
             });
         },
         registerButtonEvents: function(schema, $table) {
-            // @ŧodo: button click handlers go here
-
+            $table.on('click', 'tbody > tr .-fn-save', function(event) {
+                // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
+                event.stopPropagation();
+                var $tr = $(this).closest('tr');
+                var data = $tr.data();
+                var schema = data.schema;
+                var feature = data.item;
+                if (schema && feature) {
+                    schema.saveFeature(feature);
+                }
+            });
         },
         getCustomOptions: function(schema) {
             // Unlike upstream DM, we DO NOT want to forward any random value from schema config
@@ -353,6 +341,8 @@
             Mapbender.DataManager.TableRenderer.prototype.onRowCreation.apply(this, arguments);
             // Place table row into feature data for quick access (synchronized highlighting etc)
             feature.set('table-row', tr);
+            // Inline save buttons start out disabled
+            $('.-fn-save', tr).prop('disabled', true);
             this.registerFeatureEvents(schema, feature);
         },
         registerFeatureEvents: function(schema, feature) {
@@ -382,6 +372,23 @@
                 }
             });
 
+            feature.on('Digitizer.ModifyFeature', function (event) {
+                var feature = event.target;
+                var tr = feature && feature.get('table-row');
+                if (tr) {
+                    $('.-fn-save', tr).prop('disabled', false);
+                }
+                // @todo: integrate with "save all" button (outside table)
+                // frame.find(".resultTableControlButtons .save").removeAttr("disabled");
+            });
+            feature.on('Digitizer.UnmodifyFeature', function (event) {
+                var feature = event.target;
+                var tr = feature && feature.get('table-row');
+                if (tr) {
+                    $('.-fn-save', tr).prop('disabled', true);
+                }
+                // @todo: integrate with "save all" button (outside table)?
+            });
         }
     });
 })();
