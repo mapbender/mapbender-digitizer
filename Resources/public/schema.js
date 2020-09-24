@@ -410,23 +410,10 @@
 
     Mapbender.Digitizer.Scheme.prototype.copyFeature = function (feature) {
         var schema = this;
-        var layer = schema.layer;
+        var layer = schema.renderer.getLayer();
         var newFeature = feature.clone();
 
         var defaultAttributes = schema.copy.data || {};
-
-        /** Copy prevention is disabled - no code in Configuration**/
-            // var allowCopy = true;
-            //
-            //
-            // _.each(schema.evaluatedHooksForCopyPrevention, function (allowCopyForFeature) {
-            //     allowCopy = allowCopy && (allowCopyForFeature(feature));
-            // });
-            //
-            // if (!allowCopy) {
-            //     $.notify(Mapbender.trans('mb.digitizer.feature.clone.on.error'));
-            //     return;
-            // }
 
         var newAttributes = _.extend({}, defaultAttributes);
 
@@ -449,13 +436,11 @@
         if (schema.copy.moveCopy) {
             newFeature.getGeometry().translate(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
         }
-
-
-        schema.layer.getSource().addFeature(newFeature);
+        layer.getSource().addFeature(newFeature);
 
         // Watch out - Name "Copy of ..." is not instantly stored
         // Control Factory namespace can be misleading and is used for congruence onl<
-        schema.layer.getSource().dispatchEvent({type: 'controlFactory.FeatureCopied', feature: newFeature});
+        layer.getSource().dispatchEvent({type: 'controlFactory.FeatureCopied', feature: newFeature});
 
     };
 

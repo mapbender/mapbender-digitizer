@@ -194,10 +194,7 @@
         if (schema.copy && schema.copy.enable) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.clone.title'),
-                cssClass: 'icon-copy copy', // NOTE: "copy" class required for getButtonByFeature ...
-                onClick: function (feature, ui) {
-                    schema.copyFeature(feature);
-                }
+                cssClass: 'icon-copy -fn-copy'
             });
         }
         if (schema.allowCustomStyle) {
@@ -280,7 +277,15 @@
                 event.stopPropagation();
                 var feature = $(this).closest('tr').data().item;
                 schema.zoomToFeature(feature);
-            })
+            });
+            $table.on('click', 'tbody > tr .-fn-copy', function(event) {
+                // Avoid calling row click handlers (may already try to zoom to feature, or open the edit dialog, depending on schema config)
+                event.stopPropagation();
+                var data = $(this).closest('tr').data();
+                if (data.schema && data.item) {
+                    data.schema.copyFeature(data.item);
+                }
+            });
         },
         getCustomOptions: function(schema) {
             // Unlike upstream DM, we DO NOT want to forward any random value from schema config
