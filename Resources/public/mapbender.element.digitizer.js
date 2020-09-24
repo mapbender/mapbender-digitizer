@@ -211,6 +211,7 @@
         _afterRemove: function(schema, feature, id) {
             var olMap = this.mbMap.getModel().olMap;
             schema.renderer.getLayer().getSource().removeFeature(feature);
+            this._super(schema, feature, id);
             // Multi-Digitizer sync support
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
         },
