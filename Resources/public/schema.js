@@ -167,13 +167,8 @@
         },
         registerFeatureEvents: function(schema, feature) {
             feature.on('Digitizer.HoverFeature', function (event) {
-                if (!feature.get("hidden")) {
-                    feature.set("selected", true);
-                }
-            });
-
-            feature.on('Digitizer.UnhoverFeature', function (event) {
-                feature.set("selected", false);
+                var hover = !!event.hover || (typeof (event.hover) === 'undefined');
+                feature.set('selected', hover && !feature.get('hidden'));
             });
 
             feature.on('Digitizer.UnmodifyFeature', function (event) {
@@ -389,11 +384,11 @@
         highlightControl.on('select', function (e) {
 
             e.selected.forEach(function (feature) {
-                feature.dispatchEvent({type: 'Digitizer.HoverFeature'});
+                feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: true});
             });
 
             e.deselected.forEach(function (feature) {
-                feature.dispatchEvent({type: 'Digitizer.UnhoverFeature'});
+                feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: false});
             });
 
         });

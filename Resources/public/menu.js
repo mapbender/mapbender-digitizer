@@ -228,16 +228,11 @@
             return table;
         },
         registerEvents: function(schema, $table) {
-            $table.on('mouseenter', 'tbody > tr', function () {
+            $table.on('mouseenter mouseleave', 'tbody > tr', function(event) {
+                var hover = event.handleObj.origType === 'mouseenter';
                 var feature = $(this).data().item;
                 if (feature) {
-                    feature.dispatchEvent({type: 'Digitizer.HoverFeature'});
-                }
-            });
-            $table.on('mouseleave', 'tbody > tr', function () {
-                var feature = $(this).data().item;
-                if (feature) {
-                    feature.dispatchEvent({type: 'Digitizer.UnhoverFeature'});
+                    feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: hover});
                 }
             });
             $table.on('click', 'tbody > tr', function () {
@@ -352,8 +347,11 @@
             feature.on('Digitizer.HoverFeature', function (event) {
                 var feature = event.target;
                 var tr = feature && feature.get('table-row');
+                var hover = !!event.hover || (typeof (event.hover) === 'undefined');
                 if (tr) {
-                    $(tr).addClass('hover');
+                    $(tr).toggleClass('hover', hover);
+                }
+                if (tr && hover) {
                     // Page to currently hovered feature
                     // @todo: this behaviour is highly irritating. It should be configurable and off by default
                     var dt = self.getDatatablesInstance_(schema);
@@ -363,14 +361,6 @@
                     var rowPage = Math.floor(rowIndex / pageLength);
                     dt.page(rowPage);
                     dt.draw(false);
-                }
-            });
-
-            feature.on('Digitizer.UnhoverFeature', function (event) {
-                var feature = event.target;
-                var tr = feature && feature.get('table-row');
-                if (tr) {
-                    $(tr).removeClass('hover');
                 }
             });
         },
