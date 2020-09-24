@@ -43,8 +43,8 @@
                 if (this.activeInteraction && this.activeInteraction !== tool) {
                     console.warn("WARNING: enabling multiple drawing tools at the same time", toolName, this.activeInteraction);
                 }
-                this.activeInteraction = tool;
             }
+            this.activeInteraction = state && tool || null;
             tool.setActive(!!state);
         },
         registerSchemaEvents: function(schema) {
