@@ -309,10 +309,6 @@
                 fillColor: '#FFD14F',
                 strokeColor: '#F5663C',
                 fillOpacity: 0.5
-            },
-            invisible: {
-                fillOpacity: 0,
-                strokeOpacity: 0,
             }
         };
 
@@ -332,6 +328,7 @@
             styles[key] = ol.style.StyleConverter.convertToOL4Style(styleConfig);
         }
         Object.freeze(styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
+        styles.invisible = new ol.style.Style();
         return styles;
     };
 
