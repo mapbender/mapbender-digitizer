@@ -156,18 +156,6 @@
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
             var feature = event.feature;
 
-            feature.on('Digitizer.HoverFeature', function (event) {
-
-                resultTable.hoverInResultTable(feature, true);
-
-            });
-
-            feature.on('Digitizer.UnhoverFeature', function (event) {
-
-                resultTable.hoverInResultTable(feature, false);
-
-            });
-
             feature.on('Digitizer.ModifyFeature', function (event) {
 
                 var $button = resultTable.getButtonByFeature('.save', feature);
@@ -352,6 +340,40 @@
                 fieldConfigs = this.getDefaultColumnConfigs(schema);
             }
             return fieldConfigs;
+        },
+        onRowCreation: function(schema, tr, feature) {
+            Mapbender.DataManager.TableRenderer.prototype.onRowCreation.apply(this, arguments);
+            // Place table row into feature data for quick access (synchronized highlighting etc)
+            feature.set('table-row', tr);
+            this.registerFeatureEvents(schema, feature);
+        },
+        registerFeatureEvents: function(schema, feature) {
+            var self = this;
+            feature.on('Digitizer.HoverFeature', function (event) {
+                var feature = event.target;
+                var tr = feature && feature.get('table-row');
+                if (tr) {
+                    $(tr).addClass('hover');
+                    // Page to currently hovered feature
+                    // @todo: this behaviour is highly irritating. It should be configurable and off by default
+                    var dt = self.getDatatablesInstance_(schema);
+                    // NOTE: current dataTables versions could just do dt.row(tr).show().draw(false)
+                    var rowIndex = dt.row(tr).index();
+                    var pageLength = dt.page.len();
+                    var rowPage = Math.floor(rowIndex / pageLength);
+                    dt.page(rowPage);
+                    dt.draw(false);
+                }
+            });
+
+            feature.on('Digitizer.UnhoverFeature', function (event) {
+                var feature = event.target;
+                var tr = feature && feature.get('table-row');
+                if (tr) {
+                    $(tr).removeClass('hover');
+                }
+            });
+
         }
     });
 })();

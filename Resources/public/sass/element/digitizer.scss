@@ -41,6 +41,19 @@
         }
     }
 
+    // Defeat highly specific table row background color rule on feature hover
+    // See Mapbender/CoreBundle/Resources/public/sass/modules/_result_table.scss
+    .mapbender-element-result-table {
+      > .dataTables_wrapper {
+        > table[role="grid"] {
+            > tbody > tr {
+                &.hover {
+                    background-color: #F7F79A;
+                }
+            }
+        }
+      }
+    }
 }
 
 .colorpicker-saturation {

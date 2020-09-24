@@ -209,7 +209,8 @@
 
                 }
             } else {
-                style = this.getFeatureStyle_(feature);
+                // NOTE: "style" value only set by feature style editor (disabled?; see customStyleFeature_)
+                style = feature.get("style") || this.styles.default
             }
 
             // See selectableModify interaction (ol4 extensions)
@@ -431,10 +432,6 @@
     Mapbender.Digitizer.Scheme.prototype.createMenu = function() {
         var schema = this;
         return new Mapbender.Digitizer.Menu(schema);
-    };
-
-    Mapbender.Digitizer.FeatureRenderer.prototype.getFeatureStyle_ = function (feature) {
-        return feature.get("style") || this.styles.default
     };
 
     Mapbender.Digitizer.Scheme.prototype.copyFeature = function (feature) {
