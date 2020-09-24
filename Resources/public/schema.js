@@ -229,9 +229,6 @@
             feature.set('dirty', true);
             feature.set("modificationState", "isCopy");
 
-            // add to table...
-            $(schema).trigger({type: "Digitizer.FeatureAddedManually", feature: feature});
-
             schema.openFeatureEditDialog(feature);
         },
         onFeatureUpdatedOnServer: function(schema) {
