@@ -181,11 +181,6 @@
                     renderer.updateFeatureStyle(schema, feature);
                 }
             });
-
-            feature.on('Digitizer.toggleVisibility', function (event) {
-                feature.set("hidden", event.hide);
-
-            });
         },
         updateFeatureStyle: function(schema, feature) {
             var style;

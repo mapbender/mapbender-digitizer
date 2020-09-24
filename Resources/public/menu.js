@@ -42,7 +42,7 @@
             $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
             $button.click(function (event) {
                 schema.layer.getSource().getFeatures().forEach(function (feature) {
-                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: true});
+                    feature.set('hidden', true);
                 });
             });
             buttons['hideAll'] = $button;
@@ -52,7 +52,7 @@
             $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
             $button.click(function (event) {
                 schema.layer.getSource().getFeatures().forEach(function (feature) {
-                    feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: false});
+                    feature.set('hidden', false);
                 });
             });
             buttons['showAll'] = $button;
@@ -259,6 +259,7 @@
             });
         },
         registerButtonEvents: function(schema, $table) {
+            var self = this;
             $table.on('click', 'tbody > tr .-fn-save', function(event) {
                 // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
                 event.stopPropagation();
@@ -270,10 +271,10 @@
             $table.on('click', 'tbody > tr .-fn-toggle-visibility', function(event) {
                 // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
                 event.stopPropagation();
-                var feature = $(this).closest('tr').data().item;
+                var $tr = $(this).closest('tr');
+                var feature = $tr.data().item;
                 feature.set('hidden', !feature.get('hidden'));
-                // @todo: resolve self-pollination via events (we listen to this ourselves)
-                feature.dispatchEvent({type: 'Digitizer.toggleVisibility', hide: feature.get("hidden")});
+                self.updateButtonStates_($tr.get(0));
             });
             $table.on('click', 'tbody > tr .-fn-zoom-to-feature', function(event) {
                 // Avoid calling row click handlers (may already try to zoom to feature, or open the edit dialog, depending on schema config)
@@ -336,7 +337,7 @@
             feature.on([
                 'Digitizer.ModifyFeature',
                 'Digitizer.UnmodifyFeature',
-                'Digitizer.toggleVisibility'
+                ol.ObjectEventType.PROPERTYCHANGE   // to detecte "hidden" value change
                 ], function(event) {
                 var feature = event.target;
                 var tr = feature && feature.get('table-row');
@@ -365,7 +366,7 @@
             });
         },
         updateButtonStates_: function(tr, event) {
-            var feature = event.target;
+            var feature = event && event.target || $(tr).data('item');
             var hidden = !!feature.get('hidden');
             var tooltip;
             if (hidden) {
@@ -378,8 +379,8 @@
                 .toggleClass('icon-eyeOn', !hidden)
                 .attr('title', tooltip)
             ;
-            var activateSave = ['Digitizer.UnmodifyFeature', 'Digitizer.ModifyFeature'].indexOf(event.type);
-            if (activateSave !== -1) {
+            var activateSave = event && ['Digitizer.UnmodifyFeature', 'Digitizer.ModifyFeature'].indexOf(event.type);
+            if (event && activateSave !== -1) {
                 $('.-fn-save', tr).prop('disabled', !activateSave);
                 // @todo: integrate with "save all" button (outside table)?
                 // activate (trivial): frame.find(".resultTableControlButtons .save").removeAttr("disabled");
