@@ -338,6 +338,17 @@
         },
         registerFeatureEvents: function(schema, feature) {
             var self = this;
+            feature.on([
+                'Digitizer.ModifyFeature',
+                'Digitizer.UnmodifyFeature',
+                'Digitizer.toggleVisibility'
+                ], function(event) {
+                var feature = event.target;
+                var tr = feature && feature.get('table-row');
+                if (tr) {
+                    self.updateButtonStates_(tr, event);
+                }
+            });
             feature.on('Digitizer.HoverFeature', function (event) {
                 var feature = event.target;
                 var tr = feature && feature.get('table-row');
@@ -362,42 +373,28 @@
                     $(tr).removeClass('hover');
                 }
             });
-
-            feature.on('Digitizer.ModifyFeature', function (event) {
-                var feature = event.target;
-                var tr = feature && feature.get('table-row');
-                if (tr) {
-                    $('.-fn-save', tr).prop('disabled', false);
-                }
-                // @todo: integrate with "save all" button (outside table)
-                // frame.find(".resultTableControlButtons .save").removeAttr("disabled");
-            });
-            feature.on('Digitizer.UnmodifyFeature', function (event) {
-                var feature = event.target;
-                var tr = feature && feature.get('table-row');
-                if (tr) {
-                    $('.-fn-save', tr).prop('disabled', true);
-                }
+        },
+        updateButtonStates_: function(tr, event) {
+            var feature = event.target;
+            var hidden = !!feature.get('hidden');
+            var tooltip;
+            if (hidden) {
+                tooltip = Mapbender.trans('mb.digitizer.feature.visibility.toggleon')
+            } else {
+                tooltip = Mapbender.trans('mb.digitizer.feature.visibility.toggleoff')
+            }
+            $('.-fn-toggle-visibility', tr)
+                .toggleClass('icon-eyeOff', hidden)
+                .toggleClass('icon-eyeOn', !hidden)
+                .attr('title', tooltip)
+            ;
+            var activateSave = ['Digitizer.UnmodifyFeature', 'Digitizer.ModifyFeature'].indexOf(event.type);
+            if (activateSave !== -1) {
+                $('.-fn-save', tr).prop('disabled', !activateSave);
                 // @todo: integrate with "save all" button (outside table)?
-            });
-            feature.on('Digitizer.toggleVisibility', function (event) {
-                var feature = event.target;
-                var tr = feature && feature.get('table-row');
-                if (tr) {
-                    var hidden = event.hide;
-                    var tooltip;
-                    if (hidden) {
-                        tooltip = Mapbender.trans('mb.digitizer.feature.visibility.toggleon')
-                    } else {
-                        tooltip = Mapbender.trans('mb.digitizer.feature.visibility.toggleoff')
-                    }
-                    $('.-fn-toggle-visibility', tr)
-                        .toggleClass('icon-eyeOff', hidden)
-                        .toggleClass('icon-eyeOn', !hidden)
-                        .attr('title', tooltip)
-                    ;
-                }
-            });
+                // activate (trivial): frame.find(".resultTableControlButtons .save").removeAttr("disabled");
+                // @todo: deactivation requires counting of modified features...
+            }
         }
     });
 })();
