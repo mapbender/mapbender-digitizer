@@ -24,6 +24,8 @@
             var controlFactory = this;
 
             interaction.on(ol.interaction.DrawEventType.DRAWEND,function(event) {
+                // @todo: button sync? activeInteraction sync?
+                event.target.setActive(false);
                 var feature = event.feature;
                 source.dispatchEvent({ type: 'controlFactory.FeatureAdded', feature: feature});
 
