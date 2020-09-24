@@ -261,6 +261,7 @@
         getFeatureEditDialogHandler: function(feature, schema) {
             return Mapbender.Digitizer.FeatureEditDialog;
         },
+        // @todo: drop this method after changing invocations to widget._openEditDialog
         openFeatureEditDialog: function (feature) {
             // inflect via inherited data-manager widget method
             var schema = this;
@@ -482,6 +483,7 @@
     };
 
 
+    // @todo: resolve unholy non-distinction DB layer vs display layer; fold invocations back onto widget
     Mapbender.Digitizer.Scheme.prototype.removeFeature = function (feature) {
         var schema = this;
         var widget = schema.widget;

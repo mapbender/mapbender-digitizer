@@ -56,9 +56,10 @@
                 self.printClient = printClient;
                 $.extend(self.printClient, Mapbender.Digitizer.printPlugin);
             });
+            var olMap = this.mbMap.getModel().olMap;
             this.widget = new Mapbender.Digitizer(self.element, self.options);
-            this.contextMenu = this._createContextMenu(this.mbMap.model.olMap);
-            this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(this.mbMap.getModel().olMap);
+            this.contextMenu = this._createContextMenu(olMap);
+            this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(olMap);
             if (this.options.displayOnInactive) {
                 this.activate();
             }
@@ -224,7 +225,7 @@
             $(schema).trigger({type: "Digitizer.StartFeatureSave", feature: feature });
             return this._super(schema, id, feature, newValues)
                 .always(function() {
-                    $(schema).trigger({type: "Digitizer.EndFeatureSave"})
+                    $(schema).trigger({type: "Digitizer.EndFeatureSave"})   // why?
                 })
             ;
         },
