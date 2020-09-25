@@ -153,11 +153,16 @@
         },
         _updateToolset: function($container, schema) {
             this._super($container, schema);
-            if (!schema.allowDigitize) {
-                return;
+        },
+        _renderToolButtons: function(schema) {
+            var buttons = this._super(schema);
+            var toolButtonConfigs;
+            if (schema.allowDigitize) {
+                toolButtonConfigs = schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);
+            } else {
+                toolButtonConfigs = [];
             }
             var geomType = schema.featureType.geomType;
-            var toolButtonConfigs = schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);
             for (var i = 0; i < toolButtonConfigs.length; ++i) {
                 var rawButton = toolButtonConfigs[i];
                 var toolName = rawButton.type;
