@@ -126,7 +126,7 @@
         _deactivateSchema: function(schema) {
             this._super(schema);
             this._toggleSchemaInteractions(schema, false);
-            if (!(this.options.displayOnInactive || !schema.displayPermanent)) {
+            if (!(this.options.displayOnInactive || schema.displayPermanent)) {
                 schema.renderer.layer.setVisible(false);
             }
         },
