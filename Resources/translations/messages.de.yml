@@ -70,7 +70,10 @@ mb.digitizer:
         table:
             empty: 'Keine Ergebnisse'
             zerorecords: 'Keine Ergebnisse'
-            info: {status: 'Anzeige _START_ bis _END_ von _TOTAL_ Treffern', empty: 'Keine Ergebnisse', filtered: '(gefiltert von _MAX_ Objekte.)'}
+            info:
+                status: 'Anzeige _START_ bis _END_ von _TOTAL_ Treffern'
+                empty: 'Keine Ergebnisse'
+                filtered: '(von insgesamt _MAX_)'
     remoteData:
         error: 'WMS FeatureInfo Anfrage fehlgeschlagen'
     style:

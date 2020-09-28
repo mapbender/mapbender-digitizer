@@ -31,6 +31,6 @@ mb.digitizer:
       empty: 'Vuota'
       zerorecords: 'Nessun risultato.'
       info:
-        status: '_START_ to _END_ from _TOTAL_'
+        status: ~
         empty: 'Nessun risultato'
-        filtered: '(filter from _MAX_ Objects.)'
+        filtered: ~

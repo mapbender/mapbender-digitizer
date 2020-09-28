@@ -232,7 +232,6 @@ class Digitizer extends DataManagerElement
         return $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
     }
 
-
     /**
      * Digitizer renames "dataStore" to "featureType" in schema configs.
      * @return string
@@ -281,7 +280,7 @@ class Digitizer extends DataManagerElement
                 'sZeroRecords' => $translator->trans("mb.digitizer.search.table.zerorecords"),
                 'sInfo' => $translator->trans("mb.digitizer.search.table.info.status"),
                 'sInfoEmpty' => $translator->trans("mb.digitizer.search.table.info.empty"),
-                'sInfoFilter' => $translator->trans("mb.digitizer.search.table.info.filtered"),
+                'sInfoFiltered' => $translator->trans("mb.digitizer.search.table.info.filtered"),
             );
         }
         return $this->defaultTableTranslation;

@@ -67,7 +67,10 @@ mb.digitizer:
         table:
             empty: Empty.
             zerorecords: 'No entries.'
-            info: {status: '_START_ to _END_ from _TOTAL_', empty: 'No results', filtered: '(filter from _MAX_ Objects.)'}
+            info:
+                status: '_START_ to _END_ from _TOTAL_'
+                empty: 'No results'
+                filtered: '(out of _MAX_ total)'
     remoteData:
         error: 'WMS FeatureInfo request failed'
     style:
