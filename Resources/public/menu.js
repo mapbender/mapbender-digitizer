@@ -231,7 +231,11 @@
                     feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: hover});
                 }
             });
-            $table.on('click', 'tbody > tr', function () {
+            $table.on('click', 'tbody > tr', function (e) {
+                // Do nothing if click hit an interaction button; return true to allow other handlers
+                if ($(e.target).hasClass('button')) {
+                    return true;
+                }
                 var feature = $(this).data().item;
                 if (feature) {
                     if (schema.zoomOnResultTableClick) {
