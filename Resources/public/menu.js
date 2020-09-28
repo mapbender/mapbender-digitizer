@@ -38,7 +38,7 @@
         if (schema.showVisibilityNavigation && schema.allowChangeVisibility) {
 
             var $button = $("<button class='button' type='button'/>");
-            $button.addClass("icon-eyeOff eyeOff");
+            $button.addClass("fa far fa-eye-slash eyeOff"); // why .eyeOff?
             $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
             $button.click(function (event) {
                 schema.layer.getSource().getFeatures().forEach(function (feature) {
@@ -48,7 +48,7 @@
             buttons['hideAll'] = $button;
 
             var $button = $("<button class='button' type='button'/>");
-            $button.addClass("icon-eyeOn eyeOn");
+            $button.addClass("fa far fa-eye eyeOn"); // why .eyeOn?
             $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
             $button.click(function (event) {
                 schema.layer.getSource().getFeatures().forEach(function (feature) {
@@ -180,27 +180,27 @@
         if (schema.allowLocate) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
-                cssClass: 'icon-zoom -fn-zoom-to-feature'
+                cssClass: 'fa fas fa-crosshairs -fn-zoom-to-feature'
             });
         }
 
         if (schema.allowEditData && schema.allowSaveInResultTable) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.save.title'),
-                cssClass: '-fn-save icon-save'
+                cssClass: '-fn-save fa fas fa-save'
             });
         }
 
         if (schema.copy && schema.copy.enable) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.clone.title'),
-                cssClass: 'icon-copy -fn-copy'
+                cssClass: 'fa fas fa-copy -fn-copy'
             });
         }
         if (schema.allowCustomStyle) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.style.change'),
-                cssClass: 'icon-style style', // NOTE: "style" class required for getButtonByFeature ...
+                cssClass: 'fa fas fa-eye-dropper', // NOTE: "style" class required for getButtonByFeature ...
                 onClick: function (feature, ui) {
                     schema.openChangeStyleDialog(feature);
                 }
@@ -210,7 +210,7 @@
         if (schema.allowChangeVisibility) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'),
-                cssClass: 'icon-eyeOn -fn-toggle-visibility'
+                cssClass: 'fa far fa-eye -fn-toggle-visibility'
             });
         }
         var upstreamButtons = Mapbender.DataManager.TableRenderer.prototype.getButtonsOption.call(this, schema);
@@ -369,8 +369,8 @@
                 tooltip = Mapbender.trans('mb.digitizer.feature.visibility.toggleoff')
             }
             $('.-fn-toggle-visibility', tr)
-                .toggleClass('icon-eyeOff', hidden)
-                .toggleClass('icon-eyeOn', !hidden)
+                .toggleClass('fa-eye-slash', hidden)
+                .toggleClass('fa-eye', !hidden)
                 .attr('title', tooltip)
             ;
             $('.-fn-save', tr).prop('disabled', !feature.get('dirty'));
