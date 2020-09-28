@@ -131,9 +131,6 @@ class Digitizer extends DataManagerElement
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
                 '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.css',
-                '@MapbenderDigitizerBundle/Resources/public/sass/element/modal.scss',
-
-
             )),
             'trans' => array_merge($dataManagerAssets['trans'], array(
                 'mb.digitizer.*',
