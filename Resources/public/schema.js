@@ -618,22 +618,7 @@
         },
 
 
-        refreshOtherLayersAfterFeatureSave: function (feature) {
-            var schema = this;
 
-            var scheme = schema.getSchemaByFeature(feature);
-
-            if (scheme.refreshLayersAfterFeatureSave) {
-
-                _.each(scheme.refreshLayersAfterFeatureSave, function (layerInstanceId) {
-                    var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
-                    _.each(layers, function (layer) {
-                        Mapbender.layerManager.refreshLayer(layer);
-                    });
-                });
-            }
-
-        },
 
         openFeatureEditDialog: function (feature) {
             var schema = this;
@@ -962,7 +947,6 @@
             var schema = this;
             schema.layer.features = _.without(schema.getLayerFeatures(), feature);
             schema.reloadFeatures();
-            schema.refreshOtherLayersAfterFeatureSave(feature);
         },
 
         removeAllFeatures: function () {
@@ -1195,14 +1179,7 @@
 
                 successHandler();
 
-                schema.refreshOtherLayersAfterFeatureSave(feature);
-
-                schema.refreshConnectedDigitizerFeatures();
-
-                // Funktionalität nicht erwünscht
-                // if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
-                //     schema.menu.toolSet.activeControl.activate();
-                // }
+                schema.widget.element.trigger("featureSaved", {schema: schema, feature: feature});
 
                 return response;
 
@@ -1213,16 +1190,7 @@
         },
 
 
-        refreshConnectedDigitizerFeatures: function () {
-            var schema = this;
-            var widget = schema.widget;
 
-            if (schema.refreshFeaturesAfterSave) {
-                _.each(schema.refreshFeaturesAfterSave, function (schemaName, index) {
-                    widget.refreshConnectedDigitizerFeatures(schemaName);
-                })
-            }
-        },
 
         tryMailManager: function (feature) {
             var schema = this;
