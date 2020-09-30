@@ -36,7 +36,7 @@
             return new Mapbender.Digitizer.TableRenderer(this);
         },
         _createToolsetRenderer: function() {
-            return new Mapbender.Digitizer.Menu(this);
+            return new Mapbender.Digitizer.Toolset(this);
         },
         _afterCreate: function() {
             // Invoked only by data manager _create
@@ -157,49 +157,22 @@
         },
         _updateToolset: function($container, schema) {
             this._super($container, schema);
-            $('.btn', $container).addClass('btn-default');
+            $('.btn, button', $container)
+                .removeClass('button')  // no Mapbender legacy button styling
+                // some .btn- color variant is required to visualize active / not active
+                .addClass('btn btn-sm btn-default')
+            ;
         },
         _renderToolset: function(schema) {
             var nodes = $(this._super(schema)).get();   // force to array of nodes
             nodes = _.union(this.toolsetRenderer.renderCurrentExtentSwitch(schema), nodes);
-            var toolButtonConfigs;
-            if (schema.allowDigitize) {
-                toolButtonConfigs = schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);
-            } else {
-                toolButtonConfigs = [];
-            }
-            var $toolGroup = $(document.createElement('span')).attr({
-                'class': 'btn-group'
-            });
-            var geomType = schema.featureType.geomType;
-            for (var i = 0; i < toolButtonConfigs.length; ++i) {
-                var rawButton = toolButtonConfigs[i];
-                var toolName = rawButton.type;
-                var toolExists = typeof (Mapbender.Digitizer.DigitizingControlFactory.prototype[toolName]) === 'function';
-                if (!toolExists) {
-                    console.warn("interaction " + toolName + " does not exist");
-                    continue;
-                }
-                var iconClass = "icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1').toLowerCase(); // @todo: use font awesome css
-                var $icon = $(document.createElement('span')).addClass(iconClass);
-                var tooltip = Mapbender.trans('mb.digitizer.toolset.' + geomType + '.' + rawButton.type);
-                var $button = $(document.createElement('button'))
-                    .attr({
-                        type: 'button',
-                        'data-toolname': toolName,
-                        title: tooltip
-                    })
-                    .addClass('-fn-toggle-tool')
-                    .addClass('btn btn-sm') // match DataManager
-                    .append($icon)
-                    .data({
-                        schema: schema
-                    })
-                ;
-                $toolGroup.append($button);
-            }
-            if ($toolGroup.length) {
-                nodes.push($toolGroup.get(0));
+            var geometryToolButtons = this.toolsetRenderer.renderGeometryToolButtons(schema);
+            if (geometryToolButtons.length) {
+                var $toolGroup = $(document.createElement('span')).attr({
+                    'class': 'btn-group'
+                });
+                $toolGroup.append(geometryToolButtons);
+                nodes.push($toolGroup);
             }
             return nodes;
         },

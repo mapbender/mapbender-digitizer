@@ -65,37 +65,6 @@
     };
 
 
-    Mapbender.Digitizer.Menu.prototype.renderCurrentExtentSwitch = function (schema) {
-        var menu = this;
-        var $checkbox = $("<input type='checkbox' />");
-        var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
-        $checkbox.prop('checked', schema.currentExtentSearch);
-        $checkbox.change(function (e) {
-            var currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
-            menu.changeCurrentExtentSearch_(currentExtentSearch)
-        });
-        var $div = $("<div/>");
-        $div.addClass("form-group checkbox");
-        var $label = $("<label/>");
-        $label.text(title);
-        $label.prepend($checkbox);
-        $div.append($label);
-        return [$div];
-    };
-
-    Mapbender.Digitizer.Menu.prototype.changeCurrentExtentSearch_ = function(currentExtentSearch) {
-        var widget = this.widget;
-        if (this.resultTable) {
-            var features = this.schema.layer.getSource().getFeatures();
-            if (currentExtentSearch) {
-                features = features.filter(function(feature) {
-                    return widget.isInExtent(feature);
-                });
-            }
-            this.resultTable.redraw(features);  // @todo: resolve custom vis-ui dependency
-        }
-    };
-
     Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable, frame) {
         var menu = this;
         var schema = menu.schema;

@@ -1,5 +1,7 @@
 (function ($) {
     "use strict";
+    window.Mapbender.Digitizer = Mapbender.Digitizer || {};
+
     /**
      * @param {ol.layer.Vector} layer
      * @param {Mapbender.Digitizer.DigitizingControlFactory} controlFactory
@@ -68,57 +70,82 @@
         }
     });
 
-    Mapbender.Digitizer.Toolset = function (schema) {
-
-        var toolSet = this;
-        toolSet.schema = schema;
-
-        toolSet.buttons = schema.toolset;
-
-        toolSet.element = $("<div />").addClass('digitizing-tool-set').addClass('left');
-        toolSet.createToolbar();
-
-
+    Mapbender.Digitizer.Toolset = function(owner) {
+        this.owner = owner;
     };
 
     Mapbender.Digitizer.Toolset.prototype = {
-
-
-        createPlainControlButton_: function (rawButton) {
-            var toolSet = this;
-
-            var schema = toolSet.schema;
-            var geomType = schema.getGeomType();
-
-            var $button = $("<button class='button' type='button'/>");
-
-            $button.addClass(rawButton.type);
-
-            $button.attr('title', Mapbender.trans('mb.digitizer.toolset.' + geomType + '.' + rawButton.type));
-            // add icon css class
-            $button.addClass("icon-" + rawButton.type.replace(/([A-Z])+/g, '-$1').toLowerCase());
-
-            return $button;
+        getGeometryToolConfigs: function(schema) {
+            if (schema.allowDigitize) {
+                var geomType = schema.featureType.geomType;
+                return schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);
+            } else {
+                return [];
+            }
         },
-
-        /**
-         * Build Navigation
-         *
-         */
-        createToolbar: function () {
-            var toolSet = this;
-            var schema = toolSet.schema;
-            var element = $(toolSet.element);
-            var buttons = toolSet.buttons || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.getGeomType());
-
-            buttons.forEach(function (rawButton) {
-
-                var $button = toolSet.createPlainControlButton_(rawButton);
-
-                element.append($button);
+        renderGeometryToolButtons: function(schema) {
+            var geomType = schema.featureType.geomType;
+            var configs = this.getGeometryToolConfigs(schema);
+            var buttons = [];
+            for (var i = 0; i < configs.length; ++i) {
+                var buttonConfig = configs[i];
+                var toolName = buttonConfig.type;
+                var toolExists = typeof (Mapbender.Digitizer.DigitizingControlFactory.prototype[toolName]) === 'function';
+                if (!toolExists) {
+                    console.warn("interaction " + toolName + " does not exist");
+                    continue;
+                }
+                var iconClass = "icon-" + buttonConfig.type.replace(/([A-Z])+/g, '-$1').toLowerCase(); // @todo: use font awesome css
+                var $icon = $(document.createElement('span')).addClass(iconClass);
+                var tooltip = Mapbender.trans('mb.digitizer.toolset.' + geomType + '.' + buttonConfig.type);
+                var $button = $(document.createElement('button'))
+                    .attr({
+                        type: 'button',
+                        'data-toolname': toolName,
+                        title: tooltip
+                    })
+                    .addClass('-fn-toggle-tool')
+                    .append($icon)
+                    .data({
+                        schema: schema
+                    })
+                ;
+                buttons.push($button);
+            }
+            return buttons;
+        },
+        renderCurrentExtentSwitch: function (schema) {
+            var menu = this;
+            var $checkbox = $("<input type='checkbox' />");
+            var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
+            $checkbox.prop('checked', schema.currentExtentSearch);
+            $checkbox.change(function (e) {
+                var currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
+                menu.changeCurrentExtentSearch_(currentExtentSearch)
             });
+            var $div = $("<div/>");
+            $div.addClass("form-group checkbox");
+            var $label = $("<label/>");
+            $label.text(title);
+            $label.prepend($checkbox);
+            $div.append($label);
+            return [$div];
+        },
+        changeCurrentExtentSearch_: function(currentExtentSearch) {
+            var widget = this.owner;
+            if (this.resultTable) {
+                var features = this.schema.layer.getSource().getFeatures();
+                if (currentExtentSearch) {
+                    features = features.filter(function(feature) {
+                        return widget.isInExtent(feature);
+                    });
+                }
+                this.resultTable.redraw(features);  // @todo: resolve custom vis-ui dependency
+            }
         }
     };
+
+
     Object.assign(Mapbender.Digitizer.FeatureEditor.prototype, {
         getDrawingTool: function(type, schema) {
             if (!this.tools_[schema.schemaName]) {
