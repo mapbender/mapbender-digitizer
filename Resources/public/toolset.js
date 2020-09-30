@@ -75,6 +75,17 @@
     };
 
     Mapbender.Digitizer.Toolset.prototype = {
+        iconMap_: {
+            drawCircle: "icon-draw-circle",
+            drawDonut: "icon-draw-donut",
+            drawEllipse: "icon-draw-ellipse",
+            drawLine: "icon-draw-line",
+            drawPoint: "icon-draw-point",
+            drawPolygon: "icon-draw-polygon",
+            drawRectangle: "icon-draw-rectangle",
+            modifyFeature: "icon-modify-feature",
+            moveFeature: "icon-move-feature"
+        },
         getGeometryToolConfigs: function(schema) {
             if (schema.allowDigitize) {
                 var geomType = schema.featureType.geomType;
@@ -95,7 +106,7 @@
                     console.warn("interaction " + toolName + " does not exist");
                     continue;
                 }
-                var iconClass = "icon-" + buttonConfig.type.replace(/([A-Z])+/g, '-$1').toLowerCase(); // @todo: use font awesome css
+                var iconClass = this.iconMap_[toolName];
                 var $icon = $(document.createElement('span')).addClass(iconClass);
                 var tooltip = Mapbender.trans('mb.digitizer.toolset.' + geomType + '.' + buttonConfig.type);
                 var $button = $(document.createElement('button'))
