@@ -22,6 +22,7 @@
             this._super();
             var widget = this;
             var target = this.options.target;
+            this.toolsetRenderer = this._createToolsetRenderer(this);
             Mapbender.elementRegistry.waitReady(target).then(function(mbMap) {
                 widget.mbMap = mbMap;
                 widget.setup();
@@ -33,6 +34,9 @@
         },
         _createTableRenderer: function() {
             return new Mapbender.Digitizer.TableRenderer(this);
+        },
+        _createToolsetRenderer: function() {
+            return new Mapbender.Digitizer.Menu(this);
         },
         _afterCreate: function() {
             // Invoked only by data manager _create
@@ -156,6 +160,7 @@
         },
         _renderToolset: function(schema) {
             var nodes = $(this._super(schema)).get();   // force to array of nodes
+            nodes = _.union(this.toolsetRenderer.renderCurrentExtentSwitch(schema), nodes);
             var toolButtonConfigs;
             if (schema.allowDigitize) {
                 toolButtonConfigs = schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);

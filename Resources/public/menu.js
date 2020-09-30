@@ -11,21 +11,8 @@
     });
 
 
-    Mapbender.Digitizer.Menu = function (schema) {
-
-        var menu = this;
-        menu.schema = schema;
-
-        var frame = $("<div />").addClass('frame');
-
-        frame.append('<div style="clear:both;"/>'); // why?
-
-        frame.append(this.renderUtilityButtons(schema));
-        frame.append(this.renderCurrentExtentSwitch(schema));
-
-        frame.hide();   // why?
-
-        menu.currentExtentSearch = schema.currentExtentSearch;
+    Mapbender.Digitizer.Menu = function (owner) {
+        this.owner = owner;
     };
 
     /**
@@ -84,22 +71,18 @@
         if (schema.showExtendSearchSwitch) {
             var $checkbox = $("<input type='checkbox' />");
             var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
-            $checkbox.attr('title', title);
-            if (schema.currentExtentSearch) {
-                $checkbox.attr("checked", "checked");
-            }
+            $checkbox.prop('checked', schema.currentExtentSearch);
             $checkbox.change(function (e) {
                 var currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
                 menu.changeCurrentExtentSearch_(currentExtentSearch)
             });
-            var $clearFix = $("<div style='clear:both'>"); // why?
             var $div = $("<div/>");
-            $div.addClass("form-group checkbox onlyExtent");
+            $div.addClass("form-group checkbox");
             var $label = $("<label/>");
-            $label.append($checkbox);
-            $label.append(title);
+            $label.text(title);
+            $label.prepend($checkbox);
             $div.append($label);
-            return [$clearFix, $div];
+            return [$div];
         } else {
             return [];
         }
@@ -107,15 +90,14 @@
 
     Mapbender.Digitizer.Menu.prototype.changeCurrentExtentSearch_ = function(currentExtentSearch) {
         var widget = this.widget;
-        this.currentExtentSearch = !!currentExtentSearch;
         if (this.resultTable) {
             var features = this.schema.layer.getSource().getFeatures();
-            if (this.currentExtentSearch) {
+            if (currentExtentSearch) {
                 features = features.filter(function(feature) {
                     return widget.isInExtent(feature);
                 });
             }
-            this.resultTable.redraw(features);
+            this.resultTable.redraw(features);  // @todo: resolve custom vis-ui dependency
         }
     };
 
@@ -135,14 +117,15 @@
                 resultTable.clear();
 
             } else {
+                // @todo: pull value from checkbox, not from (missing) property
 
                 if (resultTable.currentExtentSearch) {
                     var features = schema.layer.getSource().getFeatures().filter(function (feature) {
                         return widget.isInExtent(feature);
                     });
-                    resultTable.redraw(features);
+                    resultTable.redraw(features);     // @todo: resolve custom vis-ui dependency
                 } else {
-                    resultTable.redraw(schema.layer.getSource().getFeatures());
+                    resultTable.redraw(schema.layer.getSource().getFeatures());   // @todo: resolve custom vis-ui dependency
                 }
 
             }
