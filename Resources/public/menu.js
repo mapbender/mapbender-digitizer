@@ -18,22 +18,24 @@
 
         var frame = $("<div />").addClass('frame');
 
-        frame.append('<div style="clear:both;"/>');
+        frame.append('<div style="clear:both;"/>'); // why?
 
-        menu.appendResultTableControlButtons_(frame);
+        frame.append(this.renderUtilityButtons(schema));
+        frame.append(this.renderCurrentExtentSwitch(schema));
 
-        menu.appendCurrentExtentSwitch_(frame);
-
-        frame.hide();
+        frame.hide();   // why?
 
         menu.currentExtentSearch = schema.currentExtentSearch;
     };
 
-    Mapbender.Digitizer.Menu.prototype.appendResultTableControlButtons_ = function (frame) {
-        var menu = this;
-        var schema = menu.schema;
-
-        var buttons = {};
+    /**
+     * Renders buttons that do NOT represent geometry interactions
+     * @param schema
+     * @return {{}}
+     * @static
+     */
+    Mapbender.Digitizer.Menu.prototype.renderUtilityButtons = function (schema) {
+        var buttons = [];
 
         if (schema.showVisibilityNavigation && schema.allowChangeVisibility) {
 
@@ -45,7 +47,7 @@
                     feature.set('hidden', true);
                 });
             });
-            buttons['hideAll'] = $button;
+            buttons.push($button);
 
             var $button = $("<button class='button' type='button'/>");
             $button.addClass("fa far fa-eye eyeOn"); // why .eyeOn?
@@ -55,7 +57,7 @@
                     feature.set('hidden', false);
                 });
             });
-            buttons['showAll'] = $button;
+            buttons.push($button);
         }
         if (schema.allowSaveAll) {
 
@@ -70,23 +72,15 @@
                     schema.saveFeature(feature);
                 });
             });
-            buttons['allowSaveAll'] = $button;
+            buttons.push($button);
 
         }
-
-
-        var $div = $("<div/>");
-        $div.addClass("resultTableControlButtons");
-        $.each(buttons, function (name, $button) {
-            $div.append($button);
-        });
-        frame.append($div);
+        return buttons;
     };
 
 
-    Mapbender.Digitizer.Menu.prototype.appendCurrentExtentSwitch_ = function (frame) {
+    Mapbender.Digitizer.Menu.prototype.renderCurrentExtentSwitch = function (schema) {
         var menu = this;
-        var schema = menu.schema;
         if (schema.showExtendSearchSwitch) {
             var $checkbox = $("<input type='checkbox' />");
             var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
@@ -98,14 +92,16 @@
                 var currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
                 menu.changeCurrentExtentSearch_(currentExtentSearch)
             });
-            frame.append("<div style='clear:both'>");
+            var $clearFix = $("<div style='clear:both'>"); // why?
             var $div = $("<div/>");
             $div.addClass("form-group checkbox onlyExtent");
             var $label = $("<label/>");
             $label.append($checkbox);
             $label.append(title);
             $div.append($label);
-            frame.append($div);
+            return [$clearFix, $div];
+        } else {
+            return [];
         }
     };
 
