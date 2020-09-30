@@ -1,46 +1,10 @@
 
 .mb-element-digitizer {
-
-    .resultTableControlButtons {
-        .save:not(:disabled) {
-            background-color: darken($buttonFirstColor, 10%);
+    .schema-toolset {
+        .btn-group + .btn-group {
+            margin-left: 0.5em;
         }
     }
-
-    .digitizing-tool-set, .resultTableControlButtons {
-        margin-top: 10px;
-
-        > button {
-
-            &:first-child {
-                margin-left: 0px;
-            }
-
-            width: 26px;
-            margin-left: -1px;
-            padding: 3px 4px;
-
-            &:before {
-                display: inline-block;
-                font-size: 17px;
-                padding-top: 0px;
-            }
-
-            &.active,
-            &.active:focus {
-                background-color: #47791f !important;
-            }
-        }
-
-        > input[type="checkbox"] {
-            margin-left: 0px;
-        }
-
-        > label input[type="checkbox"] {
-            margin-left: 0px;
-        }
-    }
-
     // Defeat highly specific table row background color rule on feature hover
     // See Mapbender/CoreBundle/Resources/public/sass/modules/_result_table.scss
     .mapbender-element-result-table {
