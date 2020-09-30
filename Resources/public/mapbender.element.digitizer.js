@@ -154,14 +154,17 @@
         _updateToolset: function($container, schema) {
             this._super($container, schema);
         },
-        _renderToolButtons: function(schema) {
-            var buttons = this._super(schema);
+        _renderToolset: function(schema) {
+            var nodes = $(this._super(schema)).get();   // force to array of nodes
             var toolButtonConfigs;
             if (schema.allowDigitize) {
                 toolButtonConfigs = schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);
             } else {
                 toolButtonConfigs = [];
             }
+            var $toolGroup = $(document.createElement('span')).attr({
+                'class': 'btn-group'
+            });
             var geomType = schema.featureType.geomType;
             for (var i = 0; i < toolButtonConfigs.length; ++i) {
                 var rawButton = toolButtonConfigs[i];
@@ -187,8 +190,12 @@
                         schema: schema
                     })
                 ;
-                $container.append($button);
-           }
+                $toolGroup.append($button);
+            }
+            if ($toolGroup.length) {
+                nodes.push($toolGroup.get(0));
+            }
+            return nodes;
         },
         _openEditDialog: function(schema, feature) {
             var $dialog = this._super(schema, feature);
