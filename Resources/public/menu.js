@@ -24,8 +24,7 @@
     Mapbender.Digitizer.Menu.prototype.renderUtilityButtons = function (schema) {
         var buttons = [];
 
-        if (schema.showVisibilityNavigation && schema.allowChangeVisibility) {
-
+        if (schema.allowChangeVisibility) {
             var $button = $("<button class='button' type='button'/>");
             $button.addClass("fa far fa-eye-slash eyeOff"); // why .eyeOff?
             $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
@@ -68,24 +67,20 @@
 
     Mapbender.Digitizer.Menu.prototype.renderCurrentExtentSwitch = function (schema) {
         var menu = this;
-        if (schema.showExtendSearchSwitch) {
-            var $checkbox = $("<input type='checkbox' />");
-            var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
-            $checkbox.prop('checked', schema.currentExtentSearch);
-            $checkbox.change(function (e) {
-                var currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
-                menu.changeCurrentExtentSearch_(currentExtentSearch)
-            });
-            var $div = $("<div/>");
-            $div.addClass("form-group checkbox");
-            var $label = $("<label/>");
-            $label.text(title);
-            $label.prepend($checkbox);
-            $div.append($label);
-            return [$div];
-        } else {
-            return [];
-        }
+        var $checkbox = $("<input type='checkbox' />");
+        var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
+        $checkbox.prop('checked', schema.currentExtentSearch);
+        $checkbox.change(function (e) {
+            var currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
+            menu.changeCurrentExtentSearch_(currentExtentSearch)
+        });
+        var $div = $("<div/>");
+        $div.addClass("form-group checkbox");
+        var $label = $("<label/>");
+        $label.text(title);
+        $label.prepend($checkbox);
+        $div.append($label);
+        return [$div];
     };
 
     Mapbender.Digitizer.Menu.prototype.changeCurrentExtentSearch_ = function(currentExtentSearch) {

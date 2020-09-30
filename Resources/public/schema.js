@@ -79,12 +79,8 @@
         //    save // deprecated - no code in config
         // hooks // deprecated - no code in config
 
-        schema.showVisibilityNavigation = options.showVisibilityNavigation || false;
-
         /** TO BE Implemented **/
         schema.zoomScaleDenominator = options.zoomScaleDenominator || 500;
-
-        schema.showExtendSearchSwitch = options.showExtendSearchSwitch || false;
 
         schema.currentExtentSearch = options.currentExtentSearch || false;
 
