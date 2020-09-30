@@ -157,6 +157,7 @@
         },
         _updateToolset: function($container, schema) {
             this._super($container, schema);
+            $('.btn', $container).addClass('btn-default');
         },
         _renderToolset: function(schema) {
             var nodes = $(this._super(schema)).get();   // force to array of nodes
