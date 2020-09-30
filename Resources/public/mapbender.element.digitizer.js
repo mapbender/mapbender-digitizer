@@ -150,11 +150,6 @@
             // Digitizer schema config aliases "dataStore" (upstream) as "featureType"
             return schema.featureType;
         },
-        _allowDirectItemCreation: function(schema) {
-            // Digitizer never allows item creation directly through a form. Creation can only happen with a drawing tool.
-            // Returning constant false suppresses the data-manager upstream direct-to-form creation tool
-            return false;
-        },
         _updateToolset: function($container, schema) {
             this._super($container, schema);
             $('.btn, button', $container)
@@ -167,9 +162,20 @@
             var nodes = $(this._super(schema)).get();   // force to array of nodes
             // extend first button group with utility buttons
             var utilityButtons = this.toolsetRenderer.renderUtilityButtons(schema);
-            if (nodes.length && utilityButtons.length) {
-                $(nodes[0]).append(utilityButtons);
-            } else {
+            if (nodes.length) {
+                var $firstGroup = $(nodes[0]);
+                // Prevent top-level item creation
+                // Unlinke DataManager, all item creation happens with a drawing tool,
+                // and doesn't work when using pure form entry
+                $('.-fn-create-item', $firstGroup).remove();
+                if (utilityButtons.length) {
+                    $firstGroup.append(utilityButtons);
+                }
+                if (!$firstGroup.children().length) {
+                    // Group is now empty, remove it entirely
+                    nodes = [];
+                }
+            } else if (utilityButtons.length) {
                 var $utilityGroup = $(document.createElement('span')).attr({
                     'class': 'btn-group'
                 });
