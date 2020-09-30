@@ -15,56 +15,6 @@
         this.owner = owner;
     };
 
-    /**
-     * Renders buttons that do NOT represent geometry interactions
-     * @param schema
-     * @return {{}}
-     * @static
-     */
-    Mapbender.Digitizer.Menu.prototype.renderUtilityButtons = function (schema) {
-        var buttons = [];
-
-        if (schema.allowChangeVisibility) {
-            var $button = $("<button class='button' type='button'/>");
-            $button.addClass("fa far fa-eye-slash eyeOff"); // why .eyeOff?
-            $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
-            $button.click(function (event) {
-                schema.layer.getSource().getFeatures().forEach(function (feature) {
-                    feature.set('hidden', true);
-                });
-            });
-            buttons.push($button);
-
-            var $button = $("<button class='button' type='button'/>");
-            $button.addClass("fa far fa-eye eyeOn"); // why .eyeOn?
-            $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
-            $button.click(function (event) {
-                schema.layer.getSource().getFeatures().forEach(function (feature) {
-                    feature.set('hidden', false);
-                });
-            });
-            buttons.push($button);
-        }
-        if (schema.allowSaveAll) {
-
-            var $button = $("<button class='button' type='button'/>");
-            $button.addClass("icon-save save");
-            $button.attr("title", Mapbender.trans('mb.digitizer.toolset.saveAll'));
-            $button.attr("disabled", "disabled");
-            $button.click(function () {
-                schema.layer.getSource().getFeatures().filter(function (feature) {
-                    return (["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState")));
-                }).forEach(function (feature) {
-                    schema.saveFeature(feature);
-                });
-            });
-            buttons.push($button);
-
-        }
-        return buttons;
-    };
-
-
     Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable, frame) {
         var menu = this;
         var schema = menu.schema;

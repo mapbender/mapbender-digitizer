@@ -165,6 +165,18 @@
         },
         _renderToolset: function(schema) {
             var nodes = $(this._super(schema)).get();   // force to array of nodes
+            // extend first button group with utility buttons
+            var utilityButtons = this.toolsetRenderer.renderUtilityButtons(schema);
+            if (nodes.length && utilityButtons.length) {
+                $(nodes[0]).append(utilityButtons);
+            } else {
+                var $utilityGroup = $(document.createElement('span')).attr({
+                    'class': 'btn-group'
+                });
+                $utilityGroup.append(utilityButtons);
+                nodes.push($utilityGroup.get(0));
+            }
+            // Place current extent switch BEFORE any buttons
             nodes = _.union(this.toolsetRenderer.renderCurrentExtentSwitch(schema), nodes);
             var geometryToolButtons = this.toolsetRenderer.renderGeometryToolButtons(schema);
             if (geometryToolButtons.length) {

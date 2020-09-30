@@ -114,6 +114,53 @@
             }
             return buttons;
         },
+        /**
+         * Renders buttons that do NOT represent geometry interactions
+         * @param schema
+         * @return {{}}
+         * @static
+         */
+        renderUtilityButtons: function(schema) {
+            var buttons = [];
+            var $button;
+
+            if (schema.allowChangeVisibility) {
+                $button = $("<button class='button' type='button'/>");
+                $button.append('<i class="fa far fa-eye-slash">');
+                $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
+                $button.click(function (event) {
+                    schema.layer.getSource().getFeatures().forEach(function (feature) {
+                        feature.set('hidden', true);
+                    });
+                });
+                buttons.push($button);
+
+                $button = $("<button class='button' type='button'/>");
+                $button.append('<i class="fa far fa-eye">');
+                $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
+                $button.click(function (event) {
+                    schema.layer.getSource().getFeatures().forEach(function (feature) {
+                        feature.set('hidden', false);
+                    });
+                });
+                buttons.push($button);
+            }
+            if (schema.allowSaveAll) {
+                $button = $("<button class='button' type='button'/>");
+                $button.append('<i class="fa fas fa-save">');
+                $button.attr("title", Mapbender.trans('mb.digitizer.toolset.saveAll'));
+                $button.prop('disabled', true);
+                $button.click(function () {
+                    schema.layer.getSource().getFeatures().filter(function (feature) {
+                        return (["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState")));
+                    }).forEach(function (feature) {
+                        schema.saveFeature(feature);
+                    });
+                });
+                buttons.push($button);
+            }
+            return buttons;
+        },
         renderCurrentExtentSwitch: function (schema) {
             var menu = this;
             var $checkbox = $("<input type='checkbox' />");
