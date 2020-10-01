@@ -10,6 +10,7 @@
         });
         this.onMap_ = false;
         this.enabled_ = false;
+        this.schema_ = null;
     };
     Object.assign(Mapbender.Digitizer.MapContextMenu.prototype, {
         enable: function() {
@@ -31,8 +32,11 @@
         registerEvents: function(olMap) {
             var self = this;
             this.contextmenu.on('beforeopen', function (evt) {
-                self.feature = olMap.forEachFeatureAtPixel(evt.pixel, function (feature) {
-                    return feature;
+                var schemaLayer = self.schema_ && self.schema_.renderer.getLayer();
+                self.feature = olMap.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                    if (layer === schemaLayer) {
+                        return feature;
+                    }
                 });
                 if (self.feature && self.enabled_ && self.menuItems_.length) {
                     self.contextmenu.enable();
@@ -50,6 +54,7 @@
             } else {
                 this.contextmenu.disable();
             }
+            this.schema_ = schema;
         },
         getMenuItems: function(schema) {
             // NOTE: self.feature initialized and updated by beforeopen handler
