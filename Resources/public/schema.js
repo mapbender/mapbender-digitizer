@@ -446,19 +446,6 @@
     };
 
 
-    // @todo: resolve unholy non-distinction DB layer vs display layer; fold invocations back onto widget
-    Mapbender.Digitizer.Scheme.prototype.removeFeature = function (feature) {
-        var schema = this;
-        var widget = schema.widget;
-        if (!feature.getId()) {
-            // HACK: renderer property is monkey-patched onto schema externally by jqui widget
-            schema.renderer.getLayer().getSource().removeFeature(feature);
-        } else {
-            widget.removeData(this, feature);
-        }
-    };
-
-
     Mapbender.Digitizer.Scheme.prototype.saveFeature = function (feature, formData) {
         var schema = this;
         var widget = schema.widget;

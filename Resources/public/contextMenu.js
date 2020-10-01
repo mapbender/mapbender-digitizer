@@ -77,7 +77,15 @@
                 items.push({
                     text: Mapbender.trans('mb.digitizer.feature.remove.title'),
                     callback: function () {
-                        schema.removeFeature(self.feature);
+                        try {
+                            self.widget.removeData(schema, self.feature);
+                        } catch (e) {
+                            // thrown if item is temporary and doesn't have an id yet
+                            // Do absolutely nothing
+                            // @todo: disable context menu during editing operations (drawing new polygon / moving geometry)
+                            // @todo: disable context menu while attribute editor is open
+                            console.warn("Fixme: context menu should not be active during this operation", e);
+                        }
                     }
                 });
             }
