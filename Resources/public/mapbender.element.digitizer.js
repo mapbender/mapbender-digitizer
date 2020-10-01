@@ -165,13 +165,6 @@
             nodes.push(this.toolsetRenderer.renderButtons(schema, dmToolset));
             return nodes;
         },
-        _openEditDialog: function(schema, feature) {
-            var $dialog = this._super(schema, feature);
-            $dialog.data('feature', feature);
-
-            return $dialog;
-
-        },
         _getEditDialogButtons: function(schema, feature) {
             var dialogImplementation = schema.getFeatureEditDialogHandler(feature, schema);
             var ownButtons = dialogImplementation.getButtonConfiguration(feature, schema);
