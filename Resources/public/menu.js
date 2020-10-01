@@ -93,7 +93,7 @@
         if (schema.allowCustomStyle) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.style.change'),
-                cssClass: 'fa fas fa-eye-dropper', // NOTE: "style" class required for getButtonByFeature ...
+                cssClass: 'fa fas fa-eyedropper fa-eye-dropper',  // NOTE: fas and fa-eye-dropper for FA5+; fa-eyedropper for FA4
                 onClick: function (feature, ui) {
                     schema.openChangeStyleDialog(feature);
                 }
