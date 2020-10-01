@@ -61,7 +61,6 @@
                 $.extend(self.printClient, Mapbender.Digitizer.printPlugin);
             });
             var olMap = this.mbMap.getModel().olMap;
-            this.widget = new Mapbender.Digitizer(self.element, self.options);
             this.contextMenu = this._createContextMenu(olMap);
             this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(olMap);
             if (this.options.displayOnInactive) {
