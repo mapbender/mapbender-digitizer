@@ -40,9 +40,6 @@
                     self.contextmenu.disable();
                 }
             });
-            olMap.getViewport().addEventListener('contextmenu', function (e) {
-                self._handleContextMenu(e);
-            });
         },
         setSchema: function(schema) {
             this.menuItems_ = this.getMenuItems(schema);
@@ -53,9 +50,6 @@
             } else {
                 this.contextmenu.disable();
             }
-        },
-        _handleContextMenu: function(e) {
-            e.preventDefault();
         },
         getMenuItems: function(schema) {
             // NOTE: self.feature initialized and updated by beforeopen handler
