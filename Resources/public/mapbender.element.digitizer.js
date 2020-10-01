@@ -168,9 +168,6 @@
         _openEditDialog: function(schema, feature) {
             var $dialog = this._super(schema, feature);
             $dialog.data('feature', feature);
-            $dialog.parent().on("mouseenter",function(){
-                feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: false});
-            });
 
             return $dialog;
 
