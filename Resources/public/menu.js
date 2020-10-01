@@ -61,10 +61,6 @@
             });
 
         });
-
-        schema.layer.getSource().on(ol.source.VectorEventType.REMOVEFEATURE, function (event) {
-            resultTable.deleteRow(event.feature);
-        });
     };
 
     Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
