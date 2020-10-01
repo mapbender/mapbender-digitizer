@@ -112,6 +112,7 @@
             return table;
         },
         registerEvents: function(schema, $table) {
+            var widget = this.owner;
             $table.on('mouseenter mouseleave', 'tbody > tr', function(event) {
                 var hover = event.handleObj.origType === 'mouseenter';
                 var feature = $(this).data().item;
@@ -127,7 +128,7 @@
                 var feature = $(this).data().item;
                 if (feature) {
                     if (schema.zoomOnResultTableClick) {
-                        schema.zoomToFeature(feature);
+                        widget.zoomToFeature(schema, feature);
                     }
                     if (schema.openDialogOnResultTableClick) {
                         schema.openFeatureEditDialog(feature);
@@ -158,7 +159,7 @@
                 // Avoid calling row click handlers (may already try to zoom to feature, or open the edit dialog, depending on schema config)
                 event.stopPropagation();
                 var feature = $(this).closest('tr').data().item;
-                schema.zoomToFeature(feature);
+                self.owner.zoomToFeature(schema, feature);
             });
             $table.on('click', 'tbody > tr .-fn-edit-style', function(event) {
                 var data = $(this).closest('tr').data();

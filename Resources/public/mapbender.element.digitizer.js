@@ -285,6 +285,9 @@
             // @todo: no stuff happening in constructor
             !(new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, {data: styleConfig}));
         },
+        zoomToFeature: function(schema, feature) {
+            Mapbender.Model.zoomToFeature(feature, {minScale: schema.zoomScaleDenominator});
+        },
         __formatting_dummy: null
     });
 

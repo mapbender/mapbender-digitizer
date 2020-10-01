@@ -426,13 +426,6 @@
     };
 
 
-    Mapbender.Digitizer.Scheme.prototype.zoomToFeature = function (feature) {
-        var schema = this;
-
-        Mapbender.Model.zoomToFeature(feature, { minScale: schema.zoomScaleDenominator});
-
-    };
-
     Mapbender.Digitizer.Scheme.prototype.saveFeature = function (feature, formData) {
         var schema = this;
         var widget = schema.widget;
