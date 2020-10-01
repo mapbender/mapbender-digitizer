@@ -15,9 +15,6 @@
         var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell');
         $parent.prepend(spinner.$element);
 
-        var qe = new Mapbender.DataManager.QueryEngine(widget.id, spinner);
-        widget.query = qe.query;
-        widget.getElementURL = qe.getElementURL;
     };
 
     Mapbender.Digitizer.prototype.TYPE = "Digitizer";
