@@ -120,6 +120,7 @@
                 schema.geometryEditor = new Mapbender.Digitizer.FeatureEditor(layer, this.controlFactory);
             }
 
+            this.contextMenu.setSchema(schema);
             this._toggleSchemaInteractions(schema, true);
             schema.renderer.layer.setVisible(true);
         },

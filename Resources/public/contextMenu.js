@@ -34,7 +34,7 @@
                 self.feature = olMap.forEachFeatureAtPixel(evt.pixel, function (feature) {
                     return feature;
                 });
-                if (self.feature && self.enabled_) {
+                if (self.feature && self.enabled_ && self.menuItems_.length) {
                     self.contextmenu.enable();
                 } else {
                     self.contextmenu.disable();
@@ -44,40 +44,50 @@
                 self._handleContextMenu(e);
             });
         },
-        _handleContextMenu: function(e) {
-            var schema = this.widget._getCurrentSchema();
-            e.preventDefault();
-
+        setSchema: function(schema) {
+            this.menuItems_ = this.getMenuItems(schema);
             this.contextmenu.clear();
-
-            var feature = this.feature; // initialized by beforeopen handler
-
+            this.contextmenu.extend(this.menuItems_);
+            if (this.enabled_ && this.menuItems_.length) {
+                this.contextmenu.enable();
+            } else {
+                this.contextmenu.disable();
+            }
+        },
+        _handleContextMenu: function(e) {
+            e.preventDefault();
+        },
+        getMenuItems: function(schema) {
+            // NOTE: self.feature initialized and updated by beforeopen handler
+            var self = this;
+            var items = [];
             if (schema.allowLocate) {
-                this.contextmenu.push({
+                items.push({
                     text: Mapbender.trans('mb.digitizer.feature.zoomTo'),
                     callback: function () {
-                        schema.zoomToFeature(feature);
+                        schema.zoomToFeature(self.feature);
                     }
                 });
             }
 
             if (schema.allowEditData) {
-                this.contextmenu.push({
+                items.push({
                     text: Mapbender.trans('mb.digitizer.feature.edit'),
                     callback: function () {
-                        schema.openFeatureEditDialog(feature);
+                        schema.openFeatureEditDialog(self.feature);
                     }
                 });
             }
 
             if (schema.allowDelete) {
-                this.contextmenu.push({
+                items.push({
                     text: Mapbender.trans('mb.digitizer.feature.remove.title'),
                     callback: function () {
-                        schema.removeFeature(feature);
+                        schema.removeFeature(self.feature);
                     }
                 });
             }
+            return items;
         }
     });
 
