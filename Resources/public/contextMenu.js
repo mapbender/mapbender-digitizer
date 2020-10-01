@@ -27,19 +27,17 @@
          */
         registerEvents: function(olMap) {
             var self = this;
-            olMap.getViewPort().addEventListener('contextmenu', function (e) {
+            olMap.getViewport().addEventListener('contextmenu', function (e) {
                 self._handleContextMenu(e);
             });
         },
         _handleContextMenu: function(e) {
-            var schema = this.widget.getCurrentSchema();
+            var schema = this.widget._getCurrentSchema();
             e.preventDefault();
 
             this.contextmenu.clear();
 
-            // @todo: figure out if this works. The result here is likely a list of features (plural),
-            //        but following logic treats it as a single feature
-            var feature = widget.map.forEachFeatureAtPixel(widget.map.getEventPixel(e),
+            var feature = this.olMap.forEachFeatureAtPixel(this.olMap.getEventPixel(e),
                 function (feature, layer) {
                     return feature;
                 }
