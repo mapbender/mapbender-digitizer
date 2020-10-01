@@ -1,10 +1,5 @@
 
 .mb-element-digitizer {
-    .schema-toolset {
-        .btn-group + .btn-group {
-            margin-left: 0.5em;
-        }
-    }
     // Defeat highly specific table row background color rule on feature hover
     // See Mapbender/CoreBundle/Resources/public/sass/modules/_result_table.scss
     .mapbender-element-result-table {

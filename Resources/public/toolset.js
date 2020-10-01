@@ -86,6 +86,25 @@
             modifyFeature: "icon-modify-feature",
             moveFeature: "icon-move-feature"
         },
+        /**
+         * @param {Object} schema
+         * @param {Array<Element>} [dmToolset] for reintegration (data-manager's entire tool set is a few [optional] buttons)
+         */
+        renderButtons: function(schema, dmToolset) {
+            var $groupWrapper = $(document.createElement('div'))
+                // @see https://getbootstrap.com/docs/3.4/components/#btn-groups-toolbar
+                .addClass('btn-toolbar')
+            ;
+            var utilityButtons = _.union(this.extractDmButtons_(dmToolset || []), this.renderUtilityButtons(schema));
+            if (utilityButtons.length) {
+                $groupWrapper.append(this.renderButtonGroup_(utilityButtons));
+            }
+            var geometryButtons = this.renderGeometryToolButtons(schema);
+            if (geometryButtons.length) {
+                $groupWrapper.append(this.renderButtonGroup_(geometryButtons));
+            }
+            return $groupWrapper.get(0);
+        },
         getGeometryToolConfigs: function(schema) {
             if (schema.allowDigitize) {
                 var geomType = schema.featureType.geomType;
@@ -187,7 +206,7 @@
             $label.text(title);
             $label.prepend($checkbox);
             $div.append($label);
-            return [$div];
+            return $div;
         },
         changeCurrentExtentSearch_: function(currentExtentSearch) {
             var widget = this.owner;
@@ -200,9 +219,29 @@
                 }
                 this.resultTable.redraw(features);  // @todo: resolve custom vis-ui dependency
             }
+        },
+        renderButtonGroup_: function(contents) {
+            var $group = $(document.createElement('div'))
+                // @see https://getbootstrap.com/docs/3.4/components/#btn-groups
+                .addClass('btn-group')
+            ;
+            $group.append(contents);
+            return $group.get(0);
+        },
+        /**
+         * @param {Array<Element>} dmToolset
+         * @private
+         * @return {Array<Element>}
+         */
+        extractDmButtons_: function(dmToolset) {
+            var $buttons = $('button,.btn,.button', $(dmToolset));
+            // Prevent top-level item creation
+            // Unlinke DataManager, all item creation happens with a drawing tool,
+            // and doesn't work when using pure form entry
+            $buttons = $buttons.not('.-fn-create-item');
+            return $buttons.get();
         }
     };
-
 
     Object.assign(Mapbender.Digitizer.FeatureEditor.prototype, {
         getDrawingTool: function(type, schema) {
