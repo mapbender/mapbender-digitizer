@@ -254,12 +254,7 @@
             // inflect via inherited data-manager widget method
             var schema = this;
             var widget = schema.widget;
-            var $dialog = widget._openEditDialog(schema, feature);
-            // Fake previous internal structure of FeatureEditDialog class
-            // @todo: resolve popup access errors in renderer event registration, then unroll this hack
-            return {
-                '$popup': $dialog
-            };
+            widget._openEditDialog(schema, feature);
         }
     });
 
