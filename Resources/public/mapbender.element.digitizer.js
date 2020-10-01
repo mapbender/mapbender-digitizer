@@ -166,10 +166,34 @@
             return nodes;
         },
         _getEditDialogButtons: function(schema, feature) {
-            var dialogImplementation = schema.getFeatureEditDialogHandler(feature, schema);
-            var ownButtons = dialogImplementation.getButtonConfiguration(feature, schema);
-            var upstreamButtons = this._super(schema, feature);
-            return _.union(ownButtons, upstreamButtons);
+            var buttons = [];
+            if (schema.copy && schema.copy.enable) {
+                buttons.push({
+                    text: Mapbender.trans('mb.digitizer.feature.clone.title'),
+                    click: function() {
+                        schema.copyFeature(feature);
+                    }
+                });
+            }
+            if (schema.allowCustomStyle) {
+                buttons.push({
+                    text: Mapbender.trans('mb.digitizer.feature.style.change'),
+                    click: function() {
+                        schema.openChangeStyleDialog(feature);
+                    }
+                });
+            }
+            if (schema.printable && this.printClient) {
+                var printClient = this.printClient;
+                buttons.push({
+                    text: Mapbender.trans('mb.digitizer.feature.print'),
+                    click: function() {
+                        printClient.printDigitizerFeature(feature, schema);
+                    }
+                });
+            }
+            buttons.push.apply(buttons, this._super(schema, feature));
+            return buttons;
         },
         _getItemData: function(schema, feature) {
             // NOTE: 'data' property may not exist if feature has just been newly created by an editing tool

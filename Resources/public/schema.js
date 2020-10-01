@@ -246,9 +246,6 @@
     });
 
     Object.assign(Mapbender.Digitizer.Scheme.prototype, {
-        getFeatureEditDialogHandler: function(feature, schema) {
-            return Mapbender.Digitizer.FeatureEditDialog;
-        },
         // @todo: drop this method after changing invocations to widget._openEditDialog
         openFeatureEditDialog: function (feature) {
             // inflect via inherited data-manager widget method
