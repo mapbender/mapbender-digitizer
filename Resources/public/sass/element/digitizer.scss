@@ -18,6 +18,15 @@
     button[disabled] {
         opacity: 0.75;
     }
+
+    .schema-toolset {
+        .btn-group-sm .btn, .btn-sm {
+            // HACK: reduce horizontal .btn-sm padding to prevent long btn-groups (many tools) from
+            //       wrapping in (legacy default) 350px Mapbender sidepane width
+            // Bootstrap standard rule is padding: 5px 10px
+            padding: 5px 5px;
+        }
+    }
 }
 
 .colorpicker-saturation {
