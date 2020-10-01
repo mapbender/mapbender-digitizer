@@ -289,12 +289,11 @@
             var formData = {};
             formData[schema.featureType.styleField] = JSON.stringify(styleData);
             // TODO enable defered saving
-            schema.saveFeature(feature,formData);
+            // @todo: decouple from feature saving; use a distinct url to save the style
+            schema.widget._saveItem(schema, undefined, feature, formData);
             featureStyleEditor.close();
 
-        },
-
-
+        }
     };
 
 })();

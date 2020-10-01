@@ -152,6 +152,7 @@
          */
         renderUtilityButtons: function(schema) {
             var buttons = [];
+            var widget = this.owner;
             var $button;
 
             if (schema.allowChangeVisibility) {
@@ -184,7 +185,7 @@
                     schema.layer.getSource().getFeatures().filter(function (feature) {
                         return (["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState")));
                     }).forEach(function (feature) {
-                        schema.saveFeature(feature);
+                        widget._saveItem(schema, undefined, feature);
                     });
                 });
                 buttons.push($button);

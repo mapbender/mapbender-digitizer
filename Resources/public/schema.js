@@ -424,14 +424,4 @@
         layer.getSource().dispatchEvent({type: 'controlFactory.FeatureCopied', feature: newFeature});
 
     };
-
-
-    Mapbender.Digitizer.Scheme.prototype.saveFeature = function (feature, formData) {
-        var schema = this;
-        var widget = schema.widget;
-        var id = (feature.get('data') || {})[schema.featureType.uniqueId];
-        widget._saveItem(schema, id, feature);
-    };
-
-
 })();

@@ -144,7 +144,7 @@
                 event.stopPropagation();
                 var data = $(this).closest('tr').data();
                 if (data.schema && data.item) {
-                    data.schema.saveFeature(data.item);
+                    self.owner._saveItem(data.schema, undefined, data.item);
                 }
             });
             $table.on('click', 'tbody > tr .-fn-toggle-visibility', function(event) {
