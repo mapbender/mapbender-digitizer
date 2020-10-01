@@ -60,15 +60,6 @@
             // NOTE: self.feature initialized and updated by beforeopen handler
             var self = this;
             var items = [];
-            if (schema.allowLocate) {
-                items.push({
-                    text: Mapbender.trans('mb.digitizer.feature.zoomTo'),
-                    callback: function () {
-                        schema.zoomToFeature(self.feature);
-                    }
-                });
-            }
-
             if (schema.allowEditData) {
                 items.push({
                     text: Mapbender.trans('mb.digitizer.feature.edit'),
