@@ -58,8 +58,6 @@
             style: null
         };
 
-        schema.useContextMenu = options.useContextMenu || false;
-
         // Deactivated schema.printable = options.printable || false;
 
         schema.allowChangeVisibility = options.allowChangeVisibility || false;

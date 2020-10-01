@@ -140,7 +140,7 @@
             }
             schema.renderer.highlightControl.setActive(state);
             schema.renderer.selectControl.setActive(state);
-            if (state && schema.useContextMenu) {
+            if (state) {
                 this.contextMenu.enable();
             } else {
                 this.contextMenu.disable();
