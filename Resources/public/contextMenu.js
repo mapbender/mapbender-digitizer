@@ -51,11 +51,9 @@
             this.contextmenu.clear();
 
             var feature = this.feature; // initialized by beforeopen handler
-            var contextmenu = this.contextmenu; // @todo: disambiguate
 
-            var subitems = [];
             if (schema.allowLocate) {
-                subitems.push({
+                this.contextmenu.push({
                     text: Mapbender.trans('mb.digitizer.feature.zoomTo'),
                     callback: function () {
                         schema.zoomToFeature(feature);
@@ -64,7 +62,7 @@
             }
 
             if (schema.allowEditData) {
-                subitems.push({
+                this.contextmenu.push({
                     text: Mapbender.trans('mb.digitizer.feature.edit'),
                     callback: function () {
                         schema.openFeatureEditDialog(feature);
@@ -73,17 +71,13 @@
             }
 
             if (schema.allowDelete) {
-                subitems.push({
+                this.contextmenu.push({
                     text: Mapbender.trans('mb.digitizer.feature.remove.title'),
                     callback: function () {
                         schema.removeFeature(feature);
                     }
                 });
             }
-            contextmenu.push({
-                text: "Feature #" + (feature.getId() || ''),
-                items: subitems
-            });
         }
     });
 
