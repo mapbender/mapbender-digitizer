@@ -70,12 +70,10 @@
     Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
         var buttons = [];
 
-        if (schema.allowLocate) {
-            buttons.push({
-                title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
-                cssClass: 'fa fas fa-crosshairs -fn-zoom-to-feature'
-            });
-        }
+        buttons.push({
+            title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
+            cssClass: 'fa fas fa-crosshairs -fn-zoom-to-feature'
+        });
 
         if (schema.allowEditData && schema.allowSaveInResultTable) {
             buttons.push({

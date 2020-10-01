@@ -64,8 +64,6 @@
 
         schema.allowDeleteByCancelNewGeometry = options.allowDeleteByCancelNewGeometry || false;
 
-        schema.allowLocate = options.allowLocate || false;
-
         // Deactivated schema.maxResults = options.maxResults || 5000;
         // only in custom bundles - allowPrintMetadata
         // mailManager
