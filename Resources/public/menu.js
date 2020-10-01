@@ -93,10 +93,7 @@
         if (schema.allowCustomStyle) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.style.change'),
-                cssClass: 'fa fas fa-eyedropper fa-eye-dropper',  // NOTE: fas and fa-eye-dropper for FA5+; fa-eyedropper for FA4
-                onClick: function (feature, ui) {
-                    schema.openChangeStyleDialog(feature);
-                }
+                cssClass: '-fn-edit-style fa fas fa-eyedropper fa-eye-dropper'  // NOTE: fas and fa-eye-dropper for FA5+; fa-eyedropper for FA4
             });
         }
 
@@ -164,6 +161,12 @@
                 event.stopPropagation();
                 var feature = $(this).closest('tr').data().item;
                 schema.zoomToFeature(feature);
+            });
+            $table.on('click', 'tbody > tr .-fn-edit-style', function(event) {
+                var data = $(this).closest('tr').data();
+                if (data.schema && data.item) {
+                    self.owner.openStyleEditor(data.schema, data.item);
+                }
             });
             $table.on('click', 'tbody > tr .-fn-copy', function(event) {
                 // Avoid calling row click handlers (may already try to zoom to feature, or open the edit dialog, depending on schema config)

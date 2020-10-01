@@ -435,17 +435,6 @@
 
     };
 
-    Mapbender.Digitizer.Scheme.prototype.openChangeStyleDialog = function (feature) {
-        var schema = this;
-
-        var styleOptions = {
-            data: feature.get("basicStyle") || schema.basicStyles.default,
-        };
-
-        var styleEditor = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, styleOptions);
-    };
-
-
     Mapbender.Digitizer.Scheme.prototype.saveFeature = function (feature, formData) {
         var schema = this;
         var widget = schema.widget;

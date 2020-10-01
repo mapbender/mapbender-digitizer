@@ -167,6 +167,7 @@
             return nodes;
         },
         _getEditDialogButtons: function(schema, feature) {
+            var self = this;
             var buttons = [];
             if (schema.copy && schema.copy.enable) {
                 buttons.push({
@@ -180,7 +181,7 @@
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.style.change'),
                     click: function() {
-                        schema.openChangeStyleDialog(feature);
+                        self.openStyleEditor(schema, feature);
                     }
                 });
             }
@@ -278,6 +279,11 @@
         // Support method for custom Scheme class
         getProjectionCode: function() {
             return this.mbMap.getModel().getCurrentProjectionCode();
+        },
+        openStyleEditor: function(schema, feature) {
+            var styleConfig = feature.get('basicStyle') || schema.renderer.basicStyles.default;
+            // @todo: no stuff happening in constructor
+            !(new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, {data: styleConfig}));
         },
         __formatting_dummy: null
     });
