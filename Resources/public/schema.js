@@ -334,36 +334,28 @@
         var schema = this;
         var layer = schema.renderer.getLayer();
         var newFeature = feature.clone();
-
-        var defaultAttributes = schema.copy.data || {};
-
-        var newAttributes = _.extend({}, defaultAttributes);
-
-        $.each(feature.getProperties().data, function (key, value) {
-            if (key === schema.featureType.uniqueId || value === '' || value === null) {
-                return;
-            }
-            if (schema.copy.overwriteValuesWithDefault) {
-                newAttributes[key] = newAttributes[key] || value; // Keep default value when existing
-            } else {
-                newAttributes[key] = value;
-            }
-
-
-        });
-
-        newFeature.set("data", newAttributes);
+        var copyDefaults = schema.copy.data || {};
+        var newAttributes = {};
+        if (schema.copy.overwriteValuesWithDefault) {
+            Object.assign(newAttributes, feature.get('data'), copyDefaults);
+        } else {
+            Object.assign(newAttributes, copyDefaults, feature.get('data'));
+        }
+        // clear id
+        newAttributes[schema.featureType.uniqueId] = null;
+        // @todo: Detect the first text-type attribute and prefix it with "Copy of"
+        //        Digitizer has no direct knowledge of data columns and types
+        //        All we have are table column and form item configuration
+        newFeature.set('data', newAttributes);
 
         // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
         if (schema.copy.moveCopy) {
             newFeature.getGeometry().translate(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
         }
-        layer.getSource().addFeature(newFeature);
+        schema.renderer.getLayer().getSource().addFeature(newFeature);
         newFeature.set('dirty', true);
         newFeature.set("modificationState", "isNew");
 
-        // Watch out - Name "Copy of ..." is not instantly stored
-        // Control Factory namespace can be misleading and is used for congruence onl<
         layer.getSource().dispatchEvent({type: 'controlFactory.FeatureAdded', feature: newFeature});
 
     };
