@@ -153,28 +153,38 @@
                 }
             });
         },
-        updateFeatureStyle: function(schema, feature) {
-            var style;
-            if (feature.get("hidden")) {
-                style = this.styles.invisible;
-            } else if (feature.get("selected")) {
-                style = this.styles.select;
-            } else if (feature.get("modificationState")) {
-                switch (feature.get("modificationState")) {
-                    case "isChanged" :
-                    case "isNew" :
-                        style = this.styles.unsaved;
-                        break;
-                }
-            } else {
-                // NOTE: "style" value only set by feature style editor (disabled?; see customStyleFeature_)
-                style = feature.get("style") || this.styles.default
+        setRenderIntent: function(feature, intent) {
+            // @todo: drop monkey-patching of setStyle = setStyleWithLabel
+            feature.setStyle(this.getStyleForIntent_(feature, intent));
+        },
+        getStyleForIntent_: function(feature, intent) {
+            // @todo: turn this into a style function on the layer, so it will work without events
+            var intent_ = intent;
+            if (!this.styles[intent]) {
+                console.warn("Unknown render intent " + intent + ", using default");
+                intent_ = 'default';
             }
-
+            var style;
+            if (intent_ === 'default') {
+                // NOTE: "style" value only set by feature style editor (disabled?; see customStyleFeature_)
+                style = feature.get('style');
+            }
+            return style || this.styles[intent_];
+        },
+        updateFeatureStyle: function(schema, feature) {
             // See selectableModify interaction (ol4 extensions)
             // @todo: selectableModify should deal with pausing style updates itself
-            if (!feature.get("featureStyleDisabled")) {
-                feature.setStyle(style);
+            if (feature.get("featureStyleDisabled")) {
+                return;
+            }
+            if (feature.get("hidden")) {
+                this.setRenderIntent(feature, 'invisible');
+            } else if (feature.get("selected")) {
+                this.setRenderIntent(feature, 'select');
+            } else if (feature.get("modificationState")) {
+                this.setRenderIntent(feature, 'unsaved');
+            } else {
+                this.setRenderIntent(feature, 'default');
             }
         }
     });
