@@ -18,58 +18,34 @@
     };
 
     Mapbender.Digitizer.DigitizingControlFactory.prototype = {
-
-
-        addDrawEndEventListener_: function(interaction,source) {
-            interaction.on(ol.interaction.DrawEventType.DRAWEND,function(event) {
-                var feature = event.feature;
-                feature.set("modificationState", "isNew");
-                feature.set('dirty', true);
-                source.dispatchEvent({ type: 'controlFactory.FeatureAdded', feature: feature});
-            });
-        },
-
         drawPoint: function (source) {
-            var controlFactory = this;
             var interaction = new ol.interaction.Draw({
                source: source,
-                type: "Point",
+                type: "Point"
             });
-
-            controlFactory.addDrawEndEventListener_(interaction,source);
-
             return interaction;
         },
 
 
         drawLine: function (source) {
-            var controlFactory = this;
             var interaction =  new ol.interaction.Draw({
                 source: source,
-                type: "LineString",
+                type: "LineString"
             });
-
-            controlFactory.addDrawEndEventListener_(interaction,source);
-
             return interaction;
         },
 
 
         drawPolygon: function (source) {
-            var controlFactory = this;
             var interaction =  new ol.interaction.Draw({
                 source: source,
-                type: 'Polygon',
+                type: 'Polygon'
             });
-
-            controlFactory.addDrawEndEventListener_(interaction,source);
-
             return interaction;
         },
 
 
         drawRectangle: function (source) {
-            var controlFactory = this;
             var interaction = new ol.interaction.Draw({
                 source: source,
                 type: 'Circle',
@@ -77,14 +53,10 @@
                 freehand: true
 
             });
-
-            controlFactory.addDrawEndEventListener_(interaction,source);
-
             return interaction;
         },
 
         drawCircle: function (source) {
-            var controlFactory = this;
             var interaction =  new ol.interaction.Draw({
                 source: source,
                 type: 'Circle',
@@ -113,13 +85,10 @@
                 freehand: true
             });
 
-            controlFactory.addDrawEndEventListener_(interaction,source);
-
             return interaction;
         },
 
         drawEllipse: function (source) {
-            var controlFactory = this;
             var interaction =  new ol.interaction.Draw({
                 source: source,
                 type: 'Circle',
@@ -141,9 +110,6 @@
                 },
                 freehand: true
             });
-
-            controlFactory.addDrawEndEventListener_(interaction,source);
-
             return interaction;
         },
 

@@ -309,7 +309,7 @@
             newFeature.set('dirty', true);
             newFeature.set("modificationState", "isNew");
 
-            layer.getSource().dispatchEvent({type: 'controlFactory.FeatureAdded', feature: newFeature});
+            this._openEditDialog(schema, newFeature);
         },
         // Support method for custom Scheme class
         getProjectionCode: function() {

@@ -91,12 +91,6 @@
             renderer.initializeFeature(schema, feature);
             renderer.registerFeatureEvents(schema, feature);
         });
-        this.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
-            // @todo: this is no longer rendering specific and this class should not listen to this event at all
-            // @todo: Renderer should know about the widget
-            schema.widget._openEditDialog(schema, event.feature);
-        });
-
         $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
             renderer.onFeatureUpdatedOnServer(renderer.schema);
         });

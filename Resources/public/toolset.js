@@ -235,7 +235,15 @@
                 this.tools_[schema.schemaName] = {};
             }
             if (!this.tools_[schema.schemaName][type]) {
-                this.tools_[schema.schemaName][type] = this.createDrawingTool(type, schema);
+                var newInteraction = this.createDrawingTool(type, schema);
+                this.tools_[schema.schemaName][type] = newInteraction;
+                newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
+                    var feature = event.feature;
+                    feature.set("modificationState", "isNew");
+                    feature.set('dirty', true);
+                    // @todo: do not rely on schema.widget property; editor should know its owner
+                    schema.widget._openEditDialog(schema, event.feature);
+                });
             }
             return this.tools_[schema.schemaName][type];
         },
