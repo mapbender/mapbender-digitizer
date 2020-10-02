@@ -101,8 +101,6 @@
         schema.openDialogOnResultTableClick = options.openDialogOnResultTableClick || false;
 
         schema.zoomOnResultTableClick = options.zoomOnResultTableClick || true;
-
-        schema.menu = schema.createMenu(schema);
     };
 
     Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(olMap, schema) {
@@ -371,16 +369,6 @@
         }
         selectControl.setActive(false);
         return selectControl;
-    };
-
-    Mapbender.Digitizer.Scheme.prototype.getGeomType = function () {
-        var schema = this;
-        return schema.featureType.geomType;
-    };
-
-    Mapbender.Digitizer.Scheme.prototype.createMenu = function() {
-        var schema = this;
-        return new Mapbender.Digitizer.Menu(schema);
     };
 
     Mapbender.Digitizer.Scheme.prototype.copyFeature = function (feature) {
