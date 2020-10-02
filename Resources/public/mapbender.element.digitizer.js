@@ -251,8 +251,7 @@
             this._super(schema, feature);
             // NOTE: this also detects cloned features (via new copy functionality) as new
             var isNew = !this._getUniqueItemId(schema, feature);
-            // @todo: why should this be configurable?
-            if (isNew /** && schema.allowDeleteByCancelNewGeometry */) {
+            if (isNew) {
                 schema.renderer.getLayer().getSource().removeFeature(feature);
             }
             // @todo: document new schema config value

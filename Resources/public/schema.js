@@ -58,8 +58,6 @@
 
         schema.allowChangeVisibility = options.allowChangeVisibility || false;
 
-        schema.allowDeleteByCancelNewGeometry = options.allowDeleteByCancelNewGeometry || false;
-
         // Deactivated schema.maxResults = options.maxResults || 5000;
         // only in custom bundles - allowPrintMetadata
         // mailManager
