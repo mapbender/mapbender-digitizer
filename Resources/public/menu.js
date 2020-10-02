@@ -66,7 +66,8 @@
     Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
         var buttons = [];
 
-        if (schema.allowEditData && schema.allowSaveInResultTable) {
+        // This save button is the only direct way to save modified geometries
+        if (schema.allowDigitize) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.save.title'),
                 cssClass: '-fn-save fa fas fa-save'

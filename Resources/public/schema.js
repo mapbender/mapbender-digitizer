@@ -23,7 +23,6 @@
         schema.tableFields = options.tableFields;
         schema.formItems = options.formItems || {};
         schema.allowEditData = options.allowEditData || (typeof options.allowEditData === 'undefined');  //default true
-        schema.allowSave = options.allowSave || false;
         schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
         schema.allowDelete = options.allowDelete || (typeof options.allowDelete === 'undefined');  //default true;
         schema.inlineSearch = options.inlineSearch || true;
@@ -39,8 +38,6 @@
         schema.allowCustomStyle = options.allowCustomStyle || false;
 
         schema.allowDigitize = options.allowDigitize || (typeof options.allowEditData === 'undefined');  // default true
-
-        schema.allowSaveInResultTable = options.allowSaveInResultTable || false;
 
         schema.copy = options.copy || {
             enable: false,
@@ -66,8 +63,6 @@
 
         /** New properties **/
         schema.revertChangedGeometryOnCancel = options.revertChangedGeometryOnCancel || false;
-
-        schema.allowSaveAll = options.allowSaveAll || false;
 
         schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
     };

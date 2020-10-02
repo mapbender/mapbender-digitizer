@@ -161,7 +161,8 @@
                 });
                 buttons.push($button);
             }
-            if (schema.allowSaveAll) {
+            // If geometry modification is allowed, we must offer a way to save
+            if (schema.allowDigitize) {
                 $button = $("<button class='button' type='button'/>");
                 $button.append('<i class="fa fas fa-save">');
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.saveAll'));
