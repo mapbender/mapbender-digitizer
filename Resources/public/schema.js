@@ -113,11 +113,6 @@
             renderer.initializeFeature(schema, feature);
             renderer.registerFeatureEvents(schema, feature);
         });
-        this.layer.getSource().on(['controlFactory.FeatureMoved', 'controlFactory.FeatureModified'], function (event) {
-            var feature = event.feature || event.features.item(0);
-            renderer.onFeatureModified(renderer.schema, feature);
-        });
-
         this.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
             // @todo: this is no longer rendering specific and this class should not listen to this event at all
             // @todo: Renderer should know about the widget
@@ -190,10 +185,6 @@
     });
 
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
-        onFeatureModified: function(schema, feature) {
-            feature.set("modificationState", "isChanged");
-            feature.set('dirty', true);
-        },
         onFeatureUpdatedOnServer: function(schema) {
             if (schema.refreshLayersAfterFeatureSave) {
                 $.each(schema.refreshLayersAfterFeatureSave, function (k1, layerInstanceId) {

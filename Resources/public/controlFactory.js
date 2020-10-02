@@ -178,6 +178,8 @@
 
 
             interaction.on(ol.interaction.DrawDonutEventType.DRAWDONUTEND,function(event) {
+                event.feature.set("modificationState", "isChanged");
+                event.feature.set('dirty', true);
                 source.dispatchEvent({ type: 'controlFactory.FeatureModified', feature: event.feature});
             });
 
@@ -192,7 +194,14 @@
             interaction.setActive = controlFactory.createActivator_(interaction);
 
             interaction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
-                source.dispatchEvent({ type: 'controlFactory.FeatureModified', features: interaction.getFeatures() });
+                // HACK: access modified feature via private interaction property
+                var feature = event.target.vertexFeature_;
+                feature.set("modificationState", "isChanged");
+                feature.set('dirty', true);
+                source.dispatchEvent({
+                    type: 'controlFactory.FeatureModified',
+                    features: new ol.Collection([feature])
+                });
             });
 
             return interaction;
@@ -210,7 +219,8 @@
             interaction.on(ol.interaction.TranslateEventType.TRANSLATEEND,function(event) {
                 var features = event.features;
                 features.forEach(function(feature) {
-                    source.dispatchEvent({ type: 'controlFactory.FeatureMoved', feature: feature});
+                    feature.set("modificationState", "isChanged");
+                    feature.set('dirty', true);
                 });
 
             });
