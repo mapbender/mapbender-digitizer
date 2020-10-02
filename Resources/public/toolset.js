@@ -48,6 +48,10 @@
             }
             this.activeInteraction = state && tool || null;
             tool.setActive(!!state);
+            // Disable select control (click on feature to open editor) while drawing
+            // NOTE: hover highlighting remains active
+            // @todo: provide access to select control without expecting monkey-patched schema property
+            schema.renderer.selectControl.setActive(!state);
         },
         registerSchemaEvents: function(schema) {
             var editor = this;
@@ -257,12 +261,6 @@
                 return;
             }
             interaction.setActive(false);
-            // @todo: replace event triggered on interaction with simple method call to toggle selectControl
-            //        on renderer
-            interaction.on('controlFactory.Activation', function (event) {
-                schema.renderer.selectControl.setActive(!event.active);
-            });
-
             schema.widget.mbMap.getModel().olMap.addInteraction(interaction);
             return interaction;
         }

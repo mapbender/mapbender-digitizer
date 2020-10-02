@@ -29,15 +29,6 @@
             });
         },
 
-        createActivator_: function(interaction) {
-            var setActiveOriginal = interaction.setActive;
-
-            return function(active) {
-                setActiveOriginal.apply(this, arguments);
-                interaction.dispatchEvent({ type: 'controlFactory.Activation', active: active});
-            };
-        },
-
         drawPoint: function (source) {
             var controlFactory = this;
             var interaction = new ol.interaction.Draw({
@@ -45,7 +36,6 @@
                 type: "Point",
             });
 
-            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -59,7 +49,6 @@
                 type: "LineString",
             });
 
-            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -73,7 +62,6 @@
                 type: 'Polygon',
             });
 
-            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -90,7 +78,6 @@
 
             });
 
-            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -126,7 +113,6 @@
                 freehand: true
             });
 
-            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
@@ -156,24 +142,16 @@
                 freehand: true
             });
 
-            interaction.setActive = controlFactory.createActivator_(interaction);
             controlFactory.addDrawEndEventListener_(interaction,source);
 
             return interaction;
         },
 
         drawDonut: function (source) {
-            var controlFactory = this;
-
             var interaction = new ol.interaction.DrawDonut({
                 source: source,
-                type: 'Polygon',
-
+                type: 'Polygon'
             });
-
-
-            interaction.setActive = controlFactory.createActivator_(interaction);
-
 
             interaction.on(ol.interaction.DrawDonutEventType.DRAWDONUTEND,function(event) {
                 event.feature.set("modificationState", "isChanged");
@@ -185,11 +163,8 @@
         },
 
         modifyFeature: function (source) {
-            var controlFactory = this;
-
             var interaction = new ol.interaction.SelectableModify({
             });
-            interaction.setActive = controlFactory.createActivator_(interaction);
 
             interaction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
                 // HACK: access modified feature via private interaction property
@@ -207,13 +182,10 @@
         },
 
         moveFeature: function (source) {
-            var controlFactory = this;
-
             var interaction = new ol.interaction.Translate({
                 source: source
             });
 
-            interaction.setActive = controlFactory.createActivator_(interaction);
             interaction.on(ol.interaction.TranslateEventType.TRANSLATEEND,function(event) {
                 var features = event.features;
                 features.forEach(function(feature) {
