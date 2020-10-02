@@ -43,8 +43,6 @@
 
         schema.openFormAfterEdit = options.openFormAfterEdit || (typeof options.openFormAfterEdit === 'undefined');  // default true
 
-        schema.openFormAfterModification = options.openFormAfterModification || false;
-
         schema.allowCustomStyle = options.allowCustomStyle || false;
 
         schema.allowDigitize = options.allowDigitize || (typeof options.allowEditData === 'undefined');  // default true
@@ -203,10 +201,6 @@
         onFeatureModified: function(schema, feature) {
             feature.set("modificationState", "isChanged");
             feature.set('dirty', true);
-
-            if (schema.openFormAfterModification) {
-                schema.openFeatureEditDialog(feature);
-            }
         },
         onFeatureAdded: function(schema, feature) {
             this.updateFeatureStyle(schema, feature);
