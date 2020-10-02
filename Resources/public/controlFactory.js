@@ -22,8 +22,6 @@
 
         addDrawEndEventListener_: function(interaction,source) {
             interaction.on(ol.interaction.DrawEventType.DRAWEND,function(event) {
-                // @todo: button sync? activeInteraction sync?
-                event.target.setActive(false);
                 var feature = event.feature;
                 feature.set("modificationState", "isNew");
                 feature.set('dirty', true);

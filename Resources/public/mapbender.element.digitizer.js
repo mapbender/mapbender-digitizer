@@ -169,6 +169,13 @@
             nodes.push(this.toolsetRenderer.renderButtons(schema, dmToolset));
             return nodes;
         },
+        _openEditDialog: function(schema, dataItem) {
+            var dialog = this._super(schema, dataItem);
+            if (schema.geometryEditor) {
+                schema.geometryEditor.pause();
+            }
+            return dialog;
+        },
         _getEditDialogButtons: function(schema, feature) {
             var self = this;
             var buttons = [];
@@ -222,14 +229,6 @@
             renderer.initializeFeature(schema, feature);
             return feature;
         },
-        _saveItem: function(schema, id, feature, newValues) {
-            $(schema).trigger({type: "Digitizer.StartFeatureSave", feature: feature });
-            return this._super(schema, id, feature, newValues)
-                .always(function() {
-                    $(schema).trigger({type: "Digitizer.EndFeatureSave"})   // why?
-                })
-            ;
-        },
         _afterSave: function(schema, feature, originalId, responseData) {
             // unravel dm-incompatible response format
             // @todo: should we or should we not replace feature geometry?
@@ -241,6 +240,9 @@
             });
             feature.set('dirty', false);
             feature.set("modificationState", undefined);
+            if (schema.geometryEditor) {
+                schema.geometryEditor.resume();
+            }
             var olMap = this.mbMap.getModel().olMap;
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
         },
@@ -266,6 +268,9 @@
                     feature.setGeometry(oldGeometry.clone());
                 }
                 feature.set('dirty', false);
+            }
+            if (schema.geometryEditor) {
+                schema.geometryEditor.resume();
             }
         },
         _replaceItemData: function(schema, feature, newValues) {

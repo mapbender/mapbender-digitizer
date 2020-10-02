@@ -59,14 +59,6 @@
                     editor.activeInteraction = null;
                 }
             });
-
-            $(schema).on("Digitizer.StartFeatureSave",function(event){
-                editor.pause();
-            });
-
-            $(schema).on("Digitizer.EndFeatureSave",function(event){
-                editor.resume();
-            });
         }
     });
 
