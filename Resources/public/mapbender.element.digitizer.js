@@ -285,7 +285,7 @@
             !(new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, {data: styleConfig}));
         },
         zoomToFeature: function(schema, feature) {
-            Mapbender.Model.zoomToFeature(feature, {minScale: schema.zoomScaleDenominator});
+            Mapbender.Model.zoomToFeature(feature);
         },
         __formatting_dummy: null
     });

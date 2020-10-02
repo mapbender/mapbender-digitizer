@@ -71,9 +71,6 @@
         //    save // deprecated - no code in config
         // hooks // deprecated - no code in config
 
-        /** TO BE Implemented **/
-        schema.zoomScaleDenominator = options.zoomScaleDenominator || 500;
-
         schema.currentExtentSearch = options.currentExtentSearch || false;
 
         schema.displayPermanent = options.displayPermanent || false;
