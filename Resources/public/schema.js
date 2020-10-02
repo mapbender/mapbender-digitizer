@@ -14,12 +14,7 @@
 
         schema.widget = widget;
 
-        schema.featureType = options.featureType || {
-            uniqueId: null,
-            geomField: null,
-            styleField: null,
-            srid: 4326
-        };
+        schema.featureType = options.featureType;
 
         schema.schemaName = options.schemaName;
 
