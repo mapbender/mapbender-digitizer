@@ -130,7 +130,8 @@
 
         this.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
             // @todo: this is no longer rendering specific and this class should not listen to this event at all
-            schema.openFeatureEditDialog(event.feature);
+            // @todo: Renderer should know about the widget
+            schema.widget._openEditDialog(schema, event.feature);
         });
 
         $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
@@ -212,19 +213,6 @@
             }
         }
     });
-
-    Object.assign(Mapbender.Digitizer.Scheme.prototype, {
-        // @todo: drop this method after changing invocations to widget._openEditDialog
-        openFeatureEditDialog: function (feature) {
-            // inflect via inherited data-manager widget method
-            var schema = this;
-            var widget = schema.widget;
-            widget._openEditDialog(schema, feature);
-        }
-    });
-
-
-
 
     Mapbender.Digitizer.Scheme.prototype.getDefaultStyles = function () {
         var styles = {
@@ -343,7 +331,8 @@
         var schema = this.schema;
         if (schema.allowEditData || this.schema.allowOpenEditDialog) {
             selectControl.on('select', function (event) {
-                schema.openFeatureEditDialog(event.selected[0]);
+                // @todo: Renderer should know about the widget
+                schema.widget._openEditDialog(schema, event.selected[0]);
                 selectControl.getFeatures().clear();
             });
         }
