@@ -41,8 +41,6 @@
 
         schema.toolset = options.toolset;
 
-        schema.openFormAfterEdit = options.openFormAfterEdit || (typeof options.openFormAfterEdit === 'undefined');  // default true
-
         schema.allowCustomStyle = options.allowCustomStyle || false;
 
         schema.allowDigitize = options.allowDigitize || (typeof options.allowEditData === 'undefined');  // default true
@@ -204,10 +202,7 @@
             this.updateFeatureStyle(schema, feature);
             feature.set("modificationState", "isNew");
             feature.set('dirty', true);
-
-            if (schema.openFormAfterEdit) {
-                schema.openFeatureEditDialog(feature);
-            }
+            schema.openFeatureEditDialog(feature);
         },
         onFeatureCopied: function(schema, feature) {
             feature.set('dirty', true);
