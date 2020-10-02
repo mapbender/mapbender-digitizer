@@ -64,7 +64,7 @@
                 items.push({
                     text: Mapbender.trans('mb.digitizer.feature.edit'),
                     callback: function () {
-                        schema.openFeatureEditDialog(self.feature);
+                        self.widget._openEditDialog(schema, self.feature);
                     }
                 });
             }
