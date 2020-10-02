@@ -24,7 +24,6 @@
         schema.schemaName = options.schemaName;
 
         schema.label = options.label;
-        schema.view = options.view = { settings: { }};
         schema.popup = options.popup || {title: schema.schemaName, width: '500px'};
         schema.tableFields = options.tableFields;
         schema.formItems = options.formItems || {};
@@ -54,20 +53,13 @@
             moveCopy: {x: 10, y: 10}
         };
 
-        // Deactivated schema.printable = options.printable || false;
+        schema.printable = options.printable || false;
 
         schema.allowChangeVisibility = options.allowChangeVisibility || false;
 
-        // Deactivated schema.maxResults = options.maxResults || 5000;
-        // only in custom bundles - allowPrintMetadata
-        // mailManager
         schema.minScale = options.minScale || undefined;
 
         schema.maxScale = options.maxScale || undefined;
-
-        //    group // not necessary
-        //    save // deprecated - no code in config
-        // hooks // deprecated - no code in config
 
         schema.currentExtentSearch = options.currentExtentSearch || false;
 
@@ -81,9 +73,6 @@
         schema.revertChangedGeometryOnCancel = options.revertChangedGeometryOnCancel || false;
 
         schema.allowSaveAll = options.allowSaveAll || false;
-
-        /** implement this **/
-        schema.showLabel = options.showLabel || false;
 
         schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
     };
