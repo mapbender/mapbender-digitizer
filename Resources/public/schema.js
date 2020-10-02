@@ -80,8 +80,6 @@
         /** New properties **/
         schema.revertChangedGeometryOnCancel = options.revertChangedGeometryOnCancel || false;
 
-        schema.deactivateControlAfterModification = options.deactivateControlAfterModification || false;
-
         schema.allowSaveAll = options.allowSaveAll || false;
 
         /** implement this **/

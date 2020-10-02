@@ -156,7 +156,6 @@
             interaction.on(ol.interaction.DrawDonutEventType.DRAWDONUTEND,function(event) {
                 event.feature.set("modificationState", "isChanged");
                 event.feature.set('dirty', true);
-                source.dispatchEvent({ type: 'controlFactory.FeatureModified', feature: event.feature});
             });
 
             return interaction;
@@ -170,10 +169,6 @@
                 var feature = event.features.item(0);
                 feature.set("modificationState", "isChanged");
                 feature.set('dirty', true);
-                source.dispatchEvent({
-                    type: 'controlFactory.FeatureModified',
-                    features: new ol.Collection([feature])
-                });
             });
 
             return interaction;

@@ -52,17 +52,6 @@
             // NOTE: hover highlighting remains active
             // @todo: provide access to select control without expecting monkey-patched schema property
             schema.renderer.selectControl.setActive(!state);
-        },
-        registerSchemaEvents: function(schema) {
-            var editor = this;
-            // @todo: should not trigger / listen on source
-            var source = schema.renderer.getLayer().getSource();
-            source.on('controlFactory.FeatureModified', function (event) {
-                if (schema.deactivateControlAfterModification) {
-                    editor.activeInteraction && editor.activeInteraction.setActive(false);
-                    editor.activeInteraction = null;
-                }
-            });
         }
     });
 
