@@ -129,11 +129,8 @@
         });
 
         this.layer.getSource().on('controlFactory.FeatureAdded', function (event) {
-            renderer.onFeatureAdded(renderer.schema, event.feature);
-        });
-
-        this.layer.getSource().on('controlFactory.FeatureCopied', function (event) {
-            renderer.onFeatureCopied(renderer.schema, event.feature);
+            // @todo: this is no longer rendering specific and this class should not listen to this event at all
+            schema.openFeatureEditDialog(event.feature);
         });
 
         $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
@@ -197,18 +194,6 @@
         onFeatureModified: function(schema, feature) {
             feature.set("modificationState", "isChanged");
             feature.set('dirty', true);
-        },
-        onFeatureAdded: function(schema, feature) {
-            this.updateFeatureStyle(schema, feature);
-            feature.set("modificationState", "isNew");
-            feature.set('dirty', true);
-            schema.openFeatureEditDialog(feature);
-        },
-        onFeatureCopied: function(schema, feature) {
-            feature.set('dirty', true);
-            feature.set("modificationState", "isCopy");
-
-            schema.openFeatureEditDialog(feature);
         },
         onFeatureUpdatedOnServer: function(schema) {
             if (schema.refreshLayersAfterFeatureSave) {
@@ -395,10 +380,12 @@
             newFeature.getGeometry().translate(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
         }
         layer.getSource().addFeature(newFeature);
+        feature.set('dirty', true);
+        feature.set("modificationState", "isCopy");
 
         // Watch out - Name "Copy of ..." is not instantly stored
         // Control Factory namespace can be misleading and is used for congruence onl<
-        layer.getSource().dispatchEvent({type: 'controlFactory.FeatureCopied', feature: newFeature});
+        layer.getSource().dispatchEvent({type: 'controlFactory.FeatureAdded', feature: newFeature});
 
     };
 })();

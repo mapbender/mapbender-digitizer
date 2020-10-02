@@ -27,8 +27,9 @@
                 // @todo: button sync? activeInteraction sync?
                 event.target.setActive(false);
                 var feature = event.feature;
+                feature.set("modificationState", "isNew");
+                feature.set('dirty', true);
                 source.dispatchEvent({ type: 'controlFactory.FeatureAdded', feature: feature});
-
             });
         },
 
