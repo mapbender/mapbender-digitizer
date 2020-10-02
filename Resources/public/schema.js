@@ -105,7 +105,8 @@
         if (schema.copy && schema.copy.style) {
             otherStyles.copy = schema.copy.style;
         }
-        this.basicStyles = Object.assign({}, schema.getDefaultStyles(), schema.styles || {}, otherStyles);
+        /** @todo: should go PHP, in getSchemaConfig; less runtime merging of stuff */
+        this.basicStyles = Object.assign({}, this.getDefaultStyles(), schema.styles || {}, otherStyles);
 
         this.styles = this.initializeStyles_(this.basicStyles); // NOTE: accessed only in event handlers currently inlined here
 
@@ -211,9 +212,9 @@
         }
     });
 
-    Mapbender.Digitizer.Scheme.prototype.getDefaultStyles = function () {
-        var styles = {
-
+    /** @todo: should go PHP, in getSchemaConfigDefaults; less runtime merging of stuff */
+    Mapbender.Digitizer.FeatureRenderer.prototype.getDefaultStyles = function () {
+        return {
             default: {
                 strokeWidth: 1,
                 strokeColor: '#6fb536',
@@ -231,7 +232,7 @@
                 strokeWidth: 5,
                 fillColor: '#f7ef7e',
                 strokeColor: '#4250b5',
-                fillOpacity: 0.7,
+                fillOpacity: 0.7
             },
             unsaved: {
                 strokeWidth: 3,
@@ -240,8 +241,6 @@
                 fillOpacity: 0.5
             }
         };
-
-        return styles;
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.getLayer = function() {
