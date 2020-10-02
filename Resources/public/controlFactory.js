@@ -167,8 +167,7 @@
             });
 
             interaction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
-                // HACK: access modified feature via private interaction property
-                var feature = event.target.vertexFeature_;
+                var feature = event.features.item(0);
                 feature.set("modificationState", "isChanged");
                 feature.set('dirty', true);
                 source.dispatchEvent({
