@@ -51,7 +51,7 @@
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
                 if (event.key === 'dirty' || event.key === 'modificationState') {
                     var length = schema.layer.getSource().getFeatures().filter(function (feature) {
-                        return ["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState"));
+                        return ["isNew", "isChanged"].includes(feature.get("modificationState"));
                     }).length;
 
                     if (length === 0) {

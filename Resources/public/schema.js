@@ -50,8 +50,7 @@
         schema.copy = options.copy || {
             enable: false,
             overwriteValuesWithDefault: false,
-            moveCopy: {x: 10, y: 10},
-            style: null
+            moveCopy: {x: 10, y: 10}
         };
 
         // Deactivated schema.printable = options.printable || false;
@@ -86,8 +85,6 @@
 
         schema.allowSaveAll = options.allowSaveAll || false;
 
-        schema.markUnsavedFeatures = options.markUnsavedFeatures || false;
-
         /** implement this **/
         schema.showLabel = options.showLabel || false;
 
@@ -101,12 +98,8 @@
     Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(olMap, schema) {
         this.schema = schema;
         this.olMap = olMap;
-        var otherStyles = {};
-        if (schema.copy && schema.copy.style) {
-            otherStyles.copy = schema.copy.style;
-        }
         /** @todo: should go PHP, in getSchemaConfig; less runtime merging of stuff */
-        this.basicStyles = Object.assign({}, this.getDefaultStyles(), schema.styles || {}, otherStyles);
+        this.basicStyles = Object.assign({}, this.getDefaultStyles(), schema.styles || {});
 
         this.styles = this.initializeStyles_(this.basicStyles); // NOTE: accessed only in event handlers currently inlined here
 
@@ -166,15 +159,12 @@
                 style = this.styles.invisible;
             } else if (feature.get("selected")) {
                 style = this.styles.select;
-            } else if (feature.get("modificationState") && schema.markUnsavedFeatures) {
+            } else if (feature.get("modificationState")) {
                 switch (feature.get("modificationState")) {
                     case "isChanged" :
                     case "isNew" :
                         style = this.styles.unsaved;
                         break;
-                    case "isCopy" :
-                        style = this.styles.copy;
-
                 }
             } else {
                 // NOTE: "style" value only set by feature style editor (disabled?; see customStyleFeature_)
@@ -227,12 +217,6 @@
                 strokeColor: '#6fb536',
                 fillOpacity: 0.5,
                 graphicZIndex: 15
-            },
-            copy: {
-                strokeWidth: 5,
-                fillColor: '#f7ef7e',
-                strokeColor: '#4250b5',
-                fillOpacity: 0.7
             },
             unsaved: {
                 strokeWidth: 3,
@@ -365,8 +349,8 @@
             newFeature.getGeometry().translate(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
         }
         layer.getSource().addFeature(newFeature);
-        feature.set('dirty', true);
-        feature.set("modificationState", "isCopy");
+        newFeature.set('dirty', true);
+        newFeature.set("modificationState", "isNew");
 
         // Watch out - Name "Copy of ..." is not instantly stored
         // Control Factory namespace can be misleading and is used for congruence onl<

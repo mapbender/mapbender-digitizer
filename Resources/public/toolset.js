@@ -183,7 +183,7 @@
                 $button.prop('disabled', true);
                 $button.click(function () {
                     schema.layer.getSource().getFeatures().filter(function (feature) {
-                        return (["isNew", "isChanged", "isCopy"].includes(feature.get("modificationState")));
+                        return (["isNew", "isChanged"].includes(feature.get("modificationState")));
                     }).forEach(function (feature) {
                         widget._saveItem(schema, undefined, feature);
                     });
