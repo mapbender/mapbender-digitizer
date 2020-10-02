@@ -84,6 +84,7 @@
                 cssClass: 'fa fas fa-copy -fn-copy'
             });
         }
+        // @todo: don't offer this button if style cannot be saved (no style field)
         if (schema.allowCustomStyle) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.style.change'),

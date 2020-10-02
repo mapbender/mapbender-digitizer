@@ -133,8 +133,9 @@
             feature.set("mbOrigin", "digitizer");
             feature.setStyle = feature.setStyleWithLabel;
             feature.setStyle(this.styles.default);
+            // @todo: don't do this if style cannot be saved (no style field)
             if (schema.allowCustomStyle) {
-                schema.customStyleFeature_(feature);
+                this.customStyleFeature_(feature);
             }
 
             feature.set("oldGeometry", feature.getGeometry().clone());

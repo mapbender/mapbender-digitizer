@@ -1,22 +1,22 @@
 (function () {
     "use strict";
 
-    Mapbender.Digitizer.FeatureStyleEditor = function (feature, schema, options) {
-
-        var editor = this;
-
-        editor.feature = feature;
-        editor.schema = schema;
-
-        var defaultOptions = {
-        };
-
-        options = $.extend(defaultOptions, options);
-
+    /**
+     * @param {*} owner jQueryUI widget, for access to _saveItem method
+     * @constructor
+     */
+    Mapbender.Digitizer.FeatureStyleEditor = function(owner) {
+        this.owner = owner;
+    };
+    /**
+     * @param {*} schema
+     * @param {*} feature
+     * @return {Element}
+     */
+    Mapbender.Digitizer.FeatureStyleEditor.prototype.renderDialogContent = function(schema, feature) {
         var geomType = feature.getGeometry().getType();
-
+        /** @todo: this is a static form, use a twig template */
         var element = $("<div/>");
-        var customColors = options.customColors;
         var fillTab = {
             title: Mapbender.trans('mb.digitizer.style.filling'),
             type: "form",
@@ -29,7 +29,6 @@
                     value: "#ff0000",
                     mandatory: "/^#{1,1}[abcdefABCDEF0-9]{6,6}$/",
                     mandatoryText: Mapbender.trans('mb.digitizer.style.chooseColorPicker'),
-                    colorSelectors: customColors,
                     css: {width: "30%"}
                 }, {
                     title: Mapbender.trans('mb.digitizer.style.opacity'),
@@ -230,7 +229,7 @@
 
         var tabs = [];
 
-        if (geomType!="LineString") {
+        if (geomType !== "LineString") {
             tabs.push(fillTab);
         }
 
@@ -241,7 +240,11 @@
             type: "tabs",
             children: tabs
         });
-
+        return element;
+    };
+    Mapbender.Digitizer.FeatureStyleEditor.prototype.openEditor = function(schema, feature, values) {
+        var element = this.renderDialogContent(schema, feature)
+        var editor = this;
         element.popupDialog({
             title: "Stylemanager",
             modal: true,
@@ -249,52 +252,39 @@
             buttons: [{
                 text: "Abbrechen",
                 click: function (e) {
-                    editor.close();
+                    element.popupDialog("close");
                     return false;
                 }
             }, {
                 text: "Speichern",
                 click: function (e) {
-                    editor.submit();
+                    editor.submit(schema, feature, element);
                 }
             }]
         });
 
         // Unfortunately, vis-ui demands it like this
         window.setTimeout(function(){
-            element.formData(options.data);
+            element.formData(values);
         },0);
-
-        editor.element = element;
-
     };
 
-    Mapbender.Digitizer.FeatureStyleEditor.prototype = {
+    Object.assign(Mapbender.Digitizer.FeatureStyleEditor.prototype, {
+        submit: function (schema, feature, element) {
+            var styleData = element.formData();
+            element.disableForm();
 
-
-        close: function () {
-            var featureStyleEditor = this;
-            featureStyleEditor.element.popupDialog("close");
-        },
-
-        submit: function () {
-            var featureStyleEditor = this;
-            var schema = featureStyleEditor.schema;
-            var feature = featureStyleEditor.feature;
-            var styleData = featureStyleEditor.element.formData();
-            featureStyleEditor.element.disableForm();
-
+            // @todo: this should certainly be checked BEFORE starting this whole editing process
             console.assert(!!schema.featureType.styleField,"Style Field in Feature Type is not specified");
 
             var formData = {};
             formData[schema.featureType.styleField] = JSON.stringify(styleData);
             // TODO enable defered saving
             // @todo: decouple from feature saving; use a distinct url to save the style
-            schema.widget._saveItem(schema, undefined, feature, formData);
-            featureStyleEditor.close();
-
+            this.owner._saveItem(schema, undefined, feature, formData);
+            element.popupDialog("close");
         }
-    };
+    });
 
 })();
 

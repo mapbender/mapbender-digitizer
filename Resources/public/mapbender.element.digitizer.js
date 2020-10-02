@@ -22,7 +22,8 @@
             this._super();
             var widget = this;
             var target = this.options.target;
-            this.toolsetRenderer = this._createToolsetRenderer(this);
+            this.toolsetRenderer = this._createToolsetRenderer();
+            this.styleEditor = this._createStyleEditor();
             Mapbender.elementRegistry.waitReady(target).then(function(mbMap) {
                 widget.mbMap = mbMap;
                 widget.setup();
@@ -37,6 +38,9 @@
         },
         _createToolsetRenderer: function() {
             return new Mapbender.Digitizer.Toolset(this);
+        },
+        _createStyleEditor: function() {
+            return new Mapbender.Digitizer.FeatureStyleEditor(this);
         },
         _afterCreate: function() {
             // Invoked only by data manager _create
@@ -176,6 +180,7 @@
                     }
                 });
             }
+            // @todo: don't offer this button if style cannot be saved (no style field)
             if (schema.allowCustomStyle) {
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.style.change'),
@@ -307,8 +312,7 @@
         },
         openStyleEditor: function(schema, feature) {
             var styleConfig = feature.get('basicStyle') || schema.renderer.basicStyles.default;
-            // @todo: no stuff happening in constructor
-            !(new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, {data: styleConfig}));
+            this.styleEditor.openEditor(schema, feature, styleConfig);
         },
         zoomToFeature: function(schema, feature) {
             Mapbender.Model.zoomToFeature(feature);
