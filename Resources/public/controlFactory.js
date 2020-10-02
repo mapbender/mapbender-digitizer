@@ -21,8 +21,6 @@
 
 
         addDrawEndEventListener_: function(interaction,source) {
-            var controlFactory = this;
-
             interaction.on(ol.interaction.DrawEventType.DRAWEND,function(event) {
                 // @todo: button sync? activeInteraction sync?
                 event.target.setActive(false);

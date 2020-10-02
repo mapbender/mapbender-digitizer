@@ -1,6 +1,7 @@
 (function () {
     "use strict";
 
+    // @todo: Move config and merging with defaults back to PHP Element (Scheme class is now a pure data object)
     /**
      *
      * @param {Object} options
@@ -328,35 +329,5 @@
         }
         selectControl.setActive(false);
         return selectControl;
-    };
-
-    Mapbender.Digitizer.Scheme.prototype.copyFeature = function (feature) {
-        var schema = this;
-        var layer = schema.renderer.getLayer();
-        var newFeature = feature.clone();
-        var copyDefaults = schema.copy.data || {};
-        var newAttributes = {};
-        if (schema.copy.overwriteValuesWithDefault) {
-            Object.assign(newAttributes, feature.get('data'), copyDefaults);
-        } else {
-            Object.assign(newAttributes, copyDefaults, feature.get('data'));
-        }
-        // clear id
-        newAttributes[schema.featureType.uniqueId] = null;
-        // @todo: Detect the first text-type attribute and prefix it with "Copy of"
-        //        Digitizer has no direct knowledge of data columns and types
-        //        All we have are table column and form item configuration
-        newFeature.set('data', newAttributes);
-
-        // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
-        if (schema.copy.moveCopy) {
-            newFeature.getGeometry().translate(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
-        }
-        schema.renderer.getLayer().getSource().addFeature(newFeature);
-        newFeature.set('dirty', true);
-        newFeature.set("modificationState", "isNew");
-
-        layer.getSource().dispatchEvent({type: 'controlFactory.FeatureAdded', feature: newFeature});
-
     };
 })();

@@ -127,7 +127,7 @@
                         widget.zoomToFeature(schema, feature);
                     }
                     if (schema.openDialogOnResultTableClick) {
-                        schema.openFeatureEditDialog(feature);
+                        widget._openEditDialog(schema, feature);
                     }
                 }
             });
@@ -168,7 +168,7 @@
                 event.stopPropagation();
                 var data = $(this).closest('tr').data();
                 if (data.schema && data.item) {
-                    data.schema.copyFeature(data.item);
+                    self.owner.cloneFeature(data.schema, data.item);
                 }
             });
         },
