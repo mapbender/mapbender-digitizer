@@ -169,8 +169,8 @@
             nodes.push(this.toolsetRenderer.renderButtons(schema, dmToolset));
             return nodes;
         },
-        _openEditDialog: function(schema, dataItem) {
-            var dialog = this._super(schema, dataItem);
+        _openEditDialog: function(schema, feature) {
+            var dialog = this._super(schema, feature);
             if (schema.geometryEditor) {
                 schema.geometryEditor.pause();
             }
