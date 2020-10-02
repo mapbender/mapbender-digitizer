@@ -88,10 +88,6 @@
         schema.showLabel = options.showLabel || false;
 
         schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
-
-        schema.openDialogOnResultTableClick = options.openDialogOnResultTableClick || false;
-
-        schema.zoomOnResultTableClick = options.zoomOnResultTableClick || true;
     };
 
     Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(olMap, schema) {

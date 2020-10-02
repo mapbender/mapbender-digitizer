@@ -66,11 +66,6 @@
     Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
         var buttons = [];
 
-        buttons.push({
-            title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
-            cssClass: 'fa fas fa-crosshairs -fn-zoom-to-feature'
-        });
-
         if (schema.allowEditData && schema.allowSaveInResultTable) {
             buttons.push({
                 title: Mapbender.trans('mb.digitizer.feature.save.title'),
@@ -124,12 +119,7 @@
                 }
                 var feature = $(this).data().item;
                 if (feature) {
-                    if (schema.zoomOnResultTableClick) {
-                        widget.zoomToFeature(schema, feature);
-                    }
-                    if (schema.openDialogOnResultTableClick) {
-                        widget._openEditDialog(schema, feature);
-                    }
+                    widget.zoomToFeature(schema, feature);
                 }
             });
             this.registerButtonEvents(schema, $table);
@@ -151,12 +141,6 @@
                 var feature = $tr.data().item;
                 feature.set('hidden', !feature.get('hidden'));
                 self.updateButtonStates_($tr.get(0), feature);
-            });
-            $table.on('click', 'tbody > tr .-fn-zoom-to-feature', function(event) {
-                // Avoid calling row click handlers (may already try to zoom to feature, or open the edit dialog, depending on schema config)
-                event.stopPropagation();
-                var feature = $(this).closest('tr').data().item;
-                self.owner.zoomToFeature(schema, feature);
             });
             $table.on('click', 'tbody > tr .-fn-edit-style', function(event) {
                 var data = $(this).closest('tr').data();
