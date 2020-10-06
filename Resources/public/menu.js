@@ -18,7 +18,7 @@
     Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable, frame) {
         var menu = this;
         var schema = menu.schema;
-        var widget = schema.widget;
+        var widget = this.owner;
         var map = widget.map;
         menu.resultTable = resultTable;
 
