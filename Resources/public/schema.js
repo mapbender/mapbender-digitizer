@@ -23,15 +23,14 @@
         schema.tableFields = options.tableFields;
         schema.formItems = options.formItems || {};
         schema.allowEditData = options.allowEditData || (typeof options.allowEditData === 'undefined');  //default true
-        schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
         schema.allowDelete = options.allowDelete || (typeof options.allowDelete === 'undefined');  //default true;
         schema.inlineSearch = options.inlineSearch || true;
         schema.pageLength = options.pageLength || 10;
         schema.inlineSearch = options.inlineSearch || false;
         schema.tableTranslation = options.tableTranslation || undefined;
 
-        // alias different config keys "allowEditData", "allowOpenEditDialog" to upstream-compatible "allowEdit"
-        schema.allowEdit = schema.allowEditData || options.allowOpenEditDialog || options.allowEdit || false;
+        // alias different config key "allowEditData" to upstream-compatible "allowEdit"
+        schema.allowEdit = schema.allowEditData || options.allowEdit || false;
 
         schema.toolset = options.toolset;
 
@@ -62,8 +61,6 @@
 
         /** New properties **/
         schema.revertChangedGeometryOnCancel = options.revertChangedGeometryOnCancel || false;
-
-        schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
     };
 
     /**
@@ -326,7 +323,7 @@
         });
 
         var schema = this.schema;
-        if (schema.allowEditData || this.schema.allowOpenEditDialog) {
+        if (schema.allowEditData) {
             var widget = this.owner;
             selectControl.on('select', function (event) {
                 // @todo: Renderer should know about the widget
