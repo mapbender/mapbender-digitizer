@@ -180,8 +180,9 @@
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
         onFeatureUpdatedOnServer: function(schema) {
             if (schema.refreshLayersAfterFeatureSave) {
-                $.each(schema.refreshLayersAfterFeatureSave, function (k1, layerInstanceId) {
-                    var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
+                $.each(schema.refreshLayersAfterFeatureSave, function (k1, instanceId) {
+                    var source = Mapbender.Model.getSourceById(instanceId);
+                    var layers = source.getNativeLayers();
                     $.each(layers, function (k2, layer) {
                         Mapbender.layerManager.refreshLayer(layer);
                     });

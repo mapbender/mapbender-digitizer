@@ -3,20 +3,6 @@
 
     Mapbender.layerManager = new function () {
         var layerManager = this;
-        /**
-         * @define {OpenLayers.Map}
-         */
-        var olMap;
-
-        /**
-         * Set map object to handle with
-         *
-         * @param {OpenLayers.Map} map
-         */
-        layerManager.setMap = function (map) {
-            olMap = map;
-            return layerManager;
-        };
 
         /**
          * Refresh layer. Only if visible.
@@ -28,6 +14,7 @@
          * @return {OpenLayers.Layer}
          */
         layerManager.refreshLayer = function (layer) {
+            // @todo: NONE of this works with Openlayers > 2
             if (!layer.getVisibility()) {
                 return layer;
             }
@@ -44,29 +31,6 @@
             }
             return layer;
         };
-
-        /**
-         * Get layers by layer instance ID
-         *
-         * @param {number|string} _layerInstanceId
-         * @return {Array<OpenLayers.Layer>}
-         */
-        layerManager.getLayersByInstanceId = function (_layerInstanceId) {
-            var layers = [];
-            _.each(Mapbender.configuration.layersets, function (layerSet) {
-                _.each(layerSet, function (layerCollection) {
-                    _.each(layerCollection, function (layerInstanceInfo) {
-                        var layerInstanceId = layerInstanceInfo.origId;
-                        var layerId = layerInstanceInfo.ollid;
-                        if (layerInstanceId == _layerInstanceId) {
-                            var items = _.where(olMap.layers, {id: layerId});
-                            layers = layers.concat(items);
-                        }
-                    });
-                })
-            });
-            return layers;
-        }
     };
 
 
