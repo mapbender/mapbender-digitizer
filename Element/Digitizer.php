@@ -281,6 +281,37 @@ class Digitizer extends DataManagerElement
         return $values;
     }
 
+    protected function getSchemaConfigDefaults()
+    {
+        return array_replace(parent::getSchemaConfigDefaults(), array(
+            'styles' => $this->getDefaultStyles(),
+        ));
+    }
+
+    protected function getDefaultStyles()
+    {
+        return array(
+            'default' => array(
+                'strokeWidth' => 1,
+                'strokeColor' => '#6fb536',
+                'fillColor' => '#6fb536',
+                'fillOpacity' => 0.3,
+            ),
+            'select' => array(
+                'strokeWidth' => 3,
+                'fillColor' => '#F7F79A',
+                'strokeColor' => '#6fb536',
+                'fillOpacity' => 0.5,
+            ),
+            'unsaved' => array(
+                'strokeWidth' =>  3,
+                'fillColor' => '#FFD14F',
+                'strokeColor' => '#F5663C',
+                'fillOpacity' => 0.5,
+            ),
+        );
+    }
+
 
     protected function getDefaultTableTranslation()
     {

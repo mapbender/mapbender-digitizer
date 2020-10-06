@@ -15,6 +15,7 @@
         schema.featureType = options.featureType;
 
         schema.schemaName = options.schemaName;
+        schema.styles = options.styles;
 
         schema.label = options.label;
         schema.popup = options.popup || {title: schema.schemaName, width: '500px'};
@@ -71,10 +72,8 @@
         this.owner = owner;
         this.schema = schema;
         this.olMap = olMap;
-        /** @todo: should go PHP, in getSchemaConfig; less runtime merging of stuff */
-        this.basicStyles = Object.assign({}, this.getDefaultStyles(), schema.styles || {});
 
-        this.styles = this.initializeStyles_(this.basicStyles); // NOTE: accessed only in event handlers currently inlined here
+        this.styles = this.initializeStyles_(schema.styles);
 
         this.layer = this.createSchemaFeatureLayer_(schema);
         this.olMap.addLayer(this.layer);
@@ -212,31 +211,6 @@
                 console.error("No active Digitizer Scheme '"+schemaName+"'",e); // ???
             }
         });
-    };
-
-    /** @todo: should go PHP, in getSchemaConfigDefaults; less runtime merging of stuff */
-    Mapbender.Digitizer.FeatureRenderer.prototype.getDefaultStyles = function () {
-        return {
-            default: {
-                strokeWidth: 1,
-                strokeColor: '#6fb536',
-                fillColor: '#6fb536',
-                fillOpacity: 0.3
-            },
-            select: {
-                strokeWidth: 3,
-                fillColor: '#F7F79A',
-                strokeColor: '#6fb536',
-                fillOpacity: 0.5,
-                graphicZIndex: 15
-            },
-            unsaved: {
-                strokeWidth: 3,
-                fillColor: '#FFD14F',
-                strokeColor: '#F5663C',
-                fillOpacity: 0.5
-            }
-        };
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.getLayer = function() {

@@ -341,7 +341,7 @@
             return this.mbMap.getModel().getCurrentProjectionCode();
         },
         openStyleEditor: function(schema, feature) {
-            var styleConfig = feature.get('basicStyle') || schema.renderer.basicStyles.default;
+            var styleConfig = feature.get('basicStyle') || schema.styles.default;
             this.styleEditor.openEditor(schema, feature, styleConfig);
         },
         zoomToFeature: function(schema, feature) {
