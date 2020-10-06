@@ -4,16 +4,15 @@
 
     /**
      * @param {*} owner jQueryUI widget instance
-     * @param {ol.PluggableMap} olMap
-     * @param {ol.layer.Vector} layer
+     * @param {Mapbender.Digitizer.FeatureRenderer} renderer
      * @param {Mapbender.Digitizer.DigitizingControlFactory} controlFactory
      *
      * @constructor
      */
-    Mapbender.Digitizer.FeatureEditor = function(owner, olMap, layer, controlFactory) {
+    Mapbender.Digitizer.FeatureEditor = function(owner, renderer, controlFactory) {
         this.owner = owner;
-        this.olMap = olMap;
-        this.layer = layer;
+        this.renderer = renderer;
+        this.olMap = renderer.olMap;
         this.controlFactory = controlFactory;
         this.activeInteraction = null;
         this.paused_ = false;
@@ -54,8 +53,7 @@
             tool.setActive(!!state);
             // Disable select control (click on feature to open editor) while drawing
             // NOTE: hover highlighting remains active
-            // @todo: provide access to select control without expecting monkey-patched schema property
-            schema.renderer.selectControl.setActive(!state);
+            this.renderer.selectControl.setActive(!state);
         }
     });
 
@@ -149,7 +147,7 @@
                 $button.append('<i class="fa far fa-eye-slash">');
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
                 $button.click(function (event) {
-                    schema.layer.getSource().getFeatures().forEach(function (feature) {
+                    widget.getSchemaLayer(schema).getSource().getFeatures().forEach(function (feature) {
                         feature.set('hidden', true);
                     });
                 });
@@ -159,7 +157,7 @@
                 $button.append('<i class="fa far fa-eye">');
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
                 $button.click(function (event) {
-                    schema.layer.getSource().getFeatures().forEach(function (feature) {
+                    widget.getSchemaLayer(schema).getSource().getFeatures().forEach(function (feature) {
                         feature.set('hidden', false);
                     });
                 });
@@ -172,7 +170,7 @@
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.saveAll'));
                 $button.prop('disabled', true);
                 $button.click(function () {
-                    schema.layer.getSource().getFeatures().filter(function (feature) {
+                    widget.getSchemaLayer(schema).getSource().getFeatures().filter(function (feature) {
                         return (["isNew", "isChanged"].includes(feature.get("modificationState")));
                     }).forEach(function (feature) {
                         widget._saveItem(schema, undefined, feature);
@@ -227,7 +225,7 @@
                 this.tools_[schema.schemaName] = {};
             }
             if (!this.tools_[schema.schemaName][type]) {
-                var newInteraction = this.createDrawingTool(type, schema);
+                var newInteraction = this.createDrawingTool(type);
                 this.tools_[schema.schemaName][type] = newInteraction;
                 var widget = this.owner;
                 newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
@@ -242,16 +240,16 @@
         },
         /**
          * @param {String} type
-         * @param {Object} schema
          */
-        createDrawingTool: function(type, schema) {
-            var interaction = this.controlFactory[type] && this.controlFactory[type](this.layer.getSource());
+        createDrawingTool: function(type) {
+            var source = this.renderer.getLayer().getSource();
+            var interaction = this.controlFactory[type] && this.controlFactory[type](source);
             if (!interaction) {
                 console.warn("interaction " + type + " does not exist");
                 return;
             }
             interaction.setActive(false);
-            this.olMap.addInteraction(interaction);
+            this.renderer.olMap.addInteraction(interaction);
             return interaction;
         }
     });

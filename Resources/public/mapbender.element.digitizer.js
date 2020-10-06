@@ -73,8 +73,7 @@
             olMap.on(ol.MapEventType.MOVEEND, function() {
                 // @todo: don't react at all if currently editing feature attributes
                 var schema = self._getCurrentSchema();
-                // @todo: resolve monkey-patching renderer onto schema
-                var layer = schema.renderer.getLayer();
+                var layer = self.getSchemaLayer(schema);
                 var resolution = olMap.getView().getResolution();
                 var $extentSearchCb = $('.schema-toolset input[name="current-extent"]', self.element);
 
@@ -133,14 +132,12 @@
             }
             // HACK: externally patch editor onto schema post-construction
             if (schema.allowDigitize && !schema.geometryEditor) {
-                var layer = schema.renderer.getLayer();
-                var olMap = this.mbMap.getModel().olMap;
-                schema.geometryEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, layer, this.controlFactory);
+                schema.geometryEditor = new Mapbender.Digitizer.FeatureEditor(this, schema.renderer, this.controlFactory);
             }
 
             this.contextMenu.setSchema(schema);
             this._toggleSchemaInteractions(schema, true);
-            schema.renderer.layer.setVisible(true);
+            this.getSchemaLayer(schema).setVisible(true);
         },
         _toggleDrawingTool: function(schema, toolName, state) {
             schema.geometryEditor.toggleTool(toolName, schema, state);
@@ -150,7 +147,7 @@
             this._super(schema);
             this._toggleSchemaInteractions(schema, false);
             if (!(this.options.displayOnInactive || schema.displayPermanent)) {
-                schema.renderer.layer.setVisible(false);
+                this.getSchemaLayer(schema).setVisible(false);
             }
         },
         _toggleSchemaInteractions: function(schema, state) {
@@ -243,7 +240,7 @@
         },
         _afterRemove: function(schema, feature, id) {
             var olMap = this.mbMap.getModel().olMap;
-            schema.renderer.getLayer().getSource().removeFeature(feature);
+            this.getSchemaLayer(schema).getSource().removeFeature(feature);
             this._super(schema, feature, id);
             // Multi-Digitizer sync support
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
@@ -273,10 +270,10 @@
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
         },
         _getData: function(schema) {
-            var renderer = schema.renderer;
+            var layer = this.getSchemaLayer(schema);
             return this._super(schema).then(function(features) {
-                renderer.getLayer().getSource().clear();
-                renderer.getLayer().getSource().addFeatures(features);
+                layer.getSource().clear();
+                layer.getSource().addFeatures(features);
                 return features;
             });
         },
@@ -285,7 +282,7 @@
             // NOTE: this also detects cloned features (via new copy functionality) as new
             var isNew = !this._getUniqueItemId(schema, feature);
             if (isNew) {
-                schema.renderer.getLayer().getSource().removeFeature(feature);
+                this.getSchemaLayer(schema).getSource().removeFeature(feature);
             }
             // @todo: document new schema config value
             if (!isNew && schema.revertChangedGeometryOnCancel) {
@@ -310,8 +307,11 @@
                 srid: this.getProjectionCode()
             };
         },
+        getSchemaLayer: function(schema) {
+            // @todo: replace monkey-patched property access on schema
+            return schema.renderer.getLayer();
+        },
         cloneFeature: function(schema, feature) {
-            var layer = schema.renderer.getLayer();
             var newFeature = feature.clone();
             var copyDefaults = schema.copy.data || {};
             var newAttributes = {};
@@ -330,7 +330,7 @@
             // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
             newFeature.getGeometry().translate(10, 10);
 
-            schema.renderer.getLayer().getSource().addFeature(newFeature);
+            this.getSchemaLayer(schema).getSource().addFeature(newFeature);
             newFeature.set('dirty', true);
             newFeature.set("modificationState", "isNew");
 
