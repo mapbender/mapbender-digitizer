@@ -184,7 +184,7 @@
             var widget = this.owner;
             var $checkbox = $('<input type="checkbox" name="current-extent" />');
             var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
-            $checkbox.prop('checked', schema.currentExtentSearch);
+            $checkbox.prop('checked', schema.searchType === 'currentExtent');
             $checkbox.change(function (e) {
                 widget._getData(schema);
             });

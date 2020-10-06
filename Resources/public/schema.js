@@ -50,7 +50,7 @@
 
         schema.maxScale = options.maxScale || undefined;
 
-        schema.currentExtentSearch = options.currentExtentSearch || false;
+        schema.searchType = options.searchType || "currentExtent";
 
         schema.displayPermanent = options.displayPermanent || false;
 
