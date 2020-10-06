@@ -1,5 +1,14 @@
 (function () {
     "use strict";
+    if (window.ol && !ol.MapEventType) {
+        // HACK: monkey patch event types not present in current OL6 repackage build
+        // @see https://github.com/openlayers/openlayers/blob/main/src/ol/MapEventType.js
+        ol.MapEventType = {
+            POSTRENDER: 'postrender',
+            MOVESTART: 'movestart',
+            MOVEEND: 'moveend'
+        };
+    }
     if (window.ol && ol.source && !ol.source.VectorEventType) {
         // HACK: monkey patch event types not present in current OL6 repackage build
         // @see https://github.com/openlayers/openlayers/blob/main/src/ol/source/VectorEventType.js
@@ -58,7 +67,7 @@
         if (!ol.interaction.Draw.Event) {
             ol.interaction.Draw.Event = ol.interaction.Draw.DrawEvent;
         }
-    };
+    }
 
     if (window.ol && ol.interaction && ol.interaction.Draw) {
         // Mode_ property no longer exists in Openlayers 6, renamed to Mode (no underscore) but same values
