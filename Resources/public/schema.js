@@ -93,8 +93,7 @@
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
         initializeFeature: function(schema, feature) {
             feature.set("mbOrigin", "digitizer");
-            feature.setStyle = feature.setStyleWithLabel;
-            feature.setStyle(this.styles.default);
+            this.setStyle_(feature, this.styles.default);
             // @todo: don't do this if style cannot be saved (no style field)
             if (schema.allowCustomStyle) {
                 this.customStyleFeature_(feature);
@@ -116,8 +115,36 @@
             });
         },
         setRenderIntent: function(feature, intent) {
-            // @todo: drop monkey-patching of setStyle = setStyleWithLabel
-            feature.setStyle(this.getStyleForIntent_(feature, intent));
+            var style = this.getStyleForIntent_(feature, intent);
+            this.setStyle_(feature, style);
+        },
+        setStyle_: function(feature, style) {
+            // adopted code from mapbender/ol4-extensions package, plus fixes
+            // @todo: turn this into a style function on the layer
+            var labelPattern = /\${([^}]+)}/g;
+            var labelValue = style.getText() && style.getText().getText();
+            if (!labelPattern.test(labelValue || '')) {
+                feature.setStyle(style);
+                return;
+            }
+            // Build a two-element list returning style function, resolving the
+            // attribute-dependent label dynamically
+            var baseStyle = style.clone();
+            var labelStyle = new ol.style.Style({
+                text: baseStyle.getText().clone()
+            });
+            baseStyle.setText(null);
+
+            var styleFunction = function (feature) {
+                var attributes = feature.get("data") || {};
+                var label = labelValue.replace(labelPattern, function(match, attributeName) {
+                    return attributes[attributeName] || '';
+                });
+                var labelStyle_ = labelStyle.clone();
+                labelStyle_.getText().setText(label);
+                return [baseStyle, labelStyle_];
+            };
+            feature.setStyle(styleFunction);
         },
         getStyleForIntent_: function(feature, intent) {
             // @todo: turn this into a style function on the layer, so it will work without events
@@ -238,7 +265,7 @@
             var style = ol.style.StyleConverter.convertToOL4Style(basicStyle);
             feature.set("basicStyle", basicStyle);
             feature.set("style", style);
-            feature.setStyle(style);
+            this.setStyle_(feature, style);
         }
     };
 
