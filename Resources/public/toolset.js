@@ -3,12 +3,16 @@
     window.Mapbender.Digitizer = Mapbender.Digitizer || {};
 
     /**
+     * @param {*} owner jQueryUI widget instance
+     * @param {ol.PluggableMap} olMap
      * @param {ol.layer.Vector} layer
      * @param {Mapbender.Digitizer.DigitizingControlFactory} controlFactory
      *
      * @constructor
      */
-    Mapbender.Digitizer.FeatureEditor = function(layer, controlFactory) {
+    Mapbender.Digitizer.FeatureEditor = function(owner, olMap, layer, controlFactory) {
+        this.owner = owner;
+        this.olMap = olMap;
         this.layer = layer;
         this.controlFactory = controlFactory;
         this.activeInteraction = null;
@@ -238,12 +242,13 @@
             if (!this.tools_[schema.schemaName][type]) {
                 var newInteraction = this.createDrawingTool(type, schema);
                 this.tools_[schema.schemaName][type] = newInteraction;
+                var widget = this.owner;
                 newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
                     var feature = event.feature;
                     feature.set("modificationState", "isNew");
                     feature.set('dirty', true);
                     // @todo: do not rely on schema.widget property; editor should know its owner
-                    schema.widget._openEditDialog(schema, event.feature);
+                    widget._openEditDialog(schema, event.feature);
                 });
             }
             return this.tools_[schema.schemaName][type];
@@ -259,7 +264,7 @@
                 return;
             }
             interaction.setActive(false);
-            schema.widget.mbMap.getModel().olMap.addInteraction(interaction);
+            this.olMap.addInteraction(interaction);
             return interaction;
         }
     });

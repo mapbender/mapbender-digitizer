@@ -120,7 +120,8 @@
             // HACK: externally patch editor onto schema post-construction
             if (schema.allowDigitize && !schema.geometryEditor) {
                 var layer = schema.renderer.getLayer();
-                schema.geometryEditor = new Mapbender.Digitizer.FeatureEditor(layer, this.controlFactory);
+                var olMap = this.mbMap.getModel().olMap;
+                schema.geometryEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, layer, this.controlFactory);
             }
 
             this.contextMenu.setSchema(schema);
