@@ -115,7 +115,7 @@
             this._super(schema);
             // HACK: externally patch renderer onto schema post-construction
             if (!schema.renderer) {
-                schema.renderer = new Mapbender.Digitizer.FeatureRenderer(this.mbMap.getModel().olMap, schema);
+                schema.renderer = new Mapbender.Digitizer.FeatureRenderer(this, this.mbMap.getModel().olMap, schema);
             }
             // HACK: externally patch editor onto schema post-construction
             if (schema.allowDigitize && !schema.geometryEditor) {

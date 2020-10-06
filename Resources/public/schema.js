@@ -66,7 +66,14 @@
         schema.allowOpenEditDialog = options.allowOpenEditDialog || false;
     };
 
-    Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(olMap, schema) {
+    /**
+     * @param {*} owner jQueryUI widget instance
+     * @param {ol.PluggableMap} olMap
+     * @param {Object} schema
+     * @constructor
+     */
+    Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(owner, olMap, schema) {
+        this.owner = owner;
         this.schema = schema;
         this.olMap = olMap;
         /** @todo: should go PHP, in getSchemaConfig; less runtime merging of stuff */
@@ -320,9 +327,10 @@
 
         var schema = this.schema;
         if (schema.allowEditData || this.schema.allowOpenEditDialog) {
+            var widget = this.owner;
             selectControl.on('select', function (event) {
                 // @todo: Renderer should know about the widget
-                schema.widget._openEditDialog(schema, event.selected[0]);
+                widget._openEditDialog(schema, event.selected[0]);
                 selectControl.getFeatures().clear();
             });
         }
