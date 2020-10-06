@@ -10,7 +10,7 @@
         });
         this.onMap_ = false;
         this.enabled_ = false;
-        this.schema_ = null;
+        this.filterLayers_ = [];
     };
     Object.assign(Mapbender.Digitizer.MapContextMenu.prototype, {
         enable: function() {
@@ -32,9 +32,8 @@
         registerEvents: function(olMap) {
             var self = this;
             this.contextmenu.on('beforeopen', function (evt) {
-                var schemaLayer = self.schema_ && self.schema_.renderer.getLayer();
                 self.feature = olMap.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                    if (layer === schemaLayer) {
+                    if (self.filterLayers_.indexOf(layer) !== -1) {
                         return feature;
                     }
                 });
@@ -54,7 +53,7 @@
             } else {
                 this.contextmenu.disable();
             }
-            this.schema_ = schema;
+            this.filterLayers_ = [this.widget.getSchemaLayer(schema)];
         },
         getMenuItems: function(schema) {
             // NOTE: self.feature initialized and updated by beforeopen handler
