@@ -11,29 +11,6 @@
     });
 
 
-    Mapbender.Digitizer.Menu = function (owner) {
-        this.owner = owner;
-    };
-
-    Mapbender.Digitizer.Menu.prototype.registerResultTableEvents = function (resultTable, frame) {
-        var menu = this;
-        var schema = menu.schema;
-        var widget = this.owner;
-        var map = widget.map;
-        menu.resultTable = resultTable;
-
-        map.on(ol.MapEventType.MOVEEND, function (event) {
-
-            var resolution = map.getView().getResolution();
-
-            if (resolution > schema.layer.getMaxResolution() || resolution < schema.layer.getMinResolution()) {
-
-                resultTable.clear();
-
-            }
-        });
-    };
-
     Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
         var buttons = [];
 

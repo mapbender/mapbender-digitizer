@@ -70,6 +70,20 @@
             if (this.options.displayOnInactive) {
                 this.activate();
             }
+            olMap.on(ol.MapEventType.MOVEEND, function() {
+                // @todo: don't react at all if currently editing feature attributes
+                var schema = self._getCurrentSchema();
+                // @todo: resolve monkey-patching renderer onto schema
+                var layer = schema.renderer.getLayer();
+                var resolution = olMap.getView().getResolution();
+                var $extentSearchCb = $('.schema-toolset input[name="current-extent"]', self.element);
+
+                if (resolution > layer.getMaxResolution() || resolution < layer.getMinResolution()) {
+                    self.tableRenderer.replaceRows(schema, []);
+                } else if ($extentSearchCb.length && $extentSearchCb.prop('checked')) {
+                    self._getData(schema);
+                }
+            });
         },
         // reveal / hide = automatic sidepane integration API
         reveal: function() {
