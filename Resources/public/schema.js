@@ -70,7 +70,6 @@
      */
     Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(owner, olMap, schema) {
         this.owner = owner;
-        this.schema = schema;
         this.olMap = olMap;
 
         this.styles = this.initializeStyles_(schema.styles);
@@ -87,7 +86,7 @@
             renderer.registerFeatureEvents(schema, feature);
         });
         $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
-            renderer.onFeatureUpdatedOnServer(renderer.schema);
+            renderer.onFeatureUpdatedOnServer(schema);
         });
     }
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
@@ -291,15 +290,12 @@
             }
         });
 
-        var schema = this.schema;
-        if (schema.allowEditData) {
-            var widget = this.owner;
-            selectControl.on('select', function (event) {
-                // @todo: Renderer should know about the widget
-                widget._openEditDialog(schema, event.selected[0]);
-                selectControl.getFeatures().clear();
-            });
-        }
+        var widget = this.owner;
+        selectControl.on('select', function (event) {
+            var schema = widget._getCurrentSchema();
+            widget._openEditDialog(schema, event.selected[0]);
+            selectControl.getFeatures().clear();
+        });
         selectControl.setActive(false);
         return selectControl;
     };

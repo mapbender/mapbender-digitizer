@@ -155,7 +155,7 @@
                 schema.geometryEditor.setActive(state);
             }
             schema.renderer.highlightControl.setActive(state);
-            schema.renderer.selectControl.setActive(state);
+            schema.renderer.selectControl.setActive(state && schema.allowEditData);
             if (state) {
                 this.contextMenu.enable();
             } else {
