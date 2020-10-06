@@ -183,13 +183,13 @@
             return buttons;
         },
         renderCurrentExtentSwitch: function (schema) {
+            var widget = this.owner;
             var menu = this;
             var $checkbox = $('<input type="checkbox" name="current-extent" />');
             var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
             $checkbox.prop('checked', schema.currentExtentSearch);
             $checkbox.change(function (e) {
-                var currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
-                menu.changeCurrentExtentSearch_(currentExtentSearch)
+                widget._getData(schema);
             });
             var $div = $("<div/>");
             $div.addClass("form-group checkbox");
