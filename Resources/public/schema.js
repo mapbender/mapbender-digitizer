@@ -41,8 +41,7 @@
 
         schema.copy = options.copy || {
             enable: false,
-            overwriteValuesWithDefault: false,
-            moveCopy: {x: 10, y: 10}
+            overwriteValuesWithDefault: false
         };
 
         schema.printable = options.printable || false;

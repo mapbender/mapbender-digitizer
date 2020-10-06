@@ -302,9 +302,8 @@
             newFeature.set('data', newAttributes);
 
             // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
-            if (schema.copy.moveCopy) {
-                newFeature.getGeometry().translate(schema.copy.moveCopy.x, schema.copy.moveCopy.y);
-            }
+            newFeature.getGeometry().translate(10, 10);
+
             schema.renderer.getLayer().getSource().addFeature(newFeature);
             newFeature.set('dirty', true);
             newFeature.set("modificationState", "isNew");
