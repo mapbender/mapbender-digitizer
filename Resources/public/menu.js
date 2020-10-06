@@ -32,22 +32,6 @@
 
             }
         });
-
-        schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
-            var feature = event.feature;
-            feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
-                if (event.key === 'dirty' || event.key === 'modificationState') {
-                    var length = schema.layer.getSource().getFeatures().filter(function (feature) {
-                        return ["isNew", "isChanged"].includes(feature.get("modificationState"));
-                    }).length;
-
-                    if (length === 0) {
-                        frame.find(".resultTableControlButtons .save").attr("disabled", "disabled");
-                    }
-                }
-            });
-
-        });
     };
 
     Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
