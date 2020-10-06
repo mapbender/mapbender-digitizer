@@ -30,20 +30,7 @@
 
                 resultTable.clear();
 
-            } else {
-                // @todo: pull value from checkbox, not from (missing) property
-
-                if (resultTable.currentExtentSearch) {
-                    var features = schema.layer.getSource().getFeatures().filter(function (feature) {
-                        return widget.isInExtent(feature);
-                    });
-                    resultTable.redraw(features);     // @todo: resolve custom vis-ui dependency
-                } else {
-                    resultTable.redraw(schema.layer.getSource().getFeatures());   // @todo: resolve custom vis-ui dependency
-                }
-
             }
-
         });
 
         schema.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {

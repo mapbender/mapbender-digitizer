@@ -184,7 +184,6 @@
         },
         renderCurrentExtentSwitch: function (schema) {
             var widget = this.owner;
-            var menu = this;
             var $checkbox = $('<input type="checkbox" name="current-extent" />');
             var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
             $checkbox.prop('checked', schema.currentExtentSearch);
@@ -198,18 +197,6 @@
             $label.prepend($checkbox);
             $div.append($label);
             return $div;
-        },
-        changeCurrentExtentSearch_: function(currentExtentSearch) {
-            var widget = this.owner;
-            if (this.resultTable) {
-                var features = this.schema.layer.getSource().getFeatures();
-                if (currentExtentSearch) {
-                    features = features.filter(function(feature) {
-                        return widget.isInExtent(feature);
-                    });
-                }
-                this.resultTable.redraw(features);  // @todo: resolve custom vis-ui dependency
-            }
         },
         renderButtonGroup_: function(contents) {
             var $group = $(document.createElement('div'))
