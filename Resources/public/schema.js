@@ -9,10 +9,8 @@
      * @constructor
      */
 
-    Mapbender.Digitizer.Scheme = function (options, widget) {
+    Mapbender.Digitizer.Scheme = function (options) {
         var schema = this;
-
-        schema.widget = widget;
 
         schema.featureType = options.featureType;
 
