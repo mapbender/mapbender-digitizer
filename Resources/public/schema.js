@@ -260,12 +260,9 @@
     Mapbender.Digitizer.FeatureRenderer.prototype.createSchemaFeatureLayer_ = function (schema) {
         var layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
-            visible: true
-            // HACK: disable min / max resolution and initial visibility while testing
-            // @todo: reenable minScale / maxScale config evaluation
-//            minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
-//            maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity),
-//            visible: false
+            visible: true,
+            minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
+            maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity)
         });
         return layer;
     };
