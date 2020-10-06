@@ -217,9 +217,14 @@
             return this._super(schema, feature.get('data'));
         },
         _getSelectRequestParams: function(schema) {
+            var srid = parseInt(this.mbMap.getModel().getCurrentProjectionCode().replace(/^\w+:/, ''));
             var params = Object.assign({}, this._super(schema), {
-                srid: this.mbMap.getModel().getCurrentProjectionCode()
+                srid: srid
             });
+            var $extentSearchCb = $('.schema-toolset input[name="current-extent"]', this.element);
+            if ($extentSearchCb.length && $extentSearchCb.prop('checked')) {
+                params['extent'] = this.mbMap.getModel().getCurrentExtentArray().join(',');
+            }
             return params;
         },
         _afterRemove: function(schema, feature, id) {

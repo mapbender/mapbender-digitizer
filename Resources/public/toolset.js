@@ -184,7 +184,7 @@
         },
         renderCurrentExtentSwitch: function (schema) {
             var menu = this;
-            var $checkbox = $("<input type='checkbox' />");
+            var $checkbox = $('<input type="checkbox" name="current-extent" />');
             var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
             $checkbox.prop('checked', schema.currentExtentSearch);
             $checkbox.change(function (e) {

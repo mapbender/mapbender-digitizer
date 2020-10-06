@@ -171,8 +171,22 @@ class Digitizer extends DataManagerElement
         $results = array();
         $criteria = array(
             'maxResults' => $maxResults,
-            'srid' => $request->query->get('srid'),   // @todo: pass on with "ESPG:" prefix yes or no?
+            'srid' => intval($request->query->get('srid')),
         );
+        if ($extent = $request->query->get('extent')) {
+            $extentCoordinates = explode(',', $extent);
+            $polygonCoordinates = array(
+                // CCW, lb => rb => rt => lt => back to lb
+                "{$extentCoordinates[0]} {$extentCoordinates[1]}",
+                "{$extentCoordinates[2]} {$extentCoordinates[1]}",
+                "{$extentCoordinates[2]} {$extentCoordinates[3]}",
+                "{$extentCoordinates[0]} {$extentCoordinates[3]}",
+                "{$extentCoordinates[0]} {$extentCoordinates[1]}",
+            );
+            $polygonWkt = 'POLYGON((' . implode(',', $polygonCoordinates) . '))';
+            $criteria['intersect'] = $polygonWkt;
+        }
+
         foreach ($repository->search($criteria) as $feature) {
             $results[] = $this->formatResponseFeature($repository, $feature);
         }
