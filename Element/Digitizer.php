@@ -165,11 +165,13 @@ class Digitizer extends DataManagerElement
         // @todo data-source: allow disabling maxResults completely (only makes sense for text term search)
         $maxResults = 100000000;
 
+
         $schemaName = $request->query->get('schema');
         $repository = $this->getDataStoreBySchemaName($schemaName);
         $results = array();
         $criteria = array(
             'maxResults' => $maxResults,
+            'srid' => $request->query->get('srid'),   // @todo: pass on with "ESPG:" prefix yes or no?
         );
         foreach ($repository->search($criteria) as $feature) {
             $results[] = $this->formatResponseFeature($repository, $feature);
@@ -212,6 +214,7 @@ class Digitizer extends DataManagerElement
      */
     protected function formatResponseFeature(FeatureType $repository, Feature $feature)
     {
+        // @todo: expose native srid?
         $properties = $feature->toArray();
         $geometryField = $repository->getGeomField();
         unset($properties[$geometryField]);

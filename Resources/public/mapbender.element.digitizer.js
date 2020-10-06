@@ -216,6 +216,12 @@
             }
             return this._super(schema, feature.get('data'));
         },
+        _getSelectRequestParams: function(schema) {
+            var params = Object.assign({}, this._super(schema), {
+                srid: this.mbMap.getModel().getCurrentProjectionCode()
+            });
+            return params;
+        },
         _afterRemove: function(schema, feature, id) {
             var olMap = this.mbMap.getModel().olMap;
             schema.renderer.getLayer().getSource().removeFeature(feature);
