@@ -327,8 +327,14 @@
             //        All we have are table column and form item configuration
             newFeature.set('data', newAttributes);
 
-            // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
-            newFeature.getGeometry().translate(10, 10);
+            // Offset new geometry by ~3% the current (projected) viewport
+            // This keeps the cloned geometry distinctly visible at any zoom level
+            var extent = this.mbMap.getModel().getCurrentExtent();
+            var cloneOffset = {
+                h: Math.abs((extent.right - extent.left) / 32.),
+                v: Math.abs((extent.top - extent.bottom) / 32.)
+            };
+            newFeature.getGeometry().translate(cloneOffset.h, cloneOffset.v);
 
             this.getSchemaLayer(schema).getSource().addFeature(newFeature);
             newFeature.set('dirty', true);
