@@ -17,6 +17,7 @@
         printClient: null,
         active: false,
         controlFactory: null,
+        activeToolName_: null,
 
         _create: function () {
             this._super();
@@ -71,6 +72,9 @@
                 this.activate();
             }
             olMap.on(ol.MapEventType.MOVEEND, function() {
+                if (self.currentPopup || self.activeToolName_) {
+                    return;
+                }
                 // @todo: don't react at all if currently editing feature attributes
                 var schema = self._getCurrentSchema();
                 var layer = self.getSchemaLayer(schema);
@@ -141,7 +145,7 @@
         },
         _toggleDrawingTool: function(schema, toolName, state) {
             schema.geometryEditor.toggleTool(toolName, schema, state);
-            // @todo: disable selectControl if drawing active and vice-versa
+            this.activeToolName_ = state && toolName || null;
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
