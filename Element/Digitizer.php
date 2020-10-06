@@ -112,7 +112,6 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js",
                 '../../vendor/mapbender/ol4-extensions/drawdonut.js',
                 '../../vendor/mapbender/ol4-extensions/styleConverter.js',
-                '../../vendor/mapbender/ol4-extensions/geoJSONWithSeperateData.js',
                 '../../vendor/mapbender/ol4-extensions/setStyleWithLabel.js',
                 '../../vendor/mapbender/ol4-extensions/selectableModify.js',
                 '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
