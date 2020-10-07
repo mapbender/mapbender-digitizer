@@ -285,6 +285,16 @@ class Digitizer extends DataManagerElement
     {
         return array_replace(parent::getSchemaConfigDefaults(), array(
             'styles' => $this->getDefaultStyles(),
+            // @todo: no form items is an error if the popup ever opens
+            'formItems' => array(),
+            // @todo: default allow or default deny?
+            'allowEditData' => true,
+            // @todo: default allow or default deny?
+            'allowDelete' => true,
+            'inlineSearch' => true,
+            'pageLength' => 16,
+            // no defaults:
+            // * tableFields
         ));
     }
 
@@ -311,7 +321,6 @@ class Digitizer extends DataManagerElement
             ),
         );
     }
-
 
     protected function getDefaultTableTranslation()
     {

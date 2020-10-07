@@ -23,9 +23,9 @@
         schema.formItems = options.formItems || {};
         schema.allowEditData = options.allowEditData || (typeof options.allowEditData === 'undefined');  //default true
         schema.allowDelete = options.allowDelete || (typeof options.allowDelete === 'undefined');  //default true;
-        schema.inlineSearch = options.inlineSearch || true;
-        schema.pageLength = options.pageLength || 10;
-        schema.inlineSearch = options.inlineSearch || false;
+        schema.inlineSearch = options.inlineSearch;
+        schema.pageLength = options.pageLength;
+        schema.table = options.table;
         schema.tableTranslation = options.tableTranslation || undefined;
 
         // alias different config key "allowEditData" to upstream-compatible "allowEdit"

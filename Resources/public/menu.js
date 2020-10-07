@@ -106,18 +106,13 @@
                 }
             });
         },
-        getCustomOptions: function(schema) {
-            // Unlike upstream DM, we DO NOT want to forward any random value from schema config
-            // into the dataTables / resultTable widget constructor
-            return undefined;
-        },
         getOptions: function(schema) {
-            var options = Mapbender.DataManager.TableRenderer.prototype.getOptions.call(this, schema);
-            if (typeof (schema.pageLength) !== 'undefined') {
-                options.pageLength = schema.pageLength;
-            }
-            options.searching = !!schema.inlineSearch || (typeof (schema.inlineSearch) === 'undefined');
-            return options;
+            return Object.assign(Mapbender.DataManager.TableRenderer.prototype.getOptions.call(this, schema), {
+                // "pageLength" is a top-level schema attribute, unlike DM (nested in "table")
+                // "searching" is aliased to top-level schema.inlineSearch, unlike DM (schema.table.searching)
+                pageLength: schema.pageLength,
+                searching: schema.inlineSearch
+            });
         },
         getDefaultColumnConfigs: function(schema) {
             // @todo DataManager: data manager does not use default columns, but it should; without
