@@ -262,6 +262,11 @@ class Digitizer extends DataManagerElement
         // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
         $values['allowCreate'] = $values['allowEdit'];
 
+        // Disallow style editing if editing is disabled
+        if (!$values['allowEdit']) {
+            $values['allowCustomStyle'] = false;
+        }
+
         if ($values['allowCustomStyle']) {
             $featureTypeConfigKey = $this->getDataStoreKeyInSchemaConfig();
             if (empty($values[$featureTypeConfigKey])) {
