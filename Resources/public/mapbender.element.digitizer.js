@@ -25,6 +25,7 @@
             var target = this.options.target;
             this.toolsetRenderer = this._createToolsetRenderer();
             this.styleEditor = this._createStyleEditor();
+            this.wktFormat_ = new ol.format.WKT();
             Mapbender.elementRegistry.waitReady(target).then(function(mbMap) {
                 widget.mbMap = mbMap;
                 widget.setup();
@@ -239,16 +240,17 @@
         },
         _prepareDataItem: function(schema, itemData) {
             var renderer = schema.renderer;
-            var feature = (new ol.format.WKT()).readFeatureFromText(itemData.geometry);
+            var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
             feature.set('data', itemData.properties || {});
             renderer.initializeFeature(schema, feature);
             return feature;
         },
         _afterSave: function(schema, feature, originalId, responseData) {
             // unravel dm-incompatible response format
-            // @todo: should we or should we not replace feature geometry?
-            // var geometry = (new ol.format.WKT()).readGeometryFromText(responseData.dataItem.geometry);
-            // feature.setGEometry(geometry);
+            // Geometry may have been modified (made valid, transformed twice) on server roundtrip
+            // => update to reflect server-side geometry exactly
+            var geometry = this.wktFormat_.readGeometryFromText(responseData.dataItem.geometry);
+            feature.setGeometry(geometry);
 
             this._super(schema, feature, originalId, {
                 dataItem: responseData.dataItem.properties
@@ -295,7 +297,7 @@
         _getSaveRequestData: function(schema, dataItem, newValues) {
             return {
                 properties: Object.assign({}, this._getItemData(schema, dataItem), newValues || {}),
-                geometry: new ol.format.WKT().writeGeometryText(dataItem.getGeometry()),
+                geometry: this.wktFormat_.writeGeometryText(dataItem.getGeometry()),
                 srid: this.getProjectionCode()
             };
         },
