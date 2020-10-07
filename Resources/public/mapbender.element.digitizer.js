@@ -61,10 +61,11 @@
                 this.activate();
             }
             olMap.on(ol.MapEventType.MOVEEND, function() {
+                // Don't react at all if currently editing feature attributes
                 if (self.currentPopup || self.activeToolName_) {
                     return;
                 }
-                // @todo: don't react at all if currently editing feature attributes
+
                 var schema = self._getCurrentSchema();
                 var layer = self.getSchemaLayer(schema);
                 var resolution = olMap.getView().getResolution();
