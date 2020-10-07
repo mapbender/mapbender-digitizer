@@ -14,7 +14,7 @@
         "debugteam/bootstrap-colorpicker": "1.x",
         "mapbender/data-manager": "^1.0.7",
         "mapbender/data-source": "~0.0.35 || ~0.1",
-        "mapbender/ol4-extensions" : "dev-master"
+        "mapbender/ol4-extensions" : "~0.0.1"
     },
     "conflict": {
         "mapbender/mapbender": "<3.0.8"
