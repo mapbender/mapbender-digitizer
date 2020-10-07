@@ -258,11 +258,7 @@ class Digitizer extends DataManagerElement
     {
         $values = parent::getSchemaBaseConfig($schemaName);
         // resolve aliasing DM "allowEdit" vs historical Digitizer "allowEditData"
-        if (isset($values['allowEditData'])) {
-            $values['allowEdit'] = !!$values['allowEditData'];
-        } else {
-            $values['allowEdit'] = true;
-        }
+        $values['allowEdit'] = !!$values['allowEditData'];
         // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
         $values['allowCreate'] = $values['allowEdit'];
 
