@@ -189,18 +189,18 @@ class Digitizer extends DataManagerElement
         //       Feature creation expects an attribute matching the (configured) geometry
         //       column name. Adapt incoming data.
         if ($itemId) {
-            $dataItem = $repository->getById($itemId);
+            $feature = $repository->getById($itemId);
         } else {
-            $dataItem = $repository->itemFactory();
+            $feature = $repository->itemFactory();
         }
         $requestData = json_decode($request->getContent(), true);
         if (!empty($requestData['geometry'])) {
-            $dataItem->setGeom($requestData['geometry']);
+            $feature->setGeom($requestData['geometry']);
         }
         if (!empty($requestData['properties'])) {
-            $dataItem->setAttributes($requestData['properties']);
+            $feature->setAttributes($requestData['properties']);
         }
-        $updatedItem = $repository->save($dataItem);
+        $updatedItem = $repository->save($feature);
         return array(
             'dataItem' => $this->formatResponseFeature($repository, $updatedItem),
         );
