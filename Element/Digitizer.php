@@ -287,14 +287,45 @@ class Digitizer extends DataManagerElement
             'styles' => $this->getDefaultStyles(),
             // @todo: no form items is an error if the popup ever opens
             'formItems' => array(),
+            'allowDigitize' => true,
             // @todo: default allow or default deny?
             'allowEditData' => true,
             // @todo: default allow or default deny?
             'allowDelete' => true,
+            'allowCustomStyle' => false,
+            // @todo: undocumented; should default to true; may not need configurability at all
+            'allowChangeVisibility' => false,
+            'displayPermanent' => false,
+            'printable' => false,
             'inlineSearch' => true,
             'pageLength' => 16,
+            'minScale' => null,
+            'maxScale' => null,
+            'searchType' => 'currentExtent',
+            // @todo: specify, document
+            'copy' => array(
+                'enable' => false,
+                'overwriteValuesWithDefault' => false,
+                'data' => null, // @todo: specify, document
+            ),
+            // @todo: specify, document
+            'refreshFeaturesAfterSave' => false,
+            // @todo: specify, document; current implementation does not work on Openlayers 4/5/6
+            'refreshLayersAfterFeatureSave' => false,
+            // @todo: specify, document; reverting geometry modification on attribute editor cancel is a confusing
+            //        workflow event. Should distinctly offer revert of geometry modification.
+            'revertChangedGeometryOnCancel' => false,
+
+            // @todo: "tableTranslation"?
+
+            // Inherited:
+            // * popup.title
+            // * popup.width
+
+
             // no defaults:
             // * tableFields
+            // * toolset
         ));
     }
 

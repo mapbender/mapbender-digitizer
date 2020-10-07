@@ -1,67 +1,6 @@
 (function () {
     "use strict";
 
-    // @todo: Move config and merging with defaults back to PHP Element (Scheme class is now a pure data object)
-    /**
-     *
-     * @param {Object} options
-     * @param widget
-     * @constructor
-     */
-
-    Mapbender.Digitizer.Scheme = function (options) {
-        var schema = this;
-
-        schema.featureType = options.featureType;
-
-        schema.schemaName = options.schemaName;
-        schema.styles = options.styles;
-
-        schema.label = options.label;
-        schema.popup = options.popup || {title: schema.schemaName, width: '500px'};
-        schema.tableFields = options.tableFields;
-        schema.formItems = options.formItems || {};
-        schema.allowEditData = options.allowEditData || (typeof options.allowEditData === 'undefined');  //default true
-        schema.allowDelete = options.allowDelete || (typeof options.allowDelete === 'undefined');  //default true;
-        schema.inlineSearch = options.inlineSearch;
-        schema.pageLength = options.pageLength;
-        schema.table = options.table;
-        schema.tableTranslation = options.tableTranslation || undefined;
-
-        // alias different config key "allowEditData" to upstream-compatible "allowEdit"
-        schema.allowEdit = schema.allowEditData || options.allowEdit || false;
-
-        schema.toolset = options.toolset;
-
-        schema.allowCustomStyle = options.allowCustomStyle || false;
-
-        schema.allowDigitize = options.allowDigitize || (typeof options.allowEditData === 'undefined');  // default true
-
-        schema.copy = options.copy || {
-            enable: false,
-            overwriteValuesWithDefault: false
-        };
-
-        schema.printable = options.printable || false;
-
-        schema.allowChangeVisibility = options.allowChangeVisibility || false;
-
-        schema.minScale = options.minScale || undefined;
-
-        schema.maxScale = options.maxScale || undefined;
-
-        schema.searchType = options.searchType || "currentExtent";
-
-        schema.displayPermanent = options.displayPermanent || false;
-
-        schema.refreshFeaturesAfterSave = options.refreshFeaturesAfterSave || false;
-
-        schema.refreshLayersAfterFeatureSave = options.refreshLayersAfterFeatureSave || false;
-
-        /** New properties **/
-        schema.revertChangedGeometryOnCancel = options.revertChangedGeometryOnCancel || false;
-    };
-
     /**
      * @param {*} owner jQueryUI widget instance
      * @param {ol.PluggableMap} olMap

@@ -57,7 +57,7 @@
                     console.error("Using Javascript code in the configuration is deprecated:", button);
                 });
             }
-            return new Mapbender.Digitizer.Scheme(schemaConfig_);
+            return schemaConfig_;
         },
         setup: function() {
             var self = this;
