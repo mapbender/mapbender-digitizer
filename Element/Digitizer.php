@@ -92,7 +92,7 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js",
                 "@MapbenderDigitizerBundle/Resources/public/toolset.js",
                 "@MapbenderDigitizerBundle/Resources/public/schema.js",
-                "@MapbenderDigitizerBundle/Resources/public/menu.js",
+                "@MapbenderDigitizerBundle/Resources/public/TableRenderer.js",
                 "@MapbenderDigitizerBundle/Resources/public/contextMenu.js",
                 "@MapbenderDigitizerBundle/Resources/public/utilities.js",
                 "@MapbenderDigitizerBundle/Resources/public/controlFactory.js",
