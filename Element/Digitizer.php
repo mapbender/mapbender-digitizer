@@ -2,22 +2,10 @@
 
 namespace Mapbender\DigitizerBundle\Element;
 
-use Doctrine\DBAL\Connection;
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
-use Mapbender\DataSourceBundle\Component\DataStore;
-use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Component\FeatureTypeService;
-use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
-use Mapbender\DigitizerBundle\Component\Uploader;
-use Mapbender\DigitizerBundle\Entity\Condition;
-use RuntimeException;
-use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
-use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Mapbender\DataManagerBundle\Element\DataManagerElement;
 use Symfony\Component\HttpFoundation\Request;
 
