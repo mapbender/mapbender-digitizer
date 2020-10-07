@@ -278,6 +278,7 @@ class Digitizer extends DataManagerElement
         // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
         $values['allowCreate'] = $values['allowEdit'];
 
+        // @todo: missing "featureType" should be an error (upstream DM 1.1?)
         return $values;
     }
 

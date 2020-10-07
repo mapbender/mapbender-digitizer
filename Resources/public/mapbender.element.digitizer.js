@@ -47,18 +47,6 @@
             // Invoked only by data manager _create
             // do nothing; deliberately do NOT call parent method
         },
-        _schemaFactory: function(schemaConfig) {
-            var schemaConfig_ = this._super(schemaConfig);
-            if (!schemaConfig_.featureType || !schemaConfig_.featureType.connection || !schemaConfig_.featureType.table || !schemaConfig_.featureType.geomType) {
-                throw new Error("Feature Type not correctly specified in Configuration of scheme")
-            }
-            if (schemaConfig_.popup && schemaConfig_.popup.buttons) {
-                _.each(schemaConfig_.popup.buttons, function (button) {
-                    console.error("Using Javascript code in the configuration is deprecated:", button);
-                });
-            }
-            return schemaConfig_;
-        },
         setup: function() {
             var self = this;
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function (printClient) {
