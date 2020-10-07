@@ -193,7 +193,6 @@
                     }
                 });
             }
-            // @todo: don't offer this button if style cannot be saved (no style field)
             if (schema.allowCustomStyle) {
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.style.change'),

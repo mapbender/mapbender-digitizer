@@ -274,9 +274,6 @@
             var styleData = element.formData();
             element.disableForm();
 
-            // @todo: this should certainly be checked BEFORE starting this whole editing process
-            console.assert(!!schema.featureType.styleField,"Style Field in Feature Type is not specified");
-
             var formData = {};
             formData[schema.featureType.styleField] = JSON.stringify(styleData);
             // TODO enable defered saving

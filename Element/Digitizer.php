@@ -266,7 +266,17 @@ class Digitizer extends DataManagerElement
         // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
         $values['allowCreate'] = $values['allowEdit'];
 
-        // @todo: missing "featureType" should be an error (upstream DM 1.1?)
+        if ($values['allowCustomStyle']) {
+            $featureTypeConfigKey = $this->getDataStoreKeyInSchemaConfig();
+            if (empty($values[$featureTypeConfigKey])) {
+                throw new ConfigurationErrorException("Missing {$featureTypeConfigKey} for schema {$schemaName})");
+            }
+            $featureTypeConfig = $this->resolveDataStoreConfig($values[$featureTypeConfigKey]);
+            if (empty($featureTypeConfig['styleField'])) {
+                @trigger_error("WARNING: disabling 'allowCustomStyle' option for schema {$schemaName}. Missing 'styleField' setting.", E_USER_DEPRECATED);
+                $values['allowCustomStyle'] = false;
+            }
+        }
         return $values;
     }
 

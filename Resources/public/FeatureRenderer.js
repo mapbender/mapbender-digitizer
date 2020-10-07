@@ -32,7 +32,6 @@
         initializeFeature: function(schema, feature) {
             feature.set("mbOrigin", "digitizer");
             this.setStyle_(feature, this.styles.default);
-            // @todo: don't do this if style cannot be saved (no style field)
             if (schema.allowCustomStyle) {
                 this.customStyleFeature_(feature);
             }
@@ -182,8 +181,6 @@
 
     Mapbender.Digitizer.FeatureRenderer.prototype.customStyleFeature_ = function (feature) {
         var schema = this;
-
-        console.assert(!!schema.featureType.styleField, "Style Field in Feature Type is not specified");
 
         var jsonStyle = feature.get("data") && feature.get("data").get(schema.featureType.styleField);
 
