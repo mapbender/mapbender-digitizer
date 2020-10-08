@@ -17,7 +17,7 @@
         "mapbender/ol4-extensions" : "~0.0.2"
     },
     "conflict": {
-        "mapbender/mapbender": "<3.0.8"
+        "mapbender/mapbender": "<3.2.1"
     },
     "autoload": {
         "psr-4": {"Mapbender\\DigitizerBundle\\": "."}
