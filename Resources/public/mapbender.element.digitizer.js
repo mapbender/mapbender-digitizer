@@ -136,6 +136,10 @@
         _toggleDrawingTool: function(schema, toolName, state) {
             schema.geometryEditor.toggleTool(toolName, schema, state);
             this.activeToolName_ = state && toolName || null;
+            // Disable highlighting interaction when a tool is active.
+            // For unknown reasons, the highlighting interaction breaks feature modification.
+            // @todo: resolve dependency on monkey-patched schema.renderer property
+            schema.renderer.highlightControl.setActive(!state);
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
