@@ -3,6 +3,7 @@
 namespace Mapbender\DigitizerBundle\Element\Type;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -29,7 +30,11 @@ class DigitizerAdminType extends AbstractType
                 // on Mapbender <=3.0.8.4 (no longer required on 3.0.8.5 RC and higher)
                 'property_path' => '[target]',
             ))
-            ->add('displayOnInactive','checkbox',array('required' => false, 'label' => 'mb.digitizer.displayOnInactive'))
+
+            ->add('displayOnInactive', 'Symfony\Component\Form\Extension\Core\Type\CheckboxType' ,array(
+                'required' => false,
+                'label' => 'mb.digitizer.displayOnInactive',
+            ))
             ->add('schemes', 'Mapbender\ManagerBundle\Form\Type\YAMLConfigurationType', array(
                 'required' => false,
                 'attr' => array(
