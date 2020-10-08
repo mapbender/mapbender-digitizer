@@ -262,6 +262,9 @@ class Digitizer extends DataManagerElement
         // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
         $values['allowCreate'] = $values['allowEdit'];
 
+        // re-merge styles (upstream merge is not recursive, we may be missing entries depending on config)
+        $values['styles'] = array_replace_recursive($this->getDefaultStyles(), $values['styles']);
+
         // Disallow style editing if editing is disabled
         if (!$values['allowEdit']) {
             $values['allowCustomStyle'] = false;
