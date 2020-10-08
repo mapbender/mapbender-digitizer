@@ -296,8 +296,8 @@ class Digitizer extends DataManagerElement
             // @todo: default allow or default deny?
             'allowDelete' => true,
             'allowCustomStyle' => false,
-            // @todo: undocumented; should default to true; may not need configurability at all
-            'allowChangeVisibility' => false,
+            // @todo: may not need configurability at all. Who doesn't want this?
+            'allowChangeVisibility' => true,
             'displayPermanent' => false,
             'printable' => false,
             'inlineSearch' => true,
