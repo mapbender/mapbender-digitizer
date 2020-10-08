@@ -136,6 +136,17 @@
                 feature.set("modificationState", "isChanged");
                 feature.set('dirty', true);
             });
+            // NOTE: select event is only triggered by custom SelectableModify, not on basic ol.interaction.Modify
+            interaction.on('select', function(event) {
+                // Style editor interactions...
+                event.selected && event.selected.forEach(function (feature) {
+                    feature.set("featureStyleDisabled", true);
+                });
+
+                event.deselected && event.deselected.forEach(function (feature) {
+                    feature.unset("featureStyleDisabled");
+                });
+            });
 
             return interaction;
 
