@@ -33,7 +33,7 @@
             feature.set("mbOrigin", "digitizer");
             this.setStyle_(feature, this.styles.default);
             if (schema.allowCustomStyle) {
-                this.customStyleFeature_(feature);
+                this.customStyleFeature_(schema, feature);
             }
 
             feature.set("oldGeometry", feature.getGeometry().clone());
@@ -179,10 +179,10 @@
         return layer;
     };
 
-    Mapbender.Digitizer.FeatureRenderer.prototype.customStyleFeature_ = function (feature) {
-        var schema = this;
-
-        var jsonStyle = feature.get("data") && feature.get("data").get(schema.featureType.styleField);
+    Mapbender.Digitizer.FeatureRenderer.prototype.customStyleFeature_ = function (schema, feature) {
+        var styleField = schema.featureType.styleField;
+        var itemData = feature.get("data");
+        var jsonStyle = styleField && itemData && itemData[styleField];
 
         if (jsonStyle) {
             var basicStyle = JSON.parse(jsonStyle);
