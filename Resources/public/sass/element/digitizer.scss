@@ -27,6 +27,11 @@
             padding: 5px 5px;
         }
     }
+    // Disable bootstrap default button outlines on focus
+    // This is to support keyboard navigation (which we don't support) but makes .active hard to see
+    .btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
+        outline: none;
+    }
 }
 
 .colorpicker-saturation {
