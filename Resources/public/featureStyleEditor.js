@@ -249,6 +249,9 @@
             title: "Stylemanager",
             modal: true,
             width: '500px',
+            classes: {
+                'ui-dialog-content': 'ui-dialog-content digitizer-style-editor'
+            },
             buttons: [{
                 text: "Abbrechen",
                 click: function (e) {
