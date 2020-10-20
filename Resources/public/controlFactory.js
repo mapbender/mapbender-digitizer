@@ -20,7 +20,8 @@
     Mapbender.Digitizer.DigitizingControlFactory.prototype = {
         drawPoint: function (source) {
             var interaction = new ol.interaction.Draw({
-               source: source,
+                source: source,
+                stopClick: true,    // prevent double-click zoom on draw end / attribute editor opening on nearby existing geometry
                 type: "Point"
             });
             return interaction;
@@ -30,6 +31,7 @@
         drawLine: function (source) {
             var interaction =  new ol.interaction.Draw({
                 source: source,
+                stopClick: true,    // prevent double-click zoom on draw end / attribute editor opening on nearby existing geometry
                 type: "LineString"
             });
             return interaction;
@@ -39,6 +41,7 @@
         drawPolygon: function (source) {
             var interaction =  new ol.interaction.Draw({
                 source: source,
+                stopClick: true,    // prevent double-click zoom on draw end / attribute editor opening on nearby existing geometry
                 type: 'Polygon'
             });
             return interaction;
@@ -48,6 +51,7 @@
         drawRectangle: function (source) {
             var interaction = new ol.interaction.Draw({
                 source: source,
+                stopClick: true,    // prevent double-click zoom on draw end / attribute editor opening on nearby existing geometry
                 type: 'Circle',
                 geometryFunction: ol.interaction.Draw.createBox(),
                 freehand: true
@@ -59,6 +63,7 @@
         drawCircle: function (source) {
             var interaction =  new ol.interaction.Draw({
                 source: source,
+                stopClick: true,    // prevent double-click zoom on draw end / attribute editor opening on nearby existing geometry
                 type: 'Circle',
                 geometryFunction: function(coordinates, geometry) {
                     // var circle = opt_geometry ? /** @type {ol.geom.Circle} */ (opt_geometry) :
@@ -91,6 +96,7 @@
         drawEllipse: function (source) {
             var interaction =  new ol.interaction.Draw({
                 source: source,
+                stopClick: true,    // prevent double-click zoom on draw end / attribute editor opening on nearby existing geometry
                 type: 'Circle',
                 geometryFunction: function(coordinates, geometry) {
                     var center = coordinates[0];
@@ -116,6 +122,7 @@
         drawDonut: function (source) {
             var interaction = new ol.interaction.DrawDonut({
                 source: source,
+                stopClick: true,    // prevent double-click zoom on draw end / attribute editor opening on nearby existing geometry
                 type: 'Polygon'
             });
 
