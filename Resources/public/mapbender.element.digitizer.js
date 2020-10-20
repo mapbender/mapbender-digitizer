@@ -227,9 +227,8 @@
             return this._super(schema, feature.get('data'));
         },
         _getSelectRequestParams: function(schema) {
-            var srid = parseInt(this.mbMap.getModel().getCurrentProjectionCode().replace(/^\w+:/, ''));
             var params = Object.assign({}, this._super(schema), {
-                srid: srid
+                srid: this.getCurrentSrid()
             });
             var $extentSearchCb = $('.schema-toolset input[name="current-extent"]', this.element);
             if ($extentSearchCb.length && $extentSearchCb.prop('checked')) {
@@ -304,7 +303,7 @@
             return {
                 properties: Object.assign({}, this._getItemData(schema, dataItem), newValues || {}),
                 geometry: this.wktFormat_.writeGeometryText(dataItem.getGeometry()),
-                srid: this.getProjectionCode()
+                srid: this.getCurrentSrid()
             };
         },
         getSchemaLayer: function(schema) {
@@ -342,9 +341,11 @@
 
             this._openEditDialog(schema, newFeature);
         },
-        // Support method for custom Scheme class
-        getProjectionCode: function() {
-            return this.mbMap.getModel().getCurrentProjectionCode();
+        /**
+         * @return {number}
+         */
+        getCurrentSrid: function() {
+            return parseInt(this.mbMap.getModel().getCurrentProjectionCode().replace(/^\w+:/, ''));
         },
         openStyleEditor: function(schema, feature) {
             var styleConfig = feature.get('basicStyle') || schema.styles.default;

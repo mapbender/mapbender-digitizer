@@ -196,6 +196,7 @@ class Digitizer extends DataManagerElement
         $requestData = json_decode($request->getContent(), true);
         if (!empty($requestData['geometry'])) {
             $feature->setGeom($requestData['geometry']);
+            $feature->setSrid($requestData['srid']);
         }
         if (!empty($requestData['properties'])) {
             $feature->setAttributes($requestData['properties']);
