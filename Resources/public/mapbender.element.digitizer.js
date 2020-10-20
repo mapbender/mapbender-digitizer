@@ -77,6 +77,18 @@
                     self._getData(schema);
                 }
             });
+            this.mbMap.element.on('mbmapsrschanged', function(event, data) {
+                var schema = self._getCurrentSchema();
+                if (schema.renderer) {
+                    var source = schema.renderer.getLayer().getSource();
+                    source.forEachFeature(/** @param {ol.Feature} feature */function(feature) {
+                        var geometry = feature.getGeometry();
+                        if (geometry) {
+                            geometry.transform(data.from, data.to);
+                        }
+                    });
+                }
+            });
         },
         // reveal / hide = automatic sidepane integration API
         reveal: function() {
