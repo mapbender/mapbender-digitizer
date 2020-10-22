@@ -62,7 +62,9 @@
             });
             $table.on('click', 'tbody > tr', function (e) {
                 // Do nothing if click hit an interaction button; return true to allow other handlers
-                if ($(e.target).hasClass('button')) {
+                var $target = $(e.target);
+                var $parentsAndSelf = $target.parentsUntil(this).add($target);
+                if ($parentsAndSelf.filter('.button,.btn').length) {
                     return true;
                 }
                 var feature = $(this).data().item;
@@ -176,7 +178,10 @@
             } else {
                 tooltip = Mapbender.trans('mb.digitizer.feature.visibility.toggleoff')
             }
-            $('.-fn-toggle-visibility', tr)
+            var $visibilityButton = $('.-fn-toggle-visibility', tr);
+            // Support both icon class ON button (legacy misuse) and icon markup INSIDE button transparently
+            var $visibilityIcon = $visibilityButton.children().add($visibilityButton).filter('.fa');
+            $visibilityIcon
                 .toggleClass('fa-eye-slash', hidden)
                 .toggleClass('fa-eye', !hidden)
                 .attr('title', tooltip)
