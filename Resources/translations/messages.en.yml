@@ -62,15 +62,6 @@ mb.digitizer:
     table:
         fields:
             not.defined: 'Feature table fields aren''t defined.'
-    search:
-        title: Search
-        table:
-            empty: Empty.
-            zerorecords: 'No entries.'
-            info:
-                status: '_START_ to _END_ from _TOTAL_'
-                empty: 'No results'
-                filtered: '(out of _MAX_ total)'
     remoteData:
         error: 'WMS FeatureInfo request failed'
     style:

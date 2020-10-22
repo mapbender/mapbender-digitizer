@@ -25,12 +25,3 @@ mb.digitizer:
   table:
     fields:
       not.defined: 'I campi della tabella Feature non sono definiti.'
-  search:
-    title: 'Cerca'
-    table:
-      empty: 'Vuota'
-      zerorecords: 'Nessun risultato.'
-      info:
-        status: ~
-        empty: 'Nessun risultato'
-        filtered: ~
