@@ -59,6 +59,8 @@
 
     Mapbender.Digitizer.Toolset = function(owner) {
         this.owner = owner;
+        this.listenedSchemas_ = {};
+        this.unsavedFeatures_ = {};
     };
 
     Mapbender.Digitizer.Toolset.prototype = {
@@ -155,6 +157,54 @@
                     widget._saveItem(schema, undefined, feature);
                 });
             });
+        },
+        setSchema: function(schema) {
+            var schemaName = schema.schemaName;
+            if (!this.listenedSchemas_[schemaName]) {
+                var widget = this.owner;
+                this.unsavedFeatures_[schemaName] = []
+
+                var source = this.owner.getSchemaLayer(schema).getSource();
+                var unsavedFeatureList = this.unsavedFeatures_[schemaName];
+                var updateSaveAll = function() {
+                    $('.-fn-save-all', widget.element).prop('disabled', !unsavedFeatureList.length);
+                }
+                var trackModified = function(feature, dirtyState) {
+                    var index = unsavedFeatureList.indexOf(feature);
+                    if (dirtyState && -1 === index) {
+                        unsavedFeatureList.push(feature);
+                        updateSaveAll();
+                    }
+                    if (!dirtyState && -1 !== index) {
+                        unsavedFeatureList.splice(index, 1);
+                        updateSaveAll();
+                    }
+                };
+                var addFeature = function(feature) {
+                    feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
+                        if (event.key === 'dirty') {
+                            trackModified(feature, feature.get('dirty'));
+                        }
+                    });
+                    trackModified(feature, feature.get('dirty'));
+                };
+                source.getFeatures().forEach(function(feature) {
+                    addFeature(feature);
+
+                });
+                source.on(ol.source.VectorEventType.ADDFEATURE, function(event) {
+                    addFeature(event.feature);
+                });
+                source.on(ol.source.VectorEventType.REMOVEFEATURE, function(event) {
+                    // feature going away, remove from tracking
+                    trackModified(event.feature, false);
+                });
+                // Avoid binding events again for the same schema
+                this.listenedSchemas_[schemaName] = true;
+            } else {
+                // empty unsaved list (in-place)
+                this.unsavedFeatures_[schemaName].splice(0, -1);
+            }
         },
         /**
          * Renders buttons that do NOT represent geometry interactions

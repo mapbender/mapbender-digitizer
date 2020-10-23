@@ -141,7 +141,7 @@
             if (schema.allowDigitize && !schema.geometryEditor) {
                 schema.geometryEditor = new Mapbender.Digitizer.FeatureEditor(this, schema.renderer, this.controlFactory);
             }
-
+            this.toolsetRenderer.setSchema(schema);
             this.contextMenu.setSchema(schema);
             this._toggleSchemaInteractions(schema, true);
             this.getSchemaLayer(schema).setVisible(true);

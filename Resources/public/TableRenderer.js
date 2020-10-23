@@ -198,9 +198,6 @@
                 .attr('title', tooltip)
             ;
             $('.-fn-save', tr).prop('disabled', !feature.get('dirty'));
-            // @todo: integrate with "save all" button (outside table)?
-            // activate (trivial): frame.find(".resultTableControlButtons .save").removeAttr("disabled");
-            // @todo: deactivation requires counting of modified features...
         }
     });
 })();
