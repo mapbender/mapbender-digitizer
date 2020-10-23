@@ -169,6 +169,10 @@
                 var feature = event.target;
                 var tr = feature && feature.get('table-row');
                 if (tr) {
+                    // page to modified feature
+                    if (event.key === 'dirty' && feature.get('dirty')) {
+                        self.showRow(schema, tr);
+                    }
                     self.updateButtonStates_(tr, feature);
                 }
             });
