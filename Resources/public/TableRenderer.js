@@ -12,37 +12,48 @@
 
 
     Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
-        var buttons = [];
+        var lateButtons = Mapbender.DataManager.TableRenderer.prototype.getButtonsOption.call(this, schema);
+        var earlyButtons = [];
 
         // This save button is the only direct way to save modified geometries
         if (schema.allowDigitize) {
-            buttons.push({
+            var saveButtonOptions = {
                 title: Mapbender.trans('mb.digitizer.feature.save.title'),
-                cssClass: '-fn-save fa fas fa-save'
-            });
+                cssClass: '-fn-save fa fas fa-save btn-success'
+            };
+            // Insert save button before delete button (=after attribute editing button)
+            var deleteButton = lateButtons.filter(function(buttonOptions) {
+                return /fn-delete/.test(buttonOptions.cssClass || '')
+            })[0];
+            var deleteButtonPosition = deleteButton ? lateButtons.indexOf(deleteButton) : -1;
+            if (deleteButtonPosition !== -1) {
+                lateButtons.splice(deleteButtonPosition, 0, saveButtonOptions);
+            } else {
+                lateButtons.push(saveButtonOptions);
+            }
         }
 
+        // All other buttons go "to the left" of the inherited buttons
         if (schema.copy && schema.copy.enable) {
-            buttons.push({
+            earlyButtons.push({
                 title: Mapbender.trans('mb.digitizer.feature.clone.title'),
                 cssClass: 'fa fas fa-copy -fn-copy'
             });
         }
         if (schema.allowCustomStyle) {
-            buttons.push({
+            earlyButtons.push({
                 title: Mapbender.trans('mb.digitizer.feature.style.change'),
                 cssClass: '-fn-edit-style fa fas fa-eyedropper fa-eye-dropper'  // NOTE: fas and fa-eye-dropper for FA5+; fa-eyedropper for FA4
             });
         }
 
         if (schema.allowChangeVisibility) {
-            buttons.push({
+            earlyButtons.push({
                 title: Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'),
                 cssClass: 'fa far fa-eye -fn-toggle-visibility'
             });
         }
-        var upstreamButtons = Mapbender.DataManager.TableRenderer.prototype.getButtonsOption.call(this, schema);
-        return _.union(buttons, upstreamButtons);
+        return earlyButtons.concat(lateButtons);
     };
 
     Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
