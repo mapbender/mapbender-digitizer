@@ -318,6 +318,46 @@
                 srid: this.getCurrentSrid()
             };
         },
+        updateMultiple: function(schema, features) {
+            var params = {
+                schema: schema.schemaName
+            };
+            var postData = {
+                srid: this.getCurrentSrid(),
+                // generate mapping of id => properties and geometry
+                features: {}
+            };
+            var featureMap = {};
+            for (var i = 0; i < features.length; ++i) {
+                var feature = features[i];
+                var id = this._getUniqueItemId(schema, feature);
+                featureMap[id] = feature;
+                postData.features[id] = {
+                    properties: this._getItemData(schema, feature),
+                    geometry: this.wktFormat_.writeGeometryText(feature.getGeometry())
+                };
+            }
+            var widget = this;
+            var idProperty = this._getUniqueItemIdProperty(schema);
+            this.postJSON('update-multiple?' + $.param(params), postData)
+                .then(function(response) {
+                    var savedItems = response.saved;
+                    for (var i = 0; i < savedItems.length; ++i) {
+                        var savedItem = savedItems[i];
+                        var id = savedItem.properties[idProperty];
+                        var feature = featureMap[id];
+
+                        var geometry = widget.wktFormat_.readGeometryFromText(savedItem.geometry);
+                        feature.setGeometry(geometry);
+                        widget._replaceItemData(schema, feature, savedItem.properties || {});
+                        feature.set('dirty', false);
+                        feature.set("modificationState", undefined);
+                        widget.tableRenderer.refreshRow(schema, feature, false);
+                    }
+                    $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
+                })
+            ;
+        },
         getSchemaLayer: function(schema) {
             // @todo: replace monkey-patched property access on schema
             return schema.renderer.getLayer();

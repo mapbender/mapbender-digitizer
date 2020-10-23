@@ -150,12 +150,10 @@
             widget.element.on('click', '.-fn-save-all', function() {
                 var schema = widget._getCurrentSchema();
                 var source = widget.getSchemaLayer(schema).getSource();
-                source.getFeatures().filter(function (feature) {
+                var features = source.getFeatures().filter(function (feature) {
                     return (["isNew", "isChanged"].includes(feature.get("modificationState")));
-                }).forEach(function (feature) {
-                    // @todo: use single bulk save operation; loop implementation is inefficient and also emits N success notifications
-                    widget._saveItem(schema, undefined, feature);
                 });
+                widget.updateMultiple(schema, features);
             });
         },
         setSchema: function(schema) {

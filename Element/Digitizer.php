@@ -3,11 +3,14 @@
 namespace Mapbender\DigitizerBundle\Element;
 
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
+use Mapbender\DataManagerBundle\Exception\UnknownSchemaException;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Component\FeatureTypeService;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DataManagerBundle\Element\DataManagerElement;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 
 /**
@@ -117,6 +120,23 @@ class Digitizer extends DataManagerElement
     }
 
     /**
+     * @param Request $request
+     * @return Response|null
+     * @throws UnknownSchemaException
+     * @throws ConfigurationErrorException
+     */
+    protected function dispatchRequest(Request $request)
+    {
+        $action = $request->attributes->get('action');
+        switch ($action) {
+            default:
+                return parent::dispatchRequest($request);
+            case 'update-multiple':
+                return new JsonResponse($this->getUpdateMultipleActionResponseData($request));
+        }
+    }
+
+    /**
      * @param string $schemaName
      * @return FeatureType
      * @throws ConfigurationErrorException
@@ -172,6 +192,37 @@ class Digitizer extends DataManagerElement
             $results[] = $this->formatResponseFeature($repository, $feature);
         }
         return $results;
+    }
+
+    protected function getUpdateMultipleActionResponseData(Request $request)
+    {
+        $dataOut = array(
+            'saved' => array(),
+        );
+        $schemaName = $request->query->get('schema');
+        $repository = $this->getDataStoreBySchemaName($schemaName);
+        // NOTE: Client always sends geometry as a separate "geometry" attribute, while
+        //       Feature creation expects an attribute matching the (configured) geometry
+        //       column name. Adapt incoming data.
+        $requestData = json_decode($request->getContent(), true);
+        $srid = $requestData['srid'];
+        foreach ($requestData['features'] as $id => $featureData) {
+            $feature = $repository->getById($id);
+            if (!$feature) {
+                // uh-oh!
+                continue;
+            }
+            if (!empty($featureData['geometry'])) {
+                $feature->setGeom($featureData['geometry']);
+                $feature->setSrid($srid);
+            }
+            if (!empty($featureData['properties'])) {
+                $feature->setAttributes($featureData['properties']);
+            }
+            $updatedFeature = $repository->save($feature);
+            $dataOut['saved'][] = $this->formatResponseFeature($repository, $updatedFeature);
+        }
+        return $dataOut;
     }
 
     protected function getSaveActionResponseData(Request $request)
