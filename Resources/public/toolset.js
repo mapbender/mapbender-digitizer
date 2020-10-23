@@ -123,7 +123,7 @@
                         'data-toolname': toolName,
                         title: tooltip
                     })
-                    .addClass('-fn-toggle-tool')
+                    .addClass('-fn-toggle-tool btn btn-default')
                     .append($icon)
                     .data({
                         schema: schema
@@ -190,7 +190,6 @@
                 };
                 source.getFeatures().forEach(function(feature) {
                     addFeature(feature);
-
                 });
                 source.on(ol.source.VectorEventType.ADDFEATURE, function(event) {
                     addFeature(event.feature);
@@ -217,12 +216,12 @@
             var $button;
 
             if (schema.allowChangeVisibility) {
-                $button = $('<button type="button" class="btn -fn-hide-all" />');
+                $button = $('<button type="button" class="btn -fn-hide-all btn-default" />');
                 $button.append('<i class="fa far fa-eye-slash">');
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
                 buttons.push($button);
 
-                $button = $('<button type="button" class="btn -fn-show-all" />');
+                $button = $('<button type="button" class="btn -fn-show-all btn-default" />');
                 $button.append('<i class="fa far fa-eye">');
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
                 buttons.push($button);

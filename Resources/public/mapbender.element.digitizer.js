@@ -181,10 +181,9 @@
         },
         _updateToolset: function($container, schema) {
             this._super($container, schema);
-            $('.btn, button', $container)
-                .removeClass('button')  // no Mapbender legacy button styling
-                // some .btn- color variant is required to visualize active / not active
-                .addClass('btn btn-sm btn-default')
+            $('button', $container)
+                // Resize buttons to btn-sm to fit our (potentially many) tool buttons
+                .addClass('btn btn-sm')
             ;
         },
         _renderToolset: function(schema) {
