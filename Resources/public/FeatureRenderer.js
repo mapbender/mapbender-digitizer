@@ -46,7 +46,7 @@
 
             var renderer = this;
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
-                if (event.key == "selected" || event.key == "modificationState" || event.key == "hidden") {
+                if (event.key === 'selected' || event.key === 'dirty' || event.key === 'hidden') {
                     renderer.updateFeatureStyle(schema, feature);
                 }
             });
@@ -107,7 +107,7 @@
                 this.setRenderIntent(feature, 'invisible');
             } else if (feature.get("selected")) {
                 this.setRenderIntent(feature, 'select');
-            } else if (feature.get("modificationState")) {
+            } else if (feature.get('dirty')) {
                 this.setRenderIntent(feature, 'unsaved');
             } else {
                 this.setRenderIntent(feature, 'default');

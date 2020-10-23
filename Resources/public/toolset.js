@@ -151,7 +151,7 @@
                 var schema = widget._getCurrentSchema();
                 var source = widget.getSchemaLayer(schema).getSource();
                 var features = source.getFeatures().filter(function (feature) {
-                    return (["isNew", "isChanged"].includes(feature.get("modificationState")));
+                    return feature.get('dirty');
                 });
                 widget.updateMultiple(schema, features);
             });
@@ -284,7 +284,6 @@
                 var widget = this.owner;
                 newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
                     var feature = event.feature;
-                    feature.set("modificationState", "isNew");
                     feature.set('dirty', true);
                     // @todo: do not rely on schema.widget property; editor should know its owner
                     widget._openEditDialog(schema, event.feature);

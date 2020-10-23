@@ -273,7 +273,6 @@
                 dataItem: responseData.dataItem.properties
             });
             feature.set('dirty', false);
-            feature.set("modificationState", undefined);
             if (schema.geometryEditor) {
                 schema.geometryEditor.resume();
             }
@@ -351,7 +350,6 @@
                         feature.setGeometry(geometry);
                         widget._replaceItemData(schema, feature, savedItem.properties || {});
                         feature.set('dirty', false);
-                        feature.set("modificationState", undefined);
                         widget.tableRenderer.refreshRow(schema, feature, false);
                     }
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
@@ -389,7 +387,6 @@
 
             this.getSchemaLayer(schema).getSource().addFeature(newFeature);
             newFeature.set('dirty', true);
-            newFeature.set("modificationState", "isNew");
 
             this._openEditDialog(schema, newFeature);
         },
