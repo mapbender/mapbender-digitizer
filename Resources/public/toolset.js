@@ -131,6 +131,31 @@
             }
             return buttons;
         },
+        registerEvents: function() {
+            var widget = this.owner;
+            widget.element.on('click', '.-fn-hide-all', function() {
+                var source = widget.getSchemaLayer(widget._getCurrentSchema()).getSource();
+                source.getFeatures().forEach(function (feature) {
+                    feature.set('hidden', true);
+                });
+            });
+            widget.element.on('click', '.-fn-show-all', function() {
+                var source = widget.getSchemaLayer(widget._getCurrentSchema()).getSource();
+                source.getFeatures().forEach(function (feature) {
+                    feature.set('hidden', false);
+                });
+            });
+            widget.element.on('click', '.-fn-save-all', function() {
+                var schema = widget._getCurrentSchema();
+                var source = widget.getSchemaLayer(schema).getSource();
+                source.getFeatures().filter(function (feature) {
+                    return (["isNew", "isChanged"].includes(feature.get("modificationState")));
+                }).forEach(function (feature) {
+                    // @todo: use single bulk save operation; loop implementation is inefficient and also emits N success notifications
+                    widget._saveItem(schema, undefined, feature);
+                });
+            });
+        },
         /**
          * Renders buttons that do NOT represent geometry interactions
          * @param schema
@@ -139,43 +164,25 @@
          */
         renderUtilityButtons: function(schema) {
             var buttons = [];
-            var widget = this.owner;
             var $button;
 
             if (schema.allowChangeVisibility) {
-                $button = $("<button class='button' type='button'/>");
+                $button = $('<button type="button" class="btn -fn-hide-all" />');
                 $button.append('<i class="fa far fa-eye-slash">');
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
-                $button.click(function (event) {
-                    widget.getSchemaLayer(schema).getSource().getFeatures().forEach(function (feature) {
-                        feature.set('hidden', true);
-                    });
-                });
                 buttons.push($button);
 
-                $button = $("<button class='button' type='button'/>");
+                $button = $('<button type="button" class="btn -fn-show-all" />');
                 $button.append('<i class="fa far fa-eye">');
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
-                $button.click(function (event) {
-                    widget.getSchemaLayer(schema).getSource().getFeatures().forEach(function (feature) {
-                        feature.set('hidden', false);
-                    });
-                });
                 buttons.push($button);
             }
             // If geometry modification is allowed, we must offer a way to save
             if (schema.allowDigitize) {
-                $button = $("<button class='button' type='button'/>");
+                $button = $('<button type="button" class="btn -fn-save-all btn-success" />');
                 $button.append('<i class="fa fas fa-save">');
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.saveAll'));
                 $button.prop('disabled', true);
-                $button.click(function () {
-                    widget.getSchemaLayer(schema).getSource().getFeatures().filter(function (feature) {
-                        return (["isNew", "isChanged"].includes(feature.get("modificationState")));
-                    }).forEach(function (feature) {
-                        widget._saveItem(schema, undefined, feature);
-                    });
-                });
                 buttons.push($button);
             }
             return buttons;

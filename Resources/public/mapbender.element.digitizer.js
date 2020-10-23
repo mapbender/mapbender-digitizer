@@ -20,10 +20,10 @@
         activeToolName_: null,
 
         _create: function () {
+            this.toolsetRenderer = this._createToolsetRenderer();
             this._super();
             var widget = this;
             var target = this.options.target;
-            this.toolsetRenderer = this._createToolsetRenderer();
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
             Mapbender.elementRegistry.waitReady(target).then(function(mbMap) {
@@ -102,6 +102,7 @@
         },
         _initializeEvents: function() {
             this._super();
+            this.toolsetRenderer.registerEvents();
             var self = this;
             this.element.on('click', '.-fn-toggle-tool[data-toolname]', function() {
                 var $button = $(this);
