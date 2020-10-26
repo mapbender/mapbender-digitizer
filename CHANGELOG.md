@@ -1,3 +1,15 @@
+## 1.4-beta2
+* Fix saving features to table with SRS different from current map view
+* Fix missing response to Mapbender SRS switch
+* Fix undesired map zoom when ending polygon drawing with double-click
+  * Note: issue still occurs when ending polygon _editing_ with double-click
+* Fix poor visualization of currently active tool button
+* Fix poor visualization of save interaction acitve / disabled button states
+* Add missing function of "Save all" button
+* Page table view to currently edited feature when editing started via left click or context menu
+* Misc translation fixes
+* Misc design inconsistency fixes vs Mapbender 3.2
+
 ## 1.4-beta1
 * Compatible with Openlayers 4/5/6 only
 * Compatible with Mapbender >=3.2.1 only
