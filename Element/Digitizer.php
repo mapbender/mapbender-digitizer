@@ -146,20 +146,6 @@ class Digitizer extends DataManagerElement
         return $this->getDataStoreService()->featureTypeFactory($this->getDataStoreConfigForSchema($schemaName));
     }
 
-    /**
-     * @return FeatureTypeService
-     */
-    protected function getDataStoreService()
-    {
-        // HACK: instantiate for temp decoupling from DataSourceBundle services config (not available if bundle not
-        //       registered)
-        // @todo: bring your own service definition
-        /** @var FeatureTypeService $service */
-        // $service = $this->container->get('features');
-        $service = new FeatureTypeService($this->container);
-        return $service;
-    }
-
     protected function getSelectActionResponseData(Request $request)
     {
         // @todo: implement current extent search
@@ -386,5 +372,20 @@ class Digitizer extends DataManagerElement
                 'fillOpacity' => 0.5,
             ),
         );
+    }
+
+    /**
+     * @return FeatureTypeService
+     */
+    protected function getDataStoreService()
+    {
+        /** @var FeatureTypeService $service */
+        $service = $this->container->get('mb.digitizer.registry');
+        return $service;
+    }
+
+    protected function getDataStoreDefinition($storeId)
+    {
+        return $this->getDataStoreService()->getFeatureTypeDeclarations();
     }
 }
