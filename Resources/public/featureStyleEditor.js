@@ -281,7 +281,7 @@
             formData[schema.featureType.styleField] = JSON.stringify(styleData);
             // TODO enable defered saving
             // @todo: decouple from feature saving; use a distinct url to save the style
-            this.owner._saveItem(schema, undefined, feature, formData);
+            this.owner._saveItem(schema, feature, formData);
             element.popupDialog("close");
         }
     });

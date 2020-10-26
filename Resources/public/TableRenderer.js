@@ -92,7 +92,7 @@
                 event.stopPropagation();
                 var data = $(this).closest('tr').data();
                 if (data.schema && data.item) {
-                    self.owner._saveItem(data.schema, undefined, data.item);
+                    self.owner._saveItem(data.schema, data.item);
                 }
             });
             $table.on('click', 'tbody > tr .-fn-toggle-visibility', function(event) {
