@@ -194,6 +194,13 @@
             return nodes;
         },
         _openEditDialog: function(schema, feature) {
+            // Make feature visible in table when editing was started
+            // from map click or context menu.
+            // NOTE: newly created features are not in the table and cannot be paged to
+            var tr = feature.get('table-row');
+            if (tr) {
+                this.tableRenderer.showRow(schema, tr);
+            }
             var dialog = this._super(schema, feature);
             if (schema.geometryEditor) {
                 schema.geometryEditor.pause();
