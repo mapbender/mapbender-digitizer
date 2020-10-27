@@ -169,7 +169,8 @@
                 }
                 var trackModified = function(feature, dirtyState) {
                     var index = unsavedFeatureList.indexOf(feature);
-                    if (dirtyState && -1 === index) {
+                    // Ignore newly created features (empty id) in tracking
+                    if (dirtyState && -1 === index && widget._getUniqueItemId(schema, feature)) {
                         unsavedFeatureList.push(feature);
                         updateSaveAll();
                     }
