@@ -32,6 +32,11 @@
     .btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
         outline: none;
     }
+    // Disable Bootstrap btn-default color changes on :focus
+    .btn-default:not(.active):focus {
+        background-color: #fff; // = less variable @btn-default-bg
+        border-color: #ccc; // = less variable @btn-default-border
+    }
 }
 
 .digitizer-style-editor {
