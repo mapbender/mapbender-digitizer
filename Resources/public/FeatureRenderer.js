@@ -165,6 +165,7 @@
         }
         Object.freeze(styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
         styles.invisible = new ol.style.Style();
+        styles.editing = this.createEditingStyle_();
         return styles;
     };
 
@@ -235,5 +236,61 @@
         });
         selectControl.setActive(false);
         return selectControl;
+    };
+
+    /**
+     * @return function
+     * @private
+     */
+    Mapbender.Digitizer.FeatureRenderer.prototype.createEditingStyle_ = function() {
+        // Adopted from "ol4-extensions" repository
+        // @see https://github.com/mapbender/ol4-extensions/blob/0.0.4/selectableModify.js#L3
+        var baseStyle = ol.style.Style.defaultFunction()[0].clone();
+        var verticesStyle = new ol.style.Style({
+            geometry: function(feature) {
+                // Concatenate all vertices of all rings
+                var coordinates = Array.prototype.concat.apply([], feature.getGeometry().getCoordinates());
+                return new ol.geom.MultiPoint(coordinates);
+            },
+            image: new ol.style.Circle({
+                radius: 3,
+                fill: new ol.style.Fill({
+                    color: "#ffcc33"
+                })
+            })
+        });
+        var midpointStyle = new ol.style.Style({
+            geometry: function(feature) {
+                var lineStrings = feature.getGeometry().getCoordinates().map(function(ringCoordinates) {
+                    return new ol.geom.LineString(ringCoordinates);
+                });
+                var coordinates = Array.prototype.concat.apply([], lineStrings.map(function(lineString) {
+                    var midpoints = [];
+                    lineString.forEachSegment(function(start, end) {
+                        midpoints.push([(start[0] + end[0]) / 2, (start[1] + end[1]) / 2]);
+                    });
+                    return midpoints;
+                }));
+                return new ol.geom.MultiPoint(coordinates);
+            },
+            image: new ol.style.Circle({
+                radius: 3,
+                stroke: new ol.style.Stroke({
+                    color: "#ffcc33",
+                    width: 4
+                })
+            })
+        });
+
+        return function (feature) {
+            var geometry = feature.getGeometry();
+            var styles = [baseStyle];
+
+            if (feature.getGeometry().getType() == "Polygon") {
+                styles.push(verticesStyle);
+                styles.push(midpointStyle);
+            }
+            return styles;
+        }
     };
 })();
