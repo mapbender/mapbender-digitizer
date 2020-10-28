@@ -59,27 +59,32 @@
             // adopted code from mapbender/ol4-extensions package, plus fixes
             // @todo: turn this into a style function on the layer
             var labelPattern = /\${([^}]+)}/g;
-            var labelValue = style.getText() && style.getText().getText();
-            if (!labelPattern.test(labelValue || '')) {
-                feature.setStyle(style);
-                return;
-            }
-            // Build a two-element list returning style function, resolving the
-            // attribute-dependent label dynamically
-            var baseStyle = style.clone();
-            var labelStyle = new ol.style.Style({
-                text: baseStyle.getText().clone()
-            });
-            baseStyle.setText(null);
-
             var styleFunction = function (feature) {
+                var baseStyles;
+                if (typeof style === 'function') {
+                    baseStyles = style.apply(this, arguments);
+                    if (!Array.isArray(baseStyles)) {
+                        baseStyles = [baseStyles];
+                    }
+                } else {
+                    baseStyles = [style];
+                }
+                var labelValue = baseStyles[0].getText() && baseStyles[0].getText().getText();
+                if (!labelPattern.test(labelValue || '')) {
+                    return baseStyles;
+                }
+                var labelStyle = new ol.style.Style({
+                    text: baseStyles[0].getText().clone()
+                });
+                baseStyles[0] = baseStyles[0].clone();
+                baseStyles[0].setText(null);
+
                 var attributes = feature.get("data") || {};
                 var label = labelValue.replace(labelPattern, function(match, attributeName) {
                     return attributes[attributeName] || '';
                 });
-                var labelStyle_ = labelStyle.clone();
-                labelStyle_.getText().setText(label);
-                return [baseStyle, labelStyle_];
+                labelStyle.getText().setText(label);
+                return baseStyles.concat([labelStyle]);
             };
             feature.setStyle(styleFunction);
         },
