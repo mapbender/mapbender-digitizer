@@ -126,10 +126,6 @@
                 type: 'Polygon'
             });
 
-            interaction.on(ol.interaction.DrawDonutEventType.DRAWDONUTEND,function(event) {
-                event.feature.set('dirty', true);
-            });
-
             return interaction;
         },
 
@@ -137,10 +133,6 @@
             var interaction = new ol.interaction.SelectableModify({
             });
 
-            interaction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
-                var feature = event.features.item(0);
-                feature.set('dirty', true);
-            });
             // NOTE: select event is only triggered by custom SelectableModify, not on basic ol.interaction.Modify
             interaction.on('select', function(event) {
                 // Style editor interactions...

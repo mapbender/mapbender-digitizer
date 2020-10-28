@@ -289,6 +289,10 @@
                     // @todo: do not rely on schema.widget property; editor should know its owner
                     widget._openEditDialog(schema, event.feature);
                 });
+                newInteraction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
+                    var feature = event.features.item(0);
+                    feature.set('dirty', true);
+                });
             }
             return this.tools_[schema.schemaName][type];
         },
