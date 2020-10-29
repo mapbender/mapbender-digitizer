@@ -68,7 +68,7 @@
                 var hover = event.handleObj.origType === 'mouseenter';
                 var feature = $(this).data().item;
                 if (feature) {
-                    feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: hover});
+                    feature.set('hover', hover);
                 }
             });
             $table.on('click', 'tbody > tr', function (e) {
@@ -176,12 +176,13 @@
                     self.updateButtonStates_(tr, feature);
                 }
             });
-            feature.on('Digitizer.HoverFeature', function (event) {
-                var feature = event.target;
-                var tr = feature && feature.get('table-row');
-                var hover = !!event.hover || (typeof (event.hover) === 'undefined');
-                if (tr) {
-                    $(tr).toggleClass('hover', hover);
+            feature.on(ol.ObjectEventType.PROPERTYCHANGE, function(event) {
+                if (event.key === 'hover') {
+                    var feature = event.target;
+                    var tr = feature && feature.get('table-row');
+                    if (tr) {
+                        $(tr).toggleClass('hover', !!feature.get('hover'));
+                    }
                 }
             });
         },

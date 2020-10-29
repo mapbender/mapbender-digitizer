@@ -39,14 +39,10 @@
             feature.set("oldGeometry", feature.getGeometry().clone());
         },
         registerFeatureEvents: function(schema, feature) {
-            feature.on('Digitizer.HoverFeature', function (event) {
-                var hover = !!event.hover || (typeof (event.hover) === 'undefined');
-                feature.set('selected', hover && !feature.get('hidden'));
-            });
-
             var renderer = this;
+            var watchedProperties = ['hover', 'dirty', 'editing', 'hidden'];
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
-                if (event.key === 'selected' || event.key === 'dirty' || event.key === 'hidden' || event.key === 'editing') {
+                if (-1 !== watchedProperties.indexOf(event.key)) {
                     renderer.updateFeatureStyle(schema, feature);
                 }
             });
@@ -107,7 +103,7 @@
                 this.setRenderIntent(feature, 'editing');
             } else if (feature.get("hidden")) {
                 this.setRenderIntent(feature, 'invisible');
-            } else if (feature.get("selected")) {
+            } else if (feature.get('hover')) {
                 this.setRenderIntent(feature, 'select');
             } else if (feature.get('dirty')) {
                 this.setRenderIntent(feature, 'unsaved');
@@ -209,12 +205,11 @@
             layers: [this.layer]
         });
         highlightControl.on('select', function (e) {
-            e.selected.forEach(function (feature) {
-                feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: true});
+            e.deselected.forEach(function(feature) {
+                feature.set('hover', false);
             });
-
-            e.deselected.forEach(function (feature) {
-                feature.dispatchEvent({type: 'Digitizer.HoverFeature', hover: false});
+            e.selected.forEach(function(feature) {
+                feature.set('hover', true);
             });
         });
 
