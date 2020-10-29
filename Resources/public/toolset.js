@@ -51,9 +51,6 @@
             }
             this.activeInteraction = state && tool || null;
             tool.setActive(!!state);
-            // Disable select control (click on feature to open editor) while drawing
-            // NOTE: hover highlighting remains active
-            this.renderer.selectControl.setActive(!state);
         }
     });
 

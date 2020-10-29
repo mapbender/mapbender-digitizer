@@ -168,7 +168,7 @@
                 schema.geometryEditor.setActive(state);
             }
             schema.renderer.highlightControl.setActive(state);
-            schema.renderer.selectControl.setActive(state && schema.allowEditData);
+            schema.renderer.selectControl.setActive(state);
             if (state) {
                 this.contextMenu.enable();
             } else {
@@ -396,6 +396,12 @@
             newFeature.set('dirty', true);
 
             this._openEditDialog(schema, newFeature);
+        },
+        onFeatureClick: function(feature) {
+            var schema = this._getCurrentSchema();
+            if (!this.activeToolName_ && schema.allowEditData) {
+                this._openEditDialog(schema, feature);
+            }
         },
         /**
          * @return {number}

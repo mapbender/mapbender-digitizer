@@ -235,8 +235,7 @@
 
         var widget = this.owner;
         selectControl.on('select', function (event) {
-            var schema = widget._getCurrentSchema();
-            widget._openEditDialog(schema, event.selected[0]);
+            widget.onFeatureClick(event.selected[0]);
             selectControl.getFeatures().clear();
         });
         selectControl.setActive(false);
