@@ -167,6 +167,12 @@
             if (schema.geometryEditor) {
                 schema.geometryEditor.setActive(state);
             }
+            if (!state) {
+                if (schema.geometryEditor && this.activeToolName_) {
+                    schema.geometryEditor.toggleTool(this.activeToolName_, schema, false);
+                }
+                this.activeToolName_ = null;
+            }
             schema.renderer.highlightControl.setActive(state);
             schema.renderer.selectControl.setActive(state);
             if (state) {
