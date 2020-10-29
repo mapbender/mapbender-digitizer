@@ -286,7 +286,9 @@
                 dataItem: responseData.dataItem.properties
             });
             feature.set('dirty', false);
+            schema.renderer.resetSelection();
             if (schema.geometryEditor) {
+                schema.geometryEditor.setEditFeature(null);
                 schema.geometryEditor.resume();
             }
             this.contextMenu.setActive(!this.activeToolName_);

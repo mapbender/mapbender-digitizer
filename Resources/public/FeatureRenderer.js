@@ -48,6 +48,9 @@
                 }
             });
         },
+        resetSelection: function() {
+            this.selectControl.getFeatures().clear();
+        },
         setRenderIntent: function(feature, intent) {
             var style = this.getStyleForIntent_(feature, intent);
             this.setStyle_(feature, style);
