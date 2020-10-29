@@ -18,6 +18,7 @@
         active: false,
         controlFactory: null,
         activeToolName_: null,
+        selectControl: null,
 
         _create: function () {
             this.toolsetRenderer = this._createToolsetRenderer();
@@ -89,6 +90,8 @@
                     });
                 }
             });
+            this.selectControl = this.createSelectControl_();
+            olMap.addInteraction(this.selectControl);
         },
         // reveal / hide = automatic sidepane integration API
         reveal: function() {
@@ -124,10 +127,12 @@
         activate: function() {
             if (!this.active) {
                 this._activateSchema(this._getCurrentSchema());
+                this.selectControl.setActive(true);
                 this.active = true;
             }
         },
         deactivate: function() {
+            this.selectControl.setActive(false);
             this._deactivateSchema(this._getCurrentSchema());
             this.active = false;
         },
@@ -158,6 +163,8 @@
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
+            schema.geometryEditor.setEditFeature(null);
+            this.selectControl.getFeatures().clear();
             this._toggleSchemaInteractions(schema, false);
             if (!(this.options.displayOnInactive || schema.displayPermanent)) {
                 this.getSchemaLayer(schema).setVisible(false);
@@ -174,7 +181,6 @@
                 this.activeToolName_ = null;
             }
             this.getRenderer(schema).highlightControl.setActive(state);
-            this.getRenderer(schema).selectControl.setActive(state);
             if (state) {
                 this.contextMenu.enable();
             } else {
@@ -286,7 +292,7 @@
                 dataItem: responseData.dataItem.properties
             });
             feature.set('dirty', false);
-            this.getRenderer(schema).resetSelection();
+            this.selectControl.getFeatures().clear();
             if (schema.geometryEditor) {
                 schema.geometryEditor.setEditFeature(null);
                 schema.geometryEditor.resume();
@@ -443,6 +449,24 @@
         },
         zoomToFeature: function(schema, feature) {
             Mapbender.Model.zoomToFeature(feature);
+        },
+        createSelectControl_: function() {
+            var self = this;
+            var selectControl = new ol.interaction.Select({
+                condition: ol.events.condition.singleClick,
+                layers: function(layer) {
+                    var schema = self._getCurrentSchema();
+                    var activeLayer = schema && self.getSchemaLayer(schema);
+                    return layer === activeLayer;
+                },
+                style: null
+            });
+
+            selectControl.on('select', function (event) {
+                self.onFeatureClick(event.selected[0] || null);
+            });
+            selectControl.setActive(true);
+            return selectControl;
         },
         __formatting_dummy: null
     });

@@ -18,8 +18,6 @@
         this.excludedFromHighlighting_ = [];
 
         this.highlightControl = this.initializeHighlightControl_();
-        this.selectControl = this.initializeSelectControl_();
-        olMap.addInteraction(this.selectControl);
         olMap.addInteraction(this.highlightControl);
 
         var renderer = this;
@@ -50,9 +48,6 @@
                     renderer.updateFeatureStyle(schema, feature);
                 }
             });
-        },
-        resetSelection: function() {
-            this.selectControl.getFeatures().clear();
         },
         setRenderIntent: function(feature, intent) {
             var style = this.getStyleForIntent_(feature, intent);
@@ -239,24 +234,6 @@
         highlightControl.setActive(false);
         return highlightControl;
     };
-    Mapbender.Digitizer.FeatureRenderer.prototype.initializeSelectControl_ = function () {
-        var widget = this.owner;
-        var selectControl = new ol.interaction.Select({
-            condition: ol.events.condition.singleClick,
-            layers: function(layer) {
-                var schema = widget._getCurrentSchema();
-                var activeLayer = schema && widget.getSchemaLayer(schema);
-                return layer === activeLayer;
-            }
-        });
-
-        selectControl.on('select', function (event) {
-            widget.onFeatureClick(event.selected[0] || null);
-        });
-        selectControl.setActive(false);
-        return selectControl;
-    };
-
     /**
      * @return function
      * @private
