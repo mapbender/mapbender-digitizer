@@ -4,15 +4,14 @@
 
     /**
      * @param {*} owner jQueryUI widget instance
-     * @param {Mapbender.Digitizer.FeatureRenderer} renderer
+     * @param {ol.PluggableMap} olMap
      * @param {Mapbender.Digitizer.DigitizingControlFactory} controlFactory
      *
      * @constructor
      */
-    Mapbender.Digitizer.FeatureEditor = function(owner, renderer, controlFactory) {
+    Mapbender.Digitizer.FeatureEditor = function(owner, olMap, controlFactory) {
         this.owner = owner;
-        this.renderer = renderer;
-        this.olMap = renderer.olMap;
+        this.olMap = olMap;
         this.controlFactory = controlFactory;
         this.activeInteraction = null;
         this.paused_ = false;
@@ -348,7 +347,10 @@
          * @param {String} type
          */
         createDrawingTool: function(type) {
-            var source = this.renderer.getLayer().getSource();
+            var widget = this.owner;
+            var schema = widget._getCurrentSchema();
+            var layer = schema && widget.getSchemaLayer(schema);
+            var source = layer && layer.getSource();
             var interaction;
             switch (type) {
                 case 'modifyFeature':
@@ -361,7 +363,7 @@
                     break;
             }
             interaction.setActive(false);
-            this.renderer.olMap.addInteraction(interaction);
+            this.olMap.addInteraction(interaction);
             return interaction;
         }
     });

@@ -79,9 +79,9 @@
             });
             this.mbMap.element.on('mbmapsrschanged', function(event, data) {
                 var schema = self._getCurrentSchema();
-                if (schema.renderer) {
-                    var source = schema.renderer.getLayer().getSource();
-                    source.forEachFeature(/** @param {ol.Feature} feature */function(feature) {
+                var layer = schema && self.getSchemaLayer(schema);
+                if (layer) {
+                    layer.getSource().forEachFeature(/** @param {ol.Feature} feature */function(feature) {
                         var geometry = feature.getGeometry();
                         if (geometry) {
                             geometry.transform(data.from, data.to);
@@ -134,12 +134,13 @@
         _activateSchema: function(schema) {
             this._super(schema);
             // HACK: externally patch renderer onto schema post-construction
+            var olMap = this.mbMap.getModel().olMap;
             if (!schema.renderer) {
-                schema.renderer = new Mapbender.Digitizer.FeatureRenderer(this, this.mbMap.getModel().olMap, schema);
+                schema.renderer = new Mapbender.Digitizer.FeatureRenderer(this, olMap, schema);
             }
             // HACK: externally patch editor onto schema post-construction
             if (schema.allowDigitize && !schema.geometryEditor) {
-                schema.geometryEditor = new Mapbender.Digitizer.FeatureEditor(this, schema.renderer, this.controlFactory);
+                schema.geometryEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, this.controlFactory);
             }
             this.toolsetRenderer.setSchema(schema);
             this.contextMenu.setSchema(schema);
@@ -149,7 +150,7 @@
         _toggleDrawingTool: function(schema, toolName, state) {
             if (!state && 'modifyFeature' === toolName) {
                 schema.geometryEditor.setEditFeature(null);
-                schema.renderer.setExcludedFromHighlighting([]);
+                this.getRenderer(schema).setExcludedFromHighlighting([]);
             }
             schema.geometryEditor.toggleTool(toolName, schema, state);
             this.activeToolName_ = state && toolName || null;
@@ -172,8 +173,8 @@
                 }
                 this.activeToolName_ = null;
             }
-            schema.renderer.highlightControl.setActive(state);
-            schema.renderer.selectControl.setActive(state);
+            this.getRenderer(schema).highlightControl.setActive(state);
+            this.getRenderer(schema).selectControl.setActive(state);
             if (state) {
                 this.contextMenu.enable();
             } else {
@@ -269,10 +270,9 @@
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
         },
         _prepareDataItem: function(schema, itemData) {
-            var renderer = schema.renderer;
             var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
             feature.set('data', itemData.properties || {});
-            renderer.initializeFeature(schema, feature);
+            this.getRenderer(schema).initializeFeature(schema, feature);
             return feature;
         },
         _afterSave: function(schema, feature, originalId, responseData) {
@@ -286,7 +286,7 @@
                 dataItem: responseData.dataItem.properties
             });
             feature.set('dirty', false);
-            schema.renderer.resetSelection();
+            this.getRenderer(schema).resetSelection();
             if (schema.geometryEditor) {
                 schema.geometryEditor.setEditFeature(null);
                 schema.geometryEditor.resume();
@@ -374,8 +374,11 @@
             ;
         },
         getSchemaLayer: function(schema) {
+            return this.getRenderer(schema).getLayer();
+        },
+        getRenderer: function(schema) {
             // @todo: replace monkey-patched property access on schema
-            return schema.renderer.getLayer();
+            return schema.renderer;
         },
         cloneFeature: function(schema, feature) {
             var newFeature = feature.clone();
@@ -415,9 +418,10 @@
             if (feature && !this.activeToolName_ && schema.allowEditData) {
                 this._openEditDialog(schema, feature);
             } else if ('modifyFeature' === this.activeToolName_) {
+                var renderer = this.getRenderer(schema);
                 // Disable hover highlighting on the feature currently selected for editing. The generated style updates break
                 // usability (can't pull vertices outward).
-                schema.renderer.setExcludedFromHighlighting([feature].filter(function(x) {
+                renderer.setExcludedFromHighlighting([feature].filter(function(x) {
                     return !!x;
                 }));
                 schema.geometryEditor.setEditFeature(feature || null);

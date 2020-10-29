@@ -17,7 +17,10 @@
         this.olMap.addLayer(this.layer);
         this.excludedFromHighlighting_ = [];
 
-        this.addSelectControl_();
+        this.highlightControl = this.initializeHighlightControl_();
+        this.selectControl = this.initializeSelectControl_();
+        olMap.addInteraction(this.selectControl);
+        olMap.addInteraction(this.highlightControl);
 
         var renderer = this;
         this.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
@@ -186,6 +189,12 @@
             minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
             maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity)
         });
+        var renderer = this;
+        layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
+            var feature = event.feature;
+            renderer.initializeFeature(schema, feature);
+            renderer.registerFeatureEvents(schema, feature);
+        });
         return layer;
     };
 
@@ -203,22 +212,21 @@
         }
     };
 
-
-    Mapbender.Digitizer.FeatureRenderer.prototype.addSelectControl_ = function () {
-        this.highlightControl = this.initializeHighlightControl_();
-        this.selectControl = this.initializeSelectControl_();
-        this.olMap.addInteraction(this.selectControl);
-        this.olMap.addInteraction(this.highlightControl);
-    };
     Mapbender.Digitizer.FeatureRenderer.prototype.initializeHighlightControl_ = function () {
         var renderer = this;
+        var widget = this.owner;
         var highlightControl = new ol.interaction.Select({
             condition: ol.events.condition.pointerMove,
-            layers: [this.layer],
+            layers: function(layer) {
+                var schema = widget._getCurrentSchema();
+                var activeLayer = schema && widget.getSchemaLayer(schema);
+                return layer === activeLayer;
+            },
             filter: function(feature) {
                 return -1 === renderer.excludedFromHighlighting_.indexOf(feature);
             }
         });
+
         highlightControl.on('select', function (e) {
             e.deselected.forEach(function(feature) {
                 feature.set('hover', false);
@@ -232,12 +240,16 @@
         return highlightControl;
     };
     Mapbender.Digitizer.FeatureRenderer.prototype.initializeSelectControl_ = function () {
+        var widget = this.owner;
         var selectControl = new ol.interaction.Select({
             condition: ol.events.condition.singleClick,
-            layers: [this.layer]
+            layers: function(layer) {
+                var schema = widget._getCurrentSchema();
+                var activeLayer = schema && widget.getSchemaLayer(schema);
+                return layer === activeLayer;
+            }
         });
 
-        var widget = this.owner;
         selectControl.on('select', function (event) {
             widget.onFeatureClick(event.selected[0] || null);
         });
