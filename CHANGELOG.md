@@ -1,3 +1,22 @@
+## dev-release/1.4 @ ec24700
+* Fix donut drawing creating a magical new feature form instead of behaving like modification
+* Fix "Save all" immediately becoming active when drawing a new feature
+* Fix empty features table after deactivating and reactivating Digitizer element
+* Fix inconsistent tool button state after deactivating, then reactivating Digitizer element in sidepane
+* Fix errors caused by (potentially multiple) drawing tools remaining active after repeated schema switches
+* Do not offer inappropriate vertex modification tool for point types (prefer moving points workflow)
+* Fix missing toolset button translations for some geometry types
+* Fix broken default geometry toolsets for multipoint / multiline / multipolygon types
+* Fix broken in-map feature hovering while editing a geometry
+* Fix broken editing style on non-polygon geometries
+* Fix right-click context menu interfering with drawing tools
+* Fix right-click context menu remaining open on schema change
+* Fix right-click context menu remaining active when editing feature attributes
+* Fix feature editing style remaining active when feature with updated geometry is saved via form
+* Fix feature briefly showing with editing styles when switching schema while editing and then switching back
+* Additional fixes for undesirable button color changes on focus
+* When selecting a feature for editing, switch table pagination to show it
+
 ## 1.4-beta2
 * Fix saving features to table with SRS different from current map view
 * Fix missing response to Mapbender SRS switch
