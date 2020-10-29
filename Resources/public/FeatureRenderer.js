@@ -251,10 +251,43 @@
         // Adopted from "ol4-extensions" repository
         // @see https://github.com/mapbender/ol4-extensions/blob/0.0.4/selectableModify.js#L3
         var baseStyle = ol.style.Style.defaultFunction()[0].clone();
+        var extractEdges = function(geometry) {
+            var polygons, lines;
+            switch (geometry.getType()) {
+                case 'MultiPolygon':
+                    polygons = geometry.getPolygons();
+                    break;
+                case 'Polygon':
+                    polygons = [geometry];
+                    break;
+                case 'LineString':
+                    lines = [geometry];
+                    break;
+                case 'MultiLineString':
+                    lines = geometry.getLineStrings();
+                    break;
+                default:
+                    break;
+            }
+            if (polygons) {
+                lines = [];
+                for (var p = 0; p < polygons.length; ++p) {
+                    var polygon = polygons[p];
+                    var rings = polygon.getCoordinates();
+                    for (var r = 0; r < rings.length; ++r) {
+                        var ring = rings[r];
+                        lines.push(new ol.geom.LineString(ring));
+                    }
+                }
+            }
+            return lines || [];
+        };
         var verticesStyle = new ol.style.Style({
             geometry: function(feature) {
-                // Concatenate all vertices of all rings
-                var coordinates = Array.prototype.concat.apply([], feature.getGeometry().getCoordinates());
+                // Concatenate all vertices
+                var coordinates = Array.prototype.concat.apply([], extractEdges(feature.getGeometry()).map(function(lineString) {
+                    return lineString.getCoordinates();
+                }));
                 return new ol.geom.MultiPoint(coordinates);
             },
             image: new ol.style.Circle({
@@ -266,9 +299,7 @@
         });
         var midpointStyle = new ol.style.Style({
             geometry: function(feature) {
-                var lineStrings = feature.getGeometry().getCoordinates().map(function(ringCoordinates) {
-                    return new ol.geom.LineString(ringCoordinates);
-                });
+                var lineStrings = extractEdges(feature.getGeometry());
                 var coordinates = Array.prototype.concat.apply([], lineStrings.map(function(lineString) {
                     var midpoints = [];
                     lineString.forEachSegment(function(start, end) {
@@ -288,14 +319,7 @@
         });
 
         return function (feature) {
-            var geometry = feature.getGeometry();
-            var styles = [baseStyle];
-
-            if (geometry.getType() === "Polygon") {
-                styles.push(verticesStyle);
-                styles.push(midpointStyle);
-            }
-            return styles;
+            return [baseStyle, verticesStyle, midpointStyle];
         }
     };
 })();
