@@ -17,11 +17,6 @@
         this.olMap.addLayer(this.layer);
 
         var renderer = this;
-        this.layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
-            var feature = event.feature;
-            renderer.initializeFeature(schema, feature);
-            renderer.registerFeatureEvents(schema, feature);
-        });
         $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
             renderer.onFeatureUpdatedOnServer(schema);
         });
