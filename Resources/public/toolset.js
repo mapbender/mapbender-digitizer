@@ -132,6 +132,14 @@
                     toolNames = this.getDefaultGeometryToolNames(schema);
                 }
                 var validNames = this.getValidToolNames(schema);
+                // always append modify and move
+                var standardTools = ['modifyFeature', 'moveFeature'];
+                // Filter repeats / earlier appearances
+                toolNames = toolNames.filter(function(name) {
+                    return -1 === standardTools.indexOf(name);
+                });
+                toolNames = toolNames.concat(standardTools);
+                // Reduce to valid set (NOTE: may drop "modifyFeature" again for point / multipoint
                 return toolNames.filter(function(name) {
                     return -1 !== validNames.indexOf(name);
                 });
