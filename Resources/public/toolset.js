@@ -122,7 +122,6 @@
         },
         getGeometryToolNames: function(schema) {
             if (schema.allowDigitize) {
-                var geomType = schema.featureType.geomType;
                 var toolNames = schema.toolset && schema.toolset.map(function(tc) {
                     // Historic Digitizer / vis-ui dependency quirk: toolset
                     // configuration is a list of objects with (only) a type property
@@ -148,7 +147,6 @@
             }
         },
         renderGeometryToolButtons: function(schema) {
-            var geomType = schema.featureType.geomType;
             var toolNames = this.getGeometryToolNames(schema);
             var buttons = [];
             for (var i = 0; i < toolNames.length; ++i) {
@@ -330,7 +328,6 @@
                 newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
                     var feature = event.feature;
                     feature.set('dirty', true);
-                    // @todo: do not rely on schema.widget property; editor should know its owner
                     widget._openEditDialog(schema, event.feature);
                 });
                 newInteraction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {

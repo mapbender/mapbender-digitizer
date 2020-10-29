@@ -290,7 +290,7 @@
             var geometry = feature.getGeometry();
             var styles = [baseStyle];
 
-            if (feature.getGeometry().getType() == "Polygon") {
+            if (geometry.getType() === "Polygon") {
                 styles.push(verticesStyle);
                 styles.push(midpointStyle);
             }
