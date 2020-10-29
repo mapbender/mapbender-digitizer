@@ -94,10 +94,40 @@
             }
             return $groupWrapper.get(0);
         },
+        /**
+         * @param {Object} schema
+         * @return {Array<String>}
+         * @static
+         */
+        getValidToolNames: function(schema) {
+            switch (schema.featureType.geomType) {
+                case 'point':
+                case 'multipoint':
+                    return ['drawPoint', 'moveFeature'];
+                case 'line':
+                case 'multiline':
+                    return ['drawLine', 'modifyFeature', 'moveFeature'];
+                case 'polygon':
+                case 'multipolygon':
+                    return ['drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'modifyFeature', 'moveFeature'];
+                default:
+                    // everything
+                    return [
+                        'drawPoint',
+                        'drawLine',
+                        'drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut',
+                        'modifyFeature', 'moveFeature'
+                    ];
+            }
+        },
         getGeometryToolConfigs: function(schema) {
             if (schema.allowDigitize) {
                 var geomType = schema.featureType.geomType;
-                return schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);
+                var toolConfigs = schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);
+                var validNames = this.getValidToolNames(schema);
+                return toolConfigs.filter(function(tc) {
+                    return -1 !== validNames.indexOf(tc.type);
+                });
             } else {
                 return [];
             }
