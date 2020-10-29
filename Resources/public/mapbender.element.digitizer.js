@@ -174,6 +174,10 @@
             schema.geometryEditor.setEditFeature(null);
             this.selectControl.getFeatures().clear();
             this._toggleSchemaInteractions(schema, false);
+            if (schema === this._getCurrentSchema()) {
+                $('.-fn-toggle-tool', this.element).removeClass('active');
+                this.clearHighlightExclude_();
+            }
             if (!(this.options.displayOnInactive || schema.displayPermanent)) {
                 this.getSchemaLayer(schema).setVisible(false);
             }
