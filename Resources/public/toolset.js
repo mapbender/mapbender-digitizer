@@ -120,13 +120,23 @@
                     ];
             }
         },
-        getGeometryToolConfigs: function(schema) {
+        getDefaultGeometryToolNames: function(schema) {
+            return this.getValidToolNames(schema);
+        },
+        getGeometryToolNames: function(schema) {
             if (schema.allowDigitize) {
                 var geomType = schema.featureType.geomType;
-                var toolConfigs = schema.toolset || Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(geomType);
+                var toolNames = schema.toolset && schema.toolset.map(function(tc) {
+                    // Historic Digitizer / vis-ui dependency quirk: toolset
+                    // configuration is a list of objects with (only) a type property
+                    return tc.type;
+                });
+                if (!toolNames) {
+                    toolNames = this.getDefaultGeometryToolNames(schema);
+                }
                 var validNames = this.getValidToolNames(schema);
-                return toolConfigs.filter(function(tc) {
-                    return -1 !== validNames.indexOf(tc.type);
+                return toolNames.filter(function(name) {
+                    return -1 !== validNames.indexOf(name);
                 });
             } else {
                 return [];
@@ -134,11 +144,10 @@
         },
         renderGeometryToolButtons: function(schema) {
             var geomType = schema.featureType.geomType;
-            var configs = this.getGeometryToolConfigs(schema);
+            var toolNames = this.getGeometryToolNames(schema);
             var buttons = [];
-            for (var i = 0; i < configs.length; ++i) {
-                var buttonConfig = configs[i];
-                var toolName = buttonConfig.type;
+            for (var i = 0; i < toolNames.length; ++i) {
+                var toolName = toolNames[i];
                 var toolExists = typeof (Mapbender.Digitizer.DigitizingControlFactory.prototype[toolName]) === 'function';
                 if (!toolExists) {
                     console.warn("interaction " + toolName + " does not exist");
@@ -146,7 +155,7 @@
                 }
                 var iconClass = this.iconMap_[toolName];
                 var $icon = $(document.createElement('span')).addClass(iconClass);
-                var tooltip = Mapbender.trans('mb.digitizer.toolset.' + geomType + '.' + buttonConfig.type);
+                var tooltip = Mapbender.trans('mb.digitizer.toolset.' + geomType + '.' + toolName);
                 var $button = $(document.createElement('button'))
                     .attr({
                         type: 'button',
