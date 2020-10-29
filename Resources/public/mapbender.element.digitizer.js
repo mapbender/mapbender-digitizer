@@ -130,9 +130,11 @@
         },
         activate: function() {
             if (!this.active) {
-                this._activateSchema(this._getCurrentSchema());
                 this.selectControl.setActive(true);
                 this.highlightControl.setActive(true);
+                var schema = this._getCurrentSchema();
+                this._toggleSchemaInteractions(schema, true);
+                this.getSchemaLayer(schema).setVisible(true);
                 this.active = true;
             }
         },
