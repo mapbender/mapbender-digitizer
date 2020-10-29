@@ -407,6 +407,8 @@
             var schema = this._getCurrentSchema();
             if (!this.activeToolName_ && schema.allowEditData) {
                 this._openEditDialog(schema, feature);
+            } else if ('modifyFeature' === this.activeToolName_) {
+                schema.geometryEditor.setEditFeature(feature);
             }
         },
         /**

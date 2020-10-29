@@ -46,7 +46,7 @@
 
             var renderer = this;
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
-                if (event.key === 'selected' || event.key === 'dirty' || event.key === 'hidden') {
+                if (event.key === 'selected' || event.key === 'dirty' || event.key === 'hidden' || event.key === 'editing') {
                     renderer.updateFeatureStyle(schema, feature);
                 }
             });
@@ -103,12 +103,9 @@
             return style || this.styles[intent_];
         },
         updateFeatureStyle: function(schema, feature) {
-            // See selectableModify interaction (ol4 extensions)
-            // @todo: selectableModify should deal with pausing style updates itself
-            if (feature.get("featureStyleDisabled")) {
-                return;
-            }
-            if (feature.get("hidden")) {
+            if (feature.get('editing')) {
+                this.setRenderIntent(feature, 'editing');
+            } else if (feature.get("hidden")) {
                 this.setRenderIntent(feature, 'invisible');
             } else if (feature.get("selected")) {
                 this.setRenderIntent(feature, 'select');
@@ -227,16 +224,13 @@
     Mapbender.Digitizer.FeatureRenderer.prototype.initializeSelectControl_ = function () {
         var selectControl = new ol.interaction.Select({
             condition: ol.events.condition.singleClick,
-            layers: [this.layer],
-            style: function () {
-                return null;
-            }
+            layers: [this.layer]
         });
 
         var widget = this.owner;
         selectControl.on('select', function (event) {
-            widget.onFeatureClick(event.selected[0]);
             selectControl.getFeatures().clear();
+            widget.onFeatureClick(event.selected[0]);
         });
         selectControl.setActive(false);
         return selectControl;

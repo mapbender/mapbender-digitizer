@@ -17,6 +17,7 @@
         this.activeInteraction = null;
         this.paused_ = false;
         this.tools_ = {};
+        this.modifyingCollection_ = new ol.Collection([]);
     };
 
     Object.assign(Mapbender.Digitizer.FeatureEditor.prototype, {
@@ -50,7 +51,20 @@
                 }
             }
             this.activeInteraction = state && tool || null;
+            if (!state && 'modifyFeature' === toolName) {
+                this.setEditFeature(null);
+            }
             tool.setActive(!!state);
+        },
+        setEditFeature: function(feature) {
+            this.modifyingCollection_.forEach(function(feature) {
+                feature.set('editing', false);
+            });
+            this.modifyingCollection_.clear();
+            if (feature) {
+                feature.set('editing', true);
+                this.modifyingCollection_.push(feature);
+            }
         }
     });
 
@@ -151,11 +165,6 @@
             var buttons = [];
             for (var i = 0; i < toolNames.length; ++i) {
                 var toolName = toolNames[i];
-                var toolExists = typeof (Mapbender.Digitizer.DigitizingControlFactory.prototype[toolName]) === 'function';
-                if (!toolExists) {
-                    console.warn("interaction " + toolName + " does not exist");
-                    continue;
-                }
                 var iconClass = this.iconMap_[toolName];
                 var $icon = $(document.createElement('span')).addClass(iconClass);
                 var tooltip = Mapbender.trans('mb.digitizer.toolset.' + toolName);
@@ -343,10 +352,16 @@
          */
         createDrawingTool: function(type) {
             var source = this.renderer.getLayer().getSource();
-            var interaction = this.controlFactory[type] && this.controlFactory[type](source);
-            if (!interaction) {
-                console.warn("interaction " + type + " does not exist");
-                return;
+            var interaction;
+            switch (type) {
+                case 'modifyFeature':
+                    interaction = new ol.interaction.Modify({
+                        features: this.modifyingCollection_
+                    });
+                    break;
+                default:
+                    interaction = this.controlFactory[type](source);
+                    break;
             }
             interaction.setActive(false);
             this.renderer.olMap.addInteraction(interaction);

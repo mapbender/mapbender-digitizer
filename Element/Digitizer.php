@@ -75,7 +75,6 @@ class Digitizer extends DataManagerElement
      */
     public function getAssets()
     {
-
         $dataManagerAssets = parent::getAssets() + array(
             // provide empty array stubs for missing upstream entries
             'js' => array(),
@@ -95,7 +94,6 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js",
                 '../../vendor/mapbender/ol4-extensions/drawdonut.js',
                 '../../vendor/mapbender/ol4-extensions/styleConverter.js',
-                '../../vendor/mapbender/ol4-extensions/selectableModify.js',
                 '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
                 '/components/jquery-context-menu/jquery-context-menu-built.js',
                 '/components/select2/select2-built.js',
