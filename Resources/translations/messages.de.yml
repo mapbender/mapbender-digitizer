@@ -28,31 +28,15 @@ mb.digitizer:
         showAll: 'Alle Objekte einblenden'
         hideAll: 'Alle Objekte ausblenden'
         saveAll: 'Alle Objekte speichern'
-        point:
-            drawPoint: 'Punkt erstellen'
-            moveFeature: 'Punkt verschieben'
-        line:
-            drawLine: 'Linie erstellen'
-            modifyFeature: 'Linie bearbeiten'
-            moveFeature: 'Linie verschieben'
-        polygon:
-            drawPolygon: 'Fläche erstellen'
-            drawRectangle: 'Rechteck erstellen'
-            drawCircle: 'Kreis erstellen'
-            drawEllipse: 'Ellipse erstellen'
-            drawDonut: 'Enklave in Fläche zeichnen'
-            modifyFeature: 'Fläche bearbeiten'
-            moveFeature: 'Fläche verschieben'
-        all:
-            drawPoint: 'Punkt erstellen'
-            drawLine: 'Linie erstellen'
-            drawPolygon: 'Fläche erstellen'
-            drawRectangle: 'Rechteck erstellen'
-            drawCircle: 'Kreis erstellen'
-            drawEllipse: 'Ellipse erstellen'
-            drawDonut: 'Enklave in Fläche zeichnen'
-            modifyFeature: 'Objekt bearbeiten'
-            moveFeature: 'Objekt verschieben'
+        moveFeature: Verschieben
+        modifyFeature: Bearbeiten
+        drawPoint: 'Punkt erstellen'
+        drawLine: 'Linie erstellen'
+        drawPolygon: 'Fläche erstellen'
+        drawRectangle: 'Rechteck erstellen'
+        drawCircle: 'Kreis erstellen'
+        drawEllipse: 'Ellipse erstellen'
+        drawDonut: 'Enklave in Fläche zeichnen'
     cancel: 'Abbrechen'
     api:
         query:

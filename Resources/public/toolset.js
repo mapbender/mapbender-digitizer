@@ -160,7 +160,7 @@
                 }
                 var iconClass = this.iconMap_[toolName];
                 var $icon = $(document.createElement('span')).addClass(iconClass);
-                var tooltip = Mapbender.trans('mb.digitizer.toolset.' + geomType + '.' + toolName);
+                var tooltip = Mapbender.trans('mb.digitizer.toolset.' + toolName);
                 var $button = $(document.createElement('button'))
                     .attr({
                         type: 'button',

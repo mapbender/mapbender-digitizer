@@ -22,21 +22,15 @@ mb.digitizer:
         error: 'Копирование объекта запрещено.'
   toolset:
     current-extent: 'Ограничить поиск в пределах видимости'
-    point:
-      drawPoint: 'Создать точку'
-      moveGeometry: 'Переместить точку'
-    line:
-      drawLine: 'Создать линию'
-      modifyFeature: 'Изменить линию'
-      moveGeometry: 'Переместить линию'
-    polygon:
-      drawPolygon: 'Создать полигон'
-      drawRectangle: 'Создать квадрат'
-      drawCircle: 'Создать круг'
-      drawEllipse: 'Создать эллипс'
-      drawDonut: 'Создать donut'
-      modifyFeature: 'Изменть объект'
-      moveGeometry: 'Переместить объект'
+    modifyFeature: Изменить
+    moveFeature: Переместить
+    drawPoint: Создать точку
+    drawLine: Создать линию
+    drawPolygon: Создать полигон
+    drawRectangle: Создать квадрат
+    drawCircle: Создать круг
+    drawEllipse: Создать эллипс
+    drawDonut: Создать donut
 
   cancel: 'Отменить'
   api:

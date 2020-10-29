@@ -30,31 +30,15 @@ mb.digitizer:
         showAll: 'Show all features'
         hideAll: 'Hide all features'
         saveAll: 'Save all features'
-        point:
-            drawPoint: 'Draw point'
-            moveFeature: 'Move point'
-        line:
-            drawLine: 'Draw line'
-            modifyFeature: 'Modify line'
-            moveFeature: 'Move line'
-        polygon:
-            drawPolygon: 'Draw polygon'
-            drawRectangle: 'Draw rectangle'
-            drawCircle: 'Draw circle'
-            drawEllipse: 'Draw ellipse'
-            drawDonut: 'Draw donut'
-            modifyFeature: 'Modify polygon'
-            moveFeature: 'Move polygone'
-        all:
-            drawPoint: 'Draw point'
-            drawLine: 'Draw line'
-            drawPolygon: 'Draw polygon'
-            drawRectangle: 'Draw rectangle'
-            drawCircle: 'Draw circle'
-            drawEllipse: 'Draw ellipse'
-            drawDonut: 'Draw donut'
-            modifyFeature: 'Modify feature'
-            moveFeature: 'Move feature'
+        moveFeature: Move
+        modifyFeature: Edit
+        drawPoint: 'Draw point'
+        drawLine: 'Draw line'
+        drawPolygon: 'Draw polygon'
+        drawRectangle: 'Draw rectangle'
+        drawCircle: 'Draw circle'
+        drawEllipse: 'Draw ellipse'
+        drawDonut: 'Draw donut'
     cancel: Cancel
     api:
         query:
