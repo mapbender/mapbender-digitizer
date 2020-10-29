@@ -19,6 +19,8 @@
         controlFactory: null,
         activeToolName_: null,
         selectControl: null,
+        highlightControl: null,
+        excludedFromHighlighting_: [],
 
         _create: function () {
             this.toolsetRenderer = this._createToolsetRenderer();
@@ -91,7 +93,9 @@
                 }
             });
             this.selectControl = this.createSelectControl_();
+            this.highlightControl = this.createHighlightControl_();
             olMap.addInteraction(this.selectControl);
+            olMap.addInteraction(this.highlightControl);
         },
         // reveal / hide = automatic sidepane integration API
         reveal: function() {
@@ -128,11 +132,13 @@
             if (!this.active) {
                 this._activateSchema(this._getCurrentSchema());
                 this.selectControl.setActive(true);
+                this.highlightControl.setActive(true);
                 this.active = true;
             }
         },
         deactivate: function() {
             this.selectControl.setActive(false);
+            this.highlightControl.setActive(false);
             this._deactivateSchema(this._getCurrentSchema());
             this.active = false;
         },
@@ -180,7 +186,6 @@
                 }
                 this.activeToolName_ = null;
             }
-            this.getRenderer(schema).highlightControl.setActive(state);
             if (state) {
                 this.contextMenu.enable();
             } else {
@@ -427,9 +432,10 @@
                 var renderer = this.getRenderer(schema);
                 // Disable hover highlighting on the feature currently selected for editing. The generated style updates break
                 // usability (can't pull vertices outward).
-                renderer.setExcludedFromHighlighting([feature].filter(function(x) {
-                    return !!x;
-                }));
+                this.clearHighlightExclude_();
+                if (feature) {
+                    this.excludedFromHighlighting_.push(feature);
+                }
                 schema.geometryEditor.setEditFeature(feature || null);
                 var tr = feature && feature.get('table-row');
                 if (tr) {
@@ -465,8 +471,34 @@
             selectControl.on('select', function (event) {
                 self.onFeatureClick(event.selected[0] || null);
             });
-            selectControl.setActive(true);
             return selectControl;
+        },
+        createHighlightControl_: function() {
+            var self = this;
+            var highlightControl = new ol.interaction.Select({
+                condition: ol.events.condition.pointerMove,
+                layers: function(layer) {
+                    var schema = self._getCurrentSchema();
+                    var activeLayer = schema && self.getSchemaLayer(schema);
+                    return layer === activeLayer;
+                },
+                filter: function(feature) {
+                    return -1 === self.excludedFromHighlighting_.indexOf(feature);
+                }
+            });
+
+            highlightControl.on('select', function (e) {
+                e.deselected.forEach(function(feature) {
+                    feature.set('hover', false);
+                });
+                e.selected.forEach(function(feature) {
+                    feature.set('hover', true);
+                });
+            });
+            return highlightControl;
+        },
+        clearHighlightExclude_: function() {
+            this.excludedFromHighlighting_.splice(0, this.excludedFromHighlighting_.length);
         },
         __formatting_dummy: null
     });
