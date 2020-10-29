@@ -236,8 +236,7 @@
 
         var widget = this.owner;
         selectControl.on('select', function (event) {
-            selectControl.getFeatures().clear();
-            widget.onFeatureClick(event.selected[0]);
+            widget.onFeatureClick(event.selected[0] || null);
         });
         selectControl.setActive(false);
         return selectControl;

@@ -401,16 +401,21 @@
 
             this._openEditDialog(schema, newFeature);
         },
+        /**
+         * @param {ol.Feature|null} feature
+         */
         onFeatureClick: function(feature) {
             var schema = this._getCurrentSchema();
-            if (!this.activeToolName_ && schema.allowEditData) {
+            if (feature && !this.activeToolName_ && schema.allowEditData) {
                 this._openEditDialog(schema, feature);
             } else if ('modifyFeature' === this.activeToolName_) {
                 // Disable hover highlighting on the feature currently selected for editing. The generated style updates break
                 // usability (can't pull vertices outward).
-                schema.renderer.setExcludedFromHighlighting([feature]);
-                schema.geometryEditor.setEditFeature(feature);
-                var tr = feature.get('table-row');
+                schema.renderer.setExcludedFromHighlighting([feature].filter(function(x) {
+                    return !!x;
+                }));
+                schema.geometryEditor.setEditFeature(feature || null);
+                var tr = feature && feature.get('table-row');
                 if (tr) {
                     this.tableRenderer.showRow(schema, tr);
                 }
