@@ -330,9 +330,10 @@
                     feature.set('dirty', true);
                     widget._openEditDialog(schema, event.feature);
                 });
-                newInteraction.on(ol.interaction.ModifyEventType.MODIFYEND,function(event) {
-                    var feature = event.features.item(0);
-                    feature.set('dirty', true);
+                newInteraction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
+                    event.features.forEach(function(feature) {
+                        feature.set('dirty', true);
+                    });
                 });
             }
             return this.tools_[schema.schemaName][type];

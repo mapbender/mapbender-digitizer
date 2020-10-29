@@ -147,16 +147,7 @@
                 source: source
             });
 
-            interaction.on(ol.interaction.TranslateEventType.TRANSLATEEND,function(event) {
-                var features = event.features;
-                features.forEach(function(feature) {
-                    feature.set('dirty', true);
-                });
-
-            });
-
             return interaction;
-
         }
 
 
