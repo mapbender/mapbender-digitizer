@@ -6,15 +6,8 @@
      * Factory for Interactions.
      *
      * @constructor
-     * @param {ol.Map} map.
-     * @api
      */
-
-
-    Mapbender.Digitizer.DigitizingControlFactory = function (map) {
-
-        this.map = map;
-
+    Mapbender.Digitizer.DigitizingControlFactory = function() {
     };
 
     Mapbender.Digitizer.DigitizingControlFactory.prototype = {

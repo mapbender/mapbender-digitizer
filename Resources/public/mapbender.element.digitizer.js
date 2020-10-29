@@ -56,7 +56,7 @@
             });
             var olMap = this.mbMap.getModel().olMap;
             this.contextMenu = this._createContextMenu(olMap);
-            this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(olMap);
+            this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory();
             if (this.options.displayOnInactive) {
                 this.activate();
             }
