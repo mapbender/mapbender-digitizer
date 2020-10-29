@@ -177,11 +177,14 @@
                 }
             });
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function(event) {
-                if (event.key === 'hover') {
+                if (event.key === 'hover' || event.key === 'editing') {
                     var feature = event.target;
                     var tr = feature && feature.get('table-row');
                     if (tr) {
-                        $(tr).toggleClass('hover', !!feature.get('hover'));
+                        var editing = !!feature.get('editing');
+                        var hover = !editing && !!feature.get('hover');
+                        $(tr).toggleClass('hover', hover);
+                        $(tr).toggleClass('editing', editing);
                     }
                 }
             });

@@ -410,6 +410,10 @@
                 // usability (can't pull vertices outward).
                 schema.renderer.setExcludedFromHighlighting([feature]);
                 schema.geometryEditor.setEditFeature(feature);
+                var tr = feature.get('table-row');
+                if (tr) {
+                    this.tableRenderer.showRow(schema, tr);
+                }
             }
         },
         /**

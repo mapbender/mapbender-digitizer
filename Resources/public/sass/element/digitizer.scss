@@ -9,6 +9,9 @@
                 &.hover {
                     background-color: #F7F79A;
                 }
+                &.editing, &.hover.editing {
+                    background-color: #D8EEFF;
+                }
             }
         }
       }
