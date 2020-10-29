@@ -51,9 +51,6 @@
                 }
             }
             this.activeInteraction = state && tool || null;
-            if (!state && 'modifyFeature' === toolName) {
-                this.setEditFeature(null);
-            }
             tool.setActive(!!state);
         },
         setEditFeature: function(feature) {

@@ -147,14 +147,12 @@
             this.getSchemaLayer(schema).setVisible(true);
         },
         _toggleDrawingTool: function(schema, toolName, state) {
+            if (!state && 'modifyFeature' === toolName) {
+                schema.geometryEditor.setEditFeature(null);
+                schema.renderer.setExcludedFromHighlighting([]);
+            }
             schema.geometryEditor.toggleTool(toolName, schema, state);
             this.activeToolName_ = state && toolName || null;
-            // Disable highlighting interaction when a tool is active.
-            // For unknown reasons, the highlighting interaction breaks feature modification.
-            // @todo: resolve dependency on monkey-patched schema.renderer property
-            if (toolName === 'modifyFeature') {
-                schema.renderer.highlightControl.setActive(!state);
-            }
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
@@ -408,6 +406,9 @@
             if (!this.activeToolName_ && schema.allowEditData) {
                 this._openEditDialog(schema, feature);
             } else if ('modifyFeature' === this.activeToolName_) {
+                // Disable hover highlighting on the feature currently selected for editing. The generated style updates break
+                // usability (can't pull vertices outward).
+                schema.renderer.setExcludedFromHighlighting([feature]);
                 schema.geometryEditor.setEditFeature(feature);
             }
         },

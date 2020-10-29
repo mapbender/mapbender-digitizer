@@ -15,6 +15,7 @@
 
         this.layer = this.createSchemaFeatureLayer_(schema);
         this.olMap.addLayer(this.layer);
+        this.excludedFromHighlighting_ = [];
 
         this.addSelectControl_();
 
@@ -110,6 +111,13 @@
             } else {
                 this.setRenderIntent(feature, 'default');
             }
+        },
+        setExcludedFromHighlighting: function(features) {
+            var features_ = features || [];
+            this.excludedFromHighlighting_.splice(0, this.excludedFromHighlighting_.length);
+            for (var i = 0; i < features_.length; ++i) {
+                this.excludedFromHighlighting_.push(features_[i]);
+            }
         }
     });
 
@@ -200,9 +208,13 @@
         this.olMap.addInteraction(this.highlightControl);
     };
     Mapbender.Digitizer.FeatureRenderer.prototype.initializeHighlightControl_ = function () {
+        var renderer = this;
         var highlightControl = new ol.interaction.Select({
             condition: ol.events.condition.pointerMove,
-            layers: [this.layer]
+            layers: [this.layer],
+            filter: function(feature) {
+                return -1 === renderer.excludedFromHighlighting_.indexOf(feature);
+            }
         });
         highlightControl.on('select', function (e) {
             e.deselected.forEach(function(feature) {
