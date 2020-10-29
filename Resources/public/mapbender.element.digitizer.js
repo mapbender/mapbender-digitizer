@@ -207,6 +207,7 @@
                 this.tableRenderer.showRow(schema, tr);
             }
             var dialog = this._super(schema, feature);
+            this.contextMenu.disable();
             if (schema.geometryEditor) {
                 schema.geometryEditor.pause();
             }
@@ -288,6 +289,7 @@
             if (schema.geometryEditor) {
                 schema.geometryEditor.resume();
             }
+            this.contextMenu.setActive(!this.activeToolName_);
             var olMap = this.mbMap.getModel().olMap;
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
         },
@@ -317,6 +319,7 @@
             if (schema.geometryEditor) {
                 schema.geometryEditor.resume();
             }
+            this.contextMenu.setActive(!this.activeToolName_);
         },
         _replaceItemData: function(schema, feature, newValues) {
             // NOTE: 'data' is a regular mutable data Object (see _prpareDataItem)
