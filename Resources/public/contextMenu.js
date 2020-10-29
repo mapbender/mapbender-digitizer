@@ -13,6 +13,13 @@
         this.filterLayers_ = [];
     };
     Object.assign(Mapbender.Digitizer.MapContextMenu.prototype, {
+        setActive: function(state) {
+            if (state) {
+                this.enable();
+            } else {
+                this.disable();
+            }
+        },
         enable: function() {
             if (!this.onMap_) {
                 this.olMap.addControl(this.contextmenu);
@@ -24,6 +31,7 @@
         },
         disable: function() {
             this.enabled_ = false;
+            this.contextmenu.close();
             return this.contextmenu.disable.apply(this.contextmenu, arguments);
         },
         /**

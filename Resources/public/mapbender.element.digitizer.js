@@ -153,6 +153,7 @@
             }
             schema.geometryEditor.toggleTool(toolName, schema, state);
             this.activeToolName_ = state && toolName || null;
+            this.contextMenu.setActive(!this.activeToolName_);
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
