@@ -31,15 +31,10 @@ mb.digitizer:
         point:
             drawPoint: 'Punkt erstellen'
             moveFeature: 'Punkt verschieben'
-            selectFeature: 'Punkte de-/selektieren'
-            removeSelected: 'Selektierte Punkte löschen'
-            createGeometryLessFeature: 'Punkt ohne initiale Geometrie erstellen'
         line:
             drawLine: 'Linie erstellen'
             modifyFeature: 'Linie bearbeiten'
             moveFeature: 'Linie verschieben'
-            selectFeature: 'Linien de-/selektieren'
-            removeSelected: 'selektierten Linien löschen'
         polygon:
             drawPolygon: 'Fläche erstellen'
             drawRectangle: 'Rechteck erstellen'

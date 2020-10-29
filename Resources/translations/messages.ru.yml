@@ -25,14 +25,10 @@ mb.digitizer:
     point:
       drawPoint: 'Создать точку'
       moveGeometry: 'Переместить точку'
-      selectFeature: 'Выбрать точку'
-      removeSelected: 'Удалить точку'
     line:
       drawLine: 'Создать линию'
       modifyFeature: 'Изменить линию'
       moveGeometry: 'Переместить линию'
-      selectFeature: 'Выбрать линию'
-      removeSelected: 'Удалить линию'
     polygon:
       drawPolygon: 'Создать полигон'
       drawRectangle: 'Создать квадрат'
@@ -41,8 +37,6 @@ mb.digitizer:
       drawDonut: 'Создать donut'
       modifyFeature: 'Изменть объект'
       moveGeometry: 'Переместить объект'
-      selectFeature: 'Выбрать объект'
-      removeSelected: 'Удалить объект'
 
   cancel: 'Отменить'
   api:
