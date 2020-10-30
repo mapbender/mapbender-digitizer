@@ -127,6 +127,14 @@
                     ];
             }
         },
+        pause: function() {
+            // @todo: reintegrate with FeatureEditor :)
+            $('button.-fn-toggle-tool', this.owner.element).prop('disabled', true);
+        },
+        resume: function() {
+            // @todo: reintegrate with FeatureEditor :)
+            $('button.-fn-toggle-tool', this.owner.element).prop('disabled', false);
+        },
         getDefaultGeometryToolNames: function(schema) {
             return this.getValidToolNames(schema);
         },

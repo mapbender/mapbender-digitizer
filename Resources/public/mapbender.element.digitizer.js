@@ -116,7 +116,8 @@
                 var toolName = $button.attr('data-toolname');
                 var schema = $button.data('schema');
                 var oldState = $button.hasClass('active');
-                if (!oldState) {
+                var newState = !oldState;
+                if (newState) {
                     var $activeOthers = $button.siblings('.-fn-toggle-tool.active').not($button);
                     $activeOthers.each(function() {
                         var $other = $(this);
@@ -124,8 +125,8 @@
                     });
                     $activeOthers.removeClass('active');
                 }
-                $button.toggleClass('active', !oldState);
-                self._toggleDrawingTool(schema, toolName, !oldState);
+                $button.toggleClass('active', newState);
+                self._toggleDrawingTool(schema, toolName, newState);
             });
         },
         activate: function() {
@@ -226,6 +227,7 @@
             }
             var dialog = this._super(schema, feature);
             this.contextMenu.disable();
+            this.toolsetRenderer.pause();
             if (schema.geometryEditor) {
                 schema.geometryEditor.pause();
             }
@@ -304,6 +306,7 @@
             });
             feature.set('dirty', false);
             this.selectControl.getFeatures().clear();
+            this.toolsetRenderer.resume();
             if (schema.geometryEditor) {
                 schema.geometryEditor.setEditFeature(null);
                 schema.geometryEditor.resume();
@@ -335,6 +338,7 @@
                 }
                 feature.set('dirty', false);
             }
+            this.toolsetRenderer.resume();
             if (schema.geometryEditor) {
                 schema.geometryEditor.resume();
             }
