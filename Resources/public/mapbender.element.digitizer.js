@@ -61,9 +61,6 @@
             var olMap = this.mbMap.getModel().olMap;
             this.contextMenu = this._createContextMenu(olMap);
             this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory();
-            if (this.options.displayOnInactive) {
-                this.activate();
-            }
             olMap.on(ol.MapEventType.MOVEEND, function() {
                 // Don't react at all if currently editing feature attributes
                 if (self.currentPopup || self.activeToolName_) {
@@ -103,6 +100,9 @@
             this.featureEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, this.controlFactory);
             olMap.addInteraction(this.selectControl);
             olMap.addInteraction(this.highlightControl);
+            if (this.options.displayOnInactive) {
+                this.activate();
+            }
         },
         // reveal / hide = automatic sidepane integration API
         reveal: function() {
