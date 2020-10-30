@@ -1,27 +1,14 @@
 mb.digitizer:
   feature:
     remove:
-      remove: 'Rimuovi      '
-      successfully: 'Feature rimossa.'
-      from:
-        database: 'Elimina la feature.'
+      title: Rimuovi
     zoomTo: 'Fai zoom su'
     edit: 'Edita la feature'
     attributes: 'Attributi della feature'
     save:
-      save: 'Salva'
-      successfully: 'Feature salvata.'
-    loading:
-      error: 'Errore nel caricamento delle feature.'
+      title: Salva
     print: 'Stampa'
     style:
       change: 'Cambia stile'
   toolset:
-    current-extent: 'Selezione nell''attuale estensione'
-  cancel: 'Cancella'
-  api:
-    query:
-      error-message: 'Errore dovuto a Feature API Query.'
-  table:
-    fields:
-      not.defined: 'I campi della tabella Feature non sono definiti.'
+    current-extent: Selezione nell'attuale estensione

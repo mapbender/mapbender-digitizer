@@ -4,27 +4,21 @@ mb.digitizer:
     feature:
         remove:
             title: 'Löschen'
-            successfully: 'Objekt wurde gelöscht.'
-            from: {database: 'Objekt löschen?'}
         zoomTo: 'Heranzoomen'
         edit: 'Bearbeiten'
         attributes: 'Objektinformationen'
         save:
             title: 'Speichern'
-            successfully: 'Objekt wurde gespeichert.'
-        loading:
-            error: 'Objekte konnten nicht geladen werden!'
         print: 'Druck'
         style:
             change: 'Stil ändern'
         clone:
             title: 'Duplizieren'
-            on: {error: 'Duplizieren des Objektes ist nicht erlaubt.'}
         visibility:
             toggleoff: 'Objekt ausblenden'
             toggleon: 'Objekt einblenden'
     toolset:
-        current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen.'
+        current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen'
         showAll: 'Alle Objekte einblenden'
         hideAll: 'Alle Objekte ausblenden'
         saveAll: 'Alle Objekte speichern'
@@ -37,13 +31,6 @@ mb.digitizer:
         drawCircle: 'Kreis erstellen'
         drawEllipse: 'Ellipse erstellen'
         drawDonut: 'Enklave in Fläche zeichnen'
-    cancel: 'Abbrechen'
-    api:
-        query:
-            error-message: 'Feature API - Abfrage fehlgeschlagen.'
-    table:
-        fields:
-            not.defined: 'Felder der Tabelle sind nicht definiert!'
     remoteData:
         error: 'WMS FeatureInfo Anfrage fehlgeschlagen'
     style:

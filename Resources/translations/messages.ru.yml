@@ -2,24 +2,16 @@ mb.digitizer:
   feature:
     remove:
       title: 'Удалить'
-      successfully: 'Геометрия удалена'
-      from:
-        database: 'Удалить геометрию с сервера'
     zoomTo: 'Zoom to'
     edit: 'Редактировать'
     attributes: 'Атрибуты'
     save:
       title: 'Сохранить'
-      successfully: 'Геометрия сохранена.'
-    loading:
-      error: 'Ошибка при загрузке геометрий.'
     print: 'Print'
     style:
       change: 'Change style'
     clone:
       title: 'Клонировать'
-      on:
-        error: 'Копирование объекта запрещено.'
   toolset:
     current-extent: 'Ограничить поиск в пределах видимости'
     modifyFeature: Изменить
@@ -31,20 +23,3 @@ mb.digitizer:
     drawCircle: Создать круг
     drawEllipse: Создать эллипс
     drawDonut: Создать donut
-
-  cancel: 'Отменить'
-  api:
-    query:
-      error-message: 'Ошибка коммуникации с сервером геометрий.'
-  table:
-    fields:
-      not.defined: 'Поля таблиц геометрий не настроены.'
-  search:
-    title: 'Поиск'
-    table:
-      empty: 'Пустая таблица'
-      zerorecords: 'Без результатов'
-      info:
-        status: 'от _START_ до _END_ из _TOTAL_'
-        empty: 'Без результатов'
-        filtered: '(отфильтровано из _MAX_ объектов.)'
