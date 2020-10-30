@@ -21,6 +21,7 @@
         selectControl: null,
         highlightControl: null,
         excludedFromHighlighting_: [],
+        featureEditor: null,
 
         _create: function () {
             this.toolsetRenderer = this._createToolsetRenderer();
@@ -81,6 +82,7 @@
                 }
             });
             this.mbMap.element.on('mbmapsrschanged', function(event, data) {
+                self.featureEditor.pause();
                 var schema = self._getCurrentSchema();
                 var layer = schema && self.getSchemaLayer(schema);
                 if (layer) {
@@ -91,9 +93,11 @@
                         }
                     });
                 }
+                self.featureEditor.resume();
             });
             this.selectControl = this.createSelectControl_();
             this.highlightControl = this.createHighlightControl_();
+            this.featureEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, this.controlFactory);
             olMap.addInteraction(this.selectControl);
             olMap.addInteraction(this.highlightControl);
         },
@@ -152,10 +156,6 @@
             if (!schema.renderer) {
                 schema.renderer = new Mapbender.Digitizer.FeatureRenderer(this, olMap, schema);
             }
-            // HACK: externally patch editor onto schema post-construction
-            if (schema.allowDigitize && !schema.geometryEditor) {
-                schema.geometryEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, this.controlFactory);
-            }
             this.toolsetRenderer.setSchema(schema);
             this.contextMenu.setSchema(schema);
             this._toggleSchemaInteractions(schema, true);
@@ -163,16 +163,16 @@
         },
         _toggleDrawingTool: function(schema, toolName, state) {
             if (!state && 'modifyFeature' === toolName) {
-                schema.geometryEditor.setEditFeature(null);
+                this.featureEditor.setEditFeature(null);
                 this.clearHighlightExclude_()
             }
-            schema.geometryEditor.toggleTool(toolName, schema, state);
+            this.featureEditor.toggleTool(toolName, schema, state);
             this.activeToolName_ = state && toolName || null;
             this.contextMenu.setActive(!this.activeToolName_);
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
-            schema.geometryEditor.setEditFeature(null);
+            this.featureEditor.setEditFeature(null);
             this.selectControl.getFeatures().clear();
             this._toggleSchemaInteractions(schema, false);
             if (schema === this._getCurrentSchema()) {
@@ -184,12 +184,12 @@
             }
         },
         _toggleSchemaInteractions: function(schema, state) {
-            if (schema.geometryEditor) {
-                schema.geometryEditor.setActive(state);
+            if (schema.allowDigitize) {
+                this.featureEditor.setActive(state);
             }
             if (!state) {
-                if (schema.geometryEditor && this.activeToolName_) {
-                    schema.geometryEditor.toggleTool(this.activeToolName_, schema, false);
+                if (this.activeToolName_) {
+                    this.featureEditor.toggleTool(this.activeToolName_, schema, false);
                 }
                 this.activeToolName_ = null;
             }
@@ -228,8 +228,8 @@
             var dialog = this._super(schema, feature);
             this.contextMenu.disable();
             this.toolsetRenderer.pause();
-            if (schema.geometryEditor) {
-                schema.geometryEditor.pause();
+            if (schema.allowDigitize) {
+                this.featureEditor.pause();
             }
             return dialog;
         },
@@ -307,9 +307,9 @@
             feature.set('dirty', false);
             this.selectControl.getFeatures().clear();
             this.toolsetRenderer.resume();
-            if (schema.geometryEditor) {
-                schema.geometryEditor.setEditFeature(null);
-                schema.geometryEditor.resume();
+            if (schema.allowDigitize) {
+                this.featureEditor.setEditFeature(null);
+                this.featureEditor.resume();
             }
             this.contextMenu.setActive(!this.activeToolName_);
             var olMap = this.mbMap.getModel().olMap;
@@ -339,8 +339,8 @@
                 feature.set('dirty', false);
             }
             this.toolsetRenderer.resume();
-            if (schema.geometryEditor) {
-                schema.geometryEditor.resume();
+            if (schema.allowDigitize) {
+                this.featureEditor.resume();
             }
             this.contextMenu.setActive(!this.activeToolName_);
         },
@@ -445,7 +445,7 @@
                 if (feature) {
                     this.excludedFromHighlighting_.push(feature);
                 }
-                schema.geometryEditor.setEditFeature(feature || null);
+                this.featureEditor.setEditFeature(feature || null);
                 var tr = feature && feature.get('table-row');
                 if (tr) {
                     this.tableRenderer.showRow(schema, tr);
