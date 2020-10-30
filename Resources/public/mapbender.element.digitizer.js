@@ -157,6 +157,7 @@
             if (!(this.options.displayOnInactive || schema.displayOnInactive)) {
                 this.renderer.disable();
             }
+            this._closeCurrentPopup();
             this.active = false;
         },
         _activateSchema: function(schema) {
