@@ -28,7 +28,7 @@
             if (schema.allowCustomStyle) {
                 this.customStyleFeature_(schema, feature);
             }
-            this.owner.commitGeometry(feature);
+            this.owner.commitGeometry(schema, feature);
         },
         registerFeatureEvents: function(schema, feature) {
             var renderer = this;

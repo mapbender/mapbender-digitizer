@@ -177,9 +177,9 @@
             var contextMenuAllowed = ['modifyFeature', 'moveFeature'];
             this.contextMenu.setActive(!this.activeToolName_ || -1 !== contextMenuAllowed.indexOf(this.activeToolName_));
         },
-        commitGeometry: function(feature) {
+        commitGeometry: function(schema, feature) {
             feature.set("oldGeometry", feature.getGeometry().clone());
-            feature.set('dirty', false);
+            feature.set('dirty', !this._getUniqueItemId(schema, feature));
         },
         revertGeometry: function(feature) {
             feature.setGeometry(feature.get('oldGeometry').clone());
@@ -319,7 +319,7 @@
             this._super(schema, feature, originalId, {
                 dataItem: responseData.dataItem.properties
             });
-            this.commitGeometry(feature);
+            this.commitGeometry(schema, feature);
             this.selectControl.getFeatures().clear();
             this.toolsetRenderer.resume();
             if (schema.allowDigitize) {
