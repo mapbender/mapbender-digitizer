@@ -434,8 +434,7 @@
             var schema = this._getCurrentSchema();
             if (feature && !this.activeToolName_ && schema.allowEditData) {
                 this._openEditDialog(schema, feature);
-            } else if ('modifyFeature' === this.activeToolName_) {
-                var renderer = this.getRenderer(schema);
+            } else if (!this.currentPopup && 'modifyFeature' === this.activeToolName_) {
                 // Disable hover highlighting on the feature currently selected for editing. The generated style updates break
                 // usability (can't pull vertices outward).
                 this.clearHighlightExclude_();
