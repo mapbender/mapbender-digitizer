@@ -171,7 +171,11 @@
             }
             this.featureEditor.toggleTool(toolName, schema, state);
             this.activeToolName_ = state && toolName || null;
-            this.contextMenu.setActive(!this.activeToolName_);
+            this.resumeContextMenu_();
+        },
+        resumeContextMenu_: function() {
+            var contextMenuAllowed = ['modifyFeature', 'moveFeature'];
+            this.contextMenu.setActive(!this.activeToolName_ || -1 !== contextMenuAllowed.indexOf(this.activeToolName_));
         },
         _deactivateSchema: function(schema) {
             this._super(schema);
@@ -310,7 +314,7 @@
                 this.featureEditor.setEditFeature(null);
                 this.featureEditor.resume();
             }
-            this.contextMenu.setActive(!this.activeToolName_);
+            this.resumeContextMenu_();
             var olMap = this.mbMap.getModel().olMap;
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
         },
@@ -333,7 +337,7 @@
             if (schema.allowDigitize) {
                 this.featureEditor.resume();
             }
-            this.contextMenu.setActive(!this.activeToolName_);
+            this.resumeContextMenu_();
         },
         _replaceItemData: function(schema, feature, newValues) {
             // NOTE: 'data' is a regular mutable data Object (see _prpareDataItem)
