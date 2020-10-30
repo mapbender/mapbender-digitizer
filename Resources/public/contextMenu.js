@@ -12,6 +12,7 @@
         this.onMap_ = false;
         this.enabled_ = false;
         this.filterLayers_ = [];
+        this.schema_ = null;
     };
     Object.assign(Mapbender.Digitizer.MapContextMenu.prototype, {
         setActive: function(state) {
@@ -34,13 +35,13 @@
         registerEvents: function(olMap) {
             var self = this;
             this.contextmenu.on('beforeopen', function (evt) {
-                self.feature = olMap.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                var feature = olMap.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
                     if (self.filterLayers_.indexOf(layer) !== -1) {
                         return feature;
                     }
                 });
-                if (self.feature && self.enabled_) {
-                    if (self.reconfigure(self.feature)) {
+                if (feature && self.enabled_) {
+                    if (self.reconfigure(feature)) {
                         self.contextmenu.enable();
                     } else {
                         self.contextmenu.disable();
@@ -51,10 +52,9 @@
             });
         },
         setSchema: function(schema) {
-            this.menuItems_ = this.getMenuItems(schema);
+            this.schema_ = schema || null;
             this.contextmenu.clear();
-            this.contextmenu.extend(this.menuItems_);
-            if (this.enabled_ && this.menuItems_.length) {
+            if (this.enabled_ && this.schema_) {
                 this.contextmenu.enable();
             } else {
                 this.contextmenu.disable();
@@ -73,41 +73,28 @@
                     }
                 });
             }
-            items = items.concat(this.menuItems_);
-            this.contextmenu.clear();
-            this.contextmenu.extend(items);
-            return !!items.length;
-        },
-        getMenuItems: function(schema) {
-            // NOTE: self.feature initialized and updated by beforeopen handler
-            var self = this;
-            var items = [];
-            if (schema.allowEditData) {
+            var widget = this.widget;
+            var schema = this.schema_;
+            if (schema && schema.allowEditData) {
                 items.push({
                     text: Mapbender.trans('mb.digitizer.edit.attributes'),
                     callback: function () {
-                        self.widget._openEditDialog(schema, self.feature);
+                        widget._openEditDialog(schema, feature);
                     }
                 });
             }
-
-            if (schema.allowDelete) {
+            var featureHasId = !!widget._getUniqueItemId(schema, feature);
+            if (featureHasId && schema && schema.allowDelete) {
                 items.push({
                     text: Mapbender.trans('mb.digitizer.feature.remove.title'),
                     callback: function () {
-                        try {
-                            self.widget.removeData(schema, self.feature);
-                        } catch (e) {
-                            // thrown if item is temporary and doesn't have an id yet
-                            // Do absolutely nothing
-                            // @todo: disable context menu during editing operations (drawing new polygon / moving geometry)
-                            // @todo: disable context menu while attribute editor is open
-                            console.warn("Fixme: context menu should not be active during this operation", e);
-                        }
+                        widget.removeData(schema, feature);
                     }
                 });
             }
-            return items;
+            this.contextmenu.clear();
+            this.contextmenu.extend(items);
+            return !!items.length;
         }
     });
 
