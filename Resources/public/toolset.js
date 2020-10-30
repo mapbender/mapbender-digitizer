@@ -343,7 +343,7 @@
                     feature.set('dirty', true);
                     widget._openEditDialog(schema, event.feature);
                 });
-                newInteraction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
+                newInteraction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
                     event.features.forEach(function(feature) {
                         feature.set('dirty', true);
                     });

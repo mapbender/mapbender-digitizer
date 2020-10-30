@@ -69,7 +69,6 @@
                     callback: function() {
                         feature.setGeometry(feature.get('oldGeometry'));
                         feature.set('dirty', false);
-                        feature.set('oldGeometry', undefined);
                     }
                 });
             }
