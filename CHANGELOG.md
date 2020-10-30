@@ -1,4 +1,14 @@
-## dev-release/1.4 @ ec24700
+## dev-release/1.4 @ 828cdd2
+* Fix drawing tool switching remaining available while editing feature attributes
+* Fix geometry editing selection remaining active with an open attribute editing dialog
+* Fix geometry modification revert integration; use right-click context menu
+* Fix broken temporary geometry when using Mapbender SrsSwitcher while drawing lines or polygons
+* Fix broken revert geometry after using Mapbender SrsSwitcher
+* Fix broken revertable geometry detection when modifying vertices
+* Fix drawing tools responding to right mouse button clicks, conflicting with context menu
+* Fix reverting geometry edits on the same feature multiple times without saving
+* Fix reverting geometry edits after saving modified geometry
+* Fix switch back to vertex modification not working after modifying, then moving the same feature
 * Fix donut drawing creating a magical new feature form instead of behaving like modification
 * Fix "Save all" immediately becoming active when drawing a new feature
 * Fix empty features table after deactivating and reactivating Digitizer element
@@ -16,6 +26,7 @@
 * Fix feature briefly showing with editing styles when switching schema while editing and then switching back
 * Additional fixes for undesirable button color changes on focus
 * When selecting a feature for editing, switch table pagination to show it
+* Clean up misc translation punctuation
 
 ## 1.4-beta2
 * Fix saving features to table with SRS different from current map view
