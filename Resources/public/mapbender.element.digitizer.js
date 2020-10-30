@@ -453,6 +453,7 @@
                     this.excludedFromHighlighting_.push(feature);
                 }
                 this.featureEditor.setEditFeature(feature || null);
+                this.selectControl.getFeatures().clear();
                 var tr = feature && feature.get('table-row');
                 if (tr) {
                     this.tableRenderer.showRow(schema, tr);
