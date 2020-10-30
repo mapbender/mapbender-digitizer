@@ -9,7 +9,6 @@ mb.digitizer:
             title: 'Remove feature'
         zoomTo: 'Zoom to feature'
         edit: 'Edit'
-        savesave: 'Save feature'
         save:
             title: Save
         print: Print
