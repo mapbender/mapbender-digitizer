@@ -7,24 +7,25 @@
      * @param {Object} schema
      * @constructor
      */
-    Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(owner, olMap, schema) {
+    Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(owner, olMap) {
         this.owner = owner;
         this.olMap = olMap;
-
-        this.styles = this.initializeStyles_(schema.styles);
-
-        this.layer = this.createSchemaFeatureLayer_(schema);
-        this.olMap.addLayer(this.layer);
-
-        var renderer = this;
-        $(olMap).on('Digitizer.FeatureUpdatedOnServer', function (event) {
-            renderer.onFeatureUpdatedOnServer(schema);
-        });
+        this.globalStyles_ = this.initializeGlobalStyles_();
+        this.schemaStyles_ = {};
+        this.schemaLayers_ = {};
     }
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
+        disable: function() {
+            var layerNames = Object.keys(this.schemaLayers_);
+            for (var i = 0; i < layerNames.length; ++i) {
+                var layer = this.schemaLayers_[layerNames[i]];
+                console.log("Disabling layer", layer);
+                layer.setVisible(false);
+            }
+        },
         initializeFeature: function(schema, feature) {
             feature.set("mbOrigin", "digitizer");
-            this.setStyle_(feature, this.styles.default);
+            this.setRenderIntent_(schema, feature, 'default');
             if (schema.allowCustomStyle) {
                 this.customStyleFeature_(schema, feature);
             }
@@ -38,10 +39,6 @@
                     renderer.updateFeatureStyle(schema, feature);
                 }
             });
-        },
-        setRenderIntent: function(feature, intent) {
-            var style = this.getStyleForIntent_(feature, intent);
-            this.setStyle_(feature, style);
         },
         setStyle_: function(feature, style) {
             // adopted code from mapbender/ol4-extensions package, plus fixes
@@ -76,36 +73,36 @@
             };
             feature.setStyle(styleFunction);
         },
-        getStyleForIntent_: function(feature, intent) {
-            // @todo: turn this into a style function on the layer, so it will work without events
-            var intent_ = intent;
-            if (!this.styles[intent]) {
+        setRenderIntent_: function(schema, feature, intent) {
+            var style = intent === 'default' && feature.get('style')
+            if (!style) {
+                var schemaStyles = this.schemaStyles_[schema.schemaName];
+                style = this.globalStyles_[intent] || schemaStyles[intent];
+            }
+            if (!style && intent !== 'default') {
                 console.warn("Unknown render intent " + intent + ", using default");
-                intent_ = 'default';
+                style = schemaStyles['default'];
             }
-            var style;
-            if (intent_ === 'default') {
-                // NOTE: "style" value only set by feature style editor (disabled?; see customStyleFeature_)
-                style = feature.get('style');
-            }
-            return style || this.styles[intent_];
+
+            this.setStyle_(feature, style);
         },
         updateFeatureStyle: function(schema, feature) {
             if (feature.get('editing')) {
-                this.setRenderIntent(feature, 'editing');
+                this.setRenderIntent_(schema, feature, 'editing');
             } else if (feature.get("hidden")) {
-                this.setRenderIntent(feature, 'invisible');
+                this.setRenderIntent_(schema, feature, 'invisible');
             } else if (feature.get('hover')) {
-                this.setRenderIntent(feature, 'select');
+                this.setRenderIntent_(schema, feature, 'select');
             } else if (feature.get('dirty')) {
-                this.setRenderIntent(feature, 'unsaved');
+                this.setRenderIntent_(schema, feature, 'unsaved');
             } else {
-                this.setRenderIntent(feature, 'default');
+                this.setRenderIntent_(schema, feature, 'default');
             }
         }
     });
 
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
+        // @todo: salvage this
         onFeatureUpdatedOnServer: function(schema) {
             if (schema.refreshLayersAfterFeatureSave) {
                 $.each(schema.refreshLayersAfterFeatureSave, function (k1, instanceId) {
@@ -141,8 +138,16 @@
         });
     };
 
-    Mapbender.Digitizer.FeatureRenderer.prototype.getLayer = function() {
-        return this.layer;
+    Mapbender.Digitizer.FeatureRenderer.prototype.getLayer = function(schema) {
+        if (!this.schemaLayers_[schema.schemaName]) {
+            var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
+            this.schemaStyles_[schema.schemaName] = this.initializeStyles_(styleConfigs || {});
+            var layer = this.createSchemaFeatureLayer_(schema);
+            this.olMap.addLayer(layer);
+            this.schemaLayers_[schema.schemaName] = layer;
+        }
+
+        return this.schemaLayers_[schema.schemaName];
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.initializeStyles_ = function (styleConfigs) {
@@ -153,12 +158,15 @@
             var styleConfig = styleConfigs[key];
             styles[key] = ol.style.StyleConverter.convertToOL4Style(styleConfig);
         }
-        Object.freeze(styles.default.getFill().getColor()); // Freeze Color to prevent unpredictable behaviour
-        styles.invisible = new ol.style.Style();
-        styles.editing = this.createEditingStyle_();
         return styles;
     };
 
+    Mapbender.Digitizer.FeatureRenderer.prototype.initializeGlobalStyles_ = function() {
+        return {
+            invisible: new ol.style.Style(),
+            editing: this.createEditingStyle_()
+        };
+    };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.createSchemaFeatureLayer_ = function (schema) {
         var layer = new ol.layer.Vector({

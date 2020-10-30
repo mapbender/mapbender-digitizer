@@ -22,6 +22,7 @@
         highlightControl: null,
         excludedFromHighlighting_: [],
         featureEditor: null,
+        renderer: null,
 
         _create: function () {
             this.toolsetRenderer = this._createToolsetRenderer();
@@ -60,6 +61,7 @@
             });
             var olMap = this.mbMap.getModel().olMap;
             this.contextMenu = this._createContextMenu(olMap);
+            this.renderer = new Mapbender.Digitizer.FeatureRenderer(this, olMap);
             this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory();
             olMap.on(ol.MapEventType.MOVEEND, function() {
                 // Don't react at all if currently editing feature attributes
@@ -100,7 +102,8 @@
             this.featureEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, this.controlFactory);
             olMap.addInteraction(this.selectControl);
             olMap.addInteraction(this.highlightControl);
-            if (this.options.displayOnInactive) {
+            var initialSchema = this._getCurrentSchema();
+            if (this.options.displayOnInactive || initialSchema.displayOnInactive) {
                 this.activate();
             }
         },
@@ -149,16 +152,15 @@
         deactivate: function() {
             this.selectControl.setActive(false);
             this.highlightControl.setActive(false);
-            this._deactivateSchema(this._getCurrentSchema());
+            var schema = this._getCurrentSchema();
+            this._deactivateCommon(schema);
+            if (!(this.options.displayOnInactive || schema.displayOnInactive)) {
+                this.renderer.disable();
+            }
             this.active = false;
         },
         _activateSchema: function(schema) {
             this._super(schema);
-            // HACK: externally patch renderer onto schema post-construction
-            var olMap = this.mbMap.getModel().olMap;
-            if (!schema.renderer) {
-                schema.renderer = new Mapbender.Digitizer.FeatureRenderer(this, olMap, schema);
-            }
             this.toolsetRenderer.setSchema(schema);
             this.contextMenu.setSchema(schema);
             this._toggleSchemaInteractions(schema, true);
@@ -185,8 +187,13 @@
             feature.setGeometry(feature.get('oldGeometry').clone());
             feature.set('dirty', false);
         },
-        _deactivateSchema: function(schema) {
-            this._super(schema);
+        /**
+         * Called by both _deactivateSchema (schema selector switch) and deactivate (sidepane interaction)
+         *
+         * @param schema
+         * @private
+         */
+        _deactivateCommon: function(schema) {
             this.featureEditor.setEditFeature(null);
             this.selectControl.getFeatures().clear();
             this._toggleSchemaInteractions(schema, false);
@@ -194,7 +201,16 @@
                 $('.-fn-toggle-tool', this.element).removeClass('active');
                 this.clearHighlightExclude_();
             }
-            if (!(this.options.displayOnInactive || schema.displayPermanent)) {
+        },
+        /**
+         * Called on schema selector change with the old schema
+         * @param {Object} schema
+         * @private
+         */
+        _deactivateSchema: function(schema) {
+            this._super(schema);
+            this._deactivateCommon(schema);
+            if (!schema.displayPermanent) {
                 this.getSchemaLayer(schema).setVisible(false);
             }
         },
@@ -306,7 +322,7 @@
         _prepareDataItem: function(schema, itemData) {
             var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
             feature.set('data', itemData.properties || {});
-            this.getRenderer(schema).initializeFeature(schema, feature);
+            this.renderer.initializeFeature(schema, feature);
             return feature;
         },
         _afterSave: function(schema, feature, originalId, responseData) {
@@ -402,11 +418,7 @@
             ;
         },
         getSchemaLayer: function(schema) {
-            return this.getRenderer(schema).getLayer();
-        },
-        getRenderer: function(schema) {
-            // @todo: replace monkey-patched property access on schema
-            return schema.renderer;
+            return this.renderer.getLayer(schema);
         },
         cloneFeature: function(schema, feature) {
             var newFeature = feature.clone();
