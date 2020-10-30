@@ -28,8 +28,7 @@
             if (schema.allowCustomStyle) {
                 this.customStyleFeature_(schema, feature);
             }
-
-            feature.set("oldGeometry", feature.getGeometry().clone());
+            this.owner.commitGeometry(feature);
         },
         registerFeatureEvents: function(schema, feature) {
             var renderer = this;

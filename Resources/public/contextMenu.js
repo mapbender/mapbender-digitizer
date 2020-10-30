@@ -63,16 +63,15 @@
         },
         reconfigure: function(feature) {
             var items = [];
+            var widget = this.widget;
             if (feature.get('dirty') && feature.get('oldGeometry')) {
                 items.push({
                     text: Mapbender.trans('mb.digitizer.revert.geometry'),
                     callback: function() {
-                        feature.setGeometry(feature.get('oldGeometry'));
-                        feature.set('dirty', false);
+                        widget.revertGeometry(feature);
                     }
                 });
             }
-            var widget = this.widget;
             var schema = this.schema_;
             if (schema && schema.allowEditData) {
                 items.push({

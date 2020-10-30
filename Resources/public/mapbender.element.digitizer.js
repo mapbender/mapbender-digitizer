@@ -177,6 +177,14 @@
             var contextMenuAllowed = ['modifyFeature', 'moveFeature'];
             this.contextMenu.setActive(!this.activeToolName_ || -1 !== contextMenuAllowed.indexOf(this.activeToolName_));
         },
+        commitGeometry: function(feature) {
+            feature.set("oldGeometry", feature.getGeometry().clone());
+            feature.set('dirty', false);
+        },
+        revertGeometry: function(feature) {
+            feature.setGeometry(feature.get('oldGeometry').clone());
+            feature.set('dirty', false);
+        },
         _deactivateSchema: function(schema) {
             this._super(schema);
             this.featureEditor.setEditFeature(null);
@@ -229,7 +237,11 @@
                 this.tableRenderer.showRow(schema, tr);
             }
             var dialog = this._super(schema, feature);
-            this.contextMenu.setActive(false);
+            // Disable context menu interactions with other features only if the current item is new
+            // Exiting the form by switching to a different feature would leave the new, unsaved feature in limbo
+            if (!this._getUniqueItemId(schema, feature)) {
+                this.contextMenu.setActive(false);
+            }
             this.toolsetRenderer.pause();
             if (schema.allowDigitize) {
                 this.featureEditor.pause();
@@ -307,7 +319,7 @@
             this._super(schema, feature, originalId, {
                 dataItem: responseData.dataItem.properties
             });
-            feature.set('dirty', false);
+            this.commitGeometry(feature);
             this.selectControl.getFeatures().clear();
             this.toolsetRenderer.resume();
             if (schema.allowDigitize) {
