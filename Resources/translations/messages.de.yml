@@ -1,4 +1,7 @@
 mb.digitizer:
+    edit.attributes: Sachdaten bearbeiten
+    edit.geometry: Geometrie bearbeiten
+    revert.geometry: Geometrieänderung zurücknehemn
     useAllScheme: 'Verwende aggregierendes Schema'
     displayOnInactive: 'Auch anzeigen, wenn nicht aktiv'
     feature:
@@ -6,7 +9,6 @@ mb.digitizer:
             title: 'Löschen'
         zoomTo: 'Heranzoomen'
         edit: 'Bearbeiten'
-        attributes: 'Objektinformationen'
         save:
             title: 'Speichern'
         print: 'Druck'

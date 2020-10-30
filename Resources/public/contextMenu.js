@@ -6,6 +6,7 @@
         this.widget = widget;
         this.olMap = olMap;
         this.contextmenu = new ContextMenu({
+            width: null,
             defaultItems: false
         });
         this.onMap_ = false;
@@ -69,7 +70,7 @@
             var items = [];
             if (schema.allowEditData) {
                 items.push({
-                    text: Mapbender.trans('mb.digitizer.feature.edit'),
+                    text: Mapbender.trans('mb.digitizer.edit.attributes'),
                     callback: function () {
                         self.widget._openEditDialog(schema, self.feature);
                     }

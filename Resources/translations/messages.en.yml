@@ -1,12 +1,14 @@
 mb.digitizer:
     useAllScheme: 'Use aggregating Scheme'
     displayOnInactive: 'Display when not active'
+    edit.attributes: Edit attributes
+    edit.geometry: Edit geometry
+    revert.geometry: Revert geometry changes
     feature:
         remove:
             title: 'Remove feature'
         zoomTo: 'Zoom to feature'
         edit: 'Edit'
-        attributes: 'Feature attributes'
         savesave: 'Save feature'
         save:
             title: Save
