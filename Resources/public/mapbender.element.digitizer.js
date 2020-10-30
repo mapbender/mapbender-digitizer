@@ -196,11 +196,7 @@
                 }
                 this.activeToolName_ = null;
             }
-            if (state) {
-                this.contextMenu.enable();
-            } else {
-                this.contextMenu.disable();
-            }
+            this.contextMenu.setActive(state);
         },
         _getDataStoreFromSchema: function(schema) {
             // Digitizer schema config aliases "dataStore" (upstream) as "featureType"
@@ -229,7 +225,7 @@
                 this.tableRenderer.showRow(schema, tr);
             }
             var dialog = this._super(schema, feature);
-            this.contextMenu.disable();
+            this.contextMenu.setActive(false);
             this.toolsetRenderer.pause();
             if (schema.allowDigitize) {
                 this.featureEditor.pause();
@@ -332,14 +328,6 @@
             var isNew = !this._getUniqueItemId(schema, feature);
             if (isNew) {
                 this.getSchemaLayer(schema).getSource().removeFeature(feature);
-            }
-            // @todo: document new schema config value
-            if (!isNew && schema.revertChangedGeometryOnCancel) {
-                var oldGeometry = feature.get('oldGeometry');
-                if (oldGeometry) {
-                    feature.setGeometry(oldGeometry.clone());
-                }
-                feature.set('dirty', false);
             }
             this.toolsetRenderer.resume();
             if (schema.allowDigitize) {

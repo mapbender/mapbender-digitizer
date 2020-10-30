@@ -16,24 +16,17 @@
     Object.assign(Mapbender.Digitizer.MapContextMenu.prototype, {
         setActive: function(state) {
             if (state) {
-                this.enable();
+                if (!this.onMap_) {
+                    this.olMap.addControl(this.contextmenu);
+                    this.registerEvents(this.olMap);
+                    this.onMap_ = true;
+                }
+                this.contextmenu.enable();
             } else {
-                this.disable();
+                this.contextmenu.close();
+                this.contextmenu.disable();
             }
-        },
-        enable: function() {
-            if (!this.onMap_) {
-                this.olMap.addControl(this.contextmenu);
-                this.registerEvents(this.olMap);
-                this.onMap_ = true;
-            }
-            this.enabled_ = true;
-            return this.contextmenu.enable.apply(this.contextmenu, arguments);
-        },
-        disable: function() {
-            this.enabled_ = false;
-            this.contextmenu.close();
-            return this.contextmenu.disable.apply(this.contextmenu, arguments);
+            this.enabled_ = !!state;
         },
         /**
          * @param {ol.PluggableMap} olMap
@@ -46,8 +39,12 @@
                         return feature;
                     }
                 });
-                if (self.feature && self.enabled_ && self.menuItems_.length) {
-                    self.contextmenu.enable();
+                if (self.feature && self.enabled_) {
+                    if (self.reconfigure(self.feature)) {
+                        self.contextmenu.enable();
+                    } else {
+                        self.contextmenu.disable();
+                    }
                 } else {
                     self.contextmenu.disable();
                 }
@@ -63,6 +60,23 @@
                 this.contextmenu.disable();
             }
             this.filterLayers_ = [this.widget.getSchemaLayer(schema)];
+        },
+        reconfigure: function(feature) {
+            var items = [];
+            if (feature.get('dirty') && feature.get('oldGeometry')) {
+                items.push({
+                    text: Mapbender.trans('mb.digitizer.revert.geometry'),
+                    callback: function() {
+                        feature.setGeometry(feature.get('oldGeometry'));
+                        feature.set('dirty', false);
+                        feature.set('oldGeometry', undefined);
+                    }
+                });
+            }
+            items = items.concat(this.menuItems_);
+            this.contextmenu.clear();
+            this.contextmenu.extend(items);
+            return !!items.length;
         },
         getMenuItems: function(schema) {
             // NOTE: self.feature initialized and updated by beforeopen handler

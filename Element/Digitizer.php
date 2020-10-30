@@ -332,9 +332,6 @@ class Digitizer extends DataManagerElement
             'refreshFeaturesAfterSave' => false,
             // @todo: specify, document; current implementation does not work on Openlayers 4/5/6
             'refreshLayersAfterFeatureSave' => false,
-            // @todo: specify, document; reverting geometry modification on attribute editor cancel is a confusing
-            //        workflow event. Should distinctly offer revert of geometry modification.
-            'revertChangedGeometryOnCancel' => false,
 
             // Inherited:
             // * popup.title
