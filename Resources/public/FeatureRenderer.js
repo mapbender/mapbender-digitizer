@@ -103,13 +103,6 @@
             } else {
                 this.setRenderIntent(feature, 'default');
             }
-        },
-        setExcludedFromHighlighting: function(features) {
-            var features_ = features || [];
-            this.excludedFromHighlighting_.splice(0, this.excludedFromHighlighting_.length);
-            for (var i = 0; i < features_.length; ++i) {
-                this.excludedFromHighlighting_.push(features_[i]);
-            }
         }
     });
 

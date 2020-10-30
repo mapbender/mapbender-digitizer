@@ -163,7 +163,7 @@
         _toggleDrawingTool: function(schema, toolName, state) {
             if (!state && 'modifyFeature' === toolName) {
                 schema.geometryEditor.setEditFeature(null);
-                this.getRenderer(schema).setExcludedFromHighlighting([]);
+                this.clearHighlightExclude_()
             }
             schema.geometryEditor.toggleTool(toolName, schema, state);
             this.activeToolName_ = state && toolName || null;
