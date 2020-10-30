@@ -91,6 +91,9 @@
                         if (geometry) {
                             geometry.transform(data.from, data.to);
                         }
+                        if (feature.get('oldGeometry')) {
+                            feature.get('oldGeometry').transform(data.from, data.to);
+                        }
                     });
                 }
                 self.featureEditor.resume();
