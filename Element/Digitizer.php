@@ -35,7 +35,7 @@ class Digitizer extends BaseElement
     protected static $description = 'Georeferencing and Digitizing';
 
     /** @var int Default maximal search results number */
-    protected $maxResults = 2500;
+    protected $maxResults = 5000;
 
     protected $styleManager;
 

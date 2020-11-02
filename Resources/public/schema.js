@@ -354,7 +354,6 @@
         allowDeleteByCancelNewGeometry: false,
         allowCancelButton: false,
         allowLocate: false,
-        maxResults: 500,
         showExtendSearchSwitch: true,
         zoomScaleDenominator: 500,
         useContextMenu: true,
