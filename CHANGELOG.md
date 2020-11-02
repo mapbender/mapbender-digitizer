@@ -1,4 +1,6 @@
-## dev-release/1.4 @ 828cdd2
+## 1.4
+* Fix handling of layer visiblity options displayOnInactive and displayPermanent (+ combination)
+* Fix current attribute editing popup staying open when deactivating via Mapbender sidepane
 * Fix drawing tool switching remaining available while editing feature attributes
 * Fix geometry editing selection remaining active with an open attribute editing dialog
 * Fix geometry modification revert integration; use right-click context menu
