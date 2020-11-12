@@ -171,6 +171,12 @@
                 },
 
                 highlight: function (feature,ommitResultTable) {
+
+                    if (schema.selectControl.highlightedFeature) {
+                        schema.selectControl.unhighlight(schema.selectControl.highlightedFeature);
+                    }
+                    schema.selectControl.highlightedFeature = feature;
+
                     feature.isHighlighted = true;
 
                     console.assert(!!feature, "Feature must be set");
@@ -190,6 +196,7 @@
                 },
                 unhighlight: function (feature,ommitResultTable) {
 
+                    schema.selectControl.highlightedFeature = null;
                     feature.isHighlighted = false;
 
                     if (!schema.layer.features.includes(feature)) {
@@ -347,7 +354,6 @@
         allowDeleteByCancelNewGeometry: false,
         allowCancelButton: false,
         allowLocate: false,
-        maxResults: 500,
         showExtendSearchSwitch: true,
         zoomScaleDenominator: 500,
         useContextMenu: true,
@@ -411,6 +417,63 @@
                 mapping: null,
                 zoomScale: null
             };
+
+            if (schema.search.form) {
+
+                DataUtil.eachItem(schema.search.form, function (item) {
+
+                    if (item.mapping) {
+                        var value = item.mapping[item.name];
+
+                        if (value && item.options) {
+                            var option = item.options.find(function (option) {
+                                return option.___value && option.___value.toLowerCase() === value.toLowerCase()
+                            });
+                            if (option) {
+                                item.value = option.___value;
+                            } else {
+                                $.notify(value + " is not a valid value for " + item.name);
+                            }
+                        }
+
+                    }
+
+                    item.change = function (options) {
+
+                        schema.getData({
+                            //ommitIntersect: true,
+
+                        }).done();
+                    };
+
+                    item.keyup = function()  {
+                        item.change.apply(this,arguments);
+                    }
+
+                    if (item.type === 'select' && item.ajax) {
+
+                        item.ajax.dataType = 'json';
+                        item.ajax.url = widget.getElementURL() + 'form/select';
+                        item.ajax.data = function (params) {
+
+                            if (params && params.term) {
+                                // Save last given term to get highlighted in templateResult
+                                item.ajax.lastTerm = params.term;
+                            }
+                            var ret = {
+                                schema: schema.schemaName,
+                                item: item,
+                                form: schema.menu.getSearchData(),
+                                params: params
+                            };
+
+                            return ret;
+                        };
+
+                    }
+                });
+            }
+
 
         },
 
@@ -554,22 +617,7 @@
         },
 
 
-        refreshOtherLayersAfterFeatureSave: function (feature) {
-            var schema = this;
 
-            var scheme = schema.getSchemaByFeature(feature);
-
-            if (scheme.refreshLayersAfterFeatureSave) {
-
-                _.each(scheme.refreshLayersAfterFeatureSave, function (layerInstanceId) {
-                    var layers = Mapbender.layerManager.getLayersByInstanceId(layerInstanceId);
-                    _.each(layers, function (layer) {
-                        Mapbender.layerManager.refreshLayer(layer);
-                    });
-                });
-            }
-
-        },
 
         openFeatureEditDialog: function (feature) {
             var schema = this;
@@ -898,7 +946,6 @@
             var schema = this;
             schema.layer.features = _.without(schema.getLayerFeatures(), feature);
             schema.reloadFeatures();
-            schema.refreshOtherLayersAfterFeatureSave(feature);
         },
 
         removeAllFeatures: function () {
@@ -1131,14 +1178,7 @@
 
                 successHandler();
 
-                schema.refreshOtherLayersAfterFeatureSave(feature);
-
-                schema.refreshConnectedDigitizerFeatures();
-
-                // Funktionalität nicht erwünscht
-                // if (schema.menu.toolSet.activeControl instanceof OpenLayers.Control.ModifyFeature) {
-                //     schema.menu.toolSet.activeControl.activate();
-                // }
+                schema.widget.element.trigger("featureSaved", {schema: schema, feature: feature});
 
                 return response;
 
@@ -1149,16 +1189,7 @@
         },
 
 
-        refreshConnectedDigitizerFeatures: function () {
-            var schema = this;
-            var widget = schema.widget;
 
-            if (schema.refreshFeaturesAfterSave) {
-                _.each(schema.refreshFeaturesAfterSave, function (schemaName, index) {
-                    widget.refreshConnectedDigitizerFeatures(schemaName);
-                })
-            }
-        },
 
         tryMailManager: function (feature) {
             var schema = this;

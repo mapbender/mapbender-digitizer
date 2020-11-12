@@ -80,7 +80,11 @@
                         dataItem[fieldName] = feature.fid;
                         var dialog = dm._openEditDialog(dataItem, function(){
                             var id = dataItem[fieldName];
+                            if (!$(dialog).find(":input[name=" + fieldName + "]").length) {
+                                $.notify("No input with name "+fieldName+" found in dialog ");
+                            }
                             $(dialog).find("select[name=" + fieldName + "]").find("option[value!="+id+"]").attr("disabled",true).hide();
+                            $(dialog).find("input[name=" + fieldName + "]").attr("disabled",true);
                         });
                         dialog.parentTable = table;
                         $(dialog).find("select[name=" + fieldName + "]").attr("disabled", "true");
