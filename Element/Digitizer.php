@@ -45,20 +45,20 @@ class Digitizer extends BaseElement
     public function getAssets()
     {
 
-        $mainFiles = array('mapbender.element.digitizer','toolset','schema','schemaAll','clustering.mixin',
-                           'menu','contextMenu', 'utilities',
-                           'featureEditDialog','controlFactory','featureStyleEditor','mapbender.layermanager',
-                           'mapbender.digitizer-translator',
-                           'queryEngine','openlayers.extension','vis-ui.extension');
+        $mainFiles = array('mapbender.element.digitizer', 'toolset', 'schema', 'schemaAll', 'clustering.mixin',
+            'menu', 'contextMenu', 'utilities',
+            'featureEditDialog', 'controlFactory', 'featureStyleEditor', 'mapbender.layermanager',
+            'mapbender.digitizer-translator',
+            'queryEngine', 'openlayers.extension', 'vis-ui.extension');
 
 
         $js = array();
 
-        foreach($mainFiles as $file) {
+        foreach ($mainFiles as $file) {
             $js[] = "@MapbenderDigitizerBundle/Resources/public/$file.js";
         }
 
-        $js = array_merge($js,array(
+        $js = array_merge($js, array(
             '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
             '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
             '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
@@ -74,11 +74,9 @@ class Digitizer extends BaseElement
         ));
 
 
-
-
         return array(
-            'js'    => $js,
-            'css'   => array(
+            'js' => $js,
+            'css' => array(
                 '/components/select2/select2-built.css',
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/context-menu.scss',
@@ -123,8 +121,8 @@ class Digitizer extends BaseElement
      */
     public function getConfiguration($public = true)
     {
-        $configuration            = parent::getConfiguration();
-        $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
+        $configuration = parent::getConfiguration();
+        $configuration['debug'] = isset($configuration['debug']) ? $configuration['debug'] : false;
         $configuration['fileUri'] = $this->container->getParameter('mapbender.uploads_dir') . "/" . FeatureType::UPLOAD_DIR_NAME;
         $featureTypes = null;
 
@@ -137,13 +135,14 @@ class Digitizer extends BaseElement
         return $configuration;
     }
 
-    public function adjustScheme(&$scheme, &$featureTypes,$public) {
+    public function adjustScheme(&$scheme, &$featureTypes, $public)
+    {
         if (is_string($scheme['featureType'])) {
             if ($featureTypes === null) {
                 $featureTypes = $this->getFeatureTypeDeclarations();
             }
-            $featureTypeName           = $scheme['featureType'];
-            $scheme['featureType']     = $featureTypes[ $featureTypeName ];
+            $featureTypeName = $scheme['featureType'];
+            $scheme['featureType'] = $featureTypes[$featureTypeName];
             $scheme['featureTypeName'] = $featureTypeName;
         }
 
@@ -157,8 +156,8 @@ class Digitizer extends BaseElement
 
         if (isset($scheme['search']) && isset($scheme['search']["form"])) {
             $scheme['search']["form"] = $this->prepareItems($scheme['search']["form"]);
-            foreach($scheme['search']["form"] as &$form) {
-                $URLParamSet = isset($form["URLParam"]) && $form["URLParam"]==true;
+            foreach ($scheme['search']["form"] as &$form) {
+                $URLParamSet = isset($form["URLParam"]) && $form["URLParam"] == true;
                 if ($URLParamSet) {
                     $URLParam = $form["name"];
                     $formValue = $this->container->get('request')->get($URLParam);
@@ -172,7 +171,8 @@ class Digitizer extends BaseElement
 
     }
 
-    public function getConfigurationAction(){
+    public function getConfigurationAction()
+    {
         return $this->getConfiguration(true);
     }
 
@@ -192,8 +192,8 @@ class Digitizer extends BaseElement
                 switch ($formItem['type']) {
                     case 'select':
                         if (isset($formItem['multiple'])) {
-                            $separator                  = isset($formItem['separator']) ? $formItem['separator'] : ',';
-                            if(is_array($feature["properties"][$formItem['name']])){
+                            $separator = isset($formItem['separator']) ? $formItem['separator'] : ',';
+                            if (is_array($feature["properties"][$formItem['name']])) {
                                 $feature["properties"][$formItem['name']] = implode($separator, $feature["properties"][$formItem['name']]);
                             }
                         }
@@ -213,7 +213,7 @@ class Digitizer extends BaseElement
      */
     protected function getFeatureTypeBySchemaName($name)
     {
-        if ($name=='all') {
+        if ($name == 'all') {
             return null;
         }
         $schema = $this->getSchemaByName($name);
@@ -235,7 +235,7 @@ class Digitizer extends BaseElement
      *  returns 'Hello, John'
      *
      * @param string $code Code string.
-     * @param array  $args Variables this should be able by evaluating.
+     * @param array $args Variables this should be able by evaluating.
      * @return string Returns evaluated result.
      * @throws \Exception
      */
@@ -243,7 +243,7 @@ class Digitizer extends BaseElement
     {
         foreach ($args as $key => &$value) {
             if (is_array($value)) {
-                ${$key} = implode(",",$value);
+                ${$key} = implode(",", $value);
             } else {
                 ${$key} = &$value ?: "NULL";
             }
@@ -285,25 +285,25 @@ class Digitizer extends BaseElement
     {
         /** @var Connection $connection */
         $itemDefinition = $request["item"];
-        $schemaName     = $request["schema"];
-        $formData       = $request["form"];
-        $params         = $request["params"];
-        $config         = $this->getConfiguration();
-        $schemaConfig   = $config['schemes'][ $schemaName ];
-        $searchConfig   = $schemaConfig["search"];
-        $searchForm     = $searchConfig["form"];
-        $item           = $this->getFormItemByName($searchForm, $itemDefinition["name"]);
-        $query          = isset($params["term"]) ? $params["term"] : '';
-        $ajaxSettings   = $item['ajax'];
-        $connection     = $this->container->get("doctrine.dbal." . $ajaxSettings['connection'] . "_connection");
-        $formData       = array_merge($formData, array($item["name"] => $query));
-        $sql            = self::evalString($ajaxSettings["sql"], $formData);
-        $rows           = $connection->fetchAll($sql);
-        $results        = array();
+        $schemaName = $request["schema"];
+        $formData = $request["form"];
+        $params = $request["params"];
+        $config = $this->getConfiguration();
+        $schemaConfig = $config['schemes'][$schemaName];
+        $searchConfig = $schemaConfig["search"];
+        $searchForm = $searchConfig["form"];
+        $item = $this->getFormItemByName($searchForm, $itemDefinition["name"]);
+        $query = isset($params["term"]) ? $params["term"] : '';
+        $ajaxSettings = $item['ajax'];
+        $connection = $this->container->get("doctrine.dbal." . $ajaxSettings['connection'] . "_connection");
+        $formData = array_merge($formData, array($item["name"] => $query));
+        $sql = self::evalString($ajaxSettings["sql"], $formData);
+        $rows = $connection->fetchAll($sql);
+        $results = array();
 
         foreach ($rows as $row) {
             $results[] = array(
-                'id'   => current($row),
+                'id' => current($row),
                 'text' => end($row),
             );
         }
@@ -311,9 +311,10 @@ class Digitizer extends BaseElement
         return array('results' => $results);
     }
 
-    protected function injectFormSearch(&$request) {
+    protected function injectFormSearch(&$request)
+    {
 
-        $schemaName  = $request["schema"];
+        $schemaName = $request["schema"];
         $featureType = $this->getFeatureTypeBySchemaName($schemaName);
 
         if (isset($request["where"])) {
@@ -335,7 +336,7 @@ class Digitizer extends BaseElement
 
                 if ($condition->isSqlArray()) {
                     $subConditions = array();
-                    $arrayVars     = $vars[ $condition->getKey() ];
+                    $arrayVars = $vars[$condition->getKey()];
 
                     if (!is_array($arrayVars)) {
                         if ($arrayVars == null) {
@@ -374,7 +375,7 @@ class Digitizer extends BaseElement
      */
     public function selectAction($request)
     {
-        $schemaName  = $request["schema"];
+        $schemaName = $request["schema"];
         $featureType = $this->getFeatureTypeBySchemaName($schemaName);
 
         $this->injectFormSearch($request);
@@ -383,7 +384,7 @@ class Digitizer extends BaseElement
             $config = $this->getConfiguration();
             $schemes = $config["schemes"];
             $features = array();
-            foreach($schemes as $subSchemaName => $scheme) {
+            foreach ($schemes as $subSchemaName => $scheme) {
                 if ($subSchemaName == 'all') {
                     continue;
                 }
@@ -393,9 +394,9 @@ class Digitizer extends BaseElement
 
                     $feature["properties"]["schemaName"] = $subSchemaName;
                 };
-                $features = array_merge($features,$featureCollection["features"]);
+                $features = array_merge($features, $featureCollection["features"]);
             }
-            $featureCollection = array("type" => "FeatureCollection",  "features" => $features);
+            $featureCollection = array("type" => "FeatureCollection", "features" => $features);
         } else {
 
             $featureCollection = $featureType->search(
@@ -426,7 +427,7 @@ class Digitizer extends BaseElement
     public function deleteAction($request)
     {
         $schemaName = $request["schema"];
-        $schema     = $this->getSchemaByName($schemaName);
+        $schema = $this->getSchemaByName($schemaName);
 
         if ((isset($schema['allowDelete']) && !$schema['allowDelete']) || (isset($schema["allowEditData"]) && !$schema['allowEditData'])) {
             throw new Exception('It is forbidden to delete objects', 2);
@@ -449,7 +450,7 @@ class Digitizer extends BaseElement
     public function cloneFeature($request)
     {
         $schemaName = $request["schema"];
-        $schema      = $this->getSchemaByName($schemaName);
+        $schema = $this->getSchemaByName($schemaName);
         $featureType = $this->getFeatureTypeBySchemaName($schemaName);
         $results = array();
 
@@ -457,13 +458,13 @@ class Digitizer extends BaseElement
             throw new Exception('Clone feature is forbidden', 2);
         }
 
-        $baseId  = $request['id'];
+        $baseId = $request['id'];
         $feature = $featureType->getById($baseId);
         $feature->setId(null);
         $feature = $featureType->save($feature);
 
         return array(
-            'baseId'  => $baseId,
+            'baseId' => $baseId,
             'feature' => $feature,
         );
     }
@@ -476,13 +477,13 @@ class Digitizer extends BaseElement
      */
     public function saveAction($request)
     {
-        $schemaName    = $request["schema"];
+        $schemaName = $request["schema"];
         $configuration = $this->getConfiguration(false);
-        $schema        = $this->getSchemaByName($schemaName);
-        $featureType   = $this->getFeatureTypeBySchemaName($schemaName);
-        $connection    = $featureType->getDriver()->getConnection();
-        $results       = array();
-        $debugMode     = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
+        $schema = $this->getSchemaByName($schemaName);
+        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
+        $connection = $featureType->getDriver()->getConnection();
+        $results = array();
+        $debugMode = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
 
         if (isset($schema["allowEditData"]) && !$schema["allowEditData"]) {
             throw new Exception("It is forbidden to save objects", 2);
@@ -507,23 +508,23 @@ class Digitizer extends BaseElement
                     $featureData = $this->prepareQueriedFeatureData($feature, isset($schema['formItems']) ? $schema['formItems'] : []);
 
                     foreach ($featureType->getFileInfo() as $fileConfig) {
-                        if (!isset($fileConfig['field']) || !isset($featureData["properties"][ $fileConfig['field'] ])) {
+                        if (!isset($fileConfig['field']) || !isset($featureData["properties"][$fileConfig['field']])) {
                             continue;
                         }
-                        $url                                               = $featureType->getFileUrl($fileConfig['field']);
-                        $requestUrl                                        = $featureData["properties"][ $fileConfig['field'] ];
-                        $newUrl                                            = str_replace($url . "/", "", $requestUrl);
-                        $featureData["properties"][ $fileConfig['field'] ] = $newUrl;
+                        $url = $featureType->getFileUrl($fileConfig['field']);
+                        $requestUrl = $featureData["properties"][$fileConfig['field']];
+                        $newUrl = str_replace($url . "/", "", $requestUrl);
+                        $featureData["properties"][$fileConfig['field']] = $newUrl;
                     }
 
                     $feature = $featureType->save($featureData);
                     $results = array_merge($featureType->search(array(
-                        'srid'  => $feature->getSrid(),
+                        'srid' => $feature->getSrid(),
                         'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
                 }
 
             }
-            foreach($results as &$result) {
+            foreach ($results as &$result) {
                 $result->setAttributes(array("schemaName" => $schemaName));
             }
             $results = $featureType->toFeatureCollection($results);
@@ -539,6 +540,9 @@ class Digitizer extends BaseElement
 
     }
 
+    public function fileuploadAction($request) {
+        return $this->uploadFileAction($request);
+    }
     /**
      * Upload file
      *

@@ -249,7 +249,7 @@
             }
 
             if (item.type === "file") {
-                item.uploadHanderUrl = widget.elementUrl + "file/upload?schema=" + schema.schemaName + "&fid=" + feature.fid + "&field=" + item.name;
+                item.uploadHanderUrl = widget.getElementURL() + "file-upload?schema=" + schema.schemaName + "&fid=" + feature.fid + "&field=" + item.name;
                 if (item.hasOwnProperty("name") && feature.data.hasOwnProperty(item.name) && feature.data[item.name]) {
                     item.dbSrc = feature.data[item.name];
                     if (schema.featureType.files) {
