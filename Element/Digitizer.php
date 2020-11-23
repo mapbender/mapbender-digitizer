@@ -70,6 +70,7 @@ class Digitizer extends BaseElement
             '@MapbenderDigitizerBundle/Resources/public/polyfill/confirmDialog.js',
             '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
             '@MapbenderDigitizerBundle/Resources/public/lib/jsts.min.js',
+            '@MapbenderDigitizerBundle/Resources/public/lib/moment.js',
 
         ));
 

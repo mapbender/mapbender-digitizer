@@ -214,7 +214,11 @@
                 var selector = widget.selector;
                 var schema = selector.getSelectedSchema();
 
-                selector.previousSchema.deactivateSchema();
+                if (!selector.previousSchema) {
+                  console.warn("No previous schema found");
+                } else {
+                    selector.previousSchema.deactivateSchema();
+                }
                 schema.activateSchema();
                 selector.previousSchema = schema;
 

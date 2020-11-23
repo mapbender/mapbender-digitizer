@@ -533,8 +533,8 @@
                 if (tableField.type == "datetime") {
                     tableField.data = function(feature) {
                         var d = new Date(feature.data[index]);
-                        return d.getDate()  + "." + (d.getMonth()+1) + "." + d.getFullYear() + " " +
-                            d.getHours() + ":" + d.getMinutes()+":"+d.getSeconds();
+                        var formatted = moment(d).format(tableField.format);
+                        return formatted;
                     }
                 }
             });
