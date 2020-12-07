@@ -323,9 +323,17 @@
         _prepareDataItem: function(schema, itemData) {
             var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
             feature.set('data', itemData.properties || {});
-            feature.setId(this._generateNamespacedId(schema, feature));
-            this.renderer.initializeFeature(schema, feature);
-            return feature;
+            var id = this._generateNamespacedId(schema, feature);
+            feature.setId(id);
+            var schemaSource = this.getSchemaLayer(schema).getSource();
+            var existingFeature = schemaSource.getFeatureById(id);
+            if (existingFeature && existingFeature.get('dirty')) {
+                // Keep & reuse existing feature that has been modified in the current session
+                return existingFeature;
+            } else {
+                this.renderer.initializeFeature(schema, feature);
+                return feature;
+            }
         },
         /**
          * Return a globally unique feature id (unique even if features from multiple schemas appear on the same layer)
