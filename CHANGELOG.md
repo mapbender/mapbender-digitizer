@@ -1,3 +1,6 @@
+## 1.4.1
+* Fix unsaved feature modifications getting lost when reloading features on map movement
+
 ## 1.4
 * Fix handling of layer visiblity options displayOnInactive and displayPermanent (+ combination)
 * Fix current attribute editing popup staying open when deactivating via Mapbender sidepane
