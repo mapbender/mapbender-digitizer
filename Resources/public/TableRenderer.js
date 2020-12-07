@@ -163,6 +163,11 @@
             this.registerFeatureEvents(schema, feature);
         },
         registerFeatureEvents: function(schema, feature) {
+            // Avoid registering same event handlers on the same feature multiple times
+            if (feature.get('table-events')) {
+                return;
+            }
+
             var self = this;
             // Update interaction buttons when "hidden" and "dirty" values change
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function(event) {
@@ -188,6 +193,7 @@
                     }
                 }
             });
+            feature.set('table-events', true);
         },
         updateButtonStates_: function(tr, feature) {
             var hidden = !!feature.get('hidden');

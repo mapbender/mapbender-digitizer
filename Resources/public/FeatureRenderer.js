@@ -32,6 +32,10 @@
             }
         },
         registerFeatureEvents: function(schema, feature) {
+            // Avoid registering same event handlers on the same feature multiple times
+            if (feature.get('renderer-events')) {
+                return;
+            }
             var renderer = this;
             var watchedProperties = ['hover', 'dirty', 'editing', 'hidden'];
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
@@ -39,6 +43,7 @@
                     renderer.updateFeatureStyle(schema, feature);
                 }
             });
+            feature.set('renderer-events', true);
         },
         setStyle_: function(feature, style) {
             // adopted code from mapbender/ol4-extensions package, plus fixes
