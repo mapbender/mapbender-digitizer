@@ -375,8 +375,18 @@
         _getData: function(schema) {
             var layer = this.getSchemaLayer(schema);
             return this._super(schema).then(function(features) {
+                var modifiedFeatures = layer.getSource().getFeatures().filter(function(feature) {
+                    return feature.get('dirty');
+                });
                 layer.getSource().clear();
                 layer.getSource().addFeatures(features);
+                for (var i = 0; i < modifiedFeatures.length; ++i) {
+                    var modifiedFeature = modifiedFeatures[i];
+                    if (!layer.getSource().getFeatureById(modifiedFeature.getId())) {
+                        layer.getSource().addFeatures([modifiedFeature]);   // re-add to layer
+                        features.push(modifiedFeature);                     // re-add to table view
+                    }
+                }
                 return features;
             });
         },
