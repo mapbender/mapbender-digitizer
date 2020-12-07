@@ -323,8 +323,20 @@
         _prepareDataItem: function(schema, itemData) {
             var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
             feature.set('data', itemData.properties || {});
+            feature.setId(this._generateNamespacedId(schema, feature));
             this.renderer.initializeFeature(schema, feature);
             return feature;
+        },
+        /**
+         * Return a globally unique feature id (unique even if features from multiple schemas appear on the same layer)
+         *
+         * @param {Object} schema
+         * @param {ol.Feature} feature
+         * @return {string}
+         * @private
+         */
+        _generateNamespacedId: function(schema, feature) {
+            return [this.element.attr('id'), schema.schemaName, this._getUniqueItemId(schema, feature)].join('-');
         },
         _afterSave: function(schema, feature, originalId, responseData) {
             // unravel dm-incompatible response format
