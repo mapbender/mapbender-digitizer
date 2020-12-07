@@ -340,7 +340,7 @@
                 var widget = this.owner;
                 newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
                     var feature = event.feature;
-                    feature.set('dirty', true);
+                    widget.initializeNewFeature(schema, feature);
                     widget._openEditDialog(schema, event.feature);
                 });
                 newInteraction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {

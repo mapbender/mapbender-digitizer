@@ -331,9 +331,14 @@
                 // Keep & reuse existing feature that has been modified in the current session
                 return existingFeature;
             } else {
+                this.commitGeometry(schema, feature);
                 this.renderer.initializeFeature(schema, feature);
                 return feature;
             }
+        },
+        initializeNewFeature: function(schema, feature) {
+            this.renderer.initializeFeature(schema, feature);
+            feature.set('dirty', true);
         },
         /**
          * Return a globally unique feature id (unique even if features from multiple schemas appear on the same layer)

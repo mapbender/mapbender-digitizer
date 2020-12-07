@@ -26,10 +26,10 @@
         initializeFeature: function(schema, feature) {
             feature.set("mbOrigin", "digitizer");
             this.setRenderIntent_(schema, feature, 'default');
+            this.registerFeatureEvents(schema, feature);
             if (schema.allowCustomStyle) {
                 this.customStyleFeature_(schema, feature);
             }
-            this.owner.commitGeometry(schema, feature);
         },
         registerFeatureEvents: function(schema, feature) {
             var renderer = this;
@@ -174,12 +174,6 @@
             visible: true,
             minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
             maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity)
-        });
-        var renderer = this;
-        layer.getSource().on(ol.source.VectorEventType.ADDFEATURE, function (event) {
-            var feature = event.feature;
-            renderer.initializeFeature(schema, feature);
-            renderer.registerFeatureEvents(schema, feature);
         });
         return layer;
     };
