@@ -133,7 +133,7 @@
 
             tableFields.push({
                 data: schema.featureType.uniqueId,
-                label: 'Nr.',
+                title: 'Nr.',
                 width: '20%'
             });
             return tableFields;
@@ -149,6 +149,15 @@
                     });
                 });
             }
+            // Digitizer legacy config quirk: column configs use a "label" key, which is not a datatables option and doesn't do
+            // anything. Adapt configs to instead use the "title" option.
+            fieldConfigs = fieldConfigs.map(function(fieldConfig) {
+                if (typeof (fieldConfig.title) === 'undefined' && fieldConfig.label) {
+                    fieldConfig.title = fieldConfig.label;
+                }
+                delete fieldConfig['label'];
+                return fieldConfig;
+            });
             if (!fieldConfigs.length) {
                 fieldConfigs = this.getDefaultColumnConfigs(schema);
             }
