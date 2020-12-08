@@ -361,6 +361,9 @@
             this._super(schema, feature, originalId, {
                 dataItem: responseData.dataItem.properties
             });
+            if (!feature.getId()) {
+                feature.setId(this._generateNamespacedId(schema, feature));
+            }
             this.commitGeometry(schema, feature);
             this.selectControl.getFeatures().clear();
             this.toolsetRenderer.resume();
