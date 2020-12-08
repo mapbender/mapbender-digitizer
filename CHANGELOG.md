@@ -1,3 +1,6 @@
+## 1.4.2
+* Fix modified feature reload protection to also apply to features just created in the same session
+
 ## 1.4.1
 * Fix unsaved feature modifications getting lost when reloading features on map movement
 
