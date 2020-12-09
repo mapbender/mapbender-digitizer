@@ -1,1 +1,6 @@
-{% extends "MapbenderDigitizerBundle:ElementAdmin:digitizeradmin.html.twig" %}
+{% extends "MapbenderDataManagerBundle:ElementAdmin:dataManager.html.twig" %}
+{% block schemes_row %}
+    {# put extra rows before schemes #}
+    {{ form_row(form.configuration.target) }}
+    {{ parent() }}
+{% endblock %}
