@@ -17,7 +17,8 @@
     </style>
     <script type="text/javascript">
         $(function(){
-            var textarea = document.getElementById("form_configuration_schemes");
+            var textarea = document.getElementById({{ form.configuration.schemes.vars.id | json_encode | raw }});
+
             var yamlEditor = CodeMirror.fromTextArea(textarea, {
                 mode: "text/x-yaml",
                 styleActiveLine: true,
