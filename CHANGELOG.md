@@ -1,3 +1,7 @@
+## 1.4.4
+* Fix backend form browser text searchability through off-screen portions of "schemes" area
+* Fix backend form sizing
+
 ## 1.4.3
 * Fix missing column titles
 
