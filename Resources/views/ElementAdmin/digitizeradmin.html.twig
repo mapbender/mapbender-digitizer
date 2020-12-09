@@ -1,5 +1,9 @@
 <div class="elementForm elementFormDigitizer">
     <style media="all">
+        .elementFormDigitizer .full-width-input .inputWrapper {
+            /* defeat .inputWrapper default width limitation */
+            width: 100%;
+        }
         .elementFormDigitizer label.block {
             display: block;
             margin: 0;
@@ -45,5 +49,7 @@
     </script>
     {{ form_row(form.title) }}
     {{ form_row(form.configuration.target) }}
-    {{ form_row(form.configuration.schemes, {'label_attr': {'class': 'block'}}) }}
+    <div class="full-width-input">
+        {{ form_row(form.configuration.schemes, {'label_attr': {'class': 'block'}}) }}
+    </div>
 </div>
