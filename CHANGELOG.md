@@ -69,6 +69,12 @@
   * `allowDeleteByCancelNewGeometry`; always needed to be true to avoid dataTables exceptions
   * `featureType`: `maxResults`; any value would eventually become too low and cause errors; use current extent search to limit loaded feature volume
 
+## 1.1.73
+* Fix misc side effects of formItems runtime modifications from one feature affecting other features
+* Fix backend form browser text searchability through off-screen portions of "schemes" area
+* Fix backend form sizing
+* Resolve DataStore variadic `get` deprecation
+
 ## 1.1.72.1
 * Fix 1.1.72 Regression: restore form type compatibility with Mapbender <= 3.0.8.4
 

@@ -1,20 +1,28 @@
 <div class="elementForm elementFormDigitizer">
     <style media="all">
+        .elementFormDigitizer .full-width-input .inputWrapper {
+            /* defeat .inputWrapper default width limitation */
+            width: 100%;
+        }
         .elementFormDigitizer label.block {
             display: block;
             margin: 0;
         }
-
         .elementFormDigitizer .code-yaml {
             width: 100%;
+        }
+        .elementFormDigitizer .CodeMirror {
+            height: auto;
         }
     </style>
     <script type="text/javascript">
         $(function(){
-            var textarea = document.getElementById("form_configuration_schemes");
+            var textarea = document.getElementById({{ form.configuration.schemes.vars.id | json_encode | raw }});
+
             var yamlEditor = CodeMirror.fromTextArea(textarea, {
                 mode: "text/x-yaml",
                 styleActiveLine: true,
+                viewportMargin: Infinity,
                 lineNumbers: true,
                 indentUnit: 2,
                 tabSize: 2,
@@ -27,23 +35,19 @@
                 $(textarea).val(value);
             });
 
-
             // Resize, but only if rendered in popup
             var $popupForm = $('.popup form');
             var popupContainer = $popupForm.closest('.popup');
-            var yamlEditorElement = $(".code-yaml > div", $popupForm);
 
-            popupContainer.animate({
-                width:  '100%',
+            popupContainer.css({
+                width: '100%',
                 height: '100%'
-            }, 350);
-
-            yamlEditorElement.animate({
-                height: $(window).height() - 382
-            }, 350);
+            });
         })
     </script>
     {{ form_row(form.title) }}
     {{ form_row(form.configuration.target) }}
-    {{ form_row(form.configuration.schemes, {'label_attr': {'class': 'block'}}) }}
+    <div class="full-width-input">
+        {{ form_row(form.configuration.schemes, {'label_attr': {'class': 'block'}}) }}
+    </div>
 </div>
