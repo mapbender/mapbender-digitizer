@@ -1,0 +1,6 @@
+/*
+  necessary to prevent "jumping" dialogs - replace with more sophisticated solution ASAP
+ */
+.mb-element-popup-dialog {
+    position: absolute !important;
+}

@@ -67,6 +67,7 @@ class Digitizer extends BaseElement
              'css' => array(
                  '@MapbenderDigitizerBundle/Resources/public/sass/element/context-menu.scss',
                  '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
+                 '@MapbenderDigitizerBundle/Resources/public/sass/element/temp_adjustment.css',
              ),
              'trans' => array(
                  'MapbenderDigitizerBundle:Element:digitizer.json.twig',
