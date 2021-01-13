@@ -206,6 +206,7 @@
 
 
 
+        widget.currentPopup && widget.currentPopup.popupDialog('close');
         widget.currentPopup = $popup;
 
 
@@ -216,7 +217,6 @@
         var processedFormItems = Mapbender.Digitizer.Utilities.processFormItems(feature,formItems,dialog);
 
         $popup.generateElements({children: processedFormItems, declarations: configuration.declarations || {} });
-
 
         $popup.popupDialog(configuration);
 
