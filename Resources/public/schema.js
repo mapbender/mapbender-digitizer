@@ -326,6 +326,7 @@
 
 
         //* Newly added properties
+        zoomToExtentAfterSearch: false,
         disableFeatureHighlightInResultTable: false,
         revertChangedGeometryOnCancel: false,
         deactivateControlAfterModification: true,
@@ -441,6 +442,7 @@
                     item.change = function (options) {
 
                         schema.getData({
+                            triggered_by_search: true
                             //ommitIntersect: true,
 
                         }).done();
@@ -830,7 +832,7 @@
 
             schema.selectXHR = widget.query('select', request).then(function (featureCollection) {
                 var xhr = this;
-                schema.onFeatureCollectionLoaded(featureCollection, xhr);
+                schema.onFeatureCollectionLoaded(featureCollection, xhr,options);
                 if (typeof callback === "function") {
                     callback.apply(schema,[featureCollection.features]);
                 }
@@ -842,7 +844,7 @@
 
 
 
-        onFeatureCollectionLoaded: function (featureCollection, xhr) {
+        onFeatureCollectionLoaded: function (featureCollection, xhr,options) {
             var schema = this;
 
             if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
@@ -867,6 +869,10 @@
             schema.reloadFeatures();
 
             schema.setVisibilityForAllFeaturesInLayer();
+
+            if (options.triggered_by_search && schema.zoomToExtentAfterSearch) {
+                schema.widget.map.zoomToExtent(schema.layer.getDataExtent());
+            }
         },
 
         setStyleProperties: function (feature) {
