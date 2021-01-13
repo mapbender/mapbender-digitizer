@@ -814,7 +814,8 @@
                 if (schema.rejectSearchWhenMandatoryAttributesAreMissing(request)) {
                     schema.removeAllFeatures();
                     schema.lastRequest = null;
-                    widget.map.zoomToExtent(schema.layer.getExtent());
+                    // Zooming has to be removed, since it may leed to a endless loop by triggering moveend
+                    //widget.map.zoomToExtent(schema.layer.getExtent());
                     return $.Deferred().reject();
                 }
             }
