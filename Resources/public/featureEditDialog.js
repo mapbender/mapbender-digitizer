@@ -86,6 +86,9 @@
 
                     dialog.$popup.disableForm();
                     schema.saveFeature(feature, formData).then(function (response) {
+                        if (!response) {
+                            console.error("Caution: save operation did not return any result - this might occur due to a filter setting")
+                        } else
                         if (response.hasOwnProperty('errors')) {
                             dialog.$popup.enableForm();
                             return;
