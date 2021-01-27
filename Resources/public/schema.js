@@ -326,7 +326,6 @@
 
 
         //* Newly added properties
-        zoomToExtentAfterSearch: false,
         disableFeatureHighlightInResultTable: false,
         revertChangedGeometryOnCancel: false,
         deactivateControlAfterModification: true,
@@ -439,17 +438,17 @@
 
                     }
 
-                    item.change = function (options) {
+                    if (item.type == "select" || item.type == "input" || item.type == "radio" || item.type == "checkbox") {
+                        item.change = function (options) {
+                            schema.getData({
+                                zoomToExtentAfterSearch: !!item.zoomToExtentAfterSearch
+                            }).done();
+                        };
 
-                        schema.getData({
-                            triggered_by_search: true
-                            //ommitIntersect: true,
 
-                        }).done();
-                    };
-
-                    item.keyup = function()  {
-                        item.change.apply(this,arguments);
+                        item.keyup = function () {
+                            item.change.apply(this, arguments);
+                        }
                     }
 
                     if (item.type === 'select' && item.ajax) {
@@ -870,7 +869,7 @@
 
             schema.setVisibilityForAllFeaturesInLayer();
 
-            if (options.triggered_by_search && schema.zoomToExtentAfterSearch) {
+            if (options.zoomToExtentAfterSearch) {
                 schema.widget.map.zoomToExtent(schema.layer.getDataExtent());
             }
         },
