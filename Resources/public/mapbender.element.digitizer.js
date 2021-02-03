@@ -407,7 +407,7 @@
             var map = widget.map;
 
             map.events.register("moveend", this, function () {
-                widget.isEnabled() && widget.getCurrentSchema().getData();
+                widget.isEnabled() && widget.getCurrentSchema().getData({ triggered_by_map_move: true });
             });
 
             // Zoomend implies Moveend

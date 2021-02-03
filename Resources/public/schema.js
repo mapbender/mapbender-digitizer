@@ -803,7 +803,7 @@
 
             var request = schema.createRequest();
 
-            if (!schema.search.form) {
+            if (!schema.search.form || options.triggered_by_map_move) {
 
                 if (!schema.currentExtentSearch && schema.lastRequest === JSON.stringify(request)) {
                     return $.Deferred().reject();
