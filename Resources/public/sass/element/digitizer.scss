@@ -1,4 +1,19 @@
 
+.mb-element-popup-dialog {
+    > .modal-body {
+        // Tab-Navigator displaying if direct bounded to the window
+        > .mapbender-element-tab-navigator {
+            > .ui-tabs-nav {
+                background-color: transparent;
+            }
+        }
+    }
+}
+
+.mapbender-element-result-table > .dataTables_wrapper > table[role="grid"] > thead > tr > th {
+    text-align: left;
+}
+
 $selectColor: #F7F79A;
 
 
