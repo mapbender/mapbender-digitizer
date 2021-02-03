@@ -173,11 +173,13 @@
                     onClick: onEditClick
                 });
 
-                buttons.push({
-                    title: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
-                    className: 'remove',
-                    onClick: onRemoveClick
-                });
+                if (item.allowDelete) {
+                    buttons.push({
+                        title: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                        className: 'remove',
+                        onClick: onRemoveClick
+                    });
+                }
 
                 cloneItem.buttons = buttons;
 
