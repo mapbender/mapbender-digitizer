@@ -1,3 +1,6 @@
+## 1.4.5
+* Fix missing edit dialog when clicking on the same feature again
+
 ## 1.4.4
 * Fix backend form browser text searchability through off-screen portions of "schemes" area
 * Fix backend form sizing
