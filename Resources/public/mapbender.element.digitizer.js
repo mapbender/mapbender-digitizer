@@ -537,6 +537,10 @@
             });
 
             selectControl.on('select', function (event) {
+                // Prevent interaction from filtering out the same feature if we click on it again before doing
+                // anything else.
+                /** @see https://github.com/openlayers/openlayers/blob/v6.4.3/src/ol/interaction/Select.js#L469 */
+                this.features_.clear();
                 self.onFeatureClick(event.selected[0] || null);
             });
             return selectControl;
