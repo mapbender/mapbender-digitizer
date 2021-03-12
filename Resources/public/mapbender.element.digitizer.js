@@ -366,11 +366,15 @@
             }
             this.commitGeometry(schema, feature);
             this.selectControl.getFeatures().clear();
-            this.toolsetRenderer.resume();
             if (schema.allowDigitize) {
                 this.featureEditor.setEditFeature(null);
+                if (!schema.continueDrawingAfterSave && this.activeToolName_) {
+                    this._toggleDrawingTool(schema, this.activeToolName_, false);
+                    $('.-fn-toggle-tool', this.element).removeClass('active');
+                }
                 this.featureEditor.resume();
             }
+            this.toolsetRenderer.resume();
             this.resumeContextMenu_();
             var olMap = this.mbMap.getModel().olMap;
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
@@ -438,7 +442,7 @@
             }
             var widget = this;
             var idProperty = this._getUniqueItemIdProperty(schema);
-            this.postJSON('update-multiple?' + $.param(params), postData)
+            var promise = this.postJSON('update-multiple?' + $.param(params), postData)
                 .then(function(response) {
                     var savedItems = response.saved;
                     for (var i = 0; i < savedItems.length; ++i) {
@@ -455,6 +459,14 @@
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
                 })
             ;
+            if (!schema.continueDrawingAfterSave) {
+                promise.always(function() {
+                    if (widget.activeToolName_) {
+                        widget._toggleDrawingTool(schema, widget.activeToolName_, false);
+                    }
+                    $('.-fn-toggle-tool', widget.element).removeClass('active');
+                });
+            }
         },
         getSchemaLayer: function(schema) {
             return this.renderer.getLayer(schema);
