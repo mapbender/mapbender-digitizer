@@ -26,8 +26,6 @@
                     title: Mapbender.trans('mb.digitizer.style.color'),
                     type: "colorPicker",
                     name: "fillColor",
-                    mandatory: "/^#{1,1}[abcdefABCDEF0-9]{6,6}$/",
-                    mandatoryText: Mapbender.trans('mb.digitizer.style.chooseColorPicker'),
                     css: {width: "30%"}
                 }, {
                     title: Mapbender.trans('mb.digitizer.style.opacity'),
@@ -66,8 +64,6 @@
                     type: "colorPicker",
                     name: "strokeColor",
                     horizontal: true,
-                    mandatory: "/^\#[A-F0-9]{6}$/i",
-                    mandatoryText: Mapbender.trans('mb.digitizer.style.chooseColorPicker'),
                     css: {width: "30%"}
 
                 }, {

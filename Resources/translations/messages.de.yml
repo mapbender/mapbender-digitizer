@@ -38,7 +38,6 @@ mb.digitizer:
     style:
         filling: Filling
         color: Color
-        chooseColorPicker: 'Choose color picker'
         opacity: Opacity
         radius: 'Radius (point)'
         onlyNumbers: 'Please use only numerical values'
