@@ -442,7 +442,7 @@
             }
             var widget = this;
             var idProperty = this._getUniqueItemIdProperty(schema);
-            this.postJSON('update-multiple?' + $.param(params), postData)
+            var promise = this.postJSON('update-multiple?' + $.param(params), postData)
                 .then(function(response) {
                     var savedItems = response.saved;
                     for (var i = 0; i < savedItems.length; ++i) {
@@ -459,6 +459,14 @@
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
                 })
             ;
+            if (!schema.continueDrawingAfterSave) {
+                promise.always(function() {
+                    if (widget.activeToolName_) {
+                        widget._toggleDrawingTool(schema, widget.activeToolName_, false);
+                    }
+                    $('.-fn-toggle-tool', widget.element).removeClass('active');
+                });
+            }
         },
         getSchemaLayer: function(schema) {
             return this.renderer.getLayer(schema);
