@@ -366,11 +366,15 @@
             }
             this.commitGeometry(schema, feature);
             this.selectControl.getFeatures().clear();
-            this.toolsetRenderer.resume();
             if (schema.allowDigitize) {
                 this.featureEditor.setEditFeature(null);
+                if (!schema.continueDrawingAfterSave && this.activeToolName_) {
+                    this._toggleDrawingTool(schema, this.activeToolName_, false);
+                    $('.-fn-toggle-tool', this.element).removeClass('active');
+                }
                 this.featureEditor.resume();
             }
+            this.toolsetRenderer.resume();
             this.resumeContextMenu_();
             var olMap = this.mbMap.getModel().olMap;
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?

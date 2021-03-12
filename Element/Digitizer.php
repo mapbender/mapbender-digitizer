@@ -315,6 +315,7 @@ class Digitizer extends DataManagerElement
             'allowCustomStyle' => false,
             // @todo: may not need configurability at all. Who doesn't want this?
             'allowChangeVisibility' => true,
+            'continueDrawingAfterSave' => false,
             'displayPermanent' => false,
             'printable' => false,
             'inlineSearch' => true,
