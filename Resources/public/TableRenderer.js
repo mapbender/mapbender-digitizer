@@ -204,6 +204,19 @@
             });
             feature.set('table-events', true);
         },
+        /**
+         * @param {DataManagerSchemaConfig} schema
+         * @param {Object} feature
+         * @param {Boolean} show to automatically update pagination
+         */
+        refreshRow: function(schema, feature, show) {
+            Mapbender.DataManager.TableRenderer.prototype.refreshRow.apply(this, arguments);
+
+            var tr = feature && feature.get('table-row');
+            if (tr) {
+                this.updateButtonStates_(tr, feature);
+            }
+        },
         updateButtonStates_: function(tr, feature) {
             var hidden = !!feature.get('hidden');
             var tooltip;
