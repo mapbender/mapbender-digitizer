@@ -1,0 +1,144 @@
+<div data-style-group="fill">
+    <h3>{{ 'mb.digitizer.style.filling' | trans }}</h3>
+    <div class="row">
+        <div class="col-xs-4">
+            <div class="form-group">
+                <label for="fillColor">{{ 'mb.digitizer.style.color' | trans }}</label>
+                <div class="input-group -js-colorpicker">
+                    <input name="fillColor" class="form-control" type="text"><span class="input-group-addon"><i></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="form-group">
+                <label for="fillOpacity">{{ 'mb.digitizer.style.opacity' | trans }}</label>
+                <input name="fillOpacity" type="range" min="0" max="1" step="any">
+            </div>
+        </div>
+        <div class="col-xs-4" data-style-group="point">
+            <div class="form-group">
+                <label for="pointRadius">{{ 'mb.digitizer.style.radius' | trans }}</label>
+                <input name="pointRadius" type="range" min="0" max="30" step="1">
+            </div>
+        </div>
+    </div>
+</div>
+<div data-style-group="stroke">
+    <h3>{{ 'mb.digitizer.style.stroke' | trans }}</h3>
+    <div class="row">
+        <div class="col-xs-4">
+            <div class="form-group">
+                <label for="strokeColor">{{ 'mb.digitizer.style.color' | trans }}</label>
+                <div class="input-group -js-colorpicker">
+                    <input name="strokeColor" class="form-control" type="text"><span class="input-group-addon"><i></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="form-group">
+                <label for="strokeOpacity">{{ 'mb.digitizer.style.opacity' | trans }}</label>
+                <input name="strokeOpacity" type="range" min="0" max="1" step="any">
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="form-group">
+                <label for="strokeWidth">{{ 'mb.digitizer.style.width' | trans }}</label>
+                <input name="strokeWidth" type="range" min="0" max="10" step="1">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group">
+                <label for="strokeLinecap">{{ 'mb.digitizer.style.lineCap' | trans }}</label>
+                <select name="strokeLinecap" class="form-control">
+                    <option value="round">{{ 'mb.digitizer.style.round' | trans }}</option>
+                    <option value="square">{{ 'mb.digitizer.style.square' | trans }}</option>
+                    <option value="butt">{{ 'mb.digitizer.style.butt' | trans }}</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="form-group">
+                <label for="strokeDashstyle">{{ 'mb.digitizer.style.style' | trans }}</label>
+                <select name="strokeDashstyle" class="form-control">
+                    <option value="solid">{{ 'mb.digitizer.style.solid' | trans }}</option>
+                    <option value="dot">{{ 'mb.digitizer.style.dot' | trans }}</option>
+                    <option value="dash">{{ 'mb.digitizer.style.dash' | trans }}</option>
+                    <option value="longdash">{{ 'mb.digitizer.style.longdash' | trans }}</option>
+                    <option value="dashdot">{{ 'mb.digitizer.style.dashdot' | trans }}</option>
+                    <option value="longdashdot">{{ 'mb.digitizer.style.longdashdot' | trans }}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<div data-style-group="font">
+    <h3>{{ 'mb.digitizer.style.caption' | trans }}</h3>
+    <div class="form-group">
+        <label for="label">{{ 'mb.digitizer.style.caption' | trans }}&nbsp;<i title="{{ 'mb.digitizer.style.captionInfoText' | trans }}" class="fa fa-info-circle"></i></label>
+        <textarea name="label" class="form-control" rows="3" style="resize: none;"></textarea>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group">
+                <label for="fontFamily">{{ 'mb.digitizer.style.fontname' | trans }}</label>
+                <select name="fontFamily" class="form-control">
+                    <option value="Arial, Helvetica, sans-serif">Arial</option>
+                    <option value="Arial Black, Gadget, sans-serif">Arial Black</option>
+                    <option value="Comic Sans MS, cursive, sans-serif">Comic Sans</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="Impact, Charcoal, sans-serif">Impact</option>
+                    <option value="Lucida Sans Unicode, Lucida Grande, sans-serif">Lucida</option>
+                    <option value="Palatino Linotype, Book Antiqua, Palatino, serif">Palatino</option>
+                    <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
+                    <option value="Times New Roman, Times, serif">Times New Roman</option>
+                    <option value="Trebuchet MS, Helvetica, sans-serif">Trebuchet</option>
+                    <option value="Verdana, Geneva, sans-serif">Verdana</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label for="fontSize">{{ 'mb.digitizer.style.size' | trans }}</label>
+                <select name="fontSize" class="form-control">
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="20">20</option>
+                    <option value="24">24</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label for="fontWeight">{{ 'mb.digitizer.style.weight' | trans }}</label>
+                <select name="fontWeight" class="form-control">
+                    <option value="regular">{{ 'mb.digitizer.style.regular' | trans }}</option>
+                    <option value="bold">{{ 'mb.digitizer.style.bold' | trans }}</option>
+                    <option value="italic">{{ 'mb.digitizer.style.italic' | trans }}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-4">
+            <div class="form-group">
+                <label for="fontColor">{{ 'mb.digitizer.style.color' | trans }}</label>
+                <div class="input-group -js-colorpicker">
+                    <input name="fontColor" class="form-control" type="text"><span class="input-group-addon"><i></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="form-group">
+                <label for="fontOpacity">{{ 'mb.digitizer.style.opacity' | trans }}</label>
+                <input name="fontOpacity" type="range" min="0" max="1" step="any">
+            </div>
+        </div>
+    </div>
+</div>
+

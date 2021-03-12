@@ -8,6 +8,7 @@ use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Component\FeatureTypeService;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DataManagerBundle\Element\DataManagerElement;
+use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -130,6 +131,8 @@ class Digitizer extends DataManagerElement
                 return parent::dispatchRequest($request);
             case 'update-multiple':
                 return new JsonResponse($this->getUpdateMultipleActionResponseData($request));
+            case 'style-editor':
+                return $this->getStyleEditorResponse($request);
         }
     }
 
@@ -382,5 +385,12 @@ class Digitizer extends DataManagerElement
     protected function getDataStoreDefinition($storeId)
     {
         return $this->getDataStoreService()->getFeatureTypeDeclarations();
+    }
+
+    protected function getStyleEditorResponse(Request $request)
+    {
+        /** @var EngineInterface $templating */
+        $templating = $this->container->get('templating');
+        return $templating->renderResponse('MapbenderDigitizerBundle:Element:style-editor.html.twig');
     }
 }
