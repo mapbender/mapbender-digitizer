@@ -160,7 +160,7 @@
                         css: {width: "50%"}
 
                     }, {
-                        title:  Mapbender.trans('mb.digitizer.style.fontsize'),
+                        title:  Mapbender.trans('mb.digitizer.style.size'),
                         name: 'fontSize',
                         type: 'select',
                         value: 11,
@@ -178,8 +178,8 @@
                         infoText:  Mapbender.trans('mb.digitizer.style.fontsizeInfoText')
                     },
                         {
-                            title: 'Art',
-                            name: Mapbender.trans('mb.digitizer.style.fontweight'),
+                            title: Mapbender.trans('mb.digitizer.style.weight'),
+                            name: 'fontWeight',
                             type: 'select',
                             value: 'regular',
                             options: {
