@@ -56,12 +56,6 @@
                         visibility: geomType == "Point" ? "visible" : "hidden"
                     }
 
-                }, {
-                    title: Mapbender.trans('mb.digitizer.style.activate'),
-                    type: "checkbox",
-                    checked: true,
-                    name: "fill",
-                    value: '1'
                 }]
             }]
         };
@@ -130,12 +124,6 @@
                     css: {width: "50%"}
 
                 }]
-            }, {
-                title: Mapbender.trans('mb.digitizer.style.activate'),
-                type: "checkbox",
-                checked: true,
-                name: "stroke",
-                value: '1'
             }]
         };
 
@@ -146,7 +134,6 @@
             children: [
                 {
                     type: 'textArea',
-                    css: {width: "100 %"},
                     name: 'label',
                     infoText: Mapbender.trans('mb.digitizer.style.captionInfoText')
                 }, {
