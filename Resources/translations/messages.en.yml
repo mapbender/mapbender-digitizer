@@ -59,11 +59,8 @@ mb.digitizer:
         caption: Caption
         captionInfoText: 'The text for an optional label.  For browsers that use the canvas renderer, this requires either fillText or mozDrawText to be available.'
         fontname: 'Font name'
-        fontnameInfoText: 'The font family for the label, to be provided like in CSS.'
         fontsize: Size
-        fontsizeInfoText: 'The font size for the label, to be provided like in CSS'
         fontweight: Weight
         regular: regular
         bold: bold
         italic: italic
-        fontweightInfoText: 'The font weight for the label, to be provided like in CSS.'

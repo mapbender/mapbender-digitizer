@@ -148,7 +148,6 @@
                             'Times New Roman, Times, serif': 'Times New Roman, Times, serif (nichtproportionale Schrift)'
                         },
                         name: 'fontFamily',
-                        infoText:  Mapbender.trans('mb.digitizer.style.fontnameInfoText'),
                         css: {width: "50%"}
 
                     }, {
@@ -165,8 +164,7 @@
                             "20": 20,
                             "24": 24
                         },
-                        css: {width: "20%"},
-                        infoText:  Mapbender.trans('mb.digitizer.style.fontsizeInfoText')
+                        css: {width: "20%"}
                     },
                         {
                             title: Mapbender.trans('mb.digitizer.style.weight'),
@@ -178,7 +176,6 @@
                                 'italic':  Mapbender.trans('mb.digitizer.style.italic')
                             },
                             css: {width: "30%"},
-                            infoText:  Mapbender.trans('mb.digitizer.style.fontweightInfoText')
                         }, {
                             title:  Mapbender.trans('mb.digitizer.style.color'),
                             type: 'colorPicker',
