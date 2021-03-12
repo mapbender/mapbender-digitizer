@@ -26,7 +26,6 @@
                     title: Mapbender.trans('mb.digitizer.style.color'),
                     type: "colorPicker",
                     name: "fillColor",
-                    value: "#ff0000",
                     mandatory: "/^#{1,1}[abcdefABCDEF0-9]{6,6}$/",
                     mandatoryText: Mapbender.trans('mb.digitizer.style.chooseColorPicker'),
                     css: {width: "30%"}
@@ -37,7 +36,6 @@
                     range: "max",
                     min: 0.1,
                     max: 1,
-                    value: 1,
                     step: 0.1,
                     css: {width: "35%"}
 
@@ -50,7 +48,6 @@
                     range: "max",
                     min: 0,
                     max: 20,
-                    value: 0,
                     css: {
                         width: "35%",
                         visibility: geomType == "Point" ? "visible" : "hidden"
@@ -68,7 +65,6 @@
                     title: Mapbender.trans('mb.digitizer.style.color'),
                     type: "colorPicker",
                     name: "strokeColor",
-                    value: "#ffffff",
                     horizontal: true,
                     mandatory: "/^\#[A-F0-9]{6}$/i",
                     mandatoryText: Mapbender.trans('mb.digitizer.style.chooseColorPicker'),
@@ -81,7 +77,6 @@
                     range: "max",
                     min: 0.1,
                     max: 1,
-                    value: 1,
                     step: 0.1,
                     css: {width: "35%"}
 
@@ -92,7 +87,6 @@
                     min: 0,
                     max: 10,
                     step: 1,
-                    value: 1,
                     css: {width: "35%"}
                 }]
             }, {
@@ -106,7 +100,6 @@
                         square: Mapbender.trans('mb.digitizer.style.square'),
                         butt: Mapbender.trans('mb.digitizer.style.butt')
                     },
-                    value: "round",
                     css: {width: "50%"}
                 }, {
                     title: Mapbender.trans('mb.digitizer.style.style'),
@@ -120,7 +113,6 @@
                         dashdot: Mapbender.trans('mb.digitizer.style.dashdot'),
                         longdashdot: Mapbender.trans('mb.digitizer.style.longdashdot')
                     },
-                    value: "solid",
                     css: {width: "50%"}
 
                 }]
@@ -141,7 +133,6 @@
                     children: [{
                         title: Mapbender.trans('mb.digitizer.style.fontname'),
                         type: 'select',
-                        value: 'Arial, Helvetica, sans-serif',
                         options: {
                             'Arial, Helvetica, sans-serif': 'Arial, Helvetica, sans-serif',
                             'Arial Black, Gadget, sans-serif': 'Arial Black, Gadget, sans-serif',
@@ -163,7 +154,6 @@
                         title:  Mapbender.trans('mb.digitizer.style.size'),
                         name: 'fontSize',
                         type: 'select',
-                        value: 11,
                         options: {
                             "9": 9,
                             "10": 10,
@@ -181,7 +171,6 @@
                             title: Mapbender.trans('mb.digitizer.style.weight'),
                             name: 'fontWeight',
                             type: 'select',
-                            value: 'regular',
                             options: {
                                 'regular':  Mapbender.trans('mb.digitizer.style.regular'),
                                 'bold':  Mapbender.trans('mb.digitizer.style.bold'),
@@ -202,7 +191,6 @@
                             range: "max",
                             min: 0,
                             max: 1,
-                            value: 1,
                             step: 0.01,
                             css: {
                                 width: '50%'
@@ -252,11 +240,9 @@
                 }
             }]
         });
-
-        // Unfortunately, vis-ui demands it like this
-        window.setTimeout(function(){
-            element.formData(values);
-        },0);
+        element.formData(Object.assign({}, this.getDefaults(schema), values));
+        // Work around vis-ui formData not updating selects properly
+        $('select', element).trigger('change');
     };
 
     Object.assign(Mapbender.Digitizer.FeatureStyleEditor.prototype, {
@@ -270,6 +256,24 @@
             // @todo: decouple from feature saving; use a distinct url to save the style
             this.owner._saveItem(schema, feature, formData);
             element.popupDialog("close");
+        },
+        getDefaults: function(schema) {
+            return {
+                fillColor: '#ff0000',
+                fillOpacity: 1.0,
+                pointRadius: 5,
+                strokeColor: '#ffffff',
+                strokeOpacity: 1.0,
+                strokeWidth: 1,
+                strokeLinecap: 'round',
+                strokeDashstyle: 'solid',
+                label: null,
+                fontFamily: 'Arial, Helvetica, sans-serif',
+                fontSize: 11,
+                fontWeight: 'regular',
+                fontColor: '#000000',
+                fontOpacity: 1.0
+            };
         }
     });
 
