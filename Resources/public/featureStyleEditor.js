@@ -127,6 +127,7 @@
                 {
                     type: 'textArea',
                     name: 'label',
+                    title: Mapbender.trans('mb.digitizer.style.caption'),
                     infoText: Mapbender.trans('mb.digitizer.style.captionInfoText')
                 }, {
                     type: 'fieldSet',
