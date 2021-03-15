@@ -36,29 +36,28 @@ mb.digitizer:
     remoteData:
         error: 'WMS FeatureInfo request failed'
     style:
-        filling: Filling
+        fillColor: Fill color
         color: Color
         opacity: Opacity
-        radius: 'Radius (point)'
-        onlyNumbers: 'Please use only numerical values'
-        activate: Activate
-        stroke: Stroke
-        width: Width
-        lineCap: Smoothing
+        pointRadius: Point radius (pixels)
+        strokeColor: Line color
+        strokeWidth: Line width
+        lineCap: Line caps
         round: round
         square: square
         butt: butt
-        style: Style
+        strokeDashstyle: Pattern
         solid: solid
         dot: dot
         dash: dash
         longdash: longdash
         dashdot: dashdot
         longdashdot: longdashdot
-        caption: Caption
+        label: Label
         captionInfoText: 'The text for an optional label.  For browsers that use the canvas renderer, this requires either fillText or mozDrawText to be available.'
-        fontname: 'Font name'
-        fontsize: Size
+        fontFamily: Font
+        fontColor: Text color
+        fontSize: Font size
         fontweight: Weight
         regular: regular
         bold: bold
