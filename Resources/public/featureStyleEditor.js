@@ -60,6 +60,20 @@
                     $(this).val(formData[this.name]);
                 }
             });
+            $('input[type="range"]', $content).each(function() {
+                var $input = $(this);
+                var $vp = $('.value-preview', $input.closest('.form-group'));
+                var update = function($el) {
+                    var value = parseFloat($input.val());
+                    if (!isNaN(value)) {
+                        $vp.text(value.toFixed(2));
+                    }
+                };
+                update($input);
+                $input.on('change', function() {
+                    update($(this));
+                });
+            });
 
             self.openDialog_($content, schema, feature);
             $('.-js-colorpicker', $content).colorpicker({format: 'hex'});

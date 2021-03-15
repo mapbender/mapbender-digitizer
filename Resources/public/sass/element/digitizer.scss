@@ -49,6 +49,16 @@
         // @todo Mapbender: target tabs in vis-ui dialogs specifically
         padding: 15px;  // = Bootstrap default
     }
+    h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5em;
+    }
+    .form-group label {
+        display: block;
+    }
+    label .value-preview {
+        font-weight: normal;
+    }
 }
 
 .colorpicker-saturation {
