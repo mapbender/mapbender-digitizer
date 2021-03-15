@@ -55,7 +55,6 @@ mb.digitizer:
         dashdot: dashdot
         longdashdot: longdashdot
         label: Beschriftung
-        captionInfoText: 'The text for an optional label.  For browsers that use the canvas renderer, this requires either fillText or mozDrawText to be available.'
         fontFamily: Schriftart
         fontColor: Schriftfarbe
         fontSize: Schriftgröße
