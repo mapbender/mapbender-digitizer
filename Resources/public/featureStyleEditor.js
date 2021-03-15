@@ -46,6 +46,7 @@
         });
         $content.one('dialogclose', function() {
             promise.reject();
+            $(this).dialog('destroy');
         });
         return promise;
     };
