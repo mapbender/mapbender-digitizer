@@ -1,5 +1,11 @@
+## 1.4.6
 * Support automatically disabling drawing tool after saving (see [PR#87](https://github.com/mapbender/mapbender-digitizer/pull/87))
 * Fix table-embedded save buttons remaining active after successful bulk save
+* Fix style editor invisible opacity sliders
+* Fix style editor changes not applying until next feature reload
+* Fix style editor basic layout and field label translations
+* Fix style editor leaking dialog instances
+* Remove style editor dependencies on vis-ui (implicitly provided by data-manager)
 
 ## 1.4.5
 * Fix missing edit dialog when clicking on the same feature again
