@@ -9,7 +9,8 @@
         this.owner = owner;
         this.template_ = $.get([this.owner.elementUrl, 'style-editor'].join(''));
     };
-    Mapbender.Digitizer.FeatureStyleEditor.prototype.openDialog_ = function($content, schema, feature) {
+    Mapbender.Digitizer.FeatureStyleEditor.prototype.openDialog_ = function($content) {
+        var promise = $.Deferred();
         var editor = this;
         $content.dialog({
             title: "Stylemanager",
@@ -37,15 +38,21 @@
                 text: "Speichern",
                 class: 'button btn',
                 click: function (e) {
-                    editor.submit(schema, feature, $content);
+                    var values = editor.getFormData(this);
                     $(this).dialog('close');
+                    promise.resolveWith(null, [values]);
                 }
             }]
         });
+        $content.one('dialogclose', function() {
+            promise.reject();
+        });
+        return promise;
     };
     Mapbender.Digitizer.FeatureStyleEditor.prototype.openEditor = function(schema, feature, values) {
         var self = this;
         var geomType = feature.getGeometry().getType();
+        var valuesPromise = $.Deferred();
         this.template_.then(function(html) {
             var $content = $(document.createElement('div')).append(html);
             if (geomType !== 'Point') {
@@ -75,23 +82,31 @@
                 });
             });
 
-            self.openDialog_($content, schema, feature);
+            var dlgPromise = self.openDialog_($content);
             $('.-js-colorpicker', $content).colorpicker({format: 'hex'});
+            dlgPromise.then(function(values) {
+                valuesPromise.resolveWith(null, [values]);
+            }, function() {
+                valuesPromise.rejectWith(this, arguments);
+            });
         });
+        return valuesPromise;
     };
 
     Object.assign(Mapbender.Digitizer.FeatureStyleEditor.prototype, {
+        getFormData: function($scope) {
+            var data = {};
+            $(':input', $scope).filter('[name]').each(function() {
+                data[this.name] = $(this).val();
+            });
+            return data;
+        },
         submit: function (schema, feature, element) {
             var styleData = {};
             $(':input', element).filter('[name]').each(function() {
                 styleData[this.name] = $(this).val();
             });
 
-            var formData = {};
-            formData[schema.featureType.styleField] = JSON.stringify(styleData);
-            // TODO enable defered saving
-            // @todo: decouple from feature saving; use a distinct url to save the style
-            this.owner._saveItem(schema, feature, formData);
         },
         getDefaults: function(schema) {
             return {
