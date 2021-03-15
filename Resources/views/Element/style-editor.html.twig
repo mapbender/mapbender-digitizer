@@ -20,7 +20,7 @@
         <div class="col-xs-4" data-style-group="point">
             <div class="form-group">
                 <label for="pointRadius">{{ 'mb.digitizer.style.radius' | trans }}</label>
-                <input name="pointRadius" type="range" min="0" max="30" step="1">
+                <input name="pointRadius" type="number" min="0" max="30" step="1" class="form-control">
             </div>
         </div>
     </div>
@@ -47,7 +47,7 @@
         <div class="col-xs-4">
             <div class="form-group">
                 <label for="strokeWidth">{{ 'mb.digitizer.style.width' | trans }}</label>
-                <input name="strokeWidth" type="range" min="0" max="10" step="1">
+                <input name="strokeWidth" type="number" min="0" max="10" step="1" class="form-control">
             </div>
         </div>
     </div>
@@ -105,16 +105,7 @@
         <div class="col-xs-3">
             <div class="form-group">
                 <label for="fontSize">{{ 'mb.digitizer.style.size' | trans }}</label>
-                <select name="fontSize" class="form-control">
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                    <option value="13">13</option>
-                    <option value="14">14</option>
-                    <option value="20">20</option>
-                    <option value="24">24</option>
-                </select>
+                <input name="fontSize" type="number" min="5" max="30" class="form-control">
             </div>
         </div>
         <div class="col-xs-3">
