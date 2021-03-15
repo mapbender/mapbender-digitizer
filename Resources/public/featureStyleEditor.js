@@ -54,10 +54,13 @@
             if (geomType === "LineString") {
                 $('[data-style-group="fill"]', $content).hide();
             }
+            var formData = Object.assign({}, self.getDefaults(schema), values);
+            $(':input', $content).filter('[name]').each(function() {
+                if (typeof formData[this.name] !== 'undefined' && formData[this.name] !== null) {
+                    $(this).val(formData[this.name]);
+                }
+            });
 
-            $content.formData(Object.assign({}, self.getDefaults(schema), values));
-            // Work around vis-ui formData not updating selects properly
-            $('select', $content).trigger('change');
             self.openDialog_($content, schema, feature);
             $('.-js-colorpicker', $content).colorpicker({format: 'hex'});
         });
@@ -65,8 +68,10 @@
 
     Object.assign(Mapbender.Digitizer.FeatureStyleEditor.prototype, {
         submit: function (schema, feature, element) {
-            var styleData = element.formData();
-            element.disableForm();
+            var styleData = {};
+            $(':input', element).filter('[name]').each(function() {
+                styleData[this.name] = $(this).val();
+            });
 
             var formData = {};
             formData[schema.featureType.styleField] = JSON.stringify(styleData);
