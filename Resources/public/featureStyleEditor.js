@@ -11,23 +11,34 @@
     };
     Mapbender.Digitizer.FeatureStyleEditor.prototype.openDialog_ = function($content, schema, feature) {
         var editor = this;
-        $content.popupDialog({
+        $content.dialog({
             title: "Stylemanager",
             modal: true,
             width: '500px',
             classes: {
-                'ui-dialog-content': 'ui-dialog-content digitizer-style-editor'
+                'ui-dialog': 'ui-dialog mb-element-popup-dialog modal-content',
+                'ui-dialog-titlebar': 'ui-dialog-titlebar modal-header',
+                'ui-dialog-titlebar-close': 'ui-dialog-titlebar-close close',
+                'ui-dialog-content': 'ui-dialog-content modal-body digitizer-style-editor',
+                'ui-dialog-buttonpane': 'ui-dialog-buttonpane modal-footer',
+                'ui-button': 'ui-button button btn'
+            },
+            hide: {
+                effect: 'fadeOut',
+                duration: 200
             },
             buttons: [{
                 text: "Abbrechen",
+                class: 'button btn',
                 click: function (e) {
-                    $(this).popupDialog("close");
-                    return false;
+                    $(this).dialog('close');
                 }
             }, {
                 text: "Speichern",
+                class: 'button btn',
                 click: function (e) {
                     editor.submit(schema, feature, $content);
+                    $(this).dialog('close');
                 }
             }]
         });
@@ -62,7 +73,6 @@
             // TODO enable defered saving
             // @todo: decouple from feature saving; use a distinct url to save the style
             this.owner._saveItem(schema, feature, formData);
-            element.popupDialog("close");
         },
         getDefaults: function(schema) {
             return {
