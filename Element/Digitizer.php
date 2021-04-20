@@ -384,7 +384,8 @@ class Digitizer extends DataManagerElement
 
     protected function getDataStoreDefinition($storeId)
     {
-        return $this->getDataStoreService()->getFeatureTypeDeclarations();
+        $ftConfigs = $this->getDataStoreService()->getFeatureTypeDeclarations();
+        return $ftConfigs[$storeId];
     }
 
     protected function getStyleEditorResponse(Request $request)
