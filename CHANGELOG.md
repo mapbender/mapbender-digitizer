@@ -1,3 +1,6 @@
+## 1.4.7
+* Fix errors accessing globally defined featureType referenced by name from schema config ([MB#1337](https://github.com/mapbender/mapbender/issues/1337))
+
 ## 1.4.6
 * Support automatically disabling drawing tool after saving (see [PR#87](https://github.com/mapbender/mapbender-digitizer/pull/87))
 * Fix table-embedded save buttons remaining active after successful bulk save
