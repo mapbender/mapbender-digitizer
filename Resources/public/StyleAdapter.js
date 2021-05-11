@@ -47,7 +47,9 @@
                 newStyle.getText().setFont(this.canvasFontRuleFromSvg(ol2Style));
                 newStyle.getText().setText(ol2Style.label);
 
-                newStyle.getText().getFill().setColor(this.parseSvgColor(ol2Style, 'fontColor', 'fontOpacity'));
+                if (ol2Style.fontColor || (typeof ol2Style.fontOpacity !== 'undefined')) {
+                    newStyle.getText().getFill().setColor(this.parseSvgColor(ol2Style, 'fontColor', 'fontOpacity', newStyle.getText().getFill().getColor()));
+                }
             }
 
             newStyle.setZIndex(ol2Style.graphicZIndex || 0);
