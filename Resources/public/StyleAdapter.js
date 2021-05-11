@@ -6,6 +6,35 @@
     Mapbender.Digitizer.StyleAdapter = {
         defaultStyle_: null,
         defaultText_: null,
+        placeholderPattern_: /\${([^}]+)}/g,
+        styleFunctionFromSvgRules: function(styleConfig, dataCallback) {
+            var self = this;
+            var labelPattern = this.placeholderPattern_;
+            return (function() {
+                var baseStyle = self.getBaseStyleObject(styleConfig);
+                var labelValue = styleConfig.label;
+                var textStyle = labelValue && self.getTextStyle(styleConfig);
+                return function(feature) {
+                    var styles = [baseStyle];
+                    if (labelValue) {
+                        var labelStyle = new ol.style.Style();
+                        if (labelPattern.test(labelValue || '')) {
+                            var attributes = dataCallback(feature) || {};
+                            var label = labelValue.replace(labelPattern, function(match, attributeName) {
+                                return attributes[attributeName] || '';
+                            });
+                            labelStyle.setText(textStyle.clone());
+                            labelStyle.getText().setText(label);
+                        } else {
+                            textStyle.setText(labelValue);
+                            labelStyle.setText(textStyle);
+                        }
+                        styles.push(labelStyle);
+                    }
+                    return styles;
+                };
+            })(styleConfig);
+        },
         /**
          * @return {ol.style.Style}
          */
@@ -53,15 +82,7 @@
             newStyle.setImage(image);
             return newStyle;
         },
-        fromSvgRules: function(ol2Style) {
-            var newStyle = this.getBaseStyleObject(ol2Style);
-
-            if (ol2Style.label) {
-                newStyle.setText(this.getTextStyle_(ol2Style));
-            }
-            return newStyle;
-        },
-        getTextStyle_: function (ol2Style) {
+        getTextStyle: function (ol2Style) {
             var textStyle = this.getDefaultTextStyle();
             textStyle.setFont(this.canvasFontRuleFromSvg(ol2Style));
             textStyle.setText(ol2Style.label);

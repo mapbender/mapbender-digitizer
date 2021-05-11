@@ -25,7 +25,6 @@
         },
         initializeFeature: function(schema, feature) {
             feature.set("mbOrigin", "digitizer");
-            this.setRenderIntent_(schema, feature, 'default');
             this.registerFeatureEvents(schema, feature);
             if (schema.allowCustomStyle) {
                 this.customStyleFeature_(schema, feature);
@@ -45,63 +44,22 @@
             });
             feature.set('renderer-events', true);
         },
-        setStyle_: function(feature, style) {
-            // adopted code from mapbender/ol4-extensions package, plus fixes
-            // @todo: turn this into a style function on the layer
-            var labelPattern = /\${([^}]+)}/g;
-            var styleFunction = function (feature) {
-                var baseStyles;
-                if (typeof style === 'function') {
-                    baseStyles = style.apply(this, arguments);
-                    if (!Array.isArray(baseStyles)) {
-                        baseStyles = [baseStyles];
-                    }
-                } else {
-                    baseStyles = [style];
-                }
-                var labelValue = baseStyles[0].getText() && baseStyles[0].getText().getText();
-                if (!labelPattern.test(labelValue || '')) {
-                    return baseStyles;
-                }
-                var labelStyle = new ol.style.Style({
-                    text: baseStyles[0].getText().clone()
-                });
-                baseStyles[0] = baseStyles[0].clone();
-                baseStyles[0].setText(null);
-
-                var attributes = feature.get("data") || {};
-                var label = labelValue.replace(labelPattern, function(match, attributeName) {
-                    return attributes[attributeName] || '';
-                });
-                labelStyle.getText().setText(label);
-                return baseStyles.concat([labelStyle]);
-            };
-            feature.setStyle(styleFunction);
-        },
-        setRenderIntent_: function(schema, feature, intent) {
-            var style = intent === 'default' && feature.get('style')
-            if (!style) {
-                var schemaStyles = this.schemaStyles_[schema.schemaName];
-                style = this.globalStyles_[intent] || schemaStyles[intent];
-            }
-            if (!style && intent !== 'default') {
-                console.warn("Unknown render intent " + intent + ", using default");
-                style = schemaStyles['default'];
-            }
-
-            this.setStyle_(feature, style);
+        createStyleFunction_: function(styleConfig) {
+            return Mapbender.Digitizer.StyleAdapter.styleFunctionFromSvgRules(styleConfig, function(feature) {
+                return feature.get('data') || {};
+            });
         },
         updateFeatureStyle: function(schema, feature) {
             if (feature.get('editing')) {
-                this.setRenderIntent_(schema, feature, 'editing');
+                feature.setStyle(this.globalStyles_['editing']);
             } else if (feature.get("hidden")) {
-                this.setRenderIntent_(schema, feature, 'invisible');
+                feature.setStyle(this.globalStyles_['invisible']);
             } else if (feature.get('hover')) {
-                this.setRenderIntent_(schema, feature, 'select');
+                feature.setStyle(this.schemaStyles_[schema.schemaName]['select']);
             } else if (feature.get('dirty')) {
-                this.setRenderIntent_(schema, feature, 'unsaved');
+                feature.setStyle(this.schemaStyles_[schema.schemaName]['unsaved']);
             } else {
-                this.setRenderIntent_(schema, feature, 'default');
+                feature.setStyle(feature.get('customStyle') || null);
             }
         }
     });
@@ -148,6 +106,8 @@
             var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
             this.schemaStyles_[schema.schemaName] = this.initializeStyles_(styleConfigs || {});
             var layer = this.createSchemaFeatureLayer_(schema);
+            layer.setStyle(this.schemaStyles_[schema.schemaName]['default']);
+            delete this.schemaStyles_[schema.schemaName]['default'];
             this.olMap.addLayer(layer);
             this.schemaLayers_[schema.schemaName] = layer;
         }
@@ -160,8 +120,7 @@
         var keys = Object.keys(styleConfigs);
         for (var i = 0; i < keys.length; ++ i) {
             var key = keys[i];
-            var styleConfig = styleConfigs[key];
-            styles[key] = Mapbender.Digitizer.StyleAdapter.fromSvgRules(styleConfig);
+            styles[key] = this.createStyleFunction_(styleConfigs[key]);
         }
         return styles;
     };
@@ -189,11 +148,11 @@
         var jsonStyle = styleField && itemData && itemData[styleField];
 
         if (jsonStyle) {
-            var basicStyle = JSON.parse(jsonStyle);
-            var style = Mapbender.Digitizer.StyleAdapter.fromSvgRules(basicStyle);
-            feature.set("basicStyle", basicStyle);
-            feature.set("style", style);
-            this.setStyle_(feature, style);
+            var styleConfig = JSON.parse(jsonStyle);
+            var styleFn = this.createStyleFunction_(styleConfig);
+            feature.set('customStyleConfig', styleConfig);
+            feature.set('customStyle', styleFn);
+            feature.setStyle(styleFn);
         }
     };
 

@@ -531,14 +531,14 @@
         },
         openStyleEditor: function(schema, feature) {
             var self = this;
-            var styleConfig = feature.get('basicStyle') || schema.styles.default;
+            var styleConfig = feature.get('customStyleConfig') || schema.styles.default;
             this.styleEditor.openEditor(schema, feature, styleConfig).then(function(values) {
                 // @todo: decouple from feature saving; use a distinct url to save the style
                 var formData = {};
                 var styleFieldData = JSON.stringify(values);
                 formData[schema.featureType.styleField] = styleFieldData;
                 self._saveItem(schema, feature, formData).then(function() {
-                    feature.set('basicStyle', styleFieldData);
+                    feature.set('customStyleConfig', styleFieldData);
                     self.renderer.customStyleFeature_(schema, feature);
                 });
             });
