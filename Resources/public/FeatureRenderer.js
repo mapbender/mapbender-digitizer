@@ -44,6 +44,20 @@
             });
             feature.set('renderer-events', true);
         },
+        createLayerStyleFunction_: function(styleConfig) {
+            var self = this;
+            return (function(styleConfig) {
+                var defaultFn = self.createStyleFunction_(styleConfig);
+                return function(feature) {
+                    var customFn = feature.get('customStyle');
+                    if (customFn) {
+                        return customFn(feature);
+                    } else {
+                        return defaultFn(feature);
+                    }
+                };
+            })(styleConfig);
+        },
         createStyleFunction_: function(styleConfig) {
             return Mapbender.Digitizer.StyleAdapter.styleFunctionFromSvgRules(styleConfig, function(feature) {
                 return feature.get('data') || {};
@@ -59,7 +73,7 @@
             } else if (feature.get('dirty')) {
                 feature.setStyle(this.schemaStyles_[schema.schemaName]['unsaved']);
             } else {
-                feature.setStyle(feature.get('customStyle') || null);
+                feature.setStyle(null);
             }
         }
     });
@@ -106,7 +120,7 @@
             var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
             this.schemaStyles_[schema.schemaName] = this.initializeStyles_(styleConfigs || {});
             var layer = this.createSchemaFeatureLayer_(schema);
-            layer.setStyle(this.schemaStyles_[schema.schemaName]['default']);
+            layer.setStyle(this.createLayerStyleFunction_(styleConfigs['default']));
             delete this.schemaStyles_[schema.schemaName]['default'];
             this.olMap.addLayer(layer);
             this.schemaLayers_[schema.schemaName] = layer;
@@ -152,7 +166,6 @@
             var styleFn = this.createStyleFunction_(styleConfig);
             feature.set('customStyleConfig', styleConfig);
             feature.set('customStyle', styleFn);
-            feature.setStyle(styleFn);
         }
     };
 
