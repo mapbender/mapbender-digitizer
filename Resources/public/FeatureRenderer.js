@@ -161,7 +161,7 @@
         for (var i = 0; i < keys.length; ++ i) {
             var key = keys[i];
             var styleConfig = styleConfigs[key];
-            styles[key] = ol.style.StyleConverter.convertToOL4Style(styleConfig);
+            styles[key] = Mapbender.Digitizer.StyleAdapter.fromSvgRules(styleConfig);
         }
         return styles;
     };
@@ -190,7 +190,7 @@
 
         if (jsonStyle) {
             var basicStyle = JSON.parse(jsonStyle);
-            var style = ol.style.StyleConverter.convertToOL4Style(basicStyle);
+            var style = Mapbender.Digitizer.StyleAdapter.fromSvgRules(basicStyle);
             feature.set("basicStyle", basicStyle);
             feature.set("style", style);
             this.setStyle_(feature, style);
