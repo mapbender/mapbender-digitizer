@@ -24,7 +24,7 @@
             }
             return this.defaultText_.clone();
         },
-        fromSvgRules: function(ol2Style) {
+        getBaseStyleObject: function(ol2Style) {
             var newStyle = this.getDefaultStyleObject();
 
             if (ol2Style.fillColor || (typeof ol2Style.fillOpacity !== 'undefined')) {
@@ -42,16 +42,6 @@
              }
              newStyle.getStroke().setLineDash(this.dashRuleToComponents(ol2Style.strokeDashstyle));
 
-            if (ol2Style.label) {
-                newStyle.setText(this.getDefaultTextStyle());
-                newStyle.getText().setFont(this.canvasFontRuleFromSvg(ol2Style));
-                newStyle.getText().setText(ol2Style.label);
-
-                if (ol2Style.fontColor || (typeof ol2Style.fontOpacity !== 'undefined')) {
-                    newStyle.getText().getFill().setColor(this.parseSvgColor(ol2Style, 'fontColor', 'fontOpacity', newStyle.getText().getFill().getColor()));
-                }
-            }
-
             newStyle.setZIndex(ol2Style.graphicZIndex || 0);
 
             var image = new ol.style.Circle({
@@ -61,8 +51,24 @@
             });
 
             newStyle.setImage(image);
-
             return newStyle;
+        },
+        fromSvgRules: function(ol2Style) {
+            var newStyle = this.getBaseStyleObject(ol2Style);
+
+            if (ol2Style.label) {
+                newStyle.setText(this.getTextStyle_(ol2Style));
+            }
+            return newStyle;
+        },
+        getTextStyle_: function (ol2Style) {
+            var textStyle = this.getDefaultTextStyle();
+            textStyle.setFont(this.canvasFontRuleFromSvg(ol2Style));
+            textStyle.setText(ol2Style.label);
+            if (ol2Style.fontColor || (typeof ol2Style.fontOpacity !== 'undefined')) {
+                textStyle.getFill().setColor(this.parseSvgColor(ol2Style, 'fontColor', 'fontOpacity', textStyle.getFill().getColor()));
+            }
+            return textStyle;
         },
         /**
          * @param {Object} style
