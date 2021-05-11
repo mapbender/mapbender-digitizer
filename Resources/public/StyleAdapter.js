@@ -4,55 +4,34 @@
     window.Mapbender.Digitizer = Mapbender.Digitizer || {};
 
     Mapbender.Digitizer.StyleAdapter = {
+        defaultStyle_: null,
+        defaultText_: null,
+        /**
+         * @return {ol.style.Style}
+         */
+        getDefaultStyleObject: function() {
+            if (!this.defaultStyle_) {
+                this.defaultStyle_ = ol.style.Style.defaultFunction()[0].clone();
+                this.enforceArrayColor_(this.defaultStyle_);
+            }
+            return this.defaultStyle_.clone();
+        },
+        getDefaultTextStyle: function() {
+            if (!this.defaultText_) {
+                this.defaultText_ = new ol.style.Text();
+                this.enforceArrayColor_(this.defaultText_);
+                this.defaultText_.setOverflow(true);
+            }
+            return this.defaultText_.clone();
+        },
         fromSvgRules: function(ol2Style) {
-            var newStyle = ol.style.Style.defaultFunction()[0].clone();
+            var newStyle = this.getDefaultStyleObject();
 
-            /* creates 4 element array with color and opacity */
-            var calculateColor = function (color, opacity) {
-                var newColor;
-                if (typeof color === 'string') {
-                    newColor = Mapbender.StyleUtil.parseCssColor(color);
-                } else {
-                    newColor = color.slice();
-                }
-                newColor = newColor.slice(0, 3);
-                if (typeof opacity === 'undefined') {
-                    newColor.push(1.0);
-                } else {
-                    newColor.push(opacity);
-                }
-                return newColor;
-            };
-
-            var convertDashStyle = function (dashStyle) {
-                switch (dashStyle) {
-                    case 'solid' :
-                        return [];
-                    case 'dot'   :
-                        return [1, 5];
-                    case 'dash'      :
-                        return [10, 10];
-                    case 'longdash'      :
-                        return [20, 20];
-                    case 'dashdot'      :
-                        return [5, 10, 1];
-                    case 'longdashdot'      :
-                        return [5, 20, 1];
-                }
-            };
-
-            var getFontStyleString = function(style) {
-               var fontFamily = style.fontFamily || "sans-serif";
-               var fontSize = style.fontSize ? style.fontSize+"px" : "";
-               var fontWeight = style.fontWeight || "";
-
-               /** @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font */
-               var str = [fontWeight,fontSize,fontFamily].join(" ");
-               return str;
-            };
+            if (ol2Style.fillColor || (typeof ol2Style.fillOpacity !== 'undefined')) {
+                newStyle.getFill().setColor(this.parseSvgColor(ol2Style, 'fillColor', 'fillOpacity', newStyle.getFill().getColor()));
+            }
             if (ol2Style.strokeColor || (typeof ol2Style.strokeOpacity !== 'undefined')) {
-                var strokeColor = calculateColor(ol2Style.strokeColor || newStyle.getStroke().getColor(), ol2Style.strokeOpacity);
-                newStyle.getStroke().setColor(strokeColor);
+                newStyle.getStroke().setColor(this.parseSvgColor(ol2Style, 'strokeColor', 'strokeOpacity', newStyle.getStroke().getColor()));
             }
 
              if (typeof ol2Style.strokeWidth !== 'undefined') {
@@ -61,23 +40,14 @@
              if (typeof ol2Style.strokeLinecap !== 'undefined') {
                  newStyle.getStroke().setLineCap(ol2Style.strokeLinecap);
              }
-             if (typeof ol2Style.strokeDashstyle !== 'undefined') {
-                 newStyle.getStroke().setLineDash(convertDashStyle(ol2Style.strokeDashstyle));
-             }
-
-            if (ol2Style.fillColor || (typeof ol2Style.fillColor !== 'undefined')) {
-                var fillColor =calculateColor(ol2Style.fillColor || newStyle.getFill().getColor(), ol2Style.fillOpacity);
-                newStyle.getFill().setColor(fillColor);
-            }
+             newStyle.getStroke().setLineDash(this.dashRuleToComponents(ol2Style.strokeDashstyle));
 
             if (ol2Style.label) {
-                newStyle.setText(new ol.style.Text({
-                    text: ol2Style.label,
-                    font: getFontStyleString(ol2Style),
-                    overflow: true
-                }));
+                newStyle.setText(this.getDefaultTextStyle());
+                newStyle.getText().setFont(this.canvasFontRuleFromSvg(ol2Style));
+                newStyle.getText().setText(ol2Style.label);
 
-              newStyle.getText().getFill().setColor(calculateColor(ol2Style.fontColor, ol2Style.fontOpacity));
+                newStyle.getText().getFill().setColor(this.parseSvgColor(ol2Style, 'fontColor', 'fontOpacity'));
             }
 
             newStyle.setZIndex(ol2Style.graphicZIndex || 0);
@@ -91,6 +61,73 @@
             newStyle.setImage(image);
 
             return newStyle;
+        },
+        /**
+         * @param {Object} style
+         * @param {string} colorProp
+         * @param {string} opacityProp
+         * @param {Array<Number>} [defaults]
+         * @return {Array<Number>}
+         */
+        parseSvgColor: function(style, colorProp, opacityProp, defaults) {
+            var color = Mapbender.StyleUtil.parseSvgColor(style, colorProp, opacityProp);
+            // Unlinke Mapbender.StyleUtil, fill in missing properties using native OL6 defaults, instead of
+            // OL2 SVG defaults
+            if (!style[colorProp] && defaults) {
+                Array.prototype.splice.apply(color, [0, 3].concat(defaults.slice(0, 3)));
+            }
+            if (!style[opacityProp] && defaults) {
+                color.splice(3, 1, defaults[3]);
+            }
+            return color;
+        },
+        /**
+         * @param {Object} style
+         * @param {String} [style.fontFamily]
+         * @param {Number} [style.fontSize]
+         * @param {String} [style.fontWeight]
+         * @return {string}
+         */
+        canvasFontRuleFromSvg: function(style) {
+            var fontFamily = style.fontFamily || "sans-serif";
+            var fontSize = style.fontSize && ([style.fontSize, 'px'].join('')) || '';
+            var fontWeight = style.fontWeight || "";
+
+            /** @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font */
+            return [fontWeight, fontSize, fontFamily].join(" ");
+        },
+        /**
+         * @param {String} dashStyle
+         * @return {null|number[]}
+         */
+        dashRuleToComponents: function(dashStyle) {
+            switch (dashStyle) {
+                default:
+                case 'solid':
+                    return null;
+                case 'dot':
+                    return [1, 5];
+                case 'dash':
+                    return [10, 10];
+                case 'longdash':
+                    return [20, 20];
+                case 'dashdot':
+                    return [5, 10, 1];
+                case 'longdashdot':
+                    return [5, 20, 1];
+            }
+        },
+        /**
+         * @param {ol.style.Style|ol.style.Text} styleComponent
+         */
+        enforceArrayColor_: function(styleComponent) {
+            // Enforce Array types for fill and stroke colors, to support amending missing props with array slices
+            if (styleComponent.getStroke() && (typeof (styleComponent.getStroke().getColor()) === 'string')) {
+                styleComponent.getStroke().setColor(Mapbender.StyleUtil.parseCssColor(styleComponent.getStroke().getColor()));
+            }
+            if (styleComponent.getFill() && (typeof (styleComponent.getFill().getColor()) === 'string')) {
+                styleComponent.getFill().setColor(Mapbender.StyleUtil.parseCssColor(styleComponent.getFill().getColor()));
+            }
         }
     };
 })();
