@@ -134,7 +134,7 @@
         var keys = Object.keys(styleConfigs);
         for (var i = 0; i < keys.length; ++ i) {
             var key = keys[i];
-            styles[key] = this.createStyleFunction_(styleConfigs[key]);
+            styles[key] = this.createStyleFunction_(Object.assign({}, styleConfigs['default'], styleConfigs[key]));
         }
         return styles;
     };
