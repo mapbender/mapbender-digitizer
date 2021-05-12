@@ -53,15 +53,22 @@
             }
             return this.defaultText_.clone();
         },
+        /**
+         * @param {ol.style.Style} targetStyle
+         * @param {Object} styleConfig
+         * @private
+         */
+        resolveColors_: function(targetStyle, styleConfig) {
+            if (styleConfig.fillColor || (typeof styleConfig.fillOpacity !== 'undefined')) {
+                targetStyle.getFill().setColor(this.parseSvgColor(styleConfig, 'fillColor', 'fillOpacity', targetStyle.getFill().getColor()));
+            }
+            if (styleConfig.strokeColor || (typeof styleConfig.strokeOpacity !== 'undefined')) {
+                targetStyle.getStroke().setColor(this.parseSvgColor(styleConfig, 'strokeColor', 'strokeOpacity', targetStyle.getStroke().getColor()));
+            }
+        },
         getBaseStyleObject: function(ol2Style) {
             var newStyle = this.getDefaultStyleObject();
-
-            if (ol2Style.fillColor || (typeof ol2Style.fillOpacity !== 'undefined')) {
-                newStyle.getFill().setColor(this.parseSvgColor(ol2Style, 'fillColor', 'fillOpacity', newStyle.getFill().getColor()));
-            }
-            if (ol2Style.strokeColor || (typeof ol2Style.strokeOpacity !== 'undefined')) {
-                newStyle.getStroke().setColor(this.parseSvgColor(ol2Style, 'strokeColor', 'strokeOpacity', newStyle.getStroke().getColor()));
-            }
+            this.resolveColors_(newStyle, ol2Style);
 
              if (typeof ol2Style.strokeWidth !== 'undefined') {
                  newStyle.getStroke().setWidth(ol2Style.strokeWidth);
@@ -85,11 +92,19 @@
         getTextStyle: function (ol2Style) {
             var textStyle = this.getDefaultTextStyle();
             textStyle.setFont(this.canvasFontRuleFromSvg(ol2Style));
-            textStyle.setText(ol2Style.label);
-            if (ol2Style.fontColor || (typeof ol2Style.fontOpacity !== 'undefined')) {
-                textStyle.getFill().setColor(this.parseSvgColor(ol2Style, 'fontColor', 'fontOpacity', textStyle.getFill().getColor()));
-            }
+            this.resolveTextStyle_(textStyle, ol2Style);
             return textStyle;
+        },
+        /**
+         * @param {ol.style.Text} targetStyle
+         * @param {Object} styleConfig
+         * @private
+         */
+        resolveTextStyle_: function(targetStyle, styleConfig) {
+            targetStyle.setText(styleConfig.label);
+            if (styleConfig.fontColor || (typeof styleConfig.fontOpacity !== 'undefined')) {
+                targetStyle.getFill().setColor(this.parseSvgColor(styleConfig, 'fontColor', 'fontOpacity', targetStyle.getFill().getColor()));
+            }
         },
         /**
          * @param {Object} style
