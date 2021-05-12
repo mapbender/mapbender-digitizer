@@ -6,27 +6,36 @@
     Mapbender.Digitizer.StyleAdapter = {
         defaultStyle_: null,
         defaultText_: null,
-        placeholderPattern_: /\${([^}]+)}/g,
+        placeholderRx_: /\${([^}]+)}/g,
         styleFunctionFromSvgRules: function(styleConfig, dataCallback) {
             var self = this;
-            var labelPattern = this.placeholderPattern_;
-            return (function() {
-                var baseStyle = self.getBaseStyleObject(styleConfig);
+            var placeholderRx = this.placeholderRx_;
+            var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor'];
+            return (function(styleConfig) {
+                var placeholderProps = placeholderCandidates.filter(function(prop) {
+                    placeholderRx.lastIndex = 0;    // Reset. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test#using_test_on_a_regex_with_the_global_flag
+                    return placeholderRx.test(styleConfig[prop] || '');
+                });
                 var labelValue = styleConfig.label;
+                var dynText = labelValue && (placeholderProps.indexOf('label') !== -1 || placeholderProps.indexOf('fontColor') !== -1);
+                var dynBase = placeholderProps.indexOf('fillColor') !== -1 || placeholderProps.indexOf('strokeColor') !== -1;
+                var baseStyle = self.getBaseStyleObject(styleConfig);
                 var textStyle = labelValue && self.getTextStyle(styleConfig);
+
+                var resolvePlaceholders = self.getPlaceholderResolver_(styleConfig, placeholderProps, dataCallback);
                 return function(feature) {
                     var styles = [baseStyle];
+                    var resolvedStyle = resolvePlaceholders(styleConfig, feature);
+                    if (dynBase) {
+                        styles[0] = baseStyle.clone();
+                        self.resolveColors_(styles[0], resolvedStyle);
+                    }
                     if (labelValue) {
                         var labelStyle = new ol.style.Style();
-                        if (labelPattern.test(labelValue || '')) {
-                            var attributes = dataCallback(feature) || {};
-                            var label = labelValue.replace(labelPattern, function(match, attributeName) {
-                                return attributes[attributeName] || '';
-                            });
+                        if (dynText) {
                             labelStyle.setText(textStyle.clone());
-                            labelStyle.getText().setText(label);
+                            self.resolveTextStyle_(labelStyle.getText(), resolvedStyle);
                         } else {
-                            textStyle.setText(labelValue);
                             labelStyle.setText(textStyle);
                         }
                         styles.push(labelStyle);
@@ -110,20 +119,27 @@
          * @param {Object} style
          * @param {string} colorProp
          * @param {string} opacityProp
-         * @param {Array<Number>} [defaults]
+         * @param {Array<Number>} defaults
          * @return {Array<Number>}
          */
         parseSvgColor: function(style, colorProp, opacityProp, defaults) {
-            var color = Mapbender.StyleUtil.parseSvgColor(style, colorProp, opacityProp);
-            // Unlinke Mapbender.StyleUtil, fill in missing properties using native OL6 defaults, instead of
+            // Unlinke Mapbender.StyleUtil.parseSvgColor, fill in missing properties using native OL6 defaults, instead of
             // OL2 SVG defaults
-            if (!style[colorProp] && defaults) {
-                Array.prototype.splice.apply(color, [0, 3].concat(defaults.slice(0, 3)));
+            var components = defaults.slice();
+            if (style[colorProp]) {
+                try {
+                    components.splice.apply(components, [0, 3].concat(Mapbender.StyleUtil.parseCssColor(style[colorProp])));
+                } catch (e) {
+                    // ignore; keep defaults
+                }
             }
-            if (!style[opacityProp] && defaults) {
-                color.splice(3, 1, defaults[3]);
+            if (style[opacityProp] || style[opacityProp] === 0) {
+                var opacity = parseFloat(style[opacityProp]);
+                if (!isNaN(opacity)) {
+                    components[3] = opacity;
+                }
             }
-            return color;
+            return components;
         },
         /**
          * @param {Object} style
@@ -172,6 +188,37 @@
             if (styleComponent.getFill() && (typeof (styleComponent.getFill().getColor()) === 'string')) {
                 styleComponent.getFill().setColor(Mapbender.StyleUtil.parseCssColor(styleComponent.getFill().getColor()));
             }
-        }
+        },
+        /**
+         * @param {Object} original
+         * @param {Array<String>} propertyNames
+         * @param {function} dataCallback
+         * @return {function}
+         * @private
+         */
+        getPlaceholderResolver_: function(original, propertyNames, dataCallback) {
+            if (propertyNames.length) {
+                var placeholderRx = this.placeholderRx_;
+                return function(styleConfig, feature) {
+                    var valuesOut = Object.assign({}, styleConfig);
+                    var data = dataCallback(feature);
+                    propertyNames.forEach(function(prop) {
+                        var resolved = styleConfig[prop].replace(placeholderRx, function(match, dataProp) {
+                            return data[dataProp];
+                        });
+                        if (resolved) {
+                            valuesOut[prop] = resolved;
+                        }
+                    });
+                    return valuesOut;
+                }
+            } else {
+                return function(original) {
+                    return original;
+                }
+            }
+        },
+
+        __dummy: null
     };
 })();
