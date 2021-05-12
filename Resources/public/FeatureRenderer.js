@@ -49,7 +49,7 @@
             return (function(styleConfig) {
                 var defaultFn = self.createStyleFunction_(styleConfig);
                 return function(feature) {
-                    var customFn = feature.get('customStyle');
+                    var customFn = feature.get('customStyleFn');
                     if (customFn) {
                         return customFn(feature);
                     } else {
@@ -165,7 +165,7 @@
             var styleConfig = JSON.parse(jsonStyle);
             var styleFn = this.createStyleFunction_(styleConfig);
             feature.set('customStyleConfig', styleConfig);
-            feature.set('customStyle', styleFn);
+            feature.set('customStyleFn', styleFn);
         }
     };
 
