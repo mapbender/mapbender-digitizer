@@ -3,19 +3,30 @@
     window.Mapbender = Mapbender || {};
     window.Mapbender.Digitizer = Mapbender.Digitizer || {};
 
-    Mapbender.Digitizer.StyleAdapter = {
+    Mapbender.Digitizer.StyleAdapter = function(defaultStyleConfig) {
+        this.defaultStyle_ = ol.style.Style.defaultFunction()[0].clone();
+        this.enforceArrayColor_(this.defaultStyle_);
+
+        var placeholderProps = this.detectDataPlaceholders_(defaultStyleConfig);
+        if (placeholderProps.length) {
+            throw new Error("Fallback style MUST NOT include data placeholders. Found: " + placeholderProps.join(', '));
+        }
+        this.resolveBaseStyle_(this.defaultStyle_, defaultStyleConfig);
+
+        this.defaultText_ = new ol.style.Text();
+        this.enforceArrayColor_(this.defaultText_);
+        this.defaultText_.setOverflow(true);
+    };
+
+    Object.assign(Mapbender.Digitizer.StyleAdapter.prototype, {
         defaultStyle_: null,
         defaultText_: null,
         placeholderRx_: /\${([^}]+)}/g,
         styleFunctionFromSvgRules: function(styleConfig, dataCallback) {
             var self = this;
-            var placeholderRx = this.placeholderRx_;
             var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor'];
             return (function(styleConfig) {
-                var placeholderProps = placeholderCandidates.filter(function(prop) {
-                    placeholderRx.lastIndex = 0;    // Reset. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test#using_test_on_a_regex_with_the_global_flag
-                    return placeholderRx.test(styleConfig[prop] || '');
-                });
+                var placeholderProps = self.detectDataPlaceholders_(styleConfig, placeholderCandidates);
                 var labelValue = styleConfig.label;
                 var dynText = labelValue && (placeholderProps.indexOf('label') !== -1 || placeholderProps.indexOf('fontColor') !== -1);
                 var dynBase = placeholderProps.indexOf('fillColor') !== -1 || placeholderProps.indexOf('strokeColor') !== -1;
@@ -48,32 +59,10 @@
          * @return {ol.style.Style}
          */
         getDefaultStyleObject: function() {
-            if (!this.defaultStyle_) {
-                this.defaultStyle_ = ol.style.Style.defaultFunction()[0].clone();
-                this.enforceArrayColor_(this.defaultStyle_);
-            }
             return this.defaultStyle_.clone();
         },
         getDefaultTextStyle: function() {
-            if (!this.defaultText_) {
-                this.defaultText_ = new ol.style.Text();
-                this.enforceArrayColor_(this.defaultText_);
-                this.defaultText_.setOverflow(true);
-            }
             return this.defaultText_.clone();
-        },
-        configureDefaultStyle: function(styleConfig) {
-            var placeholderRx = this.placeholderRx_;
-            var placeholderProps = Object.keys(styleConfig).filter(function(prop) {
-                placeholderRx.lastIndex = 0;    // Reset. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test#using_test_on_a_regex_with_the_global_flag
-                return placeholderRx.test(styleConfig[prop] || '');
-            });
-            if (placeholderProps.length) {
-                throw new Error("Fallback style MUST NOT include data placeholders. Found: " + placeholderProps.join(', '));
-            }
-            var style = this.getDefaultStyleObject() && this.defaultStyle_;
-            this.resolveBaseStyle_(style, styleConfig);
-            this.defaultStyle_ = style;
         },
         /**
          * @param {ol.style.Style} targetStyle
@@ -205,6 +194,22 @@
             }
         },
         /**
+         *
+         * @param {Object} data
+         * @param {Array<String>} [candidates] to limit scanning to specifically named properties (default: scan all properties)
+         * @return {Array<String>}
+         * @private
+         */
+        detectDataPlaceholders_: function(data, candidates) {
+            var placeholderRx = this.placeholderRx_;
+            return (candidates || Object.keys(data)).filter(function(prop) {
+                // Reset global-flagged RegExp state.
+                // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test#using_test_on_a_regex_with_the_global_flag
+                placeholderRx.lastIndex = 0;
+                return placeholderRx.test(data[prop] || '');
+            });
+        },
+        /**
          * @param {Object} original
          * @param {Array<String>} propertyNames
          * @param {function} dataCallback
@@ -235,5 +240,5 @@
         },
 
         __dummy: null
-    };
+    });
 })();

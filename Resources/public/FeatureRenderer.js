@@ -4,15 +4,14 @@
     /**
      * @param {*} owner jQueryUI widget instance
      * @param {ol.PluggableMap} olMap
+     * @param {Mapbender.Digitizer.StyleAdapter} styleAdapter
      * @param {Object} schema
      * @constructor
      */
-    Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(owner, olMap) {
+    Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(owner, olMap, styleAdapter) {
         this.owner = owner;
         this.olMap = olMap;
-        if (owner.options.fallbackStyle) {
-            Mapbender.Digitizer.StyleAdapter.configureDefaultStyle(owner.options.fallbackStyle);
-        }
+        this.styleAdapter = styleAdapter;
         this.globalStyles_ = this.initializeGlobalStyles_();
         this.schemaStyles_ = {};
         this.schemaLayers_ = {};
@@ -62,7 +61,7 @@
             })(styleConfig);
         },
         createStyleFunction_: function(styleConfig) {
-            return Mapbender.Digitizer.StyleAdapter.styleFunctionFromSvgRules(styleConfig, function(feature) {
+            return this.styleAdapter.styleFunctionFromSvgRules(styleConfig, function(feature) {
                 return feature.get('data') || {};
             });
         },

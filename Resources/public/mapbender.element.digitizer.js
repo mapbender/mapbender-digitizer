@@ -49,6 +49,12 @@
         _createStyleEditor: function() {
             return new Mapbender.Digitizer.FeatureStyleEditor(this);
         },
+        _createStyleAdapter: function() {
+            return new Mapbender.Digitizer.StyleAdapter(this.options.fallbackStyle);
+        },
+        _createRenderer: function(olMap) {
+            return new Mapbender.Digitizer.FeatureRenderer(this, olMap, this._createStyleAdapter());
+        },
         _afterCreate: function() {
             // Invoked only by data manager _create
             // do nothing; deliberately do NOT call parent method
@@ -61,7 +67,7 @@
             });
             var olMap = this.mbMap.getModel().olMap;
             this.contextMenu = this._createContextMenu(olMap);
-            this.renderer = new Mapbender.Digitizer.FeatureRenderer(this, olMap);
+            this.renderer = this._createRenderer(olMap);
             this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory();
             olMap.on(ol.MapEventType.MOVEEND, function() {
                 // Don't react at all if currently editing feature attributes
