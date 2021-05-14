@@ -347,6 +347,14 @@ class Digitizer extends DataManagerElement
         ));
     }
 
+    public function getPublicConfiguration()
+    {
+        $defaultStyles = $this->getDefaultStyles();
+        return array_replace(parent::getPublicConfiguration(), array(
+            'fallbackStyle' => $defaultStyles['default'],
+        ));
+    }
+
     protected function getDefaultStyles()
     {
         return array(

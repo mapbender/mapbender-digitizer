@@ -10,6 +10,9 @@
     Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(owner, olMap) {
         this.owner = owner;
         this.olMap = olMap;
+        if (owner.options.fallbackStyle) {
+            Mapbender.Digitizer.StyleAdapter.configureDefaultStyle(owner.options.fallbackStyle);
+        }
         this.globalStyles_ = this.initializeGlobalStyles_();
         this.schemaStyles_ = {};
         this.schemaLayers_ = {};

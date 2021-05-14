@@ -62,6 +62,19 @@
             }
             return this.defaultText_.clone();
         },
+        configureDefaultStyle: function(styleConfig) {
+            var placeholderRx = this.placeholderRx_;
+            var placeholderProps = Object.keys(styleConfig).filter(function(prop) {
+                placeholderRx.lastIndex = 0;    // Reset. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test#using_test_on_a_regex_with_the_global_flag
+                return placeholderRx.test(styleConfig[prop] || '');
+            });
+            if (placeholderProps.length) {
+                throw new Error("Fallback style MUST NOT include data placeholders. Found: " + placeholderProps.join(', '));
+            }
+            var style = this.getDefaultStyleObject() && this.defaultStyle_;
+            this.resolveBaseStyle_(style, styleConfig);
+            this.defaultStyle_ = style;
+        },
         /**
          * @param {ol.style.Style} targetStyle
          * @param {Object} styleConfig
@@ -75,17 +88,19 @@
                 targetStyle.getStroke().setColor(this.parseSvgColor(styleConfig, 'strokeColor', 'strokeOpacity', targetStyle.getStroke().getColor()));
             }
         },
+        resolveBaseStyle_: function(targetStyle, styleConfig) {
+            this.resolveColors_(targetStyle, styleConfig);
+            if (typeof styleConfig.strokeWidth !== 'undefined') {
+                targetStyle.getStroke().setWidth(styleConfig.strokeWidth);
+            }
+            if (typeof styleConfig.strokeLinecap !== 'undefined') {
+                targetStyle.getStroke().setLineCap(styleConfig.strokeLinecap);
+            }
+            targetStyle.getStroke().setLineDash(this.dashRuleToComponents(styleConfig.strokeDashstyle));
+        },
         getBaseStyleObject: function(ol2Style) {
             var newStyle = this.getDefaultStyleObject();
-            this.resolveColors_(newStyle, ol2Style);
-
-             if (typeof ol2Style.strokeWidth !== 'undefined') {
-                 newStyle.getStroke().setWidth(ol2Style.strokeWidth);
-             }
-             if (typeof ol2Style.strokeLinecap !== 'undefined') {
-                 newStyle.getStroke().setLineCap(ol2Style.strokeLinecap);
-             }
-             newStyle.getStroke().setLineDash(this.dashRuleToComponents(ol2Style.strokeDashstyle));
+            this.resolveBaseStyle_(newStyle, ol2Style);
 
             newStyle.setZIndex(ol2Style.graphicZIndex || 0);
 
