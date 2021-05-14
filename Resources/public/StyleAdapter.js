@@ -132,7 +132,8 @@
             var components = defaults.slice();
             if (style[colorProp]) {
                 try {
-                    components.splice.apply(components, [0, 3].concat(Mapbender.StyleUtil.parseCssColor(style[colorProp])));
+                    var rgb = Mapbender.StyleUtil.parseCssColor(style[colorProp]).slice(0, 3);
+                    components.splice.apply(components, [0, 3].concat(rgb));
                 } catch (e) {
                     // ignore; keep defaults
                 }
