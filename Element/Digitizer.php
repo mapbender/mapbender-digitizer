@@ -100,7 +100,6 @@ class Digitizer extends DataManagerElement
                 '/components/select2/select2-built.js',
                 '/components/select2/dist/js/i18n/de.js',
                 '@MapbenderDigitizerBundle/Resources/public/polyfill/setprototype.polyfill.js',
-                '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
                 '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.js',
                 '@MapbenderDigitizerBundle/Resources/public/lib/layerManager.js',
             )),

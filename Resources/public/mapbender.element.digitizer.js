@@ -63,7 +63,6 @@
             var self = this;
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function (printClient) {
                 self.printClient = printClient;
-                $.extend(self.printClient, Mapbender.Digitizer.printPlugin);
             });
             var olMap = this.mbMap.getModel().olMap;
             this.contextMenu = this._createContextMenu(olMap);
