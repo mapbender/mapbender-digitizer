@@ -294,7 +294,9 @@
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.print'),
                     click: function() {
-                        printClient.printDigitizerFeature(feature, schema);
+                        var data = self._getItemData(schema, feature);
+                        var templates = (schema.featureType.print || {}).templates || null;
+                        printClient.printDigitizerFeature(data, schema, templates);
                     }
                 });
             }
