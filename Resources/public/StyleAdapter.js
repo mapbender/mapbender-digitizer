@@ -171,15 +171,15 @@
                 case 'solid':
                     return null;
                 case 'dot':
-                    return [1, 5];
+                    return [3, 10];
                 case 'dash':
-                    return [10, 10];
+                    return [12, 12];
                 case 'longdash':
-                    return [20, 20];
+                    return [20, 12];
                 case 'dashdot':
-                    return [5, 10, 1];
+                    return [12, 12, 3, 7];
                 case 'longdashdot':
-                    return [5, 20, 1];
+                    return [20, 12, 3, 7];
             }
         },
         /**
