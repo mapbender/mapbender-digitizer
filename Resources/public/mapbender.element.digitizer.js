@@ -23,12 +23,14 @@
         excludedFromHighlighting_: [],
         featureEditor: null,
         renderer: null,
+        styleAdapter_: null,
 
         _create: function () {
             this.toolsetRenderer = this._createToolsetRenderer();
             this._super();
             var widget = this;
             var target = this.options.target;
+            this.styleAdapter_ = this._createStyleAdapter();
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
             Mapbender.elementRegistry.waitReady(target).then(function(mbMap) {
@@ -53,7 +55,7 @@
             return new Mapbender.Digitizer.StyleAdapter(this.options.fallbackStyle);
         },
         _createRenderer: function(olMap) {
-            return new Mapbender.Digitizer.FeatureRenderer(this, olMap, this._createStyleAdapter());
+            return new Mapbender.Digitizer.FeatureRenderer(this, olMap, this.styleAdapter_);
         },
         _afterCreate: function() {
             // Invoked only by data manager _create
@@ -539,7 +541,12 @@
         },
         openStyleEditor: function(schema, feature) {
             var self = this;
-            var styleConfig = feature.get('customStyleConfig') || schema.styles.default;
+            // Generate default style without placeholders...
+            var styleDefaults = this.renderer.resolveStyleConfigPlaceholders(schema.styles.default, feature);
+            // ... but allow label placeholder (editable as text)
+            styleDefaults.label = schema.styles.default.label;
+
+            var styleConfig = feature.get('customStyleConfig') || styleDefaults;
             this.styleEditor.openEditor(schema, feature, styleConfig).then(function(values) {
                 // @todo: decouple from feature saving; use a distinct url to save the style
                 var formData = {};

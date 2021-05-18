@@ -239,7 +239,13 @@
                 }
             }
         },
-
+        resolvePlaceholders: function(styleConfig, featureData) {
+            var placeholderProps = this.detectDataPlaceholders_(styleConfig);
+            var resolver = this.getPlaceholderResolver_(styleConfig, placeholderProps, function() {
+                return featureData;
+            });
+            return resolver(styleConfig);
+        },
         __dummy: null
     });
 })();
