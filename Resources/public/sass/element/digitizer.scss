@@ -56,13 +56,3 @@
         font-weight: normal;
     }
 }
-
-.colorpicker-saturation {
-    // TODO this is an evil hack: For unknown reasons, the default option does not work
-    //background-image: url(../img/bootstrap-colorpicker/saturation.png) !important;
-    background-image: url(components/bootstrap-colorpicker/img/bootstrap-colorpicker/saturation.png) !important;
-}
-
-.colorpicker-hue {
-    background-image: url(components/bootstrap-colorpicker/img/bootstrap-colorpicker/hue.png) !important;
-}
