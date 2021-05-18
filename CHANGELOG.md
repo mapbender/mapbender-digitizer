@@ -1,3 +1,12 @@
+## 1.4.8
+NOTE: this version requires Mapbender >=3.2.5 (currently in RC phase) and will not install with older versions
+
+* Fix error processing feature style with labels but without explicit `fontColor` setting
+* Support data placeholder syntax (`${column_containing_a_color}`) also in styles also for `fillColor`, `strokeColor` and `fontColor` settings
+* Reduce feature styling performance overhead
+* Drop dependency on mapbender/ol4-extensions package
+* Improve line dash styles
+
 ## 1.4.7
 * Fix errors accessing globally defined featureType referenced by name from schema config ([MB#1337](https://github.com/mapbender/mapbender/issues/1337))
 
