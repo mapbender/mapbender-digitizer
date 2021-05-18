@@ -93,7 +93,6 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/contextMenu.js",
                 "@MapbenderDigitizerBundle/Resources/public/controlFactory.js",
                 "@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js",
-                '../../vendor/mapbender/ol4-extensions/drawdonut.js',
                 "@MapbenderDigitizerBundle/Resources/public/StyleAdapter.js",
                 '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
                 '/components/jquery-context-menu/jquery-context-menu-built.js',
