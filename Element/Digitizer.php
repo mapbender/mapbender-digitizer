@@ -149,6 +149,9 @@ class Digitizer extends DataManagerElement
         $storeConfig = $this->getDataStoreConfigForSchema($schemaName);
         $repository = $this->getDataStoreService()->featureTypeFactory($storeConfig);
         $criteria = $this->getSelectCriteria($repository, $request);
+        if (!empty($storeConfig['maxResults'])) {
+            $criteria['maxResults'] = $storeConfig['maxResults'];
+        }
         $results = array();
         foreach ($repository->search($criteria) as $feature) {
             $results[] = $this->formatResponseFeature($repository, $feature);
