@@ -267,6 +267,8 @@ class Digitizer extends DataManagerElement
 
     /**
      * @return string
+     * @todo: remove method (DM >= 1.2)
+     * @deprecated
      */
     protected function getDefaultUploadsPath()
     {
@@ -276,6 +278,8 @@ class Digitizer extends DataManagerElement
     /**
      * Digitizer renames "dataStore" to "featureType" in schema configs.
      * @return string
+     * @todo: remove method (DM >= 1.2)
+     * @deprecated
      */
     protected function getDataStoreKeyInSchemaConfig()
     {
@@ -398,6 +402,7 @@ class Digitizer extends DataManagerElement
         return $service;
     }
 
+    /** @todo: remove method (DM >= 1.2) */
     protected function getDataStoreDefinition($storeId)
     {
         $ftConfigs = $this->getDataStoreService()->getFeatureTypeDeclarations();
