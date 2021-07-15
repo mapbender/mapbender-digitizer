@@ -145,17 +145,29 @@ class Digitizer extends DataManagerElement
 
     protected function getSelectActionResponseData(Request $request)
     {
-        // @todo: implement current extent search
-        // @todo data-source: allow disabling maxResults completely (only makes sense for text term search)
-        $maxResults = 100000000;
-
-
         $schemaName = $request->query->get('schema');
-        $repository = $this->getDataStoreBySchemaName($schemaName);
+        $storeConfig = $this->getDataStoreConfigForSchema($schemaName);
+        $repository = $this->getDataStoreService()->featureTypeFactory($storeConfig);
+        $criteria = $this->getSelectCriteria($repository, $request);
         $results = array();
+        foreach ($repository->search($criteria) as $feature) {
+            $results[] = $this->formatResponseFeature($repository, $feature);
+        }
+        return $results;
+    }
+
+    /**
+     * @param FeatureType $repository
+     * @param Request $request
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    protected function getSelectCriteria(FeatureType $repository, Request $request)
+    {
+        $geomReference = $repository->getConnection()->getDatabasePlatform()->quoteIdentifier($repository->getGeomField());
         $criteria = array(
-            'maxResults' => $maxResults,
             'srid' => intval($request->query->get('srid')),
+            'where' => "$geomReference IS NOT NULL",
         );
         if ($extent = $request->query->get('extent')) {
             $extentCoordinates = explode(',', $extent);
@@ -170,11 +182,7 @@ class Digitizer extends DataManagerElement
             $polygonWkt = 'POLYGON((' . implode(',', $polygonCoordinates) . '))';
             $criteria['intersect'] = $polygonWkt;
         }
-
-        foreach ($repository->search($criteria) as $feature) {
-            $results[] = $this->formatResponseFeature($repository, $feature);
-        }
-        return $results;
+        return $criteria;
     }
 
     protected function getUpdateMultipleActionResponseData(Request $request)
