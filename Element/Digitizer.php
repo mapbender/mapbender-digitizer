@@ -146,11 +146,13 @@ class Digitizer extends DataManagerElement
     protected function getSelectActionResponseData(Request $request)
     {
         $schemaName = $request->query->get('schema');
+        // HACK: call to parent to bypass custom style shenanigans. We only need "maxResults" from this.
+        $schemaConfigMinimal = parent::getSchemaBaseConfig($schemaName);
         $storeConfig = $this->getDataStoreConfigForSchema($schemaName);
         $repository = $this->getDataStoreService()->featureTypeFactory($storeConfig);
         $criteria = $this->getSelectCriteria($repository, $request);
-        if (!empty($storeConfig['maxResults'])) {
-            $criteria['maxResults'] = $storeConfig['maxResults'];
+        if (!empty($schemaConfigMinimal['maxResults'])) {
+            $criteria['maxResults'] = $schemaConfigMinimal['maxResults'];
         }
         $results = array();
         foreach ($repository->search($criteria) as $feature) {
