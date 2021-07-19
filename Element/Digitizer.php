@@ -95,7 +95,6 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js",
                 "@MapbenderDigitizerBundle/Resources/public/StyleAdapter.js",
                 '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
-                '/components/jquery-context-menu/jquery-context-menu-built.js',
                 '/components/select2/select2-built.js',
                 '/components/select2/dist/js/i18n/de.js',
                 '@MapbenderDigitizerBundle/Resources/public/polyfill/setprototype.polyfill.js',
