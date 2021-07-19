@@ -1,3 +1,6 @@
+## 1.4.10
+* Fix error trying to access files from (not used, not required) medialize/jquery-context-menu package
+
 ## 1.4.9
 * Fix client errors processing rows with null geometry (null geometry rows are completely excluded from database select)
 * Fix initially inactive Digitizer showing geometries on initialization
