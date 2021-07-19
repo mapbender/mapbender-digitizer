@@ -21,7 +21,6 @@
             var layerNames = Object.keys(this.schemaLayers_);
             for (var i = 0; i < layerNames.length; ++i) {
                 var layer = this.schemaLayers_[layerNames[i]];
-                console.log("Disabling layer", layer);
                 layer.setVisible(false);
             }
         },
