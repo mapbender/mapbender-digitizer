@@ -1,3 +1,9 @@
+## 1.4.9
+* Fix client errors processing rows with null geometry (null geometry rows are completely excluded from database select)
+* Fix initially inactive Digitizer showing geometries on initialization
+* Fix interpretation of per-schema settings `displayOnInactive` and `displayPermanent`
+* Re-enable (now optional) interpretation of per-schema `maxResults` setting
+
 ## 1.4.8
 NOTE: this version requires Mapbender >=3.2.5 (currently in RC phase) and will not install with older versions
 
