@@ -110,9 +110,7 @@
             olMap.addInteraction(this.selectControl);
             olMap.addInteraction(this.highlightControl);
             var initialSchema = this._getCurrentSchema();
-            if (this.options.displayOnInactive || initialSchema.displayOnInactive) {
-                this.activate();
-            }
+            this._setSchemaVisible(initialSchema, initialSchema.displayOnInactive && initialSchema.displayPermanent);
         },
         // reveal / hide = automatic sidepane integration API
         reveal: function() {
@@ -146,23 +144,33 @@
                 self._toggleDrawingTool(schema, toolName, newState);
             });
         },
+        _setSchemaVisible: function(schema, state) {
+            this.getSchemaLayer(schema).setVisible(!!state);
+        },
         activate: function() {
             if (!this.active) {
                 this.selectControl.setActive(true);
                 this.highlightControl.setActive(true);
-                var schema = this._getCurrentSchema();
-                this._toggleSchemaInteractions(schema, true);
-                this.getSchemaLayer(schema).setVisible(true);
+                var currentSchema = this._getCurrentSchema();
+                this._toggleSchemaInteractions(currentSchema, true);
+                var schemaNames = Object.keys(this.options.schemes);
+                for (var s = 0; s < schemaNames.length; ++s) {
+                    var schema = this.options.schemes[schemaNames[s]];
+                    this._setSchemaVisible(schema, schema === currentSchema || schema.displayPermanent);
+                }
+                this._setSchemaVisible(currentSchema, true);
                 this.active = true;
             }
         },
         deactivate: function() {
             this.selectControl.setActive(false);
             this.highlightControl.setActive(false);
-            var schema = this._getCurrentSchema();
-            this._deactivateCommon(schema);
-            if (!(this.options.displayOnInactive || schema.displayOnInactive)) {
-                this.renderer.disable();
+            var currentSchema = this._getCurrentSchema();
+            this._deactivateCommon(currentSchema);
+            var schemaNames = Object.keys(this.options.schemes);
+            for (var s = 0; s < schemaNames.length; ++s) {
+                var schema = this.options.schemes[schemaNames[s]];
+                this._setSchemaVisible(schema, schema === currentSchema && schema.displayOnInactive);
             }
             this._closeCurrentPopup();
             this.active = false;
@@ -172,7 +180,7 @@
             this.toolsetRenderer.setSchema(schema);
             this.contextMenu.setSchema(schema);
             this._toggleSchemaInteractions(schema, true);
-            this.getSchemaLayer(schema).setVisible(true);
+            this._setSchemaVisible(schema, this.active || schema.displayOnInactive);
         },
         _toggleDrawingTool: function(schema, toolName, state) {
             if (!state && 'modifyFeature' === toolName) {
@@ -218,9 +226,7 @@
         _deactivateSchema: function(schema) {
             this._super(schema);
             this._deactivateCommon(schema);
-            if (!schema.displayPermanent) {
-                this.getSchemaLayer(schema).setVisible(false);
-            }
+            this._setSchemaVisible(schema, schema.displayPermanent);
         },
         _toggleSchemaInteractions: function(schema, state) {
             if (schema.allowDigitize) {
