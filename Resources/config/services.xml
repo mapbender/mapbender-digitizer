@@ -3,13 +3,13 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
-        <!-- must reference a container parameter populated with a FeatureType name => configuration mapping -->
-        <parameter key="mb.digitizer.registry.declarations-param">featureTypes</parameter>
+        <!-- ensure required parameter is defined (parameters.yml will win this) -->
+        <parameter key="featureTypes" type="collection" />
     </parameters>
     <services>
-        <service id="mb.digitizer.registry" class="Mapbender\DataSourceBundle\Component\FeatureTypeService" >
-            <argument type="service" id="service_container"/>
-            <argument>%mb.digitizer.registry.declarations-param%</argument>
+        <service id="mb.digitizer.registry" class="Mapbender\DataSourceBundle\Component\RepositoryRegistry">
+            <argument type="service" id="mbds.default_featuretype_factory"/>
+            <argument>%featureTypes%</argument>
         </service>
     </services>
 </container>

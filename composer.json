@@ -13,7 +13,7 @@
         "php": ">=5.3.3",
         "debugteam/bootstrap-colorpicker": "1.x",
         "mapbender/data-manager": "^1.1.4",
-        "mapbender/data-source": "~0.1.17 || ~0.2"
+        "mapbender/data-source": "~0.1.24 || ^0.2"
     },
     "conflict": {
         "mapbender/mapbender": "<3.2.5@RC",
