@@ -5,7 +5,7 @@ namespace Mapbender\DigitizerBundle\Element;
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
 use Mapbender\DataManagerBundle\Exception\UnknownSchemaException;
 use Mapbender\DataSourceBundle\Component\FeatureType;
-use Mapbender\DataSourceBundle\Component\FeatureTypeService;
+use Mapbender\DataSourceBundle\Component\RepositoryRegistry;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DataManagerBundle\Element\DataManagerElement;
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
@@ -139,7 +139,9 @@ class Digitizer extends DataManagerElement
      */
     protected function getDataStoreBySchemaName($schemaName)
     {
-        return $this->getDataStoreService()->featureTypeFactory($this->getDataStoreConfigForSchema($schemaName));
+        /** @var FeatureType $repository */
+        $repository = $this->getDataStoreService()->dataStoreFactory($this->getDataStoreConfigForSchema($schemaName));
+        return $repository;
     }
 
     protected function getSelectActionResponseData(Request $request)
@@ -147,8 +149,7 @@ class Digitizer extends DataManagerElement
         $schemaName = $request->query->get('schema');
         // HACK: call to parent to bypass custom style shenanigans. We only need "maxResults" from this.
         $schemaConfigMinimal = parent::getSchemaBaseConfig($schemaName);
-        $storeConfig = $this->getDataStoreConfigForSchema($schemaName);
-        $repository = $this->getDataStoreService()->featureTypeFactory($storeConfig);
+        $repository = $this->getDataStoreBySchemaName($schemaName);
         $criteria = $this->getSelectCriteria($repository, $request);
         if (!empty($schemaConfigMinimal['maxResults'])) {
             $criteria['maxResults'] = $schemaConfigMinimal['maxResults'];
@@ -266,27 +267,6 @@ class Digitizer extends DataManagerElement
         );
     }
 
-    /**
-     * @return string
-     * @todo: remove method (DM >= 1.2)
-     * @deprecated
-     */
-    protected function getDefaultUploadsPath()
-    {
-        return $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
-    }
-
-    /**
-     * Digitizer renames "dataStore" to "featureType" in schema configs.
-     * @return string
-     * @todo: remove method (DM >= 1.2)
-     * @deprecated
-     */
-    protected function getDataStoreKeyInSchemaConfig()
-    {
-        return 'featureType';
-    }
-
     protected function getSchemaBaseConfig($schemaName)
     {
         $values = parent::getSchemaBaseConfig($schemaName);
@@ -304,11 +284,10 @@ class Digitizer extends DataManagerElement
         }
 
         if ($values['allowCustomStyle']) {
-            $featureTypeConfigKey = $this->getDataStoreKeyInSchemaConfig();
-            if (empty($values[$featureTypeConfigKey])) {
-                throw new ConfigurationErrorException("Missing {$featureTypeConfigKey} for schema {$schemaName})");
+            if (empty($values['featureType'])) {
+                throw new ConfigurationErrorException("Missing featureType for schema {$schemaName})");
             }
-            $featureTypeConfig = $this->resolveDataStoreConfig($values[$featureTypeConfigKey]);
+            $featureTypeConfig = $this->resolveDataStoreConfig($values['featureType']);
             if (empty($featureTypeConfig['styleField'])) {
                 @trigger_error("WARNING: disabling 'allowCustomStyle' option for schema {$schemaName}. Missing 'styleField' setting.", E_USER_DEPRECATED);
                 $values['allowCustomStyle'] = false;
@@ -394,20 +373,13 @@ class Digitizer extends DataManagerElement
     }
 
     /**
-     * @return FeatureTypeService
+     * @return RepositoryRegistry
      */
     protected function getDataStoreService()
     {
-        /** @var FeatureTypeService $service */
+        /** @var RepositoryRegistry $service */
         $service = $this->container->get('mb.digitizer.registry');
         return $service;
-    }
-
-    /** @todo: remove method (DM >= 1.2) */
-    protected function getDataStoreDefinition($storeId)
-    {
-        $ftConfigs = $this->getDataStoreService()->getFeatureTypeDeclarations();
-        return $ftConfigs[$storeId];
     }
 
     protected function getStyleEditorResponse(Request $request)
