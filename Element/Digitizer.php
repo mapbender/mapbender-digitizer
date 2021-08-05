@@ -8,7 +8,7 @@ use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Component\RepositoryRegistry;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DataManagerBundle\Element\DataManagerElement;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Mapbender\DigitizerBundle\Component\HttpHandler;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -128,7 +128,7 @@ class Digitizer extends DataManagerElement
             case 'update-multiple':
                 return new JsonResponse($this->getUpdateMultipleActionResponseData($request));
             case 'style-editor':
-                return $this->getStyleEditorResponse($request);
+                return $this->getHttpHandler()->dispatchRequest($this->entity, $request);
         }
     }
 
@@ -382,10 +382,10 @@ class Digitizer extends DataManagerElement
         return $service;
     }
 
-    protected function getStyleEditorResponse(Request $request)
+    private function getHttpHandler()
     {
-        /** @var EngineInterface $templating */
-        $templating = $this->container->get('templating');
-        return $templating->renderResponse('MapbenderDigitizerBundle:Element:style-editor.html.twig');
+        /** @var HttpHandler $handler */
+        $handler = $this->container->get('mb.digitizer.http_handler');
+        return $handler;
     }
 }
