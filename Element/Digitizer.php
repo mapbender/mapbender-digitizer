@@ -9,6 +9,7 @@ use Mapbender\DataSourceBundle\Component\RepositoryRegistry;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DataManagerBundle\Element\DataManagerElement;
 use Mapbender\DigitizerBundle\Component\HttpHandler;
+use Mapbender\DigitizerBundle\Component\SchemaFilter;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -270,19 +271,8 @@ class Digitizer extends DataManagerElement
     protected function getSchemaBaseConfig($schemaName)
     {
         $values = parent::getSchemaBaseConfig($schemaName);
-        // resolve aliasing DM "allowEdit" vs historical Digitizer "allowEditData"
-        $values['allowEdit'] = !!$values['allowEditData'];
-        // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
-        $values['allowCreate'] = $values['allowEdit'];
-
-        // re-merge styles (upstream merge is not recursive, we may be missing entries depending on config)
-        $values['styles'] = array_replace_recursive($this->getDefaultStyles(), $values['styles']);
-
-        // Disallow style editing if editing is disabled
-        if (!$values['allowEdit']) {
-            $values['allowCustomStyle'] = false;
-        }
-
+        $values = $this->getSchemaFilter()->processSchemaBaseConfig($values, $schemaName);
+        // @todo: untangle / resolve dependency on feature type config (potentially by string reference)
         if ($values['allowCustomStyle']) {
             if (empty($values['featureType'])) {
                 throw new ConfigurationErrorException("Missing featureType for schema {$schemaName})");
@@ -298,78 +288,15 @@ class Digitizer extends DataManagerElement
 
     protected function getSchemaConfigDefaults()
     {
-        return array_replace(parent::getSchemaConfigDefaults(), array(
-            'styles' => $this->getDefaultStyles(),
-            // @todo: no form items is an error if the popup ever opens
-            'formItems' => array(),
-            'allowDigitize' => true,
-            // @todo: default allow or default deny?
-            'allowEditData' => true,
-            // @todo: default allow or default deny?
-            'allowDelete' => true,
-            'allowCustomStyle' => false,
-            // @todo: may not need configurability at all. Who doesn't want this?
-            'allowChangeVisibility' => true,
-            'continueDrawingAfterSave' => false,
-            'displayPermanent' => false,
-            'printable' => false,
-            'inlineSearch' => true,
-            'pageLength' => 16,
-            'minScale' => null,
-            'maxScale' => null,
-            'searchType' => 'currentExtent',
-            // @todo: specify, document
-            'copy' => array(
-                'enable' => false,
-                'overwriteValuesWithDefault' => false,
-                'data' => null, // @todo: specify, document
-            ),
-            // @todo: specify, document
-            'refreshFeaturesAfterSave' => false,
-            // @todo: specify, document; current implementation does not work on Openlayers 4/5/6
-            'refreshLayersAfterFeatureSave' => false,
-
-            // Inherited:
-            // * popup.title
-            // * popup.width
-
-
-            // no defaults:
-            // * tableFields
-            // * toolset
-        ));
+        return $this->getSchemaFilter()->getConfigDefaults();
     }
 
     public function getPublicConfiguration()
     {
-        $defaultStyles = $this->getDefaultStyles();
+        $defaultStyles = $this->getSchemaFilter()->getDefaultStyles();
         return array_replace(parent::getPublicConfiguration(), array(
             'fallbackStyle' => $defaultStyles['default'],
         ));
-    }
-
-    protected function getDefaultStyles()
-    {
-        return array(
-            'default' => array(
-                'strokeWidth' => 1,
-                'strokeColor' => '#6fb536',
-                'fillColor' => '#6fb536',
-                'fillOpacity' => 0.3,
-            ),
-            'select' => array(
-                'strokeWidth' => 3,
-                'fillColor' => '#F7F79A',
-                'strokeColor' => '#6fb536',
-                'fillOpacity' => 0.5,
-            ),
-            'unsaved' => array(
-                'strokeWidth' =>  3,
-                'fillColor' => '#FFD14F',
-                'strokeColor' => '#F5663C',
-                'fillOpacity' => 0.5,
-            ),
-        );
     }
 
     /**
@@ -387,5 +314,15 @@ class Digitizer extends DataManagerElement
         /** @var HttpHandler $handler */
         $handler = $this->container->get('mb.digitizer.http_handler');
         return $handler;
+    }
+
+    /**
+     * @return SchemaFilter
+     */
+    private function getSchemaFilter()
+    {
+        /** @var SchemaFilter $schemaFilter */
+        $filter = $this->container->get('mb.digitizer.schema_filter');
+        return $filter;
     }
 }
