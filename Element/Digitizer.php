@@ -267,27 +267,6 @@ class Digitizer extends DataManagerElement
         );
     }
 
-    /**
-     * @return string
-     * @todo: remove method (DM >= 1.2)
-     * @deprecated
-     */
-    protected function getDefaultUploadsPath()
-    {
-        return $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
-    }
-
-    /**
-     * Digitizer renames "dataStore" to "featureType" in schema configs.
-     * @return string
-     * @todo: remove method (DM >= 1.2)
-     * @deprecated
-     */
-    protected function getDataStoreKeyInSchemaConfig()
-    {
-        return 'featureType';
-    }
-
     protected function getSchemaBaseConfig($schemaName)
     {
         $values = parent::getSchemaBaseConfig($schemaName);
@@ -305,11 +284,10 @@ class Digitizer extends DataManagerElement
         }
 
         if ($values['allowCustomStyle']) {
-            $featureTypeConfigKey = $this->getDataStoreKeyInSchemaConfig();
-            if (empty($values[$featureTypeConfigKey])) {
-                throw new ConfigurationErrorException("Missing {$featureTypeConfigKey} for schema {$schemaName})");
+            if (empty($values['featureType'])) {
+                throw new ConfigurationErrorException("Missing featureType for schema {$schemaName})");
             }
-            $featureTypeConfig = $this->resolveDataStoreConfig($values[$featureTypeConfigKey]);
+            $featureTypeConfig = $this->resolveDataStoreConfig($values['featureType']);
             if (empty($featureTypeConfig['styleField'])) {
                 @trigger_error("WARNING: disabling 'allowCustomStyle' option for schema {$schemaName}. Missing 'styleField' setting.", E_USER_DEPRECATED);
                 $values['allowCustomStyle'] = false;
@@ -402,13 +380,6 @@ class Digitizer extends DataManagerElement
         /** @var RepositoryRegistry $service */
         $service = $this->container->get('mb.digitizer.registry');
         return $service;
-    }
-
-    /** @todo: remove method (DM >= 1.2) */
-    protected function getDataStoreDefinition($storeId)
-    {
-        $ftConfigs = $this->getDataStoreService()->getDataStoreDeclarations();
-        return $ftConfigs[$storeId];
     }
 
     protected function getStyleEditorResponse(Request $request)
