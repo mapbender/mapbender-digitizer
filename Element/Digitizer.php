@@ -2,7 +2,7 @@
 
 namespace Mapbender\DigitizerBundle\Element;
 
-use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
+use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataSourceBundle\Component\RepositoryRegistry;
 use Mapbender\DataManagerBundle\Element\DataManagerElement;
 use Mapbender\DigitizerBundle\Component\HttpHandler;
@@ -67,10 +67,7 @@ class Digitizer extends DataManagerElement
         );
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getAssets()
+    public function getRequiredAssets(Element $element)
     {
         $dataManagerAssets = parent::getAssets() + array(
             // provide empty array stubs for missing upstream entries
@@ -109,27 +106,17 @@ class Digitizer extends DataManagerElement
         );
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function getAssets()
+    {
+        return $this->getRequiredAssets($this->entity);
+    }
+
     public function handleHttpRequest(Request $request)
     {
         return $this->getHttpHandler()->handleRequest($this->entity, $request);
-    }
-
-    protected function getSchemaBaseConfig($schemaName)
-    {
-        $values = parent::getSchemaBaseConfig($schemaName);
-        $values = $this->getSchemaFilter()->processSchemaBaseConfig($values, $schemaName);
-        // @todo: untangle / resolve dependency on feature type config (potentially by string reference)
-        if ($values['allowCustomStyle']) {
-            if (empty($values['featureType'])) {
-                throw new ConfigurationErrorException("Missing featureType for schema {$schemaName})");
-            }
-            $featureTypeConfig = $this->resolveDataStoreConfig($values['featureType']);
-            if (empty($featureTypeConfig['styleField'])) {
-                @trigger_error("WARNING: disabling 'allowCustomStyle' option for schema {$schemaName}. Missing 'styleField' setting.", E_USER_DEPRECATED);
-                $values['allowCustomStyle'] = false;
-            }
-        }
-        return $values;
     }
 
     protected function getSchemaConfigDefaults()
@@ -139,10 +126,23 @@ class Digitizer extends DataManagerElement
 
     public function getPublicConfiguration()
     {
+        return $this->getClientConfiguration($this->entity);
+    }
+
+    public function getClientConfiguration(Element $element)
+    {
+        $configuration = $element->getConfiguration();
+        $schemaConfigs = $configuration['schemes'];
+        foreach (\array_keys($configuration['schemes']) as $schemaName) {
+            $schemaConfig = $this->getSchemaFilter()->getRawSchemaConfig($element, $schemaName, true);
+            $schemaConfig = $this->getSchemaFilter()->processSchemaBaseConfig($schemaConfig, $schemaName);
+            $schemaConfig = $this->getSchemaFilter()->postProcessSchemaBaseConfig($this->entity, $schemaConfig, $schemaName);
+            $schemaConfigs[$schemaName] = $schemaConfig;
+        }
+        $configuration['schemes'] = $this->getSchemaFilter()->prepareConfigs($schemaConfigs);
         $defaultStyles = $this->getSchemaFilter()->getDefaultStyles();
-        return array_replace(parent::getPublicConfiguration(), array(
-            'fallbackStyle' => $defaultStyles['default'],
-        ));
+        $configuration['fallbackStyle'] = $defaultStyles['default'];
+        return $configuration;
     }
 
     /**
