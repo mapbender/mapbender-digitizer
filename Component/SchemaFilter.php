@@ -4,6 +4,12 @@
 namespace Mapbender\DigitizerBundle\Component;
 
 
+use Mapbender\CoreBundle\Entity\Element;
+use Mapbender\DataSourceBundle\Component\FeatureType;
+
+/**
+ * @method FeatureType getDataStore(Element $element, $schemaName)
+ */
 class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
 {
     public static function getConfigDefaults()
