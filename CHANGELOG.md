@@ -1,3 +1,9 @@
+## 1.5.0
+* Reimplement as Symfony 4-conformant element service
+* Fix implicit robloach/component-installer dependency (include select2 assets directly from vendor)
+
+NOTE: This version is ncompatible / not installable with Mapbender versions before v3.2.6.
+
 ## 1.4.10
 * Fix error trying to access files from (not used, not required) medialize/jquery-context-menu package
 
