@@ -2,62 +2,51 @@
 
 namespace Mapbender\DigitizerBundle\Element;
 
+use Mapbender\Component\Element\StaticView;
 use Mapbender\CoreBundle\Entity\Element;
-use Mapbender\DataSourceBundle\Component\RepositoryRegistry;
-use Mapbender\DataManagerBundle\Element\DataManagerElement;
-use Mapbender\DigitizerBundle\Component\HttpHandler;
+use Mapbender\DataManagerBundle\Element\DataManager;
 use Mapbender\DigitizerBundle\Component\SchemaFilter;
-use Symfony\Component\HttpFoundation\Request;
 
 
 /**
  * Digitizer Mapbender3 element
+ * @property SchemaFilter $schemaFilter
  */
-class Digitizer extends DataManagerElement
+class Digitizer extends DataManager
 {
-    /**
-     * @inheritdoc
-     */
     public static function getClassTitle()
     {
         return "Digitizer";
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function getClassDescription()
     {
         return "Georeferencing and Digitizing";
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getWidgetName()
+    public function getWidgetName(Element $element)
     {
         return 'mapbender.mbDigitizer';
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function getType()
     {
         return 'Mapbender\DigitizerBundle\Element\Type\DigitizerAdminType';
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function getFormTemplate()
     {
         return 'MapbenderDigitizerBundle:ElementAdmin:digitizer.html.twig';
     }
 
-    public function getFrontendTemplatePath($suffix = '.html.twig')
+    public function getView(Element $element)
     {
-        return 'MapbenderDigitizerBundle:Element:digitizer.html.twig';
+        // no content
+        $view = new StaticView('');
+        $view->attributes += parent::getView($element)->attributes;
+        $parentCssClass = !empty($view->attributes['class']) ? $view->attributes['class'] : '';
+        $view->attributes['class'] = trim('mb-element-digitizer ' . $parentCssClass);
+        return $view;
     }
 
     public static function getDefaultConfiguration()
@@ -69,7 +58,7 @@ class Digitizer extends DataManagerElement
 
     public function getRequiredAssets(Element $element)
     {
-        $dataManagerAssets = parent::getAssets() + array(
+        $dataManagerAssets = parent::getRequiredAssets($element) + array(
             // provide empty array stubs for missing upstream entries
             'js' => array(),
             'css' => array(),
@@ -106,69 +95,15 @@ class Digitizer extends DataManagerElement
         );
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getAssets()
-    {
-        return $this->getRequiredAssets($this->entity);
-    }
-
-    public function handleHttpRequest(Request $request)
-    {
-        return $this->getHttpHandler()->handleRequest($this->entity, $request);
-    }
-
-    protected function getSchemaConfigDefaults()
-    {
-        return $this->getSchemaFilter()->getConfigDefaults();
-    }
-
-    public function getPublicConfiguration()
-    {
-        return $this->getClientConfiguration($this->entity);
-    }
-
     public function getClientConfiguration(Element $element)
     {
-        $configuration = $element->getConfiguration();
-        $schemaConfigs = $configuration['schemes'];
-        foreach (\array_keys($configuration['schemes']) as $schemaName) {
-            $schemaConfig = $this->getSchemaFilter()->getRawSchemaConfig($element, $schemaName, true);
-            $schemaConfig = $this->getSchemaFilter()->processSchemaBaseConfig($schemaConfig, $schemaName);
-            $schemaConfig = $this->getSchemaFilter()->postProcessSchemaBaseConfig($this->entity, $schemaConfig, $schemaName);
-            $schemaConfigs[$schemaName] = $schemaConfig;
+        $configuration = parent::getClientConfiguration($element);
+        foreach ($configuration['schemes'] as $schemaName => $schemaConfig) {
+            $schemaConfig = $this->schemaFilter->postProcessSchemaBaseConfig($element, $schemaConfig, $schemaName);
+            $configuration['schemes'][$schemaName] = $schemaConfig;
         }
-        $configuration['schemes'] = $this->getSchemaFilter()->prepareConfigs($schemaConfigs);
-        $defaultStyles = $this->getSchemaFilter()->getDefaultStyles();
+        $defaultStyles = $this->schemaFilter->getDefaultStyles();
         $configuration['fallbackStyle'] = $defaultStyles['default'];
         return $configuration;
-    }
-
-    /**
-     * @return RepositoryRegistry
-     */
-    protected function getDataStoreService()
-    {
-        /** @var RepositoryRegistry $service */
-        $service = $this->container->get('mb.digitizer.registry');
-        return $service;
-    }
-
-    private function getHttpHandler()
-    {
-        /** @var HttpHandler $handler */
-        $handler = $this->container->get('mb.digitizer.http_handler');
-        return $handler;
-    }
-
-    /**
-     * @return SchemaFilter
-     */
-    private function getSchemaFilter()
-    {
-        /** @var SchemaFilter $schemaFilter */
-        $filter = $this->container->get('mb.digitizer.schema_filter');
-        return $filter;
     }
 }

@@ -21,5 +21,11 @@
             <argument type="service" id="form.factory" />
             <argument type="service" id="mb.digitizer.schema_filter" />
         </service>
+        <service id="mapbender.element.Digitizer" class="Mapbender\DigitizerBundle\Element\Digitizer">
+            <tag name="mapbender.element" />
+            <argument type="service" id="mb.digitizer.registry" />
+            <argument type="service" id="mb.digitizer.schema_filter" />
+            <argument type="service" id="mb.digitizer.http_handler" />
+        </service>
     </services>
 </container>
