@@ -8,6 +8,7 @@ use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 
@@ -33,6 +34,8 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         switch ($action) {
             case 'style-editor':
                 return $this->getStyleEditorResponse();
+            case 'update-multiple':
+                return new JsonResponse($this->getUpdateMultipleActionResponseData($element, $request));
             default:
                 return parent::dispatchRequest($element, $request);
         }

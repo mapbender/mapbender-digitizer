@@ -3,15 +3,11 @@
 namespace Mapbender\DigitizerBundle\Element;
 
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
-use Mapbender\DataManagerBundle\Exception\UnknownSchemaException;
-use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Component\RepositoryRegistry;
 use Mapbender\DataManagerBundle\Element\DataManagerElement;
 use Mapbender\DigitizerBundle\Component\HttpHandler;
 use Mapbender\DigitizerBundle\Component\SchemaFilter;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 
 /**
@@ -113,50 +109,9 @@ class Digitizer extends DataManagerElement
         );
     }
 
-    /**
-     * @param Request $request
-     * @return Response|null
-     * @throws UnknownSchemaException
-     * @throws ConfigurationErrorException
-     */
-    protected function dispatchRequest(Request $request)
+    public function handleHttpRequest(Request $request)
     {
-        $action = $request->attributes->get('action');
-        switch ($action) {
-            default:
-                return parent::dispatchRequest($request);
-            case 'update-multiple':
-                return new JsonResponse($this->getUpdateMultipleActionResponseData($request));
-            case 'style-editor':
-                return $this->getHttpHandler()->dispatchRequest($this->entity, $request);
-        }
-    }
-
-    /**
-     * @param string $schemaName
-     * @return FeatureType
-     * @throws ConfigurationErrorException
-     */
-    protected function getDataStoreBySchemaName($schemaName)
-    {
-        /** @var FeatureType $repository */
-        $repository = $this->getDataStoreService()->dataStoreFactory($this->getDataStoreConfigForSchema($schemaName));
-        return $repository;
-    }
-
-    protected function getSelectActionResponseData(Request $request)
-    {
-        return $this->getHttpHandler()->getSelectActionResponseData($this->entity, $request);
-    }
-
-    protected function getUpdateMultipleActionResponseData(Request $request)
-    {
-        return $this->getHttpHandler()->getUpdateMultipleActionResponseData($this->entity, $request);
-    }
-
-    protected function getSaveActionResponseData(Request $request)
-    {
-        return $this->getHttpHandler()->getSaveActionResponseData($this->entity, $request);
+        return $this->getHttpHandler()->handleRequest($this->entity, $request);
     }
 
     protected function getSchemaBaseConfig($schemaName)
