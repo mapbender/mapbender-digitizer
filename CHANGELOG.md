@@ -4,6 +4,11 @@
 
 NOTE: This version is ncompatible / not installable with Mapbender versions before v3.2.6.
 
+## 1.4.11
+* Fix initialization errors if MapbenderDataSourceBundle is not registered in kernel
+* Fix implicit robloach/component-installer dependency (include select2 assets directly from vendor)
+* Switch featuretype registry to conform with Symfony 4 (requires data-source >= 0.1.22)
+
 ## 1.4.10
 * Fix error trying to access files from (not used, not required) medialize/jquery-context-menu package
 
