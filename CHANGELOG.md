@@ -1,3 +1,6 @@
+## 1.5.1
+* Fix initialization errors if MapbenderDataSourceBundle is not registered in kernel
+
 ## 1.5.0
 * Reimplement as Symfony 4-conformant element service
 * Fix implicit robloach/component-installer dependency (include select2 assets directly from vendor)
