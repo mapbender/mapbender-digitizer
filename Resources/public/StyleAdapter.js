@@ -24,7 +24,7 @@
         placeholderRx_: /\${([^}]+)}/g,
         styleFunctionFromSvgRules: function(styleConfig, dataCallback) {
             var self = this;
-            var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor'];
+            var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor', 'externalGraphic'];
             return (function(styleConfig) {
                 var placeholderProps = self.detectDataPlaceholders_(styleConfig, placeholderCandidates);
                 var labelValue = styleConfig.label;
@@ -32,6 +32,9 @@
                 var dynBase = placeholderProps.indexOf('fillColor') !== -1 || placeholderProps.indexOf('strokeColor') !== -1;
                 var baseStyle = self.getBaseStyleObject(styleConfig);
                 var textStyle = labelValue && self.getTextStyle(styleConfig);
+                var useIcon = styleConfig.externalGraphic && styleConfig.graphic !== false;
+                var dynIcon = useIcon && -1 !== placeholderProps.indexOf('externalGraphic');
+                var iconStyle = useIcon && !dynIcon && self.expandIconStyle_(self.getIconStyle(styleConfig));
 
                 var resolvePlaceholders = self.getPlaceholderResolver_(styleConfig, placeholderProps, dataCallback);
                 return function(feature) {
@@ -50,6 +53,16 @@
                             labelStyle.setText(textStyle);
                         }
                         styles.push(labelStyle);
+                    }
+                    if (dynIcon) {
+                        if (resolvedStyle.externalGraphic) {
+                            iconStyle = self.expandIconStyle_(self.getIconStyle(resolvedStyle), resolvedStyle);
+                        } else {
+                            iconStyle = null;
+                        }
+                    }
+                    if (iconStyle) {
+                        styles.push(iconStyle);
                     }
                     return styles;
                 };
@@ -107,6 +120,43 @@
             textStyle.setFont(this.canvasFontRuleFromSvg(ol2Style));
             this.resolveTextStyle_(textStyle, ol2Style);
             return textStyle;
+        },
+        getIconStyle: function(styleConfig) {
+            var iconStyle = new ol.style.Icon({
+                src: styleConfig.externalGraphic
+            });
+            if (styleConfig.graphicWidth || styleConfig.graphicHeight) {
+                var onload = this.getIconScaleHandler_(iconStyle, styleConfig);
+                // see https://github.com/openlayers/openlayers/blob/main/src/ol/ImageState.js
+                if (iconStyle.getImageState() === 2) {
+                    // already loaded
+                    onload();
+                } else {
+                    iconStyle.listenImageChange(onload);
+                }
+            }
+            return iconStyle;
+        },
+        getIconScaleHandler_: function(iconStyle, styleConfig) {
+            return (function(styleConfig) {
+                return function() {
+                    /** @this ol.style.Image */
+                    if (this.getImageState() === 2) {
+                        // Now loaded
+                        // see https://github.com/openlayers/openlayers/blob/main/src/ol/ImageState.js
+                        var naturalSize = this.getImageSize();
+                        var scale;
+                        if (!styleConfig.graphicHeight) {
+                            scale = styleConfig.graphicWidth / naturalSize[0];
+                        } else if (!styleConfig.graphicWidth) {
+                            scale = styleConfig.graphicHeight / naturalSize[1];
+                        } else {
+                            scale = [styleConfig.graphicWidth / naturalSize[0], styleConfig.graphicHeight / naturalSize[1]];
+                        }
+                        this.setScale(scale);
+                    }
+                }.bind(iconStyle);
+            }(styleConfig));
         },
         /**
          * @param {ol.style.Text} targetStyle
@@ -225,9 +275,13 @@
                     var data = dataCallback(feature);
                     propertyNames.forEach(function(prop) {
                         var resolved = styleConfig[prop].replace(placeholderRx, function(match, dataProp) {
+                            if (!data[dataProp] && prop === 'externalGraphic') {
+                                // Empty entire output value (incomplete url expansion)
+                                valuesOut[prop] = data[dataProp];
+                            }
                             return data[dataProp];
                         });
-                        if (resolved) {
+                        if (resolved && valuesOut[prop]) {
                             valuesOut[prop] = resolved;
                         }
                     });
@@ -245,6 +299,37 @@
                 return featureData;
             });
             return resolver(styleConfig);
+        },
+        /**
+         * @param {ol.style.Image} iconStyle
+         * @param {Object} styleConfig
+         * @return {ol.style.Style}
+         * @private
+         */
+        expandIconStyle_: function(iconStyle, styleConfig) {
+            return new ol.style.Style({
+                // Icons are only rendered on point geometries.
+                // => We must use a geometry function to make points out of
+                // polygons and lines.
+                // @see https://gis.stackexchange.com/questions/361817/openlayers-displaying-polygon-with-icon-style
+                geometry: this.iconStyleGeometryFunction_,
+                image: iconStyle
+            });
+        },
+        iconStyleGeometryFunction_: function(feature) {
+            var geometry = feature.getGeometry();
+            switch (geometry && geometry.getType()) {
+                case 'Polygon':
+                    return geometry.getInteriorPoint();
+                case 'MultiPolygon':
+                    return geometry.getInteriorPoints();
+                case 'LineString':
+                    return new ol.geom.Point(geometry.getFlatMidpoint(), geometry.getLayout());
+                case 'MultiLineString':
+                    return new ol.geom.MultiPoint(geometry.getFlatMidpoints(), geometry.getLayout());
+                default:
+                    return geometry;
+            }
         },
         __dummy: null
     });
