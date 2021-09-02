@@ -32,6 +32,7 @@
                 var dynBase = placeholderProps.indexOf('fillColor') !== -1 || placeholderProps.indexOf('strokeColor') !== -1;
                 var baseStyle = self.getBaseStyleObject(styleConfig);
                 var textStyle = labelValue && self.getTextStyle(styleConfig);
+                var iconStyle = styleConfig.externalGraphic && self.getIconStyle(styleConfig);
 
                 var resolvePlaceholders = self.getPlaceholderResolver_(styleConfig, placeholderProps, dataCallback);
                 return function(feature) {
@@ -50,6 +51,9 @@
                             labelStyle.setText(textStyle);
                         }
                         styles.push(labelStyle);
+                    }
+                    if (iconStyle) {
+                        styles.push(self.expandIconStyle_(iconStyle, styleConfig));
                     }
                     return styles;
                 };
@@ -107,6 +111,14 @@
             textStyle.setFont(this.canvasFontRuleFromSvg(ol2Style));
             this.resolveTextStyle_(textStyle, ol2Style);
             return textStyle;
+        },
+        getIconStyle: function(styleConfig) {
+            var size = styleConfig.graphicWidth && styleConfig.graphicHeight && [styleConfig.graphicWidth, styleConfig.graphicHeight];
+            var iconStyle = new ol.style.Icon({
+                src: styleConfig.externalGraphic,
+                imgSize: size || undefined
+            });
+            return iconStyle;
         },
         /**
          * @param {ol.style.Text} targetStyle
@@ -245,6 +257,37 @@
                 return featureData;
             });
             return resolver(styleConfig);
+        },
+        /**
+         * @param {ol.style.Image} iconStyle
+         * @param {Object} styleConfig
+         * @return {ol.style.Style}
+         * @private
+         */
+        expandIconStyle_: function(iconStyle, styleConfig) {
+            return new ol.style.Style({
+                // Icons are only rendered on point geometries.
+                // => We must use a geometry function to make points out of
+                // polygons and lines.
+                // @see https://gis.stackexchange.com/questions/361817/openlayers-displaying-polygon-with-icon-style
+                geometry: this.iconStyleGeometryFunction_,
+                image: iconStyle
+            });
+        },
+        iconStyleGeometryFunction_: function(feature) {
+            var geometry = feature.getGeometry();
+            switch (geometry && geometry.getType()) {
+                case 'Polygon':
+                    return geometry.getInteriorPoint();
+                case 'MultiPolygon':
+                    return geometry.getInteriorPoints();
+                case 'LineString':
+                    return new ol.geom.Point(geometry.getFlatMidpoint(), geometry.getLayout());
+                case 'MultiLineString':
+                    return new ol.geom.MultiPoint(geometry.getFlatMidpoints(), geometry.getLayout());
+                default:
+                    return geometry;
+            }
         },
         __dummy: null
     });
