@@ -1,3 +1,7 @@
+## 1.4.12
+* Support styling features with icons (interpret `externalGraphic`, `graphicWidth`, `graphicHeight` properties)
+* Support data placeholder syntax in `externalGraphic` (e.g. "/bundles/projectbundle/images/${type}.png")
+
 ## 1.4.11
 * Fix initialization errors if MapbenderDataSourceBundle is not registered in kernel
 * Fix implicit robloach/component-installer dependency (include select2 assets directly from vendor)
