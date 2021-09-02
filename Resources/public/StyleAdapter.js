@@ -24,7 +24,7 @@
         placeholderRx_: /\${([^}]+)}/g,
         styleFunctionFromSvgRules: function(styleConfig, dataCallback) {
             var self = this;
-            var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor'];
+            var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor', 'externalGraphic'];
             return (function(styleConfig) {
                 var placeholderProps = self.detectDataPlaceholders_(styleConfig, placeholderCandidates);
                 var labelValue = styleConfig.label;
@@ -32,7 +32,9 @@
                 var dynBase = placeholderProps.indexOf('fillColor') !== -1 || placeholderProps.indexOf('strokeColor') !== -1;
                 var baseStyle = self.getBaseStyleObject(styleConfig);
                 var textStyle = labelValue && self.getTextStyle(styleConfig);
-                var iconStyle = styleConfig.externalGraphic && self.getIconStyle(styleConfig);
+                var useIcon = styleConfig.externalGraphic && styleConfig.graphic !== false;
+                var dynIcon = useIcon && -1 !== placeholderProps.indexOf('externalGraphic');
+                var iconStyle = useIcon && !dynIcon && self.expandIconStyle_(self.getIconStyle(styleConfig));
 
                 var resolvePlaceholders = self.getPlaceholderResolver_(styleConfig, placeholderProps, dataCallback);
                 return function(feature) {
@@ -52,8 +54,15 @@
                         }
                         styles.push(labelStyle);
                     }
+                    if (dynIcon) {
+                        if (resolvedStyle.externalGraphic) {
+                            iconStyle = self.expandIconStyle_(self.getIconStyle(resolvedStyle), resolvedStyle);
+                        } else {
+                            iconStyle = null;
+                        }
+                    }
                     if (iconStyle) {
-                        styles.push(self.expandIconStyle_(iconStyle, styleConfig));
+                        styles.push(iconStyle);
                     }
                     return styles;
                 };
@@ -237,9 +246,13 @@
                     var data = dataCallback(feature);
                     propertyNames.forEach(function(prop) {
                         var resolved = styleConfig[prop].replace(placeholderRx, function(match, dataProp) {
+                            if (!data[dataProp] && prop === 'externalGraphic') {
+                                // Empty entire output value (incomplete url expansion)
+                                valuesOut[prop] = data[dataProp];
+                            }
                             return data[dataProp];
                         });
-                        if (resolved) {
+                        if (resolved && valuesOut[prop]) {
                             valuesOut[prop] = resolved;
                         }
                     });
