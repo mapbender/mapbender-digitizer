@@ -122,12 +122,41 @@
             return textStyle;
         },
         getIconStyle: function(styleConfig) {
-            var size = styleConfig.graphicWidth && styleConfig.graphicHeight && [styleConfig.graphicWidth, styleConfig.graphicHeight];
             var iconStyle = new ol.style.Icon({
-                src: styleConfig.externalGraphic,
-                imgSize: size || undefined
+                src: styleConfig.externalGraphic
             });
+            if (styleConfig.graphicWidth || styleConfig.graphicHeight) {
+                var onload = this.getIconScaleHandler_(iconStyle, styleConfig);
+                // see https://github.com/openlayers/openlayers/blob/main/src/ol/ImageState.js
+                if (iconStyle.getImageState() === 2) {
+                    // already loaded
+                    onload();
+                } else {
+                    iconStyle.listenImageChange(onload);
+                }
+            }
             return iconStyle;
+        },
+        getIconScaleHandler_: function(iconStyle, styleConfig) {
+            return (function(styleConfig) {
+                return function() {
+                    /** @this ol.style.Image */
+                    if (this.getImageState() === 2) {
+                        // Now loaded
+                        // see https://github.com/openlayers/openlayers/blob/main/src/ol/ImageState.js
+                        var naturalSize = this.getImageSize();
+                        var scale;
+                        if (!styleConfig.graphicHeight) {
+                            scale = styleConfig.graphicWidth / naturalSize[0];
+                        } else if (!styleConfig.graphicWidth) {
+                            scale = styleConfig.graphicHeight / naturalSize[1];
+                        } else {
+                            scale = [styleConfig.graphicWidth / naturalSize[0], styleConfig.graphicHeight / naturalSize[1]];
+                        }
+                        this.setScale(scale);
+                    }
+                }.bind(iconStyle);
+            }(styleConfig));
         },
         /**
          * @param {ol.style.Text} targetStyle
