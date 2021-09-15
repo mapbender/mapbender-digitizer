@@ -275,7 +275,7 @@
 
                 if (usesAllScheme()) {
                     widget.schemes['all'] = new Mapbender.Digitizer.AllScheme({
-                        label: Mapbender.DigitizerTranslator.translate('schema.allgeometries'),
+                        label: Mapbender.trans('mb.digitizer.schema.allgeometries'),
                         schemaName: 'all'
                     }, widget, index++);
                     widget.selector.appendSchema(widget.schemes['all'],true);

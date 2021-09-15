@@ -86,7 +86,7 @@
 
         if (schema.allowLocate) {
             subItems['zoomTo'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
+                name: Mapbender.trans('mb.digitizer.feature.zoomTo'),
                 action: function (key, options, parameters) {
                     schema.zoomToFeature(feature);
                 }
@@ -95,7 +95,7 @@
 
         if (schema.allowCustomStyle) {
             subItems['style'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
+                name: Mapbender.trans('mb.digitizer.feature.style.change'),
                 action: function (key, options, parameters) {
                     schema.openChangeStyleDialog(feature);
                 }
@@ -104,7 +104,7 @@
 
         if (schema.allowEditData) {
             subItems['edit'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.edit'),
+                name: Mapbender.trans('mb.digitizer.feature.edit'),
                 action: function (key, options, parameters) {
                     schema.openFeatureEditDialog(feature);
                 }
@@ -113,7 +113,7 @@
 
         if (schema.allowDelete) {
             subItems['remove'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                name: Mapbender.trans('mb.digitizer.feature.remove.title'),
                 action: function (key, options, parameters) {
                     schema.removeFeature(feature);
                 }
@@ -154,7 +154,7 @@
 
         if (schema.allowCustomStyle) {
             items['changeStyle'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.style.change'),
+                name: Mapbender.trans('mb.digitizer.feature.style.change'),
                 action: function () {
                     schema.openChangeStyleDialog(feature);
                 }
@@ -162,7 +162,7 @@
         }
 
         items['zoom'] = {
-            name: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
+            name: Mapbender.trans('mb.digitizer.feature.zoomTo'),
             action: function () {
                 schema.zoomToFeature(feature);
             }
@@ -170,7 +170,7 @@
 
         if (schema.allowDelete) {
             items['removeFeature'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                name: Mapbender.trans('mb.digitizer.feature.remove.title'),
                 action: function () {
                     schema.removeFeature(feature);
                 }
@@ -179,7 +179,7 @@
 
         if (schema.allowEditData) {
             items['edit'] = {
-                name: Mapbender.DigitizerTranslator.translate('feature.edit'),
+                name: Mapbender.trans('mb.digitizer.feature.edit'),
                 action: function () {
                     schema.openFeatureEditDialog(feature);
                 }

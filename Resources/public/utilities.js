@@ -158,7 +158,7 @@
                 var button = {
                     type: "button",
                     title: "",
-                    hover: Mapbender.DigitizerTranslator.translate('feature.create'),
+                    hover: Mapbender.trans('mb.digitizer.feature.create'),
                     cssClass: "icon-create",
                     click: onCreateClick
                 };
@@ -168,14 +168,14 @@
                 var buttons = [];
 
                 buttons.push({
-                    title: Mapbender.DigitizerTranslator.translate('feature.edit'),
+                    title: Mapbender.trans('mb.digitizer.feature.edit'),
                     className: 'edit',
                     onClick: onEditClick
                 });
 
                 if (item.allowDelete) {
                     buttons.push({
-                        title: Mapbender.DigitizerTranslator.translate('feature.remove.title'),
+                        title: Mapbender.trans('mb.digitizer.feature.remove.title'),
                         className: 'remove',
                         onClick: onRemoveClick
                     });
@@ -236,14 +236,14 @@
                     cloneItem,
                     {
                         type: "button",
-                        title: Mapbender.DigitizerTranslator.translate('feature.edit'),
+                        title: Mapbender.trans('mb.digitizer.feature.edit'),
                         cssClass: 'edit',
                         click: onEditClick
                     },
                     {
                         type: "button",
                         title: "",
-                        hover: Mapbender.DigitizerTranslator.translate('feature.create'),
+                        hover: Mapbender.trans('mb.digitizer.feature.create'),
                         cssClass: "icon-create",
                         click: onCreateClick
                     }

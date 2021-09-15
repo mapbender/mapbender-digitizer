@@ -46,7 +46,7 @@
             var toolSet = this;
             var geomType = toolSet.geomType;
 
-            return Mapbender.DigitizerTranslator.translate('toolset.'+geomType +'.' + rawButton.type);
+            return Mapbender.trans('mb.digitizer.toolset.'+geomType +'.' + rawButton.type);
         },
 
         createLayoutClass: function(rawButton) {

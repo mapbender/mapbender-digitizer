@@ -134,7 +134,7 @@
                 schema.featureStyles = data.featureStyles;
                 if (schema.featureStyles["error"]) {
                     schema.featureStyles = [];
-                    $.notify(Mapbender.DigitizerTranslator.translate('feature.style.load.error'));
+                    $.notify(Mapbender.trans('mb.digitizer.feature.style.load.error'));
                 }
             });
         },

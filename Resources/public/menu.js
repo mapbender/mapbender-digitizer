@@ -74,7 +74,7 @@
             if (schema.allowRefresh) {
                 var $button = $("<button class='button' type='button'/>");
                 $button.addClass("fa fa-refresh");
-                $button.attr("title", Mapbender.DigitizerTranslator.translate('refresh'));
+                $button.attr("title", Mapbender.trans('mb.digitizer.refresh'));
                 $button.click(function () {
                     var widget = schema.widget;
                     var dataManager = widget.getConnectedDataManager();
@@ -97,7 +97,7 @@
 
                 var $button = $("<button class='button' type='button'/>");
                 $button.addClass("fa fa-eye-slash");
-                $button.attr("title", Mapbender.DigitizerTranslator.translate('toolset.hideAll'));
+                $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
                 $button.click(function () {
                     schema.featureVisibility = false;
                     schema.setVisibilityForAllFeaturesInLayer();
@@ -106,7 +106,7 @@
 
                 var $button = $("<button class='button' type='button'/>");
                 $button.addClass("fa fa-eye");
-                $button.attr("title", Mapbender.DigitizerTranslator.translate('toolset.showAll'));
+                $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
                 $button.click(function () {
                     schema.featureVisibility = true;
                     schema.setVisibilityForAllFeaturesInLayer();
@@ -117,7 +117,7 @@
 
                 var $button = $("<button class='button' type='button'/>");
                 $button.addClass("fa fa-floppy-o");
-                $button.attr("title", Mapbender.DigitizerTranslator.translate('toolset.saveAll'));
+                $button.attr("title", Mapbender.trans('mb.digitizer.toolset.saveAll'));
                 $button.addClass("save-all-features");
                 $button.click(function () {
                     var unsavedFeatures = schema.getUnsavedFeatures();
@@ -143,7 +143,7 @@
 
             if (schema.showExtendSearchSwitch) {
                 var $checkbox = $("<input type='checkbox' />");
-                var title = Mapbender.DigitizerTranslator.translate('toolset.current-extent');
+                var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
                 $checkbox.attr('title', title);
                 if (schema.currentExtentSearch) {
                     $checkbox.attr("checked", "checked");
@@ -172,7 +172,7 @@
 
                 if (schema.allowLocate) {
                     buttons.push({
-                        title: Mapbender.DigitizerTranslator.translate('feature.zoomTo'),
+                        title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
                         className: 'zoom',
                         cssClass: 'fa fa-crosshairs',
                         onClick: function (feature, ui) {
@@ -183,7 +183,7 @@
 
                 if (schema.allowEditData && schema.allowSaveInResultTable) {
                     buttons.push({
-                        title: Mapbender.DigitizerTranslator.translate('feature.save.title'),
+                        title: Mapbender.trans('mb.digitizer.feature.save.title'),
                         className: 'save',
                         cssClass: ' fa fa-floppy-o',
                         disabled: true,
@@ -195,7 +195,7 @@
 
                 if (schema.allowEditData) {
                     buttons.push({
-                        title: Mapbender.DigitizerTranslator.translate('feature.edit'),
+                        title: Mapbender.trans('mb.digitizer.feature.edit'),
                         className: 'edit',
                         onClick: function (feature, ui) {
                             schema.openFeatureEditDialog(feature);
@@ -204,7 +204,7 @@
                 }
                 if (schema.allowEditData && schema.copy.enable) {
                     buttons.push({
-                        title: Mapbender.DigitizerTranslator.translate('feature.clone.title'),
+                        title: Mapbender.trans('mb.digitizer.feature.clone.title'),
                         className: 'clone',
                         cssClass: ' fa fa-files-o',
                         onClick: function (feature, ui) {
@@ -214,7 +214,7 @@
                 }
                 if (schema.allowCustomStyle) {
                     buttons.push({
-                        title: Mapbender.DigitizerTranslator.translate('feature.style.change'),
+                        title: Mapbender.trans('mb.digitizer.feature.style.change'),
                         className: 'style',
                         onClick: function (feature, ui) {
                             schema.openChangeStyleDialog(feature);
@@ -224,7 +224,7 @@
 
                 if (schema.allowChangeVisibility) {
                     buttons.push({
-                        title: Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'),
+                        title: Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'),
                         className: 'visibility',
                         onClick: function (feature) {
                             schema.toggleFeatureVisibility(feature);
@@ -255,7 +255,7 @@
                 if (schema.allowDelete) {
 
                     buttons.push({
-                        title: Mapbender.DigitizerTranslator.translate("feature.remove.title"),
+                        title: Mapbender.trans('mb.digitizer.feature.remove.title'),
                         className: 'remove',
                         cssClass: 'critical',
                         onClick: function (feature, ui) {
@@ -301,7 +301,7 @@
             };
 
 
-            var tableTranslation = schema.tableTranslation ? Mapbender.DigitizerTranslator.translateObject(schema.tableTranslation) : Mapbender.DigitizerTranslator.tableTranslations();
+            var tableTranslation = Mapbender.DigitizerTranslator.tableTranslations(schema.tableTranslation);
 
             var buttons = generateResultDataTableButtons();
 
@@ -322,10 +322,10 @@
                     this.api().rows(function (idx, feature, row) {
                         if (feature.visible) {
                             $(row).removeClass('invisible-feature');
-                            $(row).find(".icon-visibility").attr('title', Mapbender.DigitizerTranslator.translate('feature.visibility.toggleoff'));
+                            $(row).find(".icon-visibility").attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'));
                         } else {
                             $(row).addClass('invisible-feature');
-                            $(row).find(".icon-visibility").attr('title', Mapbender.DigitizerTranslator.translate('feature.visibility.toggleon'));
+                            $(row).find(".icon-visibility").attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleon'));
                         }
 
                     });

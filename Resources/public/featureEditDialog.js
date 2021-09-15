@@ -42,7 +42,7 @@
 
             var createButton = function (title, click) {
                 return {
-                    text: Mapbender.DigitizerTranslator.translate(title),
+                    text: Mapbender.trans('mb.digitizer.' + title),
                     createClick: function (feature, dialog) {
                         return function () {
                             click(feature, dialog);

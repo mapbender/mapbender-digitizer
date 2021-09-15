@@ -847,7 +847,7 @@
             var schema = this;
 
             if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
-                Mapbender.error(Mapbender.DigitizerTranslator.translate("features.loading.error"), featureCollection, xhr);
+                Mapbender.error(Mapbender.trans('mb.digitizer.feature.loading.error'), featureCollection, xhr);
                 return;
             }
 
@@ -967,14 +967,14 @@
                 schema.removeFeatureFromUI(feature);
             } else {
                 Mapbender.confirmDialog({
-                    html: Mapbender.DigitizerTranslator.translate("feature.remove.from.database"),
+                    html: Mapbender.trans('mb.digitizer.feature.remove.from.database'),
                     onSuccess: function () {
                         widget.query('delete', {
                             schema: schema.getSchemaByFeature(feature).schemaName,
                             feature: feature.attributes
                         }).done(function (fid) {
                             schema.removeFeatureFromUI(feature);
-                            $.notify(Mapbender.DigitizerTranslator.translate('feature.remove.successfully'), 'info');
+                            $.notify(Mapbender.trans('mb.digitizer.feature.remove.successfully'), 'info');
                         });
                     }
                 });
@@ -1005,7 +1005,7 @@
             });
 
             if (!allowCopy) {
-                $.notify(Mapbender.DigitizerTranslator.translate('feature.clone.on.error'));
+                $.notify(Mapbender.trans('mb.digitizer.feature.clone.on.error'));
                 return;
             }
 
@@ -1167,7 +1167,7 @@
 
                 schema.menu.resultTable.refreshFeatureRowInDataTable(newFeature);
 
-                $.notify(Mapbender.DigitizerTranslator.translate("feature.save.successfully"), 'info');
+                $.notify(Mapbender.trans('mb.digitizer.feature.save.successfully'), 'info');
 
 
                 schema.tryMailManager(newFeature);

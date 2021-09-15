@@ -235,7 +235,7 @@
                     if (controlFactory.injectedMethods.preventModification(feature)) {
                         this.deactivate();
                         this.activate();
-                        $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
+                        $.notify(Mapbender.trans('mb.digitizer.move.denied'));
                     }
 
 
@@ -277,7 +277,7 @@
 
                     if (controlFactory.injectedMethods.preventMove(feature)) {
                         this.cancel();
-                        $.notify(Mapbender.DigitizerTranslator.translate('move.denied'));
+                        $.notify(Mapbender.trans('mb.digitizer.move.denied'));
                     }
 
                 },

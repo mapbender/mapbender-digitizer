@@ -37,7 +37,7 @@
                 if (xhr.statusText === 'abort') {
                     return;
                 }
-                var errorMessage = Mapbender.DigitizerTranslator.translate('api.query.error-message');
+                var errorMessage = Mapbender.trans('mb.digitizer.api.query.error-message');
                 var errorDom = $(xhr.responseText);
 
                 // https://stackoverflow.com/a/298758

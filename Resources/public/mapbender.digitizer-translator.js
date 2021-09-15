@@ -17,7 +17,7 @@
             for (var k in items) {
                 var item = items[k];
                 if (typeof item === "string" && item.match(this.translationReg)) {
-                    items[k] = Mapbender.DigitizerTranslator.translate(item.split(':')[1], true);
+                    items[k] = Mapbender.trans(item.split(':')[1]);
                 } else if (typeof item === "object") {
                     this.translateObject(item);
                 }
@@ -26,39 +26,15 @@
         },
 
 
-        /**
-         * Check and replace values recursive if they should be translated.
-         * For checking used "translationReg" variable
-         *
-         *
-         * @param items
-         */
-        translateStructure: function (items) {
-            var isArray = items instanceof Array;
-            for (var k in items) {
-                if (isArray || k === "children") {
-                    this.translateStructure(items[k]);
-                } else {
-                    if (typeof items[k] == "string" && items[k].match(this.translationReg)) {
-                        items[k] = this.translate(items[k].split(':')[1], true);
-                    }
-                }
-            }
-
-            return items;
-        },
-
-        tableTranslations: function() {
-            return {
-                sSearch: this.translate("search.title") + ':',
-                sEmptyTable: this.translate("search.table.empty"),
-                sZeroRecords: this.translate("search.table.zerorecords"),
-                sInfo: this.translate("search.table.info.status"),
-                sInfoEmpty: this.translate("search.table.info.empty"),
-                sInfoFiltered: this.translate("search.table.info.filtered")
-            }
-        },
-
-
+        tableTranslations: function(overrides) {
+            return Object.assign({
+                sSearch: Mapbender.trans("mb.digitizer.search.title") + ':',
+                sEmptyTable: Mapbender.trans("mb.digitizer.search.table.empty"),
+                sZeroRecords: Mapbender.trans("mb.digitizer.search.table.zerorecords"),
+                sInfo: Mapbender.trans("mb.digitizer.search.table.info.status"),
+                sInfoEmpty: Mapbender.trans("mb.digitizer.search.table.info.empty"),
+                sInfoFiltered: Mapbender.trans("mb.digitizer.search.table.info.filtered")
+            }, this.translateObject(overrides || {}));
+        }
     };
 })(jQuery);
