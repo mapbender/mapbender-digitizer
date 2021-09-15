@@ -5,7 +5,7 @@ namespace Mapbender\DigitizerBundle\Element\Type;
 use Mapbender\ManagerBundle\Form\Type\YAMLConfigurationType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  *
@@ -13,18 +13,7 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 class DigitizerAdminType extends AbstractType
 {
 
-    /**
-     * @inheritdoc
-     */
-    public function getName()
-    {
-        return 'digitizer';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
             'application' => null
@@ -42,10 +31,20 @@ class DigitizerAdminType extends AbstractType
                 'application'   => $options['application'],
                 'property_path' => '[target]',
                 'required'      => false))
-           ->add('useAllScheme','checkbox',array('required' => false, 'label' => 'mb.digitizer.useAllScheme'))
-            ->add('displayOnInactive','checkbox',array('required' => false, 'label' => 'mb.digitizer.displayOnInactive'))
-            ->add('schemes', new YAMLConfigurationType(),
-                array('required' => false, 'attr' => array('class' => 'code-yaml')))
+           ->add('useAllScheme', 'Symfony\Component\Form\Extension\Core\Type\CheckboxType', array(
+               'required' => false,
+               'label' => 'mb.digitizer.useAllScheme',
+           ))
+            ->add('displayOnInactive', 'Symfony\Component\Form\Extension\Core\Type\CheckboxType', array(
+                'required' => false,
+                'label' => 'mb.digitizer.displayOnInactive',
+            ))
+            ->add('schemes', 'Mapbender\ManagerBundle\Form\Type\YAMLConfigurationType' , array(
+                'required' => false,
+                'attr' => array(
+                    'class' => 'code-yaml',
+                ),
+            ))
             ->add('dataManager', 'Mapbender\\CoreBundle\\Element\Type\\TargetElementType',
                 array(
                     'element_class' => 'Mapbender\\DataManagerBundle\\Element\\DataManagerElement',
