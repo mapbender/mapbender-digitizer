@@ -4,7 +4,6 @@ namespace Mapbender\DigitizerBundle\Element;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
-use Mapbender\CoreBundle\Component\Exception\InvalidElementClassException;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
@@ -59,7 +58,6 @@ class Digitizer extends BaseElement
         }
 
         $js = array_merge($js, array(
-            '@MapbenderCoreBundle/Resources/public/mapbender.container.info.js',
             '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
             '../../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js',
             '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',

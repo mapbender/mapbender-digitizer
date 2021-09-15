@@ -226,22 +226,6 @@
 
             widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
 
-            // TODO Kanonen->Spatzen: refactoring
-            var initializeActivationContainer = function () {
-
-                var containerInfo = new MapbenderContainerInfo(widget, {
-                    onactive: function () {
-                        widget.activate();
-                    },
-                    oninactive: function () {
-                        widget.deactivate();
-                    }
-                });
-
-                return containerInfo;
-
-            };
-
             var initializeSelectorOrTitleElement = function () {
 
                 var options = widget.options;
@@ -356,8 +340,6 @@
 
             createSchemes();
 
-            initializeActivationContainer();
-
             createMapContextMenu();
 
             createElementContextMenu();
@@ -453,8 +435,6 @@
             widget.enable();
             widget.isFullyActive = true;
             widget.getCurrentSchema().activateSchema(true); // triggers schema activation
-
-
         },
 
         deactivate: function () {
@@ -463,7 +443,13 @@
             widget.isFullyActive = false;
             widget.getCurrentSchema().deactivateSchema(true);
         },
-
+        // Sidepane integration api
+        hide: function() {
+            this.deactivate();
+        },
+        reveal: function() {
+            this.activate();
+        },
 
         getConnectedDataManager: function() {
             var widget = this;
