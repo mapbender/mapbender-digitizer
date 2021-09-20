@@ -83,11 +83,13 @@ class DigitizerStyleManager
     }
 
 
-    public function getStyles($userId = null,$public = false)
+    public function getStyles($userId = null, $public = false)
     {
         $styles = array();
-        $userSpecificSql = $public ? "true" : $this->db->quote("userId") . "=" . SqliteExtended::escapeValue($userId);
-        $sql = "SELECT * FROM {$this->db->quote($this->tableName)} WHERE $userSpecificSql";
+        $sql = "SELECT * FROM {$this->db->quote($this->tableName)}";
+        if (!$public) {
+            $sql .= " WHERE " . $this->db->quote("userId") . "=" . SqliteExtended::escapeValue($userId);
+        }
 
         foreach ($this->db->queryAndFetch($sql) as $styleData) {
             $style  = new Style($styleData);
@@ -113,5 +115,3 @@ class DigitizerStyleManager
         );
     }
 }
-
-
