@@ -759,12 +759,14 @@
             var map = widget.map;
             var extent = map.getExtent();
             var projection = map.getProjectionObject();
+            var intersectWKT = schema.currentExtentSearch && extent.toGeometry().toString() || null;
 
             return {
                 srid: projection.proj.srsProjNumber,
                 maxResults: schema.maxResults,
                 schema: schema.schemaName,
-                intersect: schema.currentExtentSearch ? extent.toGeometry().toString() : null,
+                intersect: intersectWKT,    // Legacy quirk (not understood by standard data-source)
+                intersectGeometry: intersectWKT,    // Standard
                 search: schema.search.form ? schema.menu.getSearchData() : null
             }
 
