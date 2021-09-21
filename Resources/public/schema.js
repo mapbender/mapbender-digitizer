@@ -797,8 +797,6 @@
             var schema = this;
             var widget = schema.widget;
 
-            var map = widget.map;
-
             options = options || {};
 
             var callback =  options.callback;
