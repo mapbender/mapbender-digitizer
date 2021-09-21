@@ -600,10 +600,7 @@ class Digitizer extends BaseElement
         $dataItem    = $request['dataItem'];
 
         $dataStore = $this->getDataStoreById($schema);
-        $uniqueIdKey = $dataStore->getDriver()->getUniqueId();
 
-
-        //var_dump($dataItem);die;
         $f = $dataStore->save($dataItem);
         $a = $this->getDatastoreAction(array('dataStoreLinkName'=>$schema , 'fid' =>$linkId, 'fieldName'=>$dataStoreLinkFieldName ));
         return array('processedItem' => $f, 'dataItems'  => $a);
