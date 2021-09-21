@@ -392,45 +392,38 @@ class Digitizer extends BaseElement
     public function selectAction($request)
     {
         $schemaName = $request["schema"];
-        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
-
         $this->injectFormSearch($request);
 
         if ($schemaName == 'all') {
-            $config = $this->getConfiguration();
-            $schemes = $config["schemes"];
-            $features = array();
-            foreach ($schemes as $subSchemaName => $scheme) {
-                if ($subSchemaName == 'all') {
-                    continue;
-                }
-                $request["schema"] = $subSchemaName;
-                $featureCollection = $this->selectAction($request);
-                foreach ($featureCollection["features"] as &$feature) {
-
-                    $feature["properties"]["schemaName"] = $subSchemaName;
-                };
-                $features = array_merge($features, $featureCollection["features"]);
-            }
-            $featureCollection = array("type" => "FeatureCollection", "features" => $features);
+            $config = $this->entity->getConfiguration();
+            $schemaNames = array_diff(array_keys($config['schemes']), array('all'));
         } else {
-
-            $featureCollection = $featureType->search(
-                array_merge(
-                    array(
-                        'returnType' => 'FeatureCollection',
-                        'maxResults' => $this->maxResults
-                    ),
-                    $request
-                )
-            );
+            $schemaNames = array($schemaName);
         }
+        $features = array();
+        $request['maxResults'] = $this->maxResults;
+        foreach ($schemaNames as $schemaName) {
+            $featureType = $this->getFeatureTypeBySchemaName($schemaName);
+            if (false && $schemaName == 'digitizer-polygones') {
+                return $featureType->search(array('returnType' => 'FeatureCollection') + $request);
+            }
 
-        //if(count($featureCollection["features"]) ==  $this->maxResults){
-        //    $featureCollection["info"] = "Limit erreicht";
-        //}
+            foreach ($featureType->search($request) as $feature) {
+                $features[] = $this->formatResponseFeature($feature, $schemaName);
+            }
+        }
+        return $features;
+    }
 
-        return $featureCollection;
+    protected function formatResponseFeature(Feature $feature, $schemaName)
+    {
+        return array(
+            'id' => $feature->getId(),
+            'geometry' => $feature->getGeom(),      // WKT format
+            'properties' => array_replace($feature->getAttributes(), array(
+                'schemaName' => $schemaName,
+            )),
+        );
     }
 
     /**
@@ -497,7 +490,6 @@ class Digitizer extends BaseElement
         $configuration = $this->getConfiguration(false);
         $schema = $this->getSchemaByName($schemaName);
         $featureType = $this->getFeatureTypeBySchemaName($schemaName);
-        $connection = $featureType->getDriver()->getConnection();
         $results = array();
         $debugMode = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
 
@@ -509,15 +501,11 @@ class Digitizer extends BaseElement
             throw new Exception("It is forbidden to save objects", 2);
         }
 
-        // save once
-        if (isset($request['feature'])) {
-            $request['features'] = array($request['feature']);
-        }
+        $features = \array_key_exists('features', $request) ? $request['features'] : array($request['feature']);
 
         try {
             // save collection
-            if (isset($request['features']) && is_array($request['features'])) {
-                foreach ($request['features'] as $feature) {
+                foreach ($features as $feature) {
                     /**
                      * @var $feature Feature
                      */
@@ -534,16 +522,8 @@ class Digitizer extends BaseElement
                     }
 
                     $feature = $featureType->save($featureData);
-                    $results = array_merge($featureType->search(array(
-                        'srid' => $feature->getSrid(),
-                        'where' => $connection->quoteIdentifier($featureType->getUniqueId()) . '=' . $connection->quote($feature->getId()))));
+                    $results[] = $this->formatResponseFeature($feature, $schemaName);
                 }
-
-            }
-            foreach ($results as &$result) {
-                $result->setAttributes(array("schemaName" => $schemaName));
-            }
-            $results = $featureType->toFeatureCollection($results);
         } catch (DBALException $e) {
             $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
                 "For more information have a look at the webserver log file. \n Error code: " . $e->getCode();

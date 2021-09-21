@@ -845,19 +845,11 @@
 
         onFeatureCollectionLoaded: function (featureCollection, xhr,options) {
             var schema = this;
-
-            if (!featureCollection || !featureCollection.hasOwnProperty("features")) {
-                Mapbender.error(Mapbender.trans('mb.digitizer.feature.loading.error'), featureCollection, xhr);
-                return;
-            }
-
-            if (featureCollection.features && featureCollection.features.length === parseInt(schema.maxResults) && schema.notifyOnFeatureOverflow) {
-                Mapbender.info("It is requested more than the maximal available number of results.\n ( > " + schema.maxResults + " results. )");
-            }
-            var geoJsonReader = new OpenLayers.Format.GeoJSON();
-            var newFeatures = geoJsonReader.read({
-                type: "FeatureCollection",
-                features: featureCollection.features
+            var newFeatures = featureCollection.map(function(featureData) {
+                var geometry = OpenLayers.Geometry.fromWKT(featureData.geometry);
+                var feature = new OpenLayers.Feature.Vector(geometry, featureData.properties);
+                feature.fid = featureData.id;
+                return feature;
             });
 
             schema.layer.features = newFeatures;
@@ -1072,25 +1064,9 @@
             //}
 
             var createNewFeatureWithDBFeature = function (feature, response) {
-
-                var features = response.features;
-
-                if (features.length === 0) {
-                    console.warn("No Feature returned from DB Operation");
-                    schema.removeFeatureFromUI(feature);
-                    return null;
-                } else if (features.length > 1) {
-                    console.warn("More than 1 Feature returned from DB Operation");
-                }
-
-                var geoJsonReader = new OpenLayers.Format.GeoJSON();
-
-                var newFeatures = geoJsonReader.read(response);
-                var newFeature = _.first(newFeatures);
-
-
-                newFeature.fid = newFeature.fid || feature.fid;
-
+                var geometry = OpenLayers.Geometry.fromWKT(response[0].geometry);
+                var newFeature = new OpenLayers.Feature.Vector(geometry, response[0].properties);
+                newFeature.fid = response[0].id || feature.fid;
                 newFeature.layer = feature.layer;
 
                 return newFeature;
