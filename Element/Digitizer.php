@@ -404,10 +404,6 @@ class Digitizer extends BaseElement
         $request['maxResults'] = $this->maxResults;
         foreach ($schemaNames as $schemaName) {
             $featureType = $this->getFeatureTypeBySchemaName($schemaName);
-            if (false && $schemaName == 'digitizer-polygones') {
-                return $featureType->search(array('returnType' => 'FeatureCollection') + $request);
-            }
-
             foreach ($featureType->search($request) as $feature) {
                 $features[] = $this->formatResponseFeature($feature, $schemaName);
             }
