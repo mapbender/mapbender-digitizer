@@ -765,8 +765,8 @@
                 srid: projection.proj.srsProjNumber,
                 maxResults: schema.maxResults,
                 schema: schema.schemaName,
-                intersect: intersectWKT,    // Legacy quirk (not understood by standard data-source)
-                intersectGeometry: intersectWKT,    // Standard
+                intersectGeometry: intersectWKT,    // Old / custom data-source quirk
+                intersect: intersectWKT,            // Current standard data-source
                 search: schema.search.form ? schema.menu.getSearchData() : null
             }
 
