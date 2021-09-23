@@ -483,11 +483,9 @@ class Digitizer extends BaseElement
     public function saveAction($request)
     {
         $schemaName = $request["schema"];
-        $configuration = $this->getConfiguration(false);
         $schema = $this->getSchemaByName($schemaName);
         $featureType = $this->getFeatureTypeBySchemaName($schemaName);
         $results = array();
-        $debugMode = $configuration['debug'] || $this->container->get('kernel')->getEnvironment() == "dev";
 
         if (isset($schema["allowEditData"]) && !$schema["allowEditData"]) {
             throw new Exception("It is forbidden to save objects", 2);
@@ -521,10 +519,8 @@ class Digitizer extends BaseElement
                     $results[] = $this->formatResponseFeature($feature, $schemaName);
                 }
         } catch (DBALException $e) {
-            $message = $debugMode ? $e->getMessage() : "Feature can't be saved. Maybe something is wrong configured or your database isn't available?\n" .
-                "For more information have a look at the webserver log file. \n Error code: " . $e->getCode();
             $results = array('errors' => array(
-                array('message' => $message, 'code' => $e->getCode())
+                array('message' => $e->getMessage(), 'code' => $e->getCode())
             ));
         }
 
