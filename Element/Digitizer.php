@@ -514,8 +514,7 @@ class Digitizer extends BaseElement
                         $newUrl = str_replace($url . "/", "", $requestUrl);
                         $featureData["properties"][$fileConfig['field']] = $newUrl;
                     }
-
-                    $feature = $featureType->save($featureData);
+                    $feature = $this->saveFeature($featureType, $featureData, $featureData['id']);
                     $results[] = $this->formatResponseFeature($feature, $schemaName);
                 }
         } catch (DBALException $e) {
@@ -525,7 +524,29 @@ class Digitizer extends BaseElement
         }
 
         return $results;
+    }
 
+    protected function saveFeature(FeatureType $featureType, $featureData, $id)
+    {
+        if ($id) {
+            $feature = $featureType->getById($id);
+        } else {
+            if (\method_exists($featureType, 'itemFromArray')) {
+                // data-source >= 0.1.16
+                $feature = $featureType->itemFromArray(array());
+            } else {
+                // ancient / custom data-source
+                $feature = $featureType->create(array());
+            }
+        }
+        if (!empty($featureData['geometry'])) {
+            $feature->setGeom($featureData['geometry']);
+            $feature->setSrid($featureData['srid']);
+        }
+        if (!empty($featureData['properties'])) {
+            $feature->setAttributes($featureData['properties']);
+        }
+        return $featureType->save($feature);
     }
 
     public function fileuploadAction($request) {
