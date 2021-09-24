@@ -69,7 +69,7 @@
             this.contextMenu = this._createContextMenu(olMap);
             this.renderer = this._createRenderer(olMap);
             this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory();
-            olMap.on(ol.MapEventType.MOVEEND, function() {
+            this.mbMap.element.on('mbmapviewchanged', function(e, data) {
                 // Don't react at all if currently editing feature attributes
                 if (self.currentPopup || self.activeToolName_) {
                     return;
@@ -77,7 +77,9 @@
 
                 var schema = self._getCurrentSchema();
                 var layer = self.getSchemaLayer(schema);
-                var resolution = olMap.getView().getResolution();
+                var m = data.mbMap.getModel();
+                var resolution = m.scaleToResolution(data.params.scale, undefined, data.params.srsName);
+
                 var $extentSearchCb = $('.schema-toolset input[name="current-extent"]', self.element);
 
                 if (resolution > layer.getMaxResolution() || resolution < layer.getMinResolution()) {
