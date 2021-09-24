@@ -76,6 +76,18 @@ class Digitizer extends DataManagerElement
      */
     public function getAssets()
     {
+        if ($this->entity->getApplication()->getMapEngineCode() === 'ol2') {
+            $engineScripts = array(
+                "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
+                "@MapbenderDigitizerBundle/Resources/public/EngineUtil-ol2.js",
+            );
+        } else {
+            $engineScripts = array(
+                "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
+                "@MapbenderDigitizerBundle/Resources/public/EngineUtil-ol6.js",
+            );
+        }
+
         $dataManagerAssets = parent::getAssets() + array(
             // provide empty array stubs for missing upstream entries
             'js' => array(),
@@ -84,8 +96,7 @@ class Digitizer extends DataManagerElement
         );
 
         return array(
-            'js' => array_merge($dataManagerAssets["js"], array(
-                "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
+            'js' => array_merge($dataManagerAssets["js"], $engineScripts, array(
                 "@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js",
                 "@MapbenderDigitizerBundle/Resources/public/toolset.js",
                 "@MapbenderDigitizerBundle/Resources/public/FeatureRenderer.js",

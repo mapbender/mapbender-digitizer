@@ -32,7 +32,6 @@
             var target = this.options.target;
             this.styleAdapter_ = this._createStyleAdapter();
             this.styleEditor = this._createStyleEditor();
-            this.wktFormat_ = new ol.format.WKT();
             Mapbender.elementRegistry.waitReady(target).then(function(mbMap) {
                 widget.mbMap = mbMap;
                 widget.setup();
@@ -337,7 +336,7 @@
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
         },
         _prepareDataItem: function(schema, itemData) {
-            var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
+            var feature = Mapbender.Digitizer.EngineUtil.featureFromWkt(itemData.geometry);
             feature.set('data', itemData.properties || {});
             var id = this._generateNamespacedId(schema, feature);
             feature.setId(id);
@@ -371,7 +370,7 @@
             // unravel dm-incompatible response format
             // Geometry may have been modified (made valid, transformed twice) on server roundtrip
             // => update to reflect server-side geometry exactly
-            var geometry = this.wktFormat_.readGeometryFromText(responseData.dataItem.geometry);
+            var geometry = Mapbender.Digitizer.EngineUtil.geometryFromWkt(responseData.dataItem.geometry);
             feature.setGeometry(geometry);
 
             this._super(schema, feature, originalId, {
@@ -433,7 +432,7 @@
         _getSaveRequestData: function(schema, dataItem, newValues) {
             return {
                 properties: Object.assign({}, this._getItemData(schema, dataItem), newValues || {}),
-                geometry: this.wktFormat_.writeGeometryText(dataItem.getGeometry()),
+                geometry: Mapbender.Digitizer.EngineUtil.dumpFeatureWkt(dataItem.getGeometry),
                 srid: this.getCurrentSrid()
             };
         },
@@ -453,7 +452,7 @@
                 featureMap[id] = feature;
                 postData.features[id] = {
                     properties: this._getItemData(schema, feature),
-                    geometry: this.wktFormat_.writeGeometryText(feature.getGeometry())
+                    geometry: Mapbender.Digitizer.EngineUtil.dumpFeatureWkt(feature)
                 };
             }
             var widget = this;
@@ -466,7 +465,7 @@
                         var id = savedItem.properties[idProperty];
                         var feature = featureMap[id];
 
-                        var geometry = widget.wktFormat_.readGeometryFromText(savedItem.geometry);
+                        var geometry = Mapbender.Digitizer.EngineUtil.geometryFromWkt(savedItem.geometry);
                         feature.setGeometry(geometry);
                         widget._replaceItemData(schema, feature, savedItem.properties || {});
                         feature.set('dirty', false);
