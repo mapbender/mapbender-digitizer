@@ -5,10 +5,15 @@
     Mapbender.Digitizer.MapContextMenu = function(olMap, widget) {
         this.widget = widget;
         this.olMap = olMap;
-        this.contextmenu = new ContextMenu({
-            width: null,
-            defaultItems: false
-        });
+        try {
+            this.contextmenu = new ContextMenu({
+                width: null,
+                defaultItems: false
+            });
+        } catch (e) {
+            console.error("No context menu implementation");
+            return;
+        }
         this.onMap_ = false;
         this.enabled_ = false;
         this.filterLayers_ = [];

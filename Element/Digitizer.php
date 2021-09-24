@@ -82,11 +82,17 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/EngineUtil-ol2.js",
                 "@MapbenderDigitizerBundle/Resources/public/controlFactory-ol2.js",
             );
+            // @todo: provide a compatible map context menu
+            $engineCss = array();
         } else {
             $engineScripts = array(
                 "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
                 "@MapbenderDigitizerBundle/Resources/public/EngineUtil-ol6.js",
                 "@MapbenderDigitizerBundle/Resources/public/controlFactory.js",
+                '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.js',
+            );
+            $engineCss = array(
+                '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.css',
             );
         }
 
@@ -111,14 +117,12 @@ class Digitizer extends DataManagerElement
                 '../../vendor/select2/select2/dist/js/select2.js',
                 '../../vendor/select2/select2/dist/js/i18n/de.js',
                 '@MapbenderDigitizerBundle/Resources/public/polyfill/setprototype.polyfill.js',
-                '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.js',
                 '@MapbenderDigitizerBundle/Resources/public/lib/layerManager.js',
             )),
-            'css' => array_merge($dataManagerAssets["css"], array(
+            'css' => array_merge($dataManagerAssets["css"], $engineCss, array(
                 '../../vendor/select2/select2/dist/css/select2.css',
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
-                '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.css',
             )),
             'trans' => array_merge($dataManagerAssets['trans'], array(
                 'mb.digitizer.*',
