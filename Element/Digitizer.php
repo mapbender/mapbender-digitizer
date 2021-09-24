@@ -80,13 +80,16 @@ class Digitizer extends DataManagerElement
             $engineScripts = array(
                 "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
                 "@MapbenderDigitizerBundle/Resources/public/EngineUtil-ol2.js",
+                "@MapbenderDigitizerBundle/Resources/public/controlFactory-ol2.js",
             );
         } else {
             $engineScripts = array(
                 "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
                 "@MapbenderDigitizerBundle/Resources/public/EngineUtil-ol6.js",
+                "@MapbenderDigitizerBundle/Resources/public/controlFactory.js",
             );
         }
+
 
         $dataManagerAssets = parent::getAssets() + array(
             // provide empty array stubs for missing upstream entries
@@ -102,7 +105,6 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/FeatureRenderer.js",
                 "@MapbenderDigitizerBundle/Resources/public/TableRenderer.js",
                 "@MapbenderDigitizerBundle/Resources/public/contextMenu.js",
-                "@MapbenderDigitizerBundle/Resources/public/controlFactory.js",
                 "@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js",
                 "@MapbenderDigitizerBundle/Resources/public/StyleAdapter.js",
                 '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',

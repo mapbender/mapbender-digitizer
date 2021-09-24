@@ -1,6 +1,9 @@
 (function () {
     "use strict";
 
+    window.Mapbender = window.Mapbender || {};
+    Mapbender.Digitizer = Mapbender.Digitizer || {};
+
     /**
      * @param options
      * @constructor
