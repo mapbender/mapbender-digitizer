@@ -81,6 +81,9 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
                 "@MapbenderDigitizerBundle/Resources/public/EngineUtil-ol2.js",
                 "@MapbenderDigitizerBundle/Resources/public/controlFactory-ol2.js",
+                "@MapbenderDigitizerBundle/Resources/public/StyleAdapter-ol2.js",
+                "@MapbenderDigitizerBundle/Resources/public/FeatureRenderer.js",
+                "@MapbenderDigitizerBundle/Resources/public/FeatureRenderer-ex-ol2.js",
             );
             // @todo: provide a compatible map context menu
             $engineCss = array();
@@ -90,6 +93,8 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/EngineUtil-ol6.js",
                 "@MapbenderDigitizerBundle/Resources/public/controlFactory.js",
                 '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.js',
+                "@MapbenderDigitizerBundle/Resources/public/StyleAdapter.js",
+                "@MapbenderDigitizerBundle/Resources/public/FeatureRenderer.js",
             );
             $engineCss = array(
                 '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.css',
@@ -112,7 +117,6 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/TableRenderer.js",
                 "@MapbenderDigitizerBundle/Resources/public/contextMenu.js",
                 "@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js",
-                "@MapbenderDigitizerBundle/Resources/public/StyleAdapter.js",
                 '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
                 '../../vendor/select2/select2/dist/js/select2.js',
                 '../../vendor/select2/select2/dist/js/i18n/de.js',
