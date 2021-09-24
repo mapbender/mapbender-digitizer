@@ -122,9 +122,9 @@
     Mapbender.Digitizer.FeatureRenderer.prototype.getLayer = function(schema) {
         if (!this.schemaLayers_[schema.schemaName]) {
             var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
+            console.log("Style configs?", styleConfigs, this.owner.options.schemes[schema.schemaName]);
             this.schemaStyles_[schema.schemaName] = this.initializeStyles_(styleConfigs || {});
-            var layer = this.createSchemaFeatureLayer_(schema);
-            layer.setStyle(this.createLayerStyleFunction_(styleConfigs['default']));
+            var layer = this.createSchemaFeatureLayer_(schema, styleConfigs['default']);
             delete this.schemaStyles_[schema.schemaName]['default'];
             this.olMap.addLayer(layer);
             this.schemaLayers_[schema.schemaName] = layer;
@@ -150,13 +150,14 @@
         };
     };
 
-    Mapbender.Digitizer.FeatureRenderer.prototype.createSchemaFeatureLayer_ = function (schema) {
+    Mapbender.Digitizer.FeatureRenderer.prototype.createSchemaFeatureLayer_ = function (schema, defaultStyleConfig) {
         var layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
             visible: true,
             minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
             maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity)
         });
+        layer.setStyle(this.createLayerStyleFunction_(defaultStyleConfig));
         return layer;
     };
 
