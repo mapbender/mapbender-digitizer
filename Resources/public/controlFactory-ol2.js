@@ -4,6 +4,22 @@
     window.Mapbender = window.Mapbender || {};
     Mapbender.Digitizer = Mapbender.Digitizer || {};
 
+    var Ol2DrawControlEx = function() {
+        OpenLayers.Control.DrawFeature.apply(this, arguments);
+    };
+    Ol2DrawControlEx.prototype = Object.create(OpenLayers.Control.DrawFeature.prototype);
+    Object.assign(Ol2DrawControlEx.prototype, {
+        constructor: Ol2DrawControlEx,
+        setActive: function(state) {
+            if (state) {
+                this.activate();
+            } else {
+                this.deactivate();
+            }
+        },
+        __dummy__: null
+    });
+
 
     Mapbender.Digitizer.DigitizingControlFactory = function() {
     };
@@ -14,29 +30,29 @@
             // console.log("Feature added", this, arguments);
         },
 
-        drawPoint: function () {
-            return new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point, {
+        drawPoint: function (layer) {
+            return new Ol2DrawControlEx(layer, OpenLayers.Handler.Point, {
                 featureAdded: this._featureAdded
             });
         },
 
 
         drawLine: function (layer) {
-            return new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Path, {
+            return new Ol2DrawControlEx(layer, OpenLayers.Handler.Path, {
                 featureAdded: this._featureAdded
             })
         },
 
 
         drawPolygon: function (layer) {
-            return new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
+            return new Ol2DrawControlEx(layer, OpenLayers.Handler.Polygon, {
                 featureAdded: this._featureAdded
             })
         },
 
 
         drawRectangle: function (layer) {
-            return new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
+            return new Ol2DrawControlEx(layer, OpenLayers.Handler.RegularPolygon, {
                 featureAdded: this._featureAdded,
                 handlerOptions: {
                     sides: 4,
@@ -46,7 +62,7 @@
         },
 
         drawCircle: function (layer) {
-            return new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
+            return new Ol2DrawControlEx(layer, OpenLayers.Handler.RegularPolygon, {
                 featureAdded: this._featureAdded,
                 handlerOptions: {
                     sides: 40
@@ -55,7 +71,7 @@
         },
 
         drawEllipse: function (layer) {
-            return new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.RegularPolygon, {
+            return new Ol2DrawControlEx(layer, OpenLayers.Handler.RegularPolygon, {
                 featureAdded: this._featureAdded,
                 handlerOptions: {
                     sides: 40,
@@ -65,7 +81,7 @@
         },
 
         drawDonut: function (layer) {
-            return new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
+            return new Ol2DrawControlEx(layer, OpenLayers.Handler.Polygon, {
                 featureAdded: function () {
                     console.warn("donut should not be created")
                 },
