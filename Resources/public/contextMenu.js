@@ -21,6 +21,9 @@
     };
     Object.assign(Mapbender.Digitizer.MapContextMenu.prototype, {
         setActive: function(state) {
+            if (!this.contextmenu) {
+                return;
+            }
             if (state) {
                 if (!this.onMap_) {
                     this.olMap.addControl(this.contextmenu);
@@ -38,6 +41,9 @@
          * @param {ol.PluggableMap} olMap
          */
         registerEvents: function(olMap) {
+            if (!this.contextmenu) {
+                return;
+            }
             var self = this;
             this.contextmenu.on('beforeopen', function (evt) {
                 var feature = olMap.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
@@ -57,6 +63,9 @@
             });
         },
         setSchema: function(schema) {
+            if (!this.contextmenu) {
+                return;
+            }
             this.schema_ = schema || null;
             this.contextmenu.clear();
             if (this.enabled_ && this.schema_) {
