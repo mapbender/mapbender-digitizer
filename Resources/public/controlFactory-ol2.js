@@ -25,35 +25,34 @@
     };
 
     Mapbender.Digitizer.DigitizingControlFactory.prototype = {
-        _featureAdded: function (feature) { // injectedMethods is actually not much more than a restricted Version of Scheme
-            // @todo: bridge events
-            // console.log("Feature added", this, arguments);
+        createDrawingTool: function(olMap, layer, type, onDrawEnd) {
+            var control = this[type](layer);
+            control.deactivate();
+            olMap.addControl(control);
+            control.events.register('featureadded', null, function(data) {
+                onDrawEnd(data.feature);
+            });
+
+            return control;
         },
 
         drawPoint: function (layer) {
-            return new Ol2DrawControlEx(layer, OpenLayers.Handler.Point, {
-                featureAdded: this._featureAdded
-            });
+            return new Ol2DrawControlEx(layer, OpenLayers.Handler.Point);
         },
 
 
         drawLine: function (layer) {
-            return new Ol2DrawControlEx(layer, OpenLayers.Handler.Path, {
-                featureAdded: this._featureAdded
-            })
+            return new Ol2DrawControlEx(layer, OpenLayers.Handler.Path);
         },
 
 
         drawPolygon: function (layer) {
-            return new Ol2DrawControlEx(layer, OpenLayers.Handler.Polygon, {
-                featureAdded: this._featureAdded
-            })
+            return new Ol2DrawControlEx(layer, OpenLayers.Handler.Polygon);
         },
 
 
         drawRectangle: function (layer) {
             return new Ol2DrawControlEx(layer, OpenLayers.Handler.RegularPolygon, {
-                featureAdded: this._featureAdded,
                 handlerOptions: {
                     sides: 4,
                     irregular: true
@@ -63,7 +62,6 @@
 
         drawCircle: function (layer) {
             return new Ol2DrawControlEx(layer, OpenLayers.Handler.RegularPolygon, {
-                featureAdded: this._featureAdded,
                 handlerOptions: {
                     sides: 40
                 }
@@ -72,7 +70,6 @@
 
         drawEllipse: function (layer) {
             return new Ol2DrawControlEx(layer, OpenLayers.Handler.RegularPolygon, {
-                featureAdded: this._featureAdded,
                 handlerOptions: {
                     sides: 40,
                     irregular: true

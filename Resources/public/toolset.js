@@ -328,43 +328,41 @@
                 this.tools_[schema.schemaName] = {};
             }
             if (!this.tools_[schema.schemaName][type]) {
-                var newInteraction = this.createDrawingTool(type);
-                this.tools_[schema.schemaName][type] = newInteraction;
-                var widget = this.owner;
-                newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
-                    var feature = event.feature;
-                    widget.initializeNewFeature(schema, feature);
-                    widget._openEditDialog(schema, event.feature);
-                });
-                newInteraction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
-                    event.features.forEach(function(feature) {
-                        feature.set('dirty', true);
-                    });
-                });
+                this.tools_[schema.schemaName][type] = this.createDrawingTool(schema, type);
             }
             return this.tools_[schema.schemaName][type];
         },
         /**
+         * @param {Object} schema
          * @param {String} type
          */
-        createDrawingTool: function(type) {
+        createDrawingTool: function(schema, type) {
+            var layer = this.owner.getSchemaLayer(schema);
             var widget = this.owner;
-            var schema = widget._getCurrentSchema();
-            var layer = schema && widget.getSchemaLayer(schema);
-            var source = layer && layer.getSource();
             var interaction;
             switch (type) {
                 case 'modifyFeature':
+                    if (this.modifyingCollection_ === null) {
+                        this.modifyingCollection_ = new ol.Collection([]);
+                    }
                     interaction = new ol.interaction.Modify({
                         features: this.modifyingCollection_
                     });
+                    interaction.setActive(false);
+                    this.olMap.addInteraction(interaction);
+                    interaction.on(['modifyend', 'modifystart', 'translateend'], function(event) {
+                        event.features.forEach(function(feature) {
+                            feature.set('dirty', true);
+                        });
+                    });
                     break;
                 default:
-                    interaction = this.controlFactory[type](source);
+                    interaction = this.controlFactory.createDrawingTool(this.olMap, layer, type, function(feature) {
+                        widget.initializeNewFeature(schema, feature);
+                        widget._openEditDialog(schema, feature);
+                    });
                     break;
             }
-            interaction.setActive(false);
-            this.olMap.addInteraction(interaction);
             return interaction;
         }
     });

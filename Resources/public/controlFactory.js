@@ -82,6 +82,16 @@
     };
 
     Mapbender.Digitizer.DigitizingControlFactory.prototype = {
+
+        createDrawingTool: function(olMap, layer, type, onDrawEnd) {
+            var interaction = this[type](layer.getSource());
+            interaction.setActive(false);
+            olMap.addInteraction(interaction);
+            interaction.on('drawend', function(event) {
+                onDrawEnd(event.feature);
+            });
+            return interaction;
+        },
         drawPoint: function (source) {
             var interaction = new ol.interaction.Draw({
                 source: source,
