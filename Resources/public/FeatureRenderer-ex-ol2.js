@@ -1,13 +1,28 @@
 ;!(function() {
     "use strict";
-    var layerMethodsPatch_ = {
+
+    var Ol2LayerEx = function() {
+        OpenLayers.Layer.Vector.apply(this, arguments);
+    };
+    Ol2LayerEx.prototype = Object.create(OpenLayers.Layer.Vector.prototype);
+    Object.assign(Ol2LayerEx.prototype, {
+        constructor: Ol2LayerEx,
         getMaxResolution: function() {
             return this.maxResolution;
         },
         getMinResolution: function() {
             return this.minResolution;
+        },
+        setVisible: function() {
+            this.setVisibility.apply(this, arguments);
+        },
+        getSource: function() {
+            return this;
+        },
+        getFeatures: function() {
+            return this.features;
         }
-    };
+    });
 
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
         initializeGlobalStyles_: function() {
@@ -26,13 +41,12 @@
             return new OpenLayers.Style(OpenLayers.Feature.Vector.style.temporary);
         },
         createSchemaFeatureLayer_: function (schema, defaultStyleConfig) {
-            var layer = new OpenLayers.Layer.Vector({
+            var layer = new Ol2LayerEx({
                 visibility: true,
                 minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
                 maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity)
             });
             layer.styleMap.styles.default = new OpenLayers.Style(defaultStyleConfig);
-            Object.assign(layer, layerMethodsPatch_);
             return layer;
         },
         initializeStyles_: function(styleConfigs) {
