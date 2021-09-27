@@ -22,6 +22,20 @@
         },
         geometryFromWkt: function(wkt) {
             return getWktFormat_().readGeometryFromText(wkt);
-        }
+        },
+        onLayerFeatureAdded: function(layer, callback, syncExisting) {
+            layer.getSource().on('addfeature', function(event) {
+                callback(event.feature);
+            });
+            if (syncExisting) {
+                layer.getSource().getFeatures().forEach(callback);
+            }
+        },
+        onLayerFeatureRemoved: function(layer, callback) {
+            layer.getSource().on('removefeature', function(event) {
+                callback(event.feature);
+            });
+        },
+        __dummy__: null
     };
 })();

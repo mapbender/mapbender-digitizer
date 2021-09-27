@@ -215,9 +215,8 @@
             var schemaName = schema.schemaName;
             if (!this.listenedSchemas_[schemaName]) {
                 var widget = this.owner;
-                this.unsavedFeatures_[schemaName] = []
-
-                var source = this.owner.getSchemaLayer(schema).getSource();
+                this.unsavedFeatures_[schemaName] = [];
+                var layer = this.owner.getSchemaLayer(schema);
                 var unsavedFeatureList = this.unsavedFeatures_[schemaName];
                 var updateSaveAll = function() {
                     $('.-fn-save-all', widget.element).prop('disabled', !unsavedFeatureList.length);
@@ -242,15 +241,9 @@
                     });
                     trackModified(feature, feature.get('dirty'));
                 };
-                source.getFeatures().forEach(function(feature) {
-                    addFeature(feature);
-                });
-                source.on(ol.source.VectorEventType.ADDFEATURE, function(event) {
-                    addFeature(event.feature);
-                });
-                source.on(ol.source.VectorEventType.REMOVEFEATURE, function(event) {
-                    // feature going away, remove from tracking
-                    trackModified(event.feature, false);
+                Mapbender.Digitizer.EngineUtil.onLayerFeatureAdded(layer, addFeature, true);
+                Mapbender.Digitizer.EngineUtil.onLayerFeatureRemoved(layer, function(feature) {
+                    trackModified(feature, false);
                 });
                 // Avoid binding events again for the same schema
                 this.listenedSchemas_[schemaName] = true;

@@ -24,6 +24,20 @@
         },
         geometryFromWkt: function(wkt) {
             return OpenLayers.Geometry.fromWKT(wkt);
-        }
+        },
+        onLayerFeatureAdded: function(layer, callback, syncExisting) {
+            layer.events.register('featureadded', null, function(data) {
+                callback(data.feature);
+            });
+            if (syncExisting) {
+                layer.features.forEach(callback);
+            }
+        },
+        onLayerFeatureRemoved: function(layer, callback) {
+            layer.events.register('featureremoved', null, function(data) {
+                callback(data.feature);
+            });
+        },
+        __dummy__: null
     };
 })();
