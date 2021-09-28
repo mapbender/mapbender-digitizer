@@ -179,7 +179,7 @@
 
             var self = this;
             // Update interaction buttons when "hidden" and "dirty" values change
-            feature.on(ol.ObjectEventType.PROPERTYCHANGE, function(event) {
+            feature.on('propertychange', function(event) {
                 var feature = event.target;
                 var tr = feature && feature.get('table-row');
                 if (tr) {
@@ -190,7 +190,7 @@
                     self.updateButtonStates_(tr, feature);
                 }
             });
-            feature.on(ol.ObjectEventType.PROPERTYCHANGE, function(event) {
+            feature.on('propertychange', function(event) {
                 if (event.key === 'hover' || event.key === 'editing') {
                     var feature = event.target;
                     var tr = feature && feature.get('table-row');

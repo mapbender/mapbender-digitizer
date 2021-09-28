@@ -36,6 +36,7 @@
                 callback(event.feature);
             });
         },
+        patchFeature: function() { /** noop */ },
         __dummy__: null
     };
 })();

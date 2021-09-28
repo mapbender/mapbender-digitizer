@@ -6,7 +6,64 @@
         wktFormat_ = wktFormat_ || new OpenLayers.Format.WKT();
         return wktFormat_;
     }
+    var FeaturePatch = {
+        clone: function() {
+            return new Ol2FeatureEx(this.geometry && this.geometry.clone() || null, this.attributes, this.style);
+        },
+        getId: function() {
+            return this.fid;
+        },
+        setId: function(value) {
+            this.fid = value;
+        },
+        set: function(key, value, silent) {
+            var oldValue = !silent && this.get(key);
+            if (key === 'data') {
+                this.attributes = value;
+            } else {
+                this.data_ = this.data_ || {};
+                this.data_[key] = value;
+            }
+            if (!silent) {
+                this.dispatchEvent({type: 'propertychange', key: key, oldValue: oldValue, target: this});
+                this.dispatchEvent({type: ['change', key].join(':'), key: key, oldValue: oldValue, target:this});
+            }
+        },
+        get: function(key) {
+            if (key === 'data') {
+                return this.attributes;
+            } else {
+                return (this.data_ || {})[key];
+            }
+        },
+        on: function(type, listener) {
+            var types = !Array.isArray(type) && [type] || type;
+            for (var i = 0; i < types.length; ++i) {
+                this.listeners_[types[i]] = this.listeners_[types[i]] || [];
+                this.listeners_[types[i]].push(listener);
+            }
+        },
+        dispatchEvent: function(evt) {
+            var listeners = this.listeners_[evt.type] || [];
+            for (var i = 0; i < listeners.length; ++i) {
+                if (false === listeners[i].call(this, evt)) {
+                    break;
+                }
+            }
+        },
+        setStyle: function(style) {
+            this.style = style || null;
+        }
+    };
 
+
+    function Ol2FeatureEx() {
+        OpenLayers.Feature.Vector.apply(this, arguments);
+        this.listeners_ = {};
+    }
+    Ol2FeatureEx.prototype = Object.create(OpenLayers.Feature.Vector.prototype);
+    Ol2FeatureEx.prototype.constructor = Ol2FeatureEx;
+    Object.assign(Ol2FeatureEx.prototype, FeaturePatch);
 
     window.Mapbender = window.Mapbender || {};
     Mapbender.Digitizer = Mapbender.Digitizer || {};
@@ -20,7 +77,7 @@
             return getWktFormat_().write(feature);
         },
         featureFromWkt: function(wkt) {
-            return new OpenLayers.Feature.Vector(this.geometryFromWKT(wkt));
+            return new Ol2FeatureEx(this.geometryFromWKT(wkt));
         },
         geometryFromWkt: function(wkt) {
             return OpenLayers.Geometry.fromWKT(wkt);
@@ -37,6 +94,12 @@
             layer.events.register('featureremoved', null, function(data) {
                 callback(data.feature);
             });
+        },
+        patchFeature: function(feature) {
+            if (typeof (feature.getId) !== 'function') {
+                feature.listeners_ = {};
+                Object.assign(feature, FeaturePatch);
+            }
         },
         __dummy__: null
     };

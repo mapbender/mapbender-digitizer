@@ -234,7 +234,8 @@
                     }
                 };
                 var addFeature = function(feature) {
-                    feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
+                    Mapbender.Digitizer.EngineUtil.patchFeature(feature);
+                    feature.on('propertychange', function (event) {
                         if (event.key === 'dirty') {
                             trackModified(feature, feature.get('dirty'));
                         }

@@ -38,7 +38,7 @@
             }
             var renderer = this;
             var watchedProperties = ['hover', 'dirty', 'editing', 'hidden'];
-            feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
+            feature.on('propertychange', function (event) {
                 if (-1 !== watchedProperties.indexOf(event.key)) {
                     renderer.updateFeatureStyle(schema, feature);
                 }
