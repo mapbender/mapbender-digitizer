@@ -163,34 +163,6 @@
 
             })
         },
-
-        modifyFeature: function (layer) {
-            var controlFactory = this;
-            return new OpenLayers.Control.ModifyFeature(layer, {
-                onModificationStart: function (feature) {
-                    feature.oldGeometry = feature.geometry.clone();
-                },
-                onModification: function (feature) {
-                    var wkt = feature.geometry.toString();
-                    var reader = new jsts.io.WKTReader();
-                    var geom = reader.read(wkt);
-                    if (geom.isValid()) {
-                        controlFactory.injectedMethods.setModifiedState(feature, this);
-                        controlFactory.injectedMethods.onFeatureChange(feature,'modify');
-                    } else {
-                        // TODO there might be a better way to revert feature
-                        controlFactory.layer.removeFeatures([feature]);
-                        feature.geometry = feature.modified.geometry;
-                        feature.modified = false;
-                        controlFactory.layer.addFeatures([feature]);
-                        // deactivation is necessary because the vertice features dont move back
-                        this.deactivate();
-                    }
-
-                }
-            })
-        },
-
         moveFeature: function (layer) {
             return new OpenLayers.Control.DragFeature(layer, {
                 onComplete: function (feature) {
