@@ -82,6 +82,7 @@
     };
 
     Mapbender.Digitizer.DigitizingControlFactory.prototype = {
+        modifyingCollection_: null,
 
         createDrawingTool: function(olMap, layer, type, onDrawEnd) {
             var interaction = this[type](layer.getSource());
@@ -91,6 +92,35 @@
                 onDrawEnd(event.feature);
             });
             return interaction;
+        },
+        createModifyTool: function(olMap, layer) {
+            if (this.modifyingCollection_ === null) {
+                this.modifyingCollection_ = new ol.Collection([]);
+            }
+            var interaction = new ol.interaction.Modify({
+                features: this.modifyingCollection_
+            });
+            interaction.setActive(false);
+            olMap.addInteraction(interaction);
+            interaction.on(['modifyend', 'modifystart', 'translateend'], function(event) {
+                event.features.forEach(function(feature) {
+                    feature.set('dirty', true);
+                });
+            });
+            return interaction;
+        },
+        setEditFeature: function(feature) {
+            if (this.modifyingCollection_ === null) {
+                this.modifyingCollection_ = new ol.Collection([]);
+            }
+            this.modifyingCollection_.forEach(function(feature) {
+                feature.set('editing', false);
+            });
+            this.modifyingCollection_.clear();
+            if (feature) {
+                feature.set('editing', true);
+                this.modifyingCollection_.push(feature);
+            }
         },
         drawPoint: function (source) {
             var interaction = new ol.interaction.Draw({

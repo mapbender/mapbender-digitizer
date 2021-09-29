@@ -53,17 +53,7 @@
             tool.setActive(!!state);
         },
         setEditFeature: function(feature) {
-            if (this.modifyingCollection_ === null) {
-                this.modifyingCollection_ = new ol.Collection([]);
-            }
-            this.modifyingCollection_.forEach(function(feature) {
-                feature.set('editing', false);
-            });
-            this.modifyingCollection_.clear();
-            if (feature) {
-                feature.set('editing', true);
-                this.modifyingCollection_.push(feature);
-            }
+            this.controlFactory.setEditFeature(feature);
         }
     });
 
@@ -346,19 +336,7 @@
             var interaction;
             switch (type) {
                 case 'modifyFeature':
-                    if (this.modifyingCollection_ === null) {
-                        this.modifyingCollection_ = new ol.Collection([]);
-                    }
-                    interaction = new ol.interaction.Modify({
-                        features: this.modifyingCollection_
-                    });
-                    interaction.setActive(false);
-                    this.olMap.addInteraction(interaction);
-                    interaction.on(['modifyend', 'modifystart', 'translateend'], function(event) {
-                        event.features.forEach(function(feature) {
-                            feature.set('dirty', true);
-                        });
-                    });
+                    interaction = this.controlFactory.createModifyTool(this.olMap, layer);
                     break;
                 default:
                     interaction = this.controlFactory.createDrawingTool(this.olMap, layer, type, function(feature) {

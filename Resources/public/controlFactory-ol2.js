@@ -35,6 +35,24 @@
 
             return control;
         },
+        createModifyTool: function(olMap, layer) {
+            var control = new OpenLayers.Control.ModifyFeature(layer, {
+                standalone: true
+            });
+            control.deactivate();
+            // Moneky-patch setActive method
+            control.setActive = Ol2DrawControlEx.prototype.setActive;
+            var modifiedHandler = function(e) {
+                if (e.modified || typeof (e.modified) === 'undefined') {
+                    e.feature.set('dirty', true);
+                }
+            };
+            layer.events.register('afterfeaturemodified', modifiedHandler);
+            layer.events.register('featuremodified', modifiedHandler);
+        },
+        setEditFeature: function(feature) {
+            console.warn("FIXME: No implementation for setEditFeature");
+        },
 
         drawPoint: function (layer) {
             return new Ol2DrawControlEx(layer, OpenLayers.Handler.Point);
