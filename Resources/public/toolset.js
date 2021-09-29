@@ -16,7 +16,7 @@
         this.activeInteraction = null;
         this.paused_ = false;
         this.tools_ = {};
-        this.modifyingCollection_ = new ol.Collection([]);
+        this.modifyingCollection_ = null;
     };
 
     Object.assign(Mapbender.Digitizer.FeatureEditor.prototype, {
@@ -53,6 +53,9 @@
             tool.setActive(!!state);
         },
         setEditFeature: function(feature) {
+            if (this.modifyingCollection_ === null) {
+                this.modifyingCollection_ = new ol.Collection([]);
+            }
             this.modifyingCollection_.forEach(function(feature) {
                 feature.set('editing', false);
             });
