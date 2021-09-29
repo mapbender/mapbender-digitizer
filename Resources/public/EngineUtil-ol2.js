@@ -77,7 +77,7 @@
             return getWktFormat_().write(feature);
         },
         featureFromWkt: function(wkt) {
-            return new Ol2FeatureEx(this.geometryFromWKT(wkt));
+            return new Ol2FeatureEx(this.geometryFromWkt(wkt));
         },
         geometryFromWkt: function(wkt) {
             return OpenLayers.Geometry.fromWKT(wkt);
