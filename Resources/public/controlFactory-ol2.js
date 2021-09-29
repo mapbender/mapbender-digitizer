@@ -52,6 +52,7 @@
             };
             layer.events.register('afterfeaturemodified', modifiedHandler);
             layer.events.register('featuremodified', modifiedHandler);
+            return control;
         },
         setEditFeature: function(feature) {
             console.warn("FIXME: No implementation for setEditFeature");
