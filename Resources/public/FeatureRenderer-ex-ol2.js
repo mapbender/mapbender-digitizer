@@ -21,6 +21,9 @@
         },
         getFeatures: function() {
             return this.features;
+        },
+        removeFeature: function(feature) {
+            this.removeFeatures([feature]);
         }
     });
 
