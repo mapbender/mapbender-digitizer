@@ -24,6 +24,9 @@
         },
         removeFeature: function(feature) {
             this.removeFeatures([feature]);
+        },
+        clear: function() {
+            this.removeAllFeatures();
         }
     });
 
