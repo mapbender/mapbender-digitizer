@@ -122,6 +122,41 @@
                 this.modifyingCollection_.push(feature);
             }
         },
+        createExclusiveHighlightControl: function(olMap, excludeList, layerFilter) {
+            var interaction = new ol.interaction.Select({
+                condition: ol.events.condition.pointerMove,
+                layers: layerFilter,
+                filter: function(feature) {
+                    return -1 === excludeList.indexOf(feature);
+                }
+            });
+            interaction.on('select', function (e) {
+                e.deselected.forEach(function(feature) {
+                    feature.set('hover', false);
+                });
+                e.selected.forEach(function(feature) {
+                    feature.set('hover', true);
+                });
+            });
+            olMap.addInteraction(interaction);
+            return interaction;
+        },
+        createSingleSelectControl: function(olMap, layerFilter, clickHandler) {
+            var interaction = new ol.interaction.Select({
+                condition: ol.events.condition.singleClick,
+                layers: layerFilter,
+                style: null
+            });
+            interaction.on('select', function(event) {
+                // Prevent interaction from filtering out the same feature if we click on it again before doing
+                // anything else.
+                /** @see https://github.com/openlayers/openlayers/blob/v6.4.3/src/ol/interaction/Select.js#L469 */
+                this.features_.clear();
+                clickHandler(event.selected[0] || null);
+            });
+            olMap.addInteraction(interaction);
+            return interaction;
+        },
         drawPoint: function (source) {
             var interaction = new ol.interaction.Draw({
                 source: source,

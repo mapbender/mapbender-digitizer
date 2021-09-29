@@ -105,11 +105,9 @@
                 }
                 self.featureEditor.resume();
             });
-            this.selectControl = this.createSelectControl_();
-            this.highlightControl = this.createHighlightControl_();
+            this.selectControl = this.createSelectControl_(olMap);
+            this.highlightControl = this.createHighlightControl_(olMap);
             this.featureEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, this.controlFactory);
-            olMap.addInteraction(this.selectControl);
-            olMap.addInteraction(this.highlightControl);
             var initialSchema = this._getCurrentSchema();
             this._setSchemaVisible(initialSchema, initialSchema.displayOnInactive && initialSchema.displayPermanent);
         },
@@ -568,50 +566,24 @@
         zoomToFeature: function(schema, feature) {
             Mapbender.Model.zoomToFeature(feature);
         },
-        createSelectControl_: function() {
+        createSelectControl_: function(olMap) {
             var self = this;
-            var selectControl = new ol.interaction.Select({
-                condition: ol.events.condition.singleClick,
-                layers: function(layer) {
-                    var schema = self._getCurrentSchema();
-                    var activeLayer = schema && self.getSchemaLayer(schema);
-                    return layer === activeLayer;
-                },
-                style: null
+            var layerFilter = function(layer) {
+                var schema = self._getCurrentSchema();
+                var activeLayer = schema && self.getSchemaLayer(schema);
+                return layer === activeLayer;
+            };
+            return this.controlFactory.createSingleSelectControl(olMap, layerFilter, function(feature) {
+                self.onFeatureClick(feature);
             });
-
-            selectControl.on('select', function (event) {
-                // Prevent interaction from filtering out the same feature if we click on it again before doing
-                // anything else.
-                /** @see https://github.com/openlayers/openlayers/blob/v6.4.3/src/ol/interaction/Select.js#L469 */
-                this.features_.clear();
-                self.onFeatureClick(event.selected[0] || null);
-            });
-            return selectControl;
         },
-        createHighlightControl_: function() {
+        createHighlightControl_: function(olMap) {
             var self = this;
-            var highlightControl = new ol.interaction.Select({
-                condition: ol.events.condition.pointerMove,
-                layers: function(layer) {
-                    var schema = self._getCurrentSchema();
-                    var activeLayer = schema && self.getSchemaLayer(schema);
-                    return layer === activeLayer;
-                },
-                filter: function(feature) {
-                    return -1 === self.excludedFromHighlighting_.indexOf(feature);
-                }
+            return this.controlFactory.createExclusiveHighlightControl(olMap, this.excludedFromHighlighting_, function(layer) {
+                var schema = self._getCurrentSchema();
+                var activeLayer = schema && self.getSchemaLayer(schema);
+                return layer === activeLayer;
             });
-
-            highlightControl.on('select', function (e) {
-                e.deselected.forEach(function(feature) {
-                    feature.set('hover', false);
-                });
-                e.selected.forEach(function(feature) {
-                    feature.set('hover', true);
-                });
-            });
-            return highlightControl;
         },
         clearHighlightExclude_: function() {
             this.excludedFromHighlighting_.splice(0, this.excludedFromHighlighting_.length);

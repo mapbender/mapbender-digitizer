@@ -17,6 +17,35 @@
         }
     };
 
+    function MultiLayerFeatureHandler(layerFilter, control) {
+        this.layerFilter_ = layerFilter;
+        OpenLayers.Handler.prototype.initialize.apply(this, [control, control.callbacks, {
+            geometryTypes: null
+        }]);
+    }
+    MultiLayerFeatureHandler.prototype = Object.create(OpenLayers.Handler.Feature.prototype);
+    MultiLayerFeatureHandler.prototype.constructor = MultiLayerFeatureHandler;
+
+    Object.assign(MultiLayerFeatureHandler.prototype, {
+        // Skip bound layer mangling / map event binding / unbinding
+        activate: OpenLayers.Handler.prototype.activate,
+        deactivate: OpenLayers.Handler.prototype.deactivate,
+        handle: function(evt) {
+            // Grab layer
+            var layers = this.map && this.map.layers.filter(this.layerFilter_);
+            if (layers && layers.length) {
+                this.layer = layers[0];
+                var rv = OpenLayers.Handler.Feature.prototype.handle.apply(this, arguments);
+                this.layer = null;
+                return rv;
+            } else {
+                return false;
+            }
+        }
+    });
+
+
+
     function Ol2DrawControlEx() {
         OpenLayers.Control.DrawFeature.apply(this, arguments);
     }
@@ -56,6 +85,45 @@
         },
         setEditFeature: function(feature) {
             console.warn("FIXME: No implementation for setEditFeature");
+        },
+        createExclusiveHighlightControl: function(olMap, excludeList, layerFilter) {
+            /** @see https://github.com/openlayers/ol2/blob/master/lib/OpenLayers/Control/SelectFeature.js */
+            var control = new OpenLayers.Control.SelectFeature(null, {
+                hover: true,
+                highlightOnly: true
+            });
+            Object.assign(control, ControlPatchCommon);
+            control.events.register('beforefeaturehighlighted', null, function(e) {
+                return e.feature.layer && layerFilter(e.feature.layer) && -1 === excludeList.indexOf(e.feature);
+            });
+            control.events.register('featurehighlighted', null, function(e) {
+                e.feature.set('hover', true);
+            });
+            control.events.register('featureunhighlighted', null, function(e) {
+                e.feature.set('hover', false);
+            });
+            control.handlers.feature = new MultiLayerFeatureHandler(layerFilter, control);
+            olMap.addControl(control);
+            return control;
+        },
+        createSingleSelectControl: function(olMap, layerFilter, clickHandler) {
+            /** @see https://github.com/openlayers/ol2/blob/master/lib/OpenLayers/Control/SelectFeature.js */
+            var control = new OpenLayers.Control.SelectFeature(null, {
+                clickout: false,
+                highlightOnly: true,
+                clickFeature: clickHandler
+            });
+            Object.assign(control, ControlPatchCommon);
+            /** @see https://github.com/openlayers/ol2/blob/master/lib/OpenLayers/Control/SelectFeature.js#L200 */
+            control.handlers.feature = new MultiLayerFeatureHandler(layerFilter, control);
+            control.getFeatures = function() {
+                return {
+                    clear: function() {
+                    }
+                };
+            };
+            olMap.addControl(control);
+            return control;
         },
 
         drawPoint: function (layer) {
