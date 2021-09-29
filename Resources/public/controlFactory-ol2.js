@@ -4,12 +4,7 @@
     window.Mapbender = window.Mapbender || {};
     Mapbender.Digitizer = Mapbender.Digitizer || {};
 
-    var Ol2DrawControlEx = function() {
-        OpenLayers.Control.DrawFeature.apply(this, arguments);
-    };
-    Ol2DrawControlEx.prototype = Object.create(OpenLayers.Control.DrawFeature.prototype);
-    Object.assign(Ol2DrawControlEx.prototype, {
-        constructor: Ol2DrawControlEx,
+    var ControlPatchCommon = {
         setActive: function(state) {
             if (state) {
                 this.activate();
@@ -17,9 +12,17 @@
                 this.deactivate();
             }
         },
-        __dummy__: null
-    });
+        getActive: function() {
+            return this.active;
+        }
+    };
 
+    function Ol2DrawControlEx() {
+        OpenLayers.Control.DrawFeature.apply(this, arguments);
+    }
+    Ol2DrawControlEx.prototype = Object.create(OpenLayers.Control.DrawFeature.prototype);
+    Ol2DrawControlEx.prototype.constructor = Ol2DrawControlEx;
+    Object.assign(Ol2DrawControlEx.prototype, ControlPatchCommon);
 
     Mapbender.Digitizer.DigitizingControlFactory = function() {
     };
@@ -40,8 +43,8 @@
                 standalone: true
             });
             control.deactivate();
-            // Moneky-patch setActive method
-            control.setActive = Ol2DrawControlEx.prototype.setActive;
+            // Moneky-patch setActive / getActive methods
+            Object.assign(control, ControlPatchCommon);
             var modifiedHandler = function(e) {
                 if (e.modified || typeof (e.modified) === 'undefined') {
                     e.feature.set('dirty', true);
