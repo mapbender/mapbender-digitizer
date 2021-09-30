@@ -90,18 +90,17 @@
             /** @see https://github.com/openlayers/ol2/blob/master/lib/OpenLayers/Control/SelectFeature.js */
             var control = new OpenLayers.Control.SelectFeature(null, {
                 hover: true,
-                highlightOnly: true
+                highlightOnly: true,
+                highlight: function(feature) {
+                    if (feature.layer && layerFilter(feature.layer) && -1 === excludeList.indexOf(feature)) {
+                        feature.set('hover', true);
+                    }
+                },
+                outFeature: function(feature) {
+                    feature.set('hover', false);
+                }
             });
             Object.assign(control, ControlPatchCommon);
-            control.events.register('beforefeaturehighlighted', null, function(e) {
-                return e.feature.layer && layerFilter(e.feature.layer) && -1 === excludeList.indexOf(e.feature);
-            });
-            control.events.register('featurehighlighted', null, function(e) {
-                e.feature.set('hover', true);
-            });
-            control.events.register('featureunhighlighted', null, function(e) {
-                e.feature.set('hover', false);
-            });
             control.handlers.feature = new MultiLayerFeatureHandler(layerFilter, control);
             olMap.addControl(control);
             return control;

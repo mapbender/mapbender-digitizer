@@ -68,16 +68,34 @@
             });
         },
         updateFeatureStyle: function(schema, feature) {
+            var intent;
             if (feature.get('editing')) {
-                feature.setStyle(this.globalStyles_['editing']);
+                intent = 'editing';
             } else if (feature.get("hidden")) {
-                feature.setStyle(this.globalStyles_['invisible']);
+                intent = 'invisible';
             } else if (feature.get('hover')) {
-                feature.setStyle(this.schemaStyles_[schema.schemaName]['select']);
+                intent = 'select';
             } else if (feature.get('dirty')) {
-                feature.setStyle(this.schemaStyles_[schema.schemaName]['unsaved']);
+                intent = 'unsaved';
             } else {
-                feature.setStyle(null);
+                intent = 'default';
+            }
+            this.updateRenderIntent(schema, feature, intent);
+        },
+        updateRenderIntent: function(schema, feature, intent) {
+            switch (intent) {
+                default:
+                case 'default':
+                    feature.setStyle(null);
+                    break;
+                case 'editing':
+                case 'invisible':
+                    feature.setStyle(this.globalStyles_[intent]);
+                    break;
+                case 'select':
+                case 'unsaved':
+                    feature.setStyle(this.schemaStyles_[schema.schemaName][intent])
+                    break;
             }
         }
     });

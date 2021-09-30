@@ -64,6 +64,12 @@
             }
             return styles;
         },
+        updateRenderIntent: function(schema, feature, intent) {
+            feature.renderIntent = intent || null;
+            if (feature.layer) {
+                feature.layer.drawFeature(feature, intent);
+            }
+        },
         __dummy__: null
     });
 
