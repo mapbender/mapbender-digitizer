@@ -51,9 +51,6 @@
                 }
             }
         },
-        setStyle: function(style) {
-            this.style = style || null;
-        },
         getGeometry: function() {
             return this.geometry;
         }
