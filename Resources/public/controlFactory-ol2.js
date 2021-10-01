@@ -31,6 +31,11 @@
         activate: OpenLayers.Handler.prototype.activate,
         deactivate: OpenLayers.Handler.prototype.deactivate,
         handle: function(evt) {
+            if (evt.type === 'click' && (!this.callbacks['click'] || !this.callbacks['clickout'])) {
+                // Fix hover control eating clicks from separate click-handling select control
+                // (OL2 base does not support pure hover controls that never handle clicks)
+                return false;
+            }
             // Grab layer
             var layers = this.map && this.map.layers.filter(this.layerFilter_);
             if (layers && layers.length) {
@@ -101,6 +106,10 @@
                 }
             });
             Object.assign(control, ControlPatchCommon);
+            // This control never handles clicks
+            delete(control.callbacks['click']);
+            delete(control.callbacks['clickout']);
+
             control.handlers.feature = new MultiLayerFeatureHandler(layerFilter, control);
             olMap.addControl(control);
             return control;
@@ -109,7 +118,6 @@
             /** @see https://github.com/openlayers/ol2/blob/master/lib/OpenLayers/Control/SelectFeature.js */
             var control = new OpenLayers.Control.SelectFeature(null, {
                 clickout: false,
-                highlightOnly: true,
                 clickFeature: clickHandler
             });
             Object.assign(control, ControlPatchCommon);
