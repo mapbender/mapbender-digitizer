@@ -59,9 +59,6 @@
                 };
             })(styleConfig);
         },
-        resolveStyleConfigPlaceholders: function(styleConfig, feature) {
-            return this.styleAdapter.resolvePlaceholders(styleConfig, feature.get('data') || {});
-        },
         createStyleFunction_: function(styleConfig) {
             return this.styleAdapter.styleFunctionFromSvgRules(styleConfig, function(feature) {
                 return feature.get('data') || {};

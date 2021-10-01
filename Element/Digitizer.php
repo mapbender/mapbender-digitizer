@@ -81,6 +81,7 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
                 "@MapbenderDigitizerBundle/Resources/public/EngineUtil-ol2.js",
                 "@MapbenderDigitizerBundle/Resources/public/controlFactory-ol2.js",
+                "@MapbenderDigitizerBundle/Resources/public/StyleUtil.js",
                 "@MapbenderDigitizerBundle/Resources/public/StyleAdapter-ol2.js",
                 "@MapbenderDigitizerBundle/Resources/public/FeatureRenderer.js",
                 "@MapbenderDigitizerBundle/Resources/public/FeatureRenderer-ex-ol2.js",
@@ -93,6 +94,7 @@ class Digitizer extends DataManagerElement
                 "@MapbenderDigitizerBundle/Resources/public/EngineUtil-ol6.js",
                 "@MapbenderDigitizerBundle/Resources/public/controlFactory.js",
                 '@MapbenderDigitizerBundle/Resources/public/lib/ol-contextmenu.js',
+                "@MapbenderDigitizerBundle/Resources/public/StyleUtil.js",
                 "@MapbenderDigitizerBundle/Resources/public/StyleAdapter.js",
                 "@MapbenderDigitizerBundle/Resources/public/FeatureRenderer.js",
             );

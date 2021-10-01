@@ -547,7 +547,7 @@
         openStyleEditor: function(schema, feature) {
             var self = this;
             // Generate default style without placeholders...
-            var styleDefaults = this.renderer.resolveStyleConfigPlaceholders(schema.styles.default, feature);
+            var styleDefaults = Mapbender.Digitizer.StyleUtil.resolvePlaceholders(schema.styles.default, feature.get('data') || {});
             // ... but allow label placeholder (editable as text)
             styleDefaults.label = schema.styles.default.label;
 

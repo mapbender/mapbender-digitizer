@@ -7,7 +7,7 @@
         this.defaultStyle_ = ol.style.Style.defaultFunction()[0].clone();
         this.enforceArrayColor_(this.defaultStyle_);
 
-        var placeholderProps = this.detectDataPlaceholders_(defaultStyleConfig);
+        var placeholderProps = Mapbender.Digitizer.StyleUtil.detectDataPlaceholders(defaultStyleConfig);
         if (placeholderProps.length) {
             throw new Error("Fallback style MUST NOT include data placeholders. Found: " + placeholderProps.join(', '));
         }
@@ -21,12 +21,11 @@
     Object.assign(Mapbender.Digitizer.StyleAdapter.prototype, {
         defaultStyle_: null,
         defaultText_: null,
-        placeholderRx_: /\${([^}]+)}/g,
         styleFunctionFromSvgRules: function(styleConfig, dataCallback) {
             var self = this;
             var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor', 'externalGraphic'];
             return (function(styleConfig) {
-                var placeholderProps = self.detectDataPlaceholders_(styleConfig, placeholderCandidates);
+                var placeholderProps = Mapbender.Digitizer.StyleUtil.detectDataPlaceholders(styleConfig, placeholderCandidates);
                 var labelValue = styleConfig.label;
                 var dynText = labelValue && (placeholderProps.indexOf('label') !== -1 || placeholderProps.indexOf('fontColor') !== -1);
                 var dynBase = placeholderProps.indexOf('fillColor') !== -1 || placeholderProps.indexOf('strokeColor') !== -1;
@@ -36,7 +35,7 @@
                 var dynIcon = useIcon && -1 !== placeholderProps.indexOf('externalGraphic');
                 var iconStyle = useIcon && !dynIcon && self.expandIconStyle_(self.getIconStyle(styleConfig));
 
-                var resolvePlaceholders = self.getPlaceholderResolver_(styleConfig, placeholderProps, dataCallback);
+                var resolvePlaceholders = Mapbender.Digitizer.StyleUtil.getPlaceholderResolver(styleConfig, placeholderProps, dataCallback);
                 return function(feature) {
                     var styles = [baseStyle];
                     var resolvedStyle = resolvePlaceholders(styleConfig, feature);
@@ -243,62 +242,6 @@
             if (styleComponent.getFill() && (typeof (styleComponent.getFill().getColor()) === 'string')) {
                 styleComponent.getFill().setColor(Mapbender.StyleUtil.parseCssColor(styleComponent.getFill().getColor()));
             }
-        },
-        /**
-         *
-         * @param {Object} data
-         * @param {Array<String>} [candidates] to limit scanning to specifically named properties (default: scan all properties)
-         * @return {Array<String>}
-         * @private
-         */
-        detectDataPlaceholders_: function(data, candidates) {
-            var placeholderRx = this.placeholderRx_;
-            return (candidates || Object.keys(data)).filter(function(prop) {
-                // Reset global-flagged RegExp state.
-                // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test#using_test_on_a_regex_with_the_global_flag
-                placeholderRx.lastIndex = 0;
-                return placeholderRx.test(data[prop] || '');
-            });
-        },
-        /**
-         * @param {Object} original
-         * @param {Array<String>} propertyNames
-         * @param {function} dataCallback
-         * @return {function}
-         * @private
-         */
-        getPlaceholderResolver_: function(original, propertyNames, dataCallback) {
-            if (propertyNames.length) {
-                var placeholderRx = this.placeholderRx_;
-                return function(styleConfig, feature) {
-                    var valuesOut = Object.assign({}, styleConfig);
-                    var data = dataCallback(feature);
-                    propertyNames.forEach(function(prop) {
-                        var resolved = styleConfig[prop].replace(placeholderRx, function(match, dataProp) {
-                            if (!data[dataProp] && prop === 'externalGraphic') {
-                                // Empty entire output value (incomplete url expansion)
-                                valuesOut[prop] = data[dataProp];
-                            }
-                            return data[dataProp];
-                        });
-                        if (resolved && valuesOut[prop]) {
-                            valuesOut[prop] = resolved;
-                        }
-                    });
-                    return valuesOut;
-                }
-            } else {
-                return function(original) {
-                    return original;
-                }
-            }
-        },
-        resolvePlaceholders: function(styleConfig, featureData) {
-            var placeholderProps = this.detectDataPlaceholders_(styleConfig);
-            var resolver = this.getPlaceholderResolver_(styleConfig, placeholderProps, function() {
-                return featureData;
-            });
-            return resolver(styleConfig);
         },
         /**
          * @param {ol.style.Image} iconStyle
