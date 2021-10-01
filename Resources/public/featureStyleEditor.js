@@ -52,7 +52,7 @@
     };
     Mapbender.Digitizer.FeatureStyleEditor.prototype.openEditor = function(schema, feature, values) {
         var self = this;
-        var geomType = feature.getGeometry().getType();
+        var geomType = Mapbender.Digitizer.EngineUtil.getGeometryType(feature.getGeometry());
         var valuesPromise = $.Deferred();
         this.template_.then(function(html) {
             var $content = $(document.createElement('div')).append(html);

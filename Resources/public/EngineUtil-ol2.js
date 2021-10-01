@@ -101,6 +101,11 @@
                 Object.assign(feature, FeaturePatch);
             }
         },
+        getGeometryType: function(geometry) {
+            // Class name splitting is seriously the "official" way to do this
+            // see https://github.com/openlayers/ol2/blob/master/lib/OpenLayers/Format/WKT.js#L140
+            return geometry.CLASS_NAME.split('.')[2];
+        },
         __dummy__: null
     };
 })();

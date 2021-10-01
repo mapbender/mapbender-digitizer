@@ -37,6 +37,9 @@
             });
         },
         patchFeature: function() { /** noop */ },
+        getGeometryType: function(geometry) {
+            return geometry.getType();
+        },
         __dummy__: null
     };
 })();
