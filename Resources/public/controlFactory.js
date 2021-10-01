@@ -274,7 +274,7 @@
 
             return interaction;
         },
-        moveFeature: function (source) {
+        createTranslationTool: function(olMap, layer) {
             var self = this;
             // ol.interaction.Translate does not have a "condition" option, but it
             // supports completely replacing the handleDownEvent method via Pointer
@@ -285,7 +285,7 @@
             };
 
             var interaction = new ol.interaction.Translate({
-                source: source,
+                source: layer.getSource(),
                 handleDownEvent: handleDownEvent
             });
 

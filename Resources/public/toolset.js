@@ -322,7 +322,7 @@
                 this.tools_[schema.schemaName] = {};
             }
             if (!this.tools_[schema.schemaName][type]) {
-                this.tools_[schema.schemaName][type] = this.createDrawingTool(schema, type);
+                this.tools_[schema.schemaName][type] = this.createTool_(schema, type);
             }
             return this.tools_[schema.schemaName][type];
         },
@@ -330,11 +330,14 @@
          * @param {Object} schema
          * @param {String} type
          */
-        createDrawingTool: function(schema, type) {
+        createTool_: function(schema, type) {
             var layer = this.owner.getSchemaLayer(schema);
             var widget = this.owner;
             var interaction;
             switch (type) {
+                case 'moveFeature':
+                    interaction = this.controlFactory.createTranslationTool(this.olMap, layer);
+                    break;
                 case 'modifyFeature':
                     interaction = this.controlFactory.createModifyTool(this.olMap, layer);
                     break;

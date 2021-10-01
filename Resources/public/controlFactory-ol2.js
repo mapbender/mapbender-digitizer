@@ -239,13 +239,16 @@
 
             })
         },
-        moveFeature: function (layer) {
-            return new OpenLayers.Control.DragFeature(layer, {
+        createTranslationTool: function(olMap, layer) {
+            var control = new OpenLayers.Control.DragFeature(layer, {
                 onComplete: function (feature) {
-                    // @todo: bridge events
-                    // console.log("moveFeature.onComplete", this, arguments);
+                    feature.set('dirty', true);
                 }
-            })
+            });
+            // Moneky-patch setActive / getActive methods
+            Object.assign(control, ControlPatchCommon);
+            olMap.addControl(control);
+            return control;
         }
     }
 
