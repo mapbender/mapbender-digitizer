@@ -24,7 +24,7 @@
                 this.data_ = this.data_ || {};
                 this.data_[key] = value;
             }
-            if (!silent) {
+            if (!silent && oldValue !== value) {
                 this.dispatchEvent({type: 'propertychange', key: key, oldValue: oldValue, target: this});
                 this.dispatchEvent({type: ['change', key].join(':'), key: key, oldValue: oldValue, target:this});
             }
