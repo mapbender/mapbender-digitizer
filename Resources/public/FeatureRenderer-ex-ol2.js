@@ -65,9 +65,30 @@
             return styles;
         },
         updateRenderIntent: function(schema, feature, intent) {
-            feature.renderIntent = intent || null;
-            if (feature.layer) {
-                feature.layer.drawFeature(feature, intent);
+            var customStyle = feature.get('customStyleConfig');
+            if (customStyle && (!intent || intent === 'default')) {
+                feature.style = customStyle;
+                feature.renderIntent = null;
+                if (feature.layer) {
+                    feature.layer.drawFeature(feature);
+                }
+            } else {
+                feature.style = null;
+                feature.renderIntent = intent || null;
+                if (feature.layer) {
+                    feature.layer.drawFeature(feature, intent);
+                }
+            }
+        },
+        customStyleFeature_: function(schema, feature) {
+            var styleField = schema.featureType.styleField;
+            var styleConfig = styleField && feature.attributes[styleField];
+            if (styleConfig && (typeof styleConfig === 'string')) {
+                styleConfig = JSON.parse(styleConfig);
+            }
+            if (styleConfig) {
+                feature.set('customStyleConfig', styleConfig);
+                feature.style = styleConfig;
             }
         },
         __dummy__: null
