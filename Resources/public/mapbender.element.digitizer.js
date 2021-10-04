@@ -16,7 +16,6 @@
         mbMap: null,
         printClient: null,
         active: false,
-        controlFactory: null,
         activeToolName_: null,
         selectControl: null,
         highlightControl: null,
@@ -24,6 +23,7 @@
         featureEditor: null,
         renderer: null,
         styleAdapter_: null,
+        activeLayerFilter_: null,
 
         _create: function () {
             this.toolsetRenderer = this._createToolsetRenderer();
@@ -53,6 +53,9 @@
         _createStyleAdapter: function() {
             return new Mapbender.Digitizer.StyleAdapter(this.options.fallbackStyle);
         },
+        _createControlFactory: function() {
+            return new Mapbender.Digitizer.DigitizingControlFactory();
+        },
         _createRenderer: function(olMap) {
             return new Mapbender.Digitizer.FeatureRenderer(this, olMap, this.styleAdapter_);
         },
@@ -68,7 +71,7 @@
             var olMap = this.mbMap.getModel().olMap;
             this.contextMenu = this._createContextMenu(olMap);
             this.renderer = this._createRenderer(olMap);
-            this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory();
+            var controlFactory = this._createControlFactory();
             this.mbMap.element.on('mbmapviewchanged', function(e, data) {
                 // Don't react at all if currently editing feature attributes
                 if (self.currentPopup || self.activeToolName_) {
@@ -105,9 +108,13 @@
                 }
                 self.featureEditor.resume();
             });
-            this.selectControl = this.createSelectControl_(olMap);
-            this.highlightControl = this.createHighlightControl_(olMap);
-            this.featureEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, this.controlFactory);
+            var layerFilterFn = this.getActiveLayerFilterFn_();
+            this.selectControl = controlFactory.createSingleSelectControl(olMap, layerFilterFn, function(feature) {
+                self.onFeatureClick(feature);
+            });
+            this.highlightControl = controlFactory.createExclusiveHighlightControl(olMap, this.excludedFromHighlighting_, layerFilterFn);
+
+            this.featureEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, controlFactory);
             var initialSchema = this._getCurrentSchema();
             this._setSchemaVisible(initialSchema, initialSchema.displayOnInactive && initialSchema.displayPermanent);
         },
@@ -566,27 +573,19 @@
         zoomToFeature: function(schema, feature) {
             Mapbender.Model.zoomToFeature(feature);
         },
-        createSelectControl_: function(olMap) {
-            var self = this;
-            var layerFilter = function(layer) {
-                var schema = self._getCurrentSchema();
-                var activeLayer = schema && self.getSchemaLayer(schema);
-                return layer === activeLayer;
-            };
-            return this.controlFactory.createSingleSelectControl(olMap, layerFilter, function(feature) {
-                self.onFeatureClick(feature);
-            });
-        },
-        createHighlightControl_: function(olMap) {
-            var self = this;
-            return this.controlFactory.createExclusiveHighlightControl(olMap, this.excludedFromHighlighting_, function(layer) {
-                var schema = self._getCurrentSchema();
-                var activeLayer = schema && self.getSchemaLayer(schema);
-                return layer === activeLayer;
-            });
-        },
         clearHighlightExclude_: function() {
             this.excludedFromHighlighting_.splice(0, this.excludedFromHighlighting_.length);
+        },
+        getActiveLayerFilterFn_: function() {
+            if (!this.activeLayerFilter_) {
+                var self = this;
+                this.activeLayerFilter_ = function(layer) {
+                    var schema = self._getCurrentSchema();
+                    var activeLayer = schema && self.getSchemaLayer(schema);
+                    return layer === activeLayer;
+                };
+            }
+            return this.activeLayerFilter_;
         },
         _processFormItem: function(schema, item, values) {
             switch (item.type) {
