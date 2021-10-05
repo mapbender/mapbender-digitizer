@@ -15,6 +15,8 @@
         },
         setId: function(value) {
             this.fid = value;
+            // id property used by getFeatureById
+            this.id = value;
         },
         set: function(key, value, silent) {
             var oldValue = !silent && this.get(key);
