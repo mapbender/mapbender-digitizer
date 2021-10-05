@@ -69,15 +69,12 @@
             if (customStyle && (!intent || intent === 'default')) {
                 feature.style = customStyle;
                 feature.renderIntent = null;
-                if (feature.layer) {
-                    feature.layer.drawFeature(feature);
-                }
             } else {
                 feature.style = null;
                 feature.renderIntent = intent || null;
-                if (feature.layer) {
-                    feature.layer.drawFeature(feature, intent);
-                }
+            }
+            if (feature.layer) {
+                feature.layer.drawFeature(feature);
             }
         },
         customStyleFeature_: function(schema, feature) {
