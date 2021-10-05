@@ -439,7 +439,7 @@
         _getSaveRequestData: function(schema, dataItem, newValues) {
             return {
                 properties: Object.assign({}, this._getItemData(schema, dataItem), newValues || {}),
-                geometry: Mapbender.Digitizer.EngineUtil.dumpFeatureWkt(dataItem.getGeometry),
+                geometry: Mapbender.Digitizer.EngineUtil.dumpFeatureWkt(dataItem),
                 srid: this.getCurrentSrid()
             };
         },
