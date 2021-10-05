@@ -88,8 +88,8 @@
                     e.feature.set('dirty', true);
                 }
             };
-            layer.events.register('afterfeaturemodified', modifiedHandler);
-            layer.events.register('featuremodified', modifiedHandler);
+            layer.events.register('afterfeaturemodified', null, modifiedHandler);
+            layer.events.register('featuremodified', null, modifiedHandler);
             olMap.addControl(control);
             this.registerModify_(layer, control);
             return control;
