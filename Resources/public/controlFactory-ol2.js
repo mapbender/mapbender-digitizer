@@ -59,9 +59,13 @@
     Object.assign(Ol2DrawControlEx.prototype, ControlPatchCommon);
 
     Mapbender.Digitizer.DigitizingControlFactory = function() {
+        this.modifyControlMap_ = {};
+        this.editingList_ = [];
     };
 
     Mapbender.Digitizer.DigitizingControlFactory.prototype = {
+        modifyControlMap_: null,
+        editingList_: null,
         createDrawingTool: function(olMap, layer, type, onDrawEnd) {
             var control = this[type](layer);
             control.deactivate();
@@ -86,10 +90,33 @@
             };
             layer.events.register('afterfeaturemodified', modifiedHandler);
             layer.events.register('featuremodified', modifiedHandler);
+            olMap.addControl(control);
+            this.registerModify_(layer, control);
             return control;
         },
         setEditFeature: function(feature) {
-            console.warn("FIXME: No implementation for setEditFeature");
+            for (var i = 0; i < this.editingList_.length; ++i) {
+                var previousFeature = this.editingList_[i];
+                previousFeature.set('editing', false);
+                var control = previousFeature.layer && this.findModifyControl_(previousFeature.layer);
+                // Previous feature may have already been unselected by clickout / toggle
+                // Second unselect invocation throws an error => avoid it
+                if (control && previousFeature === control.feature) {
+                    control.unselectFeature(previousFeature);
+                }
+            }
+            this.editingList_.splice(0, -1);
+            if (feature) {
+                feature.set('editing', true);
+                this.editingList_.push(feature);
+                this.findModifyControl_(feature.layer).selectFeature(feature);
+            }
+        },
+        registerModify_: function(layer, control) {
+            this.modifyControlMap_[layer.id] = control;
+        },
+        findModifyControl_: function(layer) {
+            return this.modifyControlMap_[layer.id];
         },
         createExclusiveHighlightControl: function(olMap, excludeList, layerFilter) {
             /** @see https://github.com/openlayers/ol2/blob/master/lib/OpenLayers/Control/SelectFeature.js */
@@ -97,11 +124,19 @@
                 hover: true,
                 highlightOnly: true,
                 highlight: function(feature) {
+                    if (typeof (feature.set) !== 'function') {
+                        // temporary editing feature, leave it alone
+                        return false;
+                    }
                     if (feature.layer && layerFilter(feature.layer) && -1 === excludeList.indexOf(feature)) {
                         feature.set('hover', true);
                     }
                 },
                 outFeature: function(feature) {
+                    if (typeof (feature.set) !== 'function') {
+                        // temporary editing feature, leave it alone
+                        return false;
+                    }
                     feature.set('hover', false);
                 }
             });
