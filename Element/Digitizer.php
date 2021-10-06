@@ -341,14 +341,13 @@ class Digitizer extends BaseElement
     {
 
         $schemaName = $request["schema"];
-        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
 
         if (isset($request["where"])) {
             unset($request["where"]);
         }
 
         if (isset($request["search"])) {
-            $connection = $featureType->getConnection();
+            $connection = $this->getFeatureTypeBySchemaName($schemaName)->getConnection();
             $schema = $this->getSchemaByName($schemaName);
             $vars = $this->escapeValues($request["search"], $connection);
 
