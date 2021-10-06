@@ -30,8 +30,6 @@ class Digitizer extends BaseElement
     /** @var int Default maximal search results number */
     protected $maxResults = 5000;
 
-    protected $styleManager;
-
 
     public static function getClassTitle()
     {
@@ -125,6 +123,18 @@ class Digitizer extends BaseElement
     protected function getFeatureTypeDeclarations()
     {
         return $this->container->getParameter('featureTypes');
+    }
+
+    protected function getFeatureTypeConfigBySchemaName($schemaName)
+    {
+        $config = $this->entity->getConfiguration();
+        $rawSchema = $config['schemes'][$schemaName];
+        if (\is_string($rawSchema['featureType'])) {
+            $globalFeatureTypes = $this->getFeatureTypeDeclarations();
+            return $globalFeatureTypes[$rawSchema['featureType']];
+        } else {
+            return $rawSchema['featureType'];
+        }
     }
 
     /**
@@ -836,9 +846,9 @@ class Digitizer extends BaseElement
      */
     protected function saveStyleAction($postData)
     {
-        $featureType = $this->getFeatureTypeBySchemaName($postData["schemaName"]);
-        $configuration = $featureType->getConfiguration("style");
-        $this->styleManager = new DigitizerStyleManager($configuration["db"],$this->container);
+        $ftConfig = $this->getFeatureTypeConfigBySchemaName($postData["schemaName"]);
+        $configuration = $ftConfig['style'];
+        $styleManager = new DigitizerStyleManager($configuration['db'], $this->container);
         $userId = $this->getCurrentUserId();
         $parameters = array(
             'featureId'  => $postData['featureId'],
@@ -848,7 +858,7 @@ class Digitizer extends BaseElement
         $styleParameters = array_merge($newStyle, $parameters);
 
         $style  = new Style($styleParameters);
-        $styleData = $this->styleManager->save($style, $userId, $configuration["public"])->toArray();
+        $styleData = $styleManager->save($style, $userId, $configuration["public"])->toArray();
         unset($styleData['userId']);
         unset($styleData['name']);
         unset($styleData['styleMaps']);
@@ -874,24 +884,21 @@ class Digitizer extends BaseElement
 
             // Ensure, that all schemes access the same style db
             foreach ($postData["schemaName"] as $schemaName) {
-                $featureType = $this->getFeatureTypeBySchemaName($schemaName);
-                $configuration = $featureType->getConfiguration("style");
+                $ftConfig = $this->getFeatureTypeConfigBySchemaName($schemaName);
+                $configuration = $ftConfig['style'];
                 if ($db && $db != $configuration["db"] && $public && $public != $configuration["public"]) {
                     return array("featureStyles" => [ "error" => true]);
                 }
                 $db = $configuration["db"];
                 $public = $configuration["public"];
             }
-
-            $featureType = $this->getFeatureTypeBySchemaName($postData["schemaName"][0]);
         } else {
-            $featureType = $this->getFeatureTypeBySchemaName($postData["schemaName"]);
+            $ftConfig = $this->getFeatureTypeConfigBySchemaName($postData["schemaName"]);
+            $db = $ftConfig['style']['db'];
+            $public = $ftConfig['style']['public'];
         }
-        $configuration = $featureType->getConfiguration("style");
-        $db = $configuration["db"];
-        $public = $configuration["public"];
-        $this->styleManager = new DigitizerStyleManager($db,$this->container);
-        $results['featureStyles'] = $this->styleManager->getStyles($this->getCurrentUserId(),$public);
+        $styleManager = new DigitizerStyleManager($db, $this->container);
+        $results['featureStyles'] = $styleManager->getStyles($this->getCurrentUserId(),$public);
 
         return $results;
     }
