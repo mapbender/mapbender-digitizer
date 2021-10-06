@@ -231,26 +231,13 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * Get schema by name
-     *
      * @param string $name Feature type name
      * @return FeatureType
-     * @throws \Symfony\Component\Config\Definition\Exception\Exception
      */
     protected function getFeatureTypeBySchemaName($name)
     {
-        if ($name == 'all') {
-            return null;
-        }
-        $schema = $this->getSchemaByName($name);
-
-        if (is_array($schema['featureType'])) {
-            $featureType = new FeatureType($this->container, $schema['featureType']);
-        } else {
-            throw new Exception('Feature type schema settings not correct', 2);
-        }
-
-        return $featureType;
+        $ftConfig = $this->getFeatureTypeConfigBySchemaName($name);
+        return new FeatureType($this->container, $ftConfig);
     }
 
     /**
