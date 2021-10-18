@@ -55,7 +55,7 @@
   .slider-holder{
 
     width: 100%;
-    vertical-align: top !important;
+    vertical-align: top;
     > .form-group{
       margin-left: 10px;
       margin-right: 10px;
@@ -101,11 +101,6 @@
         }
       }
     }
-  }
-
-  .input-group-addon{
-    padding-top: 5px;
-    padding-bottom: 5px;
   }
 }
 
