@@ -10,66 +10,6 @@
 * Form elements!
 */
 .modal-body {
-
-  .ui-accordion.ui-widget{
-    display: block;
-
-
-
-    > .ui-accordion-header{
-
-      background-color: #ad2223;
-      border: 1px solid rgb(255, 255, 255);
-      color: rgb(255, 255, 255);
-      cursor: pointer;
-      font-size: 12px;
-      line-height: 11px;
-      margin: 0;
-      margin-bottom: -1px;
-      padding: 6px 8px;
-      clear: both;
-      height: auto;
-      user-select: none !important;
-
-      > .buttons{
-        float: right;
-        margin-top: -6px;
-        margin-right: -8px;
-        clear: both;
-        margin-bottom: 0px;
-        > button{
-          padding-top: 5px;
-          padding-bottom: 0px;
-          padding-left: 5px;
-          padding-right: 5px;
-          line-height: 12px;
-          font-size: 0;
-          margin: 0;
-          height: auto;
-          margin-left: -1px;
-          &:before{
-            font-size: 12px;
-          }
-        }
-      }
-      > span{
-        text-decoration: none;
-        user-select: none !important;
-      }
-      &.ui-accordion-header-collapsed{
-
-      }
-    }
-
-    .ui-accordion-content.ui-widget-content {
-      position: relative;
-      height: auto !important;
-      &.ui-accordion-content-active {
-
-      }
-    }
-  }
-
   .form-group > .form-group {
     margin-bottom: 0;
   }
