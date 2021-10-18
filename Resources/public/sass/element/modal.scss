@@ -14,10 +14,7 @@
     margin-bottom: 0;
   }
 
-  .form-group, .checkbox {
-    position: relative;
-
-
+  .form-group {
     &.image-container{
       > img{
         @include vertical-align-middle;
@@ -55,20 +52,6 @@
     }
   }
 
-  .form-group {
-    > button.btn {
-      margin-right: 0px;
-      margin-bottom: 0px;
-      vertical-align: bottom;
-      margin-left: -1px;
-      display: inline-block;
-      &:first-child{
-        margin-left: 15px;
-      }
-    }
-    > .input-group{
-    }
-  }
   .slider-holder{
 
     width: 100%;
