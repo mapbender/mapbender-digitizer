@@ -101,76 +101,7 @@
       }
     }
 
-    > a.copy-to-clipboard{
-      display: block;
-      bottom: -1px;
-      right: 0px;
-      color: #9999A9;
-      opacity: 0.6;
-      cursor: default;
-      text-decoration: none;
-      padding-left: 2px;
-      padding-top: 1px;
-      &:hover{
-        opacity: 1;
-      }
-
-    }
-
-    > a.infoText {
-      display: block;
-      bottom: -1px;
-      right: 0px;
-      color: #9999A9;
-      opacity: 0.6;
-      cursor: default;
-      text-decoration: none;
-      width: 17px;
-
-      &:hover{
-        opacity: 1;
-      }
-
-      &:after {
-        display: inline-block;
-        font-family: FontAwesome;
-        content: "\f05a";
-        font-size:14px;
-        line-height: 30px;
-        vertical-align: middle;
-        margin-right: 7px;
-      }
-    }
-
-    &.has-title {
-      > a.copy-to-clipboard,
-      > a.infoText {
-        display: inline-block;
-        position: relative;
-        bottom: inherit;
-        right: inherit;
-        &:after{
-          line-height: inherit;
-          vertical-align: top;
-          margin-left: 3px;
-          margin-top: 1px;
-        }
-      }
-    }
-
     &.select-container{
-      > a.copy-to-clipboard,
-      > a.infoText{
-        bottom: inherit;
-        right: 15px;
-      }
-      &.has-title{
-        > a.copy-to-clipboard,
-        > a.infoText{
-          right: auto;
-        }
-      }
-
       .select2-container {
         display: block;
         width: auto !important;
@@ -182,25 +113,8 @@
         }
       }
     }
-    &.textarea-container{
-      > a.copy-to-clipboard,
-      > a.infoText{
-        bottom: inherit;
-      }
-    }
   }
 
-  .checkbox{
-    > a.copy-to-clipboard,
-    > a.infoText {
-      display: inline-block;
-      position: absolute;
-      bottom: inherit;
-      right: inherit;
-      margin-top: -4px;
-      z-index: 1;
-    }
-  }
   .form-group {
     > button.btn {
       margin-right: 0px;
