@@ -187,16 +187,6 @@ $selectColor: #F7F79A;
 
 
 
-  /* Fixes for IE < 8 */
-  @media screen\9 {
-    .fileinput-button > input {
-      filter: alpha(opacity=0);
-      font-size: 100%;
-      height: 100%;
-    }
-  }
-
-
   button:disabled  {
     opacity: 0.5;
   }
@@ -215,50 +205,17 @@ $selectColor: #F7F79A;
   opacity: 1;
 }
 
-.mb-element-digitizer {
-  button {
-
-    border: 1px solid #ccc !important;
-
-    &:focus {
-      outline: thin dotted !important;
-      box-shadow: none !important;
-      border: 1px solid #ccc !important;
-    }
-  }
-
-}
-
-
 .digitizing-tool-set, .general-digitizer-buttons {
   margin-top: 10px;
 
   > button {
-
-    &:first-child{
-      margin-left: 0px;
+    margin-left: -1px;
+    &:first-child {
+      margin-left: 0;
     }
 
     width: 26px;
-    margin-left: -1px;
     padding: 3px 4px;
-    &:before {
-      display: inline-block;
-      font-size: 17px;
-      padding-top: 0px;
-    }
-    &.active,
-    &.active:focus {
-      background-color: $buttonFirstActiveColor !important;
-    }
-  }
-
-  > input[type="checkbox"] {
-    margin-left: 0px;
-  }
-
-  > label input[type="checkbox"] {
-    margin-left: 0px;
   }
 }
 
