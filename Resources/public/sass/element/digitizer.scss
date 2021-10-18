@@ -205,7 +205,8 @@ $selectColor: #F7F79A;
   opacity: 1;
 }
 
-.digitizing-tool-set, .general-digitizer-buttons {
+.mb-element-digitizer .digitizing-tool-set, .mb-element-digitizer .general-digitizer-buttons {
+  font-size: 17px;
   margin-top: 10px;
 
   > button {
