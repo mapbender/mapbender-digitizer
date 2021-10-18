@@ -17,9 +17,6 @@
 $selectColor: #F7F79A;
 
 
-.fa.fa-floppy-o:before {
-  content: "\f0c7"; }
-
 .mb-element-digitizer {
 
   padding: 0;
@@ -99,38 +96,11 @@ $selectColor: #F7F79A;
         word-wrap: break-word;       /* Internet Explorer 5.5+ */
         word-break: break-all;
         white-space: normal;
-        .icon-style:before{
-          font-family: FontAwesome;
-          content: "\f1fb";
-        }
 
-        .icon-visibility:before{
-          font-family: FontAwesome;
-          content: "\f070";
-        }
-
-        .icon-printmetadata.active:before{
-            font-family: FontAwesome;
-            content: "\f02f";
-            color: black;
-        }
-
-        .icon-printmetadata:before{
-            font-family: FontAwesome;
-            content: "\f02f";
-            color: grey;
-        }
       }
     }
   }
 
-}
-
-.invisible-feature {
-    .icon-visibility:before{
-        font-family: FontAwesome;
-        content: "\f06e" !important;
-    }
 }
 
 .olHandlerBoxSelectFeature {
@@ -364,11 +334,6 @@ li.select2-search--inline {
 }
 
 .mb-element-popup-dialog {
-
-    .icon-create:before {
-        font-family: FontAwesome;
-        content: "\f067";
-    }
 
     .modal-header {
         a {

@@ -1247,12 +1247,8 @@
             var schema = this;
             var layer = schema.layer;
 
-            feature.toggleVisibility(!feature.visible);
-
+            feature.visible = !feature.visible;
             layer.drawFeature(feature);
-            schema.menu.resultTable.getApi().draw();
-
-
         },
 
         /** Override **/

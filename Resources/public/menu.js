@@ -173,8 +173,8 @@
                 if (schema.allowLocate) {
                     buttons.push({
                         title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
-                        className: 'zoom',
-                        cssClass: 'fa fa-crosshairs',
+                        className: '--zoom',
+                        cssClass: 'fa fas fa-crosshairs',
                         onClick: function (feature, ui) {
                             schema.zoomToFeature(feature);
                         }
@@ -184,7 +184,7 @@
                 if (schema.allowEditData && schema.allowSaveInResultTable) {
                     buttons.push({
                         title: Mapbender.trans('mb.digitizer.feature.save.title'),
-                        className: 'save',
+                        className: '--save',
                         cssClass: ' fa fa-floppy-o',
                         disabled: true,
                         onClick: function (feature, ui) {
@@ -196,7 +196,8 @@
                 if (schema.allowEditData) {
                     buttons.push({
                         title: Mapbender.trans('mb.digitizer.feature.edit'),
-                        className: 'edit',
+                        className: '--edit',
+                        cssClass: 'fa far fa-edit',
                         onClick: function (feature, ui) {
                             schema.openFeatureEditDialog(feature);
                         }
@@ -215,7 +216,8 @@
                 if (schema.allowCustomStyle) {
                     buttons.push({
                         title: Mapbender.trans('mb.digitizer.feature.style.change'),
-                        className: 'style',
+                        className: '--style',
+                        cssClass: 'fa fas fa-eyedropper',
                         onClick: function (feature, ui) {
                             schema.openChangeStyleDialog(feature);
                         }
@@ -226,7 +228,10 @@
                     buttons.push({
                         title: Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'),
                         className: 'visibility',
-                        onClick: function (feature) {
+                        cssClass: 'fa far fa-eye-slash',
+                        onClick: function (feature, $btn) {
+                            $btn.toggleClass('fa-eye fa-eye-slash');
+                            $btn.closest('tr').toggleClass('invisible-feature');
                             schema.toggleFeatureVisibility(feature);
                         }
                     });
@@ -236,6 +241,7 @@
                     buttons.push({
                         title: 'Sachdaten drucken',
                         className: 'printmetadata',
+                        cssClass: 'fa fas fa-print',
                         onClick: function (feature, ui, b, c) {
                             if (!schema.getSchemaByFeature(feature).allowPrintMetadata) {
                                 $.notify("Der Druck von Detailinformationen ist für Features dieses Schemas deaktiviert");
@@ -256,8 +262,8 @@
 
                     buttons.push({
                         title: Mapbender.trans('mb.digitizer.feature.remove.title'),
-                        className: 'remove',
-                        cssClass: 'critical',
+                        className: '--remove',
+                        cssClass: 'critical fa fas fa-times',
                         onClick: function (feature, ui) {
                             if (schema.getSchemaByFeature(feature).allowDelete) {
                                 schema.removeFeature(feature);

@@ -159,7 +159,7 @@
                     type: "button",
                     title: "",
                     hover: Mapbender.trans('mb.digitizer.feature.create'),
-                    cssClass: "icon-create",
+                    cssClass: 'fa fas fa-plus',
                     click: onCreateClick
                 };
 
