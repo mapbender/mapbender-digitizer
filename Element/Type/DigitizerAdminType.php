@@ -31,27 +31,29 @@ class DigitizerAdminType extends AbstractType
                 'application'   => $options['application'],
                 'property_path' => '[target]',
                 'required'      => false))
-           ->add('useAllScheme', 'Symfony\Component\Form\Extension\Core\Type\CheckboxType', array(
-               'required' => false,
-               'label' => 'mb.digitizer.useAllScheme',
-           ))
-            ->add('displayOnInactive', 'Symfony\Component\Form\Extension\Core\Type\CheckboxType', array(
+            ->add('useAllScheme', 'Symfony\Component\Form\Extension\Core\Type\CheckboxType', array(
                 'required' => false,
-                'label' => 'mb.digitizer.displayOnInactive',
+                'label' => 'mb.digitizer.useAllScheme',
+            ))
+             ->add('displayOnInactive', 'Symfony\Component\Form\Extension\Core\Type\CheckboxType', array(
+                 'required' => false,
+                 'label' => 'mb.digitizer.displayOnInactive',
+             ))
+            ->add('dataManager', 'Mapbender\\CoreBundle\\Element\Type\\TargetElementType', array(
+                'element_class' => 'Mapbender\\DataManagerBundle\\Element\\DataManagerElement',
+                'application'   => $options['application'],
+                'property_path' => '[dataManager]',
+                'required'      => false,
             ))
             ->add('schemes', 'Mapbender\ManagerBundle\Form\Type\YAMLConfigurationType' , array(
                 'required' => false,
                 'attr' => array(
                     'class' => 'code-yaml',
                 ),
+                'label_attr' => array(
+                    'class' => 'block',
+                ),
             ))
-            ->add('dataManager', 'Mapbender\\CoreBundle\\Element\Type\\TargetElementType',
-                array(
-                    'element_class' => 'Mapbender\\DataManagerBundle\\Element\\DataManagerElement',
-                    'application'   => $options['application'],
-                    'property_path' => '[dataManager]',
-                    'required'      => false));
-
-
+        ;
     }
 }
