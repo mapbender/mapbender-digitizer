@@ -149,8 +149,9 @@
 
                     spinner.openRequests = 0;
 
-                    var $parent = $('#' + widget.id).parents('.container-accordion').prev().find('.tablecell').prepend("<div class='spinner' style='display:none'></div>");
-                    spinner.$element = $parent.find(".spinner");
+                    var $parent = $('#' + widget.id).parents('.container-accordion').prev();
+                    this.$element = $('<span class="fa fas fa-spin fa-spinner pull-right" style="display:none;">');
+                    $parent.prepend(this.$element);
 
                     spinner.addRequest = function () {
                         spinner.openRequests++;
