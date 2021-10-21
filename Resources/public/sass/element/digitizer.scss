@@ -276,25 +276,14 @@ li.select2-search--inline {
 }
 
 .mb-element-popup-dialog {
-
-    .modal-header {
-        a {
-            min-width: 15px !important;
-            height: 20px !important;
-        }
-
-        span {
-            &:after {
-                margin-top: -6px !important;
-            }
-        }
-
-        button {
-            &.close {
-                padding-left: 4px;
-            }
-        }
-    }
+  .ui-button-icon-only .ui-icon {
+    position: static;
+    margin: 0;
+  }
+  .ui-dialog-titlebar-close {
+    position: static;
+    margin: 0;
+  }
 
     .form-group > button.btn {
         &:first-child{
