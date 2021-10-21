@@ -4,6 +4,9 @@
     Mapbender.confirmDialog = Mapbender.confirmDialog || function (options) {
         var dialog = $("<div></div>").popupDialog({
             title: options.hasOwnProperty('title') ? options.title : "",
+            classes: {
+                'ui-dialog': 'ui-dialog digitizer-dialog'
+            },
             maximizable: false,
             dblclick: false,
             minimizable: false,

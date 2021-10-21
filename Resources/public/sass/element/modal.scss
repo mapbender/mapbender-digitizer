@@ -1,19 +1,7 @@
-@mixin vertical-align-middle {
-  position: relative;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
-}
-
 /**
 * Form elements!
 */
 .modal-body {
-  .form-group > .form-group {
-    margin-bottom: 0;
-  }
-
   .form-group {
     &.text {
       > .text {

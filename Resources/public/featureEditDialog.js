@@ -176,6 +176,9 @@
         var configuration = schema.popup.clone();
 
         configuration.addFeatureAndDialog(feature, dialog);
+        configuration.classes = {
+            'ui-dialog': 'ui-dialog digitizer-dialog'
+        };
 
 
         dialog.schema = schema.getSchemaByFeature(feature);
