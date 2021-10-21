@@ -284,20 +284,4 @@ li.select2-search--inline {
     position: static;
     margin: 0;
   }
-
-    .form-group > button.btn {
-        &:first-child{
-            margin-left: 0px !important;
-            margin-bottom: 2px !important;
-        }
-        &:last-child{
-            margin-right: 15px;
-        }
-    }
-
-
-    // This is important in order to avoid the second open dialog to "jump" on resizing
-    position: absolute !important;
-    z-index: 5;
-
 }
