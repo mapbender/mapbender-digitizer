@@ -145,39 +145,21 @@ $selectColor: #F7F79A;
 //    }
   }
   .file-container{
-
-    .progress-bar{
-      width: 0;
-      height: 100%;
-      background-color: #00ccaa;
-      float: none;
-      transition: none;
-      padding: 0;
-      margin: 0;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-
     .fileinput-button {
       position: relative;
       overflow: hidden;
-      display: inline-block;
+      .progress-bar {
+        height: 3px;
+        margin-top: 2px;
+      }
       > input {
         position: absolute;
         top: 0;
-        right: 0;
+        left: 0;
+        width: 100%;
         margin: 0;
         opacity: 0;
-        -ms-filter: 'alpha(opacity=0)';
-        font-size: 200px;
-        direction: ltr;
         cursor: pointer;
-
-        &:focus, &hover {
-          box-shadow: inset 0 1px 1px transparent, 0 0 4px #000 !important;
-        }
-
       }
     }
   }

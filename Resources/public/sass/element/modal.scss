@@ -15,18 +15,6 @@
   }
 
   .form-group {
-    &.image-container{
-      > img{
-        @include vertical-align-middle;
-      }
-    }
-
-    &.file-container{
-      .progress-bar{
-        transition: none;
-      }
-    }
-
     &.text {
       > .text {
         margin-left: 5px;
