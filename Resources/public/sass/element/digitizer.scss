@@ -94,7 +94,7 @@ $selectColor: #F7F79A;
         white-space: -o-pre-wrap;    /* Opera 7 */
         white-space: pre-wrap;       /* css-3 */
         word-wrap: break-word;       /* Internet Explorer 5.5+ */
-        word-break: break-all;
+        word-break: keep-all;
         white-space: normal;
 
       }
@@ -265,13 +265,6 @@ li.select2-search--inline {
 
   input {
     width: 100% !important;
-  }
-}
-
-.mapbender-element-result-table {
-
-  tr td {
-    word-break: keep-all !important;
   }
 }
 
