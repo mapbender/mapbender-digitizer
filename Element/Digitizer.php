@@ -110,7 +110,6 @@ class Digitizer extends BaseElement
     public static function getDefaultConfiguration()
     {
         return array(
-            "target" => null
         );
     }
 

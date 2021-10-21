@@ -34,7 +34,6 @@
             // disabled: false,
             fileURI: "uploads/featureTypes",
             schemes: {},
-            target: null,
         },
         schemes: null,
         map: null,
@@ -120,10 +119,6 @@
 
             widget.id = element.attr("id");
 
-            if (!Mapbender.checkTarget("mbDigitizer", widget.options.target)) {
-                return;
-            }
-
             if (typeof widget.options.useAllScheme !== "undefined") {
                 widget.useAllScheme = widget.options.useAllScheme;
             }
@@ -174,7 +169,12 @@
             createSpinner();
 
 
-            Mapbender.elementRegistry.waitReady(widget.options.target).then(widget.setup.bind(widget));
+            Mapbender.elementRegistry.waitReady('.mb-element-map').then(function(mbMap) {
+                widget.map = mbMap.map.olMap;
+                widget.setup();
+            }, function() {
+                Mapbender.checkTarget('mbDigitizer');
+            });
 
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function (printClient) {
                 widget.printClient = printClient;
@@ -224,8 +224,6 @@
                 selector.previousSchema = schema;
 
             });
-
-            widget.map = $('#' + options.target).data('mapbenderMbMap').map.olMap;
 
             var initializeSelectorOrTitleElement = function () {
 

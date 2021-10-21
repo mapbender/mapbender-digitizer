@@ -25,12 +25,7 @@ class DigitizerAdminType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('target', 'Mapbender\\CoreBundle\\Element\Type\\TargetElementType',
-            array(
-                'element_class' => 'Mapbender\\CoreBundle\\Element\\Map',
-                'application'   => $options['application'],
-                'property_path' => '[target]',
-                'required'      => false))
+        $builder
             ->add('useAllScheme', 'Symfony\Component\Form\Extension\Core\Type\CheckboxType', array(
                 'required' => false,
                 'label' => 'mb.digitizer.useAllScheme',
