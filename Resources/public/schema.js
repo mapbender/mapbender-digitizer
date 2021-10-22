@@ -846,7 +846,7 @@
         onFeatureCollectionLoaded: function (featureCollection, xhr,options) {
             var schema = this;
             var newFeatures = featureCollection.map(function(featureData) {
-                var geometry = OpenLayers.Geometry.fromWKT(featureData.geometry);
+                var geometry = featureData.geometry && OpenLayers.Geometry.fromWKT(featureData.geometry) || null;
                 var feature = new OpenLayers.Feature.Vector(geometry, featureData.properties);
                 feature.fid = featureData.id;
                 return feature;
