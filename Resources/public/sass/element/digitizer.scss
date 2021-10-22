@@ -98,41 +98,6 @@ $selectColor: #F7F79A;
   }
 }
 
-.modal-body {
-  div.notifyjs-container > div.notifyjs-bootstrap-base > span {
-    display: block;
-    width: auto;
-    white-space: pre;
-  }
-  .image-container {
-    overflow: hidden;
-    > div.sub-container{
-      display: table-cell;
-      vertical-align: middle;
-    }
-  }
-  .file-container{
-    .fileinput-button {
-      position: relative;
-      overflow: hidden;
-      .progress-bar {
-        height: 3px;
-        margin-top: 2px;
-      }
-      > input {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        margin: 0;
-        opacity: 0;
-        cursor: pointer;
-      }
-    }
-  }
-}
-
-
 .mb-element-digitizer .digitizing-tool-set, .mb-element-digitizer .general-digitizer-buttons {
   font-size: 17px;
   margin-top: 10px;
@@ -147,17 +112,6 @@ $selectColor: #F7F79A;
     padding: 3px 4px;
   }
 }
-
-.colorpicker-saturation {
-    // TODO this is an evil hack: For unknown reasons, the default option does not work
-    //background-image: url(../img/bootstrap-colorpicker/saturation.png) !important;
-    background-image: url(components/bootstrap-colorpicker/img/bootstrap-colorpicker/saturation.png) !important;
-}
-
-.colorpicker-hue {
-    background-image: url(components/bootstrap-colorpicker/img/bootstrap-colorpicker/hue.png) !important;
-}
-
 
 .digitizer-dialog {
   padding: 0;
@@ -223,6 +177,110 @@ $selectColor: #F7F79A;
     }
     .ui-button {
       padding: 0;
+    }
+  }
+
+  .colorpicker-saturation {
+      // TODO this is an evil hack: For unknown reasons, the default option does not work
+      //background-image: url(../img/bootstrap-colorpicker/saturation.png) !important;
+      background-image: url(components/bootstrap-colorpicker/img/bootstrap-colorpicker/saturation.png);
+  }
+
+  .colorpicker-hue {
+      background-image: url(components/bootstrap-colorpicker/img/bootstrap-colorpicker/hue.png);
+  }
+
+  .form-group.text .text {
+      margin-left: 5px;
+      margin-right: 5px;
+  }
+  .select2-container {
+    display: block;
+    width: auto;
+    .select2-selection {
+      border: 1px solid #ccc;
+      border-radius: 0;
+    }
+  }
+
+  .slider-holder{
+    width: 100%;
+    vertical-align: top;
+    > .form-group{
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+    .ui-slider {
+      display: block;
+      position: relative;
+      height: 11px;
+      clear: both;
+      margin-top: 0;
+      margin-bottom: 2px;
+      top: 6px;
+      border: 1px solid #ccc;
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+      transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+      background-color: #f6f6f6;
+
+      .ui-slider-range {
+        display: block;
+        position: absolute;
+        padding: 0;
+        margin: 0;
+        right: 0;
+      }
+
+      .ui-slider-handle {
+        top: -6px;
+        display: block;
+        position: absolute;
+        width: 23px;
+        height: 23px;
+        z-index: 10;
+        margin-left: -10px;
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        background-color: #e2e2e2;
+        cursor: ew-resize;
+
+        &:focus {
+          background-color: #d10a10;
+          box-shadow: inset 0 1px 1px transparent, 0 0 8px #d10a10;
+          outline: none;
+        }
+      }
+    }
+  }
+  div.notifyjs-container > div.notifyjs-bootstrap-base > span {
+    display: block;
+    width: auto;
+    white-space: pre;
+  }
+  .image-container {
+    overflow: hidden;
+    > div.sub-container{
+      display: table-cell;
+      vertical-align: middle;
+    }
+  }
+  .file-container{
+    .fileinput-button {
+      position: relative;
+      overflow: hidden;
+      .progress-bar {
+        height: 3px;
+        margin-top: 2px;
+      }
+      > input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
     }
   }
 }
