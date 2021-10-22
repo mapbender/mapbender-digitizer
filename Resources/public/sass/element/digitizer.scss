@@ -96,20 +96,19 @@ $selectColor: #F7F79A;
   .save-all-features:not(.active) {
     opacity: 0.7;
   }
-}
+  .digitizing-tool-set, .general-digitizer-buttons {
+    font-size: 17px;
+    margin-top: 10px;
 
-.mb-element-digitizer .digitizing-tool-set, .mb-element-digitizer .general-digitizer-buttons {
-  font-size: 17px;
-  margin-top: 10px;
+    > button {
+      margin-left: -1px;
+      &:first-child {
+        margin-left: 0;
+      }
 
-  > button {
-    margin-left: -1px;
-    &:first-child {
-      margin-left: 0;
+      width: 26px;
+      padding: 3px 4px;
     }
-
-    width: 26px;
-    padding: 3px 4px;
   }
 }
 
