@@ -174,6 +174,9 @@ $selectColor: #F7F79A;
       margin-left: -10px;
       margin-right: -10px;
       margin-top: -10px;
+      .ui-tabs-panel {
+        padding: 10px;
+      }
       .ui-tabs-nav {
         background-color: #e9e9e9; // Matches .ui-widget-header in jQueryUi base theme
       }
@@ -194,6 +197,9 @@ $selectColor: #F7F79A;
   }
   .form-group > .form-group {
     margin-bottom: 0;
+  }
+  .ui-dialog-content form {
+    padding: 0 !important;  // Undo legacy (configured) inline padding styles
   }
 
 
