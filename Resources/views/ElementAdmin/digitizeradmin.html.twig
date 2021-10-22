@@ -1,7 +1,14 @@
-<div class="elementForm defaultForm elementFormDigitizer">
+<div class="elementFormDigitizer">
     <style media="all">
         .elementFormDigitizer label.block {
             display: block;
+        }
+        .elementFormDigitizer label.block + .inputWrapper {
+            display: block;
+            width: 100%;
+        }
+        .elementFormDigitizer .CodeMirror {
+            height: calc(100vh - 400px);
         }
     </style>
     <script language="JavaScript">
@@ -130,14 +137,9 @@
 
             // Resize popup dand elements
             var popupContainer = $(".popupContainer.modal > .popup");
-            var yamlEditorElement = $("#elementForm > div > div.inputWrapper.code-yaml > div");
 
             popupContainer.animate({
                 width:  '100%'
-            }, 350);
-
-            yamlEditorElement.animate({
-                height: $(window).height() - 375
             }, 350);
         })
     </script>
