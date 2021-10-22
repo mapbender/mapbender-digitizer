@@ -194,6 +194,13 @@ $selectColor: #F7F79A;
   }
   .ui-dialog-buttonpane {
     margin-top: 0;
+    button {
+      margin: 0 5px 5px 0;
+      &.btn+.btn {
+        // Undo .modal-footer collateral
+        margin-left: 0;
+      }
+    }
   }
   .form-group > .form-group {
     margin-bottom: 0;
