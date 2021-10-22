@@ -533,6 +533,9 @@
 
         element.popupDialog({
             title: "Stylemanager",
+            classes: {
+                'ui-dialog' : 'ui-dialog digitizer-dialog'
+            },
             modal: true,
             width: '500px',
             buttons: [{
