@@ -288,6 +288,12 @@
                 source: layer.getSource(),
                 handleDownEvent: handleDownEvent
             });
+            interaction.on(['modifyend', 'modifystart', 'translateend'], function(event) {
+                event.features.forEach(function(feature) {
+                    feature.set('dirty', true);
+                });
+            });
+            olMap.addInteraction(interaction);
 
             return interaction;
         }
