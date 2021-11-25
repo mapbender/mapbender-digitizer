@@ -650,47 +650,22 @@
         },
 
 
-        setModifiedState: function (feature, control) {
-            var schema = this;
-            $(schema.menu.frame).find(".save-all-features").addClass("active");
-
+        setModifiedState: function (feature, state, control) {
+            feature.isChanged = state;
             if (feature.isNew || feature.isCopy) {
                 return; // In case of non-saved feature
             }
-            feature.isChanged = true;
+            $(this.menu.frame).find(".save-all-features").toggleClass('active', !!this.getUnsavedFeatures().length);
+
             if (feature.__tr__) {
-                schema.menu.updateRow($(feature.__tr__), feature);
+                this.menu.updateRow($(feature.__tr__), feature);
             }
 
-            if (schema.getSchemaByFeature(feature).deactivateControlAfterModification) {
-                control && control.deactivate();
+            if (control && state && this.getSchemaByFeature(feature).deactivateControlAfterModification) {
+                control.deactivate();
             }
 
         },
-
-
-        unsetModifiedState: function (feature) {
-
-            var schema = this;
-
-            feature.isChanged = false;
-            feature.isNew = false;
-            feature.isCopy = false;
-
-            if (schema.getUnsavedFeatures().length === 0) {
-                $(schema.menu.frame).find(".save-all-features").removeClass("active");
-            }
-
-            var row = schema.menu.resultTable.getTableRowByFeature(feature);
-            if (!row) {
-                return; // in case of non-saved feature
-            }
-            row.find('.button.save').removeClass("active").attr('disabled', 'disabled');
-
-
-        },
-
-
         // Overwrite
         getStyleMapOptions: function (label) {
             return {};
@@ -1082,7 +1057,7 @@
                 }
 
 
-                schema.unsetModifiedState(feature);
+                schema.setModifiedState(feature, false);
 
 
                 var newFeature = createNewFeatureWithDBFeature(feature, response);

@@ -27,7 +27,7 @@
                 feature.attributes.schemaName = control.schemaName;
                 feature.isNew = true;
                 controlFactory.injectedMethods.introduceFeature(feature);
-                controlFactory.injectedMethods.setModifiedState(feature, this);
+                controlFactory.schema.setModifiedState(feature, true, this);
                 controlFactory.injectedMethods.onFeatureChange(feature,'add');
                 feature.layer.drawFeature(feature);
 
@@ -193,7 +193,7 @@
 
                         var fir = OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
                         var feature = this.polygon;
-                        controlFactory.injectedMethods.setModifiedState(feature, this.control);
+                        controlFactory.schema.setModifiedState(feature, true, this.control);
                         controlFactory.injectedMethods.onFeatureChange(feature,'donut');
                         return fir;
                     },
@@ -247,7 +247,7 @@
                     var reader = new jsts.io.WKTReader();
                     var geom = reader.read(wkt);
                     if (geom.isValid()) {
-                        controlFactory.injectedMethods.setModifiedState(feature, this);
+                        controlFactory.schema.setModifiedState(feature, true, this);
                         controlFactory.injectedMethods.onFeatureChange(feature,'modify');
                     } else {
                         // TODO there might be a better way to revert feature
@@ -287,7 +287,7 @@
                 },
 
                 onComplete: function (feature) {
-                    controlFactory.injectedMethods.setModifiedState(feature, this);
+                    controlFactory.schema.setModifiedState(feature, true, this);
                     controlFactory.injectedMethods.onFeatureChange(feature,'move');
                     controlFactory.injectedMethods.updateAfterMove(feature);
 

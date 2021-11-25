@@ -198,7 +198,7 @@
                     feature.geometry = feature.oldGeometry;
                     feature.isChanged = false;
                     schema.layer.drawFeature(feature);
-                    schema.unsetModifiedState(feature);
+                    schema.setModifiedState(feature, false, null);
 
                 }
                 if (configuration.modal) {

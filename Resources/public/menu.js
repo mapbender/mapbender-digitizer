@@ -50,9 +50,7 @@
                         return preventedByHooks || !schema.getSchemaByFeature(feature).allowEditData;
                     },
 
-                    introduceFeature: schema.introduceFeature.bind(schema),
-
-                    setModifiedState: schema.setModifiedState.bind(schema)
+                    introduceFeature: schema.introduceFeature.bind(schema)
                 }
 
 
