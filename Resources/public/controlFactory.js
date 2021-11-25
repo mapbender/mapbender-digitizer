@@ -26,11 +26,8 @@
 
                 feature.attributes.schemaName = control.schemaName;
                 feature.isNew = true;
-                controlFactory.injectedMethods.introduceFeature(feature);
-                controlFactory.schema.setModifiedState(feature, true, this);
-                controlFactory.injectedMethods.onFeatureChange(feature,'add');
-                feature.layer.drawFeature(feature);
-
+                controlFactory.schema.widget.onFeatureAdded(controlFactory.schema, feature);
+                controlFactory.schema.setModifiedState(feature, true);
                 control.deactivate();
 
         },
@@ -192,11 +189,9 @@
                     finalizeInteriorRing: function (event) {
 
                         var fir = OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
-                        var feature = this.polygon;
-                        controlFactory.schema.setModifiedState(feature, true, this.control);
-                        controlFactory.injectedMethods.onFeatureChange(feature,'donut');
+                        controlFactory.schema.widget.onFeatureModified(controlFactory.schema, this.polygon, {control: this.control});
                         return fir;
-                    },
+                    }
                 },
 
                 activate: function () {
@@ -247,8 +242,7 @@
                     var reader = new jsts.io.WKTReader();
                     var geom = reader.read(wkt);
                     if (geom.isValid()) {
-                        controlFactory.schema.setModifiedState(feature, true, this);
-                        controlFactory.injectedMethods.onFeatureChange(feature,'modify');
+                        controlFactory.schema.widget.onFeatureModified(controlFactory.schema, feature, {control: this});
                     } else {
                         // TODO there might be a better way to revert feature
                         controlFactory.layer.removeFeatures([feature]);
@@ -282,16 +276,8 @@
 
                 },
 
-                onDrag: function(feature,px) {
-                    return controlFactory.injectedMethods.updateOnMove(feature,px);
-                },
-
                 onComplete: function (feature) {
-                    controlFactory.schema.setModifiedState(feature, true, this);
-                    controlFactory.injectedMethods.onFeatureChange(feature,'move');
-                    controlFactory.injectedMethods.updateAfterMove(feature);
-
-
+                    controlFactory.schema.widget.onFeatureModified(controlFactory.schema, feature, {control: this});
                 }
             })
         }

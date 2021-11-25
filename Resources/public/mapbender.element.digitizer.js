@@ -457,11 +457,21 @@
             }
             return widget.dataManager;
         },
-
-
-
-
-
+        onFeatureAdded: function(schema, feature) {
+            schema.introduceFeature(feature);
+            schema.setModifiedState(feature, true);
+            var schemaReal = schema.getSchemaByFeature(feature);
+            if (schemaReal.openFormAfterEdit) {
+                schema.openFeatureEditDialog(feature);
+            }
+        },
+        onFeatureModified: function(schema, feature, options) {
+            schema.setModifiedState(feature, true, (options || {}).control || null);
+            var schemaReal = schema.getSchemaByFeature(feature);
+            if (schemaReal.openFormAfterModification) {
+                schema.openFeatureEditDialog(feature);
+            }
+        }
     });
 
 })(jQuery);

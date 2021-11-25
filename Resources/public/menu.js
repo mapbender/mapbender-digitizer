@@ -25,17 +25,6 @@
                 injectedMethods: {
 
 
-                    updateOnMove: function(feature,px)  {
-                        return schema.updateOnMove(feature,px);
-                    },
-
-                    // Override
-                    updateAfterMove: function(feature) {
-                        return schema.updateAfterMove(feature);
-                    },
-
-                    onFeatureChange: schema.onFeatureChange.bind(schema),
-
                     getDefaultAttributes: function () {
                         return schema.getDefaultProperties();
                     },
@@ -48,9 +37,7 @@
                     preventMove: function (feature) {
                         var preventedByHooks =  schema.evaluatedHooksForControlPrevention.onStart && schema.evaluatedHooksForControlPrevention.onStart(feature);
                         return preventedByHooks || !schema.getSchemaByFeature(feature).allowEditData;
-                    },
-
-                    introduceFeature: schema.introduceFeature.bind(schema)
+                    }
                 }
 
 
