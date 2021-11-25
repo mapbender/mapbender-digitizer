@@ -343,15 +343,15 @@
             }
 
             var $div = $("<div/>");
-            var $table = $div.resultTable(resultTableSettings);
-            menu.resultTable = $table.resultTable("instance");
-            menu.tableApi = $('table:first', $table).dataTable().api();
+            var $tableWrap = $div.resultTable(resultTableSettings);
+            menu.resultTable = $tableWrap.resultTable("instance");
+            menu.$table = $('table:first', $tableWrap);
+            menu.tableApi = menu.$table.dataTable().api();
 
             menu.resultTable.initializeColumnTitles();
 
 
-            frame.append($table);
-
+            frame.append($tableWrap);
         };
 
 
@@ -424,10 +424,26 @@
                 });
             }
         },
-
-
-
-
+        initializeTableEvents: function(schema) {
+            var self = this;
+            this.$table.on('mouseenter', '> tbody > tr', function() {
+                if (schema.selectControl) {
+                    schema.selectControl.highlight($(this).data('feature'), true);
+                }
+            });
+            this.$table.on('mouseleave', '> tbody > tr', function() {
+                if (schema.selectControl) {
+                    schema.selectControl.unhighlight($(this).data('feature'), true);
+                }
+            });
+            this.$table.on('click', '> tbody > tr', function() {
+                var feature = $(this).data('feature');
+                if (schema.selectControl) {
+                    schema.selectControl.highlight(feature, true);
+                }
+                schema.doDefaultClickAction(feature);
+            });
+        }
     };
 
 

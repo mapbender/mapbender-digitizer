@@ -2,54 +2,6 @@
 
     $.widget("digitizer.resultTable", $["vis-ui-js"].resultTable, {
 
-
-        initializeResultTableEvents: function (selectControl, processFeature) {
-            var resultTable = this;
-
-            var tableApi = resultTable.getApi();
-
-            var table = resultTable.element;
-
-            table.off('mouseenter', 'mouseleave', 'click');
-
-            table.delegate("tbody > tr", 'mouseenter', function () {
-                var tr = this;
-                var row = tableApi.row(tr);
-                var feature = row.data();
-                if (feature) {
-                    selectControl.highlight(feature,true);
-                } else {
-                    console.warn("No Feature in row", row);
-                }
-            });
-
-            table.delegate("tbody > tr", 'mouseleave', function () {
-                var tr = this;
-                var row = tableApi.row(tr);
-                var feature = row.data();
-                if (feature) {
-                    selectControl.unhighlight(feature,true);
-                } else {
-                    console.warn("No Feature in row", row);
-                }
-            });
-
-            table.delegate("tbody > tr", 'click', function () {
-                var tr = this;
-                var row = tableApi.row(tr);
-                var feature = row.data();
-
-                if (feature) {
-                    selectControl.highlight(feature,true);
-                    processFeature(feature);
-                } else {
-                    console.warn("No Feature in row", row);
-                }
-
-            });
-
-        },
-
         redrawResultTableFeatures: function (features) {
             var resultTable = this;
             var tableApi = resultTable.getApi();

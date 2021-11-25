@@ -250,8 +250,7 @@
         createMenu();
 
         addSelectControls();
-
-        schema.menu.resultTable.initializeResultTableEvents(schema.selectControl, schema.doDefaultClickAction.bind(schema));
+        schema.menu.initializeTableEvents(schema);
 
         schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
         schema.elementContextMenu = new Mapbender.Digitizer.ElementContextMenu(schema);
