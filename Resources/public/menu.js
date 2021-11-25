@@ -230,9 +230,9 @@
                         className: 'visibility',
                         cssClass: 'fa far fa-eye-slash',
                         onClick: function (feature, $btn) {
-                            $btn.toggleClass('fa-eye fa-eye-slash');
-                            $btn.closest('tr').toggleClass('invisible-feature');
-                            schema.toggleFeatureVisibility(feature);
+                            feature.visible = !feature.visible;
+                            schema.layer.drawFeature(feature);
+                            menu.updateRow($btn.closest('tr'), feature);
                         }
                     });
                 }
@@ -324,19 +324,12 @@
                 columns: generateResultDataTableColumns(),
                 buttons: buttons,
                 oLanguage: tableTranslation,
-                drawCallback: function (settings) {
-                    this.api().rows(function (idx, feature, row) {
-                        if (feature.visible) {
-                            $(row).removeClass('invisible-feature');
-                            $(row).find(".icon-visibility").attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'));
-                        } else {
-                            $(row).addClass('invisible-feature');
-                            $(row).find(".icon-visibility").attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleon'));
-                        }
-
-                    });
-
-
+                createdRow: function(tr, feature) {
+                    /** @see https://datatables.net/reference/option/createdRow */
+                    var $tr = $(tr);
+                    feature.__tr__ = tr;
+                    $tr.data('feature', feature);
+                    menu.initRow($tr, feature);
                 },
                 // This may be needed to prevent autocomplete in search field / [google chrome]
                 initComplete: function () {
@@ -388,7 +381,30 @@
             var menu = this;
             return $('form.search', menu.frame).length > 0 ? $('form.search', menu.frame).formData() : void 0;
         },
-
+        initRow: function($tr, feature) {
+            var schema = this.schema.widget.getSchemaByName(feature.attributes.schemaName);
+            $('.edit', $tr).prop('disabled', !schema.allowEditData);
+            $('.clone', $tr).prop('disabled', !schema.allowEditData || !schema.copy.enable);
+            $('.remove', $tr).prop('disabled', !schema.allowEditData || !schema.allowDelete);
+            $('.style', $tr).prop('disabled', !schema.allowCustomStyle);
+            this.updateRow($tr, feature);
+        },
+        updateRow: function($tr, feature) {
+            // @todo: find interaction button by function, not by icon / exact markup
+            var $displayToggle = $('.icon-visibility', $tr).closest('button');
+            if (feature.visible) {
+                $displayToggle.attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'));
+            } else {
+                $displayToggle.attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleon'));
+            }
+            $('.--save', $tr).prop('disabled', !feature.isChanged);
+            $('.printmetadata', $tr).toggleClass('active', !!feature.printMetadata);
+            $tr.toggleClass('invisible-feature', !feature.visible);
+            $('.visibility', $tr)
+                .toggleClass('fa-eye', !feature.visible)
+                .toggleClass('fa-eye-slash', !!feature.visible)
+            ;
+        },
         generateSearchForm: function () {
             var menu = this;
             var schema = menu.schema;

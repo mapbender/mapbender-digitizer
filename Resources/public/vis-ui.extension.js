@@ -70,7 +70,7 @@
 
 
 
-        redrawResultTableFeatures: function (features, callback) {
+        redrawResultTableFeatures: function (features) {
             var resultTable = this;
             var tableApi = resultTable.getApi();
 
@@ -81,14 +81,6 @@
             });
             tableApi.rows.add(featuresToRedraw);
             tableApi.draw();
-
-            tableApi.rows(function (idx, feature, row) {
-
-                callback(idx,feature,row);
-
-                return true;
-            });
-
         },
 
 

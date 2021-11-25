@@ -650,51 +650,21 @@
                 return;
             }
 
-            schema.menu.resultTable.redrawResultTableFeatures(features, function(idx,feature,row) {
-
-                // TODO this is a bad solution. Disabledness etc. should be controlled by buttons themselves, which unfortunately is not possible on behalf of visui result table
-                if (feature.isChanged) {
-                    $(row).find(".save").removeAttr("disabled");
-                }
-                if (feature.printMetadata) {
-                    $(row).find(".printmetadata").addClass("active");
-                }
-
-                if (!schema.getSchemaByFeature(feature).allowEditData) {
-                    $(row).find(".edit").attr("disabled","disabled");
-                    $(row).find(".clone").attr("disabled","disabled");
-                    $(row).find(".remove").attr("disabled","disabled");
-                }
-
-                if (!schema.getSchemaByFeature(feature).copy.enable) {
-                    $(row).find(".clone").attr("disabled","disabled");
-                }
-
-                if (!schema.getSchemaByFeature(feature).allowDelete) {
-                    $(row).find(".remove").attr("disabled","disabled");
-                }
-
-                if (!schema.getSchemaByFeature(feature).allowCustomStyle) {
-                    $(row).find(".style").attr("disabled","disabled");
-                }
-            });
-
+            schema.menu.resultTable.redrawResultTableFeatures(features);
         },
 
 
         setModifiedState: function (feature, control) {
-
             var schema = this;
             $(schema.menu.frame).find(".save-all-features").addClass("active");
 
-            var row = schema.menu.resultTable.getTableRowByFeature(feature);
-            if (!row) {
+            if (feature.isNew || feature.isCopy) {
                 return; // In case of non-saved feature
             }
             feature.isChanged = true;
-
-            row.find('.button.save').removeAttr("disabled");
-
+            if (feature.__tr__) {
+                schema.menu.updateRow($(feature.__tr__), feature);
+            }
 
             if (schema.getSchemaByFeature(feature).deactivateControlAfterModification) {
                 control && control.deactivate();
@@ -1241,14 +1211,6 @@
 
             schema.menu.resultTable.getApi().draw();
 
-        },
-
-        toggleFeatureVisibility: function (feature) {
-            var schema = this;
-            var layer = schema.layer;
-
-            feature.visible = !feature.visible;
-            layer.drawFeature(feature);
         },
 
         /** Override **/
