@@ -50,26 +50,6 @@
 
         },
 
-        hoverInResultTable: function (feature, highlight) {
-            var resultTable = this;
-
-            var domRow = resultTable.getDomRowByData(feature);
-            if (domRow && domRow.size()) {
-                resultTable.showByRow(domRow);
-
-                if (highlight) {
-                    domRow.addClass('hover');
-                } else {
-                    domRow.removeClass('hover');
-                }
-
-            }
-
-        },
-
-
-
-
         redrawResultTableFeatures: function (features) {
             var resultTable = this;
             var tableApi = resultTable.getApi();

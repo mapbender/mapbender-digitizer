@@ -184,10 +184,9 @@
                         return;
                     }
 
-                    if (!schema.disableFeatureHighlightInResultTable && !ommitResultTable) {
-                        schema.processFeature(feature, function (feature) {
-                            schema.menu.resultTable.hoverInResultTable(feature, true);
-                        });
+                    if (!schema.disableFeatureHighlightInResultTable && !ommitResultTable && feature.__tr__) {
+                        $(feature.__tr__).addClass('hover');
+                        schema.menu.pageToRow(feature.__tr__);
                     }
 
                     layer.drawFeature(feature);
@@ -202,10 +201,8 @@
                     if (!schema.layer.features.includes(feature)) {
                         return;
                     }
-                    if (!schema.disableFeatureHighlightInResultTable && !ommitResultTable) {
-                        schema.processFeature(feature, function (feature) {
-                            schema.menu.resultTable.hoverInResultTable(feature, false);
-                        });
+                    if (!schema.disableFeatureHighlightInResultTable && !ommitResultTable && feature.__tr__) {
+                        $(feature.__tr__).removeClass('hover');
                     }
 
 

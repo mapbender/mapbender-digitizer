@@ -345,6 +345,7 @@
             var $div = $("<div/>");
             var $table = $div.resultTable(resultTableSettings);
             menu.resultTable = $table.resultTable("instance");
+            menu.tableApi = $('table:first', $table).dataTable().api();
 
             menu.resultTable.initializeColumnTitles();
 
@@ -404,6 +405,13 @@
                 .toggleClass('fa-eye', !feature.visible)
                 .toggleClass('fa-eye-slash', !!feature.visible)
             ;
+        },
+        pageToRow: function(tr) {
+            var rowsOnOnePage = this.tableApi.page.len();
+
+            var nodePosition = this.tableApi.rows({order: 'current'}).nodes().indexOf(tr);
+            var pageNumber = Math.floor(nodePosition / rowsOnOnePage);
+            this.tableApi.page(pageNumber).draw(false);
         },
         generateSearchForm: function () {
             var menu = this;
