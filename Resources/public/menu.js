@@ -7,12 +7,18 @@
         var menu = this;
         menu.schema = schema;
         var frame = menu.frame = $("<div />").addClass('frame').addClass('schema-'+schema.schemaName);
-
-
-        var appendToolset = function () {
-            var widget = schema.widget;
+        this.appendToolset();
+        this.appendGeneralDigitizerButtons();
+        this.generateSearchForm();
+        frame.append('<div style="clear:both;"/>');
+        this.generateResultDataTable();
+        frame.hide();
+    };
+    Object.assign(Mapbender.Digitizer.Menu.prototype, {
+        appendToolset: function () {
+            var menu = this;
+            var schema = this.schema;
             var layer = schema.layer;
-
 
             var toolset = schema.toolset;
 
@@ -21,10 +27,7 @@
                 schema: schema,
                 layer: layer,
                 geomType: schema.getGeomType(),
-
                 injectedMethods: {
-
-
                     getDefaultAttributes: function () {
                         return schema.getDefaultProperties();
                     },
@@ -39,21 +42,15 @@
                         return preventedByHooks || !schema.getSchemaByFeature(feature).allowEditData;
                     }
                 }
-
-
             });
 
-
             if (schema.allowDigitize) {
-                frame.append(menu.toolSet.element);
+                this.frame.append(this.toolSet.element);
             }
-
-
-        };
-
-
-        var appendGeneralDigitizerButtons = function () {
-
+        },
+        appendGeneralDigitizerButtons: function () {
+            var schema = this.schema;
+            var frame = this.frame;
             var buttons = {};
 
             if (schema.allowRefresh) {
@@ -146,13 +143,10 @@
                 $div.append($label);
                 frame.append($div);
             }
-        };
-
-
-        var generateResultDataTable = function () {
-
-            var generateResultDataTableButtons = function () {
-
+        },
+        generateResultDataTableButtons: function () {
+            var menu = this;
+            var schema = this.schema;
                 var buttons = [];
 
                 if (schema.allowLocate) {
@@ -260,18 +254,13 @@
                 }
 
                 return buttons;
-
-
-            };
-
-            var generateResultDataTableColumns = function () {
-
+        },
+        generateResultDataTableColumns: function () {
+            var schema = this.schema;
                 var columns = [];
 
                 var createResultTableDataFunction = function (columnId,fieldSettings) {
-
                     return function (feature, type, val, meta) {
-
                         var data = feature.data[columnId];
                         if (typeof (data) == 'string') {
                             data = data.escapeHtml();
@@ -288,13 +277,14 @@
                 });
 
                 return columns;
-
-            };
-
-
+        },
+        generateResultDataTable: function () {
+            var menu = this;
+            var frame = this.frame;
+            var schema = this.schema;
             var tableTranslation = Mapbender.DigitizerTranslator.tableTranslations(schema.tableTranslation);
 
-            var buttons = generateResultDataTableButtons();
+            var buttons = this.generateResultDataTableButtons();
 
             var resultTableSettings = {
                 lengthChange: false,
@@ -306,7 +296,7 @@
                 paging: true,
                 selectable: false,
                 autoWidth: false,
-                columns: generateResultDataTableColumns(),
+                columns: this.generateResultDataTableColumns(),
                 buttons: buttons,
                 oLanguage: tableTranslation,
                 createdRow: function(tr, feature) {
@@ -319,10 +309,8 @@
                 // This may be needed to prevent autocomplete in search field / [google chrome]
                 initComplete: function () {
                     //$(this.api().table().container()).find('input').parent().wrap('<form>').parent().attr('autocomplete', 'off');
-
                 }
             };
-
             if (schema.view.settings) {
                 _.extend(resultTableSettings, schema.view.settings);
             }
@@ -332,30 +320,9 @@
             menu.resultTable = $tableWrap.resultTable("instance");
             menu.$table = $('table:first', $tableWrap);
             menu.tableApi = menu.$table.dataTable().api();
-
             menu.resultTable.initializeColumnTitles();
-
-
             frame.append($tableWrap);
-        };
-
-
-        appendToolset();
-
-        appendGeneralDigitizerButtons();
-
-        menu.generateSearchForm();
-
-        frame.append('<div style="clear:both;"/>');
-
-        generateResultDataTable();
-
-        frame.hide();
-    };
-
-
-    Mapbender.Digitizer.Menu.prototype = {
-
+        },
         deactivateControls: function () {
             var menu = this;
 
@@ -442,7 +409,7 @@
                 }
             });
         }
-    };
+    });
 
 
 
