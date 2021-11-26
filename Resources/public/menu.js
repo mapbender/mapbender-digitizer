@@ -315,13 +315,24 @@
                 _.extend(resultTableSettings, schema.view.settings);
             }
 
+            var filterPlaceholder = this.getFilterPlaceholder(resultTableSettings.columns);
             var $div = $("<div/>");
             var $tableWrap = $div.resultTable(resultTableSettings);
             menu.resultTable = $tableWrap.resultTable("instance");
             menu.$table = $('table:first', $tableWrap);
             menu.tableApi = menu.$table.dataTable().api();
-            menu.resultTable.initializeColumnTitles();
+            $('.dataTables_filter input', $tableWrap).attr('placeholder', filterPlaceholder);
             frame.append($tableWrap);
+        },
+        getFilterPlaceholder: function(columnsOptions) {
+            var titles = [];
+            for (var i = 0; i < columnsOptions.length; ++i) {
+                var columnOptions = columnsOptions[i];
+                if (columnOptions.title && columnOptions.searchable || typeof columnOptions.searchable === 'undefined') {
+                    titles.push(columnOptions.title);
+                }
+            }
+            return titles.join(', ');
         },
         deactivateControls: function () {
             var menu = this;

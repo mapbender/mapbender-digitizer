@@ -1,23 +1,6 @@
 (function ($) {
 
     $.widget("digitizer.resultTable", $["vis-ui-js"].resultTable, {
-        initializeColumnTitles: function () {
-            var resultTable = this;
-
-            var searchableColumnTitles = _.pluck(_.reject(resultTable.options.columns, function (column) {
-                if (!column.sTitle) {
-                    return true;
-                }
-
-                if (column.hasOwnProperty('searchable') && column.searchable === false) {
-                    return true;
-                }
-            }), 'sTitle');
-
-            resultTable.element.find(".dataTables_filter input[type='search']").attr('placeholder', searchableColumnTitles.join(', '));
-        },
-
-
         // Allow Button disable
         genNavigation: function (elements) {
             var html = $('<div class="button-navigation"/>');
