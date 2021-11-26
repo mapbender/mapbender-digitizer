@@ -1161,13 +1161,10 @@
             var layer = schema.layer;
 
             layer.features.forEach(function (feature) {
-
-                feature.toggleVisibility(schema.featureVisibility);
-                layer.drawFeature(feature);
+                feature.visible = schema.featureVisibility;
             });
-
+            layer.redraw();
             schema.menu.resultTable.getApi().draw();
-
         },
 
         getDefaultProperties: function () {

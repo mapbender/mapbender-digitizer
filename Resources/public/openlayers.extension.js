@@ -15,14 +15,6 @@
         OpenLayers.Feature.prototype.getClusterSize = function () {
             return this.cluster ? this.cluster.length : null;
         };
-
-
-
-        OpenLayers.Feature.prototype.toggleVisibility = function(visible) {
-            var feature = this;
-            feature.visible = visible;
-        };
-
     });
 
 })();
