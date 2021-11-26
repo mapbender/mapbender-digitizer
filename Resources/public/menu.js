@@ -312,6 +312,14 @@
         },
         initRow: function($tr, feature) {
             var schema = this.schema.widget.getSchemaByName(feature.attributes.schemaName);
+            $tr.data('schema', schema);
+            if (!schema.allowPrintMetadata) {
+                $('.printmetadata', $tr).remove();
+            }
+            if (!schema.allowDelete) {
+                $('.-fn-delete', $tr).remove();
+            }
+
             $('.-fn-edit', $tr).prop('disabled', !schema.allowEditData);
             $('.-fn-clone', $tr).prop('disabled', !schema.allowEditData || !schema.copy.enable);
             $('.-fn-delete', $tr).prop('disabled', !schema.allowEditData || !schema.allowDelete);
@@ -421,21 +429,13 @@
             this.$table.on('click', 'tbody .printmetadata', function() {
                 var $btn = $(this);
                 var feature = $btn.closest('tr').data('feature');
-                if (!schema.getSchemaByFeature(feature).allowPrintMetadata) {
-                    $.notify("Der Druck von Detailinformationen ist für Features dieses Schemas deaktiviert");
-                    return false;
-                }
                 feature.printMetadata = !feature.printMetadata;
                 $btn.toggleClass('active', feature.printMetadata);
                 return false;
             });
             this.$table.on('click', 'tbody .-fn-delete', function() {
                 var feature = $(this).closest('tr').data('feature');
-                if (schema.getSchemaByFeature(feature).allowDelete) {
-                    schema.removeFeature(feature);
-                } else {
-                    $.notify("Deletion is not allowed");
-                }
+                schema.removeFeature(feature);
                 return false;
             });
         }
