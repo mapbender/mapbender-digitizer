@@ -421,21 +421,25 @@
         },
         initializeTableEvents: function(schema) {
             this.$table.on('mouseenter', '> tbody > tr', function() {
-                if (schema.selectControl) {
-                    schema.selectControl.highlight($(this).data('feature'), true);
+                var feature = $(this).data('feature');
+                if (feature && schema.selectControl) {
+                    schema.selectControl.highlight(feature, true);
                 }
             });
             this.$table.on('mouseleave', '> tbody > tr', function() {
-                if (schema.selectControl) {
-                    schema.selectControl.unhighlight($(this).data('feature'), true);
+                var feature = $(this).data('feature');
+                if (schema.selectControl && feature) {
+                    schema.selectControl.unhighlight(feature, true);
                 }
             });
             this.$table.on('click', '> tbody > tr', function() {
                 var feature = $(this).data('feature');
                 if (schema.selectControl) {
                     schema.selectControl.highlight(feature, true);
+                    if (feature) {
+                        schema.doDefaultClickAction(feature);
+                    }
                 }
-                schema.doDefaultClickAction(feature);
             });
         }
     };
