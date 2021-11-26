@@ -409,8 +409,17 @@
                 });
             }
         },
+        replaceTableRows: function(features) {
+            this.tableApi.clear();
+            this.tableApi.rows.add(features);
+            this.tableApi.draw();
+        },
+        removeTableRow: function(feature) {
+            if (feature && feature.__tr__) {
+                this.tableApi.row(feature.__tr__).remove().draw();
+            }
+        },
         initializeTableEvents: function(schema) {
-            var self = this;
             this.$table.on('mouseenter', '> tbody > tr', function() {
                 if (schema.selectControl) {
                     schema.selectControl.highlight($(this).data('feature'), true);

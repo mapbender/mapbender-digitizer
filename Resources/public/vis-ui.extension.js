@@ -1,48 +1,6 @@
 (function ($) {
 
     $.widget("digitizer.resultTable", $["vis-ui-js"].resultTable, {
-
-        redrawResultTableFeatures: function (features) {
-            var resultTable = this;
-            var tableApi = resultTable.getApi();
-
-            tableApi.clear();
-
-            var featuresToRedraw = features.filter(function (feature) {
-                return !feature.isNew && !feature.cluster;
-            });
-            tableApi.rows.add(featuresToRedraw);
-            tableApi.draw();
-        },
-
-
-        getTableRowByFeature: function (feature) {
-            var resultTable = this;
-            var row = resultTable.getDomRowByData(feature);
-            return row;
-        },
-
-
-        refreshFeatureRowInDataTable: function (feature) {
-            var resultTable = this;
-            var tableApi = resultTable.getApi();
-
-            // TODO check this
-            tableApi.row(resultTable.getDomRowByData(feature)).invalidate();
-            tableApi.draw();
-
-        },
-
-        deleteFeatureRowInDataTable: function (feature) {
-            var resultTable = this;
-            var tableApi = resultTable.getApi();
-
-            var row = tableApi.row(resultTable.getDomRowByData(feature));
-            row.remove();
-            tableApi.draw();
-
-        },
-
         initializeColumnTitles: function () {
             var resultTable = this;
 

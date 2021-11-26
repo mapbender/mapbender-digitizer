@@ -96,13 +96,6 @@
                 });
             },
 
-            getLayerFeatures: function() {
-                var schema = this;
-                var layer = schema.layer;
-
-                return layer.features.filter(function(feature) { return !feature.cluster; });
-            },
-
             openFeatureEditDialog: function (feature) {
                 var schema = this;
                 return Mapbender.Digitizer.Scheme.prototype.openFeatureEditDialog.apply(schema, [schema.getFeatureAsList(feature)[0]]);

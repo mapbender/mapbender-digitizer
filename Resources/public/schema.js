@@ -633,22 +633,13 @@
         },
 
 
-        reloadFeatures: function (ommitResultTable) {
-            var schema = this;
-            var layer = schema.layer;
-            var features = schema.getLayerFeatures();
-
-            layer.removeAllFeatures();
-            layer.addFeatures(features);
-
-
-            if(ommitResultTable) {
-                return;
-            }
-
-            schema.menu.resultTable.redrawResultTableFeatures(features);
+        reloadFeatures: function () {
+            this.layer.redraw();
+            var tableFeatures = this.layer.features.filter(function(feature) {
+                return feature && !feature.cluster && !feature.isNew;
+            });
+            this.menu.replaceTableRows(tableFeatures);
         },
-
 
         setModifiedState: function (feature, state, control) {
             feature.isChanged = state;
@@ -790,13 +781,11 @@
                 var geometry = featureData.geometry && OpenLayers.Geometry.fromWKT(featureData.geometry) || null;
                 var feature = new OpenLayers.Feature.Vector(geometry, featureData.properties);
                 feature.fid = featureData.id;
+                schema.introduceFeature(feature);
                 return feature;
             });
-
-            schema.layer.features = newFeatures;
-            schema.layer.features.forEach(function (feature) {
-                schema.introduceFeature(feature);
-            });
+            this.layer.removeAllFeatures();
+            this.layer.addFeatures(newFeatures);
 
             schema.reloadFeatures();
 
@@ -877,14 +866,15 @@
 
         // Overwrite
         getLayerFeatures: function () {
-            var schema = this;
-            return schema.layer.features;
+            return this.layer.features.filter(function(feature) { return !feature.cluster; });
         },
 
         removeFeatureFromUI: function (feature) {
             var schema = this;
-            schema.layer.features = _.without(schema.getLayerFeatures(), feature);
-            schema.reloadFeatures();
+            if (feature && this.layer.features.indexOf(feature) !== -1) {
+                this.layer.removeFeatures([feature]);
+            }
+            this.menu.removeTableRow(feature);
         },
 
         removeAllFeatures: function () {
@@ -1079,13 +1069,9 @@
                 schema.removeFeatureFromUI(feature);
                 schema.layer.addFeatures([newFeature]);
 
-                schema.reloadFeatures();
-
-
-                schema.menu.resultTable.refreshFeatureRowInDataTable(newFeature);
-
                 $.notify(Mapbender.trans('mb.digitizer.feature.save.successfully'), 'info');
 
+                schema.reloadFeatures();
 
                 schema.tryMailManager(newFeature);
 
