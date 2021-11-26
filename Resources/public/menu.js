@@ -144,116 +144,71 @@
                 frame.append($div);
             }
         },
-        generateResultDataTableButtons: function () {
+        renderTableButtons: function(schema) {
+            var $btn0 = $('<button type="button" class="button">');
+            var $icon0 = $(document.createElement('i'));
+            var buttons = [];
             var menu = this;
-            var schema = this.schema;
-                var buttons = [];
-
-                if (schema.allowLocate) {
-                    buttons.push({
-                        title: Mapbender.trans('mb.digitizer.feature.zoomTo'),
-                        className: '--zoom',
-                        cssClass: 'fa fas fa-crosshairs',
-                        onClick: function (feature, ui) {
-                            schema.zoomToFeature(feature);
-                        }
-                    });
-                }
-
-                if (schema.allowEditData && schema.allowSaveInResultTable) {
-                    buttons.push({
-                        title: Mapbender.trans('mb.digitizer.feature.save.title'),
-                        className: '--save',
-                        cssClass: ' fa fa-floppy-o',
-                        disabled: true,
-                        onClick: function (feature, ui) {
-                            schema.saveFeature(feature);
-                        }
-                    });
-                }
-
-                if (schema.allowEditData) {
-                    buttons.push({
-                        title: Mapbender.trans('mb.digitizer.feature.edit'),
-                        className: '--edit',
-                        cssClass: 'fa far fa-edit',
-                        onClick: function (feature, ui) {
-                            schema.openFeatureEditDialog(feature);
-                        }
-                    });
-                }
-                if (schema.allowEditData && schema.copy.enable) {
-                    buttons.push({
-                        title: Mapbender.trans('mb.digitizer.feature.clone.title'),
-                        className: 'clone',
-                        cssClass: ' fa fa-files-o',
-                        onClick: function (feature, ui) {
-                            schema.copyFeature(feature);
-                        }
-                    });
-                }
-                if (schema.allowCustomStyle) {
-                    buttons.push({
-                        title: Mapbender.trans('mb.digitizer.feature.style.change'),
-                        className: '--style',
-                        cssClass: 'fa fas fa-eyedropper',
-                        onClick: function (feature, ui) {
-                            schema.openChangeStyleDialog(feature);
-                        }
-                    });
-                }
-
-                if (schema.allowChangeVisibility) {
-                    buttons.push({
-                        title: Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'),
-                        className: 'visibility',
-                        cssClass: 'fa far fa-eye-slash',
-                        onClick: function (feature, $btn) {
-                            feature.visible = !feature.visible;
-                            schema.layer.drawFeature(feature);
-                            menu.updateRow($btn.closest('tr'), feature);
-                        }
-                    });
-                }
-
-                if (schema.allowPrintMetadata) {
-                    buttons.push({
-                        title: 'Sachdaten drucken',
-                        className: 'printmetadata',
-                        cssClass: 'fa fas fa-print',
-                        onClick: function (feature, ui, b, c) {
-                            if (!schema.getSchemaByFeature(feature).allowPrintMetadata) {
-                                $.notify("Der Druck von Detailinformationen ist für Features dieses Schemas deaktiviert");
-                                return;
-                            }
-                            if (!feature.printMetadata) {
-                                feature.printMetadata = true;
-                                ui.addClass("active");
-                            } else {
-                                feature.printMetadata = false;
-                                ui.removeClass("active");
-                            }
-                        }
-                    });
-                }
-
-                if (schema.allowDelete) {
-
-                    buttons.push({
-                        title: Mapbender.trans('mb.digitizer.feature.remove.title'),
-                        className: '--remove',
-                        cssClass: 'critical fa fas fa-times',
-                        onClick: function (feature, ui) {
-                            if (schema.getSchemaByFeature(feature).allowDelete) {
-                                schema.removeFeature(feature);
-                            } else {
-                                $.notify("Deletion is not allowed");
-                            }
-                        }
-                    });
-                }
-
-                return buttons;
+            if (schema.allowLocate) {
+                buttons.push($btn0.clone()
+                    .attr('title', Mapbender.trans('mb.digitizer.feature.zoomTo'))
+                    .addClass('-fn-zoom')
+                    .append($icon0.clone().addClass('fa fas fa-crosshairs'))
+                );
+            }
+            if (schema.allowEditData && schema.allowSaveInResultTable) {
+                buttons.push($btn0.clone()
+                    .attr('title', Mapbender.trans('mb.digitizer.feature.save.title'))
+                    .addClass('-fn-save')
+                    .append($icon0.clone().addClass('fa fa-floppy-o'))
+                );
+            }
+            if (schema.allowEditData) {
+                buttons.push($btn0.clone()
+                    .attr('title', Mapbender.trans('mb.digitizer.feature.edit'))
+                    .addClass('-fn-edit')
+                    .append($icon0.clone().addClass('fa far fa-edit'))
+                );
+            }
+            if (schema.allowEditData && schema.copy.enable) {
+                buttons.push($btn0.clone()
+                    .attr('title', Mapbender.trans('mb.digitizer.feature.clone.title'))
+                    .addClass('-fn-clone')
+                    .append($icon0.clone().addClass('fa fa-files-o'))
+                );
+            }
+            if (schema.allowCustomStyle) {
+                buttons.push($btn0.clone()
+                    .attr('title', Mapbender.trans('mb.digitizer.feature.style.change'))
+                    .addClass('-fn-edit-style')
+                    .append($icon0.clone().addClass('fa fas fa-eyedropper'))
+                );
+            }
+            if (schema.allowChangeVisibility) {
+                buttons.push($btn0.clone()
+                    .attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'))
+                    .addClass('-fn-toggle-visibility')
+                    .append($icon0.clone().addClass('fa far fa-eye-slash'))
+                );
+            }
+            if (schema.allowPrintMetadata) {
+                buttons.push($btn0.clone()
+                    .attr('title', 'Sachdaten drucken') // @todo: translations
+                    .addClass('printmetadata')
+                    .append($icon0.clone().addClass('fa fas fa-print'))
+                );
+            }
+            if (schema.allowDelete) {
+                buttons.push($btn0.clone()
+                    .attr('title', Mapbender.trans('mb.digitizer.feature.remove.title'))
+                    .addClass('-fn-delete critical')
+                    .append($icon0.clone().addClass('fa fas fa-times'))
+                );
+            }
+            for (var i = 0; i < buttons.length; ++i) {
+                buttons[i].append($(document.createElement('span')).addClass('sr-only').text(buttons[i].attr('title')));
+            }
+            return $(document.createElement('div')).append(buttons).html();
         },
         generateResultDataTableColumns: function () {
             var schema = this.schema;
@@ -284,8 +239,6 @@
             var schema = this.schema;
             var tableTranslation = Mapbender.DigitizerTranslator.tableTranslations(schema.tableTranslation);
 
-            var buttons = this.generateResultDataTableButtons();
-
             var resultTableSettings = {
                 lengthChange: false,
                 pageLength: schema.pageLength,
@@ -297,7 +250,6 @@
                 selectable: false,
                 autoWidth: false,
                 columns: this.generateResultDataTableColumns(),
-                buttons: buttons,
                 oLanguage: tableTranslation,
                 createdRow: function(tr, feature) {
                     /** @see https://datatables.net/reference/option/createdRow */
@@ -316,6 +268,19 @@
             }
 
             var filterPlaceholder = this.getFilterPlaceholder(resultTableSettings.columns);
+            // Add buttons column
+            resultTableSettings.columnDefs = [{
+                targets: -1,
+                width: '1%',
+                orderable: false,
+                searchable: false,
+                className: 'interactions text-nowrap text-right',
+                defaultContent: this.renderTableButtons(schema)
+            }];
+            resultTableSettings.columns.push({
+                data: null,
+                title: ''
+            });
             var $div = $("<div/>");
             var $tableWrap = $div.resultTable(resultTableSettings);
             menu.resultTable = $tableWrap.resultTable("instance");
@@ -347,24 +312,23 @@
         },
         initRow: function($tr, feature) {
             var schema = this.schema.widget.getSchemaByName(feature.attributes.schemaName);
-            $('.edit', $tr).prop('disabled', !schema.allowEditData);
-            $('.clone', $tr).prop('disabled', !schema.allowEditData || !schema.copy.enable);
-            $('.remove', $tr).prop('disabled', !schema.allowEditData || !schema.allowDelete);
-            $('.style', $tr).prop('disabled', !schema.allowCustomStyle);
+            $('.-fn-edit', $tr).prop('disabled', !schema.allowEditData);
+            $('.-fn-clone', $tr).prop('disabled', !schema.allowEditData || !schema.copy.enable);
+            $('.-fn-delete', $tr).prop('disabled', !schema.allowEditData || !schema.allowDelete);
+            $('.-fn-edit-style', $tr).prop('disabled', !schema.allowCustomStyle);
             this.updateRow($tr, feature);
         },
         updateRow: function($tr, feature) {
-            // @todo: find interaction button by function, not by icon / exact markup
-            var $displayToggle = $('.icon-visibility', $tr).closest('button');
+            var $displayToggle = $('.-fn-toggle-visibility', $tr).closest('button');
             if (feature.visible) {
                 $displayToggle.attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'));
             } else {
                 $displayToggle.attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleon'));
             }
-            $('.--save', $tr).prop('disabled', !feature.isChanged);
+            $('.-fn-save', $tr).prop('disabled', !feature.isChanged);
             $('.printmetadata', $tr).toggleClass('active', !!feature.printMetadata);
             $tr.toggleClass('invisible-feature', !feature.visible);
-            $('.visibility', $tr)
+            $('> i', $displayToggle)
                 .toggleClass('fa-eye', !feature.visible)
                 .toggleClass('fa-eye-slash', !!feature.visible)
             ;
@@ -398,6 +362,7 @@
             }
         },
         initializeTableEvents: function(schema) {
+            var menu = this;
             this.$table.on('mouseenter', '> tbody > tr', function() {
                 var feature = $(this).data('feature');
                 if (feature && schema.selectControl) {
@@ -419,9 +384,60 @@
                     }
                 }
             });
+            this.$table.on('click', 'tbody .-fn-zoom', function() {
+                var feature = $(this).closest('tr').data('feature');
+                schema.zoomToFeature(feature);
+                return false;
+            });
+            this.$table.on('click', 'tbody .-fn-save', function() {
+                var feature = $(this).closest('tr').data('feature');
+                schema.saveFeature(feature);
+                return false;
+            });
+            this.$table.on('click', 'tbody .-fn-edit', function() {
+                var feature = $(this).closest('tr').data('feature');
+                schema.openFeatureEditDialog(feature);
+                return false;
+            });
+
+            this.$table.on('click', 'tbody .-fn-clone', function() {
+                var feature = $(this).closest('tr').data('feature');
+                schema.copyFeature(feature);
+                return false;
+            });
+            this.$table.on('click', 'tbody .-fn-edit-style', function() {
+                var feature = $(this).closest('tr').data('feature');
+                schema.openChangeStyleDialog(feature);
+                return false;
+            });
+            this.$table.on('click', 'tbody .-fn-toggle-visibility', function() {
+                var $row = $(this).closest('tr');
+                var feature = $row.data('feature');
+                feature.visible = !feature.visible;
+                schema.layer.drawFeature(feature);
+                menu.updateRow($row, feature);
+                return false;
+            });
+            this.$table.on('click', 'tbody .printmetadata', function() {
+                var $btn = $(this);
+                var feature = $btn.closest('tr').data('feature');
+                if (!schema.getSchemaByFeature(feature).allowPrintMetadata) {
+                    $.notify("Der Druck von Detailinformationen ist für Features dieses Schemas deaktiviert");
+                    return false;
+                }
+                feature.printMetadata = !feature.printMetadata;
+                $btn.toggleClass('active', feature.printMetadata);
+                return false;
+            });
+            this.$table.on('click', 'tbody .-fn-delete', function() {
+                var feature = $(this).closest('tr').data('feature');
+                if (schema.getSchemaByFeature(feature).allowDelete) {
+                    schema.removeFeature(feature);
+                } else {
+                    $.notify("Deletion is not allowed");
+                }
+                return false;
+            });
         }
     });
-
-
-
 })();

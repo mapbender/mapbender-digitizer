@@ -63,7 +63,7 @@ class Digitizer extends BaseElement
             'menu', 'contextMenu', 'utilities',
             'featureEditDialog', 'controlFactory', 'featureStyleEditor', 'mapbender.layermanager',
             'mapbender.digitizer-translator',
-            'queryEngine', 'openlayers.extension', 'vis-ui.extension');
+            'queryEngine', 'openlayers.extension');
 
 
         $js = array();
