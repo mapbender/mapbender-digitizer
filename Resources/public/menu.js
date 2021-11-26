@@ -1,6 +1,22 @@
 (function () {
     "use strict";
 
+    /**
+     * @param {String} str
+     * @returns {string}
+     */
+    function escapeHtml(str) {
+        return str.replace(/["&'\/<>]/g, function (a) {
+            return {
+                '"': '&quot;',
+                '&': '&amp;',
+                "'": '&#39;',
+                '/': '&#47;',
+                '<': '&lt;',
+                '>': '&gt;'
+            }[a];
+        });
+    }
 
     Mapbender.Digitizer.Menu = function (schema) {
 
@@ -218,12 +234,11 @@
                     return function (feature, type, val, meta) {
                         var data = feature.data[columnId];
                         if (typeof (data) == 'string') {
-                            data = data.escapeHtml();
+                            data = escapeHtml(data);
                         }
                         return data || '';
                     };
                 };
-
 
                 $.each(schema.tableFields, function (columnId, fieldSettings) {
                     fieldSettings.title = fieldSettings.label;
