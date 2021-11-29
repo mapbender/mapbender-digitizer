@@ -1153,7 +1153,7 @@
                 feature.visible = schema.featureVisibility;
             });
             layer.redraw();
-            schema.menu.resultTable.getApi().draw();
+            schema.menu.redrawTable();
         },
 
         getDefaultProperties: function () {

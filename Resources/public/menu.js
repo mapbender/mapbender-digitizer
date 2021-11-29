@@ -160,11 +160,18 @@
                 frame.append($div);
             }
         },
+        redrawTable: function() {
+            this.tableApi.draw({paging: 'page'});
+            var self = this;
+            $('> tbody tr', this.$table).each(function() {
+                var $tr = $(this);
+                self.updateRow($tr, $tr.data('feature'));
+            });
+        },
         renderTableButtons: function(schema) {
             var $btn0 = $('<button type="button" class="button">');
             var $icon0 = $(document.createElement('i'));
             var buttons = [];
-            var menu = this;
             if (schema.allowLocate) {
                 buttons.push($btn0.clone()
                     .attr('title', Mapbender.trans('mb.digitizer.feature.zoomTo'))
