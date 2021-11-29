@@ -324,19 +324,6 @@
 
             createElementContextMenu();
 
-            // widget.map.div.oncontextmenu = function(e) {
-            //
-            //     if(!e){ //dear IE...
-            //         var e = window.event;
-            //         e.returnValue = false;
-            //     }
-            //     var f = widget.getCurrentSchema().layer.getFeatureFromEvent(e);
-            //     alert(f);
-            //     //f is the pointed vector.feature :)
-            //
-            //     return false; //Prevent display of browser context menu
-            // };
-
             widget.registerMapEvents();
 
             widget._trigger('ready');

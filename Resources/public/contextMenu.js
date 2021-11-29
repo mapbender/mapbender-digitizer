@@ -4,9 +4,6 @@
     var ContextMenu = function (schema) {
         var contextMenu = this;
         contextMenu.schema = schema;
-        contextMenu.allowUseContextMenu = contextMenu.allowUseContextMenu.bind(contextMenu);
-        contextMenu.buildContextMenu = contextMenu.buildContextMenu.bind(contextMenu);
-
     };
 
     ContextMenu.prototype = {
@@ -135,19 +132,11 @@
     Mapbender.Digitizer.ElementContextMenu.prototype = Object.create(ContextMenu.prototype);
 
     Mapbender.Digitizer.ElementContextMenu.prototype.buildContextMenu = function (selectedRow, e) {
-
-
-        var contextMenu = this;
-        var schema = contextMenu.schema;
-        var api = schema.menu.resultTable.getApi();
-        var feature = api.row(selectedRow).data();
-
+        var schema = selectedRow.data('schema');
+        var feature = selectedRow.data('feature');
 
         if (!feature) {
-            return {
-                callback: function (key, options) {
-                }
-            };
+            return false;
         }
 
         var items = {};
