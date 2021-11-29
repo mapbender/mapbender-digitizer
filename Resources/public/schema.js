@@ -617,9 +617,10 @@
 
 
         openFeatureEditDialog: function (feature) {
-            var schema = this;
-            if (schema.getSchemaByFeature(feature).allowEditData || schema.getSchemaByFeature(feature).allowViewData) {
-                schema.popup.createFeatureEditDialog(feature, schema);
+            var feature_ = feature.cluster && feature.cluster[0] || feature;
+            var schema = this.getSchemaByFeature(feature_);
+            if (schema.allowEditData || schema.allowViewData) {
+                schema.popup.createFeatureEditDialog(feature_, schema);
             }
         },
 
@@ -1113,14 +1114,6 @@
                 return feature.isNew || feature.isChanged || feature.isCopy;
             });
         },
-
-
-        // Overwrite
-        processFeature: function (feature, callback) {
-            callback(feature);
-        },
-
-
         zoomToFeature: function (feature) {
             var schema = this;
             var widget = schema.widget;

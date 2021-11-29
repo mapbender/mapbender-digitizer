@@ -82,26 +82,7 @@
                         schema.updateClusterStrategy();
                     }
                 }}]);
-            },
-
-            getFeatureAsList: function (feature) {
-                return feature.cluster || [feature];
-            },
-
-            processFeature: function (feature, callback) {
-                var schema = this;
-                var features = schema.getFeatureAsList(feature);
-                _.each(features, function (feature) {
-                    callback(feature);
-                });
-            },
-
-            openFeatureEditDialog: function (feature) {
-                var schema = this;
-                return Mapbender.Digitizer.Scheme.prototype.openFeatureEditDialog.apply(schema, [schema.getFeatureAsList(feature)[0]]);
-            },
-
-
+            }
         }
 
     };

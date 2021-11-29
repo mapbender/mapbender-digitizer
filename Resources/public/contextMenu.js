@@ -34,23 +34,16 @@
     Mapbender.Digitizer.MapContextMenu.prototype = Object.create(ContextMenu.prototype);
 
     Mapbender.Digitizer.MapContextMenu.prototype.buildContextMenu = function (element, e) {
-
-
         var contextMenu = this;
         var schema = contextMenu.schema;
         var items = {};
         var feature = schema.layer.getFeatureFromEvent(e);
-
-        if (!feature) {
-            items['no-items'] = {name: "Nothing selected!"}
-        } else {
-            if (feature.isNew) {
-                return items;
-            }
-            schema.processFeature(feature, function (feature) {
-                items[feature.fid] = contextMenu.createMapContextMenuSubMenu(feature);
-            });
-
+        var features = feature && (feature.cluster || [feature]);
+        if (!feature || !features.length) {
+            return false;
+        }
+        for (var i = 0; i < features.length; ++i) {
+            items[features[i].fid] = contextMenu.createMapContextMenuSubMenu(features[i]);
         }
 
         return {
