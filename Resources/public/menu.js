@@ -303,11 +303,11 @@
                 data: null,
                 title: ''
             });
-            var $div = $("<div/>");
-            var $tableWrap = $div.resultTable(resultTableSettings);
-            menu.resultTable = $tableWrap.resultTable("instance");
-            menu.$table = $('table:first', $tableWrap);
-            menu.tableApi = menu.$table.dataTable().api();
+            var $tableWrap = $(document.createElement('div')).addClass('mapbender-element-result-table');
+            this.$table = $(document.createElement('table')).addClass('table table-striped table-hover');
+            $tableWrap.append(this.$table);
+            this.$table.dataTable(resultTableSettings);
+            this.tableApi = menu.$table.dataTable().api();
             $('.dataTables_filter input', $tableWrap).attr('placeholder', filterPlaceholder);
             frame.append($tableWrap);
         },
