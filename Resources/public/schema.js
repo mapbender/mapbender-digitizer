@@ -986,7 +986,6 @@
 
             var schema = this;
             var widget = schema.widget;
-            var tableApi = schema.menu.resultTable.getApi();
             var wkt = new OpenLayers.Format.WKT().write(feature);
             var srid = widget.map.getProjectionObject().proj.srsProjNumber;
 
@@ -1020,9 +1019,6 @@
                 srid: srid,
                 type: "Feature"
             };
-
-            // TODO check this
-            tableApi.draw({"paging": "page"});
 
             var promise = widget.query('save', {
 
