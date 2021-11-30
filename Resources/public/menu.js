@@ -161,12 +161,8 @@
             }
         },
         redrawTable: function() {
+            this.tableApi.rows().invalidate();
             this.tableApi.draw({paging: 'page'});
-            var self = this;
-            $('> tbody tr', this.$table).each(function() {
-                var $tr = $(this);
-                self.updateRow($tr, $tr.data('feature'));
-            });
         },
         renderTableButtons: function(schema) {
             var $btn0 = $('<button type="button" class="button">');
@@ -279,6 +275,11 @@
                     feature.__tr__ = tr;
                     $tr.data('feature', feature);
                     menu.initRow($tr, feature);
+                },
+                drawCallback: function() {
+                    this.api().rows().every(function() {
+                        menu.updateRow($(this.node()), this.data());
+                    });
                 },
                 // This may be needed to prevent autocomplete in search field / [google chrome]
                 initComplete: function () {
