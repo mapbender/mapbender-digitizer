@@ -187,23 +187,13 @@
                 prepend ? selector.prepend(option) : selector.append(option);
             };
 
-            widget.selector.on('focus', function () {
-                var selector = widget.selector;
-                selector.previousSchema = selector.getSelectedSchema();
-
-            }).on('change', function () {
-
-                var selector = widget.selector;
-                var schema = selector.getSelectedSchema();
-
-                if (!selector.previousSchema) {
-                  console.warn("No previous schema found");
-                } else {
-                    selector.previousSchema.deactivateSchema();
+            widget.selector.on('change', function () {
+                var schema = widget.getCurrentSchema();
+                if (widget.currentSchema_ && widget.currentSchema_ !== schema) {
+                    widget.currentSchema_.deactivateSchema();
                 }
+                widget.currentSchema_ = schema;
                 schema.activateSchema();
-                selector.previousSchema = schema;
-
             });
 
             var initializeSelectorOrTitleElement = function () {
@@ -393,15 +383,16 @@
         },
 
         getCurrentSchema: function() {
-            var widget = this;
-            return widget.initialScheme;
+            var selectedData = $('option:selected', $('select.selector', this.element)).data();
+            return selectedData && selectedData.schemaSettings || this.initialSchema;
         },
 
         activate: function () {
             var widget = this;
             widget.enable();
             widget.isFullyActive = true;
-            widget.getCurrentSchema().activateSchema(true); // triggers schema activation
+            this.currentSchema_ = this.getCurrentSchema();
+            this.currentSchema_.activateSchema();
         },
 
         deactivate: function () {

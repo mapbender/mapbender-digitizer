@@ -118,12 +118,6 @@
         popupConfiguration.buttons = augmentFeatureEditDialogButtonsWithCustomButtons();
         $.extend(popupConfiguration.buttons, createButtons());
 
-        popupConfiguration.getSchema = function (feature) {
-            var scheme = schema.getSchemaByFeature(feature);
-            return scheme;
-        };
-
-
         Object.freeze(popupConfiguration.buttons);
 
     };
@@ -179,7 +173,6 @@
         configuration.classes = {
             'ui-dialog': 'ui-dialog digitizer-dialog'
         };
-
 
         dialog.schema = schema.getSchemaByFeature(feature);
         configuration.title = schema.getSchemaByFeature(feature).popup.title;

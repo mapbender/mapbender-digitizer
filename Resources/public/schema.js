@@ -537,8 +537,7 @@
             });
         },
 
-        activateSchema: function (activateWidget) {
-
+        activateSchema: function () {
             var schema = this;
 
             var widget = schema.widget;
@@ -546,10 +545,6 @@
             var layer = schema.layer;
 
             schema.lastRequest = null;
-
-            widget.getCurrentSchema = function () {
-                return schema;
-            };
 
             var promise;
 
@@ -871,7 +866,6 @@
         },
 
         removeFeatureFromUI: function (feature) {
-            var schema = this;
             if (feature && this.layer.features.indexOf(feature) !== -1) {
                 this.layer.removeFeatures([feature]);
             }
@@ -1060,15 +1054,15 @@
                 }
 
                 newFeature.isNew = false;
+                var currentSchema = widget.getCurrentSchema();
+                currentSchema.introduceFeature(newFeature);
 
-                schema.introduceFeature(newFeature);
-
-                schema.removeFeatureFromUI(feature);
-                schema.layer.addFeatures([newFeature]);
+                currentSchema.removeFeatureFromUI(feature);
+                currentSchema.layer.addFeatures([newFeature]);
 
                 $.notify(Mapbender.trans('mb.digitizer.feature.save.successfully'), 'info');
 
-                schema.reloadFeatures();
+                currentSchema.reloadFeatures();
 
                 schema.tryMailManager(newFeature);
 
@@ -1084,7 +1078,7 @@
 
                 successHandler();
 
-                schema.widget.element.trigger("featureSaved", {schema: schema, feature: feature});
+                widget.element.trigger("featureSaved", {schema: schema, feature: feature});
 
                 return response;
 
