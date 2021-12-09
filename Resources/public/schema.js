@@ -20,58 +20,6 @@
 
         schema.prepareSearchForm();
 
-        var initializeHooksForControlPrevention = function () {
-            _.each(schema.hooks, function (value, name) {
-                if (!value) {
-                    return false;
-                }
-                console.error("Using Javascript code in the configuration is deprecated");
-
-
-                try {
-                    schema.evaluatedHooksForControlPrevention[name] = function (feature) {
-                        var control = this;
-                        var attributes = feature.attributes;
-                        return eval(value);
-                    }
-                } catch (e) {
-                    console.warn("Evaluation of control prevention hooks failed!", value, e);
-                }
-            });
-        };
-
-        var initializeHooksForCopyPrevention = function () {
-            _.each(schema.copy.rules, function (value, name) {
-                console.error("Using Javascript code in the configuration is deprecated");
-
-                try {
-                    schema.evaluatedHooksForCopyPrevention[name] = function (feature) {
-                        var f = feature;
-                        return eval(value);
-                    }
-                } catch (e) {
-                    console.warn("Evaluation of copy prevention hooks failed!", value, e);
-                }
-            });
-
-        };
-
-        var initializeHooksForTableFields = function () {
-            _.each(schema.tableFields, function (tableField, name) {
-                if (tableField.render) {
-                    console.error("Using Javascript code in the configuration is deprecated");
-                    try {
-                        eval("tableField.render = " + tableField.render);
-                    } catch (e) {
-                        console.warn("Evaluation of table field render hooks failed!", tableField.render, e);
-                    }
-
-                }
-            });
-
-        };
-
-
         var createSchemaFeatureLayer = function () {
 
             var widget = schema.widget;
@@ -205,13 +153,6 @@
             widget.map.addControl(schema.selectControl);
 
         };
-
-
-        initializeHooksForControlPrevention();
-
-        initializeHooksForCopyPrevention();
-
-        initializeHooksForTableFields();
 
         schema.initTableFields();
         this.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
@@ -376,10 +317,6 @@
         pageLength: 10,
         currentExtentSearch: false,
         inlineSearch: true,
-        hooks: {
-            onModificationStart: null,
-            onStart: null
-        },
         refreshLayersAfterFeatureSave: [], // Layer list names/ids to be refreshed after feature save complete
         tableFields: null,
         clustering: null,
@@ -1049,18 +986,6 @@
                 currentSchema.reloadFeatures();
 
                 schema.tryMailManager(newFeature);
-
-
-                var successHandler = function () {
-                    var scheme = schema.getSchemaByFeature(feature);
-                    var successHandler = scheme.save && scheme.save.on && scheme.save.on.success;
-                    if (successHandler) {
-                        console.error("Using Javascript code in the configuration is deprecated");
-                        eval(successHandler);
-                    }
-                };
-
-                successHandler();
 
                 widget.element.trigger("featureSaved", {schema: schema, feature: feature});
 
