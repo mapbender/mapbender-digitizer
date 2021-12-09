@@ -72,21 +72,6 @@
         };
 
 
-        var createPopupConfiguration = function () {
-            schema.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
-        };
-
-
-        var createMenu = function () {
-            var widget = schema.widget;
-            var element = $(widget.element);
-
-            schema.menu = new Mapbender.Digitizer.Menu(schema);
-
-            element.append(schema.menu.frame);
-
-        };
-
         var createSchemaFeatureLayer = function () {
 
             var widget = schema.widget;
@@ -229,8 +214,7 @@
         initializeHooksForTableFields();
 
         schema.initTableFields();
-
-        createPopupConfiguration();
+        this.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
 
         schema.toolset = schema.createToolset(); // Is overwritten and must therefore be implemented in the prototype
 
@@ -246,8 +230,8 @@
         }
 
         createSchemaFeatureLayer();
-
-        createMenu();
+        this.menu = new Mapbender.Digitizer.Menu(schema);
+        this.widget.element.append(schema.menu.frame);
 
         addSelectControls();
         schema.menu.initializeTableEvents(schema);
