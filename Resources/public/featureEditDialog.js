@@ -8,34 +8,6 @@
 
         $.extend(popupConfiguration, configuration);
 
-        var augmentFeatureEditDialogButtonsWithCustomButtons = function () {
-            // Initialize custom button events
-            var newButtons = {};
-            _.each(configuration.buttons, function (button) {
-                newButtons[button.text] = _.clone(button);
-                if (button.click) {
-                    console.error("Using Javascript code in the configuration is deprecated");
-
-                    newButtons[button.text].createClick = function (feature, dialog) {
-
-                        return function (e) {
-                            var _widget = schema.widget;
-                            var el = $(this);
-                            var form = dialog;
-                            var data = feature.data;
-
-                            eval(button.click);
-                            e.preventDefault();
-                            return false;
-                        }
-                    }
-                }
-
-            });
-
-            return newButtons;
-        };
-
         var createButtons = function () {
             var widget = schema.widget;
 
@@ -115,7 +87,6 @@
 
         };
 
-        popupConfiguration.buttons = augmentFeatureEditDialogButtonsWithCustomButtons();
         $.extend(popupConfiguration.buttons, createButtons());
 
         Object.freeze(popupConfiguration.buttons);
@@ -146,11 +117,6 @@
 
         createFeatureEditDialog: function (feature, schema) {
             return new FeatureEditDialog(feature, schema)
-        },
-
-        // This can be overridden
-        augment: function(feature, $popup) {
-
         }
     };
 
@@ -223,8 +189,6 @@
         doFeatureEditDialogBindings();
 
         dialog.initResultTables(feature);
-
-        configuration.augment(feature, $popup);
 
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
         setTimeout(function () {
