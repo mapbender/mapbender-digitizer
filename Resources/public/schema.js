@@ -309,7 +309,6 @@
         // oneInstanceEdit: true,
         //zoomDependentVisibility: [{max: 10000}],
         refreshFeaturesAfterSave: null,
-        mailManager: null,
         tableTranslation: null,
         save: {}, // pop a confirmation dialog when deactivating, to ask the user to save or discard current in-memory changes
         openFormAfterEdit: true,
@@ -985,8 +984,6 @@
 
                 currentSchema.reloadFeatures();
 
-                schema.tryMailManager(newFeature);
-
                 widget.element.trigger("featureSaved", {schema: schema, feature: feature});
 
                 return response;
@@ -996,21 +993,6 @@
             return promise;
 
         },
-
-
-
-
-        tryMailManager: function (feature) {
-            var schema = this;
-            if (schema.mailManager && Mapbender.hasOwnProperty("MailManager")) {
-                try {
-                    Mapbender.MailManager[schema.mailManager](feature);
-                } catch (e) {
-                    console.warn('The function' + schema.mailManager + " is not supported by the Mapbender Mail Manager Extension");
-                }
-            }
-        },
-
         getUnsavedFeatures: function () {
             var schema = this;
             return schema.layer.features.filter(function (feature) {
