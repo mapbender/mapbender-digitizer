@@ -160,11 +160,6 @@
                     schema.setModifiedState(feature, false, null);
 
                 }
-                if (configuration.modal) {
-                    widget.currentPopup = null;
-                }
-
-
             });
 
         };
