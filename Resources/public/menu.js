@@ -75,12 +75,6 @@
                 $button.attr("title", Mapbender.trans('mb.digitizer.refresh'));
                 $button.click(function () {
                     var widget = schema.widget;
-                    var dataManager = widget.getConnectedDataManager();
-                    if (dataManager) {
-                        $.each(dataManager.options.schemes, function (schemaName, scheme) {
-                            dataManager._getData(scheme);
-                        });
-                    }
                     $.each(widget.schemes,function(schemaName,scheme){
                         scheme.lastRequest = null; // force reload
                         scheme.getData();

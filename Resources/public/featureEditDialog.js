@@ -183,46 +183,12 @@
 
         doFeatureEditDialogBindings();
 
-        dialog.initResultTables(feature);
-
         /** This is evil, but filling of input fields currently relies on that (see select field) **/
         setTimeout(function () {
             $popup.formData(feature.data);
         },0);
 
     };
-
-    FeatureEditDialog.prototype.initResultTables = function(feature) {
-        var dialog = this;
-        var $popup = dialog.$popup;
-        var widget = dialog.schema.widget;
-
-        var tables = $popup.find(".mapbender-element-result-table");
-        $.each(tables, function (i,table) {
-
-            var formItem = $(table).data('item');
-
-            if (formItem.dataManagerLink) {
-
-                if (!feature.fid) {
-                    $(table).siblings(".button").attr("disabled","disabled");
-                }
-                var schemaName = formItem.dataManagerLink.schema;
-                var fieldName = formItem.dataManagerLink.fieldName;
-                var dm = widget.getConnectedDataManager();
-                dm.withSchema(schemaName, function (schema) {
-                    var tableApi = $(table).resultTable('getApi');
-                    tableApi.clear();
-                    tableApi.rows.add(schema.dataItems.filter(function(dataItem) { return dataItem[fieldName] == feature.fid }));
-                    tableApi.draw();
-                });
-            }
-
-        });
-
-    };
-
-
 
 
 

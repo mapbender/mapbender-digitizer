@@ -107,13 +107,6 @@
 
             widget.displayOnInactive = widget.options.displayOnInactive;
 
-            var dataManagerId = widget.options.dataManager;
-            if (dataManagerId) {
-                Mapbender.elementRegistry.waitReady(dataManagerId).then(function (dataManager) {
-                    widget.dataManager = dataManager;
-                });
-            }
-
             var qe = new Mapbender.Digitizer.QueryEngine(widget);
             widget.query = qe.query;
             widget.getElementURL = qe.getElementURL;
@@ -407,14 +400,6 @@
         },
         reveal: function() {
             this.activate();
-        },
-
-        getConnectedDataManager: function() {
-            var widget = this;
-            if (!widget.dataManager) {
-                throw new Error("Data Manager is not activated");
-            }
-            return widget.dataManager;
         },
         onFeatureAdded: function(schema, feature) {
             schema.introduceFeature(feature);
