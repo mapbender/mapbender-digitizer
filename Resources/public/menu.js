@@ -337,7 +337,7 @@
                 $('.-fn-delete', $tr).remove();
             }
 
-            $('.-fn-edit', $tr).prop('disabled', !schema.allowEditData);
+            $('.-fn-edit', $tr).prop('disabled', !schema.allowEditData || schema.disableAggregation);
             $('.-fn-clone', $tr).prop('disabled', !schema.allowEditData || !schema.copy.enable);
             $('.-fn-delete', $tr).prop('disabled', !schema.allowEditData || !schema.allowDelete);
             $('.-fn-edit-style', $tr).prop('disabled', !schema.allowCustomStyle);
@@ -345,12 +345,16 @@
         },
         updateRow: function($tr, feature) {
             var $displayToggle = $('.-fn-toggle-visibility', $tr).closest('button');
+            var schema = this.schema.widget.getSchemaByName(feature.attributes.schemaName);
             if (feature.visible) {
                 $displayToggle.attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'));
             } else {
                 $displayToggle.attr('title', Mapbender.trans('mb.digitizer.feature.visibility.toggleon'));
             }
-            $('.-fn-save', $tr).prop('disabled', !feature.isChanged);
+            $('.-fn-save', $tr).prop('disabled', !feature.isChanged || schema.disableAggregation);
+            if (schema.disableAggregation) {
+                $('.-fn-clone, .-fn-delete, .-fn-edit-style', $tr).prop('disabled', true);
+            }
             $('.printmetadata', $tr).toggleClass('active', !!feature.printMetadata);
             $tr.toggleClass('invisible-feature', !feature.visible);
             $('> i', $displayToggle)
