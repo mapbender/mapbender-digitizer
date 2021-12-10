@@ -155,7 +155,6 @@
         };
 
         schema.initTableFields();
-        this.popup = new Mapbender.Digitizer.PopupConfiguration(schema.popup, schema);
 
         schema.toolset = schema.createToolset(); // Is overwritten and must therefore be implemented in the prototype
 
@@ -535,7 +534,7 @@
             var feature_ = feature.cluster && feature.cluster[0] || feature;
             var schema = this.getSchemaByFeature(feature_);
             if (schema.allowEditData || schema.allowViewData) {
-                schema.popup.createFeatureEditDialog(feature_, schema);
+                Mapbender.Digitizer.FeatureEditDialog.open(feature_, schema);
             }
         },
 

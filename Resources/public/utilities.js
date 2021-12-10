@@ -40,9 +40,8 @@
         },
 
 
-        processFormItem: function (feature, item, dialog) {
+        processFormItem: function (feature, item, schema) {
 
-            var schema = dialog.schema;
             var widget = schema.widget;
 
             if (item.type === "file") {
@@ -94,10 +93,10 @@
         },
 
 
-        processFormItems: function (feature, formItems, dialog) {
+        processFormItems: function (feature, formItems, schema) {
 
             DataUtil.eachItem(formItems, function (item) {
-                Mapbender.Digitizer.Utilities.processFormItem(feature, item, dialog);
+                Mapbender.Digitizer.Utilities.processFormItem(feature, item, schema);
             });
 
             return formItems;
