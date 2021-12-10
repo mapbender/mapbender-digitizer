@@ -456,7 +456,7 @@
             });
             this.$table.on('click', 'tbody .-fn-delete', function() {
                 var feature = $(this).closest('tr').data('feature');
-                schema.removeFeature(feature);
+                schema.widget.deleteFeature(feature);
                 return false;
             });
         }

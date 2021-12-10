@@ -784,42 +784,10 @@
             return this.layer.features.filter(function(feature) { return !feature.cluster; });
         },
 
-        removeFeatureFromUI: function (feature) {
-            if (feature && this.layer.features.indexOf(feature) !== -1) {
-                this.layer.removeFeatures([feature]);
-            }
-            this.menu.removeTableRow(feature);
-        },
-
         removeAllFeatures: function () {
             var schema = this;
             schema.layer.removeAllFeatures();
         },
-
-
-        removeFeature: function (feature) {
-            var schema = this;
-            var widget = schema.widget;
-            if (feature.isNew || feature.isCopy) {
-                schema.removeFeatureFromUI(feature);
-            } else {
-                Mapbender.confirmDialog({
-                    html: Mapbender.trans('mb.digitizer.feature.remove.from.database'),
-                    onSuccess: function () {
-                        widget.query('delete', {
-                            schema: schema.getSchemaByFeature(feature).schemaName,
-                            feature: feature.attributes
-                        }).done(function (fid) {
-                            schema.removeFeatureFromUI(feature);
-                            $.notify(Mapbender.trans('mb.digitizer.feature.remove.successfully'), 'info');
-                        });
-                    }
-                });
-            }
-
-            return feature;
-        },
-
 
         copyFeature: function (feature) {
             var schema = this;
@@ -976,7 +944,10 @@
                 var currentSchema = widget.getCurrentSchema();
                 currentSchema.introduceFeature(newFeature);
 
-                currentSchema.removeFeatureFromUI(feature);
+                if (!feature.attributes.schemaName) {
+                    feature.attributes.schemaName = schema.getSchemaByFeature(feature).schemaName;
+                }
+                widget.dropFeature(feature);
                 currentSchema.layer.addFeatures([newFeature]);
 
                 $.notify(Mapbender.trans('mb.digitizer.feature.save.successfully'), 'info');

@@ -105,7 +105,7 @@
             subItems['remove'] = {
                 name: Mapbender.trans('mb.digitizer.feature.remove.title'),
                 action: function (key, options, parameters) {
-                    schema.removeFeature(feature);
+                    schema.widget.deleteFeature(feature);
                 }
             }
         }
@@ -154,7 +154,7 @@
             items['removeFeature'] = {
                 name: Mapbender.trans('mb.digitizer.feature.remove.title'),
                 action: function () {
-                    schema.removeFeature(feature);
+                    schema.widget.deleteFeature(feature);
                 }
             };
         }

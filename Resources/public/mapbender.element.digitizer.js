@@ -401,6 +401,38 @@
         reveal: function() {
             this.activate();
         },
+        dropFeature: function(feature) {
+            var schemas = [this.getSchemaByName(feature.attributes.schemaName)];
+            if (this.schemes['all']) {
+                schemas.push(this.schemes['all']);
+            }
+            for (var i = 0; i < schemas.length; ++i) {
+                var schema = schemas[i];
+                if (feature && schema.layer.features.indexOf(feature) !== -1) {
+                    schema.layer.removeFeatures([feature]);
+                }
+                schema.menu.removeTableRow(feature);
+            }
+        },
+        deleteFeature: function(feature) {
+            if (feature.isNew || feature.isCopy) {
+                this.dropFeature(feature);
+            } else {
+                var self = this;
+                Mapbender.confirmDialog({
+                    html: Mapbender.trans('mb.digitizer.feature.remove.from.database'),
+                    onSuccess: function () {
+                        self.query('delete', {
+                            schema: feature.attributes.schemaName,
+                            feature: feature.attributes
+                        }).done(function() {
+                            self.dropFeature(feature);
+                            $.notify(Mapbender.trans('mb.digitizer.feature.remove.successfully'), 'info');
+                        });
+                    }
+                });
+            }
+        },
         onFeatureAdded: function(schema, feature) {
             schema.introduceFeature(feature);
             schema.setModifiedState(feature, true);

@@ -61,7 +61,7 @@
             buttons.push({
                 text: Mapbender.trans('mb.digitizer.feature.remove.title'),
                 click: function() {
-                    schema.removeFeature(feature);
+                    schema.widget.deleteFeature(feature);
                     $dialog.dialog('close');
                 }
             });
@@ -92,7 +92,7 @@
             $popup.on('popupdialogclose', function () {
 
                 if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
-                    schema.removeFeature(feature);
+                    schema.widget.deleteFeature(feature);
                 } else if ((feature.isChanged || feature.isNew) && schema.getSchemaByFeature(feature).revertChangedGeometryOnCancel) {
 
                     schema.layer.renderer.eraseGeometry(feature.geometry);
