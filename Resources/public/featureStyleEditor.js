@@ -588,11 +588,11 @@
         },
 
         saveStyle: function(feature,styleData) {
-            var featureStyleEditor = this;
-            var schema = featureStyleEditor.schema;
+            var schema = this.schema.widget.getCurrentSchema();
             var widget = schema.widget;
             console.assert(!!feature.fid, "Feature has no ID to be assoicated with for style saving");
             schema.featureStyles[feature.fid] = styleData;
+
             schema.layer.drawFeature(feature);
             return widget.query('style/save', {
                 schemaName: schema.getSchemaByFeature(feature).schemaName,
