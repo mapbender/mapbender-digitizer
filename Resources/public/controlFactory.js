@@ -81,11 +81,7 @@
                 controlFactory: controlFactory,
                 featureAdded: controlFactory._featureAdded,
                 handlerOptions: {
-                    finalize: controlFactory._finalizeDrawFeatureWithValidityTest,
-
-                    destroyActiveComponent: function (cancel) {
-                        this.destroyFeature(cancel);
-                    }
+                    finalize: controlFactory._finalizeDrawFeatureWithValidityTest
                 },
                 eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
@@ -182,12 +178,7 @@
                         }
                         OpenLayers.Handler.Path.prototype.addPoint.apply(this, arguments);
                     },
-                    finalize: controlFactory._finalizeDrawFeatureWithValidityTest,
-                    destroyActiveComponent: function (cancel) {
-                        this.polygon.geometry.removeComponent(this.line.geometry);
-                    },
                     finalizeInteriorRing: function (event) {
-
                         var fir = OpenLayers.Handler.Polygon.prototype.finalizeInteriorRing.apply(this, arguments);
                         controlFactory.schema.widget.onFeatureModified(controlFactory.schema, this.polygon, {control: this.control});
                         return fir;
