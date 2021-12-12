@@ -865,7 +865,6 @@
 
         // TODO feature / option formData parameters are not pretty -> keep data in feature directly
         saveFeature: function (feature, formData) {
-
             var schema = this;
             var widget = schema.widget;
             var wkt = new OpenLayers.Format.WKT().write(feature);
@@ -964,10 +963,17 @@
 
         },
         getUnsavedFeatures: function () {
-            var schema = this;
-            return schema.layer.features.filter(function (feature) {
-                return feature.isNew || feature.isChanged || feature.isCopy;
-            });
+            var features = [];
+            for (var i = 0; i < this.layer.features.length; ++i) {
+                var feature = this.layer.features[i];
+                if (!feature.geometry) {
+                    console.warn("Removing invalid feature", feature);
+                    this.layer.removeFeature(feature);
+                } else if (feature.isNew || feature.isChanged || feature.isCopy) {
+                    features.push(feature);
+                }
+            }
+            return features;
         },
         zoomToFeature: function (feature) {
             var schema = this;

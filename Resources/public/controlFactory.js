@@ -41,7 +41,7 @@
 
                     if (!geom.isValid()) {
                         $.notify("Geometry not valid");
-                        this.destroyActiveComponent(cancel);
+                        this.destroyFeature(cancel);
                         this.control.deactivate();
                         return;
                     }
