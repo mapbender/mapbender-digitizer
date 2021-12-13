@@ -404,7 +404,11 @@
                     schema.selectControl.unhighlight(feature, true);
                 }
             });
-            this.$table.on('click', '> tbody > tr', function() {
+            this.$table.on('click', '> tbody > tr', function(evt) {
+                if ($(evt.target).closest('button', this).length) {
+                    // Click bubbled from (disabled) button => ignore
+                    return false;
+                }
                 var feature = $(this).data('feature');
                 if (schema.selectControl) {
                     schema.selectControl.highlight(feature, true);
