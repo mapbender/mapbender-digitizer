@@ -35,7 +35,12 @@
                     var options = schema.getStyleMapOptions(label);
                     options.context = context;
                     var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
-                    styleMapObject[label] = new OpenLayers.Style($.extend({}, styleOL, schema.getExtendedStyle(label)), options);
+                    var styleOptions = Object.assign({}, styleOL, schema.styles[label]);
+                    if (schema.clusteringLabel) {
+                        styleOptions.label = '${label}';
+                    }
+
+                    styleMapObject[label] = new OpenLayers.Style(styleOptions, options);
                 });
 
                 if (!schema.markUnsavedFeatures) {
@@ -410,9 +415,17 @@
         },
 
         getStyleLabel: function (feature) {
-            var schema = this;
-            var label = schema.getSchemaByFeature(feature).featureType.name;
-            return feature.attributes[label] || '';
+            var feature_;
+            if (feature.cluster) {
+                if (feature.cluster.length > 1) {
+                    return '' + feature.cluster.length;
+                }
+                feature_ = feature.cluster[0];
+            } else {
+                feature_ = feature;
+            }
+            var schema = this.getSchemaByFeature(feature_);
+            return feature_.attributes[schema.featureType.name] || '';
         },
 
         getStyleMapContext: function () {
@@ -426,11 +439,6 @@
 
                 label: schema.getStyleLabel.bind(schema)
             }
-        },
-
-        getExtendedStyle: function (label) {
-            var schema = this;
-            return schema.styles[label];
         },
 
         initTableFields: function () {
@@ -777,11 +785,6 @@
         getFeatureStyle: function (id) {
             var schema = this;
             return (schema.featureStyles && schema.featureStyles[id]) || null;
-        },
-
-        // Overwrite
-        getLayerFeatures: function () {
-            return this.layer.features.filter(function(feature) { return !feature.cluster; });
         },
 
         removeAllFeatures: function () {

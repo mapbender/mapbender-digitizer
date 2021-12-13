@@ -12,9 +12,6 @@
         OpenLayers.Feature.prototype.disabled = false;
         OpenLayers.Feature.prototype.visible = true;
         OpenLayers.Feature.prototype.cluster = false;
-        OpenLayers.Feature.prototype.getClusterSize = function () {
-            return this.cluster ? this.cluster.length : null;
-        };
     });
 
 })();

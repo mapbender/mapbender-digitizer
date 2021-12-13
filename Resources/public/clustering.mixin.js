@@ -6,24 +6,6 @@
         return {
 
             clusteringLabel: true,
-
-
-            getExtendedStyle: function(label) {
-                var schema = this;
-                var style = schema.styles[label] || {};
-                if (schema.clusteringLabel) {
-                    style.label = '${label}';
-                }
-                return style;
-            },
-
-            getStyleLabel: function(feature) {
-                var schema = this;
-                var parentMethod = Mapbender.Digitizer.Scheme.prototype.getStyleLabel.bind(schema);
-                var clusterSize = feature.getClusterSize();
-                return clusterSize > 1 ? clusterSize : parentMethod(clusterSize === 1 ? feature.cluster[0] : feature);
-            },
-
             initializeClustering: function () {
                 var schema = this;
 
