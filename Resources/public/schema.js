@@ -218,8 +218,6 @@
             uniqueId: null,
         },
 
-        featureStyles: null,
-
         evaluatedHooksForControlPrevention: {},
         evaluatedHooksForCopyPrevention: {},
         lastRequest: null,
@@ -388,40 +386,6 @@
                 }
             });
         },
-
-        activateSchema: function () {
-            var schema = this;
-
-            var widget = schema.widget;
-            var frame = schema.menu.frame;
-            var layer = schema.layer;
-
-            schema.lastRequest = null;
-
-            var promise;
-
-            if (schema.allowCustomStyle) {
-                promise = schema.loadCustomStyle();
-            } else {
-                schema.featureStyles = {};
-                promise = $.Deferred().resolve();
-            }
-
-            promise.then(function () {
-                return widget.query('getConfiguration');
-            }).done(function (response) {
-
-                layer.setVisibility(true);
-                frame.show();
-                if (schema.widget.isFullyActive) {
-                    schema.selectControl.activate();
-                }
-                schema.getData();
-
-            });
-
-        },
-
         deactivateSchema: function (deactivateWidget) {
             var schema = this;
             var widget = schema.widget;
@@ -451,17 +415,6 @@
 
             return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : [];// Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
         },
-
-        loadCustomStyle: function() {
-            var schema = this;
-            var widget = schema.widget;
-            return widget.query('style/list', {schemaName: schema.schemaName}).then(function (data) {
-                schema.featureStyles = data.featureStyles;
-            });
-        },
-
-
-
 
         openFeatureEditDialog: function (feature) {
             var feature_ = feature.cluster && feature.cluster[0] || feature;
@@ -523,7 +476,7 @@
             };
 
             var styleOptions = {
-                data: schema.getFeatureStyle(feature.fid) || createDefaultSymbolizer(feature),
+                data: schema.getFeatureStyle(feature) || createDefaultSymbolizer(feature),
             };
 
             schema.extendFeatureStyleOptions(feature, styleOptions);
@@ -552,54 +505,22 @@
 
         },
 
-        getData: function (options) {
+        onFeatureCollectionLoaded: function (features, options) {
             var schema = this;
-            var widget = schema.widget;
-
-            options = options || {};
-
-            var callback =  options.callback;
-
-            var request = schema.createRequest();
-            schema.lastRequest = JSON.stringify(request);
-
-
-            if (schema.selectXHR && schema.selectXHR.abort) {
-                schema.selectXHR.abort();
+            for (var i = 0; i < features.length; ++i) {
+                this.introduceFeature(features[i]);
             }
-
-            schema.selectXHR = widget.query('select', request).then(function (featureCollection) {
-                var xhr = this;
-                schema.onFeatureCollectionLoaded(featureCollection, xhr,options);
-                if (typeof callback === "function") {
-                    callback.apply(schema,[featureCollection.features]);
-                }
-                schema.selectXHR = null;
-            });
-
-            return schema.selectXHR;
-        },
-
-
-
-        onFeatureCollectionLoaded: function (featureCollection, xhr,options) {
-            var schema = this;
-            var newFeatures = featureCollection.map(function(featureData) {
-                var geometry = featureData.geometry && OpenLayers.Geometry.fromWKT(featureData.geometry) || null;
-                var feature = new OpenLayers.Feature.Vector(geometry, featureData.properties);
-                feature.fid = featureData.id;
-                schema.introduceFeature(feature);
-                return feature;
-            });
             this.layer.removeAllFeatures();
-            this.layer.addFeatures(newFeatures);
+            this.layer.addFeatures(features);
 
             schema.reloadFeatures();
-
             schema.setVisibilityForAllFeaturesInLayer();
 
-            if (options.zoomToExtentAfterSearch) {
-                schema.widget.map.zoomToExtent(schema.layer.getDataExtent());
+            if (schema.clusterStrategy && options && options.zoom) {
+                schema.updateClusterStrategy();
+            }
+            if (options && options.zoomToExtentAfterSearch) {
+                this.widget.map.zoomToExtent(schema.layer.getDataExtent());
             }
         },
 
@@ -621,7 +542,7 @@
                     get: function () {
 
                         var feature = this;
-                        var style = usesSpecificStyle(feature) ? schema.getFeatureStyle(feature.fid) : null;
+                        var style = usesSpecificStyle(feature) ? schema.getFeatureStyle(feature) : null;
 
                         return style;
                     },
@@ -666,9 +587,8 @@
             }
         },
 
-        getFeatureStyle: function (id) {
-            var schema = this;
-            return (schema.featureStyles && schema.featureStyles[id]) || null;
+        getFeatureStyle: function(feature) {
+            return feature.__custom_style__ || (feature.fid && this.widget.customStyles[feature.fid]) || null;
         },
 
         removeAllFeatures: function () {
@@ -813,17 +733,13 @@
 
                 schema.setModifiedState(feature, false);
 
-
                 var newFeature = createNewFeatureWithDBFeature(feature, response);
-
-                if (feature.saveStyleDataCallback) {
-                    feature.saveStyleDataCallback(newFeature);
-                    feature.saveStyleDataCallback = null;
-                }
-
                 if (newFeature == null) {
                     console.warn("Creation of new Feature failed");
                     return;
+                }
+                if (!feature.fid && feature.__custom_style__) {
+                    schema.widget.saveStyle(newFeature, feature.__custom_style__);
                 }
 
                 newFeature.isNew = false;

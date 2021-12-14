@@ -73,14 +73,7 @@
                 $button.addClass("fa fa-refresh");
                 $button.attr("title", Mapbender.trans('mb.digitizer.refresh'));
                 $button.click(function () {
-                    var widget = schema.widget;
-                    $.each(widget.schemes,function(schemaName,scheme){
-                        scheme.lastRequest = null; // force reload
-                        scheme.getData();
-                    });
-                    $.each(Mapbender.Model.map.olMap.layers.filter(function(layer) { return layer.mbConfig && layer.mbConfig.type === "wms"; }), function(id,layer)  {
-                        layer.redraw(true);
-                    });
+                    schema.widget.reloadData(schema);
                 });
                 buttons['refresh'] = $button;
             }
@@ -141,7 +134,7 @@
                 }
                 $checkbox.change(function (e) {
                     schema.currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
-                    schema.getData();
+                    widget.reloadData(schema);
                 });
                 frame.append("<div style='clear:both'>");
                 var $div = $("<div/>");

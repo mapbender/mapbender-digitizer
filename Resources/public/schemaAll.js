@@ -122,23 +122,7 @@
             var scheme = widget.getSchemaByName(feature.attributes.schemaName);
             return scheme;
 
-        },
-
-
-        loadCustomStyle: function() {
-            var schema = this;
-            var widget = schema.widget;
-            return widget.query('style/list', {
-                schemaName: Object.values(widget.getBasicSchemes()).map(function(scheme){ return scheme.schemaName;  })
-            }).then(function (data) {
-                schema.featureStyles = data.featureStyles;
-                if (schema.featureStyles["error"]) {
-                    schema.featureStyles = [];
-                    $.notify(Mapbender.trans('mb.digitizer.feature.style.load.error'));
-                }
-            });
-        },
-
+        }
     };
 
 

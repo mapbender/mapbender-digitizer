@@ -186,7 +186,7 @@
                     widget.currentSchema_.deactivateSchema();
                 }
                 widget.currentSchema_ = schema;
-                schema.activateSchema();
+                widget.activateSchema(schema);
             });
 
             var initializeSelectorOrTitleElement = function () {
@@ -339,13 +339,11 @@
             var map = widget.map;
 
             map.events.register("moveend", this, function () {
-                widget.isEnabled() && widget.getCurrentSchema().getData({ triggered_by_map_move: true });
+                var schema = widget.isEnabled() && widget.getCurrentSchema();
+                if (schema && schema.currentExtentSearch && schema.lastRequest !== JSON.stringify(request)) {
+                    widget.reloadData(schema);
+                }
             });
-
-            // Zoomend implies Moveend
-            // map.events.register("zoomend", this, function () {
-            //     widget.isEnabled() && widget.getCurrentSchema().getData({zoom: true});
-            // });
 
             map.events.register("mouseover", this, function () {
                 widget.isEnabled() && widget.getCurrentSchema().mapContextMenu.enable();
@@ -385,7 +383,7 @@
             widget.enable();
             widget.isFullyActive = true;
             this.currentSchema_ = this.getCurrentSchema();
-            this.currentSchema_.activateSchema();
+            this.activateSchema(this.currentSchema_);
         },
 
         deactivate: function () {
@@ -447,7 +445,87 @@
             if (schemaReal.openFormAfterModification) {
                 schema.openFeatureEditDialog(feature);
             }
+        },
+        saveStyle: function(feature, styleData) {
+            feature.__custom_style__ = styleData || null;
+            var currentSchema = this.getCurrentSchema();
+            if (-1 !== currentSchema.layer.features.indexOf(feature)) {
+                currentSchema.layer.drawFeature(feature);
+            }
+            this.customStyles = this.customStyles || {};
+            if (feature.fid) {
+                this.customStyles[feature.fid] = styleData;
+                this.query('style/save', {
+                    schemaName: currentSchema.getSchemaByFeature(feature).schemaName,
+                    style: styleData,
+                    featureId: feature.fid
+                });
+            }
+        },
+        activateSchema: function(schema) {
+            var self = this;
+            this.reloadData(schema).then(function() {
+                schema.menu.frame.show();
+                schema.layer.setVisibility(true);
+                if (self.isFullyActive) {
+                    schema.selectControl.activate();
+                }
+            });
+        },
+        loadCustomStyles: function() {
+            var schemaNames = Object.values(this.getBasicSchemes()).filter(function(schema) {
+                return schema.allowCustomStyle;
+            }).map(function(schema) {
+                return schema.schemaName;
+            });
+            if (this.customStyles && !this.stylePromise_) {
+                var deferred = $.Deferred();
+                deferred.resolveWith(null, [this.customStyles || {}]);
+                return deferred.promise();
+            } else {
+                var self = this;
+                this.stylePromise_ = this.stylePromise_ || this.query('style/list', {
+                    schemaName: schemaNames
+                }).then(function(response) {
+                    self.customStyles = self.customStyles || {};
+                    Object.assign(self.customStyles, response.featureStyles || {});
+                    return self.customStyles;
+                });
+                return this.stylePromise_;
+            }
+        },
+        reloadData: function(schema, options) {
+            var self = this;
+            schema.lastRequest = null;
+
+            var selectParams = schema.createRequest();
+            if (schema.selectXHR && schema.selectXHR.abort) {
+                schema.selectXHR.abort();
+                schema.selectXHR = null;
+            }
+
+            var selectPromise = this.query('select', selectParams);
+            return $.when(selectPromise, this.loadCustomStyles()).then(function(featureSelectArgs, styleData) {
+                var selectData = featureSelectArgs[0];
+                schema.selectXHR = null;
+                var newFeatures = self.parseFeatures_(selectData, styleData);
+                schema.onFeatureCollectionLoaded(newFeatures, options || {});
+                return newFeatures;
+            });
+        },
+        parseFeatures_: function(featureDataList, styleData) {
+            this.customStyles = this.customStyles || {};
+            Object.assign(this.customStyles, styleData || {});
+            var allCustomStyles = this.customStyles;
+            return featureDataList.map(function(featureData) {
+                var geometry = featureData.geometry && OpenLayers.Geometry.fromWKT(featureData.geometry) || null;
+                var feature = new OpenLayers.Feature.Vector(geometry, featureData.properties);
+                feature.fid = featureData.id;
+                if (allCustomStyles[feature.fid]) {
+                    feature.__custom_style__ = allCustomStyles[feature.fid];
+                }
+                return feature;
+            });
         }
     });
-
 })(jQuery);

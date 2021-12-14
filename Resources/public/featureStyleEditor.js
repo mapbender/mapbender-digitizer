@@ -4,11 +4,10 @@
     Mapbender.Digitizer.FeatureStyleEditor = function (feature, schema, options) {
 
         var editor = this;
+        this.widget = schema.widget;
 
         editor.feature = feature;
         editor.schema = schema;
-
-        editor.defaultFieldValues = options.defaultFieldValues || {};
 
         var defaultOptions = {
 
@@ -337,35 +336,11 @@
         submit: function () {
             var featureStyleEditor = this;
             var feature = featureStyleEditor.feature;
-            var styleData = $.extend({},featureStyleEditor.element.formData(),featureStyleEditor.defaultFieldValues);
+            var styleData = $.extend({},featureStyleEditor.element.formData());
             featureStyleEditor.element.disableForm();
-            if (feature.fid) {
-                featureStyleEditor.saveStyle(feature,styleData);
-            } else {
-                // defer style saving until the feature itself is saved, and has an id to associate with
-                feature.saveStyleDataCallback = function(newFeature) {
-                    return featureStyleEditor.saveStyle.bind(featureStyleEditor)(newFeature,styleData);
-                }
-            }
+            this.widget.saveStyle(feature, styleData);
             featureStyleEditor.close();
-
-        },
-
-        saveStyle: function(feature,styleData) {
-            var schema = this.schema.widget.getCurrentSchema();
-            var widget = schema.widget;
-            console.assert(!!feature.fid, "Feature has no ID to be assoicated with for style saving");
-            schema.featureStyles[feature.fid] = styleData;
-
-            schema.layer.drawFeature(feature);
-            return widget.query('style/save', {
-                schemaName: schema.getSchemaByFeature(feature).schemaName,
-                style: styleData,
-                featureId: feature.fid
-            });
         }
-
-
     };
 
 })();
