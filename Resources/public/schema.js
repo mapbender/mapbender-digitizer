@@ -18,8 +18,6 @@
 
         var styleLabels = ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
 
-        schema.prepareSearchForm();
-
         var createSchemaFeatureLayer = function () {
 
             var widget = schema.widget;
@@ -325,79 +323,6 @@
         clustering: null,
 
         featureVisibility: true,
-
-
-        prepareSearchForm: function () {
-
-            var schema = this;
-            var widget = schema.widget;
-
-            schema.search = schema.search || {
-                form: null,
-                mapping: null,
-                zoomScale: null
-            };
-
-            if (schema.search.form) {
-
-                DataUtil.eachItem(schema.search.form, function (item) {
-
-                    if (item.mapping) {
-                        var value = item.mapping[item.name];
-
-                        if (value && item.options) {
-                            var option = item.options.find(function (option) {
-                                return option.___value && option.___value.toLowerCase() === value.toLowerCase()
-                            });
-                            if (option) {
-                                item.value = option.___value;
-                            } else {
-                                $.notify(value + " is not a valid value for " + item.name);
-                            }
-                        }
-
-                    }
-
-                    if (item.type == "select" || item.type == "input" || item.type == "radio" || item.type == "checkbox") {
-                        item.change = function (options) {
-                            schema.getData({
-                                zoomToExtentAfterSearch: !!item.zoomToExtentAfterSearch
-                            }).done();
-                        };
-
-
-                        item.keyup = function () {
-                            item.change.apply(this, arguments);
-                        }
-                    }
-
-                    if (item.type === 'select' && item.ajax) {
-
-                        item.ajax.dataType = 'json';
-                        item.ajax.url = widget.getElementURL() + 'form/select';
-                        item.ajax.data = function (params) {
-
-                            if (params && params.term) {
-                                // Save last given term to get highlighted in templateResult
-                                item.ajax.lastTerm = params.term;
-                            }
-                            var ret = {
-                                schema: schema.schemaName,
-                                item: item,
-                                form: schema.menu.getSearchData(),
-                                params: params
-                            };
-
-                            return ret;
-                        };
-
-                    }
-                });
-            }
-
-
-        },
-
         getGeomType: function () {
             var schema = this;
             return schema.featureType.geomType;
@@ -622,30 +547,9 @@
                 schema: schema.schemaName,
                 intersectGeometry: intersectWKT,    // Old / custom data-source quirk
                 intersect: intersectWKT,            // Current standard data-source
-                search: schema.search.form ? schema.menu.getSearchData() : null
+                search: null
             }
 
-        },
-
-        rejectSearchWhenMandatoryAttributesAreMissing: function(request) {
-            var schema = this;
-            var mandatory = schema.search.mandatory;
-            var req = request.search;
-            var errors = [];
-
-            _.each(mandatory, function (expression, key) {
-                if (!req[key]) {
-                    errors.push(key);
-                    return;
-                }
-                var reg = new RegExp(expression, "mg");
-                if (!(req[key]).toString().match(reg)) {
-                    errors.push(key);
-                    return;
-                }
-            });
-
-            return _.size(errors) > 0;
         },
 
         getData: function (options) {
@@ -657,26 +561,6 @@
             var callback =  options.callback;
 
             var request = schema.createRequest();
-
-            if (!schema.search.form || options.triggered_by_map_move) {
-
-                if (!schema.currentExtentSearch && schema.lastRequest === JSON.stringify(request)) {
-                    return $.Deferred().reject();
-                }
-            }
-
-
-            if (schema.search.mandatory) {
-                if (schema.rejectSearchWhenMandatoryAttributesAreMissing(request)) {
-                    schema.removeAllFeatures();
-                    schema.lastRequest = null;
-                    // Zooming has to be removed, since it may leed to a endless loop by triggering moveend
-                    //widget.map.zoomToExtent(schema.layer.getExtent());
-                    return $.Deferred().reject();
-                }
-            }
-
-
             schema.lastRequest = JSON.stringify(request);
 
 

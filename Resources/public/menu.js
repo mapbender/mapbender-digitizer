@@ -25,7 +25,6 @@
         var frame = menu.frame = $("<div />").addClass('frame').addClass('schema-'+schema.schemaName);
         this.appendToolset();
         this.appendGeneralDigitizerButtons();
-        this.generateSearchForm();
         frame.append('<div style="clear:both;"/>');
         this.generateResultDataTable();
         frame.hide();
@@ -323,10 +322,6 @@
 
         },
 
-        getSearchData: function() {
-            var menu = this;
-            return $('form.search', menu.frame).length > 0 ? $('form.search', menu.frame).formData() : void 0;
-        },
         initRow: function($tr, feature) {
             var schema = this.schema.widget.getSchemaByName(feature.attributes.schemaName);
             $tr.data('schema', schema);
@@ -368,17 +363,6 @@
             var nodePosition = this.tableApi.rows({order: 'current'}).nodes().indexOf(tr);
             var pageNumber = Math.floor(nodePosition / rowsOnOnePage);
             this.tableApi.page(pageNumber).draw(false);
-        },
-        generateSearchForm: function () {
-            var menu = this;
-            var schema = menu.schema;
-            if (schema.search.form) {
-                menu.frame.generateElements({
-                    type: 'form',
-                    cssClass: 'search',
-                    children: schema.search.form,
-                });
-            }
         },
         replaceTableRows: function(features) {
             this.tableApi.clear();
