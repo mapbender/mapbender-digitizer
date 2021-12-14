@@ -400,7 +400,10 @@
             this.activate();
         },
         dropFeature: function(feature) {
-            var schemas = [this.getSchemaByName(feature.attributes.schemaName)];
+            var schemas = [this.getCurrentSchema()];
+            if (feature.attributes.schemaName) {
+                schemas.push(this.getSchemaByName(feature.attributes.schemaName));
+            }
             if (this.schemes['all']) {
                 schemas.push(this.schemes['all']);
             }

@@ -16,7 +16,7 @@
             buttons.push({
                 text: Mapbender.trans('mb.digitizer.feature.clone.title'),
                 click: function() {
-                    schema.copyFeature(feature);
+                    schema.widget.getCurrentSchema().copyFeature(feature);
                 }
             });
         }
@@ -90,17 +90,12 @@
         });
 
             $popup.on('popupdialogclose', function () {
-
-                if (feature.isNew && schema.allowDeleteByCancelNewGeometry) {
+                if (feature.isNew) {
                     schema.widget.deleteFeature(feature);
-                } else if ((feature.isChanged || feature.isNew) && schema.getSchemaByFeature(feature).revertChangedGeometryOnCancel) {
-
-                    schema.layer.renderer.eraseGeometry(feature.geometry);
+                } else if (feature.isChanged && schema.getSchemaByFeature(feature).revertChangedGeometryOnCancel) {
                     feature.geometry = feature.oldGeometry;
-                    feature.isChanged = false;
-                    schema.layer.drawFeature(feature);
                     schema.setModifiedState(feature, false, null);
-
+                    schema.layer.drawFeature(feature);
                 }
             });
 

@@ -636,7 +636,8 @@
             });
 
             newFeature.data = newAttributes;
-            schema.setModifiedState(newFeature);
+            schema.setModifiedState(newFeature, true);
+            newFeature.isNew = true;
             newFeature.isCopy = true;
             newFeature.layer = feature.layer;
             if (feature.__custom_style__) {
