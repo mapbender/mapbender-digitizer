@@ -134,7 +134,7 @@
                 }
                 $checkbox.change(function (e) {
                     schema.currentExtentSearch = !!$(e.originalEvent.target).prop("checked");
-                    widget.reloadData(schema);
+                    schema.widget.reloadData(schema);
                 });
                 frame.append("<div style='clear:both'>");
                 var $div = $("<div/>");
