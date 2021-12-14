@@ -328,7 +328,7 @@
             $('.-fn-edit', $tr).prop('disabled', !schema.allowEditData || schema.disableAggregation);
             $('.-fn-clone', $tr).prop('disabled', !schema.allowEditData || !schema.copy.enable);
             $('.-fn-delete', $tr).prop('disabled', !schema.allowEditData || !schema.allowDelete);
-            $('.-fn-edit-style', $tr).prop('disabled', !schema.allowCustomStyle);
+            $('.-fn-edit-style', $tr).prop('disabled', !schema.allowCustomStyle || schema.disableAggregation);
             this.updateRow($tr, feature);
         },
         updateRow: function($tr, feature) {
