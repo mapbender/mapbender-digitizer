@@ -841,32 +841,7 @@
             }).done(function (response) {
 
             });
-        },
-
-        // getRestrictedVersion: function () {
-        //     var schema = this;
-        //
-        //     return { // This is a narrowed version of Scheme when accessed by Feature. Helpful for Debugging
-        //         schemaName: schema.schemaName,
-        //         formItems: schema.formItems,
-        //         allowDelete: schema.allowDelete,
-        //         featureType: schema.featureType,
-        //         index: schema.index,
-        //         popup: schema.popup,
-        //         allowPrintMetadata: schema.allowPrintMetadata,
-        //         allowDeleteByCancelNewGeometry: schema.allowDeleteByCancelNewGeometry,
-        //         copy: schema.copy,
-        //         openFormAfterEdit: schema.openFormAfterEdit,
-        //         openFormAfterModification: schema.openFormAfterModification,
-        //         revertChangedGeometryOnCancel: schema.revertChangedGeometryOnCancel,
-        //         deactivateControlAfterModification: schema.deactivateControlAfterModification
-        //
-        //
-        //     };
-        //
-        // },
-
-
+        }
     };
 
 
