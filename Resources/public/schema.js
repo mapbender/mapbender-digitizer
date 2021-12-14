@@ -639,6 +639,9 @@
             schema.setModifiedState(newFeature);
             newFeature.isCopy = true;
             newFeature.layer = feature.layer;
+            if (feature.__custom_style__) {
+                newFeature.__custom_style__ = feature.__custom_style__;
+            }
 
             // TODO this works, but is potentially buggy: numbers need to be relative to current zoom
             if (featureSchema.copy.moveCopy) {
