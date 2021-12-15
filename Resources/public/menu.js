@@ -370,15 +370,25 @@
         initializeTableEvents: function(schema) {
             var menu = this;
             this.$table.on('mouseenter', '> tbody > tr', function() {
-                var feature = $(this).data('feature');
-                if (feature && schema.selectControl) {
-                    schema.selectControl.highlight(feature, true);
+                var $tr = $(this);
+                var feature = $tr.data('feature');
+                if (feature) {
+                    $tr.addClass('hover');
+                    feature.isHighlighted = true;
+                    if (feature.layer) {
+                        feature.layer.drawFeature(feature);
+                    }
                 }
             });
             this.$table.on('mouseleave', '> tbody > tr', function() {
-                var feature = $(this).data('feature');
-                if (schema.selectControl && feature) {
-                    schema.selectControl.unhighlight(feature, true);
+                var $tr = $(this);
+                var feature = $tr.data('feature');
+                $tr.removeClass('hover');
+                if (feature) {
+                    feature.isHighlighted = false;
+                    if (feature.layer) {
+                        feature.layer.drawFeature(feature);
+                    }
                 }
             });
             this.$table.on('click', '> tbody > tr', function(evt) {

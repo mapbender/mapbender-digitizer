@@ -98,53 +98,28 @@
                     return Object.getPrototypeOf(this).clickFeature.apply(this, arguments);
 
                 },
-
-                overFeature: function (feature) {
-                    this.highlight(feature);
-                },
-                outFeature: function (feature) {
-                    this.unhighlight(feature);
-                },
-
-                highlight: function (feature,ommitResultTable) {
-
-                    if (schema.selectControl.highlightedFeature) {
-                        schema.selectControl.unhighlight(schema.selectControl.highlightedFeature);
+                eventListeners: {
+                    'featurehighlighted': function(evt) {
+                        var feature = evt.feature;
+                        feature.isHighlighted = true;
+                        if (!schema.disableFeatureHighlightInResultTable && feature.__tr__) {
+                            $(feature.__tr__).addClass('hover');
+                            schema.menu.pageToRow(feature.__tr__);
+                        }
+                        if (feature.layer) {
+                            feature.layer.drawFeature(feature);
+                        }
+                    },
+                    'featureunhighlighted': function(evt) {
+                        var feature = evt.feature;
+                        feature.isHighlighted = false;
+                        if (feature.__tr__) {
+                            $(feature.__tr__).removeClass('hover');
+                        }
+                        if (feature.layer) {
+                            feature.layer.drawFeature(feature);
+                        }
                     }
-                    schema.selectControl.highlightedFeature = feature;
-
-                    feature.isHighlighted = true;
-
-                    console.assert(!!feature, "Feature must be set");
-                    if (!schema.layer.features.includes(feature)) {
-                        return;
-                    }
-
-                    if (!schema.disableFeatureHighlightInResultTable && !ommitResultTable && feature.__tr__) {
-                        $(feature.__tr__).addClass('hover');
-                        schema.menu.pageToRow(feature.__tr__);
-                    }
-
-                    layer.drawFeature(feature);
-                    this.events.triggerEvent("featurehighlighted", {feature: feature});
-
-                },
-                unhighlight: function (feature,ommitResultTable) {
-
-                    schema.selectControl.highlightedFeature = null;
-                    feature.isHighlighted = false;
-
-                    if (!schema.layer.features.includes(feature)) {
-                        return;
-                    }
-                    if (!schema.disableFeatureHighlightInResultTable && !ommitResultTable && feature.__tr__) {
-                        $(feature.__tr__).removeClass('hover');
-                    }
-
-
-                    schema.layer.drawFeature(feature);
-                    this.events.triggerEvent("featureunhighlighted", {feature: feature});
-
                 }
             });
 
