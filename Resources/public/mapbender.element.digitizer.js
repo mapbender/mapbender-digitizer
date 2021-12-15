@@ -340,7 +340,7 @@
 
             map.events.register("moveend", this, function () {
                 var schema = widget.isEnabled() && widget.getCurrentSchema();
-                if (schema && schema.currentExtentSearch && schema.lastRequest !== JSON.stringify(request)) {
+                if (schema && schema.currentExtentSearch) {
                     widget.reloadData(schema);
                 }
             });
