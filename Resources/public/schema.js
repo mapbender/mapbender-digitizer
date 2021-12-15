@@ -507,19 +507,18 @@
                 return !!descriptor && !!descriptor['get'];
             };
 
-            var usesSpecificStyle = function (feature) {
-                return feature.visible && !feature.isHighlighted && !feature.isCopy && !feature.isChanged && !feature.isNew;
-            };
-
             if (!isGetter(feature, 'style')) {
-
                 Object.defineProperty(feature, 'style', {
                     get: function () {
-
-                        var feature = this;
-                        var style = usesSpecificStyle(feature) ? schema.getFeatureStyle(feature) : null;
-
-                        return style;
+                        if (this.renderIntent !== 'default') {
+                            return null;
+                        } else {
+                            var style = schema.getFeatureStyle(this) || null;
+                            if (style && style.label === '${label}') {
+                                style.label = schema.getStyleLabel(this);
+                            }
+                            return style;
+                        }
                     },
                     set: function (value) {
                         var feature = this;
