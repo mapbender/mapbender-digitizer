@@ -7,7 +7,7 @@
 
         $.extend(toolSet, options);
 
-        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.schema, toolSet.createControlEvents());
+        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.schema);
 
         toolSet.element = $("<div />").addClass('digitizing-tool-set').addClass('left');
         toolSet.createToolbar();
@@ -15,33 +15,6 @@
     };
 
     Mapbender.Digitizer.Toolset.prototype = {
-
-        createControlEvents: function () {
-            var toolSet = this;
-            var controlEvents = {
-
-                    activate: function(event) {
-                        var control = this;
-                        control.$button.addClass('active');
-
-                    },
-
-                    deactivate: function(event) {
-                        var control = this;
-
-                        control.$button.removeClass('active');
-                        $(control.map.div).css({cursor: 'default'});
-
-                    }
-                },
-
-                controlEvents = _.defaults(toolSet.controlEvents || {},controlEvents);
-
-            return controlEvents;
-        },
-
-
-
         createLayoutTitle: function(rawButton) {
             var toolSet = this;
             var geomType = toolSet.geomType;
@@ -89,13 +62,16 @@
                     console.warn("control "+type+" does not exist");
                     return;
                 }
-
-                control.$button = $button;
+                control.events.register('activate', null, function() {
+                    $button.addClass('active');
+                });
+                control.events.register('deactivate', null, function() {
+                    $button.removeClass('active');
+                });
 
                 $($button).click(function (e) {
                     if (control.active) {
                         control.deactivate();
-
                         /*
                          * JH 10.09.2019: deactivate also the control for the digitizer
                          */

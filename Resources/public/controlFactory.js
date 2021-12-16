@@ -4,10 +4,9 @@
 
 
 
-    Mapbender.Digitizer.DigitizingControlFactory = function (schema, controlEvents) {
+    Mapbender.Digitizer.DigitizingControlFactory = function (schema) {
         this.schema = schema;
         this.layer = schema.layer;
-        this.controlEvents = controlEvents;
     };
 
     Mapbender.Digitizer.DigitizingControlFactory.prototype = {
@@ -53,7 +52,6 @@
             return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Point, {
                 controlFactory: controlFactory,
                 featureAdded: controlFactory._featureAdded,
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             });
         },
@@ -64,7 +62,6 @@
             return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Path, {
                 controlFactory: controlFactory,
                 featureAdded: controlFactory._featureAdded,
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             })
         },
@@ -78,7 +75,6 @@
                 handlerOptions: {
                     finalize: controlFactory._finalizeDrawFeatureWithValidityTest
                 },
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             })
         },
@@ -93,7 +89,6 @@
                     sides: 4,
                     irregular: true
                 },
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             })
         },
@@ -106,7 +101,6 @@
                 handlerOptions: {
                     sides: 40
                 },
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             })
         },
@@ -120,7 +114,6 @@
                     sides: 40,
                     irregular: true
                 },
-                eventListeners: controlFactory.controlEvents,
                 schemaName: schemaName
             })
         },
@@ -129,9 +122,6 @@
             var controlFactory = this;
             return new OpenLayers.Control.DrawFeature(controlFactory.layer, OpenLayers.Handler.Polygon, {
                 controlFactory: controlFactory,
-
-                eventListeners: controlFactory.controlEvents,
-
                 featureAdded: function () {
                     console.warn("donut should not be created")
                 },
@@ -207,9 +197,6 @@
             var schema = this.schema;
             return new OpenLayers.Control.ModifyFeature(controlFactory.layer, {
                 controlFactory: controlFactory,
-
-                eventListeners: controlFactory.controlEvents,
-
                 onModificationStart: function (feature) {
                     if (!schema.getSchemaByFeature(feature).allowEditData) {
                         this.deactivate();
@@ -249,8 +236,6 @@
             var schema = this.schema;
             return new OpenLayers.Control.DragFeature(controlFactory.layer, {
                 controlFactory: controlFactory,
-
-                eventListeners: controlFactory.controlEvents,
 
                 onStart: function (feature, px) {
                     if (!schema.getSchemaByFeature(feature).allowEditData) {
