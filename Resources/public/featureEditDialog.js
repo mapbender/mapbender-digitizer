@@ -92,10 +92,14 @@
             $popup.on('popupdialogclose', function () {
                 if (feature.isNew) {
                     schema.widget.deleteFeature(feature);
-                } else if (feature.isChanged && schema.getSchemaByFeature(feature).revertChangedGeometryOnCancel) {
+                } else if (feature.oldGeometry && feature.isChanged && schema.getSchemaByFeature(feature).revertChangedGeometryOnCancel) {
+                    if (feature.layer) {
+                        feature.layer.renderer.eraseFeatures([feature]);
+                    }
                     feature.geometry = feature.oldGeometry;
+                    feature.oldGeometry = null;
                     schema.setModifiedState(feature, false, null);
-                    schema.layer.drawFeature(feature);
+                    widget.redrawFeature(schema, feature, false);
                 }
             });
 
