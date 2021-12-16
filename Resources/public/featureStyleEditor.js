@@ -30,6 +30,8 @@
             labelTab: true
         };
 
+        this.data = Object.assign({}, options.data || {});
+
         options = $.extend(defaultOptions, options);
 
         if (feature.geometry.CLASS_NAME === "OpenLayers.Geometry.LineString") {
@@ -200,7 +202,6 @@
                     {
                         type: 'textArea',
                         css: {width: "100 %"},
-                        disabled: options.label_disabled,
                         name: 'label',
                         infoText: 'The text for an optional label.  For browsers that use the canvas renderer, this requires either fillText or mozDrawText to be available.'
                     }, {
@@ -297,6 +298,9 @@
             type: "tabs",
             children: tabs
         });
+        if (options.label_disabled) {
+            $('[name="label"]', element).closest('.form-group').remove();
+        }
 
         element.popupDialog({
             title: "Stylemanager",
@@ -319,7 +323,9 @@
             }]
         });
         if (options.data) {
-            element.formData(options.data);
+            window.setTimeout(function() {
+                element.formData(options.data);
+            });
         }
         editor.element = element;
 
@@ -336,9 +342,9 @@
         submit: function () {
             var featureStyleEditor = this;
             var feature = featureStyleEditor.feature;
-            var styleData = $.extend({},featureStyleEditor.element.formData());
+            Object.assign(this.data, this.element.formData());
             featureStyleEditor.element.disableForm();
-            this.widget.saveStyle(feature, styleData);
+            this.widget.saveStyle(feature, this.data);
             featureStyleEditor.close();
         }
     };

@@ -407,14 +407,10 @@
 
 
         openChangeStyleDialog: function (feature) {
-            var schema = this;
-
-            var createDefaultSymbolizer = function (feature) {
-                return schema.layer.styleMap.styles.default.createSymbolizer(feature);
-            };
+            var schema = this.getSchemaByFeature(feature);
 
             var styleOptions = {
-                data: schema.getFeatureStyle(feature) || createDefaultSymbolizer(feature),
+                data: Object.assign({}, schema.styles.default, feature.__custom_style__ || {})
             };
 
             schema.extendFeatureStyleOptions(feature, styleOptions);
