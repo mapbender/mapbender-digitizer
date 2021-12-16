@@ -761,17 +761,6 @@
             schema.menu.redrawTable();
         },
 
-        getDefaultProperties: function () {
-            var schema = this;
-
-            var newFeatureDefaultProperties = [];
-            $.each(schema.tableFields, function (fieldName) {
-                newFeatureDefaultProperties.push(fieldName);
-            });
-            return newFeatureDefaultProperties;
-        },
-
-
         exportGeoJson: function (feature) {
             var schema = this;
             var widget = schema.widget;

@@ -4,24 +4,19 @@
 
 
 
-    Mapbender.Digitizer.DigitizingControlFactory = function (schema, injectedMethods, controlEvents) {
-
+    Mapbender.Digitizer.DigitizingControlFactory = function (schema, controlEvents) {
         this.schema = schema;
         this.layer = schema.layer;
-        this.injectedMethods = injectedMethods;
         this.controlEvents = controlEvents;
-
     };
 
     Mapbender.Digitizer.DigitizingControlFactory.prototype = {
-
-        _featureAdded: function (feature) { // injectedMethods is actually not much more than a restricted Version of Scheme
-
+        _featureAdded: function (feature) {
                 var control = this;
                 var controlFactory = control.controlFactory;
 
-                _.each(controlFactory.injectedMethods.getDefaultAttributes(), function (prop) {
-                    feature.attributes[prop] = "";
+                $.each(this.schema.tableFields, function (fieldName) {
+                    feature.attributes[fieldName] = '';
                 });
 
                 feature.attributes.schemaName = control.schemaName;
@@ -209,22 +204,22 @@
 
         modifyFeature: function () {
             var controlFactory = this;
+            var schema = this.schema;
             return new OpenLayers.Control.ModifyFeature(controlFactory.layer, {
                 controlFactory: controlFactory,
 
                 eventListeners: controlFactory.controlEvents,
 
                 onModificationStart: function (feature) {
-
-                    feature.oldGeometry = feature.geometry.clone();
-
-                    if (controlFactory.injectedMethods.preventModification(feature)) {
+                    if (!schema.getSchemaByFeature(feature).allowEditData) {
                         this.deactivate();
                         this.activate();
                         $.notify(Mapbender.trans('mb.digitizer.move.denied'));
+                    } else {
+                        if (!feature.oldGeometry) {
+                            feature.oldGeometry = feature.geometry.clone();
+                        }
                     }
-
-
                 },
 
                 onModification: function (feature) {
@@ -251,20 +246,21 @@
 
         moveFeature: function () {
             var controlFactory = this;
+            var schema = this.schema;
             return new OpenLayers.Control.DragFeature(controlFactory.layer, {
                 controlFactory: controlFactory,
 
                 eventListeners: controlFactory.controlEvents,
 
                 onStart: function (feature, px) {
-
-                    feature.oldGeometry = feature.geometry.clone();
-
-                    if (controlFactory.injectedMethods.preventMove(feature)) {
+                    if (!schema.getSchemaByFeature(feature).allowEditData) {
                         this.cancel();
                         $.notify(Mapbender.trans('mb.digitizer.move.denied'));
+                    } else {
+                        if (!feature.oldGeometry) {
+                            feature.oldGeometry = feature.geometry.clone();
+                        }
                     }
-
                 },
 
                 onComplete: function (feature) {

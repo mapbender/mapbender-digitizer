@@ -7,7 +7,7 @@
 
         $.extend(toolSet, options);
 
-        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.schema, toolSet.injectedMethods,toolSet.createControlEvents());
+        toolSet.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory(toolSet.schema, toolSet.createControlEvents());
 
         toolSet.element = $("<div />").addClass('digitizing-tool-set').addClass('left');
         toolSet.createToolbar();
@@ -93,7 +93,6 @@
                 control.$button = $button;
 
                 $($button).click(function (e) {
-
                     if (control.active) {
                         control.deactivate();
 

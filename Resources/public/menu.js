@@ -41,22 +41,7 @@
                 buttons: toolset,
                 schema: schema,
                 layer: layer,
-                geomType: schema.getGeomType(),
-                injectedMethods: {
-                    getDefaultAttributes: function () {
-                        return schema.getDefaultProperties();
-                    },
-                    preventModification: function (feature) {
-
-                        var preventedByHooks = schema.evaluatedHooksForControlPrevention.onModificationStart && schema.evaluatedHooksForControlPrevention.onModificationStart(feature);
-                        return preventedByHooks || !schema.getSchemaByFeature(feature).allowEditData;
-
-                    },
-                    preventMove: function (feature) {
-                        var preventedByHooks =  schema.evaluatedHooksForControlPrevention.onStart && schema.evaluatedHooksForControlPrevention.onStart(feature);
-                        return preventedByHooks || !schema.getSchemaByFeature(feature).allowEditData;
-                    }
-                }
+                geomType: schema.getGeomType()
             });
 
             if (schema.allowDigitize) {
