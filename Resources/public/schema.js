@@ -618,17 +618,6 @@
             schema.menu.toolSet.activeControl && schema.menu.toolSet.activeControl.deactivate();
             //}
 
-            var createNewFeatureWithDBFeature = function (feature, response) {
-                var geometry = OpenLayers.Geometry.fromWKT(response[0].geometry);
-                var newFeature = new OpenLayers.Feature.Vector(geometry, response[0].properties);
-                newFeature.fid = response[0].id || feature.fid;
-                newFeature.layer = feature.layer;
-
-                return newFeature;
-
-            };
-
-
             if (feature.disabled) { // Feature is temporarily disabled
                 return;
             }
@@ -667,14 +656,12 @@
                     return response;
                 }
 
-
                 schema.setModifiedState(feature, false);
+                var geometry = OpenLayers.Geometry.fromWKT(response[0].geometry);
+                var newFeature = new OpenLayers.Feature.Vector(geometry, response[0].properties);
+                newFeature.fid = response[0].id || feature.fid;
+                newFeature.layer = feature.layer;
 
-                var newFeature = createNewFeatureWithDBFeature(feature, response);
-                if (newFeature == null) {
-                    console.warn("Creation of new Feature failed");
-                    return;
-                }
                 if (!feature.fid && feature.__custom_style__) {
                     schema.widget.saveStyle(newFeature, feature.__custom_style__);
                 }
