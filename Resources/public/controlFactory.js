@@ -15,7 +15,7 @@
                 var control = this;
                 var controlFactory = control.controlFactory;
 
-                $.each(this.schema.tableFields, function (fieldName) {
+                $.each(controlFactory.schema.tableFields, function (fieldName) {
                     feature.attributes[fieldName] = '';
                 });
 
