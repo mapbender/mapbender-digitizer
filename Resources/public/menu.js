@@ -356,7 +356,7 @@
                 var feature = $tr.data('feature');
                 if (feature) {
                     $tr.addClass('hover');
-                    feature.isHighlighted = true;
+                    schema.widget.redrawFeature(schema, feature, true);
                     if (feature.layer) {
                         feature.layer.drawFeature(feature);
                     }
@@ -366,11 +366,8 @@
                 var $tr = $(this);
                 var feature = $tr.data('feature');
                 $tr.removeClass('hover');
-                if (feature) {
-                    feature.isHighlighted = false;
-                    if (feature.layer) {
-                        feature.layer.drawFeature(feature);
-                    }
+                if (feature && feature.layer) {
+                    schema.widget.redrawFeature(schema, feature, false);
                 }
             });
             this.$table.on('click', '> tbody > tr', function(evt) {

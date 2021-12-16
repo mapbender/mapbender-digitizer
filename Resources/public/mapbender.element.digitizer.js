@@ -496,6 +496,23 @@
                 }
             });
         },
+        redrawFeature: function(schema, feature, highlight) {
+            var renderIntent =
+                (highlight && 'select')
+                || (!feature.visible && 'invisible')
+                || ((feature.isChanged || feature.isNew) && 'unsaved')
+                || (feature.isCopy && 'copy')
+                || 'default'
+            ;
+            if (renderIntent === 'default' && feature.__custom_style__) {
+                feature.style = feature.__custom_style__;
+            } else {
+                feature.style = null;
+            }
+            if (feature.layer) {
+                feature.layer.drawFeature(feature, feature.style || renderIntent);
+            }
+        },
         loadCustomStyles: function() {
             var schemaNames = Object.values(this.getBasicSchemes()).filter(function(schema) {
                 return schema.allowCustomStyle;
@@ -547,6 +564,7 @@
                 feature.fid = featureData.id;
                 if (allCustomStyles[feature.fid]) {
                     feature.__custom_style__ = allCustomStyles[feature.fid];
+                    feature.style = allCustomStyles[feature.fid];
                 }
                 return feature;
             });

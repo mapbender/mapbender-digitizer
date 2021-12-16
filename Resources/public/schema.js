@@ -85,24 +85,18 @@ Mapbender.Digitizer.Scheme.prototype = {
                 eventListeners: {
                     'featurehighlighted': function(evt) {
                         var feature = evt.feature;
-                        feature.isHighlighted = true;
                         if (!schema.disableFeatureHighlightInResultTable && feature.__tr__) {
                             $(feature.__tr__).addClass('hover');
                             schema.menu.pageToRow(feature.__tr__);
                         }
-                        if (feature.layer) {
-                            feature.layer.drawFeature(feature);
-                        }
+                        schema.widget.redrawFeature(schema, feature, true);
                     },
                     'featureunhighlighted': function(evt) {
                         var feature = evt.feature;
-                        feature.isHighlighted = false;
                         if (feature.__tr__) {
                             $(feature.__tr__).removeClass('hover');
                         }
-                        if (feature.layer) {
-                            feature.layer.drawFeature(feature);
-                        }
+                        schema.widget.redrawFeature(schema, feature, false);
                     }
                 }
             });
@@ -434,72 +428,6 @@ Mapbender.Digitizer.Scheme.prototype = {
             }
         },
 
-        setStyleProperties: function (feature) {
-            var schema = this;
-
-            var isGetter = function (obj, prop) {
-                var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
-                return !!descriptor && !!descriptor['get'];
-            };
-
-            if (!isGetter(feature, 'style')) {
-                Object.defineProperty(feature, 'style', {
-                    get: function () {
-                        if (this.renderIntent !== 'default') {
-                            return null;
-                        } else {
-                            var style = schema.getFeatureStyle(this) || null;
-                            if (style && style.label === '${label}') {
-                                style.label = schema.getStyleLabel(this);
-                            }
-                            return style;
-                        }
-                    },
-                    set: function (value) {
-                        var feature = this;
-                        feature._style = value; // is never used
-                    }
-                });
-            }
-
-            if (!isGetter(feature, 'renderIntent')) {
-
-
-                Object.defineProperty(feature, 'renderIntent', {
-                    get: function () {
-                        var feature = this;
-                        var renderIntent = "default";
-
-                        if (feature.isChanged || feature.isNew) {
-                            renderIntent = 'unsaved';
-                        }
-
-                        if (feature.isCopy) {
-                            renderIntent = 'copy';
-                        }
-
-                        if (!feature.visible) {
-                            renderIntent = 'invisible';
-                        }
-
-                        if (feature.isHighlighted) {
-                            renderIntent = "select";
-                        }
-                        return renderIntent;
-                    },
-                    set: function (value) {
-                        var feature = this;
-
-                        feature._renderIntent = value; // is never used
-                    }
-                });
-            }
-        },
-
-        getFeatureStyle: function(feature) {
-            return feature.__custom_style__ || (feature.fid && this.widget.customStyles[feature.fid]) || null;
-        },
-
         removeAllFeatures: function () {
             var schema = this;
             schema.layer.removeAllFeatures();
@@ -578,7 +506,6 @@ Mapbender.Digitizer.Scheme.prototype = {
 
         introduceFeature: function (feature) {
             var schema = this;
-            schema.setStyleProperties(feature);
             feature.mbOrigin = 'digitizer';
         },
 
