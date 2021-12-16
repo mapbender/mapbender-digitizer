@@ -9,11 +9,9 @@
         });
 
         this.allowCustomStyle = allowCustomStyle;
+        this.isAllScheme = true;
 
         Mapbender.Digitizer.Scheme.apply(this, arguments);
-
-
-
 
         this.schemaName = 'all';
 
@@ -32,41 +30,6 @@
         getGeomType: function() {
             return 'all';
         },
-
-
-        getStyleMapOptions: function (label) {
-            var schema = this;
-            var widget = schema.widget;
-
-            var rules = [];
-
-            _.each(widget.getBasicSchemes(), function (scheme) {
-
-                var rule = new OpenLayers.Rule({
-                    symbolizer: scheme.layer.styleMap.styles[label].defaultStyle,
-                    evaluate: function (feature) {
-                        var equals = feature.attributes.schemaName === scheme.schemaName;
-                        return equals;
-                    }
-                });
-
-                rules.push(rule);
-            });
-
-            // Regel zur Darstellung von nicht-digitizer Features wie den Modification Vertices
-            rules.push(new OpenLayers.Rule({
-
-                symbolizer: OpenLayers.Feature.Vector.style['default'],
-                evaluate: function (feature) {
-                    return !feature.attributes.schemaName; // Feature ohne Schemaname ist kein Digitizer Feature
-                }
-            }));
-
-            return {
-                rules: rules
-            }
-        },
-
         createToolset: function () {
             var schema = this;
             var widget = schema.widget;

@@ -14,23 +14,19 @@
         if (!rawScheme.currentExtentSearch && rawScheme.searchType) {
             schema.currentExtentSearch = rawScheme.searchType === "currentExtent";
         }
+        this.setup();
+    };
+Mapbender.Digitizer.Scheme.prototype = {
+    getRenderIntents: function() {
+        return ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
+    },
+    createStyleMap: function() {
+            var schema = this;
 
-        var styleLabels = ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
-
-        var createSchemaFeatureLayer = function () {
-
-            var widget = schema.widget;
-            var strategies = [];
-
-            var createStyleMap = function () {
-
-
-                var context = schema.getStyleMapContext();
                 var styleMapObject = {};
 
-                styleLabels.forEach(function (label) {
+                this.getRenderIntents().forEach(function (label) {
                     var options = schema.getStyleMapOptions(label);
-                    options.context = context;
                     var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
                     var styleOptions = Object.assign({}, styleOL, schema.styles[label]);
                     if (schema.clusteringLabel) {
@@ -44,18 +40,16 @@
                     styleMapObject.unsaved = styleMapObject.default;
                 }
                 return new OpenLayers.StyleMap(styleMapObject, {extendDefault: true});
-
-            };
-
-            var styleMap = createStyleMap();
-
+    },
+    createLayer: function() {
+        var schema = this;
+            var styleMap = this.createStyleMap();
 
             var layer = new OpenLayers.Layer.Vector(schema.label, {
                 styleMap: styleMap,
                 name: schema.label,
                 visibility: false,
-                rendererOptions: {zIndexing: true},
-                strategies: strategies
+                rendererOptions: {zIndexing: true}
             });
 
             if (schema.maxScale) {
@@ -64,16 +58,11 @@
             if (schema.minScale) {
                 layer.options.minScale = schema.minScale;
             }
-            schema.layer = layer;
-
-            widget.map.addLayer(schema.layer);
-
-        };
-
-        var addSelectControls = function () {
-            var layer = schema.layer;
-            var widget = schema.widget;
-
+            return layer;
+    },
+    createSelectControl: function(layer) {
+        var schema = this;
+            var widget = this.widget;
 
             var selectControl = new OpenLayers.Control.SelectFeature(layer, {
                 clickout: true,
@@ -121,17 +110,16 @@
 
             // Workaround to move map by touch vector features
             selectControl.handlers.feature.stopDown = false;
-            schema.selectControl = selectControl;
-
-            widget.map.addControl(schema.selectControl);
-
-        };
+            return selectControl;
+    },
+    setup: function() {
+        var schema = this;
 
         schema.initTableFields();
 
         schema.toolset = schema.createToolset(); // Is overwritten and must therefore be implemented in the prototype
 
-        styleLabels.forEach(function (label) {
+        this.getRenderIntents().forEach(function (label) {
             schema.styles[label] = _.isEmpty(schema.styles[label]) ? schema.widget.styles[label] : schema.styles[label];
         });
 
@@ -142,11 +130,14 @@
             Object.setPrototypeOf(clusteringScheme, originalSchemePrototype);
         }
 
-        createSchemaFeatureLayer();
+        this.layer = this.createLayer();
+        this.widget.map.addLayer(this.layer);
         this.menu = new Mapbender.Digitizer.Menu(schema);
         this.widget.element.append(schema.menu.frame);
 
-        addSelectControls();
+        this.selectControl = this.createSelectControl(this.layer);
+        this.widget.map.addControl(this.selectControl);
+
         schema.menu.initializeTableEvents(schema);
 
         schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
@@ -166,10 +157,7 @@
 
         assert();
 
-    };
-
-
-    Mapbender.Digitizer.Scheme.prototype = {
+    },
 
 
         schemaName: null,
@@ -304,19 +292,6 @@
             return feature_.attributes[schema.featureType.name] || '';
         },
 
-        getStyleMapContext: function () {
-            var schema = this;
-            return {
-                webRootPath: Mapbender.Digitizer.Utilities.getAssetsPath(),
-
-                feature: function (feature) {
-                    return feature;
-                },
-
-                label: schema.getStyleLabel.bind(schema)
-            }
-        },
-
         initTableFields: function () {
             var schema = this;
 
@@ -378,9 +353,29 @@
             }
 
         },
-        // Overwrite
-        getStyleMapOptions: function (label) {
-            return {};
+        getStyleMapOptions: function (renderIntent) {
+            var options = {
+                context: {
+                    webRootPath: Mapbender.Digitizer.Utilities.getAssetsPath(),
+                    feature: function (feature) {
+                        return feature;
+                    },
+                    label: this.getStyleLabel.bind(this)
+                }
+            };
+            if (this.isAllScheme) {
+                options.rules = _.map(this.widget.getBasicSchemes(), function(scheme) {
+                    var styleRules = scheme.styles[renderIntent] || scheme.widget.styles[renderIntent];
+                    return styleRules && new OpenLayers.Rule({
+                        symbolizer: styleRules,
+                        evaluate: function (feature) {
+                            return feature.attributes.schemaName === scheme.schemaName;
+                        }
+                    });
+                }).filter(function(rule) { return !!rule; });
+            }
+
+            return options;
         },
 
         // Overwrite
