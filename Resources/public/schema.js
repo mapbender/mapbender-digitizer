@@ -125,7 +125,7 @@
 
 
             // Workaround to move map by touch vector features
-            selectControl.handlers && selectControl.handlers.feature && (selectControl.handlers.feature.stopDown = false);
+            selectControl.handlers.feature.stopDown = false;
             schema.selectControl = selectControl;
 
             widget.map.addControl(schema.selectControl);
@@ -361,34 +361,10 @@
                 }
             });
         },
-        deactivateSchema: function (deactivateWidget) {
-            var schema = this;
-            var widget = schema.widget;
-            var frame = schema.menu.frame;
-            var layer = schema.layer;
-
-            frame.hide();
-
-            if ((deactivateWidget && !schema.widget.displayOnInactive) || (!deactivateWidget && !schema.displayPermanent)) {
-                layer.setVisibility(false);
-            }
-
-            schema.selectControl.deactivate();
-
-            if (widget.currentPopup) {
-                widget.currentPopup.popupDialog('close');
-            }
-
-            schema.menu.deactivateControls();
-
-
-        },
-
-
         createToolset: function () {
             var schema = this;
 
-            return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : [];// Mapbender.Digitizer.Utilities.getDefaultToolsetByGeomType(schema.featureType.geomType);
+            return schema.toolset && !_.isEmpty(schema.toolset) ? schema.toolset : [];
         },
 
         openFeatureEditDialog: function (feature) {

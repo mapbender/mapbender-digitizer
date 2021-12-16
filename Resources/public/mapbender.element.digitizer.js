@@ -183,7 +183,7 @@
             widget.selector.on('change', function () {
                 var schema = widget.getCurrentSchema();
                 if (widget.currentSchema_ && widget.currentSchema_ !== schema) {
-                    widget.currentSchema_.deactivateSchema();
+                    widget.deactivateSchema(widget.currentSchema_);
                 }
                 widget.currentSchema_ = schema;
                 widget.activateSchema(schema);
@@ -387,10 +387,26 @@
         },
 
         deactivate: function () {
-            var widget = this;
-            widget.disable();
-            widget.isFullyActive = false;
-            widget.getCurrentSchema().deactivateSchema(true);
+            this.disable();
+            this.isFullyActive = false;
+            var schema = this.getCurrentSchema();
+            this.deactivateSchema(schema);
+            if (schema.layer && !this.displayOnInactive) {
+                schema.layer.setVisibility(false);
+            }
+        },
+        deactivateSchema: function(schema) {
+            if (this.currentPopup) {
+                this.currentPopup.popupDialog('close');
+                this.currentPopup = null;
+            }
+
+            if (schema.layer && !schema.displayPermanent) {
+                schema.layer.setVisibility(false);
+            }
+            schema.selectControl.deactivate();
+            schema.menu.frame.hide();
+            schema.menu.deactivateControls();
         },
         // Sidepane integration api
         hide: function() {
