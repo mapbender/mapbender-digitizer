@@ -465,6 +465,11 @@
                 schema.openFeatureEditDialog(feature);
             }
         },
+        onMapFeatureClick: function(schema, feature) {
+            if (schema.allowEditData || schema.allowOpenEditDialog) {
+                schema.openFeatureEditDialog(feature);
+            }
+        },
         saveStyle: function(feature, styleData) {
             feature.__custom_style__ = styleData || null;
             var currentSchema = this.getCurrentSchema();

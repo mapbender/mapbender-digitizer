@@ -83,20 +83,16 @@
 
                 hover: true,
 
-                openDialog: function (feature) {
-
-                    if (schema.allowEditData || schema.allowOpenEditDialog) {
-                        schema.openFeatureEditDialog(feature);
-                    }
-                },
-
-                clickFeature: function (feature) {
-                    if (schema.mapHasActiveControlThatBlocksSelectControl()) {
+                clickFeature: function(feature) {
+                    var activeModifyControls = widget.map.getControlsByClass('OpenLayers.Control.ModifyFeature').filter(function(control) {
+                        return control.active;
+                    });
+                    if (activeModifyControls.length) {
                         return;
                     }
-                    this.openDialog(feature);
-                    return Object.getPrototypeOf(this).clickFeature.apply(this, arguments);
 
+                    widget.onMapFeatureClick(schema, feature);
+                    return OpenLayers.Control.SelectFeature.prototype.clickFeature.apply(this, arguments);
                 },
                 eventListeners: {
                     'featurehighlighted': function(evt) {
@@ -373,15 +369,6 @@
             if (schema.allowEditData || schema.allowViewData) {
                 Mapbender.Digitizer.FeatureEditDialog.open(feature_, schema);
             }
-        },
-
-
-        mapHasActiveControlThatBlocksSelectControl: function () {
-            var schema = this;
-            var widget = schema.widget;
-            var map = widget.map;
-
-            return !!_.find(map.getControlsByClass('OpenLayers.Control.ModifyFeature'), {active: true});
         },
 
 
