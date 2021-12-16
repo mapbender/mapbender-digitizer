@@ -1,6 +1,6 @@
 (function () {
     "use strict";
-    Mapbender.Digitizer.AllScheme = function (rawScheme, widget, index) {
+    Mapbender.Digitizer.AllScheme = function (rawScheme, widget) {
 
 
         var allowCustomStyle = false;

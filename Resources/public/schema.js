@@ -1,9 +1,8 @@
 (function () {
     "use strict";
 
-    Mapbender.Digitizer.Scheme = function (rawScheme, widget, index) {
+    Mapbender.Digitizer.Scheme = function (rawScheme, widget) {
         var schema = this;
-        schema.index = index;
         schema.widget = widget;
 
         $.extend(schema, rawScheme);
@@ -195,26 +194,9 @@
 
 
         selectXHR: null,
-        view: {
-            type: null, // No implementation
-            settings: null,
-        },
 
         selectControl: null,
         clusterStrategy: null,
-
-
-        //** Data Manager only
-        dataStore: null,
-        dataStoreLink: {
-            fieldName: null
-        },
-        dataItems: null,
-
-        //* Server Only
-        events: {
-            onAfterSave: null,
-        },
 
 
         //* Newly added properties
@@ -254,7 +236,7 @@
         popup: {
             title: null,
             width: '350px',
-            type: null,
+            type: null
         },
         styles: {
             default: {},
@@ -266,7 +248,7 @@
             rules: null,
             data: null,
             overwriteValuesWithDefault: false,
-            moveCopy: null,
+            moveCopy: null
         },
 
         formItems: null,
@@ -408,7 +390,6 @@
 
         openChangeStyleDialog: function (feature) {
             var schema = this.getSchemaByFeature(feature);
-
             var styleOptions = {
                 data: Object.assign({}, schema.styles.default, feature.__custom_style__ || {})
             };

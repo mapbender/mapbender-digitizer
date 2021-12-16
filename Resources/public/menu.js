@@ -257,9 +257,6 @@
                     //$(this.api().table().container()).find('input').parent().wrap('<form>').parent().attr('autocomplete', 'off');
                 }
             };
-            if (schema.view.settings) {
-                _.extend(resultTableSettings, schema.view.settings);
-            }
 
             var filterPlaceholder = this.getFilterPlaceholder(resultTableSettings.columns);
             // Add buttons column

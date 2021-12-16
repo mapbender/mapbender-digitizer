@@ -226,7 +226,7 @@
                 var index = 0;
                 _.each(rawSchemes, function (rawScheme, schemaName) {
                     rawScheme.schemaName = schemaName;
-                    widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget, index++);
+                    widget.schemes[schemaName] = new Mapbender.Digitizer.Scheme(rawScheme, widget);
                     if (!widget.schemes[schemaName].disableAggregation) {
                         widget.selector.appendSchema(widget.schemes[schemaName])
                     }
