@@ -197,20 +197,19 @@
             var schema = this.schema;
             return new OpenLayers.Control.ModifyFeature(controlFactory.layer, {
                 controlFactory: controlFactory,
-                onModificationStart: function (feature) {
+                beforeSelectFeature: function(feature) {
                     if (!schema.getSchemaByFeature(feature).allowEditData) {
-                        this.deactivate();
-                        this.activate();
                         $.notify(Mapbender.trans('mb.digitizer.move.denied'));
-                    } else {
-                        if (!feature.oldGeometry) {
-                            feature.oldGeometry = feature.geometry.clone();
-                        }
+                        return false;
+                    }
+                    return OpenLayers.Control.ModifyFeature.prototype.beforeSelectFeature.apply(this, arguments);
+                },
+                onModificationStart: function (feature) {
+                    if (!feature.oldGeometry) {
+                        feature.oldGeometry = feature.geometry.clone();
                     }
                 },
-
                 onModification: function (feature) {
-
                     var wkt = feature.geometry.toString();
                     var reader = new jsts.io.WKTReader();
                     var geom = reader.read(wkt);
@@ -225,9 +224,7 @@
                         // deactivation is necessary because the vertice features dont move back
                         this.deactivate();
                     }
-
-                },
-
+                }
             })
         },
 
@@ -253,8 +250,5 @@
                 }
             })
         }
-
-
     }
-
 })();
