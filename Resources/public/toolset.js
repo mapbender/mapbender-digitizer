@@ -80,11 +80,8 @@
                         toolSet.activeControl && toolSet.activeControl.deactivate();
                         control.activate();
                         toolSet.activeControl = control;
-
                     }
-
                 });
-
 
                 control.layer.map.addControl(control);
                 element.append($button);

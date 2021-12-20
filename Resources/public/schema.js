@@ -17,33 +17,9 @@
         this.setup();
     };
 Mapbender.Digitizer.Scheme.prototype = {
-    getRenderIntents: function() {
-        return ['default', 'select', 'unsaved', 'invisible', 'labelText', 'labelTextHover', 'copy'];
-    },
-    createStyleMap: function() {
-            var schema = this;
-
-                var styleMapObject = {};
-
-                this.getRenderIntents().forEach(function (label) {
-                    var options = schema.getStyleMapOptions(label);
-                    var styleOL = OpenLayers.Feature.Vector.style[label] || OpenLayers.Feature.Vector.style['default'];
-                    var styleOptions = Object.assign({}, styleOL, schema.styles[label]);
-                    if (schema.clusteringLabel) {
-                        styleOptions.label = '${label}';
-                    }
-
-                    styleMapObject[label] = new OpenLayers.Style(styleOptions, options);
-                });
-
-                if (!schema.markUnsavedFeatures) {
-                    styleMapObject.unsaved = styleMapObject.default;
-                }
-                return new OpenLayers.StyleMap(styleMapObject, {extendDefault: true});
-    },
     createLayer: function() {
         var schema = this;
-            var styleMap = this.createStyleMap();
+            var styleMap = this.widget.createStyleMap(this);
 
             var layer = new OpenLayers.Layer.Vector(schema.label, {
                 styleMap: styleMap,
@@ -112,10 +88,6 @@ Mapbender.Digitizer.Scheme.prototype = {
         schema.initTableFields();
 
         schema.toolset = schema.createToolset(); // Is overwritten and must therefore be implemented in the prototype
-
-        this.getRenderIntents().forEach(function (label) {
-            schema.styles[label] = _.isEmpty(schema.styles[label]) ? schema.widget.styles[label] : schema.styles[label];
-        });
 
         if (schema.clustering) { // Move the clustering prototype just between the scheme and its native prototype
             var clusteringScheme = Mapbender.Digitizer.ClusteringSchemeMixin();
@@ -271,21 +243,6 @@ Mapbender.Digitizer.Scheme.prototype = {
             return tableFields;
 
         },
-
-        getStyleLabel: function (feature) {
-            var feature_;
-            if (feature.cluster) {
-                if (feature.cluster.length > 1) {
-                    return '' + feature.cluster.length;
-                }
-                feature_ = feature.cluster[0];
-            } else {
-                feature_ = feature;
-            }
-            var schema = this.getSchemaByFeature(feature_);
-            return feature_.attributes[schema.featureType.name] || '';
-        },
-
         initTableFields: function () {
             var schema = this;
 
@@ -347,32 +304,6 @@ Mapbender.Digitizer.Scheme.prototype = {
             }
 
         },
-        getStyleMapOptions: function (renderIntent) {
-            var options = {
-                context: {
-                    webRootPath: Mapbender.Digitizer.Utilities.getAssetsPath(),
-                    feature: function (feature) {
-                        return feature;
-                    },
-                    label: this.getStyleLabel.bind(this)
-                }
-            };
-            if (this.isAllScheme) {
-                options.rules = _.map(this.widget.getBasicSchemes(), function(scheme) {
-                    var styleRules = scheme.styles[renderIntent] || scheme.widget.styles[renderIntent];
-                    return styleRules && new OpenLayers.Rule({
-                        symbolizer: styleRules,
-                        evaluate: function (feature) {
-                            return feature.attributes.schemaName === scheme.schemaName;
-                        }
-                    });
-                }).filter(function(rule) { return !!rule; });
-            }
-
-            return options;
-        },
-
-        // Overwrite
         extendFeatureStyleOptions: function (styleOptions) {
         },
 
@@ -505,7 +436,6 @@ Mapbender.Digitizer.Scheme.prototype = {
         },
 
         introduceFeature: function (feature) {
-            var schema = this;
             feature.mbOrigin = 'digitizer';
         },
 

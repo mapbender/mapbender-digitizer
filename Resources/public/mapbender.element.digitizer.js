@@ -34,13 +34,6 @@
                 fillOpacity: 0.5,
                 graphicZIndex: 15
             },
-            // 'selected': {
-            //     strokeWidth: 3,
-            //     fillColor: "#74b1f7",
-            //     strokeColor: '#b5ac14',
-            //     fillOpacity: 0.7,
-            //     graphicZIndex: 15
-            // },
             'copy': {
                 strokeWidth: 5,
                 fillColor: "#f7ef7e",
@@ -54,31 +47,9 @@
                 strokeColor: '#F5663C',
                 fillOpacity: 0.5
             },
-
             'invisible': {
                 display: 'none'
-            },
-
-            'labelText': {
-                strokeWidth: 0,
-                fillColor: '#cccccc',
-                fillOpacity: 0,
-                strokeColor: '#5e1a2b',
-                strokeOpacity: 0,
-                pointRadius: 15,
-                label: '${label}',
-                fontSize: 15
-            },
-            'labelTextHover': {
-                strokeWidth: 0,
-                fillColor: '#cccccc',
-                strokeColor: '#2340d3',
-                fillOpacity: 1,
-                pointRadius: 15,
-                label: '${label}',
-                fontSize: 15
-            },
-
+            }
         },
 
         initialScheme: null,
@@ -568,6 +539,73 @@
                 }
                 return feature;
             });
+        },
+        getStyleConfig: function(schema, renderIntent) {
+            var styleOL = OpenLayers.Feature.Vector.style[renderIntent] || OpenLayers.Feature.Vector.style['default'];
+            var style = Object.assign({}, styleOL || {}, this.styles[renderIntent] || {}, schema.styles[renderIntent] || {});
+            if (schema.clusteringLabel) {
+                style.label = '${label}';
+            }
+            return style;
+        },
+        getStyleMatchingRules: function(schema, renderIntent) {
+            var self = this;
+            if (schema.isAllScheme) {
+                return _.map(this.getBasicSchemes(), function(scheme) {
+                    return new OpenLayers.Rule({
+                        symbolizer: self.getStyleConfig(scheme, renderIntent),
+                        evaluate: function (feature) {
+                            return feature.attributes.schemaName === scheme.schemaName;
+                        }
+                    });
+                });
+            } else {
+                return [];
+            }
+        },
+        getStyleOptions: function(schema, renderIntent) {
+            var options = {
+                context: {
+                    webRootPath: Mapbender.Digitizer.Utilities.getAssetsPath(),
+                    feature: function (feature) {
+                        return feature;
+                    },
+                    label: function(feature) {
+                        // Supress "undefined" showing up as text
+                        var labelProp = schema.getSchemaByFeature(feature).featureType.name || 'label';
+                        return feature.attributes[labelProp] || '';
+                    }
+                },
+                rules: this.getStyleMatchingRules(schema, renderIntent)
+            };
+            if (options.rules.length) {
+                var fallbackStyle = Object.assign({},
+                    OpenLayers.Feature.Vector.style["default"],
+                    OpenLayers.Feature.Vector.style[renderIntent],
+                    this.styles[renderIntent] || {},
+                    schema.styles[renderIntent] || {}
+                );
+                options.rules.splice(0, 0, new OpenLayers.Rule({
+                    symbolizer: fallbackStyle
+                }));
+            }
+            return options;
+        },
+        createStyleMap: function(schema) {
+            var self = this;
+            var styles = {};
+            this.getKnownRenderIntents_().forEach(function (intent) {
+                var style = self.getStyleConfig(schema, intent);
+                var options = self.getStyleOptions(schema, intent);
+                styles[intent] = new OpenLayers.Style(style, options);
+            });
+            if (!schema.markUnsavedFeatures) {
+                styles.unsaved = styles.default;
+            }
+            return new OpenLayers.StyleMap(styles, {extendDefault: true});
+        },
+        getKnownRenderIntents_: function() {
+            return ['default', 'select', 'unsaved', 'invisible', 'copy'];
         }
     });
 })(jQuery);
