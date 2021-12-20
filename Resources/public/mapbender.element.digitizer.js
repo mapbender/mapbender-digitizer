@@ -420,7 +420,7 @@
             feature.__custom_style__ = styleData || null;
             var currentSchema = this.getCurrentSchema();
             if (-1 !== currentSchema.layer.features.indexOf(feature)) {
-                currentSchema.layer.drawFeature(feature);
+                this.redrawFeature(currentSchema, feature, false);
             }
             this.customStyles = this.customStyles || {};
             if (feature.fid) {

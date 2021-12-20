@@ -475,10 +475,11 @@ Mapbender.Digitizer.Scheme.prototype = {
                 var geometry = OpenLayers.Geometry.fromWKT(response[0].geometry);
                 var newFeature = new OpenLayers.Feature.Vector(geometry, response[0].properties);
                 newFeature.fid = response[0].id || feature.fid;
-                newFeature.layer = feature.layer;
 
                 if (!feature.fid && feature.__custom_style__) {
                     schema.widget.saveStyle(newFeature, feature.__custom_style__);
+                } else {
+                    newFeature.__custom_style__ = feature.__custom_style__ || null;
                 }
 
                 newFeature.isNew = false;
@@ -490,6 +491,7 @@ Mapbender.Digitizer.Scheme.prototype = {
                 }
                 widget.dropFeature(feature);
                 currentSchema.layer.addFeatures([newFeature]);
+                currentSchema.widget.redrawFeature(currentSchema, newFeature, false);
 
                 $.notify(Mapbender.trans('mb.digitizer.feature.save.successfully'), 'info');
 
