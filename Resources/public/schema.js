@@ -302,22 +302,6 @@ Mapbender.Digitizer.Scheme.prototype = {
             }
 
         },
-        extendFeatureStyleOptions: function (styleOptions) {
-        },
-
-
-        openChangeStyleDialog: function (feature) {
-            var schema = this.getSchemaByFeature(feature);
-            var styleOptions = {
-                data: Object.assign({}, schema.styles.default, feature.__custom_style__ || {})
-            };
-
-            schema.extendFeatureStyleOptions(feature, styleOptions);
-
-            var styleEditor = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, styleOptions);
-        },
-
-
         createRequest: function () {
             var schema = this;
             var widget = schema.widget;

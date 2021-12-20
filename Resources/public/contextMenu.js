@@ -87,7 +87,7 @@
             subItems['style'] = {
                 name: Mapbender.trans('mb.digitizer.feature.style.change'),
                 action: function (key, options, parameters) {
-                    schema.openChangeStyleDialog(feature);
+                    schema.widget.editStyle(feature);
                 }
             };
         }

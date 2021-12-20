@@ -500,6 +500,19 @@
                 return newFeatures;
             });
         },
+        getInitialStyleConfig: function(schema, feature) {
+            return Object.assign({}, schema.styles.default, feature.__custom_style__ || {});
+        },
+        getStyleEditorOptions: function(schema, feature) {
+            return {
+                data: this.getInitialStyleConfig(schema, feature)
+            };
+        },
+        editStyle: function(feature) {
+            var schema = this.getCurrentSchema().getSchemaByFeature(feature);
+            var editorOptions = this.getStyleEditorOptions(schema, feature);
+            var _ = new Mapbender.Digitizer.FeatureStyleEditor(feature, schema, editorOptions);
+        },
         parseFeatures_: function(featureDataList, styleData) {
             this.customStyles = this.customStyles || {};
             Object.assign(this.customStyles, styleData || {});

@@ -406,7 +406,7 @@
             });
             this.$table.on('click', 'tbody .-fn-edit-style', function() {
                 var feature = $(this).closest('tr').data('feature');
-                schema.openChangeStyleDialog(feature);
+                schema.widget.editStyle(feature);
                 return false;
             });
             this.$table.on('click', 'tbody .-fn-toggle-visibility', function() {

@@ -24,7 +24,7 @@
             buttons.push({
                 text: Mapbender.trans('mb.digitizer.feature.style.change'),
                 click: function() {
-                    schema.openChangeStyleDialog(feature);
+                    schema.widget.editStyle(feature);
                 }
             });
         }
