@@ -107,7 +107,6 @@ Mapbender.Digitizer.Scheme.prototype = {
         schema.menu.initializeTableEvents(schema);
 
         schema.mapContextMenu = new Mapbender.Digitizer.MapContextMenu(schema);
-        schema.elementContextMenu = new Mapbender.Digitizer.ElementContextMenu(schema);
 
         // use layerManager
         if (schema.refreshLayersAfterFeatureSave) {
@@ -131,7 +130,6 @@ Mapbender.Digitizer.Scheme.prototype = {
         widget: null,
         frame: null,
         mapContextMenu: null,
-        elementContextMenu: null,
         menu: null,
 
         featureType: {

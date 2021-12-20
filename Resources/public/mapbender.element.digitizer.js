@@ -247,36 +247,11 @@
 
             };
 
-            var createElementContextMenu = function () {
-                var element = $(widget.element);
-
-                var options = {
-                    position: function (opt, x, y) {
-                        opt.$menu.css({top: y, left: x + 10});
-                    },
-                    selector: '.mapbender-element-result-table > div > table > tbody > tr',
-                    events: {
-                        show: function (options) {
-                            return widget.getCurrentSchema().elementContextMenu.allowUseContextMenu(options);
-                        }
-                    },
-                    build: function (trigger, e) {
-                        return widget.getCurrentSchema().elementContextMenu.buildContextMenu(trigger, e);
-                    }
-                };
-
-                $(element).contextMenu(options);
-
-            };
-
-
             initializeSelectorOrTitleElement();
 
             createSchemes();
 
             createMapContextMenu();
-
-            createElementContextMenu();
 
             widget.registerMapEvents();
 
