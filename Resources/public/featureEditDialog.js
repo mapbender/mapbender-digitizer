@@ -99,7 +99,7 @@
                     feature.geometry = feature.oldGeometry;
                     feature.oldGeometry = null;
                     schema.setModifiedState(feature, false, null);
-                    widget.redrawFeature(schema, feature, false);
+                    widget.redrawFeature(feature, false);
                 }
             });
 

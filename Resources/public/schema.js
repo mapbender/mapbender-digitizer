@@ -65,14 +65,14 @@ Mapbender.Digitizer.Scheme.prototype = {
                             $(feature.__tr__).addClass('hover');
                             schema.menu.pageToRow(feature.__tr__);
                         }
-                        schema.widget.redrawFeature(schema, feature, true);
+                        schema.widget.redrawFeature(feature, true);
                     },
                     'featureunhighlighted': function(evt) {
                         var feature = evt.feature;
                         if (feature.__tr__) {
                             $(feature.__tr__).removeClass('hover');
                         }
-                        schema.widget.redrawFeature(schema, feature, false);
+                        schema.widget.redrawFeature(feature, false);
                     }
                 }
             });
@@ -276,16 +276,6 @@ Mapbender.Digitizer.Scheme.prototype = {
                 Mapbender.Digitizer.FeatureEditDialog.open(feature_, schema);
             }
         },
-
-
-        reloadFeatures: function () {
-            this.layer.redraw();
-            var tableFeatures = this.layer.features.filter(function(feature) {
-                return feature && !feature.cluster && !feature.isNew;
-            });
-            this.menu.replaceTableRows(tableFeatures);
-        },
-
         setModifiedState: function (feature, state, control) {
             feature.isChanged = state;
             if (feature.isNew || feature.isCopy) {
@@ -324,14 +314,15 @@ Mapbender.Digitizer.Scheme.prototype = {
 
         onFeatureCollectionLoaded: function (features, options) {
             var schema = this;
+            this.layer.removeAllFeatures();
             for (var i = 0; i < features.length; ++i) {
                 this.introduceFeature(features[i]);
+                features[i].visible = true;
             }
-            this.layer.removeAllFeatures();
             this.layer.addFeatures(features);
 
-            schema.reloadFeatures();
-            schema.setVisibilityForAllFeaturesInLayer();
+            this.widget.redrawLayer(this.layer);
+            this.menu.refreshTable(this.layer.features);
 
             if (schema.clusterStrategy && options && options.zoom) {
                 schema.updateClusterStrategy();
@@ -448,14 +439,15 @@ Mapbender.Digitizer.Scheme.prototype = {
                 srid: srid,
                 type: "Feature"
             };
+            var schemaName = schema.getSchemaByFeature(feature).schemaName;
 
             var promise = widget.query('save', {
 
-                schema: schema.getSchemaByFeature(feature).schemaName,
+                schema: schemaName,
                 feature: request
             }).then(function (response) {
 
-                feature.disabled = false; // feature is actually removed anyways
+                feature.disabled = false;
 
                 if (response.errors) {
 
@@ -470,32 +462,31 @@ Mapbender.Digitizer.Scheme.prototype = {
 
                     return response;
                 }
-
+                schema.widget.dropFeature(feature);
+                var isNew = !feature.isNew;
+                feature.isNew = false;
                 schema.setModifiedState(feature, false);
-                var geometry = OpenLayers.Geometry.fromWKT(response[0].geometry);
-                var newFeature = new OpenLayers.Feature.Vector(geometry, response[0].properties);
-                newFeature.fid = response[0].id || feature.fid;
-
-                if (!feature.fid && feature.__custom_style__) {
-                    schema.widget.saveStyle(newFeature, feature.__custom_style__);
-                } else {
-                    newFeature.__custom_style__ = feature.__custom_style__ || null;
+                feature.geometry = OpenLayers.Geometry.fromWKT(response[0].geometry);
+                Object.assign(feature.attributes, response[0].properties, {
+                    schemaName: schemaName
+                });
+                Object.assign(feature.data, feature.attributes);
+                feature.fid = response[0].id || feature.fid;
+                if (isNew && feature.__custom_style__) {
+                    schema.widget.saveStyle(feature, feature.__custom_style__);
                 }
 
-                newFeature.isNew = false;
                 var currentSchema = widget.getCurrentSchema();
-                currentSchema.introduceFeature(newFeature);
 
                 if (!feature.attributes.schemaName) {
                     feature.attributes.schemaName = schema.getSchemaByFeature(feature).schemaName;
                 }
-                widget.dropFeature(feature);
-                currentSchema.layer.addFeatures([newFeature]);
-                currentSchema.widget.redrawFeature(currentSchema, newFeature, false);
+                currentSchema.layer.addFeatures([feature]);
+                currentSchema.widget.redrawLayer(currentSchema.layer);
 
                 $.notify(Mapbender.trans('mb.digitizer.feature.save.successfully'), 'info');
 
-                currentSchema.reloadFeatures();
+                currentSchema.menu.refreshTable(currentSchema.layer.features);
 
                 widget.element.trigger("featureSaved", {schema: schema, feature: feature});
 
@@ -550,17 +541,11 @@ Mapbender.Digitizer.Scheme.prototype = {
         },
 
 
-        setVisibilityForAllFeaturesInLayer: function () {
-            var schema = this;
-            var layer = schema.layer;
-
-            layer.features.forEach(function (feature) {
-                feature.visible = schema.featureVisibility;
+        setVisibilityForAllFeaturesInLayer: function (state) {
+            this.layer.features.forEach(function (feature) {
+                feature.visible = state;
             });
-            layer.redraw();
-            schema.menu.redrawTable();
         },
-
         exportGeoJson: function (feature) {
             var schema = this;
             var widget = schema.widget;

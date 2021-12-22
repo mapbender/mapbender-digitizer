@@ -420,7 +420,7 @@
             feature.__custom_style__ = styleData || null;
             var currentSchema = this.getCurrentSchema();
             if (-1 !== currentSchema.layer.features.indexOf(feature)) {
-                this.redrawFeature(currentSchema, feature, false);
+                this.redrawFeature(feature, false);
             }
             this.customStyles = this.customStyles || {};
             if (feature.fid) {
@@ -442,7 +442,12 @@
                 }
             });
         },
-        redrawFeature: function(schema, feature, highlight) {
+        redrawLayer: function(layer) {
+            for (var i = 0; i < layer.features.length; ++i) {
+                this.redrawFeature(layer.features[i], false);
+            }
+        },
+        redrawFeature: function(feature, highlight) {
             var renderIntent =
                 (highlight && 'select')
                 || (!feature.visible && 'invisible')
@@ -450,13 +455,15 @@
                 || (feature.isCopy && 'copy')
                 || 'default'
             ;
-            if (renderIntent === 'default' && feature.__custom_style__) {
-                feature.style = feature.__custom_style__;
-            } else {
-                feature.style = null;
-            }
+            feature.style = null;
+            feature.renderIntent = renderIntent;
             if (feature.layer) {
-                feature.layer.drawFeature(feature, feature.style || renderIntent);
+                if (renderIntent === 'default' && feature.__custom_style__) {
+                    feature.style = feature.layer.styleMap.styles.default.createLiterals(feature.__custom_style__, feature);
+                    feature.layer.drawFeature(feature, feature.style);
+                } else {
+                    feature.layer.drawFeature(feature);
+                }
             }
         },
         loadCustomStyles: function() {
@@ -490,7 +497,6 @@
                 schema.selectXHR.abort();
                 schema.selectXHR = null;
             }
-
             var selectPromise = this.query('select', selectParams);
             return $.when(selectPromise, this.loadCustomStyles()).then(function(featureSelectArgs, styleData) {
                 var selectData = featureSelectArgs[0];
@@ -523,7 +529,6 @@
                 feature.fid = featureData.id;
                 if (allCustomStyles[feature.fid]) {
                     feature.__custom_style__ = allCustomStyles[feature.fid];
-                    feature.style = allCustomStyles[feature.fid];
                 }
                 return feature;
             });
@@ -553,17 +558,6 @@
         },
         getStyleOptions: function(schema, renderIntent) {
             var options = {
-                context: {
-                    webRootPath: Mapbender.Digitizer.Utilities.getAssetsPath(),
-                    feature: function (feature) {
-                        return feature;
-                    },
-                    label: function(feature) {
-                        // Supress "undefined" showing up as text
-                        var labelProp = schema.getSchemaByFeature(feature).featureType.name || 'label';
-                        return feature.attributes[labelProp] || '';
-                    }
-                },
                 rules: this.getStyleMatchingRules(schema, renderIntent)
             };
             if (options.rules.length) {

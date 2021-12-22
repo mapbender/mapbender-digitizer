@@ -49,6 +49,7 @@
             }
         },
         appendGeneralDigitizerButtons: function () {
+            var menu = this;
             var schema = this.schema;
             var frame = this.frame;
             var buttons = {};
@@ -68,8 +69,8 @@
                 $button.addClass("fa fa-eye-slash");
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
                 $button.click(function () {
-                    schema.featureVisibility = false;
-                    schema.setVisibilityForAllFeaturesInLayer();
+                    schema.setVisibilityForAllFeaturesInLayer(false);
+                    menu.redrawTable();
                 });
                 buttons['hideAll'] = $button;
 
@@ -77,8 +78,8 @@
                 $button.addClass("fa fa-eye");
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
                 $button.click(function () {
-                    schema.featureVisibility = true;
-                    schema.setVisibilityForAllFeaturesInLayer();
+                    schema.setVisibilityForAllFeaturesInLayer(true);
+                    menu.redrawTable();
                 });
                 buttons['showAll'] = $button;
             }
@@ -339,6 +340,12 @@
             var pageNumber = Math.floor(nodePosition / rowsOnOnePage);
             this.tableApi.page(pageNumber).draw(false);
         },
+        refreshTable: function(features) {
+            var displayFeatures = features.filter(function(feature) {
+                return feature && !feature.cluster && !feature.isNew;
+            });
+            this.replaceTableRows(displayFeatures);
+        },
         replaceTableRows: function(features) {
             this.tableApi.clear();
             this.tableApi.rows.add(features);
@@ -356,10 +363,7 @@
                 var feature = $tr.data('feature');
                 if (feature) {
                     $tr.addClass('hover');
-                    schema.widget.redrawFeature(schema, feature, true);
-                    if (feature.layer) {
-                        feature.layer.drawFeature(feature);
-                    }
+                    schema.widget.redrawFeature(feature, true);
                 }
             });
             this.$table.on('mouseleave', '> tbody > tr', function() {
@@ -367,7 +371,7 @@
                 var feature = $tr.data('feature');
                 $tr.removeClass('hover');
                 if (feature && feature.layer) {
-                    schema.widget.redrawFeature(schema, feature, false);
+                    schema.widget.redrawFeature(feature, false);
                 }
             });
             this.$table.on('click', '> tbody > tr', function(evt) {

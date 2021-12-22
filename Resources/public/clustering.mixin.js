@@ -44,7 +44,8 @@
                     if (clusterSetting.disable) {
                         schema.clusterStrategy.distance = -1;
                         schema.clusterStrategy.deactivate();
-                        schema.reloadFeatures();
+                        schema.widget.redrawLayer(schema.layer);
+                        schema.menu.refreshTable(schema.layer.features);
                     } else {
                         schema.clusterStrategy.activate();
                     }
