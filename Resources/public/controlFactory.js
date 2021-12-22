@@ -21,9 +21,7 @@
                 feature.attributes.schemaName = control.schemaName;
                 feature.isNew = true;
                 controlFactory.schema.widget.onFeatureAdded(controlFactory.schema, feature);
-                controlFactory.schema.setModifiedState(feature, true);
                 control.deactivate();
-
         },
 
         _finalizeDrawFeatureWithValidityTest: function (cancel) {

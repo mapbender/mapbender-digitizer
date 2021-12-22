@@ -397,11 +397,11 @@
             }
         },
         onFeatureAdded: function(schema, feature) {
-            schema.introduceFeature(feature);
-            schema.setModifiedState(feature, true);
             var schemaReal = schema.getSchemaByFeature(feature);
+            schemaReal.introduceFeature(feature);
+            schemaReal.setModifiedState(feature, true);
             if (schemaReal.openFormAfterEdit) {
-                schema.openFeatureEditDialog(feature);
+                schemaReal.openFeatureEditDialog(feature);
             }
         },
         onFeatureModified: function(schema, feature, options) {
