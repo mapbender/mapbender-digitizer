@@ -523,11 +523,13 @@
             this.customStyles = this.customStyles || {};
             Object.assign(this.customStyles, styleData || {});
             var allCustomStyles = this.customStyles;
+            var self = this;
             return featureDataList.map(function(featureData) {
                 var geometry = featureData.geometry && OpenLayers.Geometry.fromWKT(featureData.geometry) || null;
                 var feature = new OpenLayers.Feature.Vector(geometry, featureData.properties);
+                var allowStyle = self.getSchemaByName(featureData.properties.schemaName).allowCustomStyle;
                 feature.fid = featureData.id;
-                if (allCustomStyles[feature.fid]) {
+                if (allowStyle && allCustomStyles[feature.fid]) {
                     feature.__custom_style__ = allCustomStyles[feature.fid];
                 }
                 return feature;
