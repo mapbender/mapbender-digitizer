@@ -1,3 +1,7 @@
+## 1.5.3
+* Fix feature details not viewable through context menu / click inside map if editing disabled
+* Use different fallback detail popup titles for editable vs read-only objects
+
 ## 1.5.2
 * Support styling features with icons (interpret `externalGraphic`, `graphicWidth`, `graphicHeight` properties)
 * Support data placeholder syntax in `externalGraphic` (e.g. "/bundles/projectbundle/images/${type}.png")
