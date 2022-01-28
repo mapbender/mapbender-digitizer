@@ -1,5 +1,6 @@
 mb.digitizer:
-    useAllScheme: 'Use aggregating Scheme'
+    actions:
+      show_details: Show details
     displayOnInactive: 'Display when not active'
     edit.attributes: Edit attributes
     edit.geometry: Edit geometry
@@ -33,8 +34,6 @@ mb.digitizer:
         drawCircle: 'Draw circle'
         drawEllipse: 'Draw ellipse'
         drawDonut: 'Draw donut'
-    remoteData:
-        error: 'WMS FeatureInfo request failed'
     style:
         fillColor: Fill color
         color: Color

@@ -522,7 +522,7 @@
          */
         onFeatureClick: function(feature) {
             var schema = this._getCurrentSchema();
-            if (feature && !this.activeToolName_ && schema.allowEditData) {
+            if (feature && !this.activeToolName_) {
                 this._openEditDialog(schema, feature);
             } else if (!this.currentPopup && 'modifyFeature' === this.activeToolName_) {
                 // Disable hover highlighting on the feature currently selected for editing. The generated style updates break
@@ -566,6 +566,13 @@
         },
         zoomToFeature: function(schema, feature) {
             Mapbender.Model.zoomToFeature(feature);
+        },
+        _getEditDialogPopupConfig: function(schema, dataItem) {
+            var options = this._superApply(arguments);
+            if (!(schema.popup || {}).title && schema.allowEdit) {
+                options.title = Mapbender.trans('mb.digitizer.edit.attributes');
+            }
+            return options;
         },
         createSelectControl_: function() {
             var self = this;
