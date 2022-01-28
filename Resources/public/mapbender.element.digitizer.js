@@ -567,6 +567,13 @@
         zoomToFeature: function(schema, feature) {
             Mapbender.Model.zoomToFeature(feature);
         },
+        _getEditDialogPopupConfig: function(schema, dataItem) {
+            var options = this._superApply(arguments);
+            if (!(schema.popup || {}).title && schema.allowEdit) {
+                options.title = Mapbender.trans('mb.digitizer.edit.attributes');
+            }
+            return options;
+        },
         createSelectControl_: function() {
             var self = this;
             var selectControl = new ol.interaction.Select({
