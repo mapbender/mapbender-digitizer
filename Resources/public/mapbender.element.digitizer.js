@@ -522,7 +522,7 @@
          */
         onFeatureClick: function(feature) {
             var schema = this._getCurrentSchema();
-            if (feature && !this.activeToolName_ && schema.allowEditData) {
+            if (feature && !this.activeToolName_) {
                 this._openEditDialog(schema, feature);
             } else if (!this.currentPopup && 'modifyFeature' === this.activeToolName_) {
                 // Disable hover highlighting on the feature currently selected for editing. The generated style updates break

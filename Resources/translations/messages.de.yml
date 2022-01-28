@@ -1,8 +1,9 @@
 mb.digitizer:
+    actions:
+      show_details: Details anzeigen
     edit.attributes: Sachdaten bearbeiten
     edit.geometry: Geometrie bearbeiten
     revert.geometry: Geometrieänderung zurücknehemn
-    useAllScheme: 'Verwende aggregierendes Schema'
     displayOnInactive: 'Auch anzeigen, wenn nicht aktiv'
     feature:
         remove:
@@ -33,8 +34,6 @@ mb.digitizer:
         drawCircle: 'Kreis erstellen'
         drawEllipse: 'Ellipse erstellen'
         drawDonut: 'Enklave in Fläche zeichnen'
-    remoteData:
-        error: 'WMS FeatureInfo Anfrage fehlgeschlagen'
     style:
         fillColor: Füllfarbe
         color: Color

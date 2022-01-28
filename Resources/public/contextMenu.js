@@ -73,14 +73,12 @@
                 });
             }
             var schema = this.schema_;
-            if (schema && schema.allowEditData) {
-                items.push({
-                    text: Mapbender.trans('mb.digitizer.edit.attributes'),
-                    callback: function () {
-                        widget._openEditDialog(schema, feature);
-                    }
-                });
-            }
+            items.push({
+                text: Mapbender.trans(schema && schema.allowEdit && 'mb.digitizer.edit.attributes' || 'mb.digitizer.actions.show_details'),
+                callback: function () {
+                    widget._openEditDialog(schema, feature);
+                }
+            });
             var featureHasId = !!widget._getUniqueItemId(schema, feature);
             if (featureHasId && schema && schema.allowDelete) {
                 items.push({
