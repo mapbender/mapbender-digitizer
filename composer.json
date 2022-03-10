@@ -19,7 +19,9 @@
         "mapbender/openlayers6-es5": "<0.3.5"
     },
     "autoload": {
-        "psr-4": {"Mapbender\\DigitizerBundle\\": "."}
+        "psr-4": {
+            "Mapbender\\DigitizerBundle\\": "src/Mapbender/DigitizerBundle"
+        }
     },
     "extra": {
         "branch-alias": {
