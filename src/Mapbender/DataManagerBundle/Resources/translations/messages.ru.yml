@@ -1,0 +1,18 @@
+mb.data.store:
+  create: Создать
+  remove.successfully: 'Данные удалены'
+  remove.confirm:
+    text: 'Подведите удаление'
+  save.successfully: 'Данные сохранены'
+  api.query.error-message: Ошибка
+
+mb.data-manager.table:
+  filter: Поиск
+  empty: Пустая таблица
+  empty_after_filtering: Без результатов
+  from_to_total: от _START_ до _END_ из _TOTAL_
+  out_of: (отфильтровано из _MAX_ объектов)
+
+mb:
+  'data-manager':
+    details_title: Редактирование данных

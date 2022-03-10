@@ -11,16 +11,25 @@
     ],
     "require": {
         "php": ">=5.3.3",
+        "doctrine/persistence": "^1.3.0 || ^2",
+        "blueimp/jquery-file-upload": "9.*",
         "mapbender/mapbender": "^3.2.6",
         "mapbender/data-manager": "^1.2.2 || ^2",
         "mapbender/data-source": "~0.1.24 || ^0.2"
+    },
+    "provide": {
+        "mapbender/data-manager": "2.99.99"
+    },
+    "replace": {
+        "mapbender/data-manager": "2.*"
     },
     "conflict": {
         "mapbender/openlayers6-es5": "<0.3.5"
     },
     "autoload": {
         "psr-4": {
-            "Mapbender\\DigitizerBundle\\": "src/Mapbender/DigitizerBundle"
+            "Mapbender\\DigitizerBundle\\": "src/Mapbender/DigitizerBundle",
+            "Mapbender\\DataManagerBundle\\": "src/Mapbender/DataManagerBundle"
         }
     },
     "extra": {

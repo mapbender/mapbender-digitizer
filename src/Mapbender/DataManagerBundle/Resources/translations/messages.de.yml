@@ -1,0 +1,22 @@
+mb.data.store:  
+  create: Erstellen
+  remove.successfully: 'Erfolgreich gelöscht'
+  remove.confirm:
+    text: 'Objekt löschen?'
+  save.successfully: 'Erfolgreich gespeichert'
+  api.query.error-message: Fehler
+
+mb.data-manager.table:
+  filter: Durchsuchen
+  empty: Keine Daten
+  empty_after_filtering: Keine Treffer
+  from_to_total: Zeige _START_ bis _END_ von _TOTAL_
+  out_of: (aus insgesamt _MAX_)
+
+mb:
+  'data-manager':
+    actions:
+      show_details: Details anzeigen
+    details_title: Objektdetails
+    attachment:
+      open: Anhang öffnen
