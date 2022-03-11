@@ -24,6 +24,10 @@ for details.
 Connection and table configuration may either be inlined into the schema configuration directly, or
 reference an existing global configuration placed into a Symfony container parameter.
 
+## After installation
+Using Digitizer requires registering *two* bundles in your application kernel. Register *both*
+`\Mapbender\DataManagerBundle\MapbenderDataManagerBundle` and `\Mapbender\DigitizerBundle\MapbenderDigitizerBundle`.
+
 ## Configuring tabular item listing
 Each schema configuration contains an object under key `table` with the following structure:
 
