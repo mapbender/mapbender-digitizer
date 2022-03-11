@@ -172,11 +172,17 @@ class SchemaFilter
         if (empty($elementConfig['schemes'][$schemaName])) {
             throw new UnknownSchemaException("No such schema " . print_r($schemaName, true));
         }
-        $rawSchemaConfig = $elementConfig['schemes'][$schemaName];
-        if ($addDefaults) {
-            $rawSchemaConfig += $this->getConfigDefaults();
+        $schemaConfig = $elementConfig['schemes'][$schemaName];
+        // Always guarantee "schemaName" and "label" properties
+        $schemaConfig['schemaName'] = $schemaName;
+        if (empty($schemaConfig['label'])) {
+            $schemaConfig['label'] = $schemaName;
         }
-        return $rawSchemaConfig;
+
+        if ($addDefaults) {
+            $schemaConfig += $this->getConfigDefaults();
+        }
+        return $schemaConfig;
     }
 
     /**
@@ -224,20 +230,58 @@ class SchemaFilter
      */
     public function processSchemaBaseConfig(array $schemaConfig, $schemaName)
     {
-        // always guarantee "schemaName" and "label" properties, even with $raw = true
-        $schemaConfig['schemaName'] = $schemaName;
-        if (empty($schemaConfig['label'])) {
-            $schemaConfig['label'] = $schemaName;
-        }
+        $defaults = $this->getConfigDefaults();
         // Re-merge "popup" sub-array
-        if (!empty($rawConfig['popup']) && !empty($defaults['popup'])) {
-            $schemaConfig['popup'] = array_replace($defaults['popup'], $rawConfig['popup']);
+        if (!empty($schemaConfig['popup']) && !empty($defaults['popup'])) {
+            $schemaConfig['popup'] = array_replace($defaults['popup'], $schemaConfig['popup']);
         }
         // Re-merge "table" sub-array
-        if (!empty($rawConfig['table']) && !empty($defaults['table'])) {
-            $schemaConfig['table'] = array_replace($defaults['table'], $rawConfig['table']);
+        if (!empty($schemaConfig['table']) && !empty($defaults['table'])) {
+            $schemaConfig['table'] = array_replace($defaults['table'], $schemaConfig['table']);
+        }
+        if (!empty($schemaConfig['table']['columns'])) {
+            $schemaConfig['table']['columns'] = $this->normalizeColumnsConfigs($schemaConfig['table']['columns']);
         }
         return $schemaConfig;
+    }
+
+    /**
+     * Normalize legacy configuration quirks for table columns into
+     * homogenuous list-of-objects, with at least "title" and "data" keys
+     * 1) Digitizer using key:value mapping for columns instead of lists
+     * 2) Digitizer allowing scalar strings instead of objects
+
+     * @param array $rawColumns
+     * @throws \Exception
+     */
+    protected function normalizeColumnsConfigs(array $rawColumns)
+    {
+        $columnsOut = array();
+        foreach ($rawColumns as $key => $columnDef) {
+            if (\is_string($columnDef)) {
+                $columnDef = array(
+                    'data' => $columnDef,
+                );
+            } else {
+                if (empty($columnDef['data'])) {
+
+                $columnDef = array_replace($columnDef, array(
+                    'data' => $key,
+                ));
+                }
+            }
+            // Historical digitizer quirk: uses "label" (does nothing)
+            // instead of "title" (column header)
+            if (empty($columnDef['title']) && \array_key_exists('label', $columnDef)) {
+                $columnDef['title'] = $columnDef['label'];
+            }
+            unset($columnDef['label']);
+            $columnDef += array(
+                'title' => ucfirst($columnDef['data']),
+            );
+            $columnsOut[] = $columnDef;
+        }
+        return $columnsOut;
     }
 
     protected function getExtendedUploadsBasePath($storeConfig)

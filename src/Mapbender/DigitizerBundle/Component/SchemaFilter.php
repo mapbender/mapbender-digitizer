@@ -49,9 +49,7 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
             // * popup.title
             // * popup.width
 
-
             // no defaults:
-            // * tableFields
             // * toolset
         ));
     }
@@ -86,11 +84,10 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
 
     public function processSchemaBaseConfig(array $schemaConfig, $schemaName)
     {
-        $schemaConfig = parent::processSchemaBaseConfig($schemaConfig, $schemaName);
         // resolve aliasing DM "allowEdit" vs historical Digitizer "allowEditData"
-        $schemaConfig['allowEdit'] = !!$schemaConfig['allowEditData'];
-        // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
-        $schemaConfig['allowCreate'] = $schemaConfig['allowEdit'];
+        if (isset($schemaConfig['allowEditData'])) {
+            $schemaConfig['allowEdit'] = $schemaConfig['allowEditData'];
+        }
 
         // re-merge styles (upstream merge is not recursive, we may be missing entries depending on config)
         $schemaConfig['styles'] = array_replace_recursive($this->getDefaultStyles(), $schemaConfig['styles']);
@@ -99,6 +96,26 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
         if (!$schemaConfig['allowEdit']) {
             $schemaConfig['allowCustomStyle'] = false;
         }
+
+        // Resolve aliased "tableFields" (Digitizer legacy) vs "table.column" (DM)
+        $schemaConfig += array('table' => array());
+        if (!empty($schemaConfig['tableFields'])) {
+            $schemaConfig['table'] += array('columns' => $schemaConfig['tableFields']);
+        }
+        if (isset($schemaConfig['inlineSearch'])) {
+            $schemaConfig['table'] += array('searching' => $schemaConfig['inlineSearch']);
+        }
+        if (!empty($schemaConfig['pageLength'])) {
+            $schemaConfig['table'] += array('pageLength' => $schemaConfig['pageLength']);
+        }
+
+        unset($schemaConfig['tableFields']);
+        unset($schemaConfig['inlineSearch']);
+        unset($schemaConfig['pageLength']);
+
+        $schemaConfig = parent::processSchemaBaseConfig($schemaConfig, $schemaName);
+        // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
+        $schemaConfig['allowCreate'] = $schemaConfig['allowEdit'];
 
         return $schemaConfig;
     }

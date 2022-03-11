@@ -260,6 +260,12 @@
             if (!fieldConfigs.length) {
                 fieldConfigs = this.getDefaultColumnConfigs(schema);
             }
+            for (var i = 0; i < fieldConfigs.length; ++i) {
+                if (fieldConfigs[i].label && !fieldConfigs[i].title) {
+                    fieldConfigs[i].title = fieldConfigs[i].label;
+                    delete fieldConfigs[i].label;
+                }
+            }
             return fieldConfigs;
         },
         getButtonColumnOptions: function(schema) {

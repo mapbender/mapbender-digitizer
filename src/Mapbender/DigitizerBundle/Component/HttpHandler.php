@@ -176,7 +176,6 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
      */
     protected function formatResponseFeature(FeatureType $repository, Feature $feature)
     {
-        // @todo: expose native srid?
         $properties = $feature->toArray();
         $geometryField = $repository->getGeomField();
         unset($properties[$geometryField]);
