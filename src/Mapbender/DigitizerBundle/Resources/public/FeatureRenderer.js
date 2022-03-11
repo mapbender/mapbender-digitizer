@@ -82,43 +82,6 @@
         }
     });
 
-    Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
-        // @todo: salvage this
-        onFeatureUpdatedOnServer: function(schema) {
-            if (schema.refreshLayersAfterFeatureSave) {
-                $.each(schema.refreshLayersAfterFeatureSave, function (k1, instanceId) {
-                    var source = Mapbender.Model.getSourceById(instanceId);
-                    var layers = source.getNativeLayers();
-                    $.each(layers, function (k2, layer) {
-                        Mapbender.layerManager.refreshLayer(layer);
-                    });
-                });
-            }
-
-            if (schema.refreshFeaturesAfterSave) {
-                for (var i = 0; i < schema.refreshFeaturesAfterSave.length; ++i) {
-                    var schemaName = schema.refreshFeaturesAfterSave[i];
-                    this.refreshConnectedDigitizerFeatures(schemaName);
-                }
-            }
-        }
-    });
-    // @todo: salvage this
-    //        Modifying Digitizer A should NOT call into other Digitizer code
-    //        Other Digitizer should REACT to a change event
-    //        For this to work, the event must be listenable (=triggered on DOM, not on completely internal objects)
-    Mapbender.Digitizer.FeatureRenderer.prototype.refreshConnectedDigitizerFeatures = function(schemaName){
-        $(".mb-element-digitizer").not(".mb-element-data-manager").each(function(index,element){
-            var foreignDigitizer = $(element).data("mapbenderMbDigitizer");
-
-            try {
-                foreignDigitizer.schemes[schemaName].layer.getSource().refresh();
-            } catch(e) {
-                console.error("No active Digitizer Scheme '"+schemaName+"'",e); // ???
-            }
-        });
-    };
-
     Mapbender.Digitizer.FeatureRenderer.prototype.getLayer = function(schema) {
         if (!this.schemaLayers_[schema.schemaName]) {
             var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
