@@ -29,8 +29,6 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
             'continueDrawingAfterSave' => false,
             'displayPermanent' => false,
             'printable' => false,
-            'inlineSearch' => true,
-            'pageLength' => 16,
             'minScale' => null,
             'maxScale' => null,
             'searchType' => 'currentExtent',
@@ -103,10 +101,10 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
             $schemaConfig['table'] += array('columns' => $schemaConfig['tableFields']);
         }
         if (isset($schemaConfig['inlineSearch'])) {
-            $schemaConfig['table'] += array('searching' => $schemaConfig['inlineSearch']);
+            $schemaConfig['table']['searching'] = $schemaConfig['inlineSearch'];
         }
         if (!empty($schemaConfig['pageLength'])) {
-            $schemaConfig['table'] += array('pageLength' => $schemaConfig['pageLength']);
+            $schemaConfig['table']['pageLength'] = $schemaConfig['pageLength'];
         }
 
         unset($schemaConfig['tableFields']);

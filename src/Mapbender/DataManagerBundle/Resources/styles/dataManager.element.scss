@@ -33,6 +33,10 @@
     outline: none;
   }
 
+  table thead th {
+    white-space: nowrap;
+  }
+
   // Defeat highly specific table td padding rule for cell containing interface buttons
   // See Mapbender/CoreBundle/Resources/public/sass/modules/_result_table.scss
   .mapbender-element-result-table {

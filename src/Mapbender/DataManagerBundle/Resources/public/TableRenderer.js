@@ -269,14 +269,13 @@
             });
         },
         getDefaultColumnConfigs: function(schema) {
-            var tableFields = [];
-
-            tableFields.push({
-                data: this.owner._getUniqueItemIdProperty(schema),
+            return [{
+                data: function(row) {
+                    return row.id;
+                },
                 title: 'Nr.',
-                width: '20%'
-            });
-            return tableFields;
+                width: '1%'
+            }];
         },
         getColumnsConfigs: function(schema) {
             var fieldConfigs = (schema.table || {}).columns || [];

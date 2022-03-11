@@ -118,18 +118,6 @@
                 }
             });
         },
-        getDefaultColumnConfigs: function(schema) {
-            // @todo DataManager: data manager does not use default columns, but it should; without
-            //                    columns, dataTables crashes immediately.
-            var tableFields = [];
-
-            tableFields.push({
-                data: schema.featureType.uniqueId,
-                title: 'Nr.',
-                width: '20%'
-            });
-            return tableFields;
-        },
         onRowCreation: function(schema, tr, feature) {
             Mapbender.DataManager.TableRenderer.prototype.onRowCreation.apply(this, arguments);
             // Place table row into feature data for quick access (synchronized highlighting etc)
