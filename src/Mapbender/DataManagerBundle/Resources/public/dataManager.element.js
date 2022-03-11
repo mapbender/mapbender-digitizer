@@ -51,11 +51,15 @@
         currentSettings: null,
 
         _create: function() {
+            if (Array.isArray(this.options.schemes) || !Object.keys(this.options.schemes).length) {
+                throw new Error("Missing schema configuration");
+            }
             this.elementUrl = [
                 Mapbender.configuration.application.urls.element,
                 this.element.attr('id'),
                 ''  // produce trailing slash
             ].join('/');
+
             this.selector = $(this._renderSchemaSelector(this.element));
             this.formRenderer_ = this._createFormRenderer();
             this.dialogFactory_ = Mapbender.DataManager.DialogFactory;
@@ -83,35 +87,30 @@
          * @private
          */
         _renderSchemaSelector: function($container) {
-            var widget = this;
+            var self = this;
             var selector = $('<select class="selector -fn-schema-selector"/>');
-            if ((typeof this.options.schemes !== 'object') || $.isArray(this.options.schemes)) {
-                throw new Error("Invalid type for schemes configuration " + (typeof this.options.schemes));
-            }
-            // Use _.size, to support both Array and Object types
-            var nSchemes = _.size(this.options.schemes);
-            if (!nSchemes) {
-                throw new Error("Missing schemes configuration");
-            }
+            var schemaNames = Object.keys(this.options.schemes);
+            var visible = schemaNames.filter(function(schemaName) {
+                return self.options.schemes[schemaName].listed;
+            });
 
-            if (nSchemes === 1) {
-                var singleScheme = _.first(_.toArray(this.options.schemes));
+            if (visible.length === 1) {
+                var singleScheme = this.options.schemes[visible[0]];
                 var title = singleScheme.label || singleScheme.schemaName;
                 if(title) {
                     $container.append($('<h3 class="title"/>').text(title));
                 }
                 selector.hide();
             }
-            this.hasOnlyOneScheme = (nSchemes === 1);
-            $container.append(selector);
-
             // build select options
-            _.each(this.options.schemes, function(schemaConfig) {
+            for (var i = 0; i < visible.length; ++i) {
+                var schemaConfig = this.options.schemes[visible[i]];
                 var option = $("<option/>");
                 option.val(schemaConfig.schemaName).text(schemaConfig.label);
                 option.data('schema', schemaConfig);
                 selector.append(option);
-            });
+            }
+            $container.append(selector);
             return selector;
         },
         /**

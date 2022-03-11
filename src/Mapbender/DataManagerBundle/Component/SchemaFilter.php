@@ -53,6 +53,7 @@ class SchemaFilter
                 'searching' => true,
                 'pageLength' => 16,
             ),
+            'listed' => true,
         );
     }
 
