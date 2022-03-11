@@ -8,6 +8,8 @@ use Mapbender\Component\Element\ElementHttpHandlerInterface;
 use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
 use Mapbender\DataManagerBundle\Exception\UnknownSchemaException;
+use Mapbender\DataSourceBundle\Component\DataStore;
+use Mapbender\DataSourceBundle\Entity\DataItem;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -178,16 +180,31 @@ class HttpHandler implements ElementHttpHandlerInterface
     {
         $schemaName = $request->query->get('schema');
         $repository = $this->schemaFilter->getDataStore($element, $schemaName);
-        $results = array();
-        $criteria = array();
         $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $schemaName, true);
+        $criteria = $this->getSelectCriteria($repository, $request, $schemaConfig);
+        $results = array();
+        foreach ($repository->search($criteria) as $dataItem) {
+            $results[] = $this->formatResponseItem($repository, $dataItem, $schemaConfig);
+        }
+        return $results;
+    }
+
+    protected function formatResponseItem(DataStore $repository, DataItem $item, array $schemaConfig)
+    {
+        return array(
+            'id' => $item->getId(),
+            'schemaName' => $schemaConfig['schemaName'],
+            'properties' => $item->toArray(),
+        );
+    }
+
+    protected function getSelectCriteria(DataStore $repository, Request $request, array $schemaConfig)
+    {
+        $criteria = array();
         if (!empty($schemaConfig['maxResults'])) {
             $criteria['maxResults'] = $schemaConfig['maxResults'];
         }
-        foreach ($repository->search($criteria) as $dataItem) {
-            $results[] = $dataItem->toArray();
-        }
-        return $results;
+        return $criteria;
     }
 
     protected function fileDownloadAction(Element $element, Request $request, $schemaName)

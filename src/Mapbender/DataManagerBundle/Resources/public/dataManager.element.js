@@ -402,9 +402,7 @@
          * @return {Object}
          */
         _getItemData: function(schema, dataItem) {
-            // Trivial in data manager: the item and the item data are completely interchangeable
-            // @todo Digitizer: when working with native Openlayers feature, return data properties instead of top-level object
-            return dataItem;
+            return dataItem.properties;
         },
         /**
          * Places updated data (from form or otherwise) back into the item
@@ -415,8 +413,7 @@
          * @private
          */
         _replaceItemData: function(schema, dataItem, newValues) {
-            // @todo Digitizer: when working with native Openlayers feature, use data properties instead of top-level object
-            _.extend(dataItem, newValues);
+            Object.assign(dataItem.properties, newValues);
         },
         /**
          * Open edit feature dialog
@@ -579,8 +576,7 @@
          * @private
          */
         _prepareDataItem: function(schema, data) {
-            // trivial in data-manager: data item and plain data objects are interchangeable
-            // @todo Digitizer: create Openlayers feature
+            // Trivial in data-manager. Use plain object directly.
             return data;
         },
         /**

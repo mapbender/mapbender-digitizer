@@ -253,6 +253,7 @@ class SchemaFilter
 
      * @param array $rawColumns
      * @throws \Exception
+     * @return array
      */
     protected function normalizeColumnsConfigs(array $rawColumns)
     {

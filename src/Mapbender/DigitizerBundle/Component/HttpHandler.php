@@ -5,7 +5,9 @@ namespace Mapbender\DigitizerBundle\Component;
 
 
 use Mapbender\CoreBundle\Entity\Element;
+use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\FeatureType;
+use Mapbender\DataSourceBundle\Entity\DataItem;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -44,28 +46,6 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
     protected function getStyleEditorResponse()
     {
         return $this->templateEngine->renderResponse('MapbenderDigitizerBundle:Element:style-editor.html.twig');
-    }
-
-    /**
-     * @param Element $element
-     * @param Request $request
-     * @return array
-     * @todo 1.5: make protected
-     */
-    public function getSelectActionResponseData(Element $element, Request $request)
-    {
-        $schemaName = $request->query->get('schema');
-        $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $schemaName, true);
-        $repository = $this->schemaFilter->getDataStore($element, $schemaName);
-        $criteria = $this->getSelectCriteria($repository, $request);
-        if (!empty($schemaConfig['maxResults'])) {
-            $criteria['maxResults'] = $schemaConfig['maxResults'];
-        }
-        $results = array();
-        foreach ($repository->search($criteria) as $feature) {
-            $results[] = $this->formatResponseFeature($repository, $feature);
-        }
-        return $results;
     }
 
     /**
@@ -144,10 +124,10 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
      * @return mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
-    protected function getSelectCriteria(FeatureType $repository, Request $request)
+    protected function getSelectCriteria(DataStore $repository, Request $request, array $schemaConfig)
     {
         $geomReference = $repository->getConnection()->getDatabasePlatform()->quoteIdentifier($repository->getGeomField());
-        $criteria = array(
+        $criteria = parent::getSelectCriteria($repository, $request, $schemaConfig) + array(
             'srid' => intval($request->query->get('srid')),
             'where' => "$geomReference IS NOT NULL",
         );
@@ -165,6 +145,21 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
             $criteria['intersect'] = $polygonWkt;
         }
         return $criteria;
+    }
+
+    /**
+     * @param FeatureType $repository
+     * @param Feature $item
+     * @param array $schemaConfig
+     * @return array
+     */
+    protected function formatResponseItem(DataStore $repository, DataItem $item, array $schemaConfig)
+    {
+        $formatted = parent::formatResponseItem($repository, $item, $schemaConfig) + array(
+            'geometry' => $item->getGeom(),
+        );
+        unset($formatted['properties'][$repository->getGeomField()]);
+        return $formatted;
     }
 
     /**
