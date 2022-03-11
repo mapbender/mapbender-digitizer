@@ -67,9 +67,11 @@
             for (var s = 0; s < schemaNames.length; ++s) {
                 var schemaName = schemaNames[s];
                 var schema = this.options.schemes[schemaName];
-                var fileConfigs = this._getDataStoreFromSchema(schema).files || [];
-                var schemaBaseUrl = [this.elementUrl, schemaName, '/'].join('');
-                this.formRenderer_.prepareItems(schema.formItems || [], schemaBaseUrl, fileConfigs);
+                if (!schema.combine) {
+                    var fileConfigs = this._getDataStoreFromSchema(schema).files || [];
+                    var schemaBaseUrl = [this.elementUrl, schemaName, '/'].join('');
+                    this.formRenderer_.prepareItems(schema.formItems || [], schemaBaseUrl, fileConfigs);
+                }
             }
             this.tableRenderer = this._createTableRenderer();
             this._initializeEvents();
@@ -112,6 +114,9 @@
             }
             $container.append(selector);
             return selector;
+        },
+        getItemSchema: function(item) {
+            return this.options.schemes[item.schemaName];
         },
         /**
          * Unraveled from _create for child class actions after initialization, but
@@ -719,21 +724,6 @@
          */
         confirmDialog: function confirmDialog(title) {
             return this.dialogFactory_.confirm(title);
-        },
-        /**
-         * Utility method to escape HTML chars
-         * @param {String} text
-         * @returns {string}
-         * @static
-         */
-        escapeHtml: function escapeHtml(text) {
-            'use strict';
-            return text.replace(/["&'\/<>]/g, function (a) {
-                return {
-                    '"': '&quot;', '&': '&amp;', "'": '&#39;',
-                    '/': '&#47;',  '<': '&lt;',  '>': '&gt;'
-                }[a];
-            });
         },
         __dummy: null
     });

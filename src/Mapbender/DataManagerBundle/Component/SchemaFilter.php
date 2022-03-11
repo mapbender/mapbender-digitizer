@@ -58,33 +58,84 @@ class SchemaFilter
     }
 
     /**
-     * @param mixed[][] $schemaConfigs
+     * @param mixed[][] $configsIn
      * @return mixed[][]
      */
-    public function prepareConfigs($schemaConfigs)
+    public function prepareConfigs($configsIn)
     {
-        $storeConfigs = DataStoreUtil::configsFromSchemaConfigs($this->registry, $schemaConfigs);
+        $configsOut = array();
+        $storeConfigs = DataStoreUtil::configsFromSchemaConfigs($this->registry, $configsIn);
 
-        foreach ($schemaConfigs as $schemaName => $schemaConfig) {
-            $haveDs = false;
-            foreach (array('dataStore', 'featureType') as $dsKey) {
-                if (\array_key_exists($dsKey, $schemaConfig)) {
-                    $schemaConfig[$dsKey] = $storeConfigs[$schemaName];
-                    $haveDs = true;
-                }
-            }
-            if (!$haveDs) {
-                throw new ConfigurationErrorException("No dataStore / featureType in schema {$schemaName}");
-            }
-            if (!empty($schemaConfig['formItems'])) {
-                $schemaConfig['formItems'] = $this->formItemFilter->prepareItems($schemaConfig['formItems']);
+        foreach ($configsIn as $schemaName => $configIn) {
+            if (\array_key_exists('combine', $configIn)) {
+                $configOut = $this->prepareCombinationSchema($schemaName, $configIn, $configsIn, $storeConfigs);
             } else {
-                @trigger_error("WARNING: no formItems in schema {$schemaName}. Object detail view will not work", E_USER_DEPRECATED);
-                $schemaConfig['formItems'] = array();
+                $configOut = $this->prepareInlineSchema($schemaName, $configIn, $storeConfigs);
             }
-            $schemaConfigs[$schemaName] = $schemaConfig;
+            $configsOut[$schemaName] = $this->amendBaseProperties($configOut, $schemaName);
         }
-        return $schemaConfigs;
+        return $configsOut;
+    }
+
+    protected function prepareInlineSchema($name, $schemaConfig, $storeConfigs)
+    {
+        $schemaConfig += $this->getConfigDefaults();
+        $schemaConfig = $this->processSchemaBaseConfig($schemaConfig, $name);
+        $haveDs = false;
+        foreach (array('dataStore', 'featureType') as $dsKey) {
+            if (\array_key_exists($dsKey, $schemaConfig)) {
+                $schemaConfig[$dsKey] = $storeConfigs[$name];
+                $haveDs = true;
+            }
+        }
+        if (!$haveDs) {
+            throw new ConfigurationErrorException("No dataStore / featureType in schema {$schemaName}");
+        }
+        if (!empty($schemaConfig['formItems'])) {
+            $schemaConfig['formItems'] = $this->formItemFilter->prepareItems($schemaConfig['formItems']);
+        } else {
+            @trigger_error("WARNING: no formItems in schema {$name}. Object detail view will not work", E_USER_DEPRECATED);
+            $schemaConfig['formItems'] = array();
+        }
+        return $schemaConfig;
+    }
+
+    protected static function getInvalidCombinationKeys()
+    {
+        return array(
+            'featureType',
+            'dataStore',
+            'formItems',
+            'popup',
+        );
+    }
+
+    protected function prepareCombinationSchema($name, $schemaConfig, $others, $storeConfigs)
+    {
+        if (empty($schemaConfig['combine'])) {
+            throw new ConfigurationErrorException("Combination schema {$name} combines nothing");
+        }
+        if (isset($schemaConfig['listed']) && !$schemaConfig['listed']) {
+            throw new ConfigurationErrorException("Combination schema {$name} cannot be unlisted");
+        }
+        $otherKeys = \array_keys($schemaConfig);
+        $notAllowed = \array_intersect($otherKeys, $this->getInvalidCombinationKeys());
+        foreach ($otherKeys as $otherKey) {
+            if (\preg_match('#^allow#', $otherKey)) {
+                $notAllowed[] = $otherKey;
+            }
+        }
+        if ($notAllowed) {
+            throw new ConfigurationErrorException("Combination schema {$name} cannot define its own value(s) for " . \implode(', ', $notAllowed));
+        }
+        foreach ($schemaConfig['combine'] as $other) {
+            if (isset($others[$other]['combine'])) {
+                throw new ConfigurationErrorException("Combination schema {$name} cannot combine other combinations");
+            }
+        }
+        $schemaConfig['listed'] = true;
+
+        return $schemaConfig;
     }
 
     /**
@@ -174,14 +225,18 @@ class SchemaFilter
             throw new UnknownSchemaException("No such schema " . print_r($schemaName, true));
         }
         $schemaConfig = $elementConfig['schemes'][$schemaName];
+        if ($addDefaults) {
+            $schemaConfig += $this->getConfigDefaults();
+        }
+        return $this->amendBaseProperties($schemaConfig, $schemaName);
+    }
+
+    protected function amendBaseProperties($schemaConfig, $schemaName)
+    {
         // Always guarantee "schemaName" and "label" properties
         $schemaConfig['schemaName'] = $schemaName;
         if (empty($schemaConfig['label'])) {
             $schemaConfig['label'] = $schemaName;
-        }
-
-        if ($addDefaults) {
-            $schemaConfig += $this->getConfigDefaults();
         }
         return $schemaConfig;
     }
@@ -231,7 +286,6 @@ class SchemaFilter
      */
     public function processSchemaBaseConfig(array $schemaConfig, $schemaName)
     {
-        $defaults = $this->getConfigDefaults();
         // Re-merge "popup" sub-array
         if (!empty($schemaConfig['popup']) && !empty($defaults['popup'])) {
             $schemaConfig['popup'] = array_replace($defaults['popup'], $schemaConfig['popup']);

@@ -179,12 +179,22 @@ class HttpHandler implements ElementHttpHandlerInterface
     protected function getSelectActionResponseData(Element $element, Request $request)
     {
         $schemaName = $request->query->get('schema');
-        $repository = $this->schemaFilter->getDataStore($element, $schemaName);
-        $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $schemaName, true);
-        $criteria = $this->getSelectCriteria($repository, $request, $schemaConfig);
+        $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $schemaName, false);
+        if (!empty($schemaConfig['combine'])) {
+            $selectSchemaNames = $schemaConfig['combine'];
+        } else {
+            $selectSchemaNames = array($schemaName);
+        }
         $results = array();
-        foreach ($repository->search($criteria) as $dataItem) {
-            $results[] = $this->formatResponseItem($repository, $dataItem, $schemaConfig);
+        foreach ($selectSchemaNames as $delegatingSchemaName) {
+            $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $delegatingSchemaName, false);
+            $repository = $this->schemaFilter->getDataStore($element, $delegatingSchemaName);
+            $criteria = $this->getSelectCriteria($repository, $request, $schemaConfig);
+            // @todo: criteria reuse (esp. intersect)?
+            // @todo: overall maxResults cap for combinations?
+            foreach ($repository->search($criteria) as $dataItem) {
+                $results[] = $this->formatResponseItem($repository, $dataItem, $schemaConfig);
+            }
         }
         return $results;
     }

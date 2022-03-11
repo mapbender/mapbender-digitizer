@@ -1,5 +1,22 @@
 !(function () {
     "use strict";
+
+    /**
+     * Utility method to escape HTML chars
+     * @param {String} text
+     * @returns {string}
+     * @static
+     */
+    function escapeHtml(text) {
+        'use strict';
+        return text.replace(/["&'\/<>]/g, function (a) {
+            return {
+                '"': '&quot;', '&': '&amp;', "'": '&#39;',
+                '/': '&#47;',  '<': '&lt;',  '>': '&gt;'
+            }[a];
+        });
+    }
+
     Mapbender.DataManager = Mapbender.DataManager || {};
     /**
      * @param {*} owner owning DataManager (jQueryUI widget instance)
@@ -134,8 +151,8 @@
             var settings = {
                 columns: columnsOption,
                 lengthChange: false,
-                pageLength: schema.table.pageLength,
-                searching: schema.table.searching,
+                pageLength: (schema.table || {}).pageLength || 16,
+                searching: (schema.table || {}).searching || (typeof ((schema.table || {}).searching) === 'undefined'),
                 info:         true,
                 processing:   false,
                 ordering:     true,
@@ -150,7 +167,7 @@
         onRowCreation: function(schema, tr, dataItem) {
             $(tr).data({
                 item: dataItem,
-                schema: schema
+                schema: this.owner.getItemSchema(dataItem)
             });
         },
         /**
@@ -174,6 +191,18 @@
             }
             return buttons;
         },
+        defaultColumnRenderFn_: function(cellValue, type) {
+            switch (type) {
+                case 'sort':
+                case 'type':
+                default:
+                    return cellValue;
+                case 'filter':
+                    return ('' + cellValue) || '';
+                case 'display':
+                    return cellValue !== null ? escapeHtml('' + cellValue) : '';
+            }
+        },
         /**
          * @param {DataManagerSchemaConfig} schema
          * @return {Array<Object>}
@@ -181,26 +210,20 @@
          */
         getColumnsOption: function(schema) {
             var columnConfigs = this.getColumnsConfigs(schema);
-            var escapeHtml = this.escapeHtml;
             var self = this;
+            function getDefaultDataFn(schema, fieldName) {
+                return function(item) {
+                    return self.owner._getItemData(schema, item)[fieldName];
+                };
+            }
             return (columnConfigs).map(function(fieldSettings) {
-                return $.extend({}, fieldSettings, {
-                    fieldName: fieldSettings.data,  // why?
-                    render: function(data, type, row) {
-                        var rowData = self.owner._getItemData(schema, row);
-                        var cellValue = rowData[fieldSettings.data];
-                        switch (type) {
-                            case 'sort':
-                            case 'type':
-                            default:
-                                return cellValue;
-                            case 'filter':
-                                return ('' + cellValue) || '';
-                            case 'display':
-                                return cellValue !== null ? escapeHtml('' + cellValue) : '';
-                        }
-                    }
+                var option = Object.assign({}, fieldSettings, {
+                    render: self.defaultColumnRenderFn_
                 });
+                if (typeof (option.data) === 'string') {
+                    option.data = getDefaultDataFn(schema, option.data);
+                }
+                return option;
             });
         },
         renderButtonColumnContent: function(schema) {
@@ -296,22 +319,6 @@
                 sInfo: Mapbender.trans('mb.data-manager.table.from_to_total'),
                 sInfoFiltered: Mapbender.trans('mb.data-manager.table.out_of')
             };
-        },
-        /**
-         * Utility method to escape HTML chars
-         * @param {String} text
-         * @returns {string}
-         * @static
-         * @todo: eliminate duplicated code (extra utility namespace?)
-         */
-        escapeHtml: function escapeHtml(text) {
-            'use strict';
-            return text.replace(/["&'\/<>]/g, function (a) {
-                return {
-                    '"': '&quot;', '&': '&amp;', "'": '&#39;',
-                    '/': '&#47;',  '<': '&lt;',  '>': '&gt;'
-                }[a];
-            });
         }
     });
 })();
