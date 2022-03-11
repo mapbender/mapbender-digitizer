@@ -10,6 +10,7 @@
     /**
      * @typedef {Object} DataManagerSchemaConfig
      * @property {String} schemaName identifier for schema
+     * @property {Array<String>} [combine]
      * @property {DataStoreConfig} dataStore
      * @property {boolean} allowEdit
      * @property {boolean} allowCreate
@@ -81,7 +82,8 @@
             return new Mapbender.DataManager.FormRenderer();
         },
         _createTableRenderer: function() {
-            return new Mapbender.DataManager.TableRenderer(this);
+            var buttonsTemplate = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
+            return new Mapbender.DataManager.TableRenderer(this, buttonsTemplate);
         },
         /**
          * @param {jQuery} $container to render into
@@ -117,6 +119,22 @@
         },
         getItemSchema: function(item) {
             return this.options.schemes[item.schemaName];
+        },
+        /**
+         * @param {DataManagerSchemaConfig|String} schema
+         * @return {Array<DataManagerSchemaConfig>}
+         */
+        expandCombination: function(schema) {
+            var expanded = [];
+            var schema0 = (typeof schema === 'string') && this.options.schemes[schema] || schema;
+            if (!schema0.combine) {
+                expanded.push(schema0);
+            } else {
+                for (var i = 0; i < schema0.combine.length; ++i) {
+                    expanded.push(this.options.schemes[schema0.combine[i]]);
+                }
+            }
+            return expanded;
         },
         /**
          * Unraveled from _create for child class actions after initialization, but
@@ -715,6 +733,13 @@
             $.notify(errorMessage, {
                 autoHide: false
             });
+        },
+        getEnabledSchemaFunctionCodes: function(schema) {
+            var codes = ['-fn-edit-data'];
+            if (schema.allowDelete) {
+                codes.push('-fn-delete');
+            }
+            return codes;
         },
         /**
          * Promise-based confirmation dialog utility.

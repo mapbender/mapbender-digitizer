@@ -118,12 +118,14 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
         return $schemaConfig;
     }
 
-    public function postProcessSchemaBaseConfig(Element $element, array $schemaConfig, $schemaName)
+    protected function prepareInlineSchema($name, $schemaConfig, $storeConfigs)
     {
+        $schemaConfig = parent::prepareInlineSchema($name, $schemaConfig, $storeConfigs);
+
         if ($schemaConfig['allowCustomStyle']) {
-            $featureTypeConfig = $this->getDataStoreConfig($element, $schemaName);
+            $featureTypeConfig = $storeConfigs[$name];
             if (empty($featureTypeConfig['styleField'])) {
-                @trigger_error("WARNING: disabling 'allowCustomStyle' option for schema {$schemaName}. Missing 'styleField' setting.", E_USER_DEPRECATED);
+                @trigger_error("WARNING: disabling 'allowCustomStyle' option for schema {$name}. Missing 'styleField' setting.", E_USER_DEPRECATED);
                 $schemaConfig['allowCustomStyle'] = false;
             }
         }

@@ -6,7 +6,7 @@ namespace Mapbender\DataManagerBundle\Element;
 
 use Mapbender\Component\Element\ElementServiceInterface;
 use Mapbender\Component\Element\HttpHandlerProvider;
-use Mapbender\Component\Element\StaticView;
+use Mapbender\Component\Element\TemplateView;
 use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataManagerBundle\Component\HttpHandler;
 use Mapbender\DataManagerBundle\Component\SchemaFilter;
@@ -57,8 +57,7 @@ class DataManager implements ElementServiceInterface, HttpHandlerProvider
 
     public function getView(Element $element)
     {
-        // no content
-        $view = new StaticView('');
+        $view = new TemplateView('MapbenderDataManagerBundle:Element:DataManager.html.twig');
         $view->attributes['class'] = 'mb-element-data-manager';
         return $view;
     }

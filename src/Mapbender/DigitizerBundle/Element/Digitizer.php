@@ -2,7 +2,7 @@
 
 namespace Mapbender\DigitizerBundle\Element;
 
-use Mapbender\Component\Element\StaticView;
+use Mapbender\Component\Element\TemplateView;
 use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataManagerBundle\Element\DataManager;
 use Mapbender\DigitizerBundle\Component\SchemaFilter;
@@ -41,8 +41,7 @@ class Digitizer extends DataManager
 
     public function getView(Element $element)
     {
-        // no content
-        $view = new StaticView('');
+        $view = new TemplateView('MapbenderDigitizerBundle:Element:Digitizer.html.twig');
         $view->attributes += parent::getView($element)->attributes;
         $parentCssClass = !empty($view->attributes['class']) ? $view->attributes['class'] : '';
         $view->attributes['class'] = trim('mb-element-digitizer ' . $parentCssClass);
@@ -97,10 +96,6 @@ class Digitizer extends DataManager
     public function getClientConfiguration(Element $element)
     {
         $configuration = parent::getClientConfiguration($element);
-        foreach ($configuration['schemes'] as $schemaName => $schemaConfig) {
-            $schemaConfig = $this->schemaFilter->postProcessSchemaBaseConfig($element, $schemaConfig, $schemaName);
-            $configuration['schemes'][$schemaName] = $schemaConfig;
-        }
         $defaultStyles = $this->schemaFilter->getDefaultStyles();
         $configuration['fallbackStyle'] = $defaultStyles['default'];
         return $configuration;

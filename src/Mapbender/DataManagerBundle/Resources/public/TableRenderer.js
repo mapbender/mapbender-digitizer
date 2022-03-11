@@ -20,12 +20,14 @@
     Mapbender.DataManager = Mapbender.DataManager || {};
     /**
      * @param {*} owner owning DataManager (jQueryUI widget instance)
-     * @param {Element|jQuery} [scope]
+     * @param {String} buttonsTemplate
      * @constructor
      */
-    Mapbender.DataManager.TableRenderer = function TableRenderer(owner, scope) {
+    Mapbender.DataManager.TableRenderer = function TableRenderer(owner, buttonsTemplate) {
         this.owner = owner;
-        this.scope = scope || owner.element.get(0);
+        this.scope = owner.element.get(0);
+        this.buttonsTemplate = buttonsTemplate;
+        this.buttonMarkupCache_ = {};
     }
 
     Object.assign(Mapbender.DataManager.TableRenderer.prototype, {
@@ -164,32 +166,49 @@
             settings.createdRow = this.onRowCreation.bind(this, schema);
             return settings;
         },
-        onRowCreation: function(schema, tr, dataItem) {
+        getDisabledButtonsSelector: function(itemSchema) {
+            return !itemSchema.allowDelete && '.-fn-delete' || null;
+        },
+        onRowCreation: function(tableSchema, tr, dataItem) {
+            var schema = this.owner.getItemSchema(dataItem);
             $(tr).data({
                 item: dataItem,
-                schema: this.owner.getItemSchema(dataItem)
+                schema: schema
             });
+            $('.-fn-edit-data', tr).attr('title', Mapbender.trans(schema.allowEdit ? 'mb.actions.edit' : 'mb.data-manager.actions.show_details'));
+            $('.btn', tr).not(this.buttonMarkupCache_[schema.schemaName].enabledSelector).prop('disabled', true);
         },
-        /**
-         * @param {DataManagerSchemaConfig} schema
-         * @return {Array<Object>}
-         */
-        getButtonsOption: function(schema) {
-            var buttons = [];
-            // NOTE: "edit" interaction is always added even with "allowEdit" schema config false. Without "allowEdit",
-            //       the dialog will not have a save button, but it will still function as an attribute data viewer.
-            buttons.push({
-                title: Mapbender.trans(schema && schema.allowEdit ? 'mb.actions.edit' : 'mb.data-manager.actions.show_details'),
-                cssClass: 'fa fa-edit -fn-edit-data btn-default'
-            });
-
-            if (schema.allowDelete) {
-                buttons.push({
-                    title: Mapbender.trans('mb.actions.delete'),
-                    cssClass: 'critical fa fa-times -fn-delete btn-danger'
-                });
+        initButtonMarkupCache_: function(tableSchema) {
+            var functionCoverage = {};
+            var subSchemas = this.owner.expandCombination(tableSchema);
+            for (var s = 0; s < subSchemas.length; ++s) {
+                if (subSchemas[s] !== tableSchema) {
+                    this.initButtonMarkupCache_(subSchemas[s]);
+                }
+                var schemaFunctions = this.owner.getEnabledSchemaFunctionCodes(subSchemas[s]);
+                for (var f = 0; f < schemaFunctions.length; ++f) {
+                    var schemaFunction = schemaFunctions[f];
+                    functionCoverage[schemaFunction] = (functionCoverage[schemaFunction] || []).concat(subSchemas[s].schemaName);
+                }
             }
-            return buttons;
+            var keepFunctions = Object.keys(functionCoverage);
+            // Remove buttons not present in the any subschema of the combination
+            var keepSelector = keepFunctions.length && keepFunctions.map(function(code) {
+                return ['.', code].join('');
+            }).join(',');
+            var $remaining = $($.parseHTML(this.buttonsTemplate));
+            $('.btn', $remaining).not(keepSelector).remove();
+            var remainingMarkup = $remaining.get().map(function(node) {
+                return node.outerHTML;
+            }).join('');
+
+            this.buttonMarkupCache_[tableSchema.schemaName] = {
+                html: remainingMarkup,
+                // Buttons present partially in some schemas, but not all, will
+                // remain (to preserve grid layout sanity), but may be disabled
+                // on a row-by-row basis
+                enabledSelector: keepSelector
+            };
         },
         defaultColumnRenderFn_: function(cellValue, type) {
             switch (type) {
@@ -217,55 +236,12 @@
                 };
             }
             return (columnConfigs).map(function(fieldSettings) {
-                var option = Object.assign({}, fieldSettings, {
-                    render: self.defaultColumnRenderFn_
-                });
+                var option = Object.assign({}, fieldSettings);
+                option.render = option.render || self.defaultColumnRenderFn_
                 if (typeof (option.data) === 'string') {
                     option.data = getDefaultDataFn(schema, option.data);
                 }
                 return option;
-            });
-        },
-        renderButtonColumnContent: function(schema) {
-            var rowButtons = this.renderRowButtons(schema);
-            if (rowButtons.length) {
-                return $('<div class="btn-group">')
-                    .append(rowButtons)
-                    .get(0)
-                ;
-            } else {
-                return null;
-            }
-        },
-        renderRowButtons: function(schema) {
-            var buttonConfigs = this.getButtonsOption(schema);
-            return buttonConfigs.map(function(buttonConfig) {
-                var allClasses = (buttonConfig.cssClass || '').split(/\s+/);
-                var buttonClasses = allClasses.filter(function(cls) {
-                    return cls && !(/^(icon|fa)/.test(cls));
-                });
-                var iconClasses = allClasses.filter(function(cls) {
-                    return cls && (/^(icon|fa)/.test(cls));
-                });
-                var $icon = $(document.createElement('i'))
-                    .addClass(iconClasses.join(' '))
-                ;
-                var $button = $(document.createElement('button'))
-                    .attr({
-                        type: 'button',
-                        title: buttonConfig.title
-                    })
-                    .addClass(buttonClasses.join(' '))
-                    .addClass('btn')
-                    .append($icon)
-                ;
-                var colorClasses = buttonClasses.filter(function(cls) {
-                    return /^(btn-)/.test(cls);
-                });
-                if (!colorClasses.length) {
-                    $button.addClass('btn-default');
-                }
-                return $button.get(0);
             });
         },
         getDefaultColumnConfigs: function(schema) {
@@ -290,18 +266,17 @@
             }
             return fieldConfigs;
         },
-        getButtonColumnOptions: function(schema) {
-            var interfaceElement = this.renderButtonColumnContent(schema).outerHTML;
-            return interfaceElement && {
+        getButtonColumnOptions: function(tableSchema) {
+            if (!this.buttonMarkupCache_[tableSchema.schemaName]) {
+                this.initButtonMarkupCache_(tableSchema);
+            }
+            return {
+                targets: -1,
+                width: '1%',
+                orderable: false,
+                searchable: false,
                 className: 'interface',
-                render: function(val, type) {
-                    if (type === 'display') {
-                        return interfaceElement;
-                    } else {
-                        return null;
-                    }
-                },
-                sortable: false
+                defaultContent: this.buttonMarkupCache_[tableSchema.schemaName].html
             };
         },
         /**

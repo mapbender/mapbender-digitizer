@@ -10,52 +10,6 @@
         constructor: Mapbender.Digitizer.TableRenderer
     });
 
-
-    Mapbender.Digitizer.TableRenderer.prototype.getButtonsOption = function(schema) {
-        var lateButtons = Mapbender.DataManager.TableRenderer.prototype.getButtonsOption.call(this, schema);
-        var earlyButtons = [];
-
-        // This save button is the only direct way to save modified geometries
-        if (schema.allowDigitize) {
-            var saveButtonOptions = {
-                title: Mapbender.trans('mb.digitizer.feature.save.title'),
-                cssClass: '-fn-save fa fas fa-save btn-success'
-            };
-            // Insert save button before delete button (=after attribute editing button)
-            var deleteButton = lateButtons.filter(function(buttonOptions) {
-                return /fn-delete/.test(buttonOptions.cssClass || '')
-            })[0];
-            var deleteButtonPosition = deleteButton ? lateButtons.indexOf(deleteButton) : -1;
-            if (deleteButtonPosition !== -1) {
-                lateButtons.splice(deleteButtonPosition, 0, saveButtonOptions);
-            } else {
-                lateButtons.push(saveButtonOptions);
-            }
-        }
-
-        // All other buttons go "to the left" of the inherited buttons
-        if (schema.copy && schema.copy.enable) {
-            earlyButtons.push({
-                title: Mapbender.trans('mb.digitizer.feature.clone.title'),
-                cssClass: 'fa fas fa-copy -fn-copy'
-            });
-        }
-        if (schema.allowCustomStyle) {
-            earlyButtons.push({
-                title: Mapbender.trans('mb.digitizer.feature.style.change'),
-                cssClass: '-fn-edit-style fa fas fa-eyedropper fa-eye-dropper'  // NOTE: fas and fa-eye-dropper for FA5+; fa-eyedropper for FA4
-            });
-        }
-
-        if (schema.allowChangeVisibility) {
-            earlyButtons.push({
-                title: Mapbender.trans('mb.digitizer.feature.visibility.toggleoff'),
-                cssClass: 'fa far fa-eye -fn-toggle-visibility'
-            });
-        }
-        return earlyButtons.concat(lateButtons);
-    };
-
     Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
         render: function(schema) {
             var table = Mapbender.DataManager.TableRenderer.prototype.render.call(this, schema);
@@ -118,19 +72,20 @@
                 }
             });
         },
-        onRowCreation: function(schema, tr, feature) {
+        onRowCreation: function(tableSchema, tr, feature) {
             Mapbender.DataManager.TableRenderer.prototype.onRowCreation.apply(this, arguments);
             // Place table row into feature data for quick access (synchronized highlighting etc)
             feature.set('table-row', tr);
             // Inline save buttons start out disabled
             $('.-fn-save', tr).prop('disabled', !feature.get('dirty'));
-            this.registerFeatureEvents(schema, feature);
+            this.registerFeatureEvents(tableSchema, feature);
         },
-        registerFeatureEvents: function(schema, feature) {
+        registerFeatureEvents: function(tableSchema, feature) {
             // Avoid registering same event handlers on the same feature multiple times
             if (feature.get('table-events')) {
                 return;
             }
+            // @todo: track across multiple tables
 
             var self = this;
             // Update interaction buttons when "hidden" and "dirty" values change
@@ -140,7 +95,7 @@
                 if (tr) {
                     // page to modified feature
                     if (event.key === 'dirty' && feature.get('dirty')) {
-                        self.showRow(schema, tr);
+                        self.showRow(tableSchema, tr);
                     }
                     self.updateButtonStates_(tr, feature);
                 }

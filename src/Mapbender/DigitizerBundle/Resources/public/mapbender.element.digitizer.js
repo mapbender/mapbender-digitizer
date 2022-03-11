@@ -43,7 +43,8 @@
             });
         },
         _createTableRenderer: function() {
-            return new Mapbender.Digitizer.TableRenderer(this);
+            var buttonsTemplate = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
+            return new Mapbender.Digitizer.TableRenderer(this, buttonsTemplate);
         },
         _createToolsetRenderer: function() {
             return new Mapbender.Digitizer.Toolset(this);
@@ -339,6 +340,7 @@
         _prepareDataItem: function(schema, itemData) {
             var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
             feature.set('data', itemData.properties || {});
+            feature.set('schemaName', itemData.schemaName);
             var id = this._generateNamespacedId(schema, feature);
             feature.setId(id);
             var schemaSource = this.getSchemaLayer(schema).getSource();
@@ -351,6 +353,19 @@
                 this.renderer.initializeFeature(schema, feature);
                 return feature;
             }
+        },
+        getItemSchema: function(feature) {
+            return this.options.schemes[feature.get('schemaName')];
+        },
+        getEnabledSchemaFunctionCodes: function(schema) {
+            var codes = this._superApply(arguments);
+            codes = codes.concat([
+                schema.allowDigitize && '-fn-save',
+                schema.copy && schema.copy.enable && '-fn-copy',
+                schema.allowCustomStyle && '-fn-edit-style',
+                schema.allowChangeVisibility && '-fn-toggle-visibility'
+            ]);
+            return codes.filter(function(x) { return !!x; });
         },
         initializeNewFeature: function(schema, feature) {
             this.renderer.initializeFeature(schema, feature);

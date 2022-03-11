@@ -1,0 +1,16 @@
+<div style="display: none;" class="-tpl-table-buttons">
+    <div class="btn-group">
+        {%- block table_buttons -%}
+            {%- block edit_button -%}
+                <button type="button"
+                        class="-fn-edit-data btn btn-default"
+                        title="{{ 'mb.actions.edit' | trans }}"><i class="fa fa-edit"></i></button>
+            {%- endblock -%}
+            {%- block delete_button -%}
+                <button type="button"
+                        class="critical -fn-delete btn btn-danger"
+                        title="{{ 'mb.actions.delete' | trans }}"><i class="fa fa-times"></i></button>
+            {%- endblock -%}
+        {%- endblock -%}
+    </div>
+</div>
