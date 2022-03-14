@@ -83,25 +83,6 @@
         },
         /**
          * @param {Object} schema
-         * @param {Array<Element>} [dmToolset] for reintegration (data-manager's entire tool set is a few [optional] buttons)
-         */
-        renderButtons: function(schema, dmToolset) {
-            var $groupWrapper = $(document.createElement('div'))
-                // @see https://getbootstrap.com/docs/3.4/components/#btn-groups-toolbar
-                .addClass('btn-toolbar')
-            ;
-            var utilityButtons = _.union(this.extractDmButtons_(dmToolset || []), this.renderUtilityButtons(schema));
-            if (utilityButtons.length) {
-                $groupWrapper.append(this.renderButtonGroup_(utilityButtons));
-            }
-            var geometryButtons = this.renderGeometryToolButtons(schema);
-            if (geometryButtons.length) {
-                $groupWrapper.append(this.renderButtonGroup_(geometryButtons));
-            }
-            return $groupWrapper.get(0);
-        },
-        /**
-         * @param {Object} schema
          * @return {Array<String>}
          * @static
          */
@@ -137,40 +118,54 @@
         getDefaultGeometryToolNames: function(schema) {
             return this.getValidToolNames(schema);
         },
-        getGeometryToolNames: function(schema) {
-            if (schema.allowDigitize) {
-                var toolNames = schema.toolset && schema.toolset.map(function(tc) {
-                    // Historic Digitizer / vis-ui dependency quirk: toolset
-                    // configuration is a list of objects with (only) a type property
-                    return tc.type;
-                });
-                if (!toolNames) {
-                    toolNames = this.getDefaultGeometryToolNames(schema);
+        normalizeToolSet_: function(schema) {
+            var seen = {};
+            var toolSpecs = [];
+            var subSchemas = this.owner.expandCombination(schema);
+            var standardTools = ['modifyFeature', 'moveFeature'];
+            var addStandard = false;
+            for (var s = 0; s < subSchemas.length; ++s) {
+                if (!subSchemas[s].allowDigitize) {
+                    continue;
                 }
-                var validNames = this.getValidToolNames(schema);
-                // always append modify and move
-                var standardTools = ['modifyFeature', 'moveFeature'];
-                // Filter repeats / earlier appearances
-                toolNames = toolNames.filter(function(name) {
-                    return -1 === standardTools.indexOf(name);
+                addStandard = true;
+                var validNames = this.getValidToolNames(subSchemas[s]);
+                var subSchemaTools = (subSchemas[s].toolset || validNames).map(function(tc) {
+                    var obj = (typeof tc === 'string') && {type: tc} || Object.assign({}, tc);
+                    obj.schema = obj.schema || subSchemas[s].schemaName;
+                    return obj;
+                }).filter(function(toolSpec) {
+                    return (!seen[toolSpec.type])
+                        && -1 === standardTools.indexOf(toolSpec.type)
+                        && -1 !== validNames.indexOf(toolSpec.type)
+                    ;
                 });
-                toolNames = toolNames.concat(standardTools);
-                // Reduce to valid set (NOTE: may drop "modifyFeature" again for point / multipoint
-                return toolNames.filter(function(name) {
-                    return -1 !== validNames.indexOf(name);
-                });
-            } else {
-                return [];
+                for (var t = 0; t < subSchemaTools.length; ++t) {
+                    var toolSpec = subSchemaTools[t];
+                    if (!seen[toolSpec.type]) {
+                        toolSpecs.push(toolSpec);
+                        seen[toolSpec.type] = true;
+                    }
+                }
             }
+            if (addStandard) {
+                // Skip modify for single point geometries
+                if (-1 !== validNames.indexOf('modifyFeature')) {
+                    toolSpecs.push({type: 'modifyFeature'});
+                }
+                toolSpecs.push({type: 'moveFeature'});
+            }
+            return toolSpecs;
         },
         renderGeometryToolButtons: function(schema) {
-            var toolNames = this.getGeometryToolNames(schema);
+            var toolSpecs = this.normalizeToolSet_(schema);
             var buttons = [];
-            for (var i = 0; i < toolNames.length; ++i) {
-                var toolName = toolNames[i];
+            for (var i = 0; i < toolSpecs.length; ++i) {
+                var toolName = toolSpecs[i].type;
                 var iconClass = this.iconMap_[toolName];
                 var $icon = $(document.createElement('span')).addClass(iconClass);
                 var tooltip = Mapbender.trans('mb.digitizer.toolset.' + toolName);
+                var btnSchema = this.owner.options.schemes[toolSpecs[i].schema] || schema;
                 var $button = $(document.createElement('button'))
                     .attr({
                         type: 'button',
@@ -180,7 +175,7 @@
                     .addClass('-fn-toggle-tool btn btn-default')
                     .append($icon)
                     .data({
-                        schema: schema
+                        schema: btnSchema
                     })
                 ;
                 buttons.push($button);
@@ -188,7 +183,6 @@
             return buttons;
         },
         registerEvents: function() {
-            var self = this;
             var widget = this.owner;
             widget.element.on('click', '.-fn-visibility-all', function() {
                 var state = !!$(this).attr('data-visibility');
@@ -198,87 +192,6 @@
                     }
                 });
             });
-        },
-        /**
-         * Renders buttons that do NOT represent geometry interactions
-         * @param schema
-         * @return {{}}
-         * @static
-         */
-        renderUtilityButtons: function(schema) {
-            var buttons = [];
-            var $button;
-            var visChange = false, saveAll = false;
-            var subSchemas = this.owner.expandCombination(schema);
-            for (var s = 0; s < subSchemas.length; ++s) {
-                visChange = visChange || subSchemas[s].allowChangeVisibility;
-                saveAll = saveAll || subSchemas[s].allowDigitize;
-
-                if (visChange && saveAll) {
-                    break;
-                }
-            }
-
-            if (visChange) {
-                $button = $('<button type="button" class="btn -fn-visibility-all btn-default" />');
-                $button.append('<i class="fa far fa-eye-slash">');
-                $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
-                buttons.push($button);
-
-                $button = $('<button type="button" class="btn -fn-visibility-all btn-default" />');
-                $button.append('<i class="fa far fa-eye">');
-                $button.attr({
-                    'data-visibility': "1",
-                    title: Mapbender.trans('mb.digitizer.toolset.showAll')
-                });
-                buttons.push($button);
-            }
-            // If geometry modification is allowed, we must offer a way to save
-            if (saveAll) {
-                $button = $('<button type="button" class="btn -fn-save-all btn-success" />');
-                $button.append('<i class="fa fas fa-save">');
-                $button.attr("title", Mapbender.trans('mb.digitizer.toolset.saveAll'));
-                $button.prop('disabled', true);
-                buttons.push($button);
-            }
-            return buttons;
-        },
-        renderCurrentExtentSwitch: function (schema) {
-            var widget = this.owner;
-            var $checkbox = $('<input type="checkbox" name="current-extent" />');
-            var title = Mapbender.trans('mb.digitizer.toolset.current-extent');
-            $checkbox.prop('checked', schema.searchType === 'currentExtent');
-            $checkbox.change(function (e) {
-                widget._getData(schema);
-            });
-            var $div = $("<div/>");
-            $div.addClass("form-group checkbox");
-            var $label = $("<label/>");
-            $label.text(title);
-            $label.prepend($checkbox);
-            $div.append($label);
-            return $div;
-        },
-        renderButtonGroup_: function(contents) {
-            var $group = $(document.createElement('div'))
-                // @see https://getbootstrap.com/docs/3.4/components/#btn-groups
-                .addClass('btn-group')
-            ;
-            $group.append(contents);
-            return $group.get(0);
-        },
-        /**
-         * @param {Array<Element>} dmToolset
-         * @private
-         * @return {Array<Element>}
-         */
-        extractDmButtons_: function(dmToolset) {
-            var $buttons = $('button,.btn,.button', $(dmToolset));
-            // Prevent top-level item creation
-            // Unlinke DataManager, all item creation happens with a drawing tool,
-            // and doesn't work when using pure form entry
-            $buttons = $buttons.not('.-fn-create-item');
-            return $buttons.get();
         }
     };
 
@@ -288,7 +201,7 @@
                 this.tools_[schema.schemaName] = {};
             }
             if (!this.tools_[schema.schemaName][type]) {
-                var newInteraction = this.createDrawingTool(type);
+                var newInteraction = this.createDrawingTool(schema, type);
                 this.tools_[schema.schemaName][type] = newInteraction;
                 var widget = this.owner;
                 newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
@@ -305,12 +218,11 @@
             return this.tools_[schema.schemaName][type];
         },
         /**
+         * @param {Object} schema
          * @param {String} type
          */
-        createDrawingTool: function(type) {
-            var widget = this.owner;
-            var schema = widget._getCurrentSchema();
-            var layer = schema && widget.getSchemaLayer(schema);
+        createDrawingTool: function(schema, type) {
+            var layer = this.owner.getSchemaLayer(schema);
             var source = layer && layer.getSource();
             var interaction;
             switch (type) {

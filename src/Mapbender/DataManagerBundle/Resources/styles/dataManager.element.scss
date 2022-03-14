@@ -1,5 +1,5 @@
 .mb-element-data-manager {
-  select.selector, .dataTables_filter label input {
+  > select, .dataTables_filter label input {
     display: block;
     width: 100%;
     background: white;
@@ -8,17 +8,18 @@
   .dataTables_filter label {
     display: block; // allow input (inside label!) to grow to full width
   }
-  .dataTables_filter, select.selector, >.title {
+  .dataTables_filter, > select, >.title {
     margin-bottom: 1.5ex;
   }
   .loading-indicator {
     text-align: right;
     // move spinning icon content slightly left to prevent horizontal overflow and flickering scrollbar
     padding-right: 0.25em;
+    opacity: 0;   // hidden without affecting layout size
   }
   color: #555;
   font-size: 0.85rem;
-  select.selector, .dataTables_filter input {
+  > select, .dataTables_filter input {
     height: 2.5em;
     padding: 0.35em;
     border-radius: 0;

@@ -78,8 +78,7 @@
                 }
 
                 var schema = self._getCurrentSchema();
-                var $extentSearchCb = $('.schema-toolset input[name="current-extent"]', self.element);
-                if ($extentSearchCb.length && $extentSearchCb.prop('checked')) {
+                if ($('input[name="current-extent"]', self.element).prop('checked')) {
                     self._getData(schema);
                 }
 
@@ -138,12 +137,16 @@
                     var $activeOthers = $button.siblings('.-fn-toggle-tool.active').not($button);
                     $activeOthers.each(function() {
                         var $other = $(this);
-                        self._toggleDrawingTool(schema, $other.attr('data-toolname'), false);
+                        var otherSchema = $other.data('schema');
+                        self._toggleDrawingTool(otherSchema, $other.attr('data-toolname'), false);
                     });
                     $activeOthers.removeClass('active');
                 }
                 $button.toggleClass('active', newState);
                 self._toggleDrawingTool(schema, toolName, newState);
+            });
+            this.element.on('change', 'input[name="current-extent"]', function() {
+                self._getData(self._getCurrentSchema());
             });
             this.element.on('click', '.-fn-save-all', function() {
                 self.updateMultiple(self.getSaveAllCandidates_());
@@ -245,19 +248,36 @@
             // Digitizer schema config aliases "dataStore" (upstream) as "featureType"
             return schema.featureType;
         },
-        _updateToolset: function($container, schema) {
-            this._super($container, schema);
-            $('button', $container)
+        _updateToolset: function(schema) {
+            this._super(schema);
+            var $toolset = $('.toolset', this.element);
+            $('input[name="current-extent"]', $toolset).prop('checked', schema.searchType === 'currentExtent');
+            $('.btn-group', $toolset)
                 // Resize buttons to btn-sm to fit our (potentially many) tool buttons
-                .addClass('btn btn-sm')
+                .addClass('btn-group-sm')
             ;
-        },
-        _renderToolset: function(schema) {
-            var dmToolset = $(this._super(schema)).get();   // force to array of nodes
-            var nodes = [];
-            nodes.push(this.toolsetRenderer.renderCurrentExtentSwitch(schema));
-            nodes.push(this.toolsetRenderer.renderButtons(schema, dmToolset));
-            return nodes;
+            // Prevent top-level item creation
+            // Unlinke DataManager, all item creation happens with a drawing tool,
+            // and doesn't work when using pure form entry
+            $('.-fn-create-item', $toolset).remove();
+            var keepVisChange = false, keepSaveAll = false;
+            var subSchemas = this.expandCombination(schema);
+            for (var s = 0; s < subSchemas.length; ++s) {
+                keepVisChange = keepVisChange || subSchemas[s].allowChangeVisibility;
+                keepSaveAll = keepSaveAll || subSchemas[s].allowDigitize;
+                if (keepVisChange && keepSaveAll) {
+                    break;
+                }
+            }
+
+            if (!keepVisChange) {
+                $('.-fn-visibility-all', $toolset).remove();
+            }
+            if (!keepSaveAll) {
+                $('.-fn-save-all', $toolset).remove();
+            }
+            var $geometryToolGroup = $('.-js-drawing-tools', $toolset);
+            $geometryToolGroup.empty().append(this.toolsetRenderer.renderGeometryToolButtons(schema));
         },
         _openEditDialog: function(schema, feature) {
             // Make feature visible in table when editing was started
@@ -324,8 +344,7 @@
             var params = Object.assign({}, this._super(schema), {
                 srid: this.getCurrentSrid()
             });
-            var $extentSearchCb = $('.schema-toolset input[name="current-extent"]', this.element);
-            if ($extentSearchCb.length && $extentSearchCb.prop('checked')) {
+            if ($('input[name="current-extent"]', this.element).prop('checked')) {
                 params['extent'] = this.mbMap.getModel().getCurrentExtentArray().join(',');
             }
             return params;

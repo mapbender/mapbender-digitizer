@@ -50,6 +50,7 @@
         },
         /** @type {{DataManagerSchemaConfig|null}} */
         currentSettings: null,
+        toolsetTemplate_: null,
 
         _create: function() {
             if (Array.isArray(this.options.schemes) || !Object.keys(this.options.schemes).length) {
@@ -60,8 +61,8 @@
                 this.element.attr('id'),
                 ''  // produce trailing slash
             ].join('/');
-
-            this.selector = $(this._renderSchemaSelector(this.element));
+            this.updateSchemaSelector_();
+            this.toolsetTemplate_ = $('.-tpl-toolset', this.element).remove().css('display', '').html();
             this.formRenderer_ = this._createFormRenderer();
             this.dialogFactory_ = Mapbender.DataManager.DialogFactory;
             var schemaNames = Object.keys(this.options.schemes);
@@ -86,36 +87,33 @@
             return new Mapbender.DataManager.TableRenderer(this, buttonsTemplate);
         },
         /**
-         * @param {jQuery} $container to render into
-         * @return {*|jQuery|HTMLElement} should always be (or wrap) the <select> tag
          * @private
          */
-        _renderSchemaSelector: function($container) {
+        updateSchemaSelector_: function() {
             var self = this;
-            var selector = $('<select class="selector -fn-schema-selector"/>');
+            var $select = $('select.-fn-schema-selector', this.element);
             var schemaNames = Object.keys(this.options.schemes);
             var visible = schemaNames.filter(function(schemaName) {
                 return self.options.schemes[schemaName].listed;
             });
 
             if (visible.length === 1) {
+                $select.hide();
                 var singleScheme = this.options.schemes[visible[0]];
                 var title = singleScheme.label || singleScheme.schemaName;
-                if(title) {
-                    $container.append($('<h3 class="title"/>').text(title));
+                if (title) {
+                    $select.before($('<h3 class="title"/>').text(title));
                 }
-                selector.hide();
             }
             // build select options
+            $select.empty();
             for (var i = 0; i < visible.length; ++i) {
                 var schemaConfig = this.options.schemes[visible[i]];
                 var option = $("<option/>");
                 option.val(schemaConfig.schemaName).text(schemaConfig.label);
                 option.data('schema', schemaConfig);
-                selector.append(option);
+                $select.append(option);
             }
-            $container.append(selector);
-            return selector;
         },
         getItemSchema: function(item) {
             return this.options.schemes[item.schemaName];
@@ -153,11 +151,11 @@
         _start: function() {
             this._trigger('ready');
             // Use schema change event, it does everything we need
-            this.selector.trigger('change');
+            $('.-fn-schema-selector', this.element).trigger('change');
         },
         _initializeEvents: function() {
             var self = this;
-            $('select.selector', this.element).on('change', function() {
+            $('.-fn-schema-selector', this.element).on('change', function() {
                 self._onSchemaSelectorChange();
             });
             this.element.on('click', '.-fn-edit-data', function() {
@@ -168,14 +166,12 @@
                 var $tr = $(this).closest('tr');
                 self.removeData($tr.data('schema'), $tr.data('item'));
             });
-            this.element.on('click', '.-fn-refresh-schema', function() {
-                var schema = $(this).data('schema');
+            this.element.on('click', '.-fn-refresh', function() {
                 self._closeCurrentPopup();
-                self._getData(schema);
+                self._getData(self._getCurrentSchema());
             });
             this.element.on('click', '.-fn-create-item', function() {
-                var schema = $(this).data('schema');
-                self._createItem(schema);
+                self._createItem(self._getCurrentSchema());
             });
         },
         /**
@@ -209,9 +205,12 @@
                 this._deactivateSchema(this.currentSettings);
                 this.currentSettings = null;
             }
-            $('.frame', this.element).remove();
             this.currentSettings = schema;
-            $('select.selector', this.element).after(this._renderSchemaFrame(schema));
+            this._updateToolset(schema);
+            $('.data-container', this.element)
+                .empty()
+                .append(this.tableRenderer.render(schema))
+            ;
         },
         /**
          * @param {DataManagerSchemaConfig} schema
@@ -221,7 +220,7 @@
             this._closeCurrentPopup();
         },
         _getCurrentSchema: function() {
-            var $select = $('select.selector', this.element);
+            var $select = $('.-fn-schema-selector', this.element);
             var option = $('option:selected', $select);
             return option.data("schema");
         },
@@ -231,73 +230,24 @@
             this._getData(schemaNew);
         },
         /**
-         * @param {DataManagerSchemaConfig} schema
-         * @return {jQuery}
-         * @private
-         */
-        _renderSchemaFrame: function(schema) {
-            var frame =  $("<div/>")
-                .addClass('frame')
-                .data("schema", schema)
-            ;
-            var $toolset = $('<div>').addClass('schema-toolset');
-            frame.append($toolset);
-            this._updateToolset($toolset, schema);
-
-            frame.append($toolset);
-            var $loadingIndicator = $(document.createElement('div'))
-                .addClass('loading-indicator')
-                .css({opacity: 0})
-                .append($('<i class="fa fas fa-spinner fa-spin">'))
-            ;
-            frame.append($loadingIndicator);
-            frame.append(this.tableRenderer.render(schema));
-            return frame;
-        },
-        /**
          * @param {jQuery} $container
          * @param {DataManagerSchemaConfig} schema
          * @private
          */
-        _updateToolset: function($container, schema) {
-            $container.empty();
-            var toolset = this._renderToolset(schema);
-            $container.append(toolset);
-        },
-        /**
-         * @param {DataManagerSchemaConfig}schema
-         * @return {Array<(Element|{jQuery})>}
-         * @private
-         */
-        _renderToolset: function(schema) {
-            var buttons = [];
-            if (schema.allowRefresh) {
-                var $refreshButton = $('<button>').data('schema', schema).attr({
-                    type: 'button',
-                    'class': 'btn btn-sm -fn-refresh-schema btn-default',
-                    title: Mapbender.trans('mb.actions.refresh')
-                });
-                $refreshButton.append($('<i/>').addClass('fa fa-refresh'));
-                buttons.push($refreshButton);
+        _updateToolset: function(schema) {
+            $('.toolset', this.element).replaceWith(this.toolsetTemplate_);
+            var $toolset = $('.toolset', this.element);
+            if (schema.combine) {
+                // Combination schema cannot create items
+                $('.-fn-create-item', $toolset).remove();
             }
-
-            if (schema.allowCreate) {
-                var $createButton = $('<button>').data('schema', schema).attr({
-                    type: 'button',
-                    'class': 'btn btn-sm -fn-create-item btn-default',
-                    title: Mapbender.trans('mb.data.store.create')
-                });
-                $createButton.append($('<i/>').addClass('fa fa-plus'));
-                buttons.push($createButton);
+            var subSchemas = this.expandCombination(schema);
+            var keepRefresh = false;
+            for (var s = 0; s < subSchemas.length; ++s) {
+                keepRefresh = keepRefresh || subSchemas[s].allowRefresh;
             }
-            if (buttons.length) {
-                var $group = $(document.createElement('span'))
-                    .addClass('btn-group')
-                    .append(buttons)
-                ;
-                return $group.get();
-            } else {
-                return [];
+            if (!keepRefresh) {
+                $('.-fn-refresh', $toolset).remove();
             }
         },
         /**
