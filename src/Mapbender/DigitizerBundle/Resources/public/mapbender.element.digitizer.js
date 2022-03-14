@@ -418,7 +418,7 @@
                 self.renderer.replaceFeatures(schema, features);
                 // Re-add unsaved features from current session
                 var unsaved = self.renderer.addFeatures(modifiedFeatures, function(layer, feature) {
-                    return !layer.getSource().getFeatureById(features.getId());
+                    return !layer.getSource().getFeatureById(feature.getId());
                 });
                 return features.concat(unsaved);
             });
