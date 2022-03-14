@@ -58,12 +58,13 @@ class SchemaFilter
     }
 
     /**
-     * @param mixed[][] $configsIn
+     * @param Element $element
      * @return mixed[][]
      */
-    public function prepareConfigs($configsIn)
+    public function prepareConfigs(Element $element)
     {
         $configsOut = array();
+        $configsIn = $this->getAllConfigs($element);
         $storeConfigs = DataStoreUtil::configsFromSchemaConfigs($this->registry, $configsIn);
 
         foreach ($configsIn as $schemaName => $configIn) {
@@ -75,6 +76,15 @@ class SchemaFilter
             $configsOut[$schemaName] = $this->amendBaseProperties($configOut, $schemaName);
         }
         return $configsOut;
+    }
+
+    /**
+     * @param Element $element
+     * @return mixed[]
+     */
+    protected function getAllConfigs(Element $element)
+    {
+        return $element->getConfiguration()['schemes'];
     }
 
     protected function prepareInlineSchema($name, $schemaConfig, $storeConfigs)
@@ -217,14 +227,11 @@ class SchemaFilter
      */
     public function getRawSchemaConfig(Element $element, $schemaName, $addDefaults = false)
     {
-        $elementConfig = $element->getConfiguration();
-        if (empty($elementConfig['schemes'])) {
-            throw new ConfigurationErrorException("Schema configuration completely empty");
-        }
-        if (empty($elementConfig['schemes'][$schemaName])) {
+        $allConfigs = $this->getAllConfigs($element);
+        if (empty($allConfigs[$schemaName])) {
             throw new UnknownSchemaException("No such schema " . print_r($schemaName, true));
         }
-        $schemaConfig = $elementConfig['schemes'][$schemaName];
+        $schemaConfig = $allConfigs[$schemaName];
         if ($addDefaults) {
             $schemaConfig += $this->getConfigDefaults();
         }

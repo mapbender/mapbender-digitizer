@@ -96,7 +96,7 @@ class DataManager implements ElementServiceInterface, HttpHandlerProvider
     public function getClientConfiguration(Element $element)
     {
         $configuration = $element->getConfiguration();
-        $configuration['schemes'] = $this->schemaFilter->prepareConfigs($configuration['schemes']);
+        $configuration['schemes'] = $this->schemaFilter->prepareConfigs($element);
         return $configuration;
     }
 
