@@ -78,31 +78,31 @@
                 }
 
                 var schema = self._getCurrentSchema();
-                var layer = self.getSchemaLayer(schema);
-                var resolution = olMap.getView().getResolution();
                 var $extentSearchCb = $('.schema-toolset input[name="current-extent"]', self.element);
-
-                if (resolution > layer.getMaxResolution() || resolution < layer.getMinResolution()) {
-                    self.tableRenderer.replaceRows(schema, []);
-                } else if ($extentSearchCb.length && $extentSearchCb.prop('checked')) {
+                if ($extentSearchCb.length && $extentSearchCb.prop('checked')) {
                     self._getData(schema);
+                }
+
+                // @todo ml: filter table rows for min/max resolution (not just on moveend, but always)
+                if (false) {
+                    var layer = self.getSchemaLayer(schema);
+                    var resolution = olMap.getView().getResolution();
+                    if (resolution > layer.getMaxResolution() || resolution < layer.getMinResolution()) {
+                        self.tableRenderer.replaceRows(schema, []);
+                    }
                 }
             });
             this.mbMap.element.on('mbmapsrschanged', function(event, data) {
                 self.featureEditor.pause();
-                var schema = self._getCurrentSchema();
-                var layer = schema && self.getSchemaLayer(schema);
-                if (layer) {
-                    layer.getSource().forEachFeature(/** @param {ol.Feature} feature */function(feature) {
-                        var geometry = feature.getGeometry();
-                        if (geometry) {
-                            geometry.transform(data.from, data.to);
-                        }
-                        if (feature.get('oldGeometry')) {
-                            feature.get('oldGeometry').transform(data.from, data.to);
-                        }
-                    });
-                }
+                self.renderer.forAllFeatures(/** @param {ol.Feature} feature */function(feature) {
+                    var geometry = feature.getGeometry();
+                    if (geometry) {
+                        geometry.transform(data.from, data.to);
+                    }
+                    if (feature.get('oldGeometry')) {
+                        feature.get('oldGeometry').transform(data.from, data.to);
+                    }
+                });
                 self.featureEditor.resume();
             });
             this.selectControl = this.createSelectControl_();
@@ -111,7 +111,8 @@
             olMap.addInteraction(this.selectControl);
             olMap.addInteraction(this.highlightControl);
             var initialSchema = this._getCurrentSchema();
-            this._setSchemaVisible(initialSchema, initialSchema.displayOnInactive && initialSchema.displayPermanent);
+            // @todo ml: evaluate displayPermanent
+            this.renderer.toggleSchema(initialSchema, initialSchema.displayOnInactive && initialSchema.displayPermanent);
         },
         // reveal / hide = automatic sidepane integration API
         reveal: function() {
@@ -145,9 +146,6 @@
                 self._toggleDrawingTool(schema, toolName, newState);
             });
         },
-        _setSchemaVisible: function(schema, state) {
-            this.getSchemaLayer(schema).setVisible(!!state);
-        },
         activate: function() {
             if (!this.active) {
                 this.selectControl.setActive(true);
@@ -157,9 +155,9 @@
                 var schemaNames = Object.keys(this.options.schemes);
                 for (var s = 0; s < schemaNames.length; ++s) {
                     var schema = this.options.schemes[schemaNames[s]];
-                    this._setSchemaVisible(schema, schema === currentSchema || schema.displayPermanent);
+                    this.renderer.toggleSchema(schema, schema === currentSchema || schema.displayPermanent);
                 }
-                this._setSchemaVisible(currentSchema, true);
+                this.renderer.toggleSchema(currentSchema, true);
                 this.active = true;
             }
         },
@@ -171,7 +169,7 @@
             var schemaNames = Object.keys(this.options.schemes);
             for (var s = 0; s < schemaNames.length; ++s) {
                 var schema = this.options.schemes[schemaNames[s]];
-                this._setSchemaVisible(schema, schema === currentSchema && schema.displayOnInactive);
+                this.renderer.toggleSchema(schema, schema === currentSchema && schema.displayOnInactive);
             }
             this._closeCurrentPopup();
             this.active = false;
@@ -181,7 +179,7 @@
             this.toolsetRenderer.setSchema(schema);
             this.contextMenu.setSchema(schema);
             this._toggleSchemaInteractions(schema, true);
-            this._setSchemaVisible(schema, this.active || schema.displayOnInactive);
+            this.renderer.toggleSchema(schema, this.active || schema.displayOnInactive);
         },
         _toggleDrawingTool: function(schema, toolName, state) {
             if (!state && 'modifyFeature' === toolName) {
@@ -198,7 +196,7 @@
         },
         commitGeometry: function(schema, feature) {
             feature.set("oldGeometry", feature.getGeometry().clone());
-            feature.set('dirty', !this._getUniqueItemId(schema, feature));
+            feature.set('dirty', !this._getUniqueItemId(feature));
         },
         revertGeometry: function(feature) {
             feature.setGeometry(feature.get('oldGeometry').clone());
@@ -227,7 +225,7 @@
         _deactivateSchema: function(schema) {
             this._super(schema);
             this._deactivateCommon(schema);
-            this._setSchemaVisible(schema, schema.displayPermanent);
+            this.renderer.toggleSchema(schema, schema.displayPermanent);
         },
         _toggleSchemaInteractions: function(schema, state) {
             if (schema.allowDigitize) {
@@ -270,7 +268,7 @@
             var dialog = this._super(schema, feature);
             // Disable context menu interactions with other features only if the current item is new
             // Exiting the form by switching to a different feature would leave the new, unsaved feature in limbo
-            if (!this._getUniqueItemId(schema, feature)) {
+            if (!this._getUniqueItemId(feature)) {
                 this.contextMenu.setActive(false);
             }
             this._initColorpickers(dialog);
@@ -331,28 +329,31 @@
             return params;
         },
         _afterRemove: function(schema, feature, id) {
-            var olMap = this.mbMap.getModel().olMap;
-            this.getSchemaLayer(schema).getSource().removeFeature(feature);
+            this.renderer.removeFeature(feature);
             this._super(schema, feature, id);
-            // Multi-Digitizer sync support
-            $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
         },
-        _prepareDataItem: function(schema, itemData) {
+
+        _prepareDataItem: function(itemData) {
             var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
             feature.set('data', itemData.properties || {});
             feature.set('schemaName', itemData.schemaName);
-            var id = this._generateNamespacedId(schema, feature);
+            var itemSchema = this.options.schemes[itemData.schemaName];
+            feature.set('uniqueIdProperty', this._getUniqueItemIdProperty(itemSchema));
+            var id = this._generateNamespacedId(itemSchema, feature);
             feature.setId(id);
-            var schemaSource = this.getSchemaLayer(schema).getSource();
+            var schemaSource = this.getSchemaLayer(itemSchema).getSource();
             var existingFeature = schemaSource.getFeatureById(id);
             if (existingFeature && existingFeature.get('dirty')) {
                 // Keep & reuse existing feature that has been modified in the current session
                 return existingFeature;
             } else {
-                this.commitGeometry(schema, feature);
-                this.renderer.initializeFeature(schema, feature);
+                this.commitGeometry(itemSchema, feature);
+                this.renderer.initializeFeature(itemSchema, feature);
                 return feature;
             }
+        },
+        _getUniqueItemId: function(feature) {
+            return (feature.get('data') || {})[feature.get('uniqueIdProperty')] || null;
         },
         getItemSchema: function(feature) {
             return this.options.schemes[feature.get('schemaName')];
@@ -380,7 +381,7 @@
          * @private
          */
         _generateNamespacedId: function(schema, feature) {
-            return [this.element.attr('id'), schema.schemaName, this._getUniqueItemId(schema, feature)].join('-');
+            return [this.element.attr('id'), schema.schemaName, this._getUniqueItemId(feature)].join('-');
         },
         _afterSave: function(schema, feature, originalId, responseData) {
             // unravel dm-incompatible response format
@@ -407,33 +408,27 @@
             }
             this.toolsetRenderer.resume();
             this.resumeContextMenu_();
-            var olMap = this.mbMap.getModel().olMap;
-            $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
         },
         _getData: function(schema) {
-            var layer = this.getSchemaLayer(schema);
+            var self = this;
             return this._super(schema).then(function(features) {
-                var modifiedFeatures = layer.getSource().getFeatures().filter(function(feature) {
+                var modifiedFeatures = self.renderer.filterFeatures(schema, function(feature) {
                     return feature.get('dirty');
                 });
-                layer.getSource().clear();
-                layer.getSource().addFeatures(features);
-                for (var i = 0; i < modifiedFeatures.length; ++i) {
-                    var modifiedFeature = modifiedFeatures[i];
-                    if (!layer.getSource().getFeatureById(modifiedFeature.getId())) {
-                        layer.getSource().addFeatures([modifiedFeature]);   // re-add to layer
-                        features.push(modifiedFeature);                     // re-add to table view
-                    }
-                }
-                return features;
+                self.renderer.replaceFeatures(schema, features);
+                // Re-add unsaved features from current session
+                var unsaved = self.renderer.addFeatures(modifiedFeatures, function(layer, feature) {
+                    return !layer.getSource().getFeatureById(features.getId());
+                });
+                return features.concat(unsaved);
             });
         },
         _cancelForm: function(schema, feature) {
             this._super(schema, feature);
             // NOTE: this also detects cloned features (via new copy functionality) as new
-            var isNew = !this._getUniqueItemId(schema, feature);
+            var isNew = !this._getUniqueItemId(feature);
             if (isNew) {
-                this.getSchemaLayer(schema).getSource().removeFeature(feature);
+                this.renderer.removeFeature(schema, feature);
             }
             this.toolsetRenderer.resume();
             if (schema.allowDigitize) {
@@ -464,7 +459,7 @@
             var featureMap = {};
             for (var i = 0; i < features.length; ++i) {
                 var feature = features[i];
-                var id = this._getUniqueItemId(schema, feature);
+                var id = this._getUniqueItemId(feature);
                 featureMap[id] = feature;
                 postData.features[id] = {
                     properties: this._getItemData(schema, feature),
@@ -499,8 +494,14 @@
                 });
             }
         },
+        getSchemaLayers: function(schema) {
+            return this.renderer.getLayers(schema);
+        },
         getSchemaLayer: function(schema) {
-            return this.renderer.getLayer(schema);
+            if (schema.combine) {
+                throw new Error("Cannot get single layer for combination schema");
+            }
+            return this.getSchemaLayers(schema)[0];
         },
         cloneFeature: function(schema, feature) {
             var newFeature = feature.clone();
@@ -536,9 +537,10 @@
          * @param {ol.Feature|null} feature
          */
         onFeatureClick: function(feature) {
-            var schema = this._getCurrentSchema();
+            var tableSchema = this._getCurrentSchema();
+            var itemSchema = this.getItemSchema(feature);
             if (feature && !this.activeToolName_) {
-                this._openEditDialog(schema, feature);
+                this._openEditDialog(itemSchema, feature);
             } else if (!this.currentPopup && 'modifyFeature' === this.activeToolName_) {
                 // Disable hover highlighting on the feature currently selected for editing. The generated style updates break
                 // usability (can't pull vertices outward).
@@ -550,7 +552,7 @@
                 this.selectControl.getFeatures().clear();
                 var tr = feature && feature.get('table-row');
                 if (tr) {
-                    this.tableRenderer.showRow(schema, tr);
+                    this.tableRenderer.showRow(tableSchema, tr);
                 }
             }
         },
@@ -595,8 +597,8 @@
                 condition: ol.events.condition.singleClick,
                 layers: function(layer) {
                     var schema = self._getCurrentSchema();
-                    var activeLayer = schema && self.getSchemaLayer(schema);
-                    return layer === activeLayer;
+                    var activeLayers = schema && self.getSchemaLayers(schema) || [];
+                    return -1 !== activeLayers.indexOf(layer);
                 },
                 style: null
             });
@@ -616,8 +618,8 @@
                 condition: ol.events.condition.pointerMove,
                 layers: function(layer) {
                     var schema = self._getCurrentSchema();
-                    var activeLayer = schema && self.getSchemaLayer(schema);
-                    return layer === activeLayer;
+                    var activeLayers = schema && self.getSchemaLayers(schema) || [];
+                    return -1 !== activeLayers.indexOf(layer);
                 },
                 filter: function(feature) {
                     return -1 === self.excludedFromHighlighting_.indexOf(feature);

@@ -59,7 +59,7 @@
             } else {
                 this.contextmenu.disable();
             }
-            this.filterLayers_ = [this.widget.getSchemaLayer(schema)];
+            this.filterLayers_ = [this.widget.getSchemaLayers(schema)];
         },
         reconfigure: function(feature) {
             var items = [];
@@ -79,8 +79,7 @@
                     widget._openEditDialog(schema, feature);
                 }
             });
-            var featureHasId = !!widget._getUniqueItemId(schema, feature);
-            if (featureHasId && schema && schema.allowDelete) {
+            if (this.widget._getUniqueItemId(feature) && schema && schema.allowDelete) {
                 items.push({
                     text: Mapbender.trans('mb.digitizer.feature.remove.title'),
                     callback: function () {

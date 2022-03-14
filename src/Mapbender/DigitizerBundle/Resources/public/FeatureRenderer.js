@@ -82,18 +82,104 @@
         }
     });
 
-    Mapbender.Digitizer.FeatureRenderer.prototype.getLayer = function(schema) {
-        if (!this.schemaLayers_[schema.schemaName]) {
-            var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
-            this.schemaStyles_[schema.schemaName] = this.initializeStyles_(styleConfigs || {});
-            var layer = this.createSchemaFeatureLayer_(schema);
-            layer.setStyle(this.createLayerStyleFunction_(styleConfigs['default']));
-            delete this.schemaStyles_[schema.schemaName]['default'];
-            this.olMap.addLayer(layer);
-            this.schemaLayers_[schema.schemaName] = layer;
+    Mapbender.Digitizer.FeatureRenderer.prototype.toggleSchema = function(schema, state) {
+        // @todo ml: respect displayPermanent / displayOnInActive on a sub-schema basis
+        var subSchemas = !schema && [] || this.owner.expandCombination(schema);
+        for (var s = 0; s < subSchemas.length; ++s) {
+            var layer = this.schemaLayers_[subSchemas[s].schemaName];
+            if (layer) {
+                layer.setVisible(!!state);
+            }
         }
+    };
 
-        return this.schemaLayers_[schema.schemaName];
+    Mapbender.Digitizer.FeatureRenderer.prototype.getLayers = function(schema) {
+        var subSchemas = this.owner.expandCombination(schema);
+        var layers = [];
+        for (var s = 0; s < subSchemas.length; ++s) {
+            var subSchema = subSchemas[s];
+            if (!this.schemaLayers_[subSchema.schemaName]) {
+                this.schemaLayers_[subSchema.schemaName] = this.initItemSchemaLayer_(subSchema);
+            }
+            layers.push(this.schemaLayers_[subSchema.schemaName]);
+        }
+        return layers;
+    };
+
+    Mapbender.Digitizer.FeatureRenderer.prototype.initItemSchemaLayer_ = function(schema) {
+        var layer = this.createSchemaFeatureLayer_(schema);
+        var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
+        this.schemaStyles_[schema.schemaName] = this.initializeStyles_(styleConfigs || {});
+        layer.setStyle(this.createLayerStyleFunction_(styleConfigs['default']));
+        delete this.schemaStyles_[schema.schemaName]['default'];
+        this.olMap.addLayer(layer);
+        return layer;
+    };
+
+    Mapbender.Digitizer.FeatureRenderer.prototype.forAllFeatures = function(callback) {
+        var layers = Object.values(this.schemaLayers_);
+        for (var i = 0; i < layers.length; ++i) {
+            layers[i].getSource().forEachFeature(callback);
+        }
+    };
+    Mapbender.Digitizer.FeatureRenderer.prototype.forAllSchemaFeatures = function(schema, callback) {
+        var self = this;
+        var layers = this.owner.expandCombination(schema).map(function(itemSchema) {
+            return self.schemaLayers_[itemSchema.schemaName];
+        });
+        for (var i = 0; i < layers.length; ++i) {
+            if (layers[i]) {
+                layers[i].getSource().forEachFeature(callback);
+            }
+        }
+    };
+    Mapbender.Digitizer.FeatureRenderer.prototype.filterFeatures = function(schema, callback) {
+        var self = this;
+        var features = [];
+        var sources = this.owner.expandCombination(schema).map(function(itemSchema) {
+            return self.schemaLayers_[itemSchema.schemaName].getSource();
+        });
+        for (var s = 0; s < sources.length; ++s) {
+            features = features.concat(sources[s].getFeatures().filter(callback));
+        }
+        return features;
+    };
+
+    Mapbender.Digitizer.FeatureRenderer.prototype.replaceFeatures = function(schema, features) {
+        var self = this;
+        this.owner.expandCombination(schema).forEach(function(itemSchema) {
+            self.schemaLayers_[itemSchema.schemaName].getSource().clear();
+        });
+        this.addFeatures(features);
+    };
+
+    Mapbender.Digitizer.FeatureRenderer.prototype.addFeatures = function(features, condition) {
+        var self = this;
+        var layerBuckets = {};
+        var filtered = features.filter(function(feature) {
+            var itemSchema = self.owner.getItemSchema(feature);
+            var schemaLayer = self.schemaLayers_[itemSchema.schemaName];
+            if (!condition || condition(schemaLayer, feature)) {
+                if (!layerBuckets[itemSchema.schemaName]) {
+                    layerBuckets[itemSchema.schemaName] = [self.schemaLayers_[itemSchema.schemaName], []];
+                }
+                layerBuckets[itemSchema.schemaName][1].push(feature);
+                return true;
+            } else {
+                return false;
+            }
+        });
+        Object.keys(layerBuckets).forEach(function(bucketName) {
+            layerBuckets[bucketName][0].getSource().addFeatures(layerBuckets[bucketName][1]);
+        });
+        return filtered;
+    };
+
+    Mapbender.Digitizer.FeatureRenderer.prototype.removeFeature = function(itemSchema, feature) {
+        var layer = this.schemaLayers_[itemSchema.schemaName];
+        if (layer) {
+            layer.getSource().removeFeature(feature);
+        }
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.initializeStyles_ = function (styleConfigs) {

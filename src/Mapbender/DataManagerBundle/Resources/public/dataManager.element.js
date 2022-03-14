@@ -312,7 +312,7 @@
             var params = {
                 schema: schema.schemaName
             };
-            var id = this._getUniqueItemId(schema, dataItem);
+            var id = this._getUniqueItemId(dataItem);
             if (id) {
                 params.id = id;
             }
@@ -349,7 +349,7 @@
             /** @var {DataManagagerSaveEventData} eventData */
             var eventData = {
                 item: dataItem,
-                itemId: this._getUniqueItemId(schema, dataItem),
+                itemId: this._getUniqueItemId(dataItem),
                 originalId: originalId,
                 uniqueIdKey: this._getUniqueItemIdProperty(schema),
                 schema: schema,
@@ -530,7 +530,7 @@
                     }
                 });
             }
-            if (schema.allowDelete && this._getUniqueItemId(schema, dataItem)) {
+            if (schema.allowDelete && this._getUniqueItemId(dataItem)) {
                 buttons.push({
                     text: Mapbender.trans('mb.actions.delete'),
                     'class': 'critical',
@@ -583,7 +583,7 @@
             return this.getJSON('select', this._getSelectRequestParams(schema))
                 .then(function(dataItems) {
                     var preparedItems = dataItems.map(function(itemData) {
-                        return widget._prepareDataItem(schema, itemData);
+                        return widget._prepareDataItem(itemData);
                     });
                     widget.tableRenderer.replaceRows(schema, preparedItems);
                     return preparedItems;
@@ -592,12 +592,11 @@
         },
         /**
          * Transforms data item server response data to internally used item structure.
-         * @param {DataManagerSchemaConfig} schema
          * @param {Object} data
          * @return {*}
          * @private
          */
-        _prepareDataItem: function(schema, data) {
+        _prepareDataItem: function(data) {
             // Trivial in data-manager. Use plain object directly.
             return data;
         },
@@ -609,7 +608,7 @@
          */
         removeData: function(schema, dataItem) {
             var widget = this;
-            var id = this._getUniqueItemId(schema, dataItem);
+            var id = this._getUniqueItemId(dataItem);
             if (!id) {
                 throw new Error("Can't delete item without id from server");
             }
@@ -683,10 +682,8 @@
          * @return {(String|null)}
          * @private
          */
-        _getUniqueItemId: function(schema, item) {
-            var itemData = this._getItemData(schema, item);
-            var idProperty = this._getUniqueItemIdProperty(schema);
-            return itemData[idProperty] || null;
+        _getUniqueItemId: function(item) {
+            return item.id || null;
         },
         /**
          * @param {String} uri

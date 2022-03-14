@@ -245,9 +245,10 @@
             });
         },
         getDefaultColumnConfigs: function(schema) {
+            var self = this;
             return [{
                 data: function(row) {
-                    return row.id;
+                    return self.owner._getUniqueItemId(row);
                 },
                 title: 'Nr.',
                 width: '1%'

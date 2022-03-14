@@ -191,28 +191,29 @@
         registerEvents: function() {
             var widget = this.owner;
             widget.element.on('click', '.-fn-hide-all', function() {
-                var source = widget.getSchemaLayer(widget._getCurrentSchema()).getSource();
-                source.getFeatures().forEach(function (feature) {
+                widget.renderer.forAllSchemaFeatures(widget._getCurrentSchema(), function (feature) {
                     feature.set('hidden', true);
                 });
             });
             widget.element.on('click', '.-fn-show-all', function() {
-                var source = widget.getSchemaLayer(widget._getCurrentSchema()).getSource();
-                source.getFeatures().forEach(function (feature) {
+                widget.renderer.forAllSchemaFeatures(widget._getCurrentSchema(), function (feature) {
                     feature.set('hidden', false);
                 });
             });
             widget.element.on('click', '.-fn-save-all', function() {
-                var schema = widget._getCurrentSchema();
-                var source = widget.getSchemaLayer(schema).getSource();
-                var features = source.getFeatures().filter(function (feature) {
-                    return feature.get('dirty');
+                var features = [];
+                widget.renderer.forAllSchemaFeatures(widget._getCurrentSchema(), function(feature) {
+                    if (feature.get('dirty')) {
+                        features.push(feature);
+                    }
                 });
                 widget.updateMultiple(schema, features);
             });
         },
         setSchema: function(schema) {
             var schemaName = schema.schemaName;
+            return;
+            // @todo ml: fix save all tracking
             if (!this.listenedSchemas_[schemaName]) {
                 var widget = this.owner;
                 this.unsavedFeatures_[schemaName] = []
@@ -225,7 +226,7 @@
                 var trackModified = function(feature, dirtyState) {
                     var index = unsavedFeatureList.indexOf(feature);
                     // Ignore newly created features (empty id) in tracking
-                    if (dirtyState && -1 === index && widget._getUniqueItemId(schema, feature)) {
+                    if (dirtyState && -1 === index && widget._getUniqueItemId(feature)) {
                         unsavedFeatureList.push(feature);
                         updateSaveAll();
                     }
