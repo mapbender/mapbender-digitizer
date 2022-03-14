@@ -26,12 +26,12 @@
         },
         initializeFeature: function(schema, feature) {
             feature.set("mbOrigin", "digitizer");
-            this.registerFeatureEvents(schema, feature);
+            this.registerFeatureEvents(feature);
             if (schema.allowCustomStyle) {
-                this.customStyleFeature_(schema, feature);
+                this.customStyleFeature_(feature);
             }
         },
-        registerFeatureEvents: function(schema, feature) {
+        registerFeatureEvents: function(feature) {
             // Avoid registering same event handlers on the same feature multiple times
             if (feature.get('renderer-events')) {
                 return;
@@ -40,7 +40,7 @@
             var watchedProperties = ['hover', 'dirty', 'editing', 'hidden'];
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
                 if (-1 !== watchedProperties.indexOf(event.key)) {
-                    renderer.updateFeatureStyle(schema, feature);
+                    renderer.updateFeatureStyle(feature);
                 }
             });
             feature.set('renderer-events', true);
@@ -67,15 +67,18 @@
                 return feature.get('data') || {};
             });
         },
-        updateFeatureStyle: function(schema, feature) {
+        updateFeatureStyle: function(feature) {
+            var itemSchema;
             if (feature.get('editing')) {
                 feature.setStyle(this.globalStyles_['editing']);
             } else if (feature.get("hidden")) {
                 feature.setStyle(this.globalStyles_['invisible']);
             } else if (feature.get('hover')) {
-                feature.setStyle(this.schemaStyles_[schema.schemaName]['select']);
+                itemSchema = this.owner.getItemSchema(feature);
+                feature.setStyle(this.schemaStyles_[itemSchema.schemaName]['select']);
             } else if (feature.get('dirty')) {
-                feature.setStyle(this.schemaStyles_[schema.schemaName]['unsaved']);
+                itemSchema = this.owner.getItemSchema(feature);
+                feature.setStyle(this.schemaStyles_[itemSchema.schemaName]['unsaved']);
             } else {
                 feature.setStyle(null);
             }
@@ -209,8 +212,9 @@
         return layer;
     };
 
-    Mapbender.Digitizer.FeatureRenderer.prototype.customStyleFeature_ = function (schema, feature) {
-        var styleField = schema.featureType.styleField;
+    Mapbender.Digitizer.FeatureRenderer.prototype.customStyleFeature_ = function (feature) {
+        var itemSchema = this.owner.getItemSchema(feature);
+        var styleField = itemSchema.featureType.styleField;
         var itemData = feature.get("data");
         var jsonStyle = styleField && itemData && itemData[styleField];
 

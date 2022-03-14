@@ -78,9 +78,9 @@
             feature.set('table-row', tr);
             // Inline save buttons start out disabled
             $('.-fn-save', tr).prop('disabled', !feature.get('dirty'));
-            this.registerFeatureEvents(tableSchema, feature);
+            this.registerFeatureEvents(feature);
         },
-        registerFeatureEvents: function(tableSchema, feature) {
+        registerFeatureEvents: function(feature) {
             // Avoid registering same event handlers on the same feature multiple times
             if (feature.get('table-events')) {
                 return;
@@ -95,7 +95,7 @@
                 if (tr) {
                     // page to modified feature
                     if (event.key === 'dirty' && feature.get('dirty')) {
-                        self.showRow(tableSchema, tr);
+                        self.showRow(tr);
                     }
                     self.updateButtonStates_(tr, feature);
                 }
@@ -115,11 +115,10 @@
             feature.set('table-events', true);
         },
         /**
-         * @param {DataManagerSchemaConfig} schema
          * @param {Object} feature
          * @param {Boolean} show to automatically update pagination
          */
-        refreshRow: function(schema, feature, show) {
+        refreshRow: function(feature, show) {
             Mapbender.DataManager.TableRenderer.prototype.refreshRow.apply(this, arguments);
 
             var tr = feature && feature.get('table-row');

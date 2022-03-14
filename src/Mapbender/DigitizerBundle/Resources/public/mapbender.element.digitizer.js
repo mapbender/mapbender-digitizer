@@ -88,7 +88,7 @@
                     var layer = self.getSchemaLayer(schema);
                     var resolution = olMap.getView().getResolution();
                     if (resolution > layer.getMaxResolution() || resolution < layer.getMinResolution()) {
-                        self.tableRenderer.replaceRows(schema, []);
+                        self.tableRenderer.replaceRows([]);
                     }
                 }
             });
@@ -263,7 +263,7 @@
             // NOTE: newly created features are not in the table and cannot be paged to
             var tr = feature.get('table-row');
             if (tr) {
-                this.tableRenderer.showRow(schema, tr);
+                this.tableRenderer.showRow(tr);
             }
             var dialog = this._super(schema, feature);
             // Disable context menu interactions with other features only if the current item is new
@@ -368,8 +368,10 @@
             ]);
             return codes.filter(function(x) { return !!x; });
         },
-        initializeNewFeature: function(schema, feature) {
-            this.renderer.initializeFeature(schema, feature);
+        initializeNewFeature: function(itemSchema, feature) {
+            feature.set('schemaName', itemSchema.schemaName);
+            feature.set('uniqueIdProperty', this._getUniqueItemIdProperty(itemSchema));
+            this.renderer.initializeFeature(itemSchema, feature);
             feature.set('dirty', true);
         },
         /**
@@ -480,7 +482,7 @@
                         feature.setGeometry(geometry);
                         widget._replaceItemData(schema, feature, savedItem.properties || {});
                         feature.set('dirty', false);
-                        widget.tableRenderer.refreshRow(schema, feature, false);
+                        widget.tableRenderer.refreshRow(feature, false);
                     }
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
                 })
@@ -537,7 +539,6 @@
          * @param {ol.Feature|null} feature
          */
         onFeatureClick: function(feature) {
-            var tableSchema = this._getCurrentSchema();
             var itemSchema = this.getItemSchema(feature);
             if (feature && !this.activeToolName_) {
                 this._openEditDialog(itemSchema, feature);
@@ -552,7 +553,7 @@
                 this.selectControl.getFeatures().clear();
                 var tr = feature && feature.get('table-row');
                 if (tr) {
-                    this.tableRenderer.showRow(tableSchema, tr);
+                    this.tableRenderer.showRow(tr);
                 }
             }
         },
@@ -577,7 +578,7 @@
                 formData[schema.featureType.styleField] = styleFieldData;
                 self._saveItem(schema, feature, formData).then(function() {
                     feature.set('customStyleConfig', styleFieldData);
-                    self.renderer.customStyleFeature_(schema, feature);
+                    self.renderer.customStyleFeature_(feature);
                 });
             });
         },

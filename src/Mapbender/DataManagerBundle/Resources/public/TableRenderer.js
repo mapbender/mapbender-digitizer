@@ -38,7 +38,7 @@
         render: function(schema) {
             var settings = this.getOptions(schema);
             // var $tableWrap = $("<div/>").resultTable(settings);
-            var $table = $('<table class="table table-striped">');
+            var $table = $('<table class="table table-striped -js-items">');
             $table.DataTable(settings);
             var $tableWrap = $('<div class="mapbender-element-result-table">');
             $tableWrap.append($table.closest('.dataTables_wrapper'));
@@ -46,25 +46,23 @@
             return $tableWrap;
         },
         /**
-         * @param {DataManagerSchemaConfig} schema
          * @param {Array<Object>} data
          */
-        replaceRows: function(schema, data) {
-            var dt = this.getDatatablesInstance_(schema);
+        replaceRows: function(data) {
+            var dt = this.getDatatablesInstance_();
             dt.clear();
             dt.rows.add(data);
             dt.draw();
         },
         /**
-         * @param {DataManagerSchemaConfig} schema
          * @param {Object} item
          * @param {Boolean} show to automatically update pagination
          */
-        addRow: function(schema, item, show) {
-            var dt = this.getDatatablesInstance_(schema);
+        addRow: function(item, show) {
+            var dt = this.getDatatablesInstance_();
             var tr = dt.row.add(item).node();
             if (show) {
-                this.showRow(schema, tr);
+                this.showRow(tr);
             }
         },
         /**
@@ -72,11 +70,10 @@
          * Will maintain current pagination if there are still items on the current page.
          * NOTE: If the current page becomes empty, dataTables will automatically switch to the previous page.
          *
-         * @param {DataManagerSchemaConfig} schema
          * @param {Object} item
          */
-        removeRow: function(schema, item) {
-            var dt = this.getDatatablesInstance_(schema);
+        removeRow: function(item) {
+            var dt = this.getDatatablesInstance_();
             var dtRow = dt.row(function(_, data) {
                 return data === item;
             });
@@ -84,28 +81,26 @@
             dt.draw(false);
         },
         /**
-         * @param {DataManagerSchemaConfig} schema
          * @param {Object} item
          * @param {Boolean} show to automatically update pagination
          */
-        refreshRow: function(schema, item, show) {
-            var dt = this.getDatatablesInstance_(schema);
+        refreshRow: function(item, show) {
+            var dt = this.getDatatablesInstance_();
             var dtRow = dt.row(function(_, data) {
                 return data === item;
             });
             dtRow.data(item);
             if (show) {
-                this.showRow(schema, dtRow.node());
+                this.showRow(dtRow.node());
             }
         },
         /**
          * Switch pagination so the given tr element is on the current page
          *
-         * @param {DataManagerSchemaConfig} schema
          * @param {Element} tr
          */
-        showRow: function(schema, tr) {
-            var dt = this.getDatatablesInstance_(schema);
+        showRow: function(tr) {
+            var dt = this.getDatatablesInstance_();
             // NOTE: current dataTables versions could just do dt.row(tr).show().draw(false)
             var rowIndex = dt.rows({order: 'current'}).nodes().indexOf(tr);
             var pageLength = dt.page.len();
@@ -114,30 +109,13 @@
             dt.draw(false);
         },
         /**
-         * Get table DOM Element for schema. Must be in current document.
-         *
-         * @param {DataManagerSchemaConfig} schema
-         * @return {Element|null}
-         */
-        findElement: function(schema) {
-            // NOTE: Class mapbender-element-result-table added implicitly by vis-ui resultTable
-            //       data-schema-name added by us (see render)
-            var $tableWrap = $('.mapbender-element-result-table[data-schema-name="' + schema.schemaName + '"]', this.scope);
-            return $tableWrap.get(0) || null;
-        },
-        /**
-         * Get native dataTables instance for schema. Must be in current document.
-         * @param {DataManagerSchemaConfig} schema
+         * Get dataTables api instance
          * @return {Element|null}
          * @private
          */
-        getDatatablesInstance_: function(schema) {
-            var element = this.findElement(schema);
-            if (!element) {
-                throw new Error("Cannot access dataTables instance for schema " + schema.schemaName + ". Table not in DOM?")
-            }
+        getDatatablesInstance_: function() {
             // This works with or without vis-ui resultTable
-            return $('table:first', element).dataTable().api();
+            return $('table.-js-items:first', this.scope).dataTable().api();
         },
         /**
          * Returns options used to initialize resultTable widget.
