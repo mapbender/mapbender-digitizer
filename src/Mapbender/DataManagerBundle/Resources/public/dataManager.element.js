@@ -333,7 +333,7 @@
          */
         _getSaveRequestData: function(schema, dataItem, newValues) {
             return {
-                dataItem: Object.assign({}, this._getItemData(schema, dataItem), newValues || {})
+                dataItem: Object.assign({}, this._getItemData(dataItem), newValues || {})
             };
         },
         /**
@@ -423,7 +423,7 @@
          * Gets persistent data properties of the item
          * @return {Object}
          */
-        _getItemData: function(schema, dataItem) {
+        _getItemData: function(dataItem) {
             return dataItem.properties;
         },
         /**
@@ -447,7 +447,7 @@
         _openEditDialog: function(schema, dataItem) {
             var widget = this;
             this._closeCurrentPopup();
-            var itemValues = this._getItemData(schema, dataItem);
+            var itemValues = this._getItemData(dataItem);
 
             var dialog = $("<div/>");
             dialog.append(this.formRenderer_.renderElements(schema.formItems));

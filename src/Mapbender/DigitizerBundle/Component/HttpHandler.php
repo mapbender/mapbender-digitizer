@@ -54,20 +54,25 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
      * @return array
      * @todo 1.5: make protected
      */
-    public function getUpdateMultipleActionResponseData(Element $element, Request $request)
+    protected function getUpdateMultipleActionResponseData(Element $element, Request $request)
     {
         $dataOut = array(
             'saved' => array(),
         );
-        $schemaName = $request->query->get('schema');
-        $repository = $this->schemaFilter->getDataStore($element, $schemaName);
+        /** @var FeatureType[] $schemaRepositories */
+        $schemaRepositories = array();
         // NOTE: Client always sends geometry as a separate "geometry" attribute, while
         //       Feature creation expects an attribute matching the (configured) geometry
         //       column name. Adapt incoming data.
         $requestData = json_decode($request->getContent(), true);
         $srid = $requestData['srid'];
-        foreach ($requestData['features'] as $id => $featureData) {
-            $feature = $repository->getById($id);
+        foreach ($requestData['features'] as $featureData) {
+            $schemaName = $featureData['schemaName'];
+            if (empty($schemaRepositories[$schemaName])) {
+                $schemaRepositories[$schemaName] = $this->schemaFilter->getDataStore($element, $schemaName);
+            }
+            $repository = $schemaRepositories[$schemaName];
+            $feature = $repository->getById($featureData['idInSchema']);
             if (!$feature) {
                 // uh-oh!
                 continue;
@@ -80,7 +85,9 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
                 $feature->setAttributes($featureData['properties']);
             }
             $updatedFeature = $repository->save($feature);
-            $dataOut['saved'][] = $this->formatResponseFeature($repository, $updatedFeature);
+            $dataOut['saved'][] = $this->formatResponseFeature($repository, $updatedFeature) + array(
+                'uniqueId' => $featureData['uniqueId'],
+            );
         }
         return $dataOut;
     }

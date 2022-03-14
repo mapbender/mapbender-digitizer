@@ -26,24 +26,9 @@
         },
         initializeFeature: function(schema, feature) {
             feature.set("mbOrigin", "digitizer");
-            this.registerFeatureEvents(feature);
             if (schema.allowCustomStyle) {
                 this.customStyleFeature_(feature);
             }
-        },
-        registerFeatureEvents: function(feature) {
-            // Avoid registering same event handlers on the same feature multiple times
-            if (feature.get('renderer-events')) {
-                return;
-            }
-            var renderer = this;
-            var watchedProperties = ['hover', 'dirty', 'editing', 'hidden'];
-            feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
-                if (-1 !== watchedProperties.indexOf(event.key)) {
-                    renderer.updateFeatureStyle(feature);
-                }
-            });
-            feature.set('renderer-events', true);
         },
         createLayerStyleFunction_: function(styleConfig) {
             var self = this;
@@ -68,19 +53,24 @@
             });
         },
         updateFeatureStyle: function(feature) {
-            var itemSchema;
+            var itemSchema, style;
             if (feature.get('editing')) {
-                feature.setStyle(this.globalStyles_['editing']);
+                style = this.globalStyles_['editing'];
             } else if (feature.get("hidden")) {
-                feature.setStyle(this.globalStyles_['invisible']);
+                style = this.globalStyles_['invisible'];
             } else if (feature.get('hover')) {
                 itemSchema = this.owner.getItemSchema(feature);
-                feature.setStyle(this.schemaStyles_[itemSchema.schemaName]['select']);
+                style = this.schemaStyles_[itemSchema.schemaName]['select'];
             } else if (feature.get('dirty')) {
                 itemSchema = this.owner.getItemSchema(feature);
-                feature.setStyle(this.schemaStyles_[itemSchema.schemaName]['unsaved']);
+                style = this.schemaStyles_[itemSchema.schemaName]['unsaved'];
             } else {
-                feature.setStyle(null);
+                style = null;
+            }
+            // Avoid triggering recursive change events if same style already
+            // set.
+            if (style !== feature.getStyle()) {
+                feature.setStyle(style);
             }
         }
     });
@@ -116,6 +106,18 @@
         layer.setStyle(this.createLayerStyleFunction_(styleConfigs['default']));
         delete this.schemaStyles_[schema.schemaName]['default'];
         this.olMap.addLayer(layer);
+        this.registerLayerEvents(layer);
+        return layer;
+    };
+
+    Mapbender.Digitizer.FeatureRenderer.prototype.registerLayerEvents = function(layer) {
+        var self = this;
+        layer.getSource().on('change', function() {
+            self.owner.updateSaveAll();
+        });
+        layer.getSource().on('changefeature', function(evt) {
+            self.updateFeatureStyle(evt.feature);
+        });
         return layer;
     };
 

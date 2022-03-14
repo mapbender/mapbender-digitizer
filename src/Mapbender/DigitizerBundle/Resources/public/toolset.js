@@ -67,7 +67,6 @@
     Mapbender.Digitizer.Toolset = function(owner) {
         this.owner = owner;
         this.listenedSchemas_ = {};
-        this.unsavedFeatures_ = {};
     };
 
     Mapbender.Digitizer.Toolset.prototype = {
@@ -189,76 +188,16 @@
             return buttons;
         },
         registerEvents: function() {
+            var self = this;
             var widget = this.owner;
-            widget.element.on('click', '.-fn-hide-all', function() {
+            widget.element.on('click', '.-fn-visibility-all', function() {
+                var state = !!$(this).attr('data-visibility');
                 widget.renderer.forAllSchemaFeatures(widget._getCurrentSchema(), function (feature) {
-                    feature.set('hidden', true);
-                });
-            });
-            widget.element.on('click', '.-fn-show-all', function() {
-                widget.renderer.forAllSchemaFeatures(widget._getCurrentSchema(), function (feature) {
-                    feature.set('hidden', false);
-                });
-            });
-            widget.element.on('click', '.-fn-save-all', function() {
-                var features = [];
-                widget.renderer.forAllSchemaFeatures(widget._getCurrentSchema(), function(feature) {
-                    if (feature.get('dirty')) {
-                        features.push(feature);
+                    if (widget.getItemSchema(feature).allowChangeVisibility) {
+                        feature.set('hidden', !state);
                     }
                 });
-                widget.updateMultiple(schema, features);
             });
-        },
-        setSchema: function(schema) {
-            var schemaName = schema.schemaName;
-            return;
-            // @todo ml: fix save all tracking
-            if (!this.listenedSchemas_[schemaName]) {
-                var widget = this.owner;
-                this.unsavedFeatures_[schemaName] = []
-
-                var source = this.owner.getSchemaLayer(schema).getSource();
-                var unsavedFeatureList = this.unsavedFeatures_[schemaName];
-                var updateSaveAll = function() {
-                    $('.-fn-save-all', widget.element).prop('disabled', !unsavedFeatureList.length);
-                }
-                var trackModified = function(feature, dirtyState) {
-                    var index = unsavedFeatureList.indexOf(feature);
-                    // Ignore newly created features (empty id) in tracking
-                    if (dirtyState && -1 === index && widget._getUniqueItemId(feature)) {
-                        unsavedFeatureList.push(feature);
-                        updateSaveAll();
-                    }
-                    if (!dirtyState && -1 !== index) {
-                        unsavedFeatureList.splice(index, 1);
-                        updateSaveAll();
-                    }
-                };
-                var addFeature = function(feature) {
-                    feature.on(ol.ObjectEventType.PROPERTYCHANGE, function (event) {
-                        if (event.key === 'dirty') {
-                            trackModified(feature, feature.get('dirty'));
-                        }
-                    });
-                    trackModified(feature, feature.get('dirty'));
-                };
-                source.getFeatures().forEach(function(feature) {
-                    addFeature(feature);
-                });
-                source.on(ol.source.VectorEventType.ADDFEATURE, function(event) {
-                    addFeature(event.feature);
-                });
-                source.on(ol.source.VectorEventType.REMOVEFEATURE, function(event) {
-                    // feature going away, remove from tracking
-                    trackModified(event.feature, false);
-                });
-                // Avoid binding events again for the same schema
-                this.listenedSchemas_[schemaName] = true;
-            } else {
-                // empty unsaved list (in-place)
-                this.unsavedFeatures_[schemaName].splice(0, -1);
-            }
         },
         /**
          * Renders buttons that do NOT represent geometry interactions
@@ -269,20 +208,33 @@
         renderUtilityButtons: function(schema) {
             var buttons = [];
             var $button;
+            var visChange = false, saveAll = false;
+            var subSchemas = this.owner.expandCombination(schema);
+            for (var s = 0; s < subSchemas.length; ++s) {
+                visChange = visChange || subSchemas[s].allowChangeVisibility;
+                saveAll = saveAll || subSchemas[s].allowDigitize;
 
-            if (schema.allowChangeVisibility) {
-                $button = $('<button type="button" class="btn -fn-hide-all btn-default" />');
+                if (visChange && saveAll) {
+                    break;
+                }
+            }
+
+            if (visChange) {
+                $button = $('<button type="button" class="btn -fn-visibility-all btn-default" />');
                 $button.append('<i class="fa far fa-eye-slash">');
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.hideAll'));
                 buttons.push($button);
 
-                $button = $('<button type="button" class="btn -fn-show-all btn-default" />');
+                $button = $('<button type="button" class="btn -fn-visibility-all btn-default" />');
                 $button.append('<i class="fa far fa-eye">');
-                $button.attr("title", Mapbender.trans('mb.digitizer.toolset.showAll'));
+                $button.attr({
+                    'data-visibility': "1",
+                    title: Mapbender.trans('mb.digitizer.toolset.showAll')
+                });
                 buttons.push($button);
             }
             // If geometry modification is allowed, we must offer a way to save
-            if (schema.allowDigitize) {
+            if (saveAll) {
                 $button = $('<button type="button" class="btn -fn-save-all btn-success" />');
                 $button.append('<i class="fa fas fa-save">');
                 $button.attr("title", Mapbender.trans('mb.digitizer.toolset.saveAll'));

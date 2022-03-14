@@ -145,6 +145,9 @@
                 $button.toggleClass('active', newState);
                 self._toggleDrawingTool(schema, toolName, newState);
             });
+            this.element.on('click', '.-fn-save-all', function() {
+                self.updateMultiple(self.getSaveAllCandidates_());
+            });
         },
         activate: function() {
             if (!this.active) {
@@ -176,7 +179,6 @@
         },
         _activateSchema: function(schema) {
             this._super(schema);
-            this.toolsetRenderer.setSchema(schema);
             this.contextMenu.setSchema(schema);
             this._toggleSchemaInteractions(schema, true);
             this.renderer.toggleSchema(schema, this.active || schema.displayOnInactive);
@@ -302,7 +304,7 @@
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.print'),
                     click: function() {
-                        var data = self._getItemData(schema, feature);
+                        var data = self._getItemData(feature);
                         var templates = (schema.featureType.print || {}).templates || null;
                         printClient.printDigitizerFeature(data, schema, templates);
                     }
@@ -311,7 +313,7 @@
             buttons.push.apply(buttons, this._super(schema, feature));
             return buttons;
         },
-        _getItemData: function(schema, feature) {
+        _getItemData: function(feature) {
             // NOTE: 'data' property may not exist if feature has just been newly created by an editing tool
             if (!feature.get('data')) {
                 feature.set('data', {});
@@ -444,49 +446,50 @@
         },
         _getSaveRequestData: function(schema, dataItem, newValues) {
             return {
-                properties: Object.assign({}, this._getItemData(schema, dataItem), newValues || {}),
+                properties: Object.assign({}, this._getItemData(dataItem), newValues || {}),
                 geometry: this.wktFormat_.writeGeometryText(dataItem.getGeometry()),
                 srid: this.getCurrentSrid()
             };
         },
-        updateMultiple: function(schema, features) {
-            var params = {
-                schema: schema.schemaName
-            };
+        updateMultiple: function(features) {
             var postData = {
                 srid: this.getCurrentSrid(),
                 // generate mapping of id => properties and geometry
-                features: {}
+                features: []
             };
             var featureMap = {};
             for (var i = 0; i < features.length; ++i) {
                 var feature = features[i];
-                var id = this._getUniqueItemId(feature);
-                featureMap[id] = feature;
-                postData.features[id] = {
-                    properties: this._getItemData(schema, feature),
+                var itemSchema = this.getItemSchema(feature);
+                var mapId = this._generateNamespacedId(itemSchema, feature);
+                featureMap[mapId] = feature;
+                postData.features.push({
+                    schemaName: itemSchema.schemaName,
+                    idInSchema: this._getUniqueItemId(feature),
+                    uniqueId: mapId,
+                    properties: this._getItemData(feature),
                     geometry: this.wktFormat_.writeGeometryText(feature.getGeometry())
-                };
+                });
             }
             var widget = this;
-            var idProperty = this._getUniqueItemIdProperty(schema);
-            var promise = this.postJSON('update-multiple?' + $.param(params), postData)
+            var promise = this.postJSON('update-multiple', postData)
                 .then(function(response) {
                     var savedItems = response.saved;
                     for (var i = 0; i < savedItems.length; ++i) {
                         var savedItem = savedItems[i];
-                        var id = savedItem.properties[idProperty];
-                        var feature = featureMap[id];
+                        var itemSchema = widget.options.schemes[savedItem.schemaName];
+                        var feature = featureMap[savedItem.uniqueId];
 
                         var geometry = widget.wktFormat_.readGeometryFromText(savedItem.geometry);
                         feature.setGeometry(geometry);
-                        widget._replaceItemData(schema, feature, savedItem.properties || {});
+                        widget._replaceItemData(itemSchema, feature, savedItem.properties || {});
                         feature.set('dirty', false);
                         widget.tableRenderer.refreshRow(feature, false);
                     }
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
                 })
             ;
+            // @todo ml: find a reasonable continueDrawingAfterSave policy for combination schema
             if (!schema.continueDrawingAfterSave) {
                 promise.always(function() {
                     if (widget.activeToolName_) {
@@ -495,6 +498,19 @@
                     $('.-fn-toggle-tool', widget.element).removeClass('active');
                 });
             }
+        },
+        updateSaveAll: function() {
+            var $saveAllButton = $('.-fn-save-all', this.element);
+            var candidates = $saveAllButton.length && this.getSaveAllCandidates_() || [];
+            $saveAllButton.prop('disabled', !candidates.length);
+        },
+        getSaveAllCandidates_: function() {
+            var self = this;
+            return this.renderer.filterFeatures(this._getCurrentSchema(), function(feature) {
+                return self._getUniqueItemId(feature)
+                    && feature.get('dirty')
+                    && self.getItemSchema(feature).allowDigitize;
+            });
         },
         getSchemaLayers: function(schema) {
             return this.renderer.getLayers(schema);

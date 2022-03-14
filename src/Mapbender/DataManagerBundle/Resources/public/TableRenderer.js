@@ -210,7 +210,7 @@
             var self = this;
             function getDefaultDataFn(schema, fieldName) {
                 return function(item) {
-                    return self.owner._getItemData(schema, item)[fieldName];
+                    return self.owner._getItemData(item)[fieldName];
                 };
             }
             return (columnConfigs).map(function(fieldSettings) {
