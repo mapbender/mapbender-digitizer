@@ -41,12 +41,12 @@
 
 
             // Resize, but only if rendered in popup
-            var $popupForm = $('.popup form');
-            var popupContainer = $popupForm.closest('.popup');
+            var $form = $(document.getElementById({{ form.configuration.schemes.vars.id | json_encode | raw }})).closest('form');
+            var popupContainer = $form.closest('.popup,.modal-dialog');
 
             popupContainer.css({
-                width:  '100%',
-                height: '100%'
+                width: '90%',
+                'min-height': '90vh'
             });
 
         })
