@@ -123,13 +123,18 @@
             var toolSpecs = [];
             var subSchemas = this.owner.expandCombination(schema);
             var standardTools = ['modifyFeature', 'moveFeature'];
-            var addStandard = false;
+            var addModify = false;
+            var addMove = false;
             for (var s = 0; s < subSchemas.length; ++s) {
+                // Ignore tools if geometry editing not allowed
                 if (!subSchemas[s].allowDigitize) {
                     continue;
                 }
-                addStandard = true;
                 var validNames = this.getValidToolNames(subSchemas[s]);
+                // Note: Modify not allowed on single point geometries
+                //       Move allowed on everything
+                addModify = addModify || -1 !== validNames.indexOf('modifyFeature');
+                addMove = true;
                 var subSchemaTools = (subSchemas[s].toolset || validNames).map(function(tc) {
                     var obj = (typeof tc === 'string') && {type: tc} || Object.assign({}, tc);
                     obj.schema = obj.schema || subSchemas[s].schemaName;
@@ -148,11 +153,10 @@
                     }
                 }
             }
-            if (addStandard) {
-                // Skip modify for single point geometries
-                if (-1 !== validNames.indexOf('modifyFeature')) {
-                    toolSpecs.push({type: 'modifyFeature'});
-                }
+            if (addModify) {
+                toolSpecs.push({type: 'modifyFeature'});
+            }
+            if (addMove) {
                 toolSpecs.push({type: 'moveFeature'});
             }
             return toolSpecs;
@@ -222,8 +226,6 @@
          * @param {String} type
          */
         createDrawingTool: function(schema, type) {
-            var layer = this.owner.getSchemaLayer(schema);
-            var source = layer && layer.getSource();
             var interaction;
             switch (type) {
                 case 'modifyFeature':
@@ -231,7 +233,12 @@
                         features: this.modifyingCollection_
                     });
                     break;
+                case 'moveFeature':
+                    interaction = this.controlFactory[type](this.owner);
+                    break;
                 default:
+                    var layer = this.owner.getSchemaLayer(schema);
+                    var source = layer && layer.getSource();
                     interaction = this.controlFactory[type](source);
                     break;
             }

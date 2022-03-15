@@ -581,10 +581,12 @@
                 // Disable hover highlighting on the feature currently selected for editing. The generated style updates break
                 // usability (can't pull vertices outward).
                 this.clearHighlightExclude_();
-                if (feature) {
+                if (feature && itemSchema.allowDigitize) {
                     this.excludedFromHighlighting_.push(feature);
+                    this.featureEditor.setEditFeature(feature);
+                } else {
+                    this.featureEditor.setEditFeature(null);
                 }
-                this.featureEditor.setEditFeature(feature || null);
                 this.selectControl.getFeatures().clear();
                 var tr = feature && feature.get('table-row');
                 if (tr) {

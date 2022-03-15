@@ -196,7 +196,7 @@
 
             return interaction;
         },
-        moveFeature: function (source) {
+        moveFeature: function(owner) {
             var self = this;
             // ol.interaction.Translate does not have a "condition" option, but it
             // supports completely replacing the handleDownEvent method via Pointer
@@ -207,8 +207,17 @@
             };
 
             var interaction = new ol.interaction.Translate({
-                source: source,
-                handleDownEvent: handleDownEvent
+                handleDownEvent: handleDownEvent,
+                layers: function(layer) {
+                    var schema = owner._getCurrentSchema();
+                    var subSchemas = (schema && owner.expandCombination(schema) || []).filter(function(schema) {
+                        return schema.allowDigitize;
+                    });
+                    var layers = subSchemas.map(function(schema) {
+                        return owner.getSchemaLayer(schema);
+                    });
+                    return -1 !== layers.indexOf(layer);
+                }
             });
 
             return interaction;
