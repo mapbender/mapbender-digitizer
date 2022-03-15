@@ -52,6 +52,9 @@
         })
     </script>
     {{ form_row(form.title) }}
+    {%- for child_name_before_schemes in form.configuration | keys | filter(k => k != 'schemes') -%}
+        {{- form_row(form.configuration[child_name_before_schemes]) -}}
+    {%- endfor -%}
 {% block schemes_row %}
     {{ form_row(form.configuration.schemes, {'label_attr': {'class': 'block'}}) }}
 {% endblock schemes_row %}
