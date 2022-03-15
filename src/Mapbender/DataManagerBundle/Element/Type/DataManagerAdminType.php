@@ -4,7 +4,6 @@ namespace Mapbender\DataManagerBundle\Element\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Class DataManagerAdminType
@@ -14,16 +13,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class DataManagerAdminType extends AbstractType
 {
-
-    /**
-     * @inheritdoc
-     */
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefaults(array(
-            'application' => null
-        ));
-    }
 
     /**
      * @inheritdoc

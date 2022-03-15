@@ -29,16 +29,6 @@ class Digitizer extends DataManager
         return 'mapbender.mbDigitizer';
     }
 
-    public static function getType()
-    {
-        return 'Mapbender\DigitizerBundle\Element\Type\DigitizerAdminType';
-    }
-
-    public static function getFormTemplate()
-    {
-        return 'MapbenderDigitizerBundle:ElementAdmin:digitizer.html.twig';
-    }
-
     public function getView(Element $element)
     {
         $view = new TemplateView('MapbenderDigitizerBundle:Element:Digitizer.html.twig');
@@ -46,13 +36,6 @@ class Digitizer extends DataManager
         $parentCssClass = !empty($view->attributes['class']) ? $view->attributes['class'] : '';
         $view->attributes['class'] = trim('mb-element-digitizer ' . $parentCssClass);
         return $view;
-    }
-
-    public static function getDefaultConfiguration()
-    {
-        return array(
-            "target" => null
-        );
     }
 
     public function getRequiredAssets(Element $element)

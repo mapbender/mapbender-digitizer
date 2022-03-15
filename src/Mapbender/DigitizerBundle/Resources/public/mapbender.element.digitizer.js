@@ -6,12 +6,7 @@
     $.widget("mapbender.mbDigitizer", $.mapbender.mbDataManager, {
 
         options: {
-            classes: {},
-            create: null,
-            debug: false,
-            fileURI: "uploads/featureTypes",
-            schemes: {},
-            target: null
+            schemes: {}
         },
         mbMap: null,
         printClient: null,
@@ -29,17 +24,16 @@
             this.toolsetRenderer = this._createToolsetRenderer();
             this._super();
             var widget = this;
-            var target = this.options.target;
             this.styleAdapter_ = this._createStyleAdapter();
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
-            Mapbender.elementRegistry.waitReady(target).then(function(mbMap) {
+            Mapbender.elementRegistry.waitReady('.mb-element-map').then(function(mbMap) {
                 widget.mbMap = mbMap;
                 widget.setup();
                 // Let data manager base method trigger "ready" event and start loading data
                 widget._start();
             }, function() {
-                Mapbender.checkTarget("mbDigitizer", target);
+                Mapbender.checkTarget("mbDigitizer");
             });
         },
         _createTableRenderer: function() {
