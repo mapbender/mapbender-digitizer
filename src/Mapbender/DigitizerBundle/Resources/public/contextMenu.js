@@ -12,7 +12,6 @@
         this.onMap_ = false;
         this.enabled_ = false;
         this.filterLayers_ = [];
-        this.schema_ = null;
     };
     Object.assign(Mapbender.Digitizer.MapContextMenu.prototype, {
         setActive: function(state) {
@@ -52,14 +51,13 @@
             });
         },
         setSchema: function(schema) {
-            this.schema_ = schema || null;
             this.contextmenu.clear();
-            if (this.enabled_ && this.schema_) {
+            if (this.enabled_) {
                 this.contextmenu.enable();
             } else {
                 this.contextmenu.disable();
             }
-            this.filterLayers_ = [this.widget.getSchemaLayers(schema)];
+            this.filterLayers_ = this.widget.getSchemaLayers(schema);
         },
         reconfigure: function(feature) {
             var items = [];
@@ -72,7 +70,7 @@
                     }
                 });
             }
-            var schema = this.schema_;
+            var schema = this.widget.getItemSchema(feature);
             items.push({
                 text: Mapbender.trans(schema && schema.allowEdit && 'mb.digitizer.edit.attributes' || 'mb.digitizer.actions.show_details'),
                 callback: function () {
