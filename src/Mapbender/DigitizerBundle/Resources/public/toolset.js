@@ -204,6 +204,9 @@
             }
             if (!this.tools_[schema.schemaName][type]) {
                 var newInteraction = this.createDrawingTool(schema, type);
+                newInteraction.setActive(false);
+                this.olMap.addInteraction(newInteraction);
+
                 this.tools_[schema.schemaName][type] = newInteraction;
                 var widget = this.owner;
                 newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
@@ -224,25 +227,18 @@
          * @param {String} type
          */
         createDrawingTool: function(schema, type) {
-            var interaction;
             switch (type) {
                 case 'modifyFeature':
-                    interaction = new ol.interaction.Modify({
+                    return new ol.interaction.Modify({
                         features: this.modifyingCollection_
                     });
-                    break;
                 case 'moveFeature':
-                    interaction = this.controlFactory[type](this.owner);
-                    break;
+                    return this.controlFactory[type](this.owner);
                 default:
                     var layer = this.owner.getSchemaLayer(schema);
                     var source = layer && layer.getSource();
-                    interaction = this.controlFactory[type](source);
-                    break;
+                    return this.controlFactory[type](source);
             }
-            interaction.setActive(false);
-            this.olMap.addInteraction(interaction);
-            return interaction;
         }
     });
 
