@@ -63,7 +63,6 @@
             var olMap = this.mbMap.getModel().olMap;
             this.contextMenu = this._createContextMenu(olMap);
             this.renderer = this._createRenderer(olMap);
-            this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory();
             olMap.on(ol.MapEventType.MOVEEND, function() {
                 // Don't react at all if currently editing feature attributes
                 if (self.currentPopup || self.activeToolName_) {

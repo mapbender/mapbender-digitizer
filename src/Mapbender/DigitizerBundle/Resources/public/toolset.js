@@ -5,14 +5,13 @@
     /**
      * @param {*} owner jQueryUI widget instance
      * @param {ol.PluggableMap} olMap
-     * @param {Mapbender.Digitizer.DigitizingControlFactory} controlFactory
      *
      * @constructor
      */
-    Mapbender.Digitizer.FeatureEditor = function(owner, olMap, controlFactory) {
+    Mapbender.Digitizer.FeatureEditor = function(owner, olMap) {
         this.owner = owner;
         this.olMap = olMap;
-        this.controlFactory = controlFactory;
+        this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory();
         this.activeInteraction = null;
         this.paused_ = false;
         this.tools_ = {};
