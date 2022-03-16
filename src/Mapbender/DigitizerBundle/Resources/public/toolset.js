@@ -66,7 +66,6 @@
 
     Mapbender.Digitizer.Toolset = function(owner) {
         this.owner = owner;
-        this.listenedSchemas_ = {};
     };
 
     Mapbender.Digitizer.Toolset.prototype = {
@@ -168,7 +167,7 @@
                 var toolName = toolSpecs[i].type;
                 var iconClass = this.iconMap_[toolName];
                 var $icon = $(document.createElement('span')).addClass(iconClass);
-                var tooltip = Mapbender.trans('mb.digitizer.toolset.' + toolName);
+                var tooltip = Mapbender.trans(toolSpecs[i].label || ('mb.digitizer.toolset.' + toolName));
                 var btnSchema = this.owner.options.schemes[toolSpecs[i].schema] || schema;
                 var $button = $(document.createElement('button'))
                     .attr({
