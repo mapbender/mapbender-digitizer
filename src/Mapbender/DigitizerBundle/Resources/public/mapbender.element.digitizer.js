@@ -19,6 +19,7 @@
         featureEditor: null,
         renderer: null,
         styleAdapter_: null,
+        extentSearchFlags_: {},
 
         _create: function () {
             this.toolsetRenderer = this._createToolsetRenderer();
@@ -73,7 +74,7 @@
                 }
 
                 var schema = self._getCurrentSchema();
-                if ($('input[name="current-extent"]', self.element).prop('checked')) {
+                if (self.extentSearchFlags_[schema.schemaName]) {
                     self._getData(schema);
                 }
 
@@ -141,7 +142,9 @@
                 self._toggleDrawingTool(schema, toolName, newState);
             });
             this.element.on('change', 'input[name="current-extent"]', function() {
-                self._getData(self._getCurrentSchema());
+                var schema = self._getCurrentSchema();
+                self.extentSearchFlags_[schema.schemaName] = $(this).prop('checked');
+                self._getData(schema);
             });
             this.element.on('click', '.-fn-save-all', function() {
                 self.updateMultiple(self.getSaveAllCandidates_());
@@ -246,7 +249,10 @@
         _updateToolset: function(schema) {
             this._super(schema);
             var $toolset = $('.toolset', this.element);
-            $('input[name="current-extent"]', $toolset).prop('checked', schema.searchType === 'currentExtent');
+            if (typeof (this.extentSearchFlags_[schema.schemaName]) === 'undefined') {
+                this.extentSearchFlags_[schema.schemaName] = schema.searchType === 'currentExtent';
+            }
+            $('input[name="current-extent"]', $toolset).prop('checked', this.extentSearchFlags_[schema.schemaName]);
             $('.btn-group', $toolset)
                 // Resize buttons to btn-sm to fit our (potentially many) tool buttons
                 .addClass('btn-group-sm')
@@ -339,7 +345,7 @@
             var params = Object.assign({}, this._super(schema), {
                 srid: this.getCurrentSrid()
             });
-            if ($('input[name="current-extent"]', this.element).prop('checked')) {
+            if (this.extentSearchFlags_[schema.schemaName]) {
                 params['extent'] = this.mbMap.getModel().getCurrentExtentArray().join(',');
             }
             return params;
