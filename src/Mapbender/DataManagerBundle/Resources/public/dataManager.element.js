@@ -52,6 +52,7 @@
         currentSettings: null,
         toolsetTemplate_: null,
         tableButtonsTemplate_: null,
+        fetchXhr: null,
 
         _create: function() {
             if (Array.isArray(this.options.schemes) || !Object.keys(this.options.schemes).length) {
@@ -642,15 +643,26 @@
          * @return {jQuery.Deferred}
          */
         getJSON: function(uri, data) {
+            var self = this;
             var url = this.elementUrl + uri;
             var $loadingIndicator = $('.loading-indicator', this.element);
             $loadingIndicator.css({opacity: 1});
-            return $.getJSON(url, data)
-                .fail(this._onAjaxError)
+            if (this.fetchXhr) {
+                this.fetchXhr.abort();
+                this.fetchXhr = null;
+            }
+            this.fetchXhr = $.getJSON(url, data)
+                .fail(function(xhr) {
+                    if (xhr.statusText !== 'abort') {
+                        self._onAjaxError(xhr);
+                    }
+                })
                 .always(function() {
+                    self.fetchXhr = null;
                     $loadingIndicator.css({opacity: 0})
                 })
             ;
+            return this.fetchXhr;
         },
         postJSON: function(uri, data, options) {
             var options_ = {
