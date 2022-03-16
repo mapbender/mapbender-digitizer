@@ -12,7 +12,8 @@ use Mapbender\DataSourceBundle\Entity\Feature;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
 
 /**
  * @property SchemaFilter $schemaFilter
@@ -20,15 +21,15 @@ use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
  */
 class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
 {
-    /** @var EngineInterface */
-    protected $templateEngine;
+    /** @var Environment */
+    protected $twig;
 
-    public function __construct(EngineInterface $templateEngine,
+    public function __construct(Environment $twig,
                                 FormFactoryInterface $formFactory,
                                 SchemaFilter $schemaFilter)
     {
         parent::__construct($formFactory, $schemaFilter);
-        $this->templateEngine = $templateEngine;
+        $this->twig = $twig;
     }
 
     public function dispatchRequest(Element $element, Request $request)
@@ -46,7 +47,8 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
 
     protected function getStyleEditorResponse()
     {
-        return $this->templateEngine->renderResponse('MapbenderDigitizerBundle:Element:style-editor.html.twig');
+        $content = $this->twig->render('MapbenderDigitizerBundle:Element:style-editor.html.twig');
+        return new Response($content);
     }
 
     /**

@@ -17,7 +17,7 @@
             <argument>%mapbender.uploads_dir%</argument>
         </service>
         <service id="mb.digitizer.http_handler" class="Mapbender\DigitizerBundle\Component\HttpHandler">
-            <argument type="service" id="templating" />
+            <argument type="service" id="twig" />
             <argument type="service" id="form.factory" />
             <argument type="service" id="mb.digitizer.schema_filter" />
         </service>
