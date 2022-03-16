@@ -281,7 +281,7 @@
                             }
                             return data[dataProp];
                         });
-                        if (resolved && valuesOut[prop]) {
+                        if ((typeof resolved !== 'undefined') && valuesOut[prop]) {
                             valuesOut[prop] = resolved;
                         }
                     });
