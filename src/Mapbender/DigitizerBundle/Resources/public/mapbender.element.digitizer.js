@@ -458,11 +458,10 @@
             Object.assign(feature.get('data'), newValues);
         },
         _getSaveRequestData: function(schema, dataItem, newValues) {
-            return {
-                properties: Object.assign({}, this._getItemData(dataItem), newValues || {}),
+            return Object.assign(this._superApply(arguments), {
                 geometry: this.wktFormat_.writeGeometryText(dataItem.getGeometry()),
                 srid: this.getCurrentSrid()
-            };
+            });
         },
         updateMultiple: function(features) {
             var postData = {

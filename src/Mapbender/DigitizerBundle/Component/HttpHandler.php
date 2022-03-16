@@ -68,7 +68,9 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         //       Feature creation expects an attribute matching the (configured) geometry
         //       column name. Adapt incoming data.
         $requestData = json_decode($request->getContent(), true);
-        $srid = $requestData['srid'];
+        $common = array(
+            'srid' => $requestData['srid'],
+        );
         foreach ($requestData['features'] as $featureData) {
             $schemaName = $featureData['schemaName'];
             if (empty($schemaRepositories[$schemaName])) {
@@ -80,13 +82,7 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
                 // uh-oh!
                 continue;
             }
-            if (!empty($featureData['geometry'])) {
-                $feature->setGeom($featureData['geometry']);
-                $feature->setSrid($srid);
-            }
-            if (!empty($featureData['properties'])) {
-                $feature->setAttributes($featureData['properties']);
-            }
+            $this->populateItem($element, $feature, $schemaName, $common + $featureData);
             $updatedFeature = $repository->save($feature);
             $dataOut['saved'][] = $this->formatResponseItem($repository, $updatedFeature, $schemaName) + array(
                 'uniqueId' => $featureData['uniqueId'],
@@ -95,37 +91,14 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         return $dataOut;
     }
 
-    /**
-     * @param Element $element
-     * @param Request $request
-     * @return array
-     * @todo 1.5: make protected
-     */
-    public function getSaveActionResponseData(Element $element, Request $request)
+    protected function populateItem(Element $element, DataItem $item, $schemaName, array $data)
     {
-        $itemId = $request->query->get('id', null);
-        $schemaName = $request->query->get('schema');
-        $repository = $this->schemaFilter->getDataStore($element, $schemaName);
-        // NOTE: Client always sends geometry as a separate "geometry" attribute, while
-        //       Feature creation expects an attribute matching the (configured) geometry
-        //       column name. Adapt incoming data.
-        if ($itemId) {
-            $feature = $repository->getById($itemId);
-        } else {
-            $feature = $repository->itemFactory();
+        /** @var Feature $item */
+        if (!empty($data['geometry'])) {
+            $item->setGeom($data['geometry']);
+            $item->setSrid($data['srid']);
         }
-        $requestData = json_decode($request->getContent(), true);
-        if (!empty($requestData['geometry'])) {
-            $feature->setGeom($requestData['geometry']);
-            $feature->setSrid($requestData['srid']);
-        }
-        if (!empty($requestData['properties'])) {
-            $feature->setAttributes($requestData['properties']);
-        }
-        $updatedItem = $repository->save($feature);
-        return array(
-            'dataItem' => $this->formatResponseItem($repository, $updatedItem, $schemaName),
-        );
+        parent::populateItem($element, $item, $schemaName, $data);
     }
 
     /**

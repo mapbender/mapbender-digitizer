@@ -283,7 +283,7 @@
          */
         _getSaveRequestData: function(schema, dataItem, newValues) {
             return {
-                dataItem: Object.assign({}, this._getItemData(dataItem), newValues || {})
+                properties: Object.assign({}, this._getItemData(dataItem), newValues || {})
             };
         },
         /**
