@@ -170,7 +170,7 @@
                 }
             }
             var keepFunctions = Object.keys(functionCoverage);
-            // Remove buttons not present in the any subschema of the combination
+            // Remove buttons not present in any subschema of the combination
             var keepSelector = keepFunctions.length && keepFunctions.map(function(code) {
                 return ['.', code].join('');
             }).join(',');

@@ -37,8 +37,7 @@
             });
         },
         _createTableRenderer: function() {
-            var buttonsTemplate = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
-            return new Mapbender.Digitizer.TableRenderer(this, buttonsTemplate);
+            return new Mapbender.Digitizer.TableRenderer(this, this.tableButtonsTemplate_);
         },
         _createToolsetRenderer: function() {
             return new Mapbender.Digitizer.Toolset(this);

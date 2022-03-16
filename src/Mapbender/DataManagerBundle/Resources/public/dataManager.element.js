@@ -51,6 +51,7 @@
         /** @type {{DataManagerSchemaConfig|null}} */
         currentSettings: null,
         toolsetTemplate_: null,
+        tableButtonsTemplate_: null,
 
         _create: function() {
             if (Array.isArray(this.options.schemes) || !Object.keys(this.options.schemes).length) {
@@ -62,6 +63,7 @@
                 ''  // produce trailing slash
             ].join('/');
             this.updateSchemaSelector_();
+            this.tableButtonsTemplate_ = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
             this.toolsetTemplate_ = $('.-tpl-toolset', this.element).remove().css('display', '').html();
             this.formRenderer_ = this._createFormRenderer();
             this.dialogFactory_ = Mapbender.DataManager.DialogFactory;
@@ -83,8 +85,7 @@
             return new Mapbender.DataManager.FormRenderer();
         },
         _createTableRenderer: function() {
-            var buttonsTemplate = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
-            return new Mapbender.DataManager.TableRenderer(this, buttonsTemplate);
+            return new Mapbender.DataManager.TableRenderer(this, this.tableButtonsTemplate_);
         },
         /**
          * @private
