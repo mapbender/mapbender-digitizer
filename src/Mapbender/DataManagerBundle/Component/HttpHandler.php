@@ -187,23 +187,35 @@ class HttpHandler implements ElementHttpHandlerInterface
         }
         $results = array();
         foreach ($selectSchemaNames as $delegatingSchemaName) {
+            // @todo: overall maxResults cap for combinations?
+            // @todo: criteria reuse (esp. intersect)?
             $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $delegatingSchemaName, false);
             $repository = $this->schemaFilter->getDataStore($element, $delegatingSchemaName);
-            $criteria = $this->getSelectCriteria($repository, $request, $schemaConfig);
-            // @todo: criteria reuse (esp. intersect)?
-            // @todo: overall maxResults cap for combinations?
-            foreach ($repository->search($criteria) as $dataItem) {
-                $results[] = $this->formatResponseItem($repository, $dataItem, $schemaConfig);
+            foreach ($this->searchRepository($element, $repository, $schemaConfig, $request) as $item) {
+                $results[] = $this->formatResponseItem($repository, $item, $delegatingSchemaName);
             }
         }
         return $results;
     }
 
-    protected function formatResponseItem(DataStore $repository, DataItem $item, array $schemaConfig)
+    /**
+     * @param Element $element
+     * @param DataStore $repository
+     * @param array $schemaConfig
+     * @param Request $request
+     * @return DataItem[]
+     */
+    protected function searchRepository(Element $element, DataStore $repository, array $schemaConfig, Request $request)
+    {
+        $criteria = $this->getSelectCriteria($repository, $request, $schemaConfig);
+        return $repository->search($criteria);
+    }
+
+    protected function formatResponseItem(DataStore $repository, DataItem $item, $schemaName)
     {
         return array(
             'id' => $item->getId(),
-            'schemaName' => $schemaConfig['schemaName'],
+            'schemaName' => $schemaName,
             'properties' => $item->toArray(),
         );
     }

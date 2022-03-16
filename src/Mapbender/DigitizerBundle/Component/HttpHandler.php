@@ -16,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 
 /**
  * @property SchemaFilter $schemaFilter
+ * @method Feature[] searchSchema(Element $element, $schemaName, Request $request)
  */
 class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
 {
@@ -85,7 +86,7 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
                 $feature->setAttributes($featureData['properties']);
             }
             $updatedFeature = $repository->save($feature);
-            $dataOut['saved'][] = $this->formatResponseFeature($repository, $updatedFeature) + array(
+            $dataOut['saved'][] = $this->formatResponseItem($repository, $updatedFeature, $schemaName) + array(
                 'uniqueId' => $featureData['uniqueId'],
             );
         }
@@ -121,13 +122,14 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         }
         $updatedItem = $repository->save($feature);
         return array(
-            'dataItem' => $this->formatResponseFeature($repository, $updatedItem),
+            'dataItem' => $this->formatResponseItem($repository, $updatedItem, $schemaName),
         );
     }
 
     /**
      * @param FeatureType $repository
      * @param Request $request
+     * @param array $schemaConfig
      * @return mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
@@ -157,33 +159,15 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
     /**
      * @param FeatureType $repository
      * @param Feature $item
-     * @param array $schemaConfig
+     * @param string $schemaName
      * @return array
      */
-    protected function formatResponseItem(DataStore $repository, DataItem $item, array $schemaConfig)
+    protected function formatResponseItem(DataStore $repository, DataItem $item, $schemaName)
     {
-        $formatted = parent::formatResponseItem($repository, $item, $schemaConfig) + array(
+        $formatted = parent::formatResponseItem($repository, $item, $schemaName) + array(
             'geometry' => $item->getGeom(),
         );
         unset($formatted['properties'][$repository->getGeomField()]);
         return $formatted;
-    }
-
-    /**
-     * Convert feature back into serializable and client-consumable form.
-     *
-     * @param FeatureType $repository
-     * @param Feature $feature
-     * @return array
-     */
-    protected function formatResponseFeature(FeatureType $repository, Feature $feature)
-    {
-        $properties = $feature->toArray();
-        $geometryField = $repository->getGeomField();
-        unset($properties[$geometryField]);
-        return array(
-            'properties' => $properties,
-            'geometry' => $feature->getGeom(),
-        );
     }
 }
