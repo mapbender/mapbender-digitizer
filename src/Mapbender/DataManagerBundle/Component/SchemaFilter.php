@@ -99,7 +99,7 @@ class SchemaFilter
             }
         }
         if (!$haveDs) {
-            throw new ConfigurationErrorException("No dataStore / featureType in schema {$schemaName}");
+            throw new ConfigurationErrorException("No dataStore / featureType in schema {$name}");
         }
         if (!empty($schemaConfig['formItems'])) {
             $schemaConfig['formItems'] = $this->formItemFilter->prepareItems($schemaConfig['formItems']);
