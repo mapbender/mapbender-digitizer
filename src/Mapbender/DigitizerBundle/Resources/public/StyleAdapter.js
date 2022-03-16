@@ -164,7 +164,7 @@
          * @private
          */
         resolveTextStyle_: function(targetStyle, styleConfig) {
-            targetStyle.setText(styleConfig.label);
+            targetStyle.setText(styleConfig.label || '');
             if (styleConfig.fontColor || (typeof styleConfig.fontOpacity !== 'undefined')) {
                 targetStyle.getFill().setColor(this.parseSvgColor(styleConfig, 'fontColor', 'fontOpacity', targetStyle.getFill().getColor()));
             }
@@ -274,16 +274,10 @@
                     var valuesOut = Object.assign({}, styleConfig);
                     var data = dataCallback(feature);
                     propertyNames.forEach(function(prop) {
-                        var resolved = styleConfig[prop].replace(placeholderRx, function(match, dataProp) {
-                            if (!data[dataProp] && prop === 'externalGraphic') {
-                                // Empty entire output value (incomplete url expansion)
-                                valuesOut[prop] = data[dataProp];
-                            }
-                            return data[dataProp];
+                        valuesOut[prop] = styleConfig[prop].replace(placeholderRx, function(match, dataProp) {
+                            var dataValue = data[dataProp];
+                            return dataValue || (prop === 'label' ? '' : dataValue);
                         });
-                        if ((typeof resolved !== 'undefined') && valuesOut[prop]) {
-                            valuesOut[prop] = resolved;
-                        }
                     });
                     return valuesOut;
                 }
