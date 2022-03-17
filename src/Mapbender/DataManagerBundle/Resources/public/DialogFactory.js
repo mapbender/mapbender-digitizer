@@ -13,6 +13,7 @@
                     'ui-dialog': 'ui-dialog data-manager-dialog',
                     'ui-button': 'ui-button button btn'
                 },
+                closeText: '',
                 resizable: false
             };
             var options_ = Object.assign({}, defaults, options || {}, {

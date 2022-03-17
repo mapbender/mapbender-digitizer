@@ -72,6 +72,10 @@
   &:focus {
     outline: none;
   }
+  background: #fff;
+  .ui-dialog-content, .ui-dialog-bottonpane {
+    background: transparent;
+  }
   display: flex;
   flex-direction: column;
   .ui-dialog-content {
@@ -81,7 +85,6 @@
   .ui-dialog-titlebar, .ui-dialog-buttonpane {
     flex: 0 1 auto;
   }
-  background: #e4e4e4;
   border: 1px solid #b3b3b3;
   .ui-dialog-button-pane {
     border-bottom: 5px solid #b3b3b3;

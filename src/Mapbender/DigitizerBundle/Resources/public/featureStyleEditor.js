@@ -12,21 +12,13 @@
     Mapbender.Digitizer.FeatureStyleEditor.prototype.openDialog_ = function($content) {
         var promise = $.Deferred();
         var editor = this;
-        $content.dialog({
+
+        Mapbender.DataManager.DialogFactory.dialog($content, {
             title: "Stylemanager",
-            modal: true,
             width: '500px',
+            resizable: true,
             classes: {
-                'ui-dialog': 'ui-dialog mb-element-popup-dialog modal-content',
-                'ui-dialog-titlebar': 'ui-dialog-titlebar modal-header',
-                'ui-dialog-titlebar-close': 'ui-dialog-titlebar-close close',
-                'ui-dialog-content': 'ui-dialog-content modal-body digitizer-style-editor',
-                'ui-dialog-buttonpane': 'ui-dialog-buttonpane modal-footer',
-                'ui-button': 'ui-button button btn'
-            },
-            hide: {
-                effect: 'fadeOut',
-                duration: 200
+                'ui-dialog-content': 'ui-dialog-content digitizer-style-editor'
             },
             buttons: [{
                 text: "Abbrechen",
@@ -39,8 +31,8 @@
                 class: 'button btn',
                 click: function (e) {
                     var values = editor.getFormData(this);
-                    $(this).dialog('close');
                     promise.resolveWith(null, [values]);
+                    $(this).dialog('close');
                 }
             }]
         });
