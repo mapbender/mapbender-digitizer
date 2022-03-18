@@ -44,17 +44,11 @@
     };
     Mapbender.Digitizer.FeatureStyleEditor.prototype.openEditor = function(schema, feature, values) {
         var self = this;
-        var geomType = feature.getGeometry().getType();
         var valuesPromise = $.Deferred();
         this.template_.then(function(html) {
             var $content = $(document.createElement('div')).append(html);
-            if (geomType !== 'Point') {
-                $('[data-style-group="point"]', $content).hide();
-            }
-            if (geomType === "LineString") {
-                $('[data-style-group="fill"]', $content).hide();
-            }
-            var formData = Object.assign({}, self.getDefaults(schema), values);
+            self.configureContent($content, schema, feature);
+            var formData = self.extendDefaults(schema, values);
             $(':input', $content).filter('[name]').each(function() {
                 if (typeof formData[this.name] !== 'undefined' && formData[this.name] !== null) {
                     $(this).val(formData[this.name]);
@@ -90,6 +84,15 @@
     };
 
     Object.assign(Mapbender.Digitizer.FeatureStyleEditor.prototype, {
+        configureContent: function($content, schema, feature) {
+            var geomType = feature.getGeometry().getType();
+            if (geomType !== 'Point') {
+                $('[data-style-group="point"]', $content).hide();
+            }
+            if (geomType === "LineString") {
+                $('[data-style-group="fill"]', $content).hide();
+            }
+        },
         getFormData: function($scope) {
             var data = {};
             $(':input', $scope).filter('[name]').each(function() {
@@ -97,12 +100,17 @@
             });
             return data;
         },
-        submit: function (schema, feature, element) {
-            var styleData = {};
-            $(':input', element).filter('[name]').each(function() {
-                styleData[this.name] = $(this).val();
+        extendDefaults: function(schema, values) {
+            var defaults = this.getDefaults(schema);
+            var merged = Object.assign({}, defaults, values);
+            // Fix empty values that cannot be allowed (breaks colorpickers
+            // and rendering)
+            ['fillColor', 'strokeColor', 'fontColor'].forEach(function(nonEmpty) {
+                if (!merged[nonEmpty]) {
+                    merged[nonEmpty] = defaults[nonEmpty];
+                }
             });
-
+            return merged;
         },
         getDefaults: function(schema) {
             return {
