@@ -77,6 +77,9 @@
 
             var dlgPromise = self.openDialog_($content);
             $('.-js-colorpicker', $content).colorpicker({format: 'hex'});
+            dlgPromise.always(function() {
+                $('.-js-colorpicker', $content).colorpicker('destroy');
+            });
             dlgPromise.then(function(values) {
                 valuesPromise.resolveWith(null, [values]);
             }, function() {
