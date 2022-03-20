@@ -602,12 +602,15 @@
         },
         openStyleEditor: function(schema, feature) {
             var self = this;
-            // Generate default style without placeholders...
-            var styleDefaults = this.renderer.resolveStyleConfigPlaceholders(schema.styles.default, feature);
-            // ... but allow label placeholder (editable as text)
-            styleDefaults.label = schema.styles.default.label;
+            var styleConfig = feature.get('customStyleConfig');
+            if (!styleConfig) {
+                var defaults = this.getInitialCustomStyle_(schema, feature);
+                // Resolve any placeholders ...
+                styleConfig = this.renderer.resolveStyleConfigPlaceholders(defaults, feature);
+                // ... but allow label placeholder (editable as text)
+                styleConfig.label = defaults.label || '';
+            }
 
-            var styleConfig = feature.get('customStyleConfig') || styleDefaults;
             this.styleEditor.openEditor(schema, feature, styleConfig).then(function(values) {
                 // @todo: decouple from feature saving; use a distinct url to save the style
                 var formData = {};
@@ -699,6 +702,9 @@
                 $cpInput.replaceWith($inputGroup);
                 $inputGroup.colorpicker({format: 'hex'})
             });
+        },
+        getInitialCustomStyle_: function(schema, feature) {
+            return schema.styles.default;
         },
         __formatting_dummy: null
     });
