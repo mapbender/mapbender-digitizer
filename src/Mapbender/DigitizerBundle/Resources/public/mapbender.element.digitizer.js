@@ -23,6 +23,11 @@
         queuedRefresh_: {},
 
         _create: function () {
+            // NOTE: Arrays / Objects in ui widget prototype are shared
+            // between instances. Separate them
+            this.excludedFromHighlighting_ = [];
+            this.extentSearchFlags_ = {};
+            this.queuedRefresh_ = {};
             this.toolsetRenderer = this._createToolsetRenderer();
             this._super();
             var widget = this;
