@@ -20,6 +20,7 @@
         renderer: null,
         styleAdapter_: null,
         extentSearchFlags_: {},
+        queuedRefresh_: {},
 
         _create: function () {
             this.toolsetRenderer = this._createToolsetRenderer();
@@ -33,6 +34,7 @@
                 widget.setup();
                 // Let data manager base method trigger "ready" event and start loading data
                 widget._start();
+                widget.registerMapEvents_();
             }, function() {
                 Mapbender.checkTarget("mbDigitizer");
             });
@@ -67,6 +69,18 @@
             var olMap = this.mbMap.getModel().olMap;
             this.contextMenu = this._createContextMenu(olMap);
             this.renderer = this._createRenderer(olMap);
+            this.selectControl = this.createSelectControl_();
+            this.highlightControl = this.createHighlightControl_();
+            this.featureEditor = this._createFeatureEditor(olMap);
+            olMap.addInteraction(this.selectControl);
+            olMap.addInteraction(this.highlightControl);
+            var initialSchema = this._getCurrentSchema();
+            // @todo ml: evaluate displayPermanent
+            this.renderer.toggleSchema(initialSchema, initialSchema.displayOnInactive && initialSchema.displayPermanent);
+        },
+        registerMapEvents_: function() {
+            var self = this;
+            var olMap = this.mbMap.getModel().olMap;
             olMap.on(ol.MapEventType.MOVEEND, function() {
                 // Don't react at all if currently editing feature attributes
                 if (self.currentPopup || self.activeToolName_) {
@@ -75,7 +89,11 @@
 
                 var schema = self._getCurrentSchema();
                 if (self.extentSearchFlags_[schema.schemaName]) {
-                    self._getData(schema);
+                    if (self.active || schema.displayOnInactive) {
+                        self._getData(schema);
+                    } else {
+                        self.queuedRefresh_[schema.schemaName] = true;
+                    }
                 }
 
                 // @todo ml: filter table rows for min/max resolution (not just on moveend, but always)
@@ -100,14 +118,6 @@
                 });
                 self.featureEditor.resume();
             });
-            this.selectControl = this.createSelectControl_();
-            this.highlightControl = this.createHighlightControl_();
-            this.featureEditor = this._createFeatureEditor(olMap);
-            olMap.addInteraction(this.selectControl);
-            olMap.addInteraction(this.highlightControl);
-            var initialSchema = this._getCurrentSchema();
-            // @todo ml: evaluate displayPermanent
-            this.renderer.toggleSchema(initialSchema, initialSchema.displayOnInactive && initialSchema.displayPermanent);
         },
         // reveal / hide = automatic sidepane integration API
         reveal: function() {
@@ -163,6 +173,9 @@
                 }
                 this.renderer.toggleSchema(currentSchema, true);
                 this.active = true;
+                if (this.queuedRefresh_[currentSchema.schemaName]) {
+                    this._getData(currentSchema);
+                }
             }
         },
         deactivate: function() {
@@ -434,8 +447,10 @@
             this.resumeContextMenu_();
         },
         _getData: function(schema) {
+            this.queuedRefresh_[schema.schemaName] = false;
             var self = this;
             return this._super(schema).then(function(features) {
+                self.queuedRefresh_[schema.schemaName] = false;
                 var modifiedFeatures = self.renderer.filterFeatures(schema, function(feature) {
                     return feature.get('dirty');
                 });
