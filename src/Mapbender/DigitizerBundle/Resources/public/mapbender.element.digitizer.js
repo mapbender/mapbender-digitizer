@@ -630,14 +630,20 @@
             }
 
             this.styleEditor.openEditor(schema, feature, styleConfig).then(function(values) {
-                // @todo: decouple from feature saving; use a distinct url to save the style
-                var formData = {};
                 var styleFieldData = JSON.stringify(values);
-                formData[schema.featureType.styleField] = styleFieldData;
-                self._saveItem(schema, feature, formData).then(function() {
-                    feature.set('customStyleConfig', styleFieldData);
+                function always() {
+                    feature.get('data')[schema.featureType.styleField] = styleFieldData;
                     self.renderer.customStyleFeature_(feature);
-                });
+                }
+                if (self._getUniqueItemId(feature)) {
+                    var formData = {};
+                    formData[schema.featureType.styleField] = styleFieldData;
+                    self._saveItem(schema, feature, formData).then(function() {
+                        always();
+                    });
+                } else {
+                    always();
+                }
             });
         },
         zoomToFeature: function(schema, feature) {
