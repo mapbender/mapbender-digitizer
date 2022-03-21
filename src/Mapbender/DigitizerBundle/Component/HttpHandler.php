@@ -82,8 +82,7 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
                 // uh-oh!
                 continue;
             }
-            $this->populateItem($element, $feature, $schemaName, $common + $featureData);
-            $updatedFeature = $repository->save($feature);
+            $updatedFeature = $this->saveItem($element, $repository, $feature, $schemaName, $common + $featureData);
             $dataOut['saved'][] = $this->formatResponseItem($repository, $updatedFeature, $schemaName) + array(
                 'uniqueId' => $featureData['uniqueId'],
             );
@@ -91,14 +90,14 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         return $dataOut;
     }
 
-    protected function populateItem(Element $element, DataItem $item, $schemaName, array $data)
+    protected function saveItem(Element $element, DataStore $repository, DataItem $item, $schemaName, array $data)
     {
         /** @var Feature $item */
         if (!empty($data['geometry'])) {
             $item->setGeom($data['geometry']);
             $item->setSrid($data['srid']);
         }
-        parent::populateItem($element, $item, $schemaName, $data);
+        return parent::saveItem($element, $repository, $item, $schemaName, $data);
     }
 
     /**

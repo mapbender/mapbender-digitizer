@@ -165,16 +165,16 @@ class HttpHandler implements ElementHttpHandlerInterface
             // store new item
             $dataItem = $repository->itemFactory();
         }
-        $this->populateItem($element, $dataItem, $schemaName, $requestData);
-        $itemOut = $repository->save($dataItem);
+        $itemOut = $this->saveItem($element, $repository, $dataItem, $schemaName, $requestData);
         return array(
             'dataItem' => $this->formatResponseItem($repository, $itemOut, $schemaName),
         );
     }
 
-    protected function populateItem(Element $element, DataItem $item, $schemaName, array $data)
+    protected function saveItem(Element $element, DataStore $repository, DataItem $item, $schemaName, array $data)
     {
         $item->setAttributes($data['properties']);
+        return $repository->save($item);
     }
 
     /**
