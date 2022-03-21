@@ -18,7 +18,6 @@
         excludedFromHighlighting_: [],
         featureEditor: null,
         renderer: null,
-        styleAdapter_: null,
         extentSearchFlags_: {},
         queuedRefresh_: {},
 
@@ -31,7 +30,6 @@
             this.toolsetRenderer = this._createToolsetRenderer();
             this._super();
             var widget = this;
-            this.styleAdapter_ = this._createStyleAdapter();
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
             Mapbender.elementRegistry.waitReady('.mb-element-map').then(function(mbMap) {
@@ -53,11 +51,11 @@
         _createStyleEditor: function() {
             return new Mapbender.Digitizer.FeatureStyleEditor(this);
         },
-        _createStyleAdapter: function() {
+        createStyleAdapter: function() {
             return new Mapbender.Digitizer.StyleAdapter(this.options.fallbackStyle);
         },
         _createRenderer: function(olMap) {
-            return new Mapbender.Digitizer.FeatureRenderer(this, olMap, this.styleAdapter_);
+            return new Mapbender.Digitizer.FeatureRenderer(this, olMap);
         },
         _createFeatureEditor: function(olMap) {
             return new Mapbender.Digitizer.FeatureEditor(this, olMap);

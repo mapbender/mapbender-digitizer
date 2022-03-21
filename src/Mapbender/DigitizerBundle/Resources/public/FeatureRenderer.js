@@ -4,14 +4,14 @@
     /**
      * @param {*} owner jQueryUI widget instance
      * @param {ol.PluggableMap} olMap
-     * @param {Mapbender.Digitizer.StyleAdapter} styleAdapter
+     * @param {Mapbender.Digitizer.StyleAdapter} [styleAdapter]
      * @param {Object} schema
      * @constructor
      */
     Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(owner, olMap, styleAdapter) {
         this.owner = owner;
         this.olMap = olMap;
-        this.styleAdapter = styleAdapter;
+        this.styleAdapter = styleAdapter || owner.createStyleAdapter();
         this.globalStyles_ = this.initializeGlobalStyles_();
         this.schemaStyles_ = {};
         this.schemaLayers_ = {};
@@ -30,7 +30,7 @@
                 this.customStyleFeature_(feature);
             }
         },
-        createLayerStyleFunction_: function(styleConfig) {
+        createLayerStyleFunction_: function(schema, styleConfig) {
             var self = this;
             return (function(styleConfig) {
                 var defaultFn = self.createStyleFunction_(styleConfig);
@@ -103,7 +103,7 @@
         var layer = this.createSchemaFeatureLayer_(schema);
         var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
         this.schemaStyles_[schema.schemaName] = this.initializeStyles_(styleConfigs || {});
-        layer.setStyle(this.createLayerStyleFunction_(styleConfigs['default']));
+        layer.setStyle(this.createLayerStyleFunction_(schema, styleConfigs['default']));
         delete this.schemaStyles_[schema.schemaName]['default'];
         this.olMap.addLayer(layer);
         this.registerLayerEvents(layer);
