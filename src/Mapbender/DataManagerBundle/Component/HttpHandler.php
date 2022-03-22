@@ -191,17 +191,43 @@ class HttpHandler implements ElementHttpHandlerInterface
         } else {
             $selectSchemaNames = array($schemaName);
         }
+        $limitTotal = !empty($schemaConfig['maxResults']) ? $schemaConfig['maxResults'] : null;
         $results = array();
         foreach ($selectSchemaNames as $delegatingSchemaName) {
-            // @todo: overall maxResults cap for combinations?
             // @todo: criteria reuse (esp. intersect)?
             $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $delegatingSchemaName, false);
+            $limitSchema = !empty($schemaConfig['maxResults']) ? \intval($schemaConfig['maxResults']) : null;
+            $limitSchema = $this->calculateSchemaLimit($limitTotal, $limitSchema, count($results));
+            if ($limitSchema !== null && $limitSchema <= 0) {
+                continue;
+            }
+            $schemaConfig['maxResults'] = $limitSchema;
+
             $repository = $this->schemaFilter->getDataStore($element, $delegatingSchemaName);
             foreach ($this->searchRepository($element, $repository, $schemaConfig, $request) as $item) {
                 $results[] = $this->formatResponseItem($repository, $item, $delegatingSchemaName);
             }
         }
         return $results;
+    }
+
+    /**
+     * @param int|null $limitTotal
+     * @param int|null $limitSchema
+     * @param int $limitUsed
+     * @return int|null
+     */
+    protected function calculateSchemaLimit($limitTotal, $limitSchema, $limitUsed)
+    {
+        if (!$limitTotal && !$limitSchema) {
+            return null;
+        }
+        if ($limitTotal) {
+            $limitTotal = \intval($limitTotal);
+            return max(0, min($limitTotal - $limitUsed, \intval($limitSchema ?: $limitTotal)));
+        } else {
+            return max(0, \intval($limitSchema) - $limitUsed);
+        }
     }
 
     /**
