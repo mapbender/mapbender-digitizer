@@ -112,3 +112,10 @@
 .ol-ctx-menu-container li:hover.ol-ctx-menu-zoom-out {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAABYklEQVQ4T72U4VHCQBCF36tA91KAWIFYgViBWIFYgWMFYgdYgVCBWAFSgdiBFpAsFWSdxcDkQoBkhnF/ZjbfvX377ogjF4/Mw/8CVbUD4MynEJF5k2lqFapqz8yeAPRKkCXJEYAXEVnugm8BVXVgZq/FD+9mtgBwSrJfqF2QvN4FjYCq2jWzTwA/DhARh20qTdMRyQcA0xDCbZ3KCJhl2RTATaHgo+6HLMv8+xXJy+qB3l8FGoB5CKHsXcRV1b6ZvZF8FBH3NKotoJlNkiQZFONdlLtJ3rufbouZPSdJMjwIbKDQEzBrClx7eC4i33Uepmk6JnnXaOQifzMAtdGoRApugYiMI1uqKkrRWAfZo9MxM1+UZzFewl8mN4nYdVM83L7BkwbXLUrF3sfBLQDQBbDy08x8vOohXyEE71lVq9emuEk+3gZa3XYroCvwFyjP8yHJDsnxwaU08GxvS2uFhw78BbzWrxXgMbsHAAAAAElFTkSuQmCC");
 }
+
+/** On-top customizations */
+/** Fix empty menu container initially dangling visibly in top left map corner
+    by moving it off screen (will be overruled later by inline styles) */
+  body .ol-ctx-menu-container {
+    left: -400px;
+  }
