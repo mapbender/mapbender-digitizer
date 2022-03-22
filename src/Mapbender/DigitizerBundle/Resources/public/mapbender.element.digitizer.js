@@ -12,7 +12,7 @@
         printClient: null,
         active: false,
         controlFactory: null,
-        activeToolName_: null,
+        activeTool_: null,
         selectControl: null,
         highlightControl: null,
         excludedFromHighlighting_: [],
@@ -86,7 +86,7 @@
             var olMap = this.mbMap.getModel().olMap;
             olMap.on(ol.MapEventType.MOVEEND, function() {
                 // Don't react at all if currently editing feature attributes
-                if (self.currentPopup || self.activeToolName_) {
+                if (self.currentPopup || self.activeTool_) {
                     return;
                 }
 
@@ -206,12 +206,12 @@
                 this.clearHighlightExclude_()
             }
             this.featureEditor.toggleTool(toolName, schema, state);
-            this.activeToolName_ = state && toolName || null;
+            this.activeTool_ = state && {name: toolName, schema: schema} || null;
             this.resumeContextMenu_();
         },
         resumeContextMenu_: function() {
             var contextMenuAllowed = ['modifyFeature', 'moveFeature'];
-            this.contextMenu.setActive(!this.activeToolName_ || -1 !== contextMenuAllowed.indexOf(this.activeToolName_));
+            this.contextMenu.setActive(!this.activeTool_ || -1 !== contextMenuAllowed.indexOf(this.activeTool_.name));
         },
         commitGeometry: function(schema, feature) {
             feature.set("oldGeometry", feature.getGeometry().clone());
@@ -251,10 +251,10 @@
                 this.featureEditor.setActive(state);
             }
             if (!state) {
-                if (this.activeToolName_) {
-                    this.featureEditor.toggleTool(this.activeToolName_, schema, false);
+                if (this.activeTool_ && this.activeTool_.schema === schema) {
+                    this.featureEditor.toggleTool(this.activeTool_.name, schema, false);
                 }
-                this.activeToolName_ = null;
+                this.activeTool_ = null;
             }
             this.contextMenu.setActive(state);
         },
@@ -440,8 +440,8 @@
             this.selectControl.getFeatures().clear();
             if (schema.allowDigitize) {
                 this.featureEditor.setEditFeature(null);
-                if (!schema.continueDrawingAfterSave && this.activeToolName_) {
-                    this._toggleDrawingTool(schema, this.activeToolName_, false);
+                if (!schema.continueDrawingAfterSave && (this.activeTool_ || {}).schema === schema) {
+                    this._toggleDrawingTool(schema, this.activeTool_.name, false);
                     $('.-fn-toggle-tool', this.element).removeClass('active');
                 }
                 this.featureEditor.resume();
@@ -495,9 +495,11 @@
                 features: []
             };
             var featureMap = {};
+            var continueDrawing = false;
             for (var i = 0; i < features.length; ++i) {
                 var feature = features[i];
                 var itemSchema = this.getItemSchema(feature);
+                continueDrawing = continueDrawing || itemSchema.continueDrawingAfterSave;
                 var mapId = this._generateNamespacedId(itemSchema, feature);
                 featureMap[mapId] = feature;
                 postData.features.push({
@@ -527,10 +529,10 @@
                 })
             ;
             // @todo ml: find a reasonable continueDrawingAfterSave policy for combination schema
-            if (!schema.continueDrawingAfterSave) {
+            if (!continueDrawing) {
                 promise.always(function() {
-                    if (widget.activeToolName_) {
-                        widget._toggleDrawingTool(schema, widget.activeToolName_, false);
+                    if (widget.activeTool_) {
+                        widget._toggleDrawingTool(widget.activeTool_.schema, widget.activeTool_.name, false);
                     }
                     $('.-fn-toggle-tool', widget.element).removeClass('active');
                 });
@@ -593,9 +595,9 @@
          */
         onFeatureClick: function(feature) {
             var itemSchema = this.getItemSchema(feature);
-            if (feature && !this.activeToolName_) {
+            if (feature && !this.activeTool_) {
                 this._openEditDialog(itemSchema, feature);
-            } else if (!this.currentPopup && 'modifyFeature' === this.activeToolName_) {
+            } else if (!this.currentPopup && 'modifyFeature' === this.activeTool_.name) {
                 // Disable hover highlighting on the feature currently selected for editing. The generated style updates break
                 // usability (can't pull vertices outward).
                 this.clearHighlightExclude_();
