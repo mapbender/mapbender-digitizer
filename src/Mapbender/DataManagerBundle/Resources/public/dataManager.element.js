@@ -646,11 +646,11 @@
             var self = this;
             var url = this.elementUrl + uri;
             var $loadingIndicator = $('.loading-indicator', this.element);
-            $loadingIndicator.css({opacity: 1});
             if (this.fetchXhr) {
                 this.fetchXhr.abort();
                 this.fetchXhr = null;
             }
+            $loadingIndicator.css({opacity: 1});
             this.fetchXhr = $.getJSON(url, data)
                 .fail(function(xhr) {
                     if (xhr.statusText !== 'abort') {
