@@ -55,7 +55,6 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
      * @param Element $element
      * @param Request $request
      * @return array
-     * @todo 1.5: make protected
      */
     protected function getUpdateMultipleActionResponseData(Element $element, Request $request)
     {
