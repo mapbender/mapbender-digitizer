@@ -247,15 +247,16 @@
             this.renderer.toggleSchema(schema, schema.displayPermanent);
         },
         _toggleSchemaInteractions: function(schema, state) {
-            if (schema.allowDigitize) {
-                this.featureEditor.setActive(state);
+            var subSchemas = this.expandCombination(schema);
+            var allowFeatureEditing = false;
+            for (var s = 0; s < subSchemas.length; ++s) {
+                allowFeatureEditing = allowFeatureEditing || state && subSchemas[s].allowDigitize;
             }
-            if (!state) {
-                if (this.activeTool_ && this.activeTool_.schema === schema) {
-                    this.featureEditor.toggleTool(this.activeTool_.name, schema, false);
-                }
+            if (!state && this.activeTool_) {
+                this.featureEditor.toggleTool(this.activeTool_.name, this.activeTool_.schema, false);
                 this.activeTool_ = null;
             }
+            this.featureEditor.setActive(allowFeatureEditing);
             this.contextMenu.setActive(state);
         },
         _getDataStoreFromSchema: function(schema) {
