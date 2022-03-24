@@ -273,8 +273,7 @@
                 scale: 5000000,
                 distance: 30
             }]
-        },
-        // Default tool-sets
+        }, // Default tool-sets
         toolsets: {
             point: [
 
@@ -331,8 +330,6 @@
             }
 
         },
-        printClient: null,
-
         /**
          * Constructor.
          *
@@ -350,12 +347,6 @@
             }
 
             widget.elementUrl = Mapbender.configuration.application.urls.element + '/' + element.attr('id') + '/';
-            var self = this;
-            Mapbender.elementRegistry.waitReady('.mb-element-printclient').then(function(printClient) {
-                self.printClient = printClient;
-            }, function() {
-                self.printClient = false;
-            });
             Mapbender.elementRegistry.onElementReady(widget.options.target, $.proxy(widget._setup, widget));
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function(printClient){
                 this.printClient = printClient;
@@ -857,10 +848,6 @@
                 }
             });
 
-            if (!widget.currentSettings.displayPermanent) {
-                this.currentSettings.deactivateSchema();
-            }
-
             widget.updateClusterStrategies();
 
         },
@@ -1103,7 +1090,7 @@
             var buttons = [];
             var schema = olFeature.schema;
 
-            if (schema.printable && this.printClient) {
+            if (schema.printable) {
 
                 var printButton = {
                     text: Mapbender.digitizer_translate('feature.print'),
@@ -1457,6 +1444,7 @@
                         value: mapProjection,
                         css : { width: '33.33%' },
                         cssClass: '-fn-active-epsgCode',
+                        disabled: !!item.disabled,
                         change: function(event){
 
                             var oldEpsgCode = $('.-fn-coordinates-container').data('activeEpsgCode');
@@ -1484,6 +1472,7 @@
                         type : 'input',
                         label: '',
                         css : { width: '33.33%' },
+                        disabled: !!item.disabled,
 
                     };
 
@@ -1746,6 +1735,22 @@
                     })
                 })
             }
+
+            // Make variables available within generateElements by adding it to each item
+            let iterate = (formItems) => {
+                formItems.forEach((fi) => {
+                    if (fi.children) {
+                        iterate(fi.children);
+                    } else {
+                        fi.elementUrl = widget.elementUrl;
+                        fi.schema = schema.schemaName;
+                        fi.dialog = dialog;
+                        fi.srs =  widget.map.getProjectionObject().proj.srsProjNumber;
+                    }
+                });
+            }
+
+            iterate(formItems);
 
             dialog.generateElements({children: formItems});
             dialog.popupDialog(popupConfiguration);

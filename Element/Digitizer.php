@@ -7,7 +7,6 @@ use Doctrine\DBAL\DBALException;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\DataStoreService;
 use Mapbender\DataSourceBundle\Component\FeatureType;
-use Mapbender\DataSourceBundle\Component\FeatureTypeService;
 use Mapbender\DataSourceBundle\Element\BaseElement;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DigitizerBundle\Component\Uploader;
@@ -17,45 +16,21 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Mapbender\TrackingBundle\Controller\ElevationDataController;
 
 /**
  * Digitizer Mapbender3 element
  */
 class Digitizer extends BaseElement
 {
+    /** @var string Digitizer element title */
+    protected static $title = 'Digitizer';
+
+    /** @var string Digitizer element description */
+    protected static $description = 'Georeferencing and Digitizing';
 
     /** @var int Default maximal search results number */
     protected $maxResults = 2500;
-    /** @var mixed[]|null lazy-initialized */
-    protected $featureTypeConfigs;
-    /** @var mixed[] lazy-initialized entries */
-    protected $schemaConfigs = array();
-    /** @var bool */
-    protected $schemaConfigsComplete = false;
-
-    /**
-     * @inheritdoc
-     */
-    public static function getClassTitle()
-    {
-        return "Digitizer";
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function getClassDescription()
-    {
-        return "Georeferencing and Digitizing";
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getWidgetName()
-    {
-        return 'mapbender.mbDigitizer';
-    }
 
     /**
      * @inheritdoc
@@ -78,7 +53,8 @@ class Digitizer extends BaseElement
                 '@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js',
                 '@MapbenderDigitizerBundle/Resources/public/plugins/printPlugin.js',
                 '@MapbenderDigitizerBundle/Resources/public/plugins/coordinatesTransformation.js',
-                '@MapbenderDigitizerBundle/Resources/public/plugins/geometrylessFeatureAdd.js'
+                '@MapbenderDigitizerBundle/Resources/public/plugins/geometrylessFeatureAdd.js',
+                '@MapbenderDigitizerBundle/Resources/public/plugins/generateElements.js',
             ),
             'css'   => array(
                 '/components/select2/select2-built.css',
@@ -98,8 +74,7 @@ class Digitizer extends BaseElement
     public static function getDefaultConfiguration()
     {
         return array(
-            "target" => null,
-            'schemes' => null,
+            "target" => null
         );
     }
 
@@ -112,18 +87,6 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * @param string $name
-     * @return mixed[]
-     */
-    protected function getFeatureTypeConfig($name)
-    {
-        if (null === $this->featureTypeConfigs) {
-            $this->featureTypeConfigs = $this->getFeatureTypeDeclarations() ?: array();
-        }
-        return $this->featureTypeConfigs[$name];
-    }
-
-    /**
      * Prepare form items for each scheme definition
      * Optional: get featureType by name from global context.
      *
@@ -133,43 +96,40 @@ class Digitizer extends BaseElement
      */
     public function getConfiguration($public = true)
     {
-        $configuration = $this->entity->getConfiguration() + array(
-            'debug' => false,
-            'fileUri' => $this->getFileUri(),
-        );
-        $configuration['schemes'] = array();
-        foreach ($this->getSchemaConfigs() as $schemaName => $schemaConfig) {
-            if ($public && !empty($schemaConfig['featureType'])) {
-                $schemaConfig['featureType'] = $this->cleanFromInternConfiguration($schemaConfig['featureType']);
+        $configuration            = parent::getConfiguration();
+        $configuration['debug']   = isset($configuration['debug']) ? $configuration['debug'] : false;
+        $configuration['fileUri'] = $this->container->getParameter('mapbender.uploads_dir') . "/" . FeatureType::UPLOAD_DIR_NAME;
+        $featureTypes = null;
+
+        if (isset($configuration["schemes"]) && is_array($configuration["schemes"])) {
+            foreach ($configuration['schemes'] as $key => &$scheme) {
+                if (is_string($scheme['featureType'])) {
+                    if ($featureTypes === null) {
+                        $featureTypes = $this->getFeatureTypeDeclarations();
+                    }
+                    $featureTypeName           = $scheme['featureType'];
+                    $scheme['featureType']     = $featureTypes[ $featureTypeName ];
+                    $scheme['featureTypeName'] = $featureTypeName;
+                }
+
+                if ($public) {
+                    $this->cleanFromInternConfiguration($scheme['featureType']);
+                }
+
+                if (isset($scheme['formItems'])) {
+                    $scheme['formItems'] = $this->prepareItems($scheme['formItems']);
+                }
+
+                if (isset($scheme['search']) && isset($scheme['search']["form"])) {
+                    $scheme['search']["form"] = $this->prepareItems($scheme['search']["form"]);
+                }
             }
-            $configuration['schemes'][$schemaName] = $schemaConfig;
         }
         return $configuration;
     }
 
     public function getConfigurationAction(){
         return $this->getConfiguration(true);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function getType()
-    {
-        return 'Mapbender\DigitizerBundle\Element\Type\DigitizerAdminType';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function getFormTemplate()
-    {
-        return 'MapbenderDigitizerBundle:ElementAdmin:digitizeradmin.html.twig';
-    }
-
-    public function getFrontendTemplatePath($suffix = '.html.twig')
-    {
-        return 'MapbenderDigitizerBundle:Element:digitizer.html.twig';
     }
 
     /**
@@ -198,89 +158,6 @@ class Digitizer extends BaseElement
             }
         }
         return $feature;
-    }
-
-    /**
-     * Request handling adapter for old Mapbender < 3.0.8-beta1
-     * @param string $action ignored
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function httpAction($action)
-    {
-        /** @var $requestService Request */
-        $request = $this->container->get('request_stack')->getCurrentRequest();
-        return $this->handleHttpRequest($request);
-    }
-
-    /**
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
-     */
-    public function handleHttpRequest(Request $request)
-    {
-        $action = $request->attributes->get('action');
-        switch ($action) {
-            case 'getConfiguration':
-            case 'configuration/get':
-                // @todo: all '*Action' methods should return responses
-                return new JsonResponse($this->getConfigurationAction());
-            case 'select':
-                return new JsonResponse($this->selectAction($this->getRequestData()));
-            case 'save':
-                // @todo: all '*Action' methods should return responses
-                // @todo: all '*Action' methods should deal with the framework's Request object directly
-                return new JsonResponse($this->saveAction($this->getRequestData()));
-            case 'delete':
-                // @todo: all '*Action' methods should return responses
-                // @todo: all '*Action' methods should deal with the framework's Request object directly
-                return new JsonResponse($this->deleteAction($this->getRequestData()));
-            case 'selectForm':
-            case 'form/select':
-                // @todo: all '*Action' methods should return responses
-                // @todo: all '*Action' methods should deal with the framework's Request object directly
-                return new JsonResponse($this->selectFormAction($this->getRequestData()));
-            case 'uploadFile':
-            case 'file/upload':
-            case 'file-upload': // super legacy mode
-                // @todo: all '*Action' methods should return responses
-                // @todo: all '*Action' methods should deal with the framework's Request object directly
-                return new JsonResponse($this->uploadFileAction($this->getRequestData()));
-            case 'datastore/save':
-            case 'saveDatastore':
-                // @todo: all '*Action' methods should return responses
-                // @todo: all '*Action' methods should deal with the framework's Request object directly
-                return new JsonResponse($this->saveDatastoreAction($this->getRequestData()));
-            case 'datastore/get':
-            case 'getDatastore':
-                // @todo: all '*Action' methods should return responses
-                // @todo: all '*Action' methods should deal with the framework's Request object directly
-                return new JsonResponse($this->getDatastoreAction($this->getRequestData()));
-            case 'removeDatastore':
-            case 'datastore/remove':
-            // @todo: all '*Action' methods should return responses
-            // @todo: all '*Action' methods should deal with the framework's Request object directly
-                return new JsonResponse($this->removeDatastoreAction($this->getRequestData()));
-            case 'listStyle':
-            case 'style/list':
-                // @todo: all '*Action' methods should return responses
-                // @todo: all '*Action' methods should deal with the framework's Request object directly
-                return new JsonResponse($this->listStyleAction($this->getRequestData()));
-            case 'saveStyle':
-            case 'style/save':
-                // @todo: all '*Action' methods should return responses
-                // @todo: all '*Action' methods should deal with the framework's Request object directly
-                return new JsonResponse($this->saveStyleAction($this->getRequestData()));
-            case 'getFeatureInfo':
-            case 'featureInfo/get':
-            case 'info/getFeature':     // srsly (emulating BaseElement magic)
-            case 'info/feature/get':    // ...
-                // @todo: all '*Action' methods should return responses
-                // @todo: all '*Action' methods should deal with the framework's Request object directly
-                return new JsonResponse($this->getFeatureInfoAction($this->getRequestData()));
-            default:
-                throw new NotFoundHttpException("No such action " . print_r($action, true));
-        }
     }
 
     /**
@@ -579,7 +456,7 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * Updates the index of solr (full import) and returns the status 
+     * Updates the index of solr (full import) and returns the status
      * @param $request
      * @return int status
      */
@@ -755,19 +632,19 @@ class Digitizer extends BaseElement
                 if($head["reponse_code"] !== 200){
                     $responseArray['error'][] = array('response' => $response, 'code' => $head['reponse_code']);
                 } else if (!!(json_decode($response))) {
-                   
+
                     $dataSets[] = $response;
                 } else {
                     $responseArray['error'][]  = array('response' => $response, 'code' => "Response of url: {$url} is not a JSON");
                 }
-                
+
             } else  {
                 $responseArray['error'][]  = "Unknown error for url: {$url}";
             }
 
         }
-    
-       
+
+
 
         $responseArray['dataSets'] = $dataSets;
         return $responseArray;
@@ -778,7 +655,6 @@ class Digitizer extends BaseElement
      *
      * @param array $featureType
      * @return array
-     * @todo: remove reference abuse, callers should use the return value
      */
     protected function cleanFromInternConfiguration(array &$featureType)
     {
@@ -881,98 +757,78 @@ class Digitizer extends BaseElement
     }
 
     /**
-     * @return string
-     */
-    protected function getFileUri()
-    {
-        return $this->container->getParameter("mapbender.uploads_dir") . "/" . FeatureType::UPLOAD_DIR_NAME;
-    }
-
-    /**
      * @param string $id
      * @return DataStore
      */
     protected function getDataStoreById($id)
     {
-        return $this->getDataStoreService()->get($id);
+        /** @var DataStoreService $dataStoreService */
+        $dataStoreService = $this->container->get('data.source');
+        return $dataStoreService->get($id);
     }
 
     /**
-     * Override hook for child classes
+     * Select/search features and return feature collection
      *
-     * @return DataStoreService
+     * @param array $request
+     * @return array Feature collection
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
      */
-    protected function getDataStoreService()
+    public function getMaxElevationAction($request)
     {
-        /** @var DataStoreService $service */
-        $service = $this->container->get('data.source');
-        return $service;
-    }
+        $schemaName  = $request["schema"];
+        $featureType = $this->getFeatureTypeBySchemaName($schemaName);
+        $val = $request["curveseg_id"];
+        $srs = $request["srs"];
+        $connection     = $featureType->getConnection();
 
-    /**
-     * Override hook for child classes
-     *
-     * @return FeatureTypeService
-     */
-    protected function getFeatureTypeService()
-    {
-        /** @var FeatureTypeService $service */
-        $service = $this->container->get('features');
-        return $service;
-    }
+        $sql            = "Select ST_ASText(geom) as linestring, vertex1_point_id as p1, vertex2_point_id as p2 from data.curveseg_line where curveseg_id = ?";
+        $curveseg_line   = $connection->fetchAssoc($sql,[$val]);
+        $p1 = $curveseg_line["p1"];
+        $p2 = $curveseg_line["p2"];
+        $lineString = $curveseg_line["linestring"];
 
-    /**
-     * Get a mapping of ALL schema configurations
-     *
-     * @return mixed[] with schema names as string keys
-     */
-    protected function getSchemaConfigs()
-    {
-        if (!$this->schemaConfigsComplete) {
-            $entityConfig = $this->entity->getConfiguration() + array(
-                'schemes' => array(),
-            );
-            foreach (array_keys($entityConfig['schemes'] ?: array()) as $schemaName) {
-                $this->getSchemaConfig($schemaName);
-            }
+        $sql            = "Select ST_ASText(coordinate) as coord, elevation_top, height from data.point where point_id = ?";
+        $point1   = $connection->fetchAssoc($sql,[$p1]);
+        $point2   = $connection->fetchAssoc($sql,[$p2]);
+        $xy1 = $point1["coord"];
+        $elevation1 = $point1["elevation_top"] ?: 0;
+        $xy2 = $point2["coord"];
+        $elevation2 = $point2["elevation_top"]  ?: 0;
+        $height_diff = $elevation1-$elevation2;
+        $base_height = $point1["height"];
+
+        $elevation_connection = $this->container->get('doctrine.dbal.elevation_connection');
+
+        $sql = "SELECT st_x(st_transform(point, $srs)) as x, st_y(st_transform(point, $srs)) as y, z AS elevation, line_frac AS fraction
+        FROM get_base_elevation_data(st_transform(st_geomfromtext(?, ?), 31287), ?)";
+        //$sql = 'SELECT SELECT * FROM get_elevation_data(?, ?, ?)';
+        $arr =  [$lineString, '4326', 300 ];
+        $stmt = $elevation_connection->executeQuery($sql,$arr);
+        $result = $stmt->fetchAll();
+
+
+        $size = sizeof($result);
+        foreach($result as &$res) {
+            $res["additional_elevation"] =  $base_height - $height_diff*($res["fraction"]);
+            $res["height_max_curveseg"] = $res["elevation"]+$res["additional_elevation"];
+
         }
-        return $this->schemaConfigs;
-    }
 
-    /**
-     * Get a single (transformed) schema configuration. Transformed means
-     * * formItems prepared
-     * * featureType string reference resolved to full featureType configuration + featureTypeName entry
-     * NOTE: the getSchemaByName method (introduced on newer branches) only returns the RAW config
-     *
-     * @param string $schemaName
-     * @return mixed[]
-     * @throws \RuntimeException for unknown $schemaName
-     */
-    protected function getSchemaConfig($schemaName)
-    {
-        if (!array_key_exists($schemaName, $this->schemaConfigs)) {
-            $entityConfig = $this->entity->getConfiguration() + array(
-                'schemes' => array(),
-            );
-            if (empty($entityConfig['schemes'][$schemaName])) {
-                throw new \RuntimeException("No such schema " . print_r($schemaName));
-            }
-            $schemaConfig = $entityConfig['schemes'][$schemaName];
-            if (is_string($schemaConfig['featureType'])) {
-                $schemaConfig['featureTypeName'] = $schemaConfig['featureType'];
-                $schemaConfig['featureType'] = $this->getFeatureTypeConfig($schemaConfig['featureType']);
-            }
-            if (isset($schemaConfig['formItems'])) {
-                $schemaConfig['formItems'] = $this->prepareItems($schemaConfig['formItems']);
-            }
-            if (isset($schemaConfig['search']) && isset($schemaConfig['search']['form'])) {
-                $schemaConfig['search']["form"] = $this->prepareItems($schemaConfig['search']['form']);
+        $max = 0;
+        $found = null;
+        foreach($result as $r) {
+            if ($r["height_max_curveseg"] > $max) {
+                $found = $r;
+                $max = $r["height_max_curveseg"];
             }
 
-            $this->schemaConfigs[$schemaName] = $schemaConfig;
-            $this->schemaConfigsComplete = !array_diff(array_keys($entityConfig['schemes']), array_keys($this->schemaConfigs));
         }
-        return $this->schemaConfigs[$schemaName];
+
+
+        return new JsonResponse($found);
+
+
     }
 }
