@@ -205,13 +205,17 @@
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.createSchemaFeatureLayer_ = function (schema) {
-        var layer = new ol.layer.Vector({
+        var options = {
             source: new ol.source.Vector(),
-            visible: true,
-            minResolution: Mapbender.Model.scaleToResolution(schema.maxScale || 0),
-            maxResolution: Mapbender.Model.scaleToResolution(schema.minScale || Infinity)
-        });
-        return layer;
+            visible: true
+        };
+        if (schema.maxScale) {
+            options.maxResolution = Mapbender.Model.scaleToResolution(parseInt(schema.maxScale, 10));
+        }
+        if (schema.minScale) {
+            options.inResolution = Mapbender.Model.scaleToResolution(parseInt(schema.minScale, 10));
+        }
+        return new ol.layer.Vector(options);
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.customStyleFeature_ = function (feature) {
