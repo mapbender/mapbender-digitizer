@@ -37,7 +37,6 @@
          */
         render: function(schema) {
             var settings = this.getOptions(schema);
-            // var $tableWrap = $("<div/>").resultTable(settings);
             var $table = $('<table class="table table-striped -js-items">');
             $table.DataTable(settings);
             var $tableWrap = $('<div class="mapbender-element-result-table">');
@@ -114,11 +113,9 @@
          * @private
          */
         getDatatablesInstance_: function() {
-            // This works with or without vis-ui resultTable
             return $('table.-js-items:first', this.scope).dataTable().api();
         },
         /**
-         * Returns options used to initialize resultTable widget.
          * @param {DataManagerSchemaConfig} schema
          * @return {Object}
          */

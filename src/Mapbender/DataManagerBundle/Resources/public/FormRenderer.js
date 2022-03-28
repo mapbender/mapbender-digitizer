@@ -781,7 +781,6 @@
     // * 'formGroup'
     // * 'button'
     // * 'submit'
-    // * 'resultTable'
     // * 'digitizingToolSet'
     // * 'popup'
     // * 'slider' (=mockup, hardcoded [0..10] range; prefer <input type="range">)
