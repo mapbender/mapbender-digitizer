@@ -226,7 +226,8 @@
                     return self.owner._getUniqueItemId(row);
                 },
                 title: 'Nr.',
-                width: '1%'
+                width: '1%',
+                className: 'text-right'
             }];
         },
         getColumnsConfigs: function(schema) {
