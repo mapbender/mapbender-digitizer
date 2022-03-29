@@ -25,30 +25,31 @@ class DataStoreUtil
      */
     public static function configsFromSchemaConfigs(RepositoryRegistry $registry, array $schemaConfigs)
     {
-        $merged = $registry->getDataStoreDeclarations() ?: array();
+        $pool = $registry->getDataStoreDeclarations() ?: array();
+        $bySchema = array();
         foreach ($schemaConfigs as $schemaName => $schemaConfig) {
             foreach (array('dataStore', 'featureType') as $dsKey) {
-                if (!empty($schemaConfig[$dsKey]) && empty($merged[$schemaName])) {
-                    $merged[$schemaName] = $schemaConfig[$dsKey];
+                if (!empty($schemaConfig[$dsKey]) && empty($bySchema[$schemaName])) {
+                    $bySchema[$schemaName] = $schemaConfig[$dsKey];
                 }
             }
         }
-        $merged = static::resolveConfigReferences($merged);
-        static::checkConfigs($merged);
-        return $merged;
+        $resolved = static::resolveConfigReferences($bySchema, $pool + $bySchema);
+        static::checkConfigs($resolved);
+        return $resolved;
     }
 
     /**
-     * @param mixed[] $storeConfigs
+     * @param mixed[] $bySchema
      * @return mixed[][]
      * @throws ConfigurationErrorException
      */
-    public static function resolveConfigReferences(array $storeConfigs)
+    protected static function resolveConfigReferences(array $bySchema, array $storePool = array())
     {
-        foreach ($storeConfigs as $schemaName => $storeConfig) {
+        foreach ($bySchema as $schemaName => $storeConfig) {
             $visited = array();
             while (\is_string($storeConfig)) {
-                if (empty($storeConfigs[$storeConfig])) {
+                if (empty($storePool[$storeConfig]) && empty($bySchema[$storeConfig])) {
                     throw new ConfigurationErrorException("Undefined dataStore / featureType reference in schema {$schemaName}: {$storeConfig}");
                 }
                 $isCyclic = \in_array($storeConfig, $visited);
@@ -56,10 +57,14 @@ class DataStoreUtil
                 if ($isCyclic) {
                     throw new ConfigurationErrorException("Circular dataStore / featureType reference in schema {$schemaName}: " . implode(' => ', $visited));
                 }
-                $storeConfigs[$schemaName] = $storeConfig = $storeConfigs[$storeConfig];
+                $storeConfig = !empty($storePool[$storeConfig])
+                    ? $storePool[$storeConfig]
+                    : $bySchema[$storeConfig]
+                ;
+                $bySchema[$schemaName] = $storeConfig;
             }
         }
-        return $storeConfigs;
+        return $bySchema;
     }
 
     /**
