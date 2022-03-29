@@ -227,7 +227,7 @@
                 },
                 title: 'Nr.',
                 width: '1%',
-                className: 'text-right'
+                className: 'text-right no-clip'
             }];
         },
         getColumnsConfigs: function(schema) {
@@ -252,7 +252,7 @@
                 width: '1%',
                 orderable: false,
                 searchable: false,
-                className: 'interface',
+                className: 'interface no-clip',
                 defaultContent: this.buttonMarkupCache_[tableSchema.schemaName].html
             };
         },

@@ -66,7 +66,7 @@
   td.interface {
     text-align: right;
   }
-  td:not(.interface) {
+  td:not(.no-clip) {
     overflow-x: hidden;
     text-overflow: ellipsis;
     // Ellipsis requires a width property; see https://stackoverflow.com/a/11877033
