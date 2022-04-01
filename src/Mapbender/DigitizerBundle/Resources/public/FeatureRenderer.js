@@ -102,7 +102,7 @@
     Mapbender.Digitizer.FeatureRenderer.prototype.initItemSchemaLayer_ = function(schema) {
         var layer = this.createSchemaFeatureLayer_(schema);
         var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
-        this.schemaStyles_[schema.schemaName] = this.initializeStyles_(styleConfigs || {});
+        this.schemaStyles_[schema.schemaName] = this.initializeStyles_(schema, styleConfigs || {});
         layer.setStyle(this.createLayerStyleFunction_(schema, styleConfigs['default']));
         delete this.schemaStyles_[schema.schemaName]['default'];
         this.olMap.addLayer(layer);
@@ -187,7 +187,7 @@
         }
     };
 
-    Mapbender.Digitizer.FeatureRenderer.prototype.initializeStyles_ = function (styleConfigs) {
+    Mapbender.Digitizer.FeatureRenderer.prototype.initializeStyles_ = function (itemSchema, styleConfigs) {
         var styles = {};
         var keys = Object.keys(styleConfigs);
         for (var i = 0; i < keys.length; ++ i) {
