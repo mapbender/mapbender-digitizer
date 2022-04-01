@@ -368,7 +368,7 @@
             return params;
         },
         _afterRemove: function(schema, feature, id) {
-            this.renderer.removeFeature(feature);
+            this.renderer.removeFeature(schema, feature);
             this._super(schema, feature, id);
         },
 
