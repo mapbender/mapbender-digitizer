@@ -370,6 +370,11 @@
         _afterRemove: function(schema, feature, id) {
             this.renderer.removeFeature(schema, feature);
             this._super(schema, feature, id);
+            this.toolsetRenderer.resume();
+            if (schema.allowDigitize) {
+                this.featureEditor.resume();
+            }
+            this.resumeContextMenu_();
         },
 
         _prepareDataItem: function(itemData) {
