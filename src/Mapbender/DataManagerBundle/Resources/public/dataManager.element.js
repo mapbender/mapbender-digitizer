@@ -498,8 +498,6 @@
                     widget._cancelForm(schema, dataItem);
                 }
             });
-            // @todo Digitizer: add custom schema buttons...?
-
             return buttons;
         },
         /**

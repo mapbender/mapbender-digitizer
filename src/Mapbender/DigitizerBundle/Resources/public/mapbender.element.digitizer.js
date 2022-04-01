@@ -321,7 +321,7 @@
         _getEditDialogButtons: function(schema, feature) {
             var self = this;
             var buttons = [];
-            if (schema.copy && schema.copy.enable) {
+            if (schema.copy && schema.copy.enable && this._getUniqueItemId(feature)) {
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.clone.title'),
                     click: function() {
