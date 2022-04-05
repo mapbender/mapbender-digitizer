@@ -56,7 +56,7 @@ mb.digitizer:
         fontFamily: Font
         fontColor: Text color
         fontSize: Font size
-        fontweight: Weight
+        fontWeight: Font weight
         regular: regular
         bold: bold
         italic: italic
