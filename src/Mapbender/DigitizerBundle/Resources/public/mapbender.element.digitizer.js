@@ -530,7 +530,7 @@
                         widget._replaceItemData(itemSchema, feature, savedItem.properties || {});
                         feature.set('dirty', false);
                         widget.tableRenderer.refreshRow(feature, false);
-                        this._saveEvent(itemSchema, feature, widget._getUniqueItemId(feature));
+                        widget._saveEvent(itemSchema, feature, widget._getUniqueItemId(feature));
                     }
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
                 })
