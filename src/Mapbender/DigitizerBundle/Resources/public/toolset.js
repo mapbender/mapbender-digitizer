@@ -14,7 +14,8 @@
         this.controlFactory = new Mapbender.Digitizer.DigitizingControlFactory();
         this.activeInteraction = null;
         this.paused_ = false;
-        this.tools_ = {};
+        this.schemaTools_ = {};
+        this.sharedTools_ = {};
         this.modifyingCollection_ = new ol.Collection([]);
     };
 
@@ -199,15 +200,21 @@
 
     Object.assign(Mapbender.Digitizer.FeatureEditor.prototype, {
         getDrawingTool: function(type, schema) {
-            if (!this.tools_[schema.schemaName]) {
-                this.tools_[schema.schemaName] = {};
+            var toolGroup;
+            if (type === 'moveFeature' || type === 'modifyFeature') {
+                toolGroup = this.sharedTools_;
+            } else {
+                if (!this.schemaTools_[schema.schemaName]) {
+                    this.schemaTools_[schema.schemaName] = {};
+                }
+                toolGroup = this.schemaTools_[schema.schemaName];
             }
-            if (!this.tools_[schema.schemaName][type]) {
+            if (!toolGroup[type]) {
                 var newInteraction = this.createDrawingTool(schema, type);
                 newInteraction.setActive(false);
                 this.olMap.addInteraction(newInteraction);
 
-                this.tools_[schema.schemaName][type] = newInteraction;
+                toolGroup[type] = newInteraction;
                 var widget = this.owner;
                 newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
                     var feature = event.feature;
@@ -220,7 +227,7 @@
                     });
                 });
             }
-            return this.tools_[schema.schemaName][type];
+            return toolGroup[type];
         },
         /**
          * @param {Object} schema

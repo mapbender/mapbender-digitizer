@@ -446,7 +446,7 @@
             this.selectControl.getFeatures().clear();
             if (schema.allowDigitize) {
                 this.featureEditor.setEditFeature(null);
-                if (!schema.continueDrawingAfterSave && (this.activeTool_ || {}).schema === schema) {
+                if (!schema.continueDrawingAfterSave && this.activeTool_) {
                     this._toggleDrawingTool(schema, this.activeTool_.name, false);
                     $('.-fn-toggle-tool', this.element).removeClass('active');
                 }
