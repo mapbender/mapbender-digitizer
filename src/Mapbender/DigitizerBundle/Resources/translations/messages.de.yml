@@ -39,25 +39,24 @@ mb.digitizer:
         color: Color
         opacity: Deckkraft
         pointRadius: Punktgröße (pixel)
-        activate: Activate
         strokeColor: Strichfarbe
         strokeWidth: Strichstärke
         lineCap: Strichabschlüsse
-        round: round
-        square: square
-        butt: butt
+        round: Abgerundet
+        square: Eckig
+        butt: Bündig
         strokeDashstyle: Linienmuster
-        solid: solid
-        dot: dot
-        dash: dash
-        longdash: longdash
-        dashdot: dashdot
-        longdashdot: longdashdot
+        solid: Durchgezogen
+        dot: Punktiert
+        dash: Gestrichelt
+        longdash: Gestrichelt, lang
+        dashdot: Strichpunkt
+        longdashdot: Strichpunktpunkt
         label: Beschriftung
         fontFamily: Schriftart
         fontColor: Schriftfarbe
         fontSize: Schriftgröße
         fontWeight: Schriftstärke
-        regular: regular
-        bold: bold
-        italic: italic
+        regular: Normal
+        bold: Dick
+        italic: Kursiv
