@@ -206,7 +206,7 @@
         canvasFontRuleFromSvg: function(style) {
             var fontFamily = style.fontFamily || "sans-serif";
             var fontSize = style.fontSize && ([style.fontSize, 'px'].join('')) || '';
-            var fontWeight = style.fontWeight || "";
+            var fontWeight = style.fontWeight !== 'regular' && style.fontWeight || 'normal';
 
             /** @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font */
             return [fontWeight, fontSize, fontFamily].join(" ");
