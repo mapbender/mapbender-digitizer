@@ -298,6 +298,7 @@
             $geometryToolGroup.empty().append(this.toolsetRenderer.renderGeometryToolButtons(schema));
         },
         _openEditDialog: function(schema, feature) {
+            let self = this;
             // Make feature visible in table when editing was started
             // from map click or context menu.
             // NOTE: newly created features are not in the table and cannot be paged to
@@ -316,6 +317,12 @@
             if (schema.allowDigitize) {
                 this.featureEditor.pause();
             }
+            dialog.one('dialogclose', function() {
+                var $activeButton = self.element.find('.-fn-toggle-tool.active[data-toolname]');
+                var schema = $activeButton.data('schema');
+                self._toggleDrawingTool(schema, $activeButton.attr('data-toolname'), false);
+                $activeButton.removeClass('active');
+            });
             return dialog;
         },
         _getEditDialogButtons: function(schema, feature) {
