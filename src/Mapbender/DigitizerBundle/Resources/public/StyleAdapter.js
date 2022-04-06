@@ -209,7 +209,7 @@
             var fontWeight = style.fontWeight !== 'regular' && style.fontWeight || 'normal';
 
             /** @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font */
-            return [fontWeight, fontSize, fontFamily].filter(function(part) { retun !!part; }).join(" ");
+            return [fontWeight, fontSize, fontFamily].filter(function(part) { return !!part; }).join(" ");
         },
         /**
          * @param {String} dashStyle
