@@ -317,7 +317,7 @@
             if (schema.allowDigitize) {
                 this.featureEditor.pause();
             }
-            dialog.one('dialogclose', function() {
+            dialog.one('destroy', function() {
                 var $activeButton = self.element.find('.-fn-toggle-tool.active[data-toolname]');
                 var schema = $activeButton.data('schema');
                 self._toggleDrawingTool(schema, $activeButton.attr('data-toolname'), false);
