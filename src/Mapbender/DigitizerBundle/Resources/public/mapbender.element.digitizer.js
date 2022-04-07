@@ -319,9 +319,12 @@
             }
             dialog.one('destroy', function() {
                 var $activeButton = self.element.find('.-fn-toggle-tool.active[data-toolname]');
-                var schema = $activeButton.data('schema');
-                self._toggleDrawingTool(schema, $activeButton.attr('data-toolname'), false);
-                $activeButton.removeClass('active');
+                if ($activeButton.length) {
+                    var schema = $activeButton.data('schema');
+                    self._toggleDrawingTool(schema, $activeButton.attr('data-toolname'), false);
+                    $activeButton.removeClass('active');
+                }
+
             });
             return dialog;
         },
