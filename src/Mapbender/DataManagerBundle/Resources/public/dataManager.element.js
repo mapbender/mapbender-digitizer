@@ -194,6 +194,7 @@
             if (this.currentPopup) {
                 if (this.currentPopup.dialog('instance')) {
                     this.currentPopup.dialog('destroy');
+                    this.currentPopup.trigger('destroy');
                 }
                 this.currentPopup = null;
             }
