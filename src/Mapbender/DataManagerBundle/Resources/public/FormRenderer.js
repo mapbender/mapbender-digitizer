@@ -527,7 +527,7 @@
             ;
         },
         handle_select_: function(settings) {
-            var required = (settings.attr || {}).required || settings.required;
+            var required = (settings.attr || {}).required || settings.required || !!settings.mandatory;
             var multiple = (settings.attr || {}).multiple || settings.multiple;
             var $select = $(document.createElement('select'))
                 .attr(settings.attr || {})
