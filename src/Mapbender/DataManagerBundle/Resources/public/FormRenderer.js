@@ -213,6 +213,11 @@
                 $('.-js-init-select2', scope).each(function() {
                     var $select = $(this);
                     $(this).select2($select.data('select2-options') || {});
+                    // Forward custom css rules from (now hidden) select2-ified select to visible select2 element
+                    var style = $select.attr('style');
+                    if (style) {
+                        $('.select2-selection', $select.closest('.form-group')).attr('style', style);
+                    }
                 });
             }
             var self = this;
