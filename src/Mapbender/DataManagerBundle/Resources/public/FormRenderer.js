@@ -561,6 +561,7 @@
             if (!multiple && settings.placeholder && !haveEmptyOption) {
                 var $placeholderOption = $(document.createElement('option'))
                     .text(settings.placeholder)
+                    .attr('value', '')
                     .prop('disabled', required)
                     .prop('selected', true)
                 ;
