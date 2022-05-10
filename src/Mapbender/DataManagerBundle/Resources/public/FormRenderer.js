@@ -537,6 +537,8 @@
                 .addClass('form-control')
             ;
             var options = settings.options || [];
+            var $options = [];
+            var haveEmptyOption = false;
             for (var i = 0; i < options.length; ++i) {
                 var option = options[i];
                 var $option = $(document.createElement('option'))
@@ -544,9 +546,23 @@
                     .attr('value', option.value)
                     .text(option.label)
                 ;
-                $select.append($option);
+                $options.push($option);
+                if (!option.value) {
+                    haveEmptyOption = true;
+                }
             }
-            if (multiple || settings.select2) {
+            /** "For multi-selects, you must *not* have an empty <option> element */
+            /** @see https://select2.org/placeholders */
+            if (!multiple && settings.placeholder && !haveEmptyOption) {
+                var $placeholderOption = $(document.createElement('option'))
+                    .text(settings.placeholder)
+                    .prop('disabled', required)
+                    .prop('selected', true)
+                ;
+                $options.splice(0, 0, $placeholderOption);
+            }
+            $select.append($options);
+            if ((multiple || settings.select2) && typeof ($select.select2) === 'function') {
                 $select.addClass('-js-init-select2');
                 if (settings.placeholder) {
                     $select.data('select2-options', {placeholder: settings.placeholder});
