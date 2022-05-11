@@ -512,7 +512,11 @@
          * @private
          */
         _createItem: function(schema) {
-            this._openEditDialog(schema, {});
+            this._openEditDialog(schema, {
+                id: null,
+                schemaName: schema.schemaName,
+                properties: {}
+            });
         },
         /**
          * @param {DataManagerSchemaConfig} schema
