@@ -526,19 +526,48 @@
             };
         },
         /**
+         * Loads data items with explicit request params, without side effects.
+         *
+         * @param {Object} params
+         * @returns {Promise} resolves with prepared items
+         */
+        loadItems: function(params) {
+            var self = this;
+            return $.getJSON([this.elementUrl, 'select'].join(''), params)
+                .then(function(dataItems) {
+                    return dataItems.map(function(itemData) {
+                        return self._prepareDataItem(itemData);
+                    });
+                })
+            ;
+        },
+        /**
+         * Loads data items, and replaces current table (Digitizer: and map layer contents).
+         * Aborts previous pending item request.
+         * Updates loading indicator
+         * Notifies on error
+         *
+         * @returns {Promise} resolves with prepared items
          * @private
          */
         _getData: function(schema) {
             var widget = this;
-            return this.getJSON('select', this._getSelectRequestParams(schema))
-                .then(function(dataItems) {
-                    var preparedItems = dataItems.map(function(itemData) {
-                        return widget._prepareDataItem(itemData);
-                    });
+            var $loadingIndicator = $('.loading-indicator', this.element);
+            if (this.fetchXhr) {
+                this.fetchXhr.abort();
+                this.fetchXhr = null;
+            }
+            $loadingIndicator.css({opacity: 1});
+            this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), $loadingIndicator)
+                .always(function() {
+                    widget.fetchXhr = null;
+                })
+                .then(function(preparedItems) {
                     widget.tableRenderer.replaceRows(preparedItems);
                     return preparedItems;
                 })
             ;
+            return this.fetchXhr;
         },
         /**
          * Transforms data item server response data to internally used item structure.
@@ -635,33 +664,6 @@
         _getUniqueItemId: function(item) {
             return item.id || null;
         },
-        /**
-         * @param {String} uri
-         * @param {Object} [data]
-         * @return {jQuery.Deferred}
-         */
-        getJSON: function(uri, data) {
-            var self = this;
-            var url = this.elementUrl + uri;
-            var $loadingIndicator = $('.loading-indicator', this.element);
-            if (this.fetchXhr) {
-                this.fetchXhr.abort();
-                this.fetchXhr = null;
-            }
-            $loadingIndicator.css({opacity: 1});
-            this.fetchXhr = $.getJSON(url, data)
-                .fail(function(xhr) {
-                    if (xhr.statusText !== 'abort') {
-                        self._onAjaxError(xhr);
-                    }
-                })
-                .always(function() {
-                    self.fetchXhr = null;
-                    $loadingIndicator.css({opacity: 0})
-                })
-            ;
-            return this.fetchXhr;
-        },
         postJSON: function(uri, data, options) {
             var options_ = {
                 url: this.elementUrl + uri,
@@ -675,14 +677,21 @@
             }
             var $loadingIndicator = $('.loading-indicator', this.element);
             $loadingIndicator.css({opacity: 1});
-            return $.ajax(options_)
-                .fail(this._onAjaxError)
-                .always(function() {
-                    $loadingIndicator.css({opacity: 0})
-                })
-            ;
+            return this.decorateXhr_($.ajax(options_, $loadingIndicator));
+        },
+        decorateXhr_: function(jqXhr, $loadingIndicator) {
+            if ($loadingIndicator) {
+                jqXhr.always(function() {
+                    $loadingIndicator.css({opacity: 0});
+                });
+            }
+            jqXhr.fail(this._onAjaxError);
+            return jqXhr;
         },
         _onAjaxError: function(xhr) {
+            if (xhr.statusText === 'abort') {
+                return;
+            }
             var errorMessage = Mapbender.trans('mb.data.store.api.query.error-message');
             console.error(errorMessage, xhr);
             if (xhr.responseJSON && xhr.responseJSON.message) {
