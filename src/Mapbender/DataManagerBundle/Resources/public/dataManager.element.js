@@ -152,8 +152,13 @@
          */
         _start: function() {
             this._trigger('ready');
-            // Use schema change event, it does everything we need
-            $('.-fn-schema-selector', this.element).trigger('change');
+            if (!this.skipInitialData_()) {
+                // Use schema change event, it does everything we need
+                $('.-fn-schema-selector', this.element).trigger('change');
+            }
+        },
+        skipInitialData_: function() {
+            return !!this.element.parents('.contentPane').length;
         },
         _initializeEvents: function() {
             var self = this;

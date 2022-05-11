@@ -81,6 +81,10 @@
             // @todo ml: evaluate displayPermanent
             this.renderer.toggleSchema(initialSchema, initialSchema.displayOnInactive && initialSchema.displayPermanent);
         },
+        skipInitialData_: function() {
+            // Digitizer only: allow permanently invisible "headless" Digitizer to load / render features normally
+            return false;
+        },
         registerMapEvents_: function() {
             var self = this;
             var olMap = this.mbMap.getModel().olMap;
