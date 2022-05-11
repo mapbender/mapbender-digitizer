@@ -407,6 +407,8 @@
             var itemValues = this._getItemData(dataItem);
 
             var dialog = $("<div/>");
+            dialog.data('item', dataItem);
+            dialog.data('schema', schema);
             dialog.append(this.formRenderer_.renderElements(schema.formItems));
             if (!schema.allowEdit) {
                 $('.-fn-delete-attachment', dialog).remove();
