@@ -594,6 +594,9 @@
         getSelect2Options: function(item, required, multiple, placeholderText) {
             /** @see https://select2.org/configuration/options-api */
             return {
+                dropdownAutoWidth: true,
+                // Safest width inside .form-group / Bootstrap grids
+                width: '100%',
                 placeholder: placeholderText || ''
             };
         },
