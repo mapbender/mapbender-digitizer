@@ -542,6 +542,7 @@
                 .addClass('form-control')
             ;
             var options = settings.options || [];
+            var placeholderText = (settings.attr || {}).placeholder || settings.placeholder;
             var $options = [];
             var haveEmptyOption = false;
             for (var i = 0; i < options.length; ++i) {
@@ -554,11 +555,12 @@
                 $options.push($option);
                 if (!option.value) {
                     haveEmptyOption = true;
+                    placeholderText = option.label || placeholderText;
                 }
             }
             /** "For multi-selects, you must *not* have an empty <option> element */
             /** @see https://select2.org/placeholders */
-            if (!multiple && settings.placeholder && !haveEmptyOption) {
+            if (!multiple && placeholderText && !haveEmptyOption) {
                 var $placeholderOption = $(document.createElement('option'))
                     .text(settings.placeholder)
                     .attr('value', '')
@@ -570,9 +572,8 @@
             $select.append($options);
             if ((multiple || settings.select2) && typeof ($select.select2) === 'function') {
                 $select.addClass('-js-init-select2');
-                if (settings.placeholder) {
-                    $select.data('select2-options', {placeholder: settings.placeholder});
-                }
+                var s2options = this.getSelect2Options(settings, required, multiple, placeholderText);
+                $select.data('select2-options', s2options);
             }
             if (settings.value !== null && typeof (settings.value) !== 'undefined') {
                 var initial = settings.value;
@@ -585,6 +586,12 @@
             $select.data('declaration', settings);
             this.addCustomEvents_($select, settings);
             return this.wrapInput_($select, settings);
+        },
+        getSelect2Options: function(item, required, multiple, placeholderText) {
+            /** @see https://select2.org/configuration/options-api */
+            return {
+                placeholder: placeholderText || ''
+            };
         },
         handle_radioGroup_: function(settings) {
             var wrappedRadios = [];
