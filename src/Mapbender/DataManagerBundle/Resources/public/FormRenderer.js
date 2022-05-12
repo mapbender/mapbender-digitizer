@@ -212,7 +212,11 @@
             if ($.fn.select2) {
                 $('.-js-init-select2', scope).each(function() {
                     var $select = $(this);
-                    $(this).select2($select.data('select2-options') || {});
+                    var s2options = $select.data('select2-options') || {};
+                    if (!s2options.dropdownParent) {
+                        s2options.dropdownParent = scope;
+                    }
+                    $(this).select2(s2options);
                     // Forward custom css rules from (now hidden) select2-ified select to visible select2 element
                     var style = $select.attr('style');
                     if (style) {
