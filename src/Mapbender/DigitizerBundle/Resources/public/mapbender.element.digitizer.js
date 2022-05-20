@@ -465,6 +465,9 @@
             this.toolsetRenderer.resume();
             this.resumeContextMenu_();
         },
+        _afterFailedSave: function(schema, feature) {
+            this.revertGeometry(feature);
+        },
         _getData: function(schema) {
             this.queuedRefresh_[schema.schemaName] = false;
             var self = this;
