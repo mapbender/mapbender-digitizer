@@ -395,6 +395,9 @@
             var olMap = this.mbMap.getModel().olMap;
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
         },
+        _afterFailedSave: function(schema, feature) {
+            this.revertGeometry(feature);
+        },
         _getData: function(schema) {
             var layer = this.getSchemaLayer(schema);
             return this._super(schema).then(function(features) {
