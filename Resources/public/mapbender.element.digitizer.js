@@ -476,7 +476,11 @@
                         widget.tableRenderer.refreshRow(schema, feature, false);
                     }
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
-                })
+                }).fail(function(){
+                    features.forEach(function(feature){
+                        widget._afterFailedSave(schema,feature);
+                    });
+                });
             ;
             if (!schema.continueDrawingAfterSave) {
                 promise.always(function() {
