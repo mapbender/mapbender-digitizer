@@ -548,7 +548,7 @@
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
                 }).fail(function(){
                     features.forEach(function(feature){
-                        widget._afterFailedSave(schema,feature);
+                        widget._afterFailedSave(widget.getItemSchema(feature),feature);
                     });
                 });
             ;
