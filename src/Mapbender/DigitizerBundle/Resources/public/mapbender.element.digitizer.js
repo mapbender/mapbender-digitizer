@@ -546,7 +546,11 @@
                         widget._saveEvent(itemSchema, feature, widget._getUniqueItemId(feature));
                     }
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
-                })
+                }).fail(function(){
+                    features.forEach(function(feature){
+                        widget._afterFailedSave(schema,feature);
+                    });
+                });
             ;
             // @todo ml: find a reasonable continueDrawingAfterSave policy for combination schema
             if (!continueDrawing) {
