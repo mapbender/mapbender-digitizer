@@ -133,6 +133,9 @@
          */
         renderElements: function(children) {
             var elements = [];
+            if (!children) {
+                return [];
+            }
             for (var i = 0; i < children.length; ++i) {
                 var $element = this.renderElement(children[i]);
                 elements.push.apply(elements, $element.get());
