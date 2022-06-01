@@ -1,3 +1,5 @@
+$buttonActiveTextColor: #fff !default;
+
 .mb-element-data-manager {
   > select, .dataTables_filter label input {
     display: block;
@@ -99,6 +101,10 @@
     line-height: 2;
     padding: 0 0 0 15px;
     background-color: $buttonFirstActiveColor;
+    color: $buttonActiveTextColor;
+    .ui-widget-header, .ui-button {
+      color: inherit;
+    }
     font-size: 16px;
     > .ui-button, > .ui-dialog-titlebar-buttonpane {
       font-size: inherit;
@@ -109,10 +115,6 @@
       background: transparent;
     }
     .ui-dialog-titlebar-close {
-      opacity: 0.8;
-      &:hover {
-        opacity: 1;
-      }
       &:before {
         content: "\f00d"; // =.fa-times
         font-family: "FontAwesome", "Font Awesome 5 Free", "Font Awesome 5 Pro";
@@ -124,7 +126,6 @@
   }
   .ui-dialog-title {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: #fff;
   }
   .ui-dialog-content {
     min-width: 100%;
