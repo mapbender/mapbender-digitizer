@@ -541,17 +541,10 @@
          * Loads data items with explicit request params, without side effects.
          *
          * @param {Object} params
-         * @returns {Promise} resolves with prepared items
+         * @returns {jqXHR} resolves with prepared items
          */
         loadItems: function(params) {
-            var self = this;
-            return $.getJSON([this.elementUrl, 'select'].join(''), params)
-                .then(function(dataItems) {
-                    return dataItems.map(function(itemData) {
-                        return self._prepareDataItem(itemData);
-                    });
-                })
-            ;
+            return $.getJSON([this.elementUrl, 'select'].join(''), params);
         },
         /**
          * Loads data items, and replaces current table (Digitizer: and map layer contents).
@@ -571,15 +564,20 @@
             }
             $loadingIndicator.css({opacity: 1});
             this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), $loadingIndicator)
+            return this.fetchXhr
                 .always(function() {
                     widget.fetchXhr = null;
+                })
+                .then(function(dataItems) {
+                    return dataItems.map(function(itemData) {
+                        return widget._prepareDataItem(itemData);
+                    });
                 })
                 .then(function(preparedItems) {
                     widget.tableRenderer.replaceRows(preparedItems);
                     return preparedItems;
                 })
             ;
-            return this.fetchXhr;
         },
         /**
          * Transforms data item server response data to internally used item structure.
