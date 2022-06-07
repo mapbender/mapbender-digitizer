@@ -216,11 +216,20 @@
                     if (!s2options.dropdownParent) {
                         s2options.dropdownParent = scope;
                     }
+                    var style = $select.attr('style');
                     $(this).select2(s2options);
                     // Forward custom css rules from (now hidden) select2-ified select to visible select2 element
-                    var style = $select.attr('style');
+                    var $group = $select.closest('.form-group');
+                    var widthRxp = /width\s*:\s*[^;]*;?\s*/;
+                    var widthMatch = style && style.match(widthRxp);
+                    if (widthMatch) {
+                        $select.css({width: ''});
+                        var containerWidth = widthMatch[0].split(':', 2)[1].replace(/^\s*/, '').replace(/[\s;]*$/, '');
+                        $('.select2-container', $group).css({width: containerWidth});
+                        style = style.replace(widthRxp, '').replace(/^\s*/, '').replace(/\s*$/, '');
+                    }
                     if (style) {
-                        $('.select2-selection', $select.closest('.form-group')).attr('style', style);
+                        $('.select2-selection', $group).attr('style', style);
                     }
                 });
             }
