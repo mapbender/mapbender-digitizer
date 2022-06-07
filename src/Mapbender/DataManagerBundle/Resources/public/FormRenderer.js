@@ -513,8 +513,10 @@
                 .addClass('-fn-calculated-text')
                 .attr('data-expression', settings.text)
             ;
+            if (settings.title) {
+                $wrapper.append(this.fieldLabel_(settings));
+            }
             $wrapper
-                .append(this.fieldLabel_({title: settings.title, infoText: settings.infoText}))
                 .append($textContainer)
                 .css(settings.css || {})
                 .addClass(settings.cssClass)
