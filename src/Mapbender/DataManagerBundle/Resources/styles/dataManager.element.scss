@@ -6,6 +6,7 @@ $buttonActiveTextColor: #fff !default;
     width: 100%;
     background: white;
     border: solid 1px grey;
+    font-weight: normal;
   }
   .dataTables_filter label {
     display: block; // allow input (inside label!) to grow to full width
