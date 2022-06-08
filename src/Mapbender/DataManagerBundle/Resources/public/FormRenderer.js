@@ -609,7 +609,8 @@
                 dropdownAutoWidth: true,
                 // Safest width inside .form-group / Bootstrap grids
                 width: '100%',
-                placeholder: placeholderText || ''
+                placeholder: placeholderText || '',
+                allowClear: !required && !!placeholderText
             };
         },
         handle_radioGroup_: function(settings) {
