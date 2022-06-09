@@ -478,7 +478,9 @@
                         if (saved) {
                             saved.then(function() {
                                 widget._closeCurrentPopup();
-                            });
+                            }).fail(function(){
+                                widget._afterFailedSave(schema,dataItem);
+                            });;
                         }
                     }
                 });
@@ -525,6 +527,12 @@
             return {
                 schema: schema.schemaName
             };
+        },
+        /**
+         * @override
+         * @private
+         */
+        _afterFailedSave: function(schema, feature) {
         },
         /**
          * @private
