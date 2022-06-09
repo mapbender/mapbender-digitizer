@@ -472,7 +472,8 @@
             if (schema.allowEdit) {
                 buttons.push({
                     text: Mapbender.trans('mb.actions.save'),
-                    click: function() {
+                    click: function(event) {
+                        $(event.target).attr("disabled","disabled");
                         var $scope = $(this).closest('.ui-dialog-content');
                         var saved = widget._submitFormData(schema, $scope, dataItem);
                         if (saved) {
