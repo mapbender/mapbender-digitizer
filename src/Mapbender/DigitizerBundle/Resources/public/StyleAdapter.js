@@ -84,11 +84,19 @@
          */
         resolveColors_: function(targetStyle, styleConfig) {
             if (styleConfig.fillColor || (typeof styleConfig.fillOpacity !== 'undefined')) {
-                targetStyle.getFill().setColor(this.parseSvgColor(styleConfig, 'fillColor', 'fillOpacity', targetStyle.getFill().getColor()));
+                var resolvedFill = this.parseSvgColor(styleConfig, 'fillColor', 'fillOpacity', targetStyle.getFill().getColor());
+                targetStyle.getFill().setColor(resolvedFill);
+                targetStyle.getImage().getFill().setColor(targetStyle.getFill().getColor());
             }
             if (styleConfig.strokeColor || (typeof styleConfig.strokeOpacity !== 'undefined')) {
-                targetStyle.getStroke().setColor(this.parseSvgColor(styleConfig, 'strokeColor', 'strokeOpacity', targetStyle.getStroke().getColor()));
+                var resolvedStroke = this.parseSvgColor(styleConfig, 'strokeColor', 'strokeOpacity', targetStyle.getStroke().getColor());
+                targetStyle.getStroke().setColor(resolvedStroke);
+                targetStyle.getImage().getStroke().setColor(targetStyle.getStroke().getColor());
             }
+            // Work around upstream misdetecting point styles as unchanged unless we explicitly
+            // clone image style again.
+            /** @see https://github.com/openlayers/openlayers/blob/v6.4.3/src/ol/renderer/vector.js#L107 */
+            targetStyle.setImage(targetStyle.getImage().clone());
         },
         resolveBaseStyle_: function(targetStyle, styleConfig) {
             this.resolveColors_(targetStyle, styleConfig);
