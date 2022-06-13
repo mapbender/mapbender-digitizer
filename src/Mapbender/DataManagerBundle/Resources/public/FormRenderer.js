@@ -341,6 +341,7 @@
                 var defaultValue = now.toISOString().replace(/T.*$/, '');
                 $input.val(defaultValue);
             }
+            this.addCustomEvents_($input, settings);
             var $wrapper = this.wrapInput_($input, settings);
             if (!native) {
                 $input.addClass('-js-datepicker');
