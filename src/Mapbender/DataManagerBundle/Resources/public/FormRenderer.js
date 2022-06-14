@@ -684,6 +684,12 @@
             return $label;
         },
         wrapInput_: function($input, settings) {
+            if ($input.is('input[type="hidden"]')) {
+                if (settings.title) {
+                    console.error("Hidden input with a label. Label will not render", settings.title);
+                }
+                return $input;
+            }
             var $group = $(document.createElement('div'))
                 .addClass(settings.cssClass || '')
                 .addClass('form-group')
