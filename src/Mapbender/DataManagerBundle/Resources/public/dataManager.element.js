@@ -500,8 +500,9 @@
                     }
                 });
             }
+            var closeText = buttons.length && 'mb.actions.cancel' || 'mb.actions.close';
             buttons.push({
-                text: Mapbender.trans('mb.actions.cancel'),
+                text: Mapbender.trans(closeText),
                 click: function() {
                     widget._cancelForm(schema, dataItem);
                 }
