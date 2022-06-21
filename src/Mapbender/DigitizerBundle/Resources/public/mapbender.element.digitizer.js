@@ -546,6 +546,7 @@
                         widget._saveEvent(itemSchema, feature, widget._getUniqueItemId(feature));
                     }
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
+                    return response.saved;
                 }).fail(function(){
                     features.forEach(function(feature){
                         widget._afterFailedSave(widget.getItemSchema(feature),feature);
