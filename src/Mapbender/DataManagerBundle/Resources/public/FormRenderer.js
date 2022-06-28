@@ -698,7 +698,16 @@
             if (settings.title) {
                 $group.append(this.fieldLabel_(settings));
             }
-            $group.append($input);
+            // Wrap in extra div (for .form-horizontal support), but avoid wrapping form-group-addons, images etc
+            if ($input.is(':input')) {
+                var $controlWrapper = $(document.createElement('div'))
+                    .addClass('control-wrapper')
+                    .css('width', (settings.inputCss || {}).width || '')
+                ;
+                $group.append($controlWrapper.append($input));
+            } else {
+                $group.append($input);
+            }
             return $group;
         },
         renderFallback_: function(settings) {
