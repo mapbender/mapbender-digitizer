@@ -702,7 +702,6 @@
             if ($input.is(':input')) {
                 var $controlWrapper = $(document.createElement('div'))
                     .addClass('control-wrapper')
-                    .css('width', (settings.inputCss || {}).width || '')
                 ;
                 $group.append($controlWrapper.append($input));
             } else {
