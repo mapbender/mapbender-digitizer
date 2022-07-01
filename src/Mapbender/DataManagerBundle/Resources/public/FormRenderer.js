@@ -666,6 +666,7 @@
                 .attr(settings.label_attr || {})
                 .attr({'for': settings.name || null })
                 .text(settings.title || settings.text)
+                .addClass('control-label')
             ;
             if (settings.infoText) {
                 var $icon = $('<i/>')
