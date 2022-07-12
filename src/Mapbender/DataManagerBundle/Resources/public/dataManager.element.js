@@ -53,6 +53,7 @@
         toolsetTemplate_: null,
         tableButtonsTemplate_: null,
         fetchXhr: null,
+        $loadingIndicator_: null,
 
         _create: function() {
             if (Array.isArray(this.options.schemes) || !Object.keys(this.options.schemes).length) {
@@ -63,6 +64,16 @@
                 this.element.attr('id'),
                 ''  // produce trailing slash
             ].join('/');
+            this.$loadingIndicator_ = $('.loading-indicator', this.element);
+            var $accordionHeader = this.element.parentsUntil('.sidePane', '.container-accordion').prev('.accordion');
+            if ($accordionHeader.length) {
+                this.$loadingIndicator_.remove();
+                $accordionHeader
+                    .addClass('clearfix')
+                    .prepend(this.$loadingIndicator_.css({float: 'right', opacity: 0.0}))
+                ;
+            }
+
             this.updateSchemaSelector_();
             this.tableButtonsTemplate_ = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
             this.toolsetTemplate_ = $('.-tpl-toolset', this.element).remove().css('display', '').html();
@@ -558,13 +569,12 @@
          */
         _getData: function(schema) {
             var widget = this;
-            var $loadingIndicator = $('.loading-indicator', this.element);
             if (this.fetchXhr) {
                 this.fetchXhr.abort();
                 this.fetchXhr = null;
             }
-            $loadingIndicator.css({opacity: 1});
-            this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), $loadingIndicator)
+            this.$loadingIndicator_.css({opacity: 1});
+            this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), this.$loadingIndicator_)
             return this.fetchXhr
                 .always(function() {
                     widget.fetchXhr = null;
@@ -686,9 +696,8 @@
             if (data && !options_.data) {
                 options_.data = JSON.stringify(data);
             }
-            var $loadingIndicator = $('.loading-indicator', this.element);
-            $loadingIndicator.css({opacity: 1});
-            return this.decorateXhr_($.ajax(options_, $loadingIndicator));
+            this.$loadingIndicator_.css({opacity: 1});
+            return this.decorateXhr_($.ajax(options_, this.$loadingIndicator_));
         },
         decorateXhr_: function(jqXhr, $loadingIndicator) {
             if ($loadingIndicator) {
