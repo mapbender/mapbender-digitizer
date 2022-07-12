@@ -11,14 +11,21 @@ $buttonActiveTextColor: #fff !default;
   .dataTables_filter label {
     display: block; // allow input (inside label!) to grow to full width
   }
-  .dataTables_filter, > select, >.title {
+  .dataTables_filter, > select, >.title, .toolset {
     margin-bottom: 1.5ex;
   }
+  .data-container {
+    margin-top: 1.5ex;
+  }
+
   .loading-indicator {
     text-align: right;
     // move spinning icon content slightly left to prevent horizontal overflow and flickering scrollbar
     padding-right: 0.25em;
     opacity: 0;   // hidden without affecting layout size
+    // Do not take up vertical layout space (we have margins to fall into)
+    height: 0;
+    overflow-y: visible;
   }
   color: #555;
   font-size: 0.85rem;
