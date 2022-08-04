@@ -481,7 +481,10 @@
                                 widget._closeCurrentPopup();
                             }).fail(function(){
                                 widget._afterFailedSave(schema,dataItem);
+                                $(event.target).removeAttr("disabled");
                             });;
+                        } else {
+                            $(event.target).removeAttr("disabled");
                         }
                     }
                 });
