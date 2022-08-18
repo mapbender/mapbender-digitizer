@@ -577,9 +577,9 @@
             }
             /** "For multi-selects, you must *not* have an empty <option> element */
             /** @see https://select2.org/placeholders */
-            if (!multiple && placeholderText && !haveEmptyOption) {
+            if (!multiple && !required && !haveEmptyOption) {
                 var $placeholderOption = $(document.createElement('option'))
-                    .text(settings.placeholder)
+                    .text(placeholderText || '')
                     .attr('value', '')
                     .prop('disabled', required)
                     .prop('selected', true)
