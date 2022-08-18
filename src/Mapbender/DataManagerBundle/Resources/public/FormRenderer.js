@@ -419,8 +419,7 @@
             return this.wrapInput_($img, {
                 title: settings.title,
                 infoText: settings.infoText,
-                css: settings.css,
-                label_attr: settings.label_attr || {}
+                css: settings.css
             });
         },
         textInput_: function(settings, type) {
@@ -662,7 +661,6 @@
         fieldLabel_: function(settings) {
             /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L353 */
             var $label = $(document.createElement('label'))
-                .attr(settings.label_attr || {})
                 .attr({'for': settings.name || null })
                 .text(settings.title || settings.text)
                 .addClass('control-label')
