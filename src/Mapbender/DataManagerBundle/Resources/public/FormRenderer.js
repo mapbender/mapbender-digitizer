@@ -581,7 +581,6 @@
                 var $placeholderOption = $(document.createElement('option'))
                     .text(placeholderText || '')
                     .attr('value', '')
-                    .prop('disabled', required)
                     .prop('selected', true)
                 ;
                 $options.splice(0, 0, $placeholderOption);
