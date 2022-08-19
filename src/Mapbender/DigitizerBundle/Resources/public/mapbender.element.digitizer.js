@@ -315,7 +315,6 @@
             if (!this._getUniqueItemId(feature)) {
                 this.contextMenu.setActive(false);
             }
-            this._initColorpickers(dialog);
             this.toolsetRenderer.pause();
             if (schema.allowDigitize) {
                 this.featureEditor.pause();
@@ -716,29 +715,6 @@
         },
         clearHighlightExclude_: function() {
             this.excludedFromHighlighting_.splice(0, this.excludedFromHighlighting_.length);
-        },
-        _processFormItem: function(schema, item, values) {
-            switch (item.type) {
-                default:
-                    return this._super(schema, item, values);
-                case 'colorPicker':
-                    return Object.assign({}, item, {
-                        type: 'input',
-                        cssClass: [item.cssClass || '', '-js-colorpicker'].join(' ').replace(/^\s+/, '')
-                    });
-            }
-        },
-        _initColorpickers: function(scope) {
-            $('.-js-colorpicker', scope).each(function() {
-                var $cpInput = $(this).is('input') ? this : $('input', this);
-                var $inputGroup = $(document.createElement('div'))
-                    .addClass('input-group colorpicker-component')
-                    .append($cpInput.clone())
-                    .append($('<span class="input-group-addon"><i></i></span>'))
-                ;
-                $cpInput.replaceWith($inputGroup);
-                $inputGroup.colorpicker({format: 'hex'})
-            });
         },
         getInitialCustomStyle_: function(schema, feature) {
             return schema.styles.default;
