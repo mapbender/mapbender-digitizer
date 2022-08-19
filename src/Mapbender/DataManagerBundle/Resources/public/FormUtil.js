@@ -138,8 +138,13 @@
             // NOTE: hidden inputs must be explicitly excluded from jQuery validation
             //       see https://stackoverflow.com/questions/51534473/jquery-validate-not-working-on-hidden-input
             var isValid =
-                ($input.is(':valid') || $input.get(0).type === 'hidden')
-                && this.validateCustom_($input)
+                ($input.is(':valid')
+                    || $input.get(0).type === 'hidden'
+                    // Explicitly ignore readonly and disabled fields (jQuery treats them
+                    // as invalid, regardless of value)
+                    // See https://stackoverflow.com/questions/10803294/how-can-i-disable-jquery-validation-on-readonly-fields
+                    || $input.prop('disabled') || $input.prop('readonly')
+                ) && this.validateCustom_($input)
             ;
             this.markValidationState($input, isValid);
             if (!isValid) {
