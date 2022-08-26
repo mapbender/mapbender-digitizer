@@ -72,6 +72,7 @@
 
     Mapbender.Digitizer.Toolset.prototype = {
         iconMap_: {
+            openDialog: "fa fa-plus",
             drawCircle: "icon-draw-circle",
             drawDonut: "icon-draw-donut",
             drawEllipse: "icon-draw-ellipse",
@@ -110,7 +111,7 @@
             switch (schema.featureType.geomType) {
                 case 'point':
                 case 'multipoint':
-                    return ['drawPoint', 'moveFeature'];
+                    return ['openDialog','drawPoint', 'moveFeature'];
                 case 'line':
                 case 'multiline':
                     return ['drawLine', 'modifyFeature', 'moveFeature'];
@@ -361,6 +362,18 @@
             var source = layer && layer.getSource();
             var interaction;
             switch (type) {
+                case 'openDialog':
+                    interaction =  new ol.interaction.Interaction({
+                        features: [],
+                    });
+                    interaction.setActive = function(on) {
+                        if (on) {
+                            let feature = new ol.Feature();
+                            widget.initializeNewFeature(schema, feature);
+                            widget._openEditDialog(schema, feature);
+                        }
+                    }
+                    break;
                 case 'modifyFeature':
                     interaction = new ol.interaction.Modify({
                         features: this.modifyingCollection_

@@ -277,6 +277,15 @@
             if (schema.allowDigitize) {
                 this.featureEditor.pause();
             }
+            let geometry = feature.get("geometry");
+            if ( geometry instanceof ol.geom.Point) {
+               let x = geometry.flatCoordinates[0];
+               let y = geometry.flatCoordinates[1];
+                dialog.find("input.-fn-coordinates.x").val(x);
+                dialog.find("input.-fn-coordinates.y").val(y);
+            }
+            dialog.data("feature",feature);
+
             return dialog;
         },
         _getEditDialogButtons: function(schema, feature) {
@@ -417,7 +426,7 @@
             this._super(schema, feature);
             // NOTE: this also detects cloned features (via new copy functionality) as new
             var isNew = !this._getUniqueItemId(schema, feature);
-            if (isNew) {
+            if (isNew && feature.get("geometry")) {
                 this.getSchemaLayer(schema).getSource().removeFeature(feature);
             }
             this.toolsetRenderer.resume();
