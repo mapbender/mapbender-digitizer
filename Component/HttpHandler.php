@@ -4,9 +4,11 @@
 namespace Mapbender\DigitizerBundle\Component;
 
 
+use Doctrine\Persistence\ConnectionRegistry;
 use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Entity\Feature;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,12 +22,15 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
     /** @var EngineInterface */
     protected $templateEngine;
 
+    protected ConnectionRegistry $connectionRegistry;
+
     public function __construct(EngineInterface $templateEngine,
                                 FormFactoryInterface $formFactory,
-                                SchemaFilter $schemaFilter)
+                                SchemaFilter $schemaFilter, ConnectionRegistry $connectionRegistry)
     {
         parent::__construct($formFactory, $schemaFilter);
         $this->templateEngine = $templateEngine;
+        $this->connectionRegistry = $connectionRegistry;
     }
 
     public function dispatchRequest(Element $element, Request $request)
@@ -36,6 +41,8 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
                 return $this->getStyleEditorResponse();
             case 'update-multiple':
                 return new JsonResponse($this->getUpdateMultipleActionResponseData($element, $request));
+            case 'getMaxElevation':
+                return new JsonResponse($this->getMaxElevation($element,$request));
             default:
                 return parent::dispatchRequest($element, $request);
         }
@@ -184,5 +191,87 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
             'properties' => $properties,
             'geometry' => $feature->getGeom(),
         );
+    }
+
+
+    /**
+     * Select/search features and return feature collection
+     *
+     * @param Request $request
+     * @return JsonResponse Feature collection
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
+     */
+    public function getMaxElevation(Element $element, Request $request)
+    {
+
+        $schemaName = $request->query->get('schema');
+        $repository = $this->schemaFilter->getDataStore($element, $schemaName);
+        $query = $request->query;
+        $val = $query->get("curveseg_id");
+        $srs = $query->get("srs");
+        $connection     = $repository->getConnection();
+
+        $sql            = "Select ST_ASText(geom) as linestring, vertex1_point_id as p1, vertex2_point_id as p2 from data.curveseg_line where curveseg_id = ?";
+        $curveseg_line   = $connection->fetchAssoc($sql,[$val]);
+        $p1 = $curveseg_line["p1"];
+        $p2 = $curveseg_line["p2"];
+        $lineString = $curveseg_line["linestring"];
+
+        $sql            = "Select ST_ASText(coordinate) as coord, elevation_top, elevation_base, height from data.point where point_id = ?";
+        $point1   = $connection->fetchAssoc($sql,[$p1]);
+        $point2   = $connection->fetchAssoc($sql,[$p2]);
+        $elevation1 = $point1["elevation_top"] ?:  $point1["elevation_base"];
+        $elevation2 = $point2["elevation_top"]  ?: $point2["elevation_base"];
+
+        $elevation_connection = $this->connectionRegistry->getConnection('doctrine.dbal.elevation_connection');
+
+        $sql = "SELECT st_x(st_transform(point, $srs)) as x, st_y(st_transform(point, $srs)) as y, z AS elevation, line_frac AS fraction
+        FROM get_base_elevation_data(st_transform(st_geomfromtext(?, ?), 31287), ?)";
+        //$sql = 'SELECT SELECT * FROM get_elevation_data(?, ?, ?)';
+        $arr =  [$lineString, '4326', 300 ];
+        $stmt = $elevation_connection->executeQuery($sql,$arr);
+        $result = $stmt->fetchAll();
+
+        $found = $this->calculateMaxElevation($result,$elevation1,$elevation2);
+
+        return $found;
+
+    }
+
+    function calculateMaxElevation($result,$elevation1,$elevation2) {
+
+        if ($reverse = ($elevation2 > $elevation1)) {
+            list($elevation1,$elevation2) = array($elevation2,$elevation1);
+            $result = array_reverse($result);
+        }
+
+        $height_diff = floatval($elevation1)-floatval($elevation2);
+        $size = sizeof($result);
+        foreach($result as $k => &$res) {
+            $fraction = $res["fraction"] ?? (1 / $size)*$k;
+            $res["connecting_line_height"] =  $height_diff - ($height_diff*$fraction);
+            $res["number"] = $reverse ? $size-$k-1 : $k;
+            if ($res["connecting_line_height"] < 0) {
+                throw new Exception("calculation Error: ".$res["connecting_line_height"]." must be > 0");
+            }
+            if ($res["connecting_line_height"] > abs($height_diff)) {
+                throw new Exception("calculation Error: ".$res["connecting_line_height"]." must be < $height_diff");
+            }
+            $res["height_max_curveseg"] = ($elevation2-$res["elevation"])+$res["connecting_line_height"];
+
+        }
+
+        $max = -INF;
+        $found = null;
+        foreach($result as $r) {
+            if ($r["height_max_curveseg"] > $max) {
+                $found = $r;
+                $max = $r["height_max_curveseg"];
+            }
+
+        }
+
+        return $found;
     }
 }
