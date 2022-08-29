@@ -43,6 +43,8 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
                 return new JsonResponse($this->getUpdateMultipleActionResponseData($element, $request));
             case 'getMaxElevation':
                 return new JsonResponse($this->getMaxElevation($element,$request));
+            case 'getFeatureInfo':
+                return new JsonResponse($this->getFeatureInfo($element,$request));
             default:
                 return parent::dispatchRequest($element, $request);
         }
@@ -191,6 +193,69 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
             'properties' => $properties,
             'geometry' => $feature->getGeom(),
         );
+    }
+
+
+    public function getFeatureInfo($element,$request){
+
+        $query = $request->query;
+        $schemaName = $request->query->get('schema');
+        $config = $this->schemaFilter->getRawSchemaConfig($element, $schemaName);
+
+        $bbox = $query->get('bbox');
+        $srid = $query->get('srid');
+        $dataSets = [];
+        $responseArray = ['errors' => []];
+        $remoteData = isset($config["popup"]) && isset($config["popup"]["remoteData"]) ? $config["popup"]["remoteData"]  : [];
+        if (empty($remoteData)) {
+            throw new \Exception("$schemaName does not support remote Data");
+        }
+        foreach ($remoteData as $url){
+            $url = str_replace("{bbox}", $bbox, $url);
+            $url = str_replace("{BBOX}", $bbox, $url);
+            $url = str_replace("{srid}", $srid, $url);
+            $url = str_replace("{SRID}", $srid, $url);
+            try {
+                $context = stream_context_create(array(
+                    'http' => array(
+                        'ignore_errors' => true
+                    )
+                ));
+                $response  = file_get_contents($url, false, $context);
+            } catch (\Exception $e) {
+                $responseArray['error']  = $e->getMessage();
+            }
+            if(is_array($http_response_header)){
+                $head = array();
+                foreach( $http_response_header as $k=>$v )
+                {
+                    $t = explode( ':', $v, 2 );
+                    if( isset( $t[1] ) )
+                        $head[ trim($t[0]) ] = trim( $t[1] );
+                    else
+                    {
+                        $head[] = $v;
+                        if( preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#",$v, $out ) )
+                            $head['reponse_code'] = intval($out[1]);
+                    }
+                }
+                if($head["reponse_code"] !== 200){
+                    $responseArray['error'][] = array('response' => $response, 'code' => $head['reponse_code']);
+                } else if (!!(json_decode($response))) {
+
+                    $dataSets[] = $response;
+                } else {
+                    $responseArray['error'][]  = array('response' => $response, 'code' => "Response of url: {$url} is not a JSON");
+                }
+
+            } else  {
+                $responseArray['error'][]  = "Unknown error for url: {$url}";
+            }
+
+        }
+
+        $responseArray['dataSets'] = $dataSets;
+        return $responseArray;
     }
 
 

@@ -654,6 +654,48 @@
                 $inputGroup.colorpicker({format: 'hex'})
             });
         },
+
+
+
+        // TODO seperate Feature Info calls for individual properties in order to avoid iterating through meaningless dataSets
+        _getRemotePropertyValues: function (feature, schema) {
+            console.log(arguments);
+            var widget = this;
+            if (!feature.getGeometry()) {
+                return false;
+            }
+            var bbox = feature.getGeometry().getExtent();
+
+            var srid = this.mbMap.getModel().getCurrentProjectionCode();
+            var url = this.elementUrl + "getFeatureInfo";
+
+            var ajaxCall = $.get(url,{
+                bbox: bbox.join(","),
+                schema: schema.schemaName,
+                srid: srid
+            });
+
+            return ajaxCall.then(function (response) {
+                if (response.error) {
+                    Mapbender.error(Mapbender.trans('remoteData.error'));
+                    return;
+                }
+                _.each(response.dataSets, function (dataSet) {
+                    try {
+                        var json =  JSON.parse(dataSet);
+                        var properties = json.features[0].properties;
+                    } catch (e) {
+                        // Prevent interruption in case of empty features
+                    }
+                });
+                return properties;
+            }).fail(function (response) {
+                Mapbender.error(Mapbender.trans("remoteData.error"));
+
+            });
+
+
+        },
         __formatting_dummy: null
     });
 
