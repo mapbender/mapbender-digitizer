@@ -659,7 +659,6 @@
 
         // TODO seperate Feature Info calls for individual properties in order to avoid iterating through meaningless dataSets
         _getRemotePropertyValues: function (feature, schema) {
-            console.log(arguments);
             var widget = this;
             if (!feature.getGeometry()) {
                 return false;
