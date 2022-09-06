@@ -547,6 +547,13 @@
                 .append($label)
             ;
         },
+        renderSelectOption_: function(optionConfig, selectConfig) {
+            return $(document.createElement('option'))
+                .attr(optionConfig.attr || {})
+                .attr('value', optionConfig.value)
+                .text(optionConfig.label)
+            ;
+        },
         handle_select_: function(settings) {
             var required = (settings.attr || {}).required || settings.required || !!settings.mandatory;
             var multiple = (settings.attr || {}).multiple || settings.multiple;
@@ -563,12 +570,7 @@
             var haveEmptyOption = false;
             for (var i = 0; i < options.length; ++i) {
                 var option = options[i];
-                var $option = $(document.createElement('option'))
-                    .attr(option.attr || {})
-                    .attr('value', option.value)
-                    .text(option.label)
-                ;
-                $options.push($option);
+                $options.push(this.renderSelectOption_(option, settings));
                 if (!option.value) {
                     haveEmptyOption = true;
                     placeholderText = option.label || placeholderText;
