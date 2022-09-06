@@ -576,7 +576,7 @@
             }
             /** "For multi-selects, you must *not* have an empty <option> element */
             /** @see https://select2.org/placeholders */
-            if (!multiple && !required && !haveEmptyOption) {
+            if (!haveEmptyOption && !multiple && (!required || (typeof placeholderText !== 'undefined'))) {
                 var $placeholderOption = $(document.createElement('option'))
                     .text(placeholderText || '')
                     .attr('value', '')
