@@ -185,7 +185,6 @@
                 self.removeData($tr.data('schema'), $tr.data('item'));
             });
             this.element.on('click', '.-fn-refresh', function() {
-                self._closeCurrentPopup();
                 self._getData(self._getCurrentSchema());
             });
             this.element.on('click', '.-fn-create-item', function() {
@@ -573,6 +572,7 @@
                 this.fetchXhr.abort();
                 this.fetchXhr = null;
             }
+            this._closeCurrentPopup();
             this.$loadingIndicator_.css({opacity: 1});
             this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), this.$loadingIndicator_)
             return this.fetchXhr

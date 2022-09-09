@@ -30,6 +30,19 @@
                 this.customStyleFeature_(feature);
             }
         },
+        getFeatureById: function(id, itemSchema) {
+            var layers = !itemSchema && Object.values(this.schemaLayers_) || this.getLayers(itemSchema);
+            for (var i = 0; i < layers.length; ++i) {
+                var sublayers = layers[i].getLayersArray();
+                for (var j = 0; j < sublayers.length; ++j) {
+                    var feature = sublayers[j].getSource().getFeatureById(id);
+                    if (feature) {
+                        return feature;
+                    }
+                }
+            }
+            return null;
+        },
         createLayerStyleFunction_: function(schema, styleConfig) {
             var self = this;
             return (function(styleConfig) {
@@ -158,26 +171,19 @@
         this.addFeatures(features);
     };
 
-    Mapbender.Digitizer.FeatureRenderer.prototype.addFeatures = function(features, condition) {
+    Mapbender.Digitizer.FeatureRenderer.prototype.addFeatures = function(features) {
         var self = this;
         var layerBuckets = {};
-        var filtered = features.filter(function(feature) {
+        features.forEach(function(feature) {
             var itemSchema = self.owner.getItemSchema(feature);
-            var schemaLayer = self.schemaLayers_[itemSchema.schemaName];
-            if (!condition || condition(schemaLayer, feature)) {
-                if (!layerBuckets[itemSchema.schemaName]) {
-                    layerBuckets[itemSchema.schemaName] = [self.schemaLayers_[itemSchema.schemaName], []];
-                }
-                layerBuckets[itemSchema.schemaName][1].push(feature);
-                return true;
-            } else {
-                return false;
+            if (!layerBuckets[itemSchema.schemaName]) {
+                layerBuckets[itemSchema.schemaName] = [self.schemaLayers_[itemSchema.schemaName], []];
             }
+            layerBuckets[itemSchema.schemaName][1].push(feature);
         });
         Object.keys(layerBuckets).forEach(function(bucketName) {
             layerBuckets[bucketName][0].getSource().addFeatures(layerBuckets[bucketName][1]);
         });
-        return filtered;
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.removeFeature = function(itemSchema, feature) {

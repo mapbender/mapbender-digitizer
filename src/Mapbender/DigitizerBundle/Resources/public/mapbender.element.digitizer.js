@@ -198,6 +198,16 @@
             this._closeCurrentPopup();
             this.active = false;
         },
+        _closeCurrentPopup: function() {
+            if (this.currentPopup) {
+                var feature = this.currentPopup.data('item');
+                var itemSchema = this.currentPopup.data('schema');
+                if (!feature.getId()) {
+                    this.renderer.removeFeature(itemSchema, feature);
+                }
+            }
+            return this._superApply(arguments);
+        },
         _activateSchema: function(schema) {
             this._super(schema);
             this._toggleSchemaInteractions(schema, true);
@@ -386,13 +396,12 @@
             var itemSchema = this.options.schemes[itemData.schemaName];
             feature.set('uniqueIdProperty', this._getUniqueItemIdProperty(itemSchema));
             var id = this._generateNamespacedId(itemSchema, feature);
-            feature.setId(id);
-            var schemaSource = this.getSchemaLayer(itemSchema).getSource();
-            var existingFeature = schemaSource.getFeatureById(id);
+            var existingFeature = this.renderer.getFeatureById(id, itemSchema);
             if (existingFeature && existingFeature.get('dirty')) {
                 // Keep & reuse existing feature that has been modified in the current session
                 return existingFeature;
             } else {
+                feature.setId(id);
                 this.commitGeometry(itemSchema, feature);
                 this.renderer.initializeFeature(itemSchema, feature);
                 return feature;
@@ -462,15 +471,8 @@
             var self = this;
             return this._super(schema).then(function(features) {
                 self.queuedRefresh_[schema.schemaName] = false;
-                var modifiedFeatures = self.renderer.filterFeatures(schema, function(feature) {
-                    return feature.get('dirty');
-                });
                 self.renderer.replaceFeatures(schema, features);
-                // Re-add unsaved features from current session
-                var unsaved = self.renderer.addFeatures(modifiedFeatures, function(layer, feature) {
-                    return !feature.getId() || !layer.getSource().getFeatureById(feature.getId());
-                });
-                return features.concat(unsaved);
+                return features;
             });
         },
         _cancelForm: function(schema, feature) {
