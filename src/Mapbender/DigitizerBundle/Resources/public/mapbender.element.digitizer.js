@@ -604,9 +604,9 @@
                 v: Math.abs((extent.top - extent.bottom) / 32.)
             };
             newFeature.getGeometry().translate(cloneOffset.h, cloneOffset.v);
-
-            this.getSchemaLayer(schema).getSource().addFeature(newFeature);
             newFeature.set('dirty', true);
+
+            this.renderer.addFeatures([newFeature]);
 
             this._openEditDialog(schema, newFeature);
         },
