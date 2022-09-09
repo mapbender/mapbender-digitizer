@@ -11,7 +11,6 @@
         });
         this.onMap_ = false;
         this.enabled_ = false;
-        this.filterLayers_ = [];
     };
     Object.assign(Mapbender.Digitizer.MapContextMenu.prototype, {
         setActive: function(state) {
@@ -25,6 +24,7 @@
             } else {
                 this.contextmenu.close();
                 this.contextmenu.disable();
+                this.contextmenu.clear();
             }
             this.enabled_ = !!state;
         },
@@ -34,12 +34,20 @@
         registerEvents: function(olMap) {
             var self = this;
             this.contextmenu.on('beforeopen', function (evt) {
-                var feature = olMap.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                    if (self.filterLayers_.indexOf(layer) !== -1) {
-                        return feature;
+                var layers = self.enabled_ && self.widget.getSchemaLayers(self.widget._getCurrentSchema());
+                // NOTE: prefer forEachFeatureAtPixel over getFeaturesAtPixel for performance
+                //       forEachFeatureAtPixel allows early out by returning truthy value from callback,
+                //       which is also (unintuitively) forwarded back to the caller
+                /** @see https://github.com/openlayers/openlayers/blob/v6.14.1/src/ol/PluggableMap.js#L612 */
+                var callback = function(feature) {
+                    return feature;
+                };
+                var feature = layers.length && olMap.forEachFeatureAtPixel(evt.pixel, callback, {
+                    layerFilter: function(layer) {
+                        return -1 !== layers.indexOf(layer);
                     }
                 });
-                if (feature && self.enabled_) {
+                if (feature) {
                     if (self.reconfigure(feature)) {
                         self.contextmenu.enable();
                     } else {
@@ -49,15 +57,6 @@
                     self.contextmenu.disable();
                 }
             });
-        },
-        setSchema: function(schema) {
-            this.contextmenu.clear();
-            if (this.enabled_) {
-                this.contextmenu.enable();
-            } else {
-                this.contextmenu.disable();
-            }
-            this.filterLayers_ = this.widget.getSchemaLayers(schema);
         },
         reconfigure: function(feature) {
             var items = [];

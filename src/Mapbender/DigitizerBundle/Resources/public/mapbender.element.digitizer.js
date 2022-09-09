@@ -200,7 +200,6 @@
         },
         _activateSchema: function(schema) {
             this._super(schema);
-            this.contextMenu.setSchema(schema);
             this._toggleSchemaInteractions(schema, true);
             this.renderer.toggleSchema(schema, this.active || schema.displayOnInactive);
         },
