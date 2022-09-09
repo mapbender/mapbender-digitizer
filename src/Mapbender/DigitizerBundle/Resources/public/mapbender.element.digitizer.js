@@ -560,9 +560,18 @@
                     && self.getItemSchema(feature).allowDigitize;
             });
         },
+        /**
+         * @param {*} schema
+         * @returns {Array<ol.layer.Vector>}
+         */
         getSchemaLayers: function(schema) {
             return this.renderer.getLayers(schema);
         },
+        /**
+         * @param {*} schema
+         * @returns {ol.layer.Vector|undefined}
+         * @deprecated use getSchemaLayers for proper multi-layer support
+         */
         getSchemaLayer: function(schema) {
             if (schema.combine) {
                 throw new Error("Cannot get single layer for combination schema");

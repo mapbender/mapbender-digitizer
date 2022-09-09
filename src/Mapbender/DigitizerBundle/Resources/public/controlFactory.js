@@ -213,10 +213,12 @@
                     var subSchemas = (schema && owner.expandCombination(schema) || []).filter(function(schema) {
                         return schema.allowDigitize;
                     });
-                    var layers = subSchemas.map(function(schema) {
-                        return owner.getSchemaLayer(schema);
-                    });
-                    return -1 !== layers.indexOf(layer);
+                    for (var s = 0; s < subSchemas.length; ++s) {
+                        if (-1 !== owner.getSchemaLayers(subSchemas[s]).indexOf(layer)) {
+                            return true;
+                        }
+                    }
+                    return false;
                 }
             });
 
