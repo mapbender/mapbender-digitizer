@@ -16,6 +16,12 @@
         this.schemaLayers_ = {};
     }
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
+        /**
+         * Limit max features per individual ol.layer.Vector
+         * If more features are loaded, a new layer is appended to the item schema's group layer.
+         * This speeds up hover interactions (=full redraw of layer containing feature) considerably.
+         */
+        MAX_FEATURES_PER_LAYER: 75,
         disable: function() {
             var layerNames = Object.keys(this.schemaLayers_);
             for (var i = 0; i < layerNames.length; ++i) {
@@ -98,28 +104,44 @@
         }
     };
 
+    /**
+     * @param {Object} schema
+     * @returns {Array<ol.layer.Vector>}
+     */
     Mapbender.Digitizer.FeatureRenderer.prototype.getLayers = function(schema) {
         var subSchemas = this.owner.expandCombination(schema);
         var layers = [];
         for (var s = 0; s < subSchemas.length; ++s) {
             var subSchema = subSchemas[s];
-            if (!this.schemaLayers_[subSchema.schemaName]) {
-                this.schemaLayers_[subSchema.schemaName] = this.initItemSchemaLayer_(subSchema);
-            }
-            layers.push(this.schemaLayers_[subSchema.schemaName]);
+            layers = this.getSchemaLayerGroup_(subSchema, true).getLayersArray(layers);
         }
         return layers;
     };
 
-    Mapbender.Digitizer.FeatureRenderer.prototype.initItemSchemaLayer_ = function(schema) {
-        var layer = this.createSchemaFeatureLayer_(schema);
-        var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
-        this.schemaStyles_[schema.schemaName] = this.initializeStyles_(schema, styleConfigs || {});
-        layer.setStyle(this.createLayerStyleFunction_(schema, styleConfigs['default']));
-        delete this.schemaStyles_[schema.schemaName]['default'];
-        this.olMap.addLayer(layer);
-        this.registerLayerEvents(layer);
-        return layer;
+    /**
+     * @param {Object} itemSchema
+     * @param {boolean} [init]
+     * @returns {ol.layer.Group|null}
+     * @private
+     */
+    Mapbender.Digitizer.FeatureRenderer.prototype.getSchemaLayerGroup_ = function(itemSchema, init) {
+        if (!this.schemaLayers_[itemSchema.schemaName] && init) {
+            this.schemaLayers_[itemSchema.schemaName] = this.initSchemaLayerGroup_(itemSchema);
+        }
+        return this.schemaLayers_[itemSchema.schemaName] || null;
+    };
+
+    Mapbender.Digitizer.FeatureRenderer.prototype.initSchemaLayerGroup_ = function(itemSchema) {
+        var schemaName = itemSchema.schemaName;
+        var styleConfigs = (this.owner.options.schemes[schemaName] || {}).styles;
+        this.schemaStyles_[schemaName] = this.initializeStyles_(itemSchema, styleConfigs || {});
+        var group = new ol.layer.Group();
+        // Need at least one layer inside group so draw controls
+        // have a valid target layer + source even on empty datasets
+        var firstLayer = this.createSchemaFeatureLayer_(itemSchema);
+        group.getLayers().push(firstLayer);
+        this.olMap.addLayer(group);
+        return group;
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.registerLayerEvents = function(layer) {
@@ -168,12 +190,37 @@
         return features;
     };
 
+    Mapbender.Digitizer.FeatureRenderer.prototype.trimGroupLayer_ = function(groupLayer, keepOne) {
+        var sublayers = groupLayer.getLayers().getArray().slice();
+        for (var i = 0; i < sublayers.length; ++i) {
+            var sublayer  = sublayers[i];
+            if (sublayer instanceof ol.layer.Group) {
+                this.trimGroupLayer_(sublayer, false);
+            } else {
+                var popuplation = sublayer.getSource().getFeatures().length;
+                if ((!keepOne || i > 0) && !popuplation) {
+                    groupLayer.getLayers().remove(sublayer);
+                }
+            }
+        }
+    };
+
     Mapbender.Digitizer.FeatureRenderer.prototype.replaceFeatures = function(schema, features) {
         var self = this;
+        var layerGroups = [];
         this.owner.expandCombination(schema).forEach(function(itemSchema) {
-            self.schemaLayers_[itemSchema.schemaName].getSource().clear();
+            var layerGroup = self.getSchemaLayerGroup_(itemSchema, false);
+            layerGroups.push(layerGroup);
+            layerGroup.getLayersArray().forEach(function(layer) {
+                layer.getSource().clear();
+            });
         });
         this.addFeatures(features);
+
+        layerGroups.forEach(function(layerGroup) {
+            // GC: remove extra empty vector layers from their groups (will always keep one)
+            self.trimGroupLayer_(layerGroup, true);
+        });
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.addFeatures = function(features) {
@@ -182,12 +229,37 @@
         features.forEach(function(feature) {
             var itemSchema = self.owner.getItemSchema(feature);
             if (!layerBuckets[itemSchema.schemaName]) {
-                layerBuckets[itemSchema.schemaName] = [self.schemaLayers_[itemSchema.schemaName], []];
+                layerBuckets[itemSchema.schemaName] = {
+                    groupLayer: self.schemaLayers_[itemSchema.schemaName],
+                    schema: itemSchema,
+                    features: []
+                };
             }
-            layerBuckets[itemSchema.schemaName][1].push(feature);
+            layerBuckets[itemSchema.schemaName].features.push(feature);
         });
+        var mfpl = this.MAX_FEATURES_PER_LAYER;
         Object.keys(layerBuckets).forEach(function(bucketName) {
-            layerBuckets[bucketName][0].getSource().addFeatures(layerBuckets[bucketName][1]);
+            var bucket = layerBuckets[bucketName];
+            var layerIndex = -1;
+            var chunkTarget, population;
+
+            while (bucket.features.length) {
+                // Scan for the next vector layer with free space / feature population below limit
+                do {
+                    ++layerIndex;
+                    while (layerIndex >= bucket.groupLayer.getLayers().getLength()) {
+                        // We're past the end of existing layers => create more
+                        bucket.groupLayer.getLayers().push(self.createSchemaFeatureLayer_(bucket.schema));
+                    }
+                    chunkTarget = bucket.groupLayer.getLayers().item(layerIndex).getSource();
+                    population = chunkTarget.getFeatures().length;
+                } while (population >= mfpl);
+
+                var chunkLength = Math.min(bucket.features.length, mfpl - population);
+                var chunk = bucket.features.slice(0, chunkLength);
+                chunkTarget.addFeatures(chunk);
+                bucket.features = bucket.features.slice(chunkLength);
+            }
         });
     };
 
@@ -208,7 +280,15 @@
         var keys = Object.keys(styleConfigs);
         for (var i = 0; i < keys.length; ++ i) {
             var key = keys[i];
-            styles[key] = this.createStyleFunction_(Object.assign({}, styleConfigs['default'], styleConfigs[key]));
+            var settings = styleConfigs[key];
+            var styleFn;
+            if (key === 'default') {
+                styleFn = this.createLayerStyleFunction_(itemSchema, settings);
+            } else {
+                settings = Object.assign({}, styleConfigs['default'], settings);
+                styleFn = this.createStyleFunction_(settings);
+            }
+            styles[key] = styleFn;
         }
         return styles;
     };
@@ -231,7 +311,10 @@
         if (schema.minScale) {
             options.inResolution = Mapbender.Model.scaleToResolution(parseInt(schema.minScale, 10));
         }
-        return new ol.layer.Vector(options);
+        var layer = new ol.layer.Vector(options);
+        layer.setStyle(this.schemaStyles_[schema.schemaName]['default']);
+        this.registerLayerEvents(layer);
+        return layer;
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.customStyleFeature_ = function (feature) {
