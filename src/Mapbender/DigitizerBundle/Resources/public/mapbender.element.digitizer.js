@@ -715,10 +715,18 @@
 
             highlightControl.on('select', function (e) {
                 e.deselected.forEach(function(feature) {
-                    feature.set('hover', false);
+                    // Avoid excessive property updates to reduce layer re-rendering
+                    if (feature.get('hover')) {
+                        feature.set('hover', false);
+                    }
                 });
                 e.selected.forEach(function(feature) {
-                    feature.set('hover', true);
+                    // Avoid excessive property updates to reduce layer re-rendering
+                    // Styling for editing / hidden states takes priority over hover,
+                    // allowing a sake skip of the hover style update
+                    if (!feature.get('editing') || !feature.get('hidden')) {
+                        feature.set('hover', true);
+                    }
                 });
             });
             return highlightControl;

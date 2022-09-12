@@ -93,23 +93,29 @@
                 var feature = event.target;
                 var tr = feature && feature.get('table-row');
                 if (tr) {
-                    // page to modified feature
+                    switch (event.key) {
+                        default:
+                            // do nothing
+                            break;
+                        case 'dirty':
+                            // Page to feature on initial modification
+                            if (feature.get('dirty')) {
+                                self.showRow(tr);
+                            }
+                            self.updateButtonStates_(tr, feature);
+                            break;
+                        case 'hover':
+                        case 'editing':
+                            $(tr).toggleClass('hover', !!feature.get('hover'));
+                            $(tr).toggleClass('editing', !!feature.get('editing'));
+                            break;
+                    }
+
+
                     if (event.key === 'dirty' && feature.get('dirty')) {
                         self.showRow(tr);
                     }
                     self.updateButtonStates_(tr, feature);
-                }
-            });
-            feature.on(ol.ObjectEventType.PROPERTYCHANGE, function(event) {
-                if (event.key === 'hover' || event.key === 'editing') {
-                    var feature = event.target;
-                    var tr = feature && feature.get('table-row');
-                    if (tr) {
-                        var editing = !!feature.get('editing');
-                        var hover = !editing && !!feature.get('hover');
-                        $(tr).toggleClass('hover', hover);
-                        $(tr).toggleClass('editing', editing);
-                    }
                 }
             });
             feature.set('table-events', true);
