@@ -5,7 +5,6 @@
      * @param {*} owner jQueryUI widget instance
      * @param {ol.PluggableMap} olMap
      * @param {Mapbender.Digitizer.StyleAdapter} [styleAdapter]
-     * @param {Object} schema
      * @constructor
      */
     Mapbender.Digitizer.FeatureRenderer = function FeatureRenderer(owner, olMap, styleAdapter) {
