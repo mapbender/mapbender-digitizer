@@ -133,27 +133,34 @@
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.forAllFeatures = function(callback) {
-        var layers = Object.values(this.schemaLayers_);
+        var layers = [];
+        Object.values(this.schemaLayers_).forEach(function(layer) {
+            layers = layer.getLayersArray(layers);
+        });
         for (var i = 0; i < layers.length; ++i) {
             layers[i].getSource().forEachFeature(callback);
         }
     };
     Mapbender.Digitizer.FeatureRenderer.prototype.forAllSchemaFeatures = function(schema, callback) {
         var self = this;
-        var layers = this.owner.expandCombination(schema).map(function(itemSchema) {
-            return self.schemaLayers_[itemSchema.schemaName];
+        var layers = [];
+        this.owner.expandCombination(schema).forEach(function(itemSchema) {
+            if (self.schemaLayers_[itemSchema.schemaName]) {
+                self.schemaLayers_[itemSchema.schemaName].getLayersArray(layers);
+            }
         });
         for (var i = 0; i < layers.length; ++i) {
-            if (layers[i]) {
-                layers[i].getSource().forEachFeature(callback);
-            }
+            layers[i].getSource().forEachFeature(callback);
         }
     };
     Mapbender.Digitizer.FeatureRenderer.prototype.filterFeatures = function(schema, callback) {
         var self = this;
         var features = [];
-        var sources = this.owner.expandCombination(schema).map(function(itemSchema) {
-            return self.schemaLayers_[itemSchema.schemaName].getSource();
+        var sources = [];
+        this.owner.expandCombination(schema).forEach(function(itemSchema) {
+            sources = sources.concat(self.getLayers(itemSchema).map(function(layer) {
+                return layer.getSource();
+            }));
         });
         for (var s = 0; s < sources.length; ++s) {
             features = features.concat(sources[s].getFeatures().filter(callback));
@@ -185,9 +192,14 @@
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.removeFeature = function(itemSchema, feature) {
-        var layer = this.schemaLayers_[itemSchema.schemaName];
-        if (layer) {
-            layer.getSource().removeFeature(feature);
+        var layers = this.getLayers(itemSchema);
+        for (var i = 0; i < layers.length; ++i) {
+            // NOTE: hasFeature uses id / uid indexes and is a little faster than the RBush
+            //       check in removeFeature if the feature does not exist
+            if (layers[i].getSource().hasFeature(feature)) {
+                layers[i].getSource().removeFeature(feature);
+                return;
+            }
         }
     };
 
