@@ -130,7 +130,6 @@
         layer.getSource().on('changefeature', function(evt) {
             self.updateFeatureStyle(evt.feature);
         });
-        return layer;
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.forAllFeatures = function(callback) {
