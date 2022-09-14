@@ -13,10 +13,9 @@
 
     Object.assign(DrawDonut.prototype, {
         constructor: DrawDonut,
-        startDrawing_: function(event) {
+        startDrawing_: function() {
             ol.interaction.Draw.prototype.startDrawing_.apply(this, arguments);
-
-            var map = event.map;
+            var map = this.getMap();
             var coordinate = this.sketchFeature_.getGeometry().getFirstCoordinate();
 
             this.originalFeature_ = map.forEachFeatureAtPixel(map.getPixelFromCoordinate(coordinate), function (feature) {
