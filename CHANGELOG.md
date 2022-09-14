@@ -1,3 +1,6 @@
+## 1.4.14
+* Fix donut drawing errors on Openlayers 6.14
+
 ## 1.4.13
 * Fix feature details not viewable through context menu / click inside map if editing disabled
 * Use different fallback detail popup titles for editable vs read-only objects
