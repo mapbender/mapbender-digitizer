@@ -136,6 +136,30 @@ formItems:
         value: v3
 ```
 
+Selects (NOT radioGroup items) can alternatively specify `sql`
+and `connection` (Doctrine DBAL connection name) to generate choices
+dynamically. The `sql` _should_ generate `label` and `value` aliases
+for clarity. If it does not, the first column of each
+row is used as the option label and the last column as the submit value.
+
+Static `option` definitions and `sql` can also be combined.
+```yml
+<...>
+formItems:
+  - type: select
+    options:
+      # Allow user to explicitly (re)select ~nothing in particular
+      - label: ''
+        value: ''
+      - label: Static option a
+        value: a
+      - sql: SELECT CONCAT("label_prefix", ': ', "name") AS label, "id" AS value FROM "some_table"
+        connection: name_of_some_connection
+```
+
+If `sql` is defined but `connection` is omitted, the "default" DBAL connection
+is used for the query.
+
 #### File uploads
 Files uploaded through `type: file` form items will be stored in the
 server's file system. The mapped database column will only store a file path as a string.
