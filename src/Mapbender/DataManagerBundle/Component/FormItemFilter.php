@@ -140,7 +140,14 @@ class FormItemFilter
                     'value' => $both,
                     'properties' => $row,
                 );
+            } elseif (\array_key_exists('label', $row) && \array_key_exists('value', $row)) {
+                $options[] = array(
+                    'label' => $row['label'],
+                    'value' => $row['value'],
+                    'properties' => $row,
+                );
             } else {
+                // Fingers crossed
                 $flat = \array_values($row);
                 $options[] = array(
                     'label' => $flat[0],
