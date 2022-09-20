@@ -131,7 +131,7 @@ class FormItemFilter
             });
             if (count($row) <= 1) {
                 if (!$warnedSingleColumn) {
-                    @trigger_error("Sql for select item options is single-column. Use a statement that generates a value (first) and label (second).", E_USER_DEPRECATED);
+                    @trigger_error("Sql for select item options is single-column. Use a statement that generates a label (first) and value (second).", E_USER_DEPRECATED);
                     $warnedSingleColumn = true;
                 }
                 $both = array_values($row)[0];
