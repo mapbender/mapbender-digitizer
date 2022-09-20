@@ -445,7 +445,7 @@
             if (settings.name && settings.mandatory && (typeof settings.mandatory === 'string')) {
                 $input.data('warn', this.createValidationCallback_(settings.mandatory));
             }
-            $input.attr('data-custom-validation-message', settings.mandatoryText || null);
+            this.configureValidationMessage_($input, settings);
         },
         handle_tabs_: function(settings) {
             /** https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L641 */
@@ -602,6 +602,7 @@
             // Legacy amenities
             $select.data('declaration', settings);
             this.addCustomEvents_($select, settings);
+            this.configureValidationMessage_($select, settings);
             return this.wrapInput_($select, settings);
         },
         getSelect2Options: function(item, required, multiple, placeholderText) {
@@ -729,6 +730,9 @@
                     return rxp.test(value);
                 }
             }());
+        },
+        configureValidationMessage_: function($input, settings) {
+            $input.attr('data-custom-validation-message', settings.name && settings.mandatoryText || null);
         },
         addCustomEvents_: function($input, settings) {
             /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L123 */
