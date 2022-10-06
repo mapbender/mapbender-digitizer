@@ -269,12 +269,11 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
      */
     public function getMaxElevation(Element $element, Request $request)
     {
-
-        $schemaName = $request->query->get('schema');
+        $query =  json_decode($request->getContent(), true);
+        $schemaName = $query['schema'];
         $repository = $this->schemaFilter->getDataStore($element, $schemaName);
-        $query = $request->query;
-        $val = $query->get("curveseg_id");
-        $srs = $query->get("srs");
+        $val = $query["curveseg_id"];
+        $srs = $query["srs"];
         $connection     = $repository->getConnection();
 
         $sql            = "Select ST_ASText(geom) as linestring, vertex1_point_id as p1, vertex2_point_id as p2 from data.curveseg_line where curveseg_id = ?";
@@ -288,8 +287,7 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         $point2   = $connection->fetchAssoc($sql,[$p2]);
         $elevation1 = $point1["elevation_top"] ?:  $point1["elevation_base"];
         $elevation2 = $point2["elevation_top"]  ?: $point2["elevation_base"];
-
-        $elevation_connection = $this->connectionRegistry->getConnection('doctrine.dbal.elevation_connection');
+        $elevation_connection = $this->connectionRegistry->getConnection('elevation');
 
         $sql = "SELECT st_x(st_transform(point, $srs)) as x, st_y(st_transform(point, $srs)) as y, z AS elevation, line_frac AS fraction
         FROM get_base_elevation_data(st_transform(st_geomfromtext(?, ?), 31287), ?)";
