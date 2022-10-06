@@ -661,7 +661,7 @@
         _getRemotePropertyValues: function (feature, schema) {
             var widget = this;
             if (!feature.getGeometry()) {
-                return false;
+                return $.Deferred().reject();
             }
             var bbox = feature.getGeometry().getExtent();
 
