@@ -296,25 +296,24 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         $stmt = $elevation_connection->executeQuery($sql,$arr);
         $result = $stmt->fetchAll();
 
+        $json = json_encode($result);
         $found = $this->calculateMaxElevation($result,$elevation1,$elevation2);
 
         return $found;
 
     }
 
-    function calculateMaxElevation($result,$elevation1,$elevation2) {
+    function calculateMaxElevation($result,$elevation1,$elevation2, $reverse = false) {
 
-        if ($reverse = ($elevation2 > $elevation1)) {
-            list($elevation1,$elevation2) = array($elevation2,$elevation1);
-            $result = array_reverse($result);
+        if ($elevation2 > $elevation1) {
+            return $this->calculateMaxElevation(array_reverse($result),$elevation2,$elevation1, true);
         }
 
         $height_diff = floatval($elevation1)-floatval($elevation2);
         $size = sizeof($result);
         foreach($result as $k => &$res) {
-            $fraction = $res["fraction"] ?? (1 / $size)*$k;
+            $fraction = (1 / $size) * $k;
             $res["connecting_line_height"] =  $height_diff - ($height_diff*$fraction);
-            $res["number"] = $reverse ? $size-$k-1 : $k;
             if ($res["connecting_line_height"] < 0) {
                 throw new Exception("calculation Error: ".$res["connecting_line_height"]." must be > 0");
             }
