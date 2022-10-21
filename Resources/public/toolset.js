@@ -114,10 +114,10 @@
                     return ['openDialog','drawPoint', 'moveFeature'];
                 case 'line':
                 case 'multiline':
-                    return ['drawLine', 'modifyFeature', 'moveFeature'];
+                    return ['openDialog','drawLine', 'modifyFeature', 'moveFeature'];
                 case 'polygon':
                 case 'multipolygon':
-                    return ['drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'modifyFeature', 'moveFeature'];
+                    return ['openDialog','drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'modifyFeature', 'moveFeature'];
                 default:
                     // everything
                     return [

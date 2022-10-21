@@ -86,6 +86,7 @@
         // @todo: salvage this
         onFeatureUpdatedOnServer: function(schema) {
             if (schema.refreshLayersAfterFeatureSave) {
+                debugger
                 $.each(schema.refreshLayersAfterFeatureSave, function (k1, instanceId) {
                     var source = Mapbender.Model.getSourceById(instanceId);
                     var layers = source.getNativeLayers();
@@ -96,6 +97,7 @@
             }
 
             if (schema.refreshFeaturesAfterSave) {
+                debugger;
                 for (var i = 0; i < schema.refreshFeaturesAfterSave.length; ++i) {
                     var schemaName = schema.refreshFeaturesAfterSave[i];
                     this.refreshConnectedDigitizerFeatures(schemaName);

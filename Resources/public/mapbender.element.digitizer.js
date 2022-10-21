@@ -440,6 +440,11 @@
             this._super(schema, feature.get('data'), newValues);
         },
         _getSaveRequestData: function(schema, dataItem, newValues) {
+            if (schema.noGeometry) {
+                return {
+                    properties: Object.assign({}, this._getItemData(schema, dataItem), newValues || {}),
+                };
+            } else
             return {
                 properties: Object.assign({}, this._getItemData(schema, dataItem), newValues || {}),
                 geometry: this.wktFormat_.writeGeometryText(dataItem.getGeometry()),
