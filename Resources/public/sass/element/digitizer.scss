@@ -43,12 +43,6 @@
 }
 
 .digitizer-style-editor {
-    &.modal-body {
-        // defeat global .modal-body "padding: 0" hack, which exists only to support tabs inside popups
-        // see Mapbender/CoreBundle/Resources/public/sass/template/fullscrees.scss
-        // @todo Mapbender: target tabs in vis-ui dialogs specifically
-        padding: 15px;  // = Bootstrap default
-    }
     .form-group label {
         display: block;
     }

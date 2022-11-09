@@ -2,36 +2,30 @@
     "use strict";
 
     /**
-     * @param {*} owner jQueryUI widget, for access to _saveItem method
+     * @param {*} owner jQueryUI widget
+     * @param {Mapbender.DataManager.DialogFactory} dialogFactory
      * @constructor
      */
-    Mapbender.Digitizer.FeatureStyleEditor = function(owner) {
+    Mapbender.Digitizer.FeatureStyleEditor = function(owner, dialogFactory) {
         this.owner = owner;
         this.template_ = $.get([this.owner.elementUrl, 'style-editor'].join(''));
+        this.dialogFactory = dialogFactory;
     };
     Mapbender.Digitizer.FeatureStyleEditor.prototype.openDialog_ = function($content) {
         var promise = $.Deferred();
         var editor = this;
-        $content.dialog({
+        this.dialogFactory.dialog($content, {
             title: "Stylemanager",
             modal: true,
             width: '500px',
             classes: {
-                'ui-dialog': 'ui-dialog mb-element-popup-dialog modal-content',
-                'ui-dialog-titlebar': 'ui-dialog-titlebar modal-header',
-                'ui-dialog-titlebar-close': 'ui-dialog-titlebar-close close',
-                'ui-dialog-content': 'ui-dialog-content modal-body digitizer-style-editor',
-                'ui-dialog-buttonpane': 'ui-dialog-buttonpane modal-footer',
-                'ui-button': 'ui-button button btn'
-            },
-            hide: {
-                effect: 'fadeOut',
-                duration: 200
+                'ui-dialog-content': 'ui-dialog-content data-manager-edit-data digitizer-style-editor content-padding'
             },
             buttons: [{
                 text: "Abbrechen",
                 class: 'button btn',
                 click: function (e) {
+                    promise.reject();
                     $(this).dialog('close');
                 }
             }, {
@@ -43,10 +37,6 @@
                     promise.resolveWith(null, [values]);
                 }
             }]
-        });
-        $content.one('dialogclose', function() {
-            promise.reject();
-            $(this).dialog('destroy');
         });
         return promise;
     };

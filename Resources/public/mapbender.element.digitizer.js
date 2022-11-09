@@ -49,7 +49,7 @@
             return new Mapbender.Digitizer.Toolset(this);
         },
         _createStyleEditor: function() {
-            return new Mapbender.Digitizer.FeatureStyleEditor(this);
+            return new Mapbender.Digitizer.FeatureStyleEditor(this, this.dialogFactory_);
         },
         _createStyleAdapter: function() {
             return new Mapbender.Digitizer.StyleAdapter(this.options.fallbackStyle);
