@@ -411,7 +411,7 @@
             var $img = $(document.createElement('img'))
                 .addClass('img-responsive')
                 .attr('src', src)
-                .attr('data-default-src', settings.src || '')
+                .attr('data-default-src', src || '')
                 .attr('data-preview-for', settings.name || null)
             ;
             // Wrap in form-group (potentially with label), but
