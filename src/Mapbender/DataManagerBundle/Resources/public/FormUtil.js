@@ -8,14 +8,20 @@
     Mapbender.DataManager.FormUtil = {
         /**
          * @param {(HTMLElement|jQuery)} form
+         * @param {bool} [filterSubmit]
          * @return {Object}
          */
-        extractValues: function(form) {
+        extractValues: function(form, filterSubmit) {
             var values = {};
             var radioMap = {};
             var $allNamedInputs = $(':input[name]', form);
             $allNamedInputs.get().forEach(function(input) {
                 var type = input.type;
+                if (filterSubmit && (input.readOnly)) {
+                    // Treat read-only input as "unmapped" and omit it when
+                    // running storage.
+                    return;
+                }
                 var value;
                 switch (type) {
                     case 'radio':
