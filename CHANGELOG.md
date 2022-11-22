@@ -1,3 +1,6 @@
+## 1.5.5
+* Fix css inconsistencies between style editor and other dialogs
+
 ## 1.5.4
 * Fix donut drawing errors on Openlayers 6.14
 

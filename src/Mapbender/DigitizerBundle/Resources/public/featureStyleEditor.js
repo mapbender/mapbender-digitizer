@@ -2,28 +2,30 @@
     "use strict";
 
     /**
-     * @param {*} owner jQueryUI widget, for access to _saveItem method
+     * @param {*} owner jQueryUI widget
+     * @param {Mapbender.DataManager.DialogFactory} dialogFactory
      * @constructor
      */
-    Mapbender.Digitizer.FeatureStyleEditor = function(owner) {
+    Mapbender.Digitizer.FeatureStyleEditor = function(owner, dialogFactory) {
         this.owner = owner;
         this.template_ = $.get([this.owner.elementUrl, 'style-editor'].join(''));
+        this.dialogFactory = dialogFactory;
     };
     Mapbender.Digitizer.FeatureStyleEditor.prototype.openDialog_ = function($content) {
         var promise = $.Deferred();
         var editor = this;
-
-        Mapbender.DataManager.DialogFactory.dialog($content, {
+        this.dialogFactory.dialog($content, {
             title: "Stylemanager",
             width: '500px',
             resizable: true,
             classes: {
-                'ui-dialog-content': 'ui-dialog-content digitizer-style-editor'
+                'ui-dialog-content': 'ui-dialog-content data-manager-edit-data digitizer-style-editor content-padding'
             },
             buttons: [{
                 text: "Abbrechen",
                 class: 'button btn',
                 click: function (e) {
+                    promise.reject();
                     $(this).dialog('close');
                 }
             }, {
@@ -35,10 +37,6 @@
                     $(this).dialog('close');
                 }
             }]
-        });
-        $content.one('dialogclose', function() {
-            promise.reject();
-            $(this).dialog('destroy');
         });
         return promise;
     };

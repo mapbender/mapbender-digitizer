@@ -43,13 +43,6 @@
 }
 
 .digitizer-style-editor {
-    &.ui-dialog-content {
-        // Overrule jqueryui padding rule to avoid horizontal scrollbar
-        // with content using Bootstrap .row
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-
     .form-group label {
         display: block;
     }
