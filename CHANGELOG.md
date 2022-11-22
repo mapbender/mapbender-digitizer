@@ -1,3 +1,6 @@
+## 1.5.4
+* Fix donut drawing errors on Openlayers 6.14
+
 ## 1.5.3
 * Fix feature details not viewable through context menu / click inside map if editing disabled
 * Use different fallback detail popup titles for editable vs read-only objects
@@ -14,6 +17,9 @@
 * Fix implicit robloach/component-installer dependency (include select2 assets directly from vendor)
 
 NOTE: This version is ncompatible / not installable with Mapbender versions before v3.2.6.
+
+## 1.4.14
+* Fix donut drawing errors on Openlayers 6.14
 
 ## 1.4.13
 * Fix feature details not viewable through context menu / click inside map if editing disabled
