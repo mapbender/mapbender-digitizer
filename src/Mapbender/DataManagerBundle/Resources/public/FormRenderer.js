@@ -240,7 +240,7 @@
                 var $group = $input.closest('.form-group');
                 var $realInput = $('input[name="' + name + '"]', $group);
                 var url = $input.attr('data-upload-url');
-                var $loadingIcon = $('.fa-spin', $group);
+                var $loadingIcon = $('.-js-loading-indicator', $group);
                 $input.fileupload({
                     dataType: 'json',
                     url: url,
@@ -382,12 +382,12 @@
                 .append('<i class="fa fa-upload" aria-hidden="true"/>')
                 .append($btnText)
             ;
-            var $downloadBtn = $('<a href="#" class="btn btn-xs -fn-open-attachment"><i class="fa fa-lg fa-fw fas fa-external-link-alt fa-external-link"></i></a>')
+            var $downloadBtn = $('<a href="#" class="-fn-open-attachment"><i class="fa fa-2x fas fa-external-link-alt fa-external-link"></i></a>')
                 .attr('title', Mapbender.trans('mb.data-manager.attachment.open'))
                 .attr('target', '_blank')
                 .append($('<span class="sr-only">').text(Mapbender.trans('mb.data-manager.attachment.open')))
             ;
-            var $deleteBtn = $('<a href="#" class="btn btn-xs -fn-delete-attachment"><i class="fa fa-lg fa-fw fas fa-trash-alt fa-trash"></i></a>')
+            var $deleteBtn = $('<a href="#" class="-fn-delete-attachment"><i class="fa fa-2x fas fa-trash-alt fa-trash"></i></a>')
                 .attr('title', Mapbender.trans('mb.actions.remove'))
                 .append($('<span class="sr-only">').text(Mapbender.trans('mb.actions.remove')))
             ;
@@ -396,7 +396,7 @@
                 .append($btn)
                 .append($downloadBtn)
                 .append($deleteBtn)
-                .append('<i class="fa fas fa-fw fa-spinner fa-spin hidden" />')
+                .append('<i class="fa fas -js-loading-indicator fa-spinner fa-spin hidden" />')
             ;
             return this.wrapInput_($group, settings);
         },

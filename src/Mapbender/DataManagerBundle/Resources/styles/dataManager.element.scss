@@ -209,16 +209,29 @@ $buttonActiveTextColor: #fff !default;
     .fileinput-button {
       flex: 0 1 auto;
     }
+    >a {
+      margin: 0 0.5em;
+    }
     >i.fa-spin {
-      line-height: inherit;
+      // Keep icon centered by forcing line-height pixels equal to height pixels
+      line-height: 2;
+      height: 2em;
+    }
+    .fa-external-link-alt {
+      // Work around bad vertical glyph kerning (obvious mismatch vs trash can icon)
+      padding-top: 0.1em;
     }
   }
   .fileinput-button {
     position: relative;
     input {
       opacity: 0;
+      // Stretch to cover entire button (including padding)
       position: absolute;
       top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
       width: 100%;
     }
     max-width: 100%;
