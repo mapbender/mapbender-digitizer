@@ -153,8 +153,8 @@ formItems:
         value: ''
       - label: Static option a
         value: a
-      - sql: SELECT CONCAT("label_prefix", ': ', "name") AS label, "id" AS value FROM "some_table"
-        connection: name_of_some_connection
+    sql: SELECT CONCAT("label_prefix", ': ', "name") AS label, "id" AS value FROM "some_table"
+    connection: name_of_some_connection
 ```
 
 If `sql` is defined but `connection` is omitted, the "default" DBAL connection
