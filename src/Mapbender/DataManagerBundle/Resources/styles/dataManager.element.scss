@@ -101,6 +101,7 @@ $buttonActiveTextColor: #fff !default;
   .ui-dialog-titlebar, .ui-dialog-buttonpane {
     flex: 0 1 auto;
   }
+  max-height: 100vh;
   border: 1px solid #b3b3b3;
   .ui-dialog-button-pane {
     border-bottom: 5px solid #b3b3b3;
