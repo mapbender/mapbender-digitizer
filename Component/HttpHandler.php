@@ -142,7 +142,6 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
      * @param FeatureType $repository
      * @param Request $request
      * @return mixed[]
-     * @throws \Doctrine\DBAL\DBALException
      */
     protected function getSelectCriteria(FeatureType $repository, Request $request)
     {
