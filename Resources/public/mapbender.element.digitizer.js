@@ -333,6 +333,7 @@
             var olMap = this.mbMap.getModel().olMap;
             this.getSchemaLayer(schema).getSource().removeFeature(feature);
             this._super(schema, feature, id);
+            this.checkSourceRefresh_(schema);
             // Multi-Digitizer sync support
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
         },
@@ -392,6 +393,7 @@
             }
             this.toolsetRenderer.resume();
             this.resumeContextMenu_();
+            this.checkSourceRefresh_(schema);
             var olMap = this.mbMap.getModel().olMap;
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
         },
@@ -621,6 +623,24 @@
         },
         clearHighlightExclude_: function() {
             this.excludedFromHighlighting_.splice(0, this.excludedFromHighlighting_.length);
+        },
+        checkSourceRefresh_: function(schema) {
+            var sourceIds = schema.refreshLayersAfterFeatureSave || [];
+            if (sourceIds && !Array.isArray(sourceIds)) {
+                sourceIds = [sourceIds];
+            }
+            for (var i = 0; i < sourceIds.length; ++i) {
+                var source = this.mbMap.getModel().getSourceById(sourceIds[i]);
+                if (source) {
+                    if (typeof (source.refresh) === 'function') {
+                        source.refresh();
+                    } else {
+                        source.addParams({_OLSALT: Math.random()});
+                    }
+                } else {
+                    console.warn("Could not find source with id " + sourceIds[i] + " for refresh");
+                }
+            }
         },
         _processFormItem: function(schema, item, values) {
             switch (item.type) {
