@@ -36,6 +36,7 @@ class DigitizerAdminType extends AbstractType
                     'class' => 'code-yaml',
                 ),
             ))
+
         ;
     }
 }

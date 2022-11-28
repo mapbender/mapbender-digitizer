@@ -6,8 +6,10 @@ namespace Mapbender\DigitizerBundle\Component;
 
 use Doctrine\Persistence\ConnectionRegistry;
 use Mapbender\CoreBundle\Entity\Element;
+use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Entity\Feature;
+use RVR\DigitizerBundle\Component\FormConfigUtil;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -173,6 +175,30 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
             $polygonWkt = 'POLYGON((' . implode(',', $polygonCoordinates) . '))';
             $criteria['intersect'] = $polygonWkt;
         }
+        $criteria = self::extendSelectCriteria($criteria, $repository,$request);
+        return $criteria;
+    }
+
+
+    public static function extendSelectCriteria(array $criteria, DataStore $repository, Request $request)
+    {
+
+        $whereParts = [];
+        $match = \array_filter($request->query->get('match', array()));
+        foreach ($match as $columnName => $value) {
+            $connection =  $repository->getConnection();
+            $whereParts[] = $connection->quoteIdentifier($columnName) . '=' . $connection->quote($value);
+        }
+
+        if ($whereParts) {
+            if (!empty($criteria['where'])) {
+                $criteria['where'] .= ' AND ';
+            } else {
+                $criteria['where'] = '';
+            }
+            $criteria['where'] .= '(' . implode(' AND ', $whereParts) . ')';
+        }
+
         return $criteria;
     }
 
