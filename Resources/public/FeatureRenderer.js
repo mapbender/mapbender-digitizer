@@ -85,16 +85,6 @@
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
         // @todo: salvage this
         onFeatureUpdatedOnServer: function(schema) {
-            if (schema.refreshLayersAfterFeatureSave) {
-                $.each(schema.refreshLayersAfterFeatureSave, function (k1, instanceId) {
-                    var source = Mapbender.Model.getSourceById(instanceId);
-                    var layers = source.getNativeLayers();
-                    $.each(layers, function (k2, layer) {
-                        Mapbender.layerManager.refreshLayer(layer);
-                    });
-                });
-            }
-
             if (schema.refreshFeaturesAfterSave) {
                 for (var i = 0; i < schema.refreshFeaturesAfterSave.length; ++i) {
                     var schemaName = schema.refreshFeaturesAfterSave[i];
