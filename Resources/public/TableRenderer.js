@@ -118,40 +118,6 @@
                 }
             });
         },
-        getOptions: function(schema) {
-            return Object.assign(Mapbender.DataManager.TableRenderer.prototype.getOptions.call(this, schema), {
-                // "pageLength" is a top-level schema attribute, unlike DM (nested in "table")
-                // "searching" is aliased to top-level schema.inlineSearch, unlike DM (schema.table.searching)
-                pageLength: schema.pageLength,
-                searching: schema.inlineSearch
-            });
-        },
-
-        getColumnsConfigs: function(schema) {
-            var fieldConfigs = schema.tableFields || [];
-            if (!Array.isArray(fieldConfigs)) {
-                // Digitizer vs DM quirk: digitizer uses a PHP-style mapping of attribute name to other config values
-                // Adapt by unravelling object-to-object mapping to list of object; add the top-level key as the "data" property
-                fieldConfigs = _.map(fieldConfigs, function(value, key) {
-                    return Object.assign({}, value, {
-                        data: key
-                    });
-                });
-            }
-            // Digitizer legacy config quirk: column configs use a "label" key, which is not a datatables option and doesn't do
-            // anything. Adapt configs to instead use the "title" option.
-            fieldConfigs = fieldConfigs.map(function(fieldConfig) {
-                if (typeof (fieldConfig.title) === 'undefined' && fieldConfig.label) {
-                    fieldConfig.title = fieldConfig.label;
-                }
-                delete fieldConfig['label'];
-                return fieldConfig;
-            });
-            if (!fieldConfigs.length) {
-                fieldConfigs = this.getDefaultColumnConfigs(schema);
-            }
-            return fieldConfigs;
-        },
         onRowCreation: function(schema, tr, feature) {
             Mapbender.DataManager.TableRenderer.prototype.onRowCreation.apply(this, arguments);
             // Place table row into feature data for quick access (synchronized highlighting etc)

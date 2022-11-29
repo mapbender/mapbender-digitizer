@@ -29,8 +29,6 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
             'continueDrawingAfterSave' => false,
             'displayPermanent' => false,
             'printable' => false,
-            'inlineSearch' => true,
-            'pageLength' => 16,
             'minScale' => null,
             'maxScale' => null,
             'searchType' => 'currentExtent',
@@ -51,7 +49,6 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
 
 
             // no defaults:
-            // * tableFields
             // * toolset
         ));
     }
@@ -86,6 +83,34 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
 
     public function processSchemaBaseConfig(array $schemaConfig, $schemaName)
     {
+        // Resolve aliased "tableFields" (Digitizer legacy) vs "table.column" (DM)
+        $schemaConfig += array('table' => array());
+        if (!empty($schemaConfig['tableFields'])) {
+            $schemaConfig['table'] += array('columns' => $schemaConfig['tableFields']);
+        }
+        foreach ($schemaConfig['table']['columns'] as $k => $column) {
+            // Resolve mapping-style vs list style data attribute specification
+            if (empty($column['data'])) {
+                $schemaConfig['table']['columns'][$k]['data'] = $k;
+            }
+            // Resolve "title" vs "label" config aliasing
+            if (!empty($column['label'])) {
+                $schemaConfig['table']['columns'][$k] += array('title' => $column['label']);
+            }
+            unset($schemaConfig['table']['columns'][$k]['label']);
+        }
+        $schemaConfig['table']['columns'] = \array_values($schemaConfig['table']['columns']);
+        if (isset($schemaConfig['inlineSearch'])) {
+            $schemaConfig['table']['searching'] = $schemaConfig['inlineSearch'];
+        }
+        if (!empty($schemaConfig['pageLength'])) {
+            $schemaConfig['table']['pageLength'] = $schemaConfig['pageLength'];
+        }
+
+        unset($schemaConfig['tableFields']);
+        unset($schemaConfig['inlineSearch']);
+        unset($schemaConfig['pageLength']);
+
         $schemaConfig = parent::processSchemaBaseConfig($schemaConfig, $schemaName);
         // resolve aliasing DM "allowEdit" vs historical Digitizer "allowEditData"
         $schemaConfig['allowEdit'] = !!$schemaConfig['allowEditData'];
