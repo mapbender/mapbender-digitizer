@@ -36,8 +36,6 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
                 'overwriteValuesWithDefault' => false,
                 'data' => null, // @todo: specify, document
             ),
-            // @todo: specify, document
-            'refreshFeaturesAfterSave' => false,
             // @todo: specify, document; current implementation does not work on Openlayers 4/5/6
             'refreshLayersAfterFeatureSave' => false,
 
