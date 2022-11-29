@@ -139,30 +139,41 @@
             return this.getValidToolNames(schema);
         },
         getGeometryToolNames: function(schema) {
+            return this.normalizeToolSet_(schema).map(function(toolSpec) {
+                return toolSpec.type;
+            });
+        },
+        normalizeToolSet_: function(schema) {
+            var seen = {};
+            var toolSpecs = [];
+            var standardTools = ['modifyFeature', 'moveFeature'];
             if (schema.allowDigitize) {
-                var toolNames = schema.toolset && schema.toolset.map(function(tc) {
-                    // Historic Digitizer / vis-ui dependency quirk: toolset
-                    // configuration is a list of objects with (only) a type property
-                    return tc.type;
-                });
-                if (!toolNames) {
-                    toolNames = this.getDefaultGeometryToolNames(schema);
-                }
                 var validNames = this.getValidToolNames(schema);
-                // always append modify and move
-                var standardTools = ['modifyFeature', 'moveFeature'];
-                // Filter repeats / earlier appearances
-                toolNames = toolNames.filter(function(name) {
-                    return -1 === standardTools.indexOf(name);
+                // Should be false with a point / multipoint schema (modify meaningless vs move), true otherwise
+                var addModify = -1 !== validNames.indexOf('modifyFeature');
+                var normalized = (schema.toolset || this.getDefaultGeometryToolNames(schema)).map(function(tc) {
+                    var obj = (typeof tc === 'string') && {type: tc} || Object.assign({}, tc);
+                    obj.schema = schema;
+                    return obj
+                }).filter(function(toolSpec) {
+                    return -1 === standardTools.indexOf(toolSpec.type)
+                        && -1 !== validNames.indexOf(toolSpec.type)
+                    ;
                 });
-                toolNames = toolNames.concat(standardTools);
-                // Reduce to valid set (NOTE: may drop "modifyFeature" again for point / multipoint
-                return toolNames.filter(function(name) {
-                    return -1 !== validNames.indexOf(name);
-                });
-            } else {
-                return [];
+                // Deduplicate
+                for (var t = 0; t < normalized.length; ++t) {
+                    var toolSpec = normalized[t];
+                    if (!seen[toolSpec.type]) {
+                        toolSpecs.push(toolSpec);
+                        seen[toolSpec.type] = true;
+                    }
+                }
+                if (addModify) {
+                    toolSpecs.push({type: 'modifyFeature'});
+                }
+                toolSpecs.push({type: 'moveFeature'});
             }
+            return toolSpecs;
         },
         renderGeometryToolButtons: function(schema) {
             var toolNames = this.getGeometryToolNames(schema);
