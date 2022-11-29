@@ -255,7 +255,7 @@ Inserts custom HTML content (no escaping), wrapped into an extra div. May specif
 <...>
 formItems:
   - type: html
-    html: 'This is will <strong>not</strong> go through any HTML escaping.'
+    html: 'This will <strong>not</strong> go through any HTML escaping.'
     cssClass: added-on-wrapping-div
 ```
 
