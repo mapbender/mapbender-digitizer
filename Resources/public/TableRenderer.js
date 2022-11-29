@@ -126,18 +126,7 @@
                 searching: schema.inlineSearch
             });
         },
-        getDefaultColumnConfigs: function(schema) {
-            // @todo DataManager: data manager does not use default columns, but it should; without
-            //                    columns, dataTables crashes immediately.
-            var tableFields = [];
 
-            tableFields.push({
-                data: schema.featureType.uniqueId,
-                title: 'Nr.',
-                width: '20%'
-            });
-            return tableFields;
-        },
         getColumnsConfigs: function(schema) {
             var fieldConfigs = schema.tableFields || [];
             if (!Array.isArray(fieldConfigs)) {
