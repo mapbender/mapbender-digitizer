@@ -20,6 +20,22 @@
                 classes: Object.assign({}, defaults.classes, (options || {}).classes || {})
             });
             $content.dialog(options_);
+            var $dialog = $content.closest('.ui-dialog');
+            // Remove draggable + resizable containments. This cannot be controlled with dialog options :(
+            var draggable = $dialog.draggable('instance');
+            var resizable = $dialog.resizable('instance');
+            if (draggable) {
+                draggable.option('containment', false);
+                // "If set to true container auto-scrolls while dragging"
+                // See https://api.jqueryui.com/draggable/#option-scroll
+                // Disable this. It breaks Mapbender's fixed full width / full height layout when
+                // dragging dialog off a screen edge.
+                draggable.option('scroll', false);
+            }
+            if (resizable) {
+                resizable.option('containment', false);
+            }
+
             // Hide text labels on .ui-button-icon-only, with or without jqueryui css
             $('.ui-dialog-titlebar .ui-button-icon-only', $content.closest('.ui-dialog')).each(function() {
                 var $button = $(this);
