@@ -21,6 +21,11 @@ extra configuration settings in a schema:
 |---|---|---|---|
 | allowDigitize | boolean | Allow geometry creation and editing (attribute editing may still be allowed via `allowEdit`) | true|
 | toolset | list of strings or null | Offered geometry creation tools (see below) | Auto-detect |
+| searchType | string or null | Initial state of checkbox for limiting feature loading to current visible map portion. On if exactly "currentExtent". Off for all other values | currentExtent |
+| allowChangeVisibility | boolean | Offer buttons to toggle feature visibility | true |
+| displayPermanent | boolean | Keep features visible on map even after switching to a different schema | false |
+| displayOnInactive | boolean | Keep features visible on map even after deactivating Digitizer | false |
+| continueDrawingAfterSave | boolean | Keep drawing tool active after creating and saving a new feature (~fast batch mode feature creation) | false |
 
 ## Configuring "toolset"
 If `toolset` is null or not set, and the connected feature type declares its
