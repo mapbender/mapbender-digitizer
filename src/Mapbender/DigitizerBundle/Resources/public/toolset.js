@@ -72,7 +72,7 @@
                 //       Move allowed on everything
                 addModify = addModify || -1 !== validNames.indexOf('modifyFeature');
                 addMove = true;
-                var subSchemaTools = (subSchemas[s].toolset || validNames).map(function(tc) {
+                var subSchemaTools = (subSchemas[s].toolset || this.getDefaultGeometryToolNames(schema)).map(function(tc) {
                     var obj = (typeof tc === 'string') && {type: tc} || Object.assign({}, tc);
                     obj.schema = obj.schema || subSchemas[s].schemaName;
                     return obj;

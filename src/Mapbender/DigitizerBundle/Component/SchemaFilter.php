@@ -20,8 +20,6 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
             'formItems' => array(),
             'allowDigitize' => true,
             // @todo: default allow or default deny?
-            'allowEditData' => true,
-            // @todo: default allow or default deny?
             'allowDelete' => true,
             'allowCustomStyle' => false,
             // @todo: may not need configurability at all. Who doesn't want this?
@@ -82,24 +80,23 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
 
     public function processSchemaBaseConfig(array $schemaConfig, $schemaName)
     {
-        // resolve aliasing DM "allowEdit" vs historical Digitizer "allowEditData"
-        if (isset($schemaConfig['allowEditData'])) {
-            $schemaConfig['allowEdit'] = $schemaConfig['allowEditData'];
-        }
-
-        // re-merge styles (upstream merge is not recursive, we may be missing entries depending on config)
-        $schemaConfig['styles'] = array_replace_recursive($this->getDefaultStyles(), $schemaConfig['styles']);
-
-        // Disallow style editing if editing is disabled
-        if (!$schemaConfig['allowEdit']) {
-            $schemaConfig['allowCustomStyle'] = false;
-        }
-
         // Resolve aliased "tableFields" (Digitizer legacy) vs "table.column" (DM)
         $schemaConfig += array('table' => array());
         if (!empty($schemaConfig['tableFields'])) {
             $schemaConfig['table'] += array('columns' => $schemaConfig['tableFields']);
         }
+        foreach ($schemaConfig['table']['columns'] as $k => $column) {
+            // Resolve mapping-style vs list style data attribute specification
+            if (empty($column['data'])) {
+                $schemaConfig['table']['columns'][$k]['data'] = $k;
+            }
+            // Resolve "title" vs "label" config aliasing
+            if (!empty($column['label'])) {
+                $schemaConfig['table']['columns'][$k] += array('title' => $column['label']);
+            }
+            unset($schemaConfig['table']['columns'][$k]['label']);
+        }
+        $schemaConfig['table']['columns'] = \array_values($schemaConfig['table']['columns']);
         if (isset($schemaConfig['inlineSearch'])) {
             $schemaConfig['table']['searching'] = $schemaConfig['inlineSearch'];
         }
@@ -111,9 +108,23 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
         unset($schemaConfig['inlineSearch']);
         unset($schemaConfig['pageLength']);
 
+        // resolve aliasing DM "allowEdit" vs historical Digitizer "allowEditData"
+        if (\array_key_exists('allowEditData', $schemaConfig)) {
+            $schemaConfig['allowEdit'] = $schemaConfig['allowEditData'];
+            unset($schemaConfig['allowEditData']);
+        }
         $schemaConfig = parent::processSchemaBaseConfig($schemaConfig, $schemaName);
+
         // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
         $schemaConfig['allowCreate'] = $schemaConfig['allowEdit'];
+
+        // re-merge styles (upstream merge is not recursive, we may be missing entries depending on config)
+        $schemaConfig['styles'] = array_replace_recursive($this->getDefaultStyles(), $schemaConfig['styles']);
+
+        // Disallow style editing if editing is disabled
+        if (!$schemaConfig['allowEdit']) {
+            $schemaConfig['allowCustomStyle'] = false;
+        }
 
         return $schemaConfig;
     }
