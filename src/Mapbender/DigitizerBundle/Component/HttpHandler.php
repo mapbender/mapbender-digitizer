@@ -104,7 +104,6 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
      * @param Request $request
      * @param array $schemaConfig
      * @return mixed[]
-     * @throws \Doctrine\DBAL\DBALException
      */
     protected function getSelectCriteria(DataStore $repository, Request $request, array $schemaConfig)
     {

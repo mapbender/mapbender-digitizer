@@ -387,6 +387,7 @@
                 this.featureEditor.resume();
             }
             this.resumeContextMenu_();
+            this.checkSourceRefresh_(schema);
         },
 
         _prepareDataItem: function(itemData) {
@@ -465,6 +466,7 @@
             }
             this.toolsetRenderer.resume();
             this.resumeContextMenu_();
+            this.checkSourceRefresh_(schema);
         },
         _getData: function(schema) {
             this.queuedRefresh_[schema.schemaName] = false;
@@ -733,6 +735,24 @@
         },
         clearHighlightExclude_: function() {
             this.excludedFromHighlighting_.splice(0, this.excludedFromHighlighting_.length);
+        },
+        checkSourceRefresh_: function(schema) {
+            var sourceIds = schema.refreshLayersAfterFeatureSave || [];
+            if (sourceIds && !Array.isArray(sourceIds)) {
+                sourceIds = [sourceIds];
+            }
+            for (var i = 0; i < sourceIds.length; ++i) {
+                var source = this.mbMap.getModel().getSourceById(sourceIds[i]);
+                if (source) {
+                    if (typeof (source.refresh) === 'function') {
+                        source.refresh();
+                    } else {
+                        source.addParams({_OLSALT: Math.random()});
+                    }
+                } else {
+                    console.warn("Could not find source with id " + sourceIds[i] + " for refresh");
+                }
+            }
         },
         getInitialCustomStyle_: function(schema, feature) {
             return schema.styles.default;
