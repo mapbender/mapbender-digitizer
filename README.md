@@ -30,9 +30,8 @@ Digitizer does not support tables without geometry columns.
 Using Digitizer requires registering *two* bundles in your application kernel. Register *both*
 `\Mapbender\DataManagerBundle\MapbenderDataManagerBundle` and `\Mapbender\DigitizerBundle\MapbenderDigitizerBundle`.
 
-# Additional schema configuration values
-In addition to settings understood by Data Manager, Digitizer allows the following
-extra configuration settings in a schema:
+## Configuring feature display and interactions
+Each schema may define the following values to control basic behaviour:
 
 | name | type | description | default |
 |---|---|---|---|
