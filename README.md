@@ -26,6 +26,7 @@ extra configuration settings in a schema:
 | displayPermanent | boolean | Keep features visible on map even after switching to a different schema | false |
 | displayOnInactive | boolean | Keep features visible on map even after deactivating Digitizer | false |
 | continueDrawingAfterSave | boolean | Keep drawing tool active after creating and saving a new feature (~fast batch mode feature creation) | false |
+| refreshLayersAfterFeatureSave | list of strings and / or numbers | Mapbender source instance ids (refer to "Layersets" tab in application backend) that will reload after any item is created, updated or deleted | -none- |
 
 ## Configuring "toolset"
 If `toolset` is null or not set, and the connected feature type declares its
