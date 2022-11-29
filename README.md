@@ -1,26 +1,46 @@
-# Mapbender digitizer module
+# Mapbender Digitizer
+Show and edit spatial database contents in a Mapbender application.
 
-## Features
-* Connecting and handling PostgreSQL(PostGIS) or Oracle data tables
-* Defining custom handling of DB tables as FeatureType's. 
-* Multiply definition's of the same table with own SQL filter
-* Defining custom FeatureType forms to handle the data
-* Displaying and modifying FeatureType on the map (powered by OpenLayer 2)
+Designed for use in a sidepane.
 
-## Installation 
-* First you need installed mapbender3-starter https://github.com/mapbender/mapbender-starter#installation project
-* Add required module to mapbender
-```sh
-$ composer require "mapbender/digitizer"
-```
+Works with Postgis and Oracle spatial data via [Mapbender Data Source layer](https://github.com/mapbender/data-source).
+For database connection / table configuration, please refer to [the relevant Data Source doumentation](For database connection / table selection, please refer to [the Data Source documentation](https://github.com/mapbender/data-source#configuring-repositories).
 
-## Update 
+Non-spatial related base functionality is equivalent to
+[Mapbender data manager](https://github.com/mapbender/data-manager).
+* [Configurable tabular listing of database contents](https://github.com/mapbender/data-manager/blob/2.0.7/README.md#configuring-tabular-item-listing)
+* [Configurable forms for editing / showing data attributes](https://github.com/mapbender/data-manager/blob/2.0.7/README.md#configuring-forms)
 
- ```sh
-$ composer update mapbender/digitizer
-```
+Digitizer does not support tables without geometry columns.
 
-# Architecture
-![Architecture](Documents/Digitizer.png)
+# Additional schema configuration values
+In addition to settings understood by Data Manager, Digitizer allows the following
+extra configuration settings in a schema:
 
-[Diagram](https://www.draw.io/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmapbender%2Fmapbender-digitizer%2Fmaster%2FDocuments%2FDigitizer.xml)
+| name | type | description | default |
+|---|---|---|---|
+| allowDigitize | boolean | Allow geometry creation and editing (attribute editing may still be allowed via `allowEdit`) | true|
+| toolset | list of strings or null | Offered geometry creation tools (see below) | Auto-detect |
+
+## Configuring "toolset"
+If `toolset` is null or not set, and the connected feature type declares its
+`geomType`, Digitizer will auto-select a compatible selection of tools to create
+feature geometries.
+
+If neither `toolset` nor the `geomType` are defined, all supported tools are offered.
+
+If auto-detection does not produce the desired set of tools, you may specify
+a list of tool names manually. Valid tool names are:
+* `drawPoint` for point creation
+* `drawLine` for line drawing
+* `drawPolygon` for polygon drawing
+* `drawRectangle`, `drawCircle`, `drawEllipse` for rectangles, circles and ellipses respectively
+* `drawDonut` for polygons with interior cutouts
+
+If `toolset` is set as an empty list, none of these tools will be offered.
+
+If `allowDigitize` is omitted or set to true, vertex modification and feature translation tools
+will also be offered.
+
+If `allowDigitize` is set to false, the `toolset` setting will be ignored completely,
+and no drawing / translating / modifying of geometries will be available at all.
