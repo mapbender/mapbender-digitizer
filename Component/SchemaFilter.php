@@ -20,8 +20,6 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
             'formItems' => array(),
             'allowDigitize' => true,
             // @todo: default allow or default deny?
-            'allowEditData' => true,
-            // @todo: default allow or default deny?
             'allowDelete' => true,
             'allowCustomStyle' => false,
             // @todo: may not need configurability at all. Who doesn't want this?
@@ -111,9 +109,13 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
         unset($schemaConfig['inlineSearch']);
         unset($schemaConfig['pageLength']);
 
-        $schemaConfig = parent::processSchemaBaseConfig($schemaConfig, $schemaName);
         // resolve aliasing DM "allowEdit" vs historical Digitizer "allowEditData"
-        $schemaConfig['allowEdit'] = !!$schemaConfig['allowEditData'];
+        if (\array_key_exists('allowEditData', $schemaConfig)) {
+            $schemaConfig['allowEdit'] = $schemaConfig['allowEditData'];
+            unset($schemaConfig['allowEditData']);
+        }
+        $schemaConfig = parent::processSchemaBaseConfig($schemaConfig, $schemaName);
+
         // Digitzer quirk: there is no "allowCreate" in any historical default or example configuration
         $schemaConfig['allowCreate'] = $schemaConfig['allowEdit'];
 
