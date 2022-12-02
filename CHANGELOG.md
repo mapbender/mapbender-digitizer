@@ -1,3 +1,8 @@
+## 1.5.6
+* Reimplement "refreshLayersAfterFeatureSave" (lost Digitizer ~1.2ish feature)
+* Allow documented DataManager-style table configuration
+* Add configuration documentation
+
 ## 1.5.5
 * Fix css inconsistencies between style editor and other dialogs
 
