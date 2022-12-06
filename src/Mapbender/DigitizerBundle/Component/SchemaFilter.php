@@ -50,9 +50,9 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
 
     public static function getGrantFlagNames()
     {
-        return parent::getGrantFlagNames() + array(
+        return \array_merge(parent::getGrantFlagNames(), array(
             'allowDigitize',
-        );
+        ));
     }
 
     /**
