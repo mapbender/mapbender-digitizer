@@ -5,7 +5,6 @@ namespace Mapbender\DataManagerBundle\Component;
 
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\FetchMode;
 use Doctrine\Persistence\ConnectionRegistry;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -124,7 +123,7 @@ class FormItemFilter
         $connectionName = isset($item['connection']) ? $item['connection'] : 'default';
         /** @var Connection $connection */
         $connection = $this->connectionRegistry->getConnection($connectionName);
-        foreach ($connection->executeQuery($item['sql'])->fetchAll(FetchMode::ASSOCIATIVE) as $row) {
+        foreach ($connection->executeQuery($item['sql'])->fetchAllAssociative() as $row) {
             // throw out resource-type columns (certain Oracle types)
             $row = \array_filter($row, function($column) {
                 return !\is_resource($column);
