@@ -80,6 +80,8 @@ class HttpHandler implements ElementHttpHandlerInterface
                 return $this->saveAction($element, $request);
             case 'delete':
                 return $this->deleteAction($element, $request);
+            case 'grants':
+                return $this->grantsAction($element);
             default:
                 return null;
         }
@@ -143,6 +145,11 @@ class HttpHandler implements ElementHttpHandlerInterface
         $repository = $this->schemaFilter->getDataStore($element, $schemaName);
         $id = $request->query->get('id');
         return new JsonResponse($repository->remove($id));
+    }
+
+    protected function grantsAction(Element $element)
+    {
+        return new JsonResponse($this->schemaFilter->getAllGrants($element));
     }
 
     /**

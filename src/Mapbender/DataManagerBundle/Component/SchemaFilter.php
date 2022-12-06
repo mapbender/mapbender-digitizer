@@ -72,6 +72,21 @@ class SchemaFilter
         );
     }
 
+    public function getAllGrants(Element $element)
+    {
+        $dataOut = array();
+        $flagNames = $this->getGrantFlagNames();
+        $schemaNames = \array_keys($element->getConfiguration()['schemes']);
+        foreach ($schemaNames as $schemaName) {
+            $schemaConfig = $this->getRawSchemaConfig($element, $schemaName, true);
+            $dataOut[$schemaName] = array();
+            foreach ($flagNames as $flagName) {
+                $dataOut[$schemaName][$flagName] = $this->resolveSchemaGrantFlag($schemaConfig, $flagName);
+            }
+        }
+        return $dataOut;
+    }
+
     /**
      * @param Element $element
      * @return mixed[][]

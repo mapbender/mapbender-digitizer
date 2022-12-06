@@ -54,6 +54,8 @@
         tableButtonsTemplate_: null,
         fetchXhr: null,
         $loadingIndicator_: null,
+        /** @type {Promise|null} */
+        grantsRequest_: null,
 
         _create: function() {
             if (Array.isArray(this.options.schemes) || !Object.keys(this.options.schemes).length) {
@@ -73,6 +75,16 @@
                     .prepend(this.$loadingIndicator_.css({float: 'right', opacity: 0.0}))
                 ;
             }
+            this.grantsRequest_ = $.getJSON([this.elementUrl, 'grants'].join(''));
+            this.grantsRequest_.then((function(mergeWith) {
+                return function(allGrants) {
+                    var schemaNames = Object.keys(allGrants);
+                    for (var i = 0; i < schemaNames.length; ++i) {
+                        var schemaName = schemaNames[i];
+                        Object.assign(mergeWith[schemaName], allGrants[schemaName]);
+                    }
+                };
+            })(this.options.schemes));
 
             this.updateSchemaSelector_();
             this.tableButtonsTemplate_ = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
