@@ -10,9 +10,12 @@ use Mapbender\DataManagerBundle\Exception\UnknownSchemaException;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Component\RepositoryRegistry;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class SchemaFilter
 {
+    /** @var AuthorizationCheckerInterface */
+    protected $authChecker;
     /** @var RepositoryRegistry */
     protected $registry;
     /** @var FormItemFilter */
@@ -23,14 +26,17 @@ class SchemaFilter
     protected $isFeatureTypeRegistry;
 
     /**
+     * @param AuthorizationCheckerInterface $authorizationChecker
      * @param RepositoryRegistry $registry
      * @param FormItemFilter $formItemFilter
      * @param string $uploadsBasePath
      */
-    public function __construct(RepositoryRegistry $registry,
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker,
+                                RepositoryRegistry $registry,
                                 FormItemFilter $formItemFilter,
                                 $uploadsBasePath)
     {
+        $this->authChecker = $authorizationChecker;
         $this->registry = $registry;
         $this->formItemFilter = $formItemFilter;
         $this->uploadsBasePath = trim($uploadsBasePath, '/\\');
@@ -54,6 +60,15 @@ class SchemaFilter
                 'pageLength' => 16,
             ),
             'listed' => true,
+        );
+    }
+
+    public static function getGrantFlagNames()
+    {
+        return array(
+            'allowEdit',
+            'allowCreate',
+            'allowDelete',
         );
     }
 
@@ -156,16 +171,7 @@ class SchemaFilter
     public function checkAllowDelete(Element $element, $schemaName)
     {
         $schemaConfig = $this->getRawSchemaConfig($element, $schemaName, true);
-        return $this->checkAllowDeleteInternal($schemaConfig);
-    }
-
-    /**
-     * @param array $schemaConfig
-     * @return boolean
-     */
-    protected function checkAllowDeleteInternal(array $schemaConfig)
-    {
-        return !empty($schemaConfig['allowDelete']);
+        return $this->resolveSchemaGrantFlag($schemaConfig, 'allowDelete');
     }
 
     /**
@@ -177,21 +183,10 @@ class SchemaFilter
     public function checkAllowSave(Element $element, $schemaName, $isNew)
     {
         $schemaConfig = $this->getRawSchemaConfig($element, $schemaName, true);
-        return $this->checkAllowSaveInternal($schemaConfig, $isNew);
-    }
-
-    /**
-     * @param array $schemaConfig
-     * @param boolean $isNew
-     * @return boolean
-     */
-    protected function checkAllowSaveInternal(array $schemaConfig, $isNew)
-    {
-        if (!$isNew || !\array_key_exists('allowCreate', $schemaConfig)) {
-            // "allowEditData": Digitizer quirk
-            return !empty($schemaConfig['allowEdit']) || !empty($schemaConfig['allowEditData']);
+        if ($isNew) {
+            return $this->resolveSchemaGrantFlag($schemaConfig, 'allowCreate');
         } else {
-            return !empty($schemaConfig['allowCreate']);
+            return $this->resolveSchemaGrantFlag($schemaConfig, 'allowEdit');
         }
     }
 
@@ -353,5 +348,24 @@ class SchemaFilter
             $this->isFeatureTypeRegistry = (($this->registry->dataStoreFactory($storeConfig)) instanceof FeatureType);
         }
         return $this->uploadsBasePath . '/' . ($this->isFeatureTypeRegistry ? 'featureTypes' : 'ds-uploads');
+    }
+
+    /**
+     * @param mixed[] $schemaConfig
+     * @param string $flagName
+     * @return bool
+     */
+    protected function resolveSchemaGrantFlag(array $schemaConfig, $flagName)
+    {
+        $value = $schemaConfig[$flagName];
+        if (\is_bool($value) || \is_null($value) || (!\is_array($value) && \strlen($value) <= 1)) {
+            return !!$value;
+        }
+        foreach ((array)$value as $role) {
+            if ($this->authChecker->isGranted($role)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

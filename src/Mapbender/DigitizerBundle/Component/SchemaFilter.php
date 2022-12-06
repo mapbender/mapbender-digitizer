@@ -48,6 +48,13 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
         ));
     }
 
+    public static function getGrantFlagNames()
+    {
+        return parent::getGrantFlagNames() + array(
+            'allowDigitize',
+        );
+    }
+
     /**
      * @return array[]
      * @todo: make protected

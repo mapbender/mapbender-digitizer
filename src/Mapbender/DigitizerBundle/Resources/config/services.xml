@@ -12,6 +12,7 @@
             <argument>%featureTypes%</argument>
         </service>
         <service id="mb.digitizer.schema_filter" class="Mapbender\DigitizerBundle\Component\SchemaFilter">
+            <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="mb.digitizer.registry" />
             <argument type="service" id="mb.data-manager.form_item_filter" />
             <argument>%mapbender.uploads_dir%</argument>
