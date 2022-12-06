@@ -202,6 +202,10 @@ class HttpHandler implements ElementHttpHandlerInterface
         foreach ($selectSchemaNames as $delegatingSchemaName) {
             // @todo: criteria reuse (esp. intersect)?
             $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $delegatingSchemaName, false);
+            if (!$this->schemaFilter->getSchemaAccess($schemaConfig)) {
+                continue;
+            }
+
             $limitSchema = !empty($schemaConfig['maxResults']) ? \intval($schemaConfig['maxResults']) : null;
             $limitSchema = $this->calculateSchemaLimit($limitTotal, $limitSchema, count($results));
             if ($limitSchema !== null && $limitSchema <= 0) {

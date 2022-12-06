@@ -161,7 +161,11 @@
                 expanded.push(schema0);
             } else {
                 for (var i = 0; i < schema0.combine.length; ++i) {
-                    expanded.push(this.options.schemes[schema0.combine[i]]);
+                    var subschemaName = schema0.combine[i];
+                    // Schema may have been pruned after loading grants
+                    if (this.options.schemes[subschemaName]) {
+                        expanded.push(this.options.schemes[subschemaName]);
+                    }
                 }
             }
             return expanded;

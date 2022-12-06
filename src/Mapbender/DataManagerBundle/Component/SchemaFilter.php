@@ -77,9 +77,32 @@ class SchemaFilter
         $dataOut = array();
         $flagNames = $this->getGrantFlagNames();
         $schemaNames = \array_keys($element->getConfiguration()['schemes']);
+        $schemaConfigs = array();
         foreach ($schemaNames as $schemaName) {
-            $schemaConfig = $this->getRawSchemaConfig($element, $schemaName, true);
-            if ($this->getSchemaAccess($schemaConfig)) {
+            if (!isset($schemaConfigs[$schemaName])) {
+                $schemaConfigs[$schemaName] = $this->getRawSchemaConfig($element, $schemaName, true);
+            }
+            $schemaConfig = $schemaConfigs[$schemaName];
+            if (isset($schemaConfig['combine'])) {
+                $remaining = array();
+                foreach ($schemaConfig['combine'] as $subSchemaName) {
+                    if (!isset($schemaConfigs[$subSchemaName])) {
+                        $schemaConfigs[$subSchemaName] = $this->getRawSchemaConfig($element, $subSchemaName, true);
+                    }
+                    if ($this->getSchemaAccess($schemaConfigs[$subSchemaName])) {
+                        $remaining[] = $subSchemaName;
+                    }
+                }
+                if ($remaining) {
+                    // Reduce combination to subschemas remaining after grants checks
+                    $dataOut[$schemaName] = array(
+                        'combine' => $remaining,
+                    );
+                } else {
+                    // Entire combination is not granted => remove combination
+                    $dataOut[$schemaName] = false;
+                }
+            } elseif ($this->getSchemaAccess($schemaConfig)) {
                 $dataOut[$schemaName] = array();
                 foreach ($flagNames as $flagName) {
                     $dataOut[$schemaName][$flagName] = $this->resolveSchemaGrantFlag($schemaConfig, $flagName);
@@ -391,7 +414,7 @@ class SchemaFilter
         return false;
     }
 
-    protected function getSchemaAccess(array $schemaConfig)
+    public function getSchemaAccess(array $schemaConfig)
     {
         if (isset($schemaConfig['roles'])) {
             foreach ($schemaConfig['roles'] as $role) {
