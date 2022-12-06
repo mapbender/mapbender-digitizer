@@ -76,19 +76,11 @@ class SchemaFilter
     {
         $dataOut = array();
         $flagNames = $this->getGrantFlagNames();
-        $schemaNames = \array_keys($element->getConfiguration()['schemes']);
-        $schemaConfigs = array();
-        foreach ($schemaNames as $schemaName) {
-            if (!isset($schemaConfigs[$schemaName])) {
-                $schemaConfigs[$schemaName] = $this->getRawSchemaConfig($element, $schemaName, true);
-            }
-            $schemaConfig = $schemaConfigs[$schemaName];
+        $schemaConfigs = $this->getAllSchemaConfigs($element, true);
+        foreach ($schemaConfigs as $schemaName => $schemaConfig) {
             if (isset($schemaConfig['combine'])) {
                 $remaining = array();
                 foreach ($schemaConfig['combine'] as $subSchemaName) {
-                    if (!isset($schemaConfigs[$subSchemaName])) {
-                        $schemaConfigs[$subSchemaName] = $this->getRawSchemaConfig($element, $subSchemaName, true);
-                    }
                     if ($this->getSchemaAccess($schemaConfigs[$subSchemaName])) {
                         $remaining[] = $subSchemaName;
                     }
@@ -121,7 +113,7 @@ class SchemaFilter
     public function prepareConfigs(Element $element)
     {
         $configsOut = array();
-        $configsIn = $this->getAllConfigs($element);
+        $configsIn = $this->getAllSchemaConfigs($element, false);
         $storeConfigs = DataStoreUtil::configsFromSchemaConfigs($this->registry, $configsIn);
 
         foreach ($configsIn as $schemaName => $configIn) {
@@ -137,11 +129,19 @@ class SchemaFilter
 
     /**
      * @param Element $element
+     * @param boolean $addDefaults
      * @return mixed[]
      */
-    protected function getAllConfigs(Element $element)
+    protected function getAllSchemaConfigs(Element $element, $addDefaults)
     {
-        return $element->getConfiguration()['schemes'];
+        $schemaConfigs = $element->getConfiguration()['schemes'];
+        if ($addDefaults) {
+            $defaults = $this->getConfigDefaults();
+            foreach (\array_keys($schemaConfigs) as $schemaName) {
+                $schemaConfigs[$schemaName] = $this->amendBaseProperties($schemaConfigs[$schemaName] + $defaults, $schemaName);
+            }
+        }
+        return $schemaConfigs;
     }
 
     protected function prepareInlineSchema($name, $schemaConfig, $storeConfigs)
@@ -264,7 +264,7 @@ class SchemaFilter
      */
     public function getRawSchemaConfig(Element $element, $schemaName, $addDefaults = false)
     {
-        $allConfigs = $this->getAllConfigs($element);
+        $allConfigs = $this->getAllSchemaConfigs($element, false);
         if (empty($allConfigs[$schemaName])) {
             throw new UnknownSchemaException("No such schema " . print_r($schemaName, true));
         }
