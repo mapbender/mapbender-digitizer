@@ -221,6 +221,26 @@
         },
         getDefaultColumnConfigs: function(schema) {
             var self = this;
+            if (schema.combine) {
+                var commonDataNames = [];
+                var subSchemas = this.owner.expandCombination(schema);
+                for (var s = 0; s < subSchemas.length; ++s) {
+                    var subschemaColumns = this.getColumnsConfigs(subSchemas[s]);
+                    var dataNames = subschemaColumns.map(function(c) {
+                        return c.data;
+                    });
+                    if (s === 0) {
+                        commonDataNames = dataNames.slice();
+                    } else {
+                        commonDataNames = commonDataNames.filter(function(name) {
+                            return -1 !== dataNames.indexOf(name);
+                        });
+                    }
+                }
+                return this.getColumnsConfigs(subSchemas[0]).filter(function(c) {
+                    return -1 !== commonDataNames.indexOf(c.data);
+                });
+            }
             return [{
                 data: function(row) {
                     return self.owner._getUniqueItemId(row);
