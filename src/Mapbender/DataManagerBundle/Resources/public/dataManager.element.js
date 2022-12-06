@@ -75,18 +75,25 @@
                     .prepend(this.$loadingIndicator_.css({float: 'right', opacity: 0.0}))
                 ;
             }
+            var self = this;
             this.grantsRequest_ = $.getJSON([this.elementUrl, 'grants'].join(''));
             this.grantsRequest_.then((function(mergeWith) {
                 return function(allGrants) {
                     var schemaNames = Object.keys(allGrants);
                     for (var i = 0; i < schemaNames.length; ++i) {
                         var schemaName = schemaNames[i];
-                        Object.assign(mergeWith[schemaName], allGrants[schemaName]);
+                        if (allGrants[schemaName] === false) {
+                            delete mergeWith[schemaName];
+                        } else {
+                            Object.assign(mergeWith[schemaName], allGrants[schemaName]);
+                        }
                     }
                 };
             })(this.options.schemes));
 
-            this.updateSchemaSelector_();
+            this.grantsRequest_.then(function() {
+                self.updateSchemaSelector_();
+            })
             this.tableButtonsTemplate_ = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
             this.toolsetTemplate_ = $('.-tpl-toolset', this.element).remove().css('display', '').html();
             this.formRenderer_ = this._createFormRenderer();

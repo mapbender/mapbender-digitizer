@@ -79,9 +79,13 @@ class SchemaFilter
         $schemaNames = \array_keys($element->getConfiguration()['schemes']);
         foreach ($schemaNames as $schemaName) {
             $schemaConfig = $this->getRawSchemaConfig($element, $schemaName, true);
-            $dataOut[$schemaName] = array();
-            foreach ($flagNames as $flagName) {
-                $dataOut[$schemaName][$flagName] = $this->resolveSchemaGrantFlag($schemaConfig, $flagName);
+            if ($this->getSchemaAccess($schemaConfig)) {
+                $dataOut[$schemaName] = array();
+                foreach ($flagNames as $flagName) {
+                    $dataOut[$schemaName][$flagName] = $this->resolveSchemaGrantFlag($schemaConfig, $flagName);
+                }
+            } else {
+                $dataOut[$schemaName] = false;
             }
         }
         return $dataOut;
@@ -372,6 +376,9 @@ class SchemaFilter
      */
     protected function resolveSchemaGrantFlag(array $schemaConfig, $flagName)
     {
+        if (!$this->getSchemaAccess($schemaConfig)) {
+            return false;
+        }
         $value = $schemaConfig[$flagName];
         if (\is_bool($value) || \is_null($value) || (!\is_array($value) && \strlen($value) <= 1)) {
             return !!$value;
@@ -382,5 +389,19 @@ class SchemaFilter
             }
         }
         return false;
+    }
+
+    protected function getSchemaAccess(array $schemaConfig)
+    {
+        if (isset($schemaConfig['roles'])) {
+            foreach ($schemaConfig['roles'] as $role) {
+                if ($this->authChecker->isGranted($role)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return true;
+        }
     }
 }

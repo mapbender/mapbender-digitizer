@@ -32,7 +32,7 @@
             var widget = this;
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
-            Mapbender.elementRegistry.waitReady('.mb-element-map').then(function(mbMap) {
+            $.when(Mapbender.elementRegistry.waitReady('.mb-element-map'), this.grantsRequest_).then(function(mbMap, _) {
                 widget.mbMap = mbMap;
                 widget.setup();
                 // Let data manager base method trigger "ready" event and start loading data
