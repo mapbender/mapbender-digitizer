@@ -295,7 +295,7 @@
             var subSchemas = this.expandCombination(schema);
             for (var s = 0; s < subSchemas.length; ++s) {
                 keepVisChange = keepVisChange || subSchemas[s].allowChangeVisibility;
-                keepSaveAll = keepSaveAll || subSchemas[s].allowDigitize;
+                keepSaveAll = keepSaveAll || subSchemas[s].allowDigitize || subSchemas[s].allowEdit;
                 if (keepVisChange && keepSaveAll) {
                     break;
                 }
