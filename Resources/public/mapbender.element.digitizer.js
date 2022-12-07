@@ -160,6 +160,7 @@
                 }
                 this._setSchemaVisible(currentSchema, true);
                 this.active = true;
+                this._getData(currentSchema);
             }
         },
         deactivate: function() {
@@ -405,6 +406,9 @@
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
         },
         _getData: function(schema) {
+            if (!this.active) {
+                return;
+            }
             var layer = this.getSchemaLayer(schema);
             return this._super(schema).then(function(features) {
                 var modifiedFeatures = layer.getSource().getFeatures().filter(function(feature) {
