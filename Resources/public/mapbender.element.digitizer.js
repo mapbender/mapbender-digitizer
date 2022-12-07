@@ -673,6 +673,10 @@
                 return $.Deferred().reject();
             }
             var bbox = feature.getGeometry().getExtent();
+            bbox[0] -= 0.00001;
+            bbox[1] -= 0.00001;
+            bbox[2] += 0.00001;
+            bbox[3] += 0.00001;
 
             var srid = this.mbMap.getModel().getCurrentProjectionCode();
             var url = this.elementUrl + "getFeatureInfo";
@@ -696,7 +700,7 @@
                         // Prevent interruption in case of empty features
                     }
                 });
-                return properties;
+                return properties || {};
             }).fail(function (response) {
                 Mapbender.error(Mapbender.trans("remoteData.error"));
 
