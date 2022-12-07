@@ -210,10 +210,12 @@
         var layerGroups = [];
         this.owner.expandCombination(schema).forEach(function(itemSchema) {
             var layerGroup = self.getSchemaLayerGroup_(itemSchema, false);
-            layerGroups.push(layerGroup);
-            layerGroup.getLayersArray().forEach(function(layer) {
-                layer.getSource().clear();
-            });
+            if (layerGroup) {
+                layerGroups.push(layerGroup);
+                layerGroup.getLayersArray().forEach(function(layer) {
+                    layer.getSource().clear();
+                });
+            }
         });
         this.addFeatures(features);
 
