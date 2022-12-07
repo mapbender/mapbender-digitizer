@@ -59,6 +59,7 @@ class SchemaFilter
                 'searching' => true,
                 'pageLength' => 16,
             ),
+            'roles' => null,
             'listed' => true,
         );
     }
