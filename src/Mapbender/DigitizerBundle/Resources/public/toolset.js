@@ -62,11 +62,8 @@
             var standardTools = ['modifyFeature', 'moveFeature'];
             var addModify = false;
             var addMove = false;
+            var self = this;
             for (var s = 0; s < subSchemas.length; ++s) {
-                // Ignore tools if geometry editing not allowed
-                if (!subSchemas[s].allowDigitize) {
-                    continue;
-                }
                 var validNames = this.getValidToolNames(subSchemas[s]);
                 // Note: Modify not allowed on single point geometries
                 //       Move allowed on everything
@@ -78,6 +75,7 @@
                     return obj;
                 }).filter(function(toolSpec) {
                     return (!seen[toolSpec.type])
+                        && self.checkToolAccess_(subSchemas[s], toolSpec.type)
                         && -1 === standardTools.indexOf(toolSpec.type)
                         && -1 !== validNames.indexOf(toolSpec.type)
                     ;
@@ -122,6 +120,14 @@
                 buttons.push($button);
             }
             return buttons;
+        },
+        checkToolAccess_: function(schema, toolName) {
+            var isModify = -1 !== ['drawDonut', 'moveFeature', 'modifyFeature'].indexOf(toolName);
+            if (isModify) {
+                return schema.allowEdit && schema.allowDigitize;
+            } else {
+                return schema.allowCreate;
+            }
         },
         registerEvents: function() {
             var widget = this.owner;
