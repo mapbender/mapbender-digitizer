@@ -30,13 +30,30 @@ Digitizer does not support tables without geometry columns.
 Using Digitizer requires registering *two* bundles in your application kernel. Register *both*
 `\Mapbender\DataManagerBundle\MapbenderDataManagerBundle` and `\Mapbender\DigitizerBundle\MapbenderDigitizerBundle`.
 
-## Configuring feature display and interactions
+## Configuring feature interactions
+Each schema may define the following values to control access to data modifying interactions:
+
+| name | type | description | default |
+|---|---|---|---|
+| allowCreate | boolean or list of strings | Allow user to make new features | true |
+| allowEdit | boolean or list of strings | Allow user to modify existing features and their attributes | true |
+| allowDelete | boolean or list of strings | Allow user to remove features from the database | true |
+| allowDigitize | boolean or list of strings | Allow geometry editing (attribute editing may still be allowed via `allowEdit`) | true |
+| roles | list of strings or null | Show this schema only to users with (at least one of) these roles | null |
+
+The `roles` list should contain entries understood by the Symfony grants system, such as
+`ROLE_USER` for logged-in users or `ROLE_GROUP_SOMETHING` for a user group created and
+assigned in the Mapbender administration backend.
+
+The allow... settings named above may also contain lists of role names to limit
+modification to certain groups of users. If they are booleans, access is uniform for
+all users (including anyonymous users).
+
+## Configuring feature display and interface behaviour
 Each schema may define the following values to control basic behaviour:
 
 | name | type | description | default |
 |---|---|---|---|
-| allowDigitize | boolean | Allow geometry creation and editing (attribute editing may still be allowed via `allowEdit`) | true|
-| toolset | list of strings or null | Offered geometry creation tools (see below) | Auto-detect |
 | searchType | string or null | Initial state of checkbox for limiting feature loading to current visible map portion. On if exactly "currentExtent". Off for all other values | currentExtent |
 | allowChangeVisibility | boolean | Offer buttons to toggle feature visibility | true |
 | displayPermanent | boolean | Keep features visible on map even after switching to a different schema | false |
@@ -45,27 +62,31 @@ Each schema may define the following values to control basic behaviour:
 | refreshLayersAfterFeatureSave | list of strings and / or numbers | Mapbender source instance ids (refer to "Layersets" tab in application backend) that will reload after any item is created, updated or deleted | -none- |
 
 ## Configuring "toolset"
-If `toolset` is null or not set, and the connected feature type declares its
-`geomType`, Digitizer will auto-select a compatible selection of tools to create
-feature geometries.
+Each schema may define a `toolset` setting to configure the types of drawing tools
+available during geometry creation. This should be a list of strings, or null
+for auto-configuration (which is the default).
 
-If neither `toolset` nor the `geomType` are defined, all supported tools are offered.
-
-If auto-detection does not produce the desired set of tools, you may specify
-a list of tool names manually. Valid tool names are:
+Valid tool names are:
 * `drawPoint` for point creation
 * `drawLine` for line drawing
 * `drawPolygon` for polygon drawing
 * `drawRectangle`, `drawCircle`, `drawEllipse` for rectangles, circles and ellipses respectively
-* `drawDonut` for polygons with interior cutouts
+* `drawDonut` for making interior cutouts in existing polygons
 
-If `toolset` is set as an empty list, none of these tools will be offered.
+If `toolset` is set as an empty list, no geometry creation tools will be offered.
 
-If `allowDigitize` is omitted or set to true, vertex modification and feature translation tools
-will also be offered.
+If `toolset` is null or not set, and the connected feature type declares its
+`geomType`, Digitizer will reduce the selection of tools to to those compatible with
+the `geomType` (e.g. no line drawing for datasets containing only points or polygons).
 
-If `allowDigitize` is set to false, the `toolset` setting will be ignored completely,
-and no drawing / translating / modifying of geometries will be available at all.
+If neither `toolset` nor the `geomType` are defined, all supported tools are offered.
+
+If feature modification is allowed (via `allowDigitize` / `allowEdit`), vertex modification
+and feature translation tools will also be offered.
+
+If `allowCreate` is set to false, no creation tools from the `toolset` setting will be
+offered. `drawDonut` (inherently a modification, not creation tool) may still be
+offered, if editing is allowed.
 
 ## Configuring tabular item listing
 Each schema configuration contains an object under key `table` with the following structure:
