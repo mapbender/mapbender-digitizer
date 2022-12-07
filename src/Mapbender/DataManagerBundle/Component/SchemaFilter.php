@@ -365,10 +365,9 @@ class SchemaFilter
                 );
             } else {
                 if (empty($columnDef['data'])) {
-
-                $columnDef = array_replace($columnDef, array(
-                    'data' => $key,
-                ));
+                    $columnDef = array_replace($columnDef, array(
+                        'data' => $key,
+                    ));
                 }
             }
             // Historical digitizer quirk: uses "label" (does nothing)
