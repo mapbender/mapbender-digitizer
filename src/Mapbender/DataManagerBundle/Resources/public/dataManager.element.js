@@ -281,12 +281,7 @@
                 // Combination schema cannot create items
                 $('.-fn-create-item', $toolset).remove();
             }
-            var subSchemas = this.expandCombination(schema);
-            var keepRefresh = false;
-            for (var s = 0; s < subSchemas.length; ++s) {
-                keepRefresh = keepRefresh || subSchemas[s].allowRefresh;
-            }
-            if (!keepRefresh) {
+            if (!schema.allowRefresh) {
                 $('.-fn-refresh', $toolset).remove();
             }
         },

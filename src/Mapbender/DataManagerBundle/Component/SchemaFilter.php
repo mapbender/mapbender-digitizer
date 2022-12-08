@@ -193,7 +193,7 @@ class SchemaFilter
         $otherKeys = \array_keys($schemaConfig);
         $notAllowed = \array_intersect($otherKeys, $this->getInvalidCombinationKeys());
         foreach ($otherKeys as $otherKey) {
-            if (\preg_match('#^allow#', $otherKey)) {
+            if ($otherKey !== 'allowRefresh' && \preg_match('#^allow#', $otherKey)) {
                 $notAllowed[] = $otherKey;
             }
         }
