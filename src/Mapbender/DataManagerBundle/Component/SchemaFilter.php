@@ -81,26 +81,28 @@ class SchemaFilter
         $flagNames = $this->getGrantFlagNames();
         $schemaConfigs = $this->getAllSchemaConfigs($element, true);
         foreach ($schemaConfigs as $schemaName => $schemaConfig) {
-            if (isset($schemaConfig['combine'])) {
-                $remaining = array();
-                foreach ($schemaConfig['combine'] as $subSchemaName) {
-                    if ($this->getSchemaAccess($schemaConfigs[$subSchemaName])) {
-                        $remaining[] = $subSchemaName;
+            if ($this->getSchemaAccess($schemaConfig)) {
+                if (isset($schemaConfig['combine'])) {
+                    $remaining = array();
+                    foreach ($schemaConfig['combine'] as $subSchemaName) {
+                        if ($this->getSchemaAccess($schemaConfigs[$subSchemaName])) {
+                            $remaining[] = $subSchemaName;
+                        }
                     }
-                }
-                if ($remaining) {
-                    // Reduce combination to subschemas remaining after grants checks
-                    $dataOut[$schemaName] = array(
-                        'combine' => $remaining,
-                    );
+                    if ($remaining) {
+                        // Reduce combination to subschemas remaining after grants checks
+                        $dataOut[$schemaName] = array(
+                            'combine' => $remaining,
+                        );
+                    } else {
+                        // Entire combination is not granted => remove combination
+                        $dataOut[$schemaName] = false;
+                    }
                 } else {
-                    // Entire combination is not granted => remove combination
-                    $dataOut[$schemaName] = false;
-                }
-            } elseif ($this->getSchemaAccess($schemaConfig)) {
-                $dataOut[$schemaName] = array();
-                foreach ($flagNames as $flagName) {
-                    $dataOut[$schemaName][$flagName] = $this->resolveSchemaGrantFlag($schemaConfig, $flagName);
+                    $dataOut[$schemaName] = array();
+                    foreach ($flagNames as $flagName) {
+                        $dataOut[$schemaName][$flagName] = $this->resolveSchemaGrantFlag($schemaConfig, $flagName);
+                    }
                 }
             } else {
                 $dataOut[$schemaName] = false;
