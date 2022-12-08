@@ -72,6 +72,7 @@ Each schema may define the following values to control basic behaviour:
 | name | type | description | default |
 |---|---|---|---|
 | searchType | string or null | Initial state of checkbox for limiting feature loading to current visible map portion. On if exactly "currentExtent". Off for all other values | currentExtent |
+| allowRefresh | boolean | Offer button to reload data (for tables frequently modified by concurrent users) | false |
 | allowChangeVisibility | boolean | Offer buttons to toggle feature visibility | true |
 | displayPermanent | boolean | Keep features visible on map even after switching to a different schema | false |
 | displayOnInactive | boolean | Keep features visible on map even after deactivating Digitizer | false |
