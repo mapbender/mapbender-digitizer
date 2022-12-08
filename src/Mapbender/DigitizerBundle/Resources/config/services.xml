@@ -21,6 +21,7 @@
             <argument type="service" id="twig" />
             <argument type="service" id="form.factory" />
             <argument type="service" id="mb.digitizer.schema_filter" />
+            <argument type="service" id="mb.digitizer.user_filter_provider" />
         </service>
         <service id="mapbender.element.Digitizer" class="Mapbender\DigitizerBundle\Element\Digitizer">
             <tag name="mapbender.element" />
@@ -28,5 +29,6 @@
             <argument type="service" id="mb.digitizer.schema_filter" />
             <argument type="service" id="mb.digitizer.http_handler" />
         </service>
+        <service id="mb.digitizer.user_filter_provider" alias="mb.data-manager.user_filter_provider" />
     </services>
 </container>

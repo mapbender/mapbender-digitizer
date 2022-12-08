@@ -9,6 +9,7 @@ use Mapbender\DataSourceBundle\Component\FeatureType;
 
 /**
  * @method FeatureType getDataStore(Element $element, $schemaName)
+ * @method FeatureType stroeFromConfig(array $config)
  */
 class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
 {

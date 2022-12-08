@@ -29,12 +29,16 @@ class HttpHandler implements ElementHttpHandlerInterface
     protected $formFactory;
     /** @var SchemaFilter */
     protected $schemaFilter;
+    /** @var UserFilterProvider */
+    protected $userFilterProvider;
 
     public function __construct(FormFactoryInterface $formFactory,
-                                SchemaFilter $schemaFilter)
+                                SchemaFilter $schemaFilter,
+                                UserFilterProvider $userFilterProvider)
     {
         $this->formFactory = $formFactory;
         $this->schemaFilter = $schemaFilter;
+        $this->userFilterProvider = $userFilterProvider;
     }
 
     public function handleRequest(Element $element, Request $request)
@@ -180,6 +184,12 @@ class HttpHandler implements ElementHttpHandlerInterface
     protected function saveItem(Element $element, DataStore $repository, DataItem $item, $schemaName, array $data)
     {
         $item->setAttributes($data['properties']);
+        $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $schemaName, true);
+        if (!empty($schemaConfig['filterUser']) || !empty($schemaConfig['trackUser'])) {
+            $storeConfig = $this->schemaFilter->getDataStoreConfig($element, $schemaName);
+            $userData = $this->userFilterProvider->getStorageValues($storeConfig, !!$item->getId());
+            $item->setAttributes($userData);
+        }
         return $repository->save($item);
     }
 
@@ -212,9 +222,12 @@ class HttpHandler implements ElementHttpHandlerInterface
                 continue;
             }
             $schemaConfig['maxResults'] = $limitSchema;
+            $storeConfig = $this->schemaFilter->getDataStoreConfig($element, $delegatingSchemaName);
+            $repository = $this->schemaFilter->storeFromConfig($storeConfig);
 
-            $repository = $this->schemaFilter->getDataStore($element, $delegatingSchemaName);
-            foreach ($this->searchRepository($element, $repository, $schemaConfig, $request) as $item) {
+            $criteria = $this->getSelectCriteria($repository, $request, $schemaConfig, $storeConfig);
+
+            foreach ($repository->search($criteria) as $item) {
                 $results[] = $this->formatResponseItem($repository, $item, $delegatingSchemaName);
             }
         }
@@ -240,19 +253,6 @@ class HttpHandler implements ElementHttpHandlerInterface
         }
     }
 
-    /**
-     * @param Element $element
-     * @param DataStore $repository
-     * @param array $schemaConfig
-     * @param Request $request
-     * @return DataItem[]
-     */
-    protected function searchRepository(Element $element, DataStore $repository, array $schemaConfig, Request $request)
-    {
-        $criteria = $this->getSelectCriteria($repository, $request, $schemaConfig);
-        return $repository->search($criteria);
-    }
-
     protected function formatResponseItem(DataStore $repository, DataItem $item, $schemaName)
     {
         return array(
@@ -262,12 +262,16 @@ class HttpHandler implements ElementHttpHandlerInterface
         );
     }
 
-    protected function getSelectCriteria(DataStore $repository, Request $request, array $schemaConfig)
+    protected function getSelectCriteria(DataStore $repository, Request $request, array $schemaConfig, array $storeConfig)
     {
         $criteria = array();
         if (!empty($schemaConfig['maxResults'])) {
             $criteria['maxResults'] = $schemaConfig['maxResults'];
         }
+        if (!empty($schemaConfig['filterUser'])) {
+            $criteria['where'] = $this->userFilterProvider->getFilterSql($repository->getConnection(), $storeConfig);
+        }
+
         return $criteria;
     }
 

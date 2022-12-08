@@ -5,6 +5,7 @@ namespace Mapbender\DigitizerBundle\Component;
 
 
 use Mapbender\CoreBundle\Entity\Element;
+use Mapbender\DataManagerBundle\Component\UserFilterProvider;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Entity\DataItem;
@@ -26,9 +27,10 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
 
     public function __construct(Environment $twig,
                                 FormFactoryInterface $formFactory,
-                                SchemaFilter $schemaFilter)
+                                SchemaFilter $schemaFilter,
+                                UserFilterProvider $userFilterProvider)
     {
-        parent::__construct($formFactory, $schemaFilter);
+        parent::__construct($formFactory, $schemaFilter, $userFilterProvider);
         $this->twig = $twig;
     }
 
@@ -103,15 +105,20 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
      * @param FeatureType $repository
      * @param Request $request
      * @param array $schemaConfig
+     * @param mixed[] $storeConfig
      * @return mixed[]
      */
-    protected function getSelectCriteria(DataStore $repository, Request $request, array $schemaConfig)
+    protected function getSelectCriteria(DataStore $repository, Request $request, array $schemaConfig, array $storeConfig)
     {
         $geomReference = $repository->getConnection()->getDatabasePlatform()->quoteIdentifier($repository->getGeomField());
-        $criteria = parent::getSelectCriteria($repository, $request, $schemaConfig) + array(
+        $criteria = parent::getSelectCriteria($repository, $request, $schemaConfig, $storeConfig) + array(
             'srid' => intval($request->query->get('srid')),
-            'where' => "$geomReference IS NOT NULL",
         );
+        $where = "$geomReference IS NOT NULL";
+        if (!empty($criteria['where'])) {
+            $where = \implode(' AND ', array($criteria['where'], $where));
+        }
+        $criteria['where'] = $where;
         if ($extent = $request->query->get('extent')) {
             $extentCoordinates = explode(',', $extent);
             $polygonCoordinates = array(

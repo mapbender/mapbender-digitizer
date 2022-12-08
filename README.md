@@ -49,6 +49,23 @@ The allow... settings named above may also contain lists of role names to limit
 modification to certain groups of users. If they are booleans, access is uniform for
 all users (including anyonymous users).
 
+## User specific data
+Data shown in each schema can be separate for different users. Each schema may define:
+| name | type | description | default |
+|---|---|---|---|
+| filterUser | boolean | Keep data separate for each user | false |
+| trackUser | boolean | Store the creating / modiying user (can be done without actually filtering selection) | false |
+
+Setting either of these to true additionally requires a `userColumn` (string) to
+be defined in the dataStore / featureType definition. This must name a database
+column of sufficient length to store user names.
+
+Note that with `filterUser` true, `trackUser` is implied and its setting, if present,
+is ignored.
+
+The `userColumn` setting is a Digitizer / Data Manager extension and not documented (nor implemented) by
+the data-source package.
+
 ## Configuring feature display and interface behaviour
 Each schema may define the following values to control basic behaviour:
 

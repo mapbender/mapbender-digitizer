@@ -61,6 +61,8 @@ class SchemaFilter
             ),
             'roles' => null,
             'listed' => true,
+            'filterUser' => false,
+            'trackUser' => false,
         );
     }
 
@@ -254,6 +256,11 @@ class SchemaFilter
     public function getDataStore(Element $element, $schemaName)
     {
         $config = $this->getDataStoreConfig($element, $schemaName);
+        return $this->storeFromConfig($config);
+    }
+
+    public function storeFromConfig(array $config)
+    {
         return $this->registry->dataStoreFactory($config);
     }
 

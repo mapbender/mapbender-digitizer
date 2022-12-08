@@ -15,5 +15,8 @@
             <argument type="service" id="doctrine" />
             <argument type="service" id="translator" />
         </service>
+        <service id="mb.data-manager.user_filter_provider" class="Mapbender\DataManagerBundle\Component\UserFilterProvider">
+            <argument type="service" id="security.token_storage" />
+        </service>
     </services>
 </container>
