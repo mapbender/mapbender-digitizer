@@ -692,10 +692,12 @@
                     Mapbender.error(Mapbender.trans('remoteData.error'));
                     return;
                 }
+                let properties = {};
                 _.each(response.dataSets, function (dataSet) {
                     try {
                         var json =  JSON.parse(dataSet);
-                        var properties = json.features[0].properties;
+                        let key = Object.keys(json.features[0].properties)[0];
+                        properties[key] = json.features[0].properties[key];
                     } catch (e) {
                         // Prevent interruption in case of empty features
                     }
