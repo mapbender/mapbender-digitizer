@@ -182,6 +182,7 @@
             this.contextMenu.setSchema(schema);
             this._toggleSchemaInteractions(schema, true);
             this._setSchemaVisible(schema, this.active || schema.displayOnInactive);
+            this._updateFormItems(schema);
         },
         _toggleDrawingTool: function(schema, toolName, state) {
             if (!state && 'modifyFeature' === toolName) {
