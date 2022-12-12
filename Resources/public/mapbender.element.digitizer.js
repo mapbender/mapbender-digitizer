@@ -342,7 +342,11 @@
         },
         _afterRemove: function(schema, feature, id) {
             var olMap = this.mbMap.getModel().olMap;
-            this.getSchemaLayer(schema).getSource().removeFeature(feature);
+            try {
+                this.getSchemaLayer(schema).getSource().removeFeature(feature);
+            } catch(e) {
+                console.warn("delete feature has not been found in layer source at the moment of deletion",feature,e);
+            }
             this._super(schema, feature, id);
             // Multi-Digitizer sync support
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});
