@@ -420,7 +420,10 @@
                     return feature.get('dirty');
                 });
                 layer.getSource().clear();
-                layer.getSource().addFeatures(features);
+                /** Dirty hack to prevent display of obstacles that dont'have points **/
+                let filteredFeatures = features.filter(function(feature) {   return feature.get("data")["point_ids"] !== null; });
+                 /** **/
+                layer.getSource().addFeatures(filteredFeatures);
                 for (var i = 0; i < modifiedFeatures.length; ++i) {
                     var modifiedFeature = modifiedFeatures[i];
                     if (!layer.getSource().getFeatureById(modifiedFeature.getId())) {
