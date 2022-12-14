@@ -115,6 +115,20 @@ Each schema configuration contains an object under key `table` with the followin
 | searching | boolean | Enables display filtering by search term | true |
 | pageLength | integer | Limits the number of rows per page | 16 |
 
+## Combination schema
+If a schema defines a `combine` setting (list of strings), it is treated as a combination schema.
+Data from multiple other schemas is then displayed together. The entries in the `combine` list
+must be the names of the sub-schemas to be combined.
+
+A schema with `combine` only allows a reduced set of other settings.
+
+It may define `roles` to limit user access to the whole combination.
+
+It may define `table` to explicitly specify table formatting of data
+common to all referenced sub-schemas.
+
+A schema referenced by a `combine` list *may* *not* itself define `combine`.
+
 ## Configuring forms
 Each schema configuration contains a list of (potentially nested) objects under key
 `formItems`, defining the contents and structure of the form shown
