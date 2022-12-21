@@ -4,7 +4,6 @@
 namespace Mapbender\DataManagerBundle\Component;
 
 
-use Doctrine\DBAL\Connection;
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
 use Mapbender\DataSourceBundle\Entity\DataItem;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
@@ -28,10 +27,10 @@ class UserFilterProvider
      * in your database (different values in the same
      * column describe effectively the same user).
      *
-     * @param Schema $schema
+     * @param ItemSchema $schema
      * @return string
      */
-    public function getFilterSql(Schema $schema)
+    public function getFilterSql(ItemSchema $schema)
     {
         if (empty($schema->repositoryConfig['userColumn'])) {
             throw new ConfigurationErrorException("Cannot filter data by user without a 'userColumn' setting in the dataStore or featureType.");
@@ -56,11 +55,11 @@ class UserFilterProvider
      * (creating user + modifying user) or treat null
      * differently.
      *
-     * @param Schema $schema
+     * @param ItemSchema $schema
      * @param DataItem $item
      * @return mixed[]
      */
-    public function getStorageValues(Schema $schema, DataItem $item)
+    public function getStorageValues(ItemSchema $schema, DataItem $item)
     {
         if (!empty($schema->config['filterUser']) || !empty($schema->config['trackUser'])) {
             if (empty($schema->repositoryConfig['userColumn'])) {

@@ -5,7 +5,7 @@ namespace Mapbender\DigitizerBundle\Component;
 
 
 use Mapbender\CoreBundle\Entity\Element;
-use Mapbender\DataManagerBundle\Component\Schema;
+use Mapbender\DataManagerBundle\Component\ItemSchema;
 use Mapbender\DataManagerBundle\Component\UserFilterProvider;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\FeatureType;
@@ -88,12 +88,12 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
     }
 
     /**
-     * @param Schema $schema
+     * @param ItemSchema $schema
      * @param Feature $item
      * @param array $postData
      * @return Feature
      */
-    protected function saveItem(Schema $schema, DataItem $item, array $postData)
+    protected function saveItem(ItemSchema $schema, DataItem $item, array $postData)
     {
         /** @var Feature $item */
         if (!empty($postData['geometry'])) {
@@ -103,7 +103,7 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         return parent::saveItem($schema, $item, $postData);
     }
 
-    protected function getSelectCriteria(Schema $schema, Request $request, $limit)
+    protected function getSelectCriteria(ItemSchema $schema, Request $request, $limit)
     {
         $connection = $schema->getRepository()->getConnection();
         $geomReference = $connection->quoteIdentifier($schema->getRepository()->getGeomField());

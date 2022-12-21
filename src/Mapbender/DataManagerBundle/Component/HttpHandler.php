@@ -182,7 +182,7 @@ class HttpHandler implements ElementHttpHandlerInterface
         );
     }
 
-    protected function saveItem(Schema $schema, DataItem $item, array $postData)
+    protected function saveItem(ItemSchema $schema, DataItem $item, array $postData)
     {
         $item->setAttributes($postData['properties']);
         $userData = $this->userFilterProvider->getStorageValues($schema, $item);
@@ -258,7 +258,7 @@ class HttpHandler implements ElementHttpHandlerInterface
         );
     }
 
-    protected function getSelectCriteria(Schema $schema, Request $request, $limit)
+    protected function getSelectCriteria(ItemSchema $schema, Request $request, $limit)
     {
         $criteria = array();
         if (!empty($limit)) {
