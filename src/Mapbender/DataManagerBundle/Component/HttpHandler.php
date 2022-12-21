@@ -218,11 +218,10 @@ class HttpHandler implements ElementHttpHandlerInterface
             if ($limitSchema !== null && $limitSchema <= 0) {
                 continue;
             }
-            $subSchema->config['maxResults'] = $limitSchema;
             $storeConfig = $this->schemaFilter->getDataStoreConfig($element, $delegatingSchemaName);
             $repository = $this->schemaFilter->storeFromConfig($storeConfig);
 
-            $criteria = $this->getSelectCriteria($subSchema, $request);
+            $criteria = $this->getSelectCriteria($subSchema, $request, $limitSchema);
 
             foreach ($subSchema->getRepository()->search($criteria) as $item) {
                 $results[] = $this->formatResponseItem($repository, $item, $delegatingSchemaName);
@@ -259,11 +258,11 @@ class HttpHandler implements ElementHttpHandlerInterface
         );
     }
 
-    protected function getSelectCriteria(Schema $schema, Request $request)
+    protected function getSelectCriteria(Schema $schema, Request $request, $limit)
     {
         $criteria = array();
-        if (!empty($schema->config['maxResults'])) {
-            $criteria['maxResults'] = $schema->config['maxResults'];
+        if (!empty($limit)) {
+            $criteria['maxResults'] = $limit;
         }
         if (!empty($schema->config['filterUser'])) {
             $criteria['where'] = $this->userFilterProvider->getFilterSql($schema);

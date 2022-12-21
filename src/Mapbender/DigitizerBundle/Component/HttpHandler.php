@@ -103,11 +103,11 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         return parent::saveItem($schema, $item, $postData);
     }
 
-    protected function getSelectCriteria(Schema $schema, Request $request)
+    protected function getSelectCriteria(Schema $schema, Request $request, $limit)
     {
         $connection = $schema->getRepository()->getConnection();
         $geomReference = $connection->quoteIdentifier($schema->getRepository()->getGeomField());
-        $criteria = parent::getSelectCriteria($schema, $request) + array(
+        $criteria = parent::getSelectCriteria($schema, $request, $limit) + array(
             'srid' => intval($request->query->get('srid')),
         );
         $where = "$geomReference IS NOT NULL";
