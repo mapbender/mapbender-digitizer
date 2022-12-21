@@ -129,7 +129,8 @@ class HttpHandler implements ElementHttpHandlerInterface
     {
         $itemId = $request->query->get('id', null);
         $schemaName = $request->query->get('schema');
-        if (!$this->schemaFilter->checkAllowSave($element, $schemaName, !$itemId)) {
+        $schema = $this->schemaFilter->getSchema($element, $schemaName);
+        if (!$this->schemaFilter->checkAllowSave($schema, !$itemId)) {
             return new JsonResponse(array('message' => "It is not allowed to edit this data"), JsonResponse::HTTP_FORBIDDEN);
         }
         return new JsonResponse($this->getSaveActionResponseData($element, $request));
@@ -142,13 +143,12 @@ class HttpHandler implements ElementHttpHandlerInterface
      */
     protected function deleteAction(Element $element, Request $request)
     {
-        $schemaName = $request->query->get('schema');
-        if (!$this->schemaFilter->checkAllowDelete($element, $schemaName)) {
+        $schema = $this->schemaFilter->getSchema($element, $request->query->get('schema'));
+        if (!$this->schemaFilter->checkAllowDelete($schema)) {
             return new JsonResponse(array('message' => "It is not allowed to edit this data"), JsonResponse::HTTP_FORBIDDEN);
         }
-        $repository = $this->schemaFilter->getDataStore($element, $schemaName);
         $id = $request->query->get('id');
-        return new JsonResponse($repository->remove($id));
+        return new JsonResponse($schema->getRepository()->remove($id));
     }
 
     protected function grantsAction(Element $element)
@@ -209,7 +209,7 @@ class HttpHandler implements ElementHttpHandlerInterface
         foreach ($selectSchemaNames as $delegatingSchemaName) {
             $subSchema = $this->schemaFilter->getSchema($element, $delegatingSchemaName);
             // @todo: criteria reuse (esp. intersect)?
-            if (!$this->schemaFilter->getSchemaAccess($subSchema->config)) {
+            if (!$this->schemaFilter->getSchemaAccess($subSchema)) {
                 continue;
             }
 
@@ -300,7 +300,8 @@ class HttpHandler implements ElementHttpHandlerInterface
      */
     protected function fileUploadAction(Element $element, Request $request, $schemaName)
     {
-        if (!$this->schemaFilter->checkAllowSave($element, $schemaName, false)) {
+        $schema = $this->schemaFilter->getSchema($element, $schemaName);
+        if (!$this->schemaFilter->checkAllowSave($schema, false)) {
             return new JsonResponse(array('message' => "It is not allowed to edit this data"), JsonResponse::HTTP_FORBIDDEN);
         }
         $fieldName = $request->query->get('field');

@@ -79,13 +79,15 @@ class SchemaFilter
     {
         $dataOut = array();
         $flagNames = $this->getGrantFlagNames();
-        $schemaConfigs = $this->getAllSchemaConfigs($element, true);
-        foreach ($schemaConfigs as $schemaName => $schemaConfig) {
-            if ($this->getSchemaAccess($schemaConfig)) {
-                if (isset($schemaConfig['combine'])) {
+        $schemaNames = $this->getAllSchemaNames($element);
+        foreach ($schemaNames as $schemaName) {
+            $schema = $this->getSchema($element, $schemaName);
+            if ($this->getSchemaAccess($schema)) {
+                if (isset($schema->config['combine'])) {
                     $remaining = array();
-                    foreach ($schemaConfig['combine'] as $subSchemaName) {
-                        if ($this->getSchemaAccess($schemaConfigs[$subSchemaName])) {
+                    foreach ($schema->config['combine'] as $subSchemaName) {
+                        $subSchema = $this->getSchema($element, $subSchemaName);
+                        if ($this->getSchemaAccess($subSchema)) {
                             $remaining[] = $subSchemaName;
                         }
                     }
@@ -101,7 +103,7 @@ class SchemaFilter
                 } else {
                     $dataOut[$schemaName] = array();
                     foreach ($flagNames as $flagName) {
-                        $dataOut[$schemaName][$flagName] = $this->resolveSchemaGrantFlag($schemaConfig, $flagName);
+                        $dataOut[$schemaName][$flagName] = $this->resolveSchemaGrantFlag($schema, $flagName);
                     }
                 }
             } else {
@@ -149,6 +151,15 @@ class SchemaFilter
             $configsOut[$schemaName] = $this->amendBaseProperties($configOut, $schemaName);
         }
         return $configsOut;
+    }
+
+    /**
+     * @param Element $element
+     * @return string[]
+     */
+    public function getAllSchemaNames(Element $element)
+    {
+        return \array_keys($element->getConfiguration()['schemes']);
     }
 
     /**
@@ -230,29 +241,25 @@ class SchemaFilter
     }
 
     /**
-     * @param Element $element
-     * @param string $schemaName
+     * @param Schema $schema
      * @return boolean
      */
-    public function checkAllowDelete(Element $element, $schemaName)
+    public function checkAllowDelete(Schema $schema)
     {
-        $schemaConfig = $this->getRawSchemaConfig($element, $schemaName, true);
-        return $this->resolveSchemaGrantFlag($schemaConfig, 'allowDelete');
+        return $this->resolveSchemaGrantFlag($schema, 'allowDelete');
     }
 
     /**
-     * @param Element $element
-     * @param string $schemaName
+     * @param Schema $schema
      * @param boolean $isNew
      * @return boolean
      */
-    public function checkAllowSave(Element $element, $schemaName, $isNew)
+    public function checkAllowSave(Schema $schema, $isNew)
     {
-        $schemaConfig = $this->getRawSchemaConfig($element, $schemaName, true);
         if ($isNew) {
-            return $this->resolveSchemaGrantFlag($schemaConfig, 'allowCreate');
+            return $this->resolveSchemaGrantFlag($schema, 'allowCreate');
         } else {
-            return $this->resolveSchemaGrantFlag($schemaConfig, 'allowEdit');
+            return $this->resolveSchemaGrantFlag($schema, 'allowEdit');
         }
     }
 
@@ -421,16 +428,16 @@ class SchemaFilter
     }
 
     /**
-     * @param mixed[] $schemaConfig
+     * @param Schema $schema
      * @param string $flagName
      * @return bool
      */
-    protected function resolveSchemaGrantFlag(array $schemaConfig, $flagName)
+    protected function resolveSchemaGrantFlag(Schema $schema, $flagName)
     {
-        if (!$this->getSchemaAccess($schemaConfig)) {
+        if (!$this->getSchemaAccess($schema)) {
             return false;
         }
-        $value = $schemaConfig[$flagName];
+        $value = $schema->config[$flagName];
         if (\is_bool($value) || \is_null($value) || (!\is_array($value) && \strlen($value) <= 1)) {
             return !!$value;
         }
@@ -442,10 +449,10 @@ class SchemaFilter
         return false;
     }
 
-    public function getSchemaAccess(array $schemaConfig)
+    public function getSchemaAccess(Schema $schema)
     {
-        if (isset($schemaConfig['roles'])) {
-            foreach ($schemaConfig['roles'] as $role) {
+        if (isset($schema->config['roles'])) {
+            foreach ($schema->config['roles'] as $role) {
                 if ($this->authChecker->isGranted($role)) {
                     return true;
                 }
