@@ -198,33 +198,33 @@ class HttpHandler implements ElementHttpHandlerInterface
     protected function getSelectActionResponseData(Element $element, Request $request)
     {
         $schemaName = $request->query->get('schema');
-        $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $schemaName, false);
-        if (!empty($schemaConfig['combine'])) {
-            $selectSchemaNames = $schemaConfig['combine'];
+        $schema = $this->schemaFilter->getSchema($element, $schemaName);
+        if (!empty($schema->config['combine'])) {
+            $selectSchemaNames = $schema->config['combine'];
         } else {
             $selectSchemaNames = array($schemaName);
         }
-        $limitTotal = !empty($schemaConfig['maxResults']) ? $schemaConfig['maxResults'] : null;
+        $limitTotal = !empty($schema->config['maxResults']) ? $schema->config['maxResults'] : null;
         $results = array();
         foreach ($selectSchemaNames as $delegatingSchemaName) {
+            $subSchema = $this->schemaFilter->getSchema($element, $delegatingSchemaName);
             // @todo: criteria reuse (esp. intersect)?
-            $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $delegatingSchemaName, false);
-            if (!$this->schemaFilter->getSchemaAccess($schemaConfig)) {
+            if (!$this->schemaFilter->getSchemaAccess($subSchema->config)) {
                 continue;
             }
 
-            $limitSchema = !empty($schemaConfig['maxResults']) ? \intval($schemaConfig['maxResults']) : null;
+            $limitSchema = !empty($subSchema->config['maxResults']) ? \intval($subSchema->config['maxResults']) : null;
             $limitSchema = $this->calculateSchemaLimit($limitTotal, $limitSchema, count($results));
             if ($limitSchema !== null && $limitSchema <= 0) {
                 continue;
             }
-            $schemaConfig['maxResults'] = $limitSchema;
+            $subSchema->config['maxResults'] = $limitSchema;
             $storeConfig = $this->schemaFilter->getDataStoreConfig($element, $delegatingSchemaName);
             $repository = $this->schemaFilter->storeFromConfig($storeConfig);
 
-            $criteria = $this->getSelectCriteria($repository, $request, $schemaConfig, $storeConfig);
+            $criteria = $this->getSelectCriteria($subSchema, $request);
 
-            foreach ($repository->search($criteria) as $item) {
+            foreach ($subSchema->getRepository()->search($criteria) as $item) {
                 $results[] = $this->formatResponseItem($repository, $item, $delegatingSchemaName);
             }
         }
@@ -259,14 +259,14 @@ class HttpHandler implements ElementHttpHandlerInterface
         );
     }
 
-    protected function getSelectCriteria(DataStore $repository, Request $request, array $schemaConfig, array $storeConfig)
+    protected function getSelectCriteria(Schema $schema, Request $request)
     {
         $criteria = array();
-        if (!empty($schemaConfig['maxResults'])) {
-            $criteria['maxResults'] = $schemaConfig['maxResults'];
+        if (!empty($schema->config['maxResults'])) {
+            $criteria['maxResults'] = $schema->config['maxResults'];
         }
-        if (!empty($schemaConfig['filterUser'])) {
-            $criteria['where'] = $this->userFilterProvider->getFilterSql($repository->getConnection(), $storeConfig);
+        if (!empty($schema->config['filterUser'])) {
+            $criteria['where'] = $this->userFilterProvider->getFilterSql($schema);
         }
 
         return $criteria;

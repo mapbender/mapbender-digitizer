@@ -28,17 +28,17 @@ class UserFilterProvider
      * in your database (different values in the same
      * column describe effectively the same user).
      *
-     * @param Connection $connection
-     * @param array $storeConfig
+     * @param Schema $schema
      * @return string
      */
-    public function getFilterSql(Connection $connection, array $storeConfig)
+    public function getFilterSql(Schema $schema)
     {
-        if (empty($storeConfig['userColumn'])) {
+        if (empty($schema->repositoryConfig['userColumn'])) {
             throw new ConfigurationErrorException("Cannot filter data by user without a 'userColumn' setting in the dataStore or featureType.");
         }
 
-        $columnRef = $connection->quoteIdentifier($storeConfig['userColumn']);
+        $connection = $schema->getRepository()->getConnection();
+        $columnRef = $connection->quoteIdentifier($schema->repositoryConfig['userColumn']);
         $value = $this->getFilterValue();
         if ($value) {
             return "{$columnRef} = " . $connection->quote($value);
@@ -63,14 +63,15 @@ class UserFilterProvider
     public function getStorageValues(Schema $schema, DataItem $item)
     {
         if (!empty($schema->config['filterUser']) || !empty($schema->config['trackUser'])) {
-            if (empty($storeConfig['userColumn'])) {
+            if (empty($schema->repositoryConfig['userColumn'])) {
                 throw new ConfigurationErrorException("Cannot store modifying user without a 'userColumn' setting in the dataStore or featureType.");
             }
+            $userColumn = $schema->repositoryConfig['userColumn'];
 
             return array(
                 // Prefer empty string for compatibility with non-nullable column
                 // (default select filter makes no distinction between null and empty string)
-                $storeConfig['userColumn'] => $this->getFilterValue() ?: '',
+                $userColumn => $this->getFilterValue() ?: '',
             );
         } else {
             return array();

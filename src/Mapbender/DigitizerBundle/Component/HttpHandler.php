@@ -103,17 +103,11 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         return parent::saveItem($schema, $item, $postData);
     }
 
-    /**
-     * @param FeatureType $repository
-     * @param Request $request
-     * @param array $schemaConfig
-     * @param mixed[] $storeConfig
-     * @return mixed[]
-     */
-    protected function getSelectCriteria(DataStore $repository, Request $request, array $schemaConfig, array $storeConfig)
+    protected function getSelectCriteria(Schema $schema, Request $request)
     {
-        $geomReference = $repository->getConnection()->getDatabasePlatform()->quoteIdentifier($repository->getGeomField());
-        $criteria = parent::getSelectCriteria($repository, $request, $schemaConfig, $storeConfig) + array(
+        $connection = $schema->getRepository()->getConnection();
+        $geomReference = $connection->quoteIdentifier($schema->getRepository()->getGeomField());
+        $criteria = parent::getSelectCriteria($schema, $request) + array(
             'srid' => intval($request->query->get('srid')),
         );
         $where = "$geomReference IS NOT NULL";
