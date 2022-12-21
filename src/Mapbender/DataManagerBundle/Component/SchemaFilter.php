@@ -24,6 +24,8 @@ class SchemaFilter
     protected $uploadsBasePath;
     /** @var boolean|null lazy-init */
     protected $isFeatureTypeRegistry;
+    /** @var array<String, Schema[]> */
+    protected $schemaBuffer = array();
 
     /**
      * @param AuthorizationCheckerInterface $authorizationChecker
@@ -120,16 +122,20 @@ class SchemaFilter
      */
     public function getSchema(Element $element, $schemaName)
     {
-        // @todo: buffer repeated lookups
-        $config = $this->getRawSchemaConfig($element, $schemaName, true);
-        $elementConfig = $element->getConfiguration();
-        if (isset($config['combine'])) {
-            return new CombinationSchema($schemaName, $config);
-        } else {
-            $storeConfigs = DataStoreUtil::configsFromSchemaConfigs($this->registry, $elementConfig['schemes']);
-            $storeConfig = $storeConfigs[$schemaName];
-            return new ItemSchema($schemaName, $config, $this->storeFromConfig($storeConfig), $storeConfig);
+        $this->schemaBuffer += array($element->getId() => array());
+        if (!isset($this->schemaBuffer[$element->getId()][$schemaName])) {
+            $config = $this->getRawSchemaConfig($element, $schemaName, true);
+            $elementConfig = $element->getConfiguration();
+            if (isset($config['combine'])) {
+                $schema = new CombinationSchema($schemaName, $config);
+            } else {
+                $storeConfigs = DataStoreUtil::configsFromSchemaConfigs($this->registry, $elementConfig['schemes']);
+                $storeConfig = $storeConfigs[$schemaName];
+                $schema = new ItemSchema($schemaName, $config, $this->storeFromConfig($storeConfig), $storeConfig);
+            }
+            $this->schemaBuffer[$element->getId()][$schemaName] = $schema;
         }
+        return $this->schemaBuffer[$element->getId()][$schemaName];
     }
 
     /**
