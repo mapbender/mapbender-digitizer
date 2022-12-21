@@ -6,6 +6,7 @@ namespace Mapbender\DataManagerBundle\Component;
 
 use Doctrine\DBAL\Connection;
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
+use Mapbender\DataSourceBundle\Entity\DataItem;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
@@ -55,21 +56,25 @@ class UserFilterProvider
      * (creating user + modifying user) or treat null
      * differently.
      *
-     * @param array $storeConfig
-     * @param boolean $isNew
+     * @param Schema $schema
+     * @param DataItem $item
      * @return mixed[]
      */
-    public function getStorageValues(array $storeConfig, $isNew)
+    public function getStorageValues(Schema $schema, DataItem $item)
     {
-        if (empty($storeConfig['userColumn'])) {
-            throw new ConfigurationErrorException("Cannot store modifying user without a 'userColumn' setting in the dataStore or featureType.");
-        }
+        if (!empty($schema->config['filterUser']) || !empty($schema->config['trackUser'])) {
+            if (empty($storeConfig['userColumn'])) {
+                throw new ConfigurationErrorException("Cannot store modifying user without a 'userColumn' setting in the dataStore or featureType.");
+            }
 
-        return array(
-            // Prefer empty string for compatibility with non-nullable column
-            // (default select filter makes no distinction between null and empty string)
-            $storeConfig['userColumn'] => $this->getFilterValue() ?: '',
-        );
+            return array(
+                // Prefer empty string for compatibility with non-nullable column
+                // (default select filter makes no distinction between null and empty string)
+                $storeConfig['userColumn'] => $this->getFilterValue() ?: '',
+            );
+        } else {
+            return array();
+        }
     }
 
     /**

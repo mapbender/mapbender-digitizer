@@ -166,31 +166,28 @@ class HttpHandler implements ElementHttpHandlerInterface
     {
         $itemId = $request->query->get('id', null);
         $schemaName = $request->query->get('schema');
-        $repository = $this->schemaFilter->getDataStore($element, $schemaName);
+        $schema = $this->schemaFilter->getSchema($element, $schemaName);
+
         $requestData = json_decode($request->getContent(), true);
         if ($itemId) {
             // update existing item
-            $dataItem = $repository->getById($itemId);
+            $dataItem = $schema->getRepository()->getById($itemId);
         } else {
             // store new item
-            $dataItem = $repository->itemFactory();
+            $dataItem = $schema->getRepository()->itemFactory();
         }
-        $itemOut = $this->saveItem($element, $repository, $dataItem, $schemaName, $requestData);
+        $itemOut = $this->saveItem($schema, $dataItem, $requestData);
         return array(
-            'dataItem' => $this->formatResponseItem($repository, $itemOut, $schemaName),
+            'dataItem' => $this->formatResponseItem($schema->getRepository(), $itemOut, $schemaName),
         );
     }
 
-    protected function saveItem(Element $element, DataStore $repository, DataItem $item, $schemaName, array $data)
+    protected function saveItem(Schema $schema, DataItem $item, array $postData)
     {
-        $item->setAttributes($data['properties']);
-        $schemaConfig = $this->schemaFilter->getRawSchemaConfig($element, $schemaName, true);
-        if (!empty($schemaConfig['filterUser']) || !empty($schemaConfig['trackUser'])) {
-            $storeConfig = $this->schemaFilter->getDataStoreConfig($element, $schemaName);
-            $userData = $this->userFilterProvider->getStorageValues($storeConfig, !!$item->getId());
-            $item->setAttributes($userData);
-        }
-        return $repository->save($item);
+        $item->setAttributes($postData['properties']);
+        $userData = $this->userFilterProvider->getStorageValues($schema, $item);
+        $item->setAttributes($userData);
+        return $schema->getRepository()->save($item);
     }
 
     /**

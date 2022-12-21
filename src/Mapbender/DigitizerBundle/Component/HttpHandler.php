@@ -5,6 +5,7 @@ namespace Mapbender\DigitizerBundle\Component;
 
 
 use Mapbender\CoreBundle\Entity\Element;
+use Mapbender\DataManagerBundle\Component\Schema;
 use Mapbender\DataManagerBundle\Component\UserFilterProvider;
 use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\FeatureType;
@@ -63,8 +64,6 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         $dataOut = array(
             'saved' => array(),
         );
-        /** @var FeatureType[] $schemaRepositories */
-        $schemaRepositories = array();
         // NOTE: Client always sends geometry as a separate "geometry" attribute, while
         //       Feature creation expects an attribute matching the (configured) geometry
         //       column name. Adapt incoming data.
@@ -74,31 +73,34 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         );
         foreach ($requestData['features'] as $featureData) {
             $schemaName = $featureData['schemaName'];
-            if (empty($schemaRepositories[$schemaName])) {
-                $schemaRepositories[$schemaName] = $this->schemaFilter->getDataStore($element, $schemaName);
-            }
-            $repository = $schemaRepositories[$schemaName];
-            $feature = $repository->getById($featureData['idInSchema']);
+            $schema = $this->schemaFilter->getSchema($element, $schemaName);
+            $feature = $schema->getRepository()->getById($featureData['idInSchema']);
             if (!$feature) {
                 // uh-oh!
                 continue;
             }
-            $updatedFeature = $this->saveItem($element, $repository, $feature, $schemaName, $common + $featureData);
-            $dataOut['saved'][] = $this->formatResponseItem($repository, $updatedFeature, $schemaName) + array(
+            $updatedFeature = $this->saveItem($schema, $feature, $common + $featureData);
+            $dataOut['saved'][] = $this->formatResponseItem($schema->getRepository(), $updatedFeature, $schemaName) + array(
                 'uniqueId' => $featureData['uniqueId'],
             );
         }
         return $dataOut;
     }
 
-    protected function saveItem(Element $element, DataStore $repository, DataItem $item, $schemaName, array $data)
+    /**
+     * @param Schema $schema
+     * @param Feature $item
+     * @param array $postData
+     * @return Feature
+     */
+    protected function saveItem(Schema $schema, DataItem $item, array $postData)
     {
         /** @var Feature $item */
-        if (!empty($data['geometry'])) {
-            $item->setGeom($data['geometry']);
-            $item->setSrid($data['srid']);
+        if (!empty($postData['geometry'])) {
+            $item->setGeom($postData['geometry']);
+            $item->setSrid($postData['srid']);
         }
-        return parent::saveItem($element, $repository, $item, $schemaName, $data);
+        return parent::saveItem($schema, $item, $postData);
     }
 
     /**

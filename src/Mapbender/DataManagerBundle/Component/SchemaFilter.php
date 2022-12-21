@@ -113,6 +113,21 @@ class SchemaFilter
 
     /**
      * @param Element $element
+     * @param $schemaName
+     * @return Schema
+     */
+    public function getSchema(Element $element, $schemaName)
+    {
+        // @todo: buffer repeated lookups
+        $config = $this->getRawSchemaConfig($element, $schemaName, true);
+        $elementConfig = $element->getConfiguration();
+        $storeConfigs = DataStoreUtil::configsFromSchemaConfigs($this->registry, $elementConfig['schemes']);
+        $storeConfig = $storeConfigs[$schemaName];
+        return new Schema($config, $this->storeFromConfig($storeConfig), $storeConfig);
+    }
+
+    /**
+     * @param Element $element
      * @return mixed[][]
      */
     public function prepareConfigs(Element $element)
