@@ -7,7 +7,6 @@ use Mapbender\Component\Element\ElementHttpHandlerInterface;
 use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
 use Mapbender\DataManagerBundle\Exception\UnknownSchemaException;
-use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Entity\DataItem;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -166,6 +165,7 @@ class HttpHandler implements ElementHttpHandlerInterface
     {
         $itemId = $request->query->get('id', null);
         $schemaName = $request->query->get('schema');
+        /** @var ItemSchema $schema */
         $schema = $this->schemaFilter->getSchema($element, $schemaName);
 
         $requestData = json_decode($request->getContent(), true);
@@ -178,7 +178,7 @@ class HttpHandler implements ElementHttpHandlerInterface
         }
         $itemOut = $this->saveItem($schema, $dataItem, $requestData);
         return array(
-            'dataItem' => $this->formatResponseItem($schema->getRepository(), $itemOut, $schemaName),
+            'dataItem' => $this->formatResponseItem($schema, $itemOut),
         );
     }
 
@@ -218,13 +218,10 @@ class HttpHandler implements ElementHttpHandlerInterface
             if ($limitSchema !== null && $limitSchema <= 0) {
                 continue;
             }
-            $storeConfig = $this->schemaFilter->getDataStoreConfig($element, $delegatingSchemaName);
-            $repository = $this->schemaFilter->storeFromConfig($storeConfig);
-
             $criteria = $this->getSelectCriteria($subSchema, $request, $limitSchema);
 
             foreach ($subSchema->getRepository()->search($criteria) as $item) {
-                $results[] = $this->formatResponseItem($repository, $item, $delegatingSchemaName);
+                $results[] = $this->formatResponseItem($subSchema, $item);
             }
         }
         return $results;
@@ -249,11 +246,11 @@ class HttpHandler implements ElementHttpHandlerInterface
         }
     }
 
-    protected function formatResponseItem(DataStore $repository, DataItem $item, $schemaName)
+    protected function formatResponseItem(ItemSchema $schema, DataItem $item)
     {
         return array(
             'id' => $item->getId(),
-            'schemaName' => $schemaName,
+            'schemaName' => $schema->getName(),
             'properties' => $item->toArray(),
         );
     }

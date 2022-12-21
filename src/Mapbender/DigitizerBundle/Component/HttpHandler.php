@@ -7,7 +7,6 @@ namespace Mapbender\DigitizerBundle\Component;
 use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataManagerBundle\Component\ItemSchema;
 use Mapbender\DataManagerBundle\Component\UserFilterProvider;
-use Mapbender\DataSourceBundle\Component\DataStore;
 use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Entity\DataItem;
 use Mapbender\DataSourceBundle\Entity\Feature;
@@ -80,7 +79,7 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
                 continue;
             }
             $updatedFeature = $this->saveItem($schema, $feature, $common + $featureData);
-            $dataOut['saved'][] = $this->formatResponseItem($schema->getRepository(), $updatedFeature, $schemaName) + array(
+            $dataOut['saved'][] = $this->formatResponseItem($schema, $updatedFeature) + array(
                 'uniqueId' => $featureData['uniqueId'],
             );
         }
@@ -132,14 +131,15 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
     }
 
     /**
-     * @param FeatureType $repository
+     * @param ItemSchema $schema
      * @param Feature $item
-     * @param string $schemaName
      * @return array
      */
-    protected function formatResponseItem(DataStore $repository, DataItem $item, $schemaName)
+    protected function formatResponseItem(ItemSchema $schema, DataItem $item)
     {
-        $formatted = parent::formatResponseItem($repository, $item, $schemaName) + array(
+        /** @var FeatureType $repository */
+        $repository = $schema->getRepository();
+        $formatted = parent::formatResponseItem($schema, $item) + array(
             'geometry' => $item->getGeom(),
         );
         unset($formatted['properties'][$repository->getGeomField()]);
