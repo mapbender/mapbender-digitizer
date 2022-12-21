@@ -4,38 +4,31 @@
 namespace Mapbender\DataManagerBundle\Component;
 
 
-use Mapbender\DataSourceBundle\Component\DataStore;
-use Mapbender\DataSourceBundle\Component\FeatureType;
-
 /**
- * Bundle of schema and repository plus (extended, non-data-source)
- * repository config values.
+ * Schema base class (CombinationSchema + concrete ItemSchema)
  *
- * Reduces repeated lookups of assorted repository configs
- * (e.g. styleColumn required with allowCustomStyle)
- * (e.g. userColumn required with filterUser / trackUser)
+ * Provides a name and the base config + defaults.
  */
-class Schema
+abstract class Schema
 {
     /** @var array */
     public $config;
-    /** @var DataStore|FeatureType */
-    protected $repository;
-    /** @var array */
-    public $repositoryConfig;
+    /** @var string */
+    protected $name;
 
-    public function __construct(array $config, DataStore $repository, array $repositoryConfig)
+    public function __construct($name, array $config)
     {
+        $this->name = $name;
         $this->config = $config;
-        $this->repository = $repository;
-        $this->repositoryConfig = $repositoryConfig;
+    }
+
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
-     * @return DataStore|FeatureType
+     * @return string[]
      */
-    public function getRepository()
-    {
-        return $this->repository;
-    }
+    abstract public function getSubSchemaNames();
 }

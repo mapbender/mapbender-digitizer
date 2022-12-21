@@ -121,9 +121,13 @@ class SchemaFilter
         // @todo: buffer repeated lookups
         $config = $this->getRawSchemaConfig($element, $schemaName, true);
         $elementConfig = $element->getConfiguration();
-        $storeConfigs = DataStoreUtil::configsFromSchemaConfigs($this->registry, $elementConfig['schemes']);
-        $storeConfig = $storeConfigs[$schemaName];
-        return new Schema($config, $this->storeFromConfig($storeConfig), $storeConfig);
+        if (isset($config['combine'])) {
+            return new CombinationSchema($schemaName, $config);
+        } else {
+            $storeConfigs = DataStoreUtil::configsFromSchemaConfigs($this->registry, $elementConfig['schemes']);
+            $storeConfig = $storeConfigs[$schemaName];
+            return new ItemSchema($schemaName, $config, $this->storeFromConfig($storeConfig), $storeConfig);
+        }
     }
 
     /**
