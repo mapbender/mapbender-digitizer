@@ -79,6 +79,14 @@
                     widget._openEditDialog(schema, feature);
                 }
             });
+            if (schema && schema.allowCustomStyle) {
+                items.push({
+                    text: Mapbender.trans('mb.digitizer.feature.style.change'),
+                    callback: function() {
+                        widget.openStyleEditor(schema, feature);
+                    }
+                });
+            }
             var featureHasId = !!widget._getUniqueItemId(schema, feature);
             if (featureHasId && schema && schema.allowDelete) {
                 items.push({
