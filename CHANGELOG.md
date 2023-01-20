@@ -1,3 +1,6 @@
+## 1.5.7
+* Rewrite context menu for Openlayers 7 compatibility
+
 ## 1.5.6
 * Reimplement "refreshLayersAfterFeatureSave" (lost Digitizer ~1.2ish feature)
 * Allow documented DataManager-style table configuration
