@@ -124,7 +124,7 @@ class SchemaFilter
     {
         $this->schemaBuffer += array($element->getId() => array());
         if (!isset($this->schemaBuffer[$element->getId()][$schemaName])) {
-            $config = $this->getRawSchemaConfig($element, $schemaName, true);
+            $config = $this->getRawSchemaConfig($element, $schemaName);
             $elementConfig = $element->getConfiguration();
             if (isset($config['combine'])) {
                 $schema = new CombinationSchema($schemaName, $config);
@@ -301,19 +301,16 @@ class SchemaFilter
     /**
      * @param Element $element
      * @param string $schemaName
-     * @param bool $addDefaults
      * @return mixed[]
      */
-    public function getRawSchemaConfig(Element $element, $schemaName, $addDefaults = false)
+    public function getRawSchemaConfig(Element $element, $schemaName)
     {
         $allConfigs = $this->getAllSchemaConfigs($element, false);
         if (empty($allConfigs[$schemaName])) {
             throw new UnknownSchemaException("No such schema " . print_r($schemaName, true));
         }
         $schemaConfig = $allConfigs[$schemaName];
-        if ($addDefaults) {
-            $schemaConfig += $this->getConfigDefaults();
-        }
+        $schemaConfig += $this->getConfigDefaults();
         return $this->amendBaseProperties($schemaConfig, $schemaName);
     }
 
