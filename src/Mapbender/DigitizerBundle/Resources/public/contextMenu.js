@@ -44,7 +44,7 @@
                     }
                 });
                 var menuItems = feature && self.getMenuItems(feature);
-                if (menuItems) {
+                if (menuItems && menuItems.length) {
                     evt.stopPropagation();
                     evt.preventDefault();
                     self.showMenu(evt, pixel, menuItems);
