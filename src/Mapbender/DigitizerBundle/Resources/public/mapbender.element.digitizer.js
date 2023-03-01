@@ -165,6 +165,7 @@
         },
         activate: function() {
             if (!this.active) {
+                console.log("set Active");
                 this.selectControl.setActive(true);
                 this.highlightControl.setActive(true);
                 var currentSchema = this._getCurrentSchema();
