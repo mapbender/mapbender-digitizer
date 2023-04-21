@@ -353,7 +353,9 @@
         },
         _prepareDataItem: function(schema, itemData) {
             var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
-            feature.set('data', itemData.properties || {});
+            const addCapitalizedFields = obj => Object.keys(obj).reduce((acc, key) => ({ ...acc, [key]: obj[key], [key.toUpperCase()]: obj[key] }), {});
+
+            feature.set('data', addCapitalizedFields(itemData.properties) || {});
             var id = this._generateNamespacedId(schema, feature);
             feature.setId(id);
             var schemaSource = this.getSchemaLayer(schema).getSource();
