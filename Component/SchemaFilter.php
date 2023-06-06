@@ -86,18 +86,20 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
         if (!empty($schemaConfig['tableFields'])) {
             $schemaConfig['table'] += array('columns' => $schemaConfig['tableFields']);
         }
-        foreach ($schemaConfig['table']['columns'] as $k => $column) {
-            // Resolve mapping-style vs list style data attribute specification
-            if (empty($column['data'])) {
-                $schemaConfig['table']['columns'][$k]['data'] = $k;
+        if ($schemaConfig['table']['columns'] ?? false) {
+            foreach ($schemaConfig['table']['columns'] as $k => $column) {
+                // Resolve mapping-style vs list style data attribute specification
+                if (empty($column['data'])) {
+                    $schemaConfig['table']['columns'][$k]['data'] = $k;
+                }
+                // Resolve "title" vs "label" config aliasing
+                if (!empty($column['label'])) {
+                    $schemaConfig['table']['columns'][$k] += array('title' => $column['label']);
+                }
+                unset($schemaConfig['table']['columns'][$k]['label']);
             }
-            // Resolve "title" vs "label" config aliasing
-            if (!empty($column['label'])) {
-                $schemaConfig['table']['columns'][$k] += array('title' => $column['label']);
-            }
-            unset($schemaConfig['table']['columns'][$k]['label']);
+            $schemaConfig['table']['columns'] = \array_values($schemaConfig['table']['columns']);
         }
-        $schemaConfig['table']['columns'] = \array_values($schemaConfig['table']['columns']);
         if (isset($schemaConfig['inlineSearch'])) {
             $schemaConfig['table']['searching'] = $schemaConfig['inlineSearch'];
         }
