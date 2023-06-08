@@ -57,6 +57,9 @@
         _createRenderer: function(olMap) {
             return new Mapbender.Digitizer.FeatureRenderer(this, olMap, this.styleAdapter_);
         },
+        _createFeatureEditor: function(olMap) {
+            return new Mapbender.Digitizer.FeatureEditor(this, olMap, this.controlFactory);
+        },
         _afterCreate: function() {
             // Invoked only by data manager _create
             // do nothing; deliberately do NOT call parent method
@@ -106,7 +109,7 @@
             });
             this.selectControl = this.createSelectControl_();
             this.highlightControl = this.createHighlightControl_();
-            this.featureEditor = new Mapbender.Digitizer.FeatureEditor(this, olMap, this.controlFactory);
+            this.featureEditor = this._createFeatureEditor(olMap);
             olMap.addInteraction(this.selectControl);
             olMap.addInteraction(this.highlightControl);
             var initialSchema = this._getCurrentSchema();

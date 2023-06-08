@@ -352,7 +352,7 @@
                 newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
                     var feature = event.feature;
                     widget.initializeNewFeature(schema, feature);
-                    widget._openEditDialog(schema, event.feature);
+                    widget._openEditDialog(schema, event.feature,type);
                 });
                 newInteraction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
                     event.features.forEach(function(feature) {
