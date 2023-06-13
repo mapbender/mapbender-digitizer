@@ -583,11 +583,7 @@
             var self = this;
             var selectControl = new ol.interaction.Select({
                 condition: ol.events.condition.singleClick,
-                layers: function(layer) {
-                    var schema = self._getCurrentSchema();
-                    var activeLayer = schema && self.getSchemaLayer(schema);
-                    return layer === activeLayer;
-                },
+                layers: self.createSelectControlLayerMethod_(),
                 style: null
             });
 
@@ -604,11 +600,7 @@
             var self = this;
             var highlightControl = new ol.interaction.Select({
                 condition: ol.events.condition.pointerMove,
-                layers: function(layer) {
-                    var schema = self._getCurrentSchema();
-                    var activeLayer = schema && self.getSchemaLayer(schema);
-                    return layer === activeLayer;
-                },
+                layers: self.createSelectControlLayerMethod_(),
                 filter: function(feature) {
                     return -1 === self.excludedFromHighlighting_.indexOf(feature);
                 }
@@ -623,6 +615,14 @@
                 });
             });
             return highlightControl;
+        },
+        createSelectControlLayerMethod_: function() {
+            let self = this;
+            return function(layer) {
+                var schema = self._getCurrentSchema();
+                var activeLayer = schema && self.getSchemaLayer(schema);
+                return layer === activeLayer;
+            };
         },
         clearHighlightExclude_: function() {
             this.excludedFromHighlighting_.splice(0, this.excludedFromHighlighting_.length);
