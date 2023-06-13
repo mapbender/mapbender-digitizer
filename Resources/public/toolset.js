@@ -348,12 +348,7 @@
             if (!this.tools_[schema.schemaName][type]) {
                 var newInteraction = this.createDrawingTool(type);
                 this.tools_[schema.schemaName][type] = newInteraction;
-                var widget = this.owner;
-                newInteraction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
-                    var feature = event.feature;
-                    widget.initializeNewFeature(schema, feature);
-                    widget._openEditDialog(schema, event.feature,type);
-                });
+                newInteraction.on(ol.interaction.DrawEventType.DRAWEND, this.onDrawEnd.bind(this,schema,type));
                 newInteraction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
                     event.features.forEach(function(feature) {
                         feature.set('dirty', true);
@@ -361,6 +356,13 @@
                 });
             }
             return this.tools_[schema.schemaName][type];
+        },
+
+        onDrawEnd: function(schema,type,event) {
+            let widget = this.owner;
+            var feature = event.feature;
+            widget.initializeNewFeature(schema, feature,type);
+            widget._openEditDialog(schema, event.feature,type);
         },
         /**
          * @param {String} type
