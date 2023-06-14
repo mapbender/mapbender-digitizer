@@ -562,7 +562,7 @@
                 // @todo: decouple from feature saving; use a distinct url to save the style
                 var formData = {};
                 var styleFieldData = JSON.stringify(values);
-                formData[schema.featureType.styleField] = styleFieldData;
+                formData[schema.featureType.styleField || '__style__'] = styleFieldData;
                 self._saveItem(schema, feature, formData).then(function() {
                     feature.set('customStyleConfig', styleFieldData);
                     self.renderer.customStyleFeature_(schema, feature);

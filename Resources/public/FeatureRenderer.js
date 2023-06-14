@@ -151,7 +151,7 @@
     };
 
     Mapbender.Digitizer.FeatureRenderer.prototype.customStyleFeature_ = function (schema, feature) {
-        var styleField = schema.featureType.styleField;
+        var styleField = schema.featureType.styleField || '__style__';
         var itemData = feature.get("data");
         var jsonStyle = styleField && itemData && itemData[styleField];
 
