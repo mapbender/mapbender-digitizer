@@ -259,10 +259,17 @@
         _deactivateSchema: function(schema) {
             this._closeCurrentPopup();
         },
-        _getCurrentSchema: function() {
-            var $select = $('.-fn-schema-selector', this.element);
-            var option = $('option:selected', $select);
-            return option.data("schema");
+        _getCurrentSchema: function () {
+            const $select = $('.-fn-schema-selector', this.element);
+            const option = $('option:selected', $select);
+            if (option.data('schema')) return option.data('schema');
+            const schemaKeys = Object.keys(this.options['schemes']);
+            if (schemaKeys.length === 0) {
+                Mapbender.error('Configuration error: Element ' + this.element.attr('id') + ' has no schema defined');
+                throw new Error('No schema defined');
+            }
+            const firstSchemaKey = schemaKeys[0];
+            return this.options["schemes"][firstSchemaKey];
         },
         _onSchemaSelectorChange: function() {
             var schemaNew = this._getCurrentSchema();
