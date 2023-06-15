@@ -12,8 +12,8 @@
     "require": {
         "php": ">=5.3.3",
         "mapbender/mapbender": "^3.2.6",
-        "mapbender/data-manager": "^1.2.2 || ^2",
-        "mapbender/data-source": "~0.1.24 || ^0.2"
+        "mapbender/data-manager": "dev-feature/enableDBSIMMSupport",
+        "mapbender/data-source": "dev-feature/enableDBSIMMSupport"
     },
     "conflict": {
         "mapbender/openlayers6-es5": "<0.3.5"
