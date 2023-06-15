@@ -442,6 +442,14 @@
                 srid: this.getCurrentSrid()
             };
         },
+
+        _createFeatureDataForMultipleUpdate(schema,feature) {
+            return {
+                properties: this._getItemData(schema, feature),
+                geometry: this.wktFormat_.writeGeometryText(feature.getGeometry())
+            };
+        },
+
         updateMultiple: function(schema, features) {
             var params = {
                 schema: schema.schemaName
@@ -456,10 +464,7 @@
                 var feature = features[i];
                 var id = this._getUniqueItemId(schema, feature);
                 featureMap[id] = feature;
-                postData.features[id] = {
-                    properties: this._getItemData(schema, feature),
-                    geometry: this.wktFormat_.writeGeometryText(feature.getGeometry())
-                };
+                postData.features[id] = this._createFeatureDataForMultipleUpdate(schema,feature);
             }
             var widget = this;
             var idProperty = this._getUniqueItemIdProperty(schema);
