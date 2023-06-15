@@ -114,7 +114,7 @@
             var styleConfigs = (this.owner.options.schemes[schema.schemaName] || {}).styles;
             this.schemaStyles_[schema.schemaName] = this.initializeStyles_(styleConfigs || {});
             var layer = this.createSchemaFeatureLayer_(schema);
-            layer.setStyle(this.createLayerStyleFunction_(styleConfigs['default']));
+            layer.setStyle(this.createLayerStyleFunction_(styleConfigs['default'],schema));
             delete this.schemaStyles_[schema.schemaName]['default'];
             this.olMap.addLayer(layer);
             this.schemaLayers_[schema.schemaName] = layer;
