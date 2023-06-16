@@ -13,16 +13,22 @@
 
     Object.assign(DrawDonut.prototype, {
         constructor: DrawDonut,
-        startDrawing_: function() {
-            ol.interaction.Draw.prototype.startDrawing_.apply(this, arguments);
+
+        getOriginalFeature_: function() {
             var map = this.getMap();
             var coordinate = this.sketchFeature_.getGeometry().getFirstCoordinate();
 
-            this.originalFeature_ = map.forEachFeatureAtPixel(map.getPixelFromCoordinate(coordinate), function (feature) {
+            return map.forEachFeatureAtPixel(map.getPixelFromCoordinate(coordinate), function (feature) {
                 if (feature.getGeometry().getType() === 'Polygon') {
                     return feature;
                 }
             });
+        },
+
+        startDrawing_: function() {
+            ol.interaction.Draw.prototype.startDrawing_.apply(this, arguments);
+
+            this.originalFeature_ = this.getOriginalFeature_();
 
             if (!this.originalFeature_) {
                 this.abortDrawing_();
