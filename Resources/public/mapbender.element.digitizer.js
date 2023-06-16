@@ -400,6 +400,9 @@
             var olMap = this.mbMap.getModel().olMap;
             $(olMap).trigger({type: "Digitizer.FeatureUpdatedOnServer", feature: feature});   // why?
         },
+        _afterFailedSave: function(schema, feature) {
+            this.revertGeometry(feature);
+        },
         _getData: function(schema) {
             var layer = this.getSchemaLayer(schema);
             return this._super(schema).then(function(features) {
@@ -483,7 +486,11 @@
                         widget.tableRenderer.refreshRow(schema, feature, false);
                     }
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
-                })
+                }).fail(function(){
+                    features.forEach(function(feature){
+                        widget._afterFailedSave(schema,feature);
+                    });
+                });
             ;
             if (!schema.continueDrawingAfterSave) {
                 promise.always(function() {
