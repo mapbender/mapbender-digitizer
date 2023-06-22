@@ -285,7 +285,7 @@
         _getEditDialogButtons: function(schema, feature) {
             var self = this;
             var buttons = [];
-            if (schema.copy && schema.copy.enable) {
+            if (schema.copy && schema.copy.enable && !!Object.keys(feature.get("data")).length > 0) {
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.clone.title'),
                     click: function() {
