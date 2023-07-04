@@ -353,9 +353,11 @@
         },
         _prepareDataItem: function(schema, itemData) {
             var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
-            const addCapitalizedFields = obj => Object.keys(obj).reduce((acc, key) => ({ ...acc, [key]: obj[key], [key.toUpperCase()]: obj[key] }), {});
-
-            feature.set('data', addCapitalizedFields(itemData.properties) || {});
+            /*** */
+            itemData.properties["KG_NUMMER"] = itemData.properties["kg_nummer"];
+            delete itemData.properties["kg_nummer"];
+            /** Quick and Dirty **/
+            feature.set('data', itemData.properties || {});
             var id = this._generateNamespacedId(schema, feature);
             feature.setId(id);
             var schemaSource = this.getSchemaLayer(schema).getSource();
