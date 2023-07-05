@@ -119,6 +119,19 @@
             var textStyle = this.getDefaultTextStyle();
             textStyle.setFont(this.canvasFontRuleFromSvg(ol2Style));
             this.resolveTextStyle_(textStyle, ol2Style);
+
+            if (ol2Style.labelOutlineColor) {
+                var rgb = Mapbender.StyleUtil.parseCssColor(ol2Style.labelOutlineColor).slice(0, 3);
+                var opacity = (typeof ol2Style.labelOutlineOpacity !== 'undefined') ? parseFloat(ol2Style.labelOutlineOpacity) : 1;
+                if (!isNaN(opacity)) {
+                    rgb.push(opacity);
+                }
+                textStyle.setStroke(new ol.style.Stroke({
+                    color: rgb,
+                    width: ol2Style.labelOutlineWidth || 1
+                }));
+            }
+
             return textStyle;
         },
         getIconStyle: function(styleConfig) {
