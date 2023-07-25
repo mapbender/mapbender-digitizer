@@ -708,8 +708,10 @@
                 _.each(response.dataSets, function (dataSet) {
                     try {
                         var json =  JSON.parse(dataSet);
-                        let key = Object.keys(json.features[0].properties)[0];
-                        properties[key] = json.features[0].properties[key];
+                        let keys = Object.keys(json.features[0].properties);
+                        keys.forEach(function(key){
+                            properties[key] = json.features[0].properties[key];
+                        });
                     } catch (e) {
                         // Prevent interruption in case of empty features
                     }
