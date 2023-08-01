@@ -378,8 +378,7 @@
                     interaction = new ol.interaction.Modify({
                         features: this.modifyingCollection_,
                         deleteCondition: function(event) {
-                            let conditionTrue = ol.events.condition.singleClick(event);
-                            return conditionTrue;
+                            return ol.events.condition.singleClick(event);
                         }
                     });
                     break;
