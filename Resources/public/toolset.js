@@ -376,7 +376,11 @@
             switch (type) {
                 case 'modifyFeature':
                     interaction = new ol.interaction.Modify({
-                        features: this.modifyingCollection_
+                        features: this.modifyingCollection_,
+                        deleteCondition: function(event) {
+                            let conditionTrue = ol.events.condition.singleClick(event);
+                            return conditionTrue;
+                        }
                     });
                     break;
                 default:
