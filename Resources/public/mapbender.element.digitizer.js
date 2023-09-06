@@ -86,7 +86,6 @@
                     //Uncaught Error: Cannot access dataTables instance for schema $schemaName. Table not in DOM?
                     //self.tableRenderer.replaceRows(schema, []);
                 } else if ($extentSearchCb.length && $extentSearchCb.prop('checked')) {
-                    console.log(2);
                     self._getData(schema);
                 }
             });
