@@ -38,7 +38,7 @@
         },
         resume: function() {
             if (this.paused_ && this.activeInteraction) {
-                this.activeInteraction.setActive(true);
+                this.activeInteraction.setActive(true, true);
             }
             this.paused_ = false;
         },
@@ -365,9 +365,10 @@
                 case 'openDialog':
                     interaction =  new ol.interaction.Interaction({
                         features: [],
+                        openEdit: true
                     });
-                    interaction.setActive = function(on) {
-                        if (on) {
+                    interaction.setActive = function(on, onResume) {
+                        if (on && !onResume) {
                             let feature = new ol.Feature();
                             widget.initializeNewFeature(schema, feature);
                             widget._openEditDialog(schema, feature);
