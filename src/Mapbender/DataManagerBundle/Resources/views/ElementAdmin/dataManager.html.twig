@@ -18,6 +18,12 @@
             /* Provide some minimal space even for (nearly) empty "schemes" text (when creating new element) */
             min-height: 15em;
         }
+        .col-sm-2 {
+            width: 8%;
+        }
+        .col-sm-10 {
+            width: 92%;
+        }
     </style>
     <script type="text/javascript">
         $(function(){
@@ -56,6 +62,7 @@
         {{- form_row(form.configuration[child_name_before_schemes]) -}}
     {%- endfor -%}
 {% block schemes_row %}
-    {{ form_row(form.configuration.schemes, {'label_attr': {'class': 'block'}}) }}
+    {{ form_label(form.configuration.schemes) }}
+    {{ form_widget(form.configuration.schemes) }}
 {% endblock schemes_row %}
 </div>
