@@ -34,15 +34,6 @@ $buttonActiveTextColor: #fff !default;
     padding: 0.35em;
     border-radius: 0;
   }
-  // Disable bootstrap default button outlines on focus
-  // This is to support keyboard navigation (which we don't support) but makes .active hard to see
-  .btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
-      outline: none;
-  }
-  // Disable webkit default outline on focused select and text input
-  select:focus, input:focus {
-    outline: none;
-  }
 
   table thead th {
     white-space: nowrap;
@@ -190,9 +181,6 @@ $buttonActiveTextColor: #fff !default;
 
   .ui-tabs-nav {
     padding: 0;
-  }
-  .form-group {
-    margin-bottom: 5px;
   }
   label, .form-control {
     font-size: inherit;

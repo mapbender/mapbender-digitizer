@@ -5,47 +5,29 @@
     .mapbender-element-result-table {
       > .dataTables_wrapper {
         > table[role="grid"] {
-            > tbody > tr {
-                &.hover {
-                    background-color: #F7F79A;
-                }
-                &.editing, &.hover.editing {
-                    background-color: #D8EEFF;
-                }
+          > tbody > tr {
+            &.hover td {
+              background-color: #F7F79A;
             }
+            &.editing td, &.hover.editing td {
+              background-color: #D8EEFF;
+            }
+          }
+          > thead > tr {
+            th {
+              color: white;
+              background-color: #6fb536;
+            }
+            th.sorting_asc, th.sorting_desc {
+              background-color: #578e2a;
+            }
+          }
         }
       }
-    }
-
-    // disabled buttons (Mapbenderish / Bootstrappy)
-    button[disabled] {
-        opacity: 0.5;
-    }
-
-    .toolset {
-        .btn-group-sm .btn, .btn-sm {
-            // HACK: reduce horizontal .btn-sm padding to prevent long btn-groups (many tools) from
-            //       wrapping in (legacy default) 350px Mapbender sidepane width
-            // Bootstrap standard rule is padding: 5px 10px
-            padding: 5px 5px;
-        }
-    }
-    // Disable bootstrap default button outlines on focus
-    // This is to support keyboard navigation (which we don't support) but makes .active hard to see
-    .btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
-        outline: none;
-    }
-    // Disable Bootstrap btn-default color changes on :focus
-    .btn-default:not(.active):focus {
-        background-color: #fff; // = less variable @btn-default-bg
-        border-color: #ccc; // = less variable @btn-default-border
     }
 }
 
 .digitizer-style-editor {
-    .form-group label {
-        display: block;
-    }
     label .value-preview {
         font-weight: normal;
     }
