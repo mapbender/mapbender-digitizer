@@ -359,8 +359,32 @@
                         feature.set('dirty', true);
                     });
                 });
+
+               this.addSnapInteraction(schema);
             }
             return this.tools_[schema.schemaName][type];
+        },
+
+        addSnapInteraction: function(schema) {
+            let layer = this.owner.getSchemaLayer(schema);
+            let olMap = this.owner.mbMap.getModel().olMap;
+            let source = layer.getSource();
+
+            let snapExists = olMap.getInteractions().getArray().some(interaction =>
+                interaction instanceof ol.interaction.Snap && interaction.source_ === source
+            );
+
+            if (!snapExists) {
+                let snapInteraction = new ol.interaction.Snap({ source });
+                olMap.addInteraction(snapInteraction);
+            }
+        },
+
+        onDrawEnd: function(schema,type,event) {
+            let widget = this.owner;
+            var feature = event.feature;
+            widget.initializeNewFeature(schema, feature,type);
+            widget._openEditDialog(schema, event.feature,type);
         },
         /**
          * @param {String} type
