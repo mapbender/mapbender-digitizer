@@ -49,7 +49,7 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
 
     protected function getStyleEditorResponse()
     {
-        $content = $this->twig->render('MapbenderDigitizerBundle:Element:style-editor.html.twig');
+        $content = $this->twig->render('@MapbenderDigitizer/Element/style-editor.html.twig');
         return new Response($content);
     }
 

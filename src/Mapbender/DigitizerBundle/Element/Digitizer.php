@@ -31,7 +31,7 @@ class Digitizer extends DataManager
 
     public function getView(Element $element)
     {
-        $view = new TemplateView('MapbenderDigitizerBundle:Element:Digitizer.html.twig');
+        $view = new TemplateView('@MapbenderDigitizer/Element/Digitizer.html.twig');
         $view->attributes += parent::getView($element)->attributes;
         $parentCssClass = !empty($view->attributes['class']) ? $view->attributes['class'] : '';
         $view->attributes['class'] = trim('mb-element-digitizer ' . $parentCssClass);
@@ -60,12 +60,12 @@ class Digitizer extends DataManager
                 "@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js",
                 "@MapbenderDigitizerBundle/Resources/public/StyleAdapter.js",
                 '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
-                '../../vendor/select2/select2/dist/js/select2.js',
-                '../../vendor/select2/select2/dist/js/i18n/de.js',
+                '../vendor/select2/select2/dist/js/select2.js',
+                '../vendor/select2/select2/dist/js/i18n/de.js',
                 '@MapbenderDigitizerBundle/Resources/public/polyfill/setprototype.polyfill.js',
             )),
             'css' => array_merge($dataManagerAssets["css"], array(
-                '../../vendor/select2/select2/dist/css/select2.css',
+                '../vendor/select2/select2/dist/css/select2.css',
                 '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
             )),

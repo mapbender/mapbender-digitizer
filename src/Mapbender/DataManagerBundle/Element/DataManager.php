@@ -57,7 +57,7 @@ class DataManager implements ElementServiceInterface, HttpHandlerProvider
 
     public function getView(Element $element)
     {
-        $view = new TemplateView('MapbenderDataManagerBundle:Element:DataManager.html.twig');
+        $view = new TemplateView('@MapbenderDataManager/Element/DataManager.html.twig');
         $view->attributes['class'] = 'mb-element-data-manager';
         return $view;
     }
@@ -72,7 +72,7 @@ class DataManager implements ElementServiceInterface, HttpHandlerProvider
                 '@MapbenderDataManagerBundle/Resources/public/FormRenderer.js',
                 '@MapbenderDataManagerBundle/Resources/public/FormUtil.js',
                 '@MapbenderDataManagerBundle/Resources/public/DialogFactory.js',
-                '../../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
+                '../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                 '@MapbenderDataManagerBundle/Resources/public/TableRenderer.js',
                 '@MapbenderDataManagerBundle/Resources/public/dataManager.element.js',
             ),
@@ -85,7 +85,7 @@ class DataManager implements ElementServiceInterface, HttpHandlerProvider
 
     public static function getFormTemplate()
     {
-        return 'MapbenderDataManagerBundle:ElementAdmin:dataManager.html.twig';
+        return '@MapbenderDataManager/ElementAdmin/dataManager.html.twig';
     }
 
     public static function getType()

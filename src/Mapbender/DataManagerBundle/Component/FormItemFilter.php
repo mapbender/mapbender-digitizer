@@ -6,7 +6,7 @@ namespace Mapbender\DataManagerBundle\Component;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ConnectionRegistry;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class FormItemFilter
 {
