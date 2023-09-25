@@ -30,7 +30,8 @@
     "autoload": {
         "psr-4": {
             "Mapbender\\DigitizerBundle\\": "src/Mapbender/DigitizerBundle",
-            "Mapbender\\DataManagerBundle\\": "src/Mapbender/DataManagerBundle"
+            "Mapbender\\DataManagerBundle\\": "src/Mapbender/DataManagerBundle",
+            "Mapbender\\DataSourceBundle\\": "src/Mapbender/DataSourceBundle"
         }
     },
     "extra": {

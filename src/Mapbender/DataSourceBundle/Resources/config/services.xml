@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="mbds.default_event_processor" class="Mapbender\DataSourceBundle\Component\EventProcessor">
+            <!-- @since 0.1.22 -->
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="security.token_storage" />
+        </service>
+        <service id="mbds.default_datastore_factory" class="Mapbender\DataSourceBundle\Component\Factory\DataStoreFactory">
+            <!-- @since 0.1.22 -->
+            <argument type="service" id="doctrine" />
+            <argument type="service" id="security.token_storage" />
+            <argument type="service" id="mbds.default_event_processor" />
+        </service>
+        <service id="mbds.default_featuretype_factory" class="Mapbender\DataSourceBundle\Component\Factory\FeatureTypeFactory">
+            <!-- @since 0.1.22 -->
+            <argument type="service" id="doctrine" />
+            <argument type="service" id="security.token_storage" />
+            <argument type="service" id="mbds.default_event_processor" />
+        </service>
+    </services>
+</container>
