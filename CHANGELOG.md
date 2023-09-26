@@ -1,3 +1,9 @@
+## next release
+* Integrated DataManagerBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-manager/blob/master/CHANGELOG.md)
+* Integrated DataSourceBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-source/blob/master/CHANGELOG.md)
+* Ensure compatibility with Mapbender 4 / Symfony 5.4
+
+
 ## 1.5.7
 * Rewrite context menu for Openlayers 7 compatibility
 

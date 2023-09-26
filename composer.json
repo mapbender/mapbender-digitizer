@@ -10,19 +10,19 @@
         {"name": "David Patzke"}
     ],
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=8.0",
         "doctrine/dbal": "^2.11 || ^3",
-        "doctrine/persistence": "^1.3.0 || ^2",
+        "doctrine/persistence": "^2 || ^3",
         "blueimp/jquery-file-upload": "9.*",
-        "mapbender/mapbender": "^3.2.6",
-        "mapbender/data-manager": "^1.2.2 || ^2",
-        "mapbender/data-source": "~0.1.24 || ^0.2"
+        "mapbender/mapbender": "^3.2.6 || ^4"
     },
     "provide": {
-        "mapbender/data-manager": "2.99.99"
+        "mapbender/data-manager": "3.0",
+        "mapbender/data-source": "1.0"
     },
     "replace": {
-        "mapbender/data-manager": "2.*"
+        "mapbender/data-manager": "2.*",
+        "mapbender/data-source": "1.*"
     },
     "conflict": {
         "mapbender/openlayers6-es5": "<0.3.5"
@@ -30,7 +30,8 @@
     "autoload": {
         "psr-4": {
             "Mapbender\\DigitizerBundle\\": "src/Mapbender/DigitizerBundle",
-            "Mapbender\\DataManagerBundle\\": "src/Mapbender/DataManagerBundle"
+            "Mapbender\\DataManagerBundle\\": "src/Mapbender/DataManagerBundle",
+            "Mapbender\\DataSourceBundle\\": "src/Mapbender/DataSourceBundle"
         }
     },
     "extra": {
