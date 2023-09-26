@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <!-- ensure required parameter is defined (parameters.yml will win this) -->
+        <parameter key="dataStores" type="collection" />
+    </parameters>
+    <services>
+        <service id="mb.data-manager.registry" class="Mapbender\DataSourceBundle\Component\RepositoryRegistry" >
+            <argument type="service" id="mbds.default_datastore_factory"/>
+            <argument>%dataStores%</argument>
+        </service>
+        <service id="mb.data-manager.form_item_filter" class="Mapbender\DataManagerBundle\Component\FormItemFilter">
+            <argument type="service" id="doctrine" />
+            <argument type="service" id="translator" />
+        </service>
+    </services>
+</container>

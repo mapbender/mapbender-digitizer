@@ -1,0 +1,250 @@
+.mb-element-data-manager {
+  select.selector, .dataTables_filter label input {
+    display: block;
+    width: 100%;
+    background: white;
+    border: solid 1px grey;
+  }
+  .dataTables_filter label {
+    display: block; // allow input (inside label!) to grow to full width
+  }
+  .dataTables_filter, select.selector, >.title {
+    margin-bottom: 1.5ex;
+  }
+  .loading-indicator {
+    text-align: right;
+    // move spinning icon content slightly left to prevent horizontal overflow and flickering scrollbar
+    padding-right: 0.25em;
+  }
+  color: #555;
+  font-size: 0.85rem;
+  select.selector, .dataTables_filter input {
+    height: 2.5em;
+    padding: 0.35em;
+    border-radius: 0;
+  }
+  // Disable bootstrap default button outlines on focus
+  // This is to support keyboard navigation (which we don't support) but makes .active hard to see
+  .btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
+      outline: none;
+  }
+  // Disable webkit default outline on focused select and text input
+  select:focus, input:focus {
+    outline: none;
+  }
+
+  // Defeat highly specific table td padding rule for cell containing interface buttons
+  // See Mapbender/CoreBundle/Resources/public/sass/modules/_result_table.scss
+  .mapbender-element-result-table {
+    > .dataTables_wrapper {
+      > table[role="grid"] {
+        td.interface {
+          padding: 0;
+        }
+      }
+    }
+
+    .btn-group {
+      white-space: nowrap;
+      >.btn {
+        // Bootstrap default float: left on .btn-group > .btn forces computed display: block, allowing horizontal
+        // collapse of the column and spreading the buttons over mulitple lines
+        // @see https://stackoverflow.com/questions/28482145/browsers-seem-to-be-ignoring-displayinline-block-and-rendering-as-block
+        // => disable float
+        float: none;
+        font-size: inherit;
+        padding: 0.28em;  // ~3px on 11px font-size
+      }
+    }
+  }
+  // Right-align buttons even if columns have no (configured!) CSS width
+  td.interface {
+    text-align: right;
+  }
+}
+
+.ui-dialog.data-manager-dialog {
+  &:focus {
+    outline: none;
+  }
+  display: flex;
+  flex-direction: column;
+  .ui-dialog-content {
+    flex: 1 1 auto;
+    height: initial !important; // Overrule inline style
+  }
+  .ui-dialog-titlebar, .ui-dialog-buttonpane {
+    flex: 0 1 auto;
+  }
+  max-height: 100vh;
+  background: #e4e4e4;
+  border: 1px solid #b3b3b3;
+  .ui-dialog-button-pane {
+    border-bottom: 5px solid #b3b3b3;
+  }
+  .ui-dialog-titlebar {
+    line-height: 2;
+    padding: 0 0 0 15px;
+    background-color: $buttonFirstActiveColor;
+    font-size: 16px;
+    > .ui-button, > .ui-dialog-titlebar-buttonpane {
+      font-size: inherit;
+      float: right;
+      border: none;
+      text-indent: 0;
+      outline: none;
+      background: transparent;
+    }
+    .ui-dialog-titlebar-close {
+      opacity: 0.8;
+      &:hover {
+        opacity: 1;
+      }
+      &:before {
+        content: "\f00d"; // =.fa-times
+        font-family: "FontAwesome", "Font Awesome 5 Free", "Font Awesome 5 Pro";
+      }
+      .ui-button-icon {
+        display: none;
+      }
+    }
+  }
+  .ui-dialog-title {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #fff;
+  }
+  .ui-dialog-content {
+    min-width: 100%;
+  }
+  a.ui-button {
+    // jquerydialogextendjs uses anchors instead of buttons
+    text-decoration: none;
+  }
+  .ui-dialog-buttonpane {
+    padding: 15px;
+    text-align: right;
+    .btn + .btn {
+      margin-left: 5px;
+    }
+  }
+}
+
+// Pop-up dialogs
+.ui-dialog-content.data-manager-edit-data {
+  overflow-y: auto;
+  color: #707070;
+  font-size: 11px;
+  > .ui-tabs .ui-tabs-panel, &.content-padding {
+    padding: 15px;
+  }
+  .ui-tabs {
+    > .ui-tabs-nav {
+      line-height: 2.5;
+      .ui-tabs-tab {
+        list-style: none;
+        float: left;
+        cursor: pointer;
+        &.ui-state-active {
+          background-color: $buttonFirstActiveColor;
+        }
+        a {
+          padding: 0 1em;
+          &, &:hover {
+            text-decoration: none;
+          }
+        }
+        &:focus, a:focus {
+          outline: none;
+        }
+      }
+    }
+  }
+  .input-group .colorpicker.dropdown-menu {
+    // .dropdown-menu: position: absolute; left: 0
+    left: initial;
+    right: 1%;  // =width of .input-group-addon
+  }
+
+  .ui-tabs-nav {
+    padding: 0;
+  }
+  .form-group {
+    margin-bottom: 5px;
+  }
+  label, .form-control {
+    font-size: inherit;
+  }
+  .form-control {
+    border-radius: 0;
+  }
+
+  .file-group {
+    display: flex;
+    flex-direction: row;
+    >i, >a {
+      flex: 0 0 auto;
+    }
+    .fileinput-button {
+      flex: 0 1 auto;
+    }
+    >a {
+      margin: 0 0.5em;
+    }
+    >i.fa-spin {
+      // Keep icon centered by forcing line-height pixels equal to height pixels
+      line-height: 2;
+      height: 2em;
+    }
+    .fa-external-link-alt {
+      // Work around bad vertical glyph kerning (obvious mismatch vs trash can icon)
+      padding-top: 0.1em;
+    }
+  }
+  .fileinput-button {
+    position: relative;
+    input {
+      opacity: 0;
+      // Stretch to cover entire button (including padding)
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+    }
+    max-width: 100%;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+  }
+  .row.reduce-gutters {
+    > :nth-child(1n+2) {
+      padding-left: 0;
+    }
+  }
+  hr {
+    border: none;
+    background: #fff;
+    height: 1px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .upload-button-text {
+    margin-left: 0.5em;
+  }
+  span.select2-container {
+    display: block;
+    width: auto !important; // overrule inline style
+  }
+  label + div.radio, label + div.checkbox {
+    margin-top: 0;
+  }
+}
+
+.data-manager-datepicker {
+  padding: 10px;
+  width: 14em;
+  .ui-datepicker-title {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+  }
+}

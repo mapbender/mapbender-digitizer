@@ -1,0 +1,7 @@
+mb.data-manager.table:
+  filter: Cerca
+  empty: Vuota
+  empty_after_filtering: Nessun risultato
+  from_to_total: ~  # @todo
+  out_of: ~ # @todo
+

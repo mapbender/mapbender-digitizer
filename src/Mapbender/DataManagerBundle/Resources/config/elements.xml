@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="mb.data-manager.schema_filter" class="Mapbender\DataManagerBundle\Component\SchemaFilter">
+            <argument type="service" id="mb.data-manager.registry" />
+            <argument type="service" id="mb.data-manager.form_item_filter" />
+            <argument>%mapbender.uploads_dir%</argument>
+        </service>
+        <service id="mb.data-manager.http_handler" class="Mapbender\DataManagerBundle\Component\HttpHandler">
+            <argument type="service" id="form.factory" />
+            <argument type="service" id="mb.data-manager.schema_filter" />
+        </service>
+        <service id="mapbender.element.DataManager" class="Mapbender\DataManagerBundle\Element\DataManager">
+            <tag name="mapbender.element" canonical="Mapbender\DataManagerBundle\Element\DataManagerElement" />
+            <argument type="service" id="mb.data-manager.registry" />
+            <argument type="service" id="mb.data-manager.schema_filter" />
+            <argument type="service" id="mb.data-manager.http_handler" />
+        </service>
+    </services>
+</container>
