@@ -365,14 +365,18 @@
             let olMap = this.owner.mbMap.getModel().olMap;
             let source = layer.getSource();
 
-            let snapExists = olMap.getInteractions().getArray().some(interaction =>
-                interaction instanceof ol.interaction.Snap && interaction.source_ === source
-            );
-
-            if (!snapExists) {
-                let snapInteraction = new ol.interaction.Snap({ source });
-                olMap.addInteraction(snapInteraction);
+            // remove existing snap interactions
+            const interactions = olMap.getInteractions().getArray();
+            for (let i = interactions.length - 1; i >= 0; i--) {
+                if (interactions[i] instanceof ol.interaction.Snap) {
+                    olMap.removeInteraction(interactions[i]);
+                }
             }
+
+
+            let snapInteraction = new ol.interaction.Snap({ source });
+            olMap.addInteraction(snapInteraction);
+
         },
 
         onDrawEnd: function(schema,type,event) {
