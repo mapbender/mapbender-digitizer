@@ -110,12 +110,15 @@
         getValidToolNames: function(schema) {
             switch (schema.featureType.geomType) {
                 case 'point':
+                    return ['openDialog','moveFeature'];
                 case 'multipoint':
                     return ['openDialog','drawPoint', 'moveFeature'];
                 case 'line':
+                    return ['openDialog'];
                 case 'multiline':
                     return ['openDialog','drawLine', 'modifyFeature', 'moveFeature'];
                 case 'polygon':
+                    return ['openDialog'];
                 case 'multipolygon':
                     return ['openDialog','drawPolygon', 'drawRectangle', 'drawCircle', 'drawEllipse', 'drawDonut', 'modifyFeature', 'moveFeature'];
                 default:
