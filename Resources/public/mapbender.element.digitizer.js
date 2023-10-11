@@ -263,6 +263,34 @@
             return nodes;
         },
         _openEditDialog: function(schema, feature) {
+            let widget = this;
+
+            let transform = (x, y, fromSrs,toSrs) => {;
+                var
+                    fromProj = proj4.Proj(fromSrs),
+                    toProj = proj4.Proj(toSrs),
+                    transformedCoordinates = proj4.transform(fromProj, toProj, [x, y])
+                ;
+                return {
+                    x: transformedCoordinates.x,
+                    y: transformedCoordinates.y
+                };
+            }
+
+            const toDMS = (value) => {
+                if (typeof value !== 'number') {
+                    $.notify("Ungültige Eingabe: " + value);
+                    return false;
+                }
+
+                const degrees = Math.floor(value);
+                const minutesDecimal = (value - degrees) * 60;
+                const minutes = Math.floor(minutesDecimal);
+                const seconds = Math.round((minutesDecimal - minutes) * 60);
+
+                return `${degrees}°${minutes}'${seconds}"`;
+            };
+
             // Make feature visible in table when editing was started
             // from map click or context menu.
             // NOTE: newly created features are not in the table and cannot be paged to
@@ -282,11 +310,16 @@
                 this.featureEditor.pause();
             }
             let geometry = feature.get("geometry");
+            let toSrs = dialog.find(".-fn-active-epsgCode select").val();
+            let fromSrs = 'EPSG:3857';
             if ( geometry instanceof ol.geom.Point) {
-               let x = geometry.flatCoordinates[0];
-               let y = geometry.flatCoordinates[1];
-                dialog.find("input.-fn-coordinates.x").val(x);
-                dialog.find("input.-fn-coordinates.y").val(y);
+                let x = geometry.flatCoordinates[0];
+                let y = geometry.flatCoordinates[1];
+                let transformedCoordinates = transform(x,y,fromSrs,toSrs);
+                let tx = toSrs == "EPSG:4326" ? toDMS(transformedCoordinates.x) : transformedCoordinates.x;
+                let ty = toSrs == "EPSG:4326" ? toDMS(transformedCoordinates.y) : transformedCoordinates.y;
+                dialog.find("input.-fn-coordinates.x").val(tx);
+                dialog.find("input.-fn-coordinates.y").val(ty);
             }
             dialog.data("feature",feature);
 
