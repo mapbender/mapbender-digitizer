@@ -328,14 +328,14 @@
         _getEditDialogButtons: function(schema, feature) {
             var self = this;
             var buttons = [];
-            if (schema.copy && schema.copy.enable) {
-                buttons.push({
-                    text: Mapbender.trans('mb.digitizer.feature.clone.title'),
-                    click: function() {
-                        self.cloneFeature(schema, feature);
-                    }
-                });
-            }
+            // if (schema.copy && schema.copy.enable) {
+            //     buttons.push({
+            //         text: Mapbender.trans('mb.digitizer.feature.clone.title'),
+            //         click: function() {
+            //             self.cloneFeature(schema, feature);
+            //         }
+            //     });
+            // }
             if (schema.allowCustomStyle) {
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.style.change'),
