@@ -286,7 +286,7 @@
                 const degrees = Math.floor(value);
                 const minutesDecimal = (value - degrees) * 60;
                 const minutes = Math.floor(minutesDecimal);
-                const seconds = Math.round((minutesDecimal - minutes) * 60);
+                const seconds = ((minutesDecimal - minutes) * 60).toFixed(2);
 
                 return `${degrees}°${minutes}'${seconds}"`;
             };
