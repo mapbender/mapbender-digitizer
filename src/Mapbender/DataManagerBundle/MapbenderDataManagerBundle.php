@@ -5,12 +5,13 @@ use Mapbender\DataSourceBundle\MapbenderDataSourceBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
  * Data manager bundle.
- * 
+ *
  * @author Andriy Oblivantsev
  */
 class MapbenderDataManagerBundle extends Bundle
@@ -29,7 +30,7 @@ class MapbenderDataManagerBundle extends Bundle
         $container->addResource(new FileResource($loader->getLocator()->locate('elements.xml')));
     }
 
-    public function getContainerExtension()
+    public function getContainerExtension(): ?ExtensionInterface
     {
         return null;
     }
