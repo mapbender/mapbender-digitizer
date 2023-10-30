@@ -103,7 +103,7 @@ class DataRepository
             ->where($this->getUniqueId() . " = :id")
             ->setParameter('id', $id)
         ;
-        $row = $qb->execute()->fetchAssociative();
+        $row = $qb->executeQuery()->fetchAssociative();
         if ($row) {
             $items = $this->prepareResults(array($row));
             return $items[0];
@@ -122,7 +122,7 @@ class DataRepository
     {
         $queryBuilder = $this->createQueryBuilder();
         $this->configureSelect($queryBuilder, true, $criteria);
-        return $this->prepareResults($queryBuilder->execute()->fetchAllAssociative());
+        return $this->prepareResults($queryBuilder->executeQuery()->fetchAllAssociative());
     }
 
     /**
@@ -136,7 +136,7 @@ class DataRepository
     {
         $qb = $this->createQueryBuilder();
         $this->configureCount($qb, true, $criteria);
-        return \intval($qb->execute()->fetchOne());
+        return \intval($qb->executeQuery()->fetchOne());
     }
 
     /**
@@ -152,7 +152,7 @@ class DataRepository
         $connection   = $queryBuilder->getConnection();
         $condition = $queryBuilder->expr()->in($this->uniqueIdFieldName, array_map(array($connection, 'quote'), $ids));
         $queryBuilder->where($condition);
-        $results = $this->prepareResults($queryBuilder->execute()->fetchAllAssociative());
+        $results = $this->prepareResults($queryBuilder->executeQuery()->fetchAllAssociative());
         return $results;
     }
 
