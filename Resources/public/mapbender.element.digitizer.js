@@ -582,7 +582,10 @@
             this.getSchemaLayer(schema).getSource().addFeature(newFeature);
             newFeature.set('dirty', true);
 
+            let old_title = schema.popup.title;
+            schema.popup.title = schema.label + " Duplizieren";
             this._openEditDialog(schema, newFeature);
+            schema.popup.title = old_title;
         },
         /**
          * @param {ol.Feature|null} feature
