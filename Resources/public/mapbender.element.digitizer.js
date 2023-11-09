@@ -389,8 +389,10 @@
         _prepareDataItem: function(schema, itemData) {
             var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
             /*** */
-            itemData.properties["KG_NUMMER"] = itemData.properties["kg_nummer"];
-            delete itemData.properties["kg_nummer"];
+            if (itemData.properties.kg_nummer) {
+                itemData.properties["KG_NUMMER"] = itemData.properties["kg_nummer"];
+                delete itemData.properties["kg_nummer"];
+            }
             /** Quick and Dirty **/
             feature.set('data', itemData.properties || {});
             var id = this._generateNamespacedId(schema, feature);
