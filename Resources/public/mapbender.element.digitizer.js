@@ -480,7 +480,10 @@
             // NOTE: this also detects cloned features (via new copy functionality) as new
             var isNew = !this._getUniqueItemId(schema, feature);
             if (isNew && feature.get("geometry")) {
-                this.getSchemaLayer(schema).getSource().removeFeature(feature);
+                // Suppress error in console
+                try {
+                    this.getSchemaLayer(schema).getSource().removeFeature(feature);
+                } catch(e) {}
             }
             this.toolsetRenderer.resume();
             if (schema.allowDigitize) {
