@@ -64,12 +64,39 @@
             }
         },
         getDrawingTool: function(type, schema) {
+            let tool;
             if (type === 'moveFeature' || type === 'modifyFeature') {
-                return this.getModificationTool_(type);
+                tool = this.getModificationTool_(type);
             } else {
-                return this.getCreationTool_(schema, type);
+                tool = this.getCreationTool_(schema, type);
             }
+            this.addSnapInteraction(schema);
+            return tool;
         },
+
+        addSnapInteraction: function(schema) {
+            let layer = this.owner.getSchemaLayer(schema);
+            let olMap = this.owner.mbMap.getModel().olMap;
+            let source = layer.getSource();
+
+            // remove existing custom snap interactions
+            const interactions = olMap.getInteractions().getArray();
+            for (let i = interactions.length - 1; i >= 0; i--) {
+                let interaction = interactions[i];
+                if (interaction instanceof ol.interaction.Snap && interaction.DIGITIZER) {
+                    olMap.removeInteraction(interaction);
+                }
+            }
+
+            // create a new snap interaction with a custom property
+            let snapInteraction = new ol.interaction.Snap({
+                source,
+                pixelTolerance: 10
+            });
+            snapInteraction.DIGITIZER = true;  // Adding a custom property
+            olMap.addInteraction(snapInteraction);
+        },
+
         getModificationTool_: function(type) {
             if (!this.sharedTools_[type]) {
                 var interaction = this.createModificationTool_(type);
