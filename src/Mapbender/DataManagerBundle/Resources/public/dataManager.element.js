@@ -717,7 +717,7 @@
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json'
             };
-            _.extend(options_, options || {});
+            Object.assign(options_, options || {});
             if (data && !options_.data) {
                 options_.data = JSON.stringify(data);
             }
