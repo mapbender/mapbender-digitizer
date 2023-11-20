@@ -245,6 +245,18 @@ $buttonActiveTextColor: #fff !default;
   label + div.radio, label + div.checkbox {
     margin-top: 0;
   }
+
+  div.mandatory {
+     input, select, textarea, .select2-selection  {
+         border: 2px solid #D5A99F; /* Slightly thicker border for better visibility */
+         border-radius: 4px; /* Rounded corners for a smoother look */
+         transition: border-color 0.3s ease; /* Smooth transition for border color */
+
+         &.select2-search__field {
+             border: none;
+         }
+     }
+  }
 }
 
 .data-manager-datepicker {

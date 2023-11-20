@@ -696,6 +696,9 @@
                 .addClass('mb-3')
                 .css(settings.css || {})
             ;
+            if (settings.mandatory || (settings.attr && settings.attr.required)) {
+                $group.addClass("mandatory");
+            }
             if (settings.title) {
                 $group.append(this.fieldLabel_(settings));
             }
