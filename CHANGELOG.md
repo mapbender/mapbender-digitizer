@@ -1,4 +1,5 @@
 ## next release
+* Integrated Snap Functionality - Mouse Pointer snaps to every Vector Geometry
 * Integrated DataManagerBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-manager/blob/master/CHANGELOG.md)
 * Integrated DataSourceBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-source/blob/master/CHANGELOG.md)
 * Ensure compatibility with Mapbender 4 / Symfony 5.4
