@@ -366,11 +366,9 @@
         },
 
         addSnapInteraction: function(schema) {
-            let layer = this.owner.getSchemaLayer(schema);
             let olMap = this.owner.mbMap.getModel().olMap;
-            let source = layer.getSource();
+            let layers = olMap.getLayers().getArray();
 
-            // remove existing snap interactions
             const interactions = olMap.getInteractions().getArray();
             for (let i = interactions.length - 1; i >= 0; i--) {
                 if (interactions[i] instanceof ol.interaction.Snap) {
@@ -378,10 +376,15 @@
                 }
             }
 
-
-            let snapInteraction = new ol.interaction.Snap({ source });
-            olMap.addInteraction(snapInteraction);
-
+            layers.forEach(layer => {
+                if (layer instanceof ol.layer.Vector) {
+                    let source = layer.getSource();
+                    let snapInteraction = new ol.interaction.Snap({
+                        source
+                    });
+                    olMap.addInteraction(snapInteraction);
+                }
+            });
         },
 
         onDrawEnd: function(schema,type,event) {
