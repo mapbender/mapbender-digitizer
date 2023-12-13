@@ -1,7 +1,9 @@
 mb.digitizer:
     actions:
       show_details: Show details
-    displayOnInactive: 'Display when not active'
+    class:
+      title: Digitizer
+      description: Georeferencing and Digitizing
     edit.attributes: Edit attributes
     edit.geometry: Edit geometry
     revert.geometry: Revert geometry changes
