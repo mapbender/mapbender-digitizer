@@ -13,6 +13,12 @@ mb.data-manager.table:
   from_to_total: Zeige _START_ bis _END_ von _TOTAL_
   out_of: (aus insgesamt _MAX_)
 
+mb.datamanager:
+  admin:
+    schemes: Konfiguration
+  class:
+    title: Data-Manager
+    description: Daten erfassen (ohne Geometrie)
 mb:
   'data-manager':
     actions:

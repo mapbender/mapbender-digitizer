@@ -33,13 +33,13 @@ class DataManager implements ElementServiceInterface, HttpHandlerProvider
     public static function getClassTitle()
     {
         // @todo: translations
-        return "Data manager";
+        return "mb.datamanager.class.title";
     }
 
     public static function getClassDescription()
     {
         // @todo: translation
-        return "Data manager element";
+        return "mb.datamanager.class.description";
     }
 
 
