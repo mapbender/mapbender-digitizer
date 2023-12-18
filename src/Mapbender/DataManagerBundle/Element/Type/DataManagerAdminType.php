@@ -21,6 +21,7 @@ class DataManagerAdminType extends AbstractType
     {
         $builder
             ->add('schemes', 'Mapbender\ManagerBundle\Form\Type\YAMLConfigurationType', array(
+                'label' => 'mb.datamanager.admin.schemes',
                 'required' => false,
                 'attr' => array(
                     'class' => 'code-yaml',

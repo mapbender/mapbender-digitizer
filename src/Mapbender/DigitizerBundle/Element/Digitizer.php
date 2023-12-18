@@ -16,12 +16,12 @@ class Digitizer extends DataManager
 {
     public static function getClassTitle()
     {
-        return "Digitizer";
+        return "mb.digitizer.class.title";
     }
 
     public static function getClassDescription()
     {
-        return "Georeferencing and Digitizing";
+        return "mb.digitizer.class.description";
     }
 
     public function getWidgetName(Element $element)
