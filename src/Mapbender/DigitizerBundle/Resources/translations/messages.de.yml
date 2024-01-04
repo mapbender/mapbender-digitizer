@@ -6,7 +6,7 @@ mb.digitizer:
       description: Datenerfassung und Bearbeitung
     edit.attributes: Sachdaten bearbeiten
     edit.geometry: Geometrie bearbeiten
-    revert.geometry: Geometrieänderung zurücknehemn
+    revert.geometry: Geometrieänderung zurücknehmen
     feature:
         remove:
             title: 'Löschen'
