@@ -5,6 +5,11 @@
 * Integrated DataSourceBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-source/blob/master/CHANGELOG.md)
 * Ensure compatibility with Mapbender 4 / Symfony 5.4
 * Translation enhancements ([PR#96](https://github.com/mapbender/mapbender-digitizer/pull/96))
+* Rename translation files from .yml to .yaml ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Allow specific message for error when not logged in ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Repair Radiobutton ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Add default whitepace: pre-line in text fields to keep formatting ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Allow to set text area height by providing row attribute  ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
 
 
 ## 1.5.7
