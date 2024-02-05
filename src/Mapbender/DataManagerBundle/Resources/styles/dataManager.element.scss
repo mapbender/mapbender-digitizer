@@ -76,6 +76,11 @@ $buttonActiveTextColor: #fff !default;
 }
 
 .ui-dialog.data-manager-dialog {
+
+  textarea.form-control {
+      min-height: 0;
+  }
+
   &:focus {
     outline: none;
   }
