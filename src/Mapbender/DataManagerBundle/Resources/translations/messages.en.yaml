@@ -1,6 +1,4 @@
-q
-
-git mb.data.store:
+mb.data.store:
   create: Create
   remove.successfully: 'Removed successfully'
   remove.confirm:
