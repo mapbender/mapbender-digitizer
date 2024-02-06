@@ -612,7 +612,8 @@
                 // Safest width inside .mb-3 / Bootstrap grids
                 width: '100%',
                 placeholder: placeholderText || '',
-                allowClear: !required && !!placeholderText
+                allowClear: !required && !!placeholderText,
+                maximumSelectionLength: item.maximumSelectionLength || null,
             };
         },
         handle_radioGroup_: function(settings) {
