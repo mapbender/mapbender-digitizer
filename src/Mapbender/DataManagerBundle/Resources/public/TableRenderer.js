@@ -125,15 +125,16 @@
             if (buttonColumnOptions) {
                 columnsOption.push(buttonColumnOptions);
             }
+
             var settings = {
                 columns: columnsOption,
                 lengthChange: false,
-                pageLength: (schema.table || {}).pageLength || 16,
-                searching: (schema.table || {}).searching || (typeof ((schema.table || {}).searching) === 'undefined'),
+                pageLength: schema.pageLength || 16,
+                searching: schema.inlineSearch ?? true,
                 info:         true,
                 processing:   false,
                 ordering:     true,
-                paging:       true,
+                paging:       schema.paging ?? true,
                 selectable:   false,
                 oLanguage: this.getOLanguageOption(schema),
                 autoWidth:    false
