@@ -10,7 +10,7 @@
 * Repair Radiobutton ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
 * Add default whitepace: pre-line in text fields to keep formatting ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
 * Allow to set text area height by providing row attribute  ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
-
+* Add option `paging` on root level to disable paging ([PR#99](https://github.com/mapbender/mapbender-digitizer/pull/99))
 
 ## 1.5.7
 * Rewrite context menu for Openlayers 7 compatibility
