@@ -54,7 +54,7 @@
             });
             $('input[type="range"]', $content).each(function() {
                 var $input = $(this);
-                var $vp = $('.value-preview', $input.closest('.mb-3'));
+                var $vp = $('.value-preview', $input.closest('.form-group'));
                 var update = function($el) {
                     var value = parseFloat($input.val());
                     if (!isNaN(value)) {

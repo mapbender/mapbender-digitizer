@@ -198,7 +198,7 @@
                 $('.-js-init-colorpicker', scope).each(function() {
                     $(this).colorpicker({
                         format: 'hex',
-                        container: $('.input-group', $(this).closest('.mb-3'))
+                        container: $('.input-group', $(this).closest('.form-group'))
                     });
                 });
             }
@@ -219,7 +219,7 @@
                     var style = $select.attr('style');
                     $(this).select2(s2options);
                     // Forward custom css rules from (now hidden) select2-ified select to visible select2 element
-                    var $group = $select.closest('.mb-3');
+                    var $group = $select.closest('.form-group');
                     var widthRxp = /width\s*:\s*[^;]*;?\s*/;
                     var widthMatch = style && style.match(widthRxp);
                     if (widthMatch) {
@@ -237,7 +237,7 @@
             $('input[type="file"][data-upload-url][data-name]', scope).each(function() {
                 var $input = $(this);
                 var name = $input.attr('data-name');
-                var $group = $input.closest('.mb-3');
+                var $group = $input.closest('.form-group');
                 var $realInput = $('input[name="' + name + '"]', $group);
                 var url = $input.attr('data-upload-url');
                 var $loadingIcon = $('.-js-loading-indicator', $group);
@@ -260,7 +260,7 @@
             });
             $(scope).on('click', '.-fn-delete-attachment', function() {
                 var $link = $(this);
-                var $group = $link.closest('.mb-3');
+                var $group = $link.closest('.form-group');
                 var $input = $('input[type="hidden"][name]', $group);
                 var dataProp = $('input[type="file"][data-name]', $group).attr('data-name');
                 $input.val('');
@@ -284,7 +284,7 @@
             var i;
             for (i = 0; i < fileInputs.length; ++i) {
                 var fileInput = fileInputs[i];
-                var $group = fileInput.closest('.mb-3');
+                var $group = fileInput.closest('.form-group');
                 var inputValue = fileInput.value;
                 var displayValue = inputValue && inputValue.split('/').pop();
                 var $display = $('.upload-button-text', $group);
@@ -354,7 +354,7 @@
                 var $addonGroup = $(document.createElement('div'))
                     .addClass('input-group colorpicker-component -js-init-colorpicker')
                     .append($input)
-                    .append($('<span class="input-group-text input-group-addon"><i></i></span>'))
+                    .append($('<span class="input-group-addon"><i></i></span>'))
                 ;
                 return this.wrapInput_($addonGroup, settings);
             } else {
@@ -414,7 +414,7 @@
                 .attr('data-default-src', src || '')
                 .attr('data-preview-for', settings.name || null)
             ;
-            // Wrap in row mb-3 (potentially with label), but
+            // Wrap in form-group (potentially with label), but
             // remove input-related values (img is not an input)
             return this.wrapInput_($img, {
                 title: settings.title,
@@ -517,7 +517,7 @@
         },
         handle_text_: function(settings) {
             /** https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L823 */
-            var $wrapper = $(document.createElement('div')).addClass('mb-3 text');
+            var $wrapper = $(document.createElement('div')).addClass('form-group text');
             var $textContainer = $(document.createElement('div'))
                 .addClass('-fn-calculated-text')
                 .attr('data-expression', settings.text)
@@ -534,16 +534,16 @@
         },
         handle_checkbox_: function(settings) {
             var $label = this.fieldLabel_(settings);
-            var $checkbox = $('<input type="checkbox" class="form-check-input"/>')
+            var $checkbox = $('<input type="checkbox"/>')
                 .attr('name', settings.name || null)
                 .attr('value', settings.value || null)
                 .prop('disabled', settings.disabled || false)
                 .prop('required', !!settings.mandatory || settings.required || !!(settings.attr || {}).required)
                 .prop('checked', settings.checked)
             ;
+            $label.prepend($checkbox);
             return $(document.createElement('div'))
-                .addClass('mb-3 form-check')
-                .append($checkbox)
+                .addClass('form-group checkbox')
                 .append($label)
             ;
         },
@@ -562,7 +562,7 @@
                 .prop('required', required)
                 .attr('name', settings.name)
                 .prop('multiple', !!multiple)
-                .addClass('form-select')
+                .addClass('form-control')
             ;
             var options = settings.options || [];
             var placeholderText = (settings.attr || {}).placeholder || settings.placeholder;
@@ -609,7 +609,7 @@
             /** @see https://select2.org/configuration/options-api */
             return {
                 dropdownAutoWidth: true,
-                // Safest width inside .mb-3 / Bootstrap grids
+                // Safest width inside .form-group / Bootstrap grids
                 width: '100%',
                 placeholder: placeholderText || '',
                 allowClear: !required && !!placeholderText
@@ -666,7 +666,7 @@
             var $label = $(document.createElement('label'))
                 .attr({'for': settings.name || null })
                 .text(settings.title || settings.text)
-                .addClass('form-label fw-bold')
+                .addClass('control-label')
             ;
             if (settings.infoText) {
                 var $icon = $('<i/>')
@@ -693,7 +693,7 @@
             }
             var $group = $(document.createElement('div'))
                 .addClass(settings.cssClass || '')
-                .addClass('mb-3')
+                .addClass('form-group')
                 .css(settings.css || {})
             ;
             if (settings.mandatory || (settings.attr && settings.attr.required)) {
@@ -702,7 +702,15 @@
             if (settings.title) {
                 $group.append(this.fieldLabel_(settings));
             }
-            $group.append($input);
+            // Wrap in extra div (for .form-horizontal support), but avoid wrapping form-group-addons, images etc
+            if ($input.is(':input')) {
+                var $controlWrapper = $(document.createElement('div'))
+                    .addClass('control-wrapper')
+                ;
+                $group.append($controlWrapper.append($input));
+            } else {
+                $group.append($input);
+            }
             return $group;
         },
         renderFallback_: function(settings) {

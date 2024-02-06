@@ -7,7 +7,7 @@
         {%- block table_buttons -%}
             {%- block edit_button -%}
                 <button type="button"
-                        class="-fn-edit-data btn btn-outline-secondary"
+                        class="-fn-edit-data btn btn-default"
                         title="{{ 'mb.actions.edit' | trans }}"><i class="fa fa-edit"></i></button>
             {%- endblock -%}
             {%- block delete_button -%}
@@ -23,13 +23,13 @@
         {%- block toolset -%}
         <div class="btn-toolbar">
             {%- block toolset_groups -%}
-            <div class="btn-group">
+            <div class="btn-group btn-group">
                 {%- block toolset_buttons -%}
                 <button type="button"
-                        class="-fn-refresh btn btn-secondary"
+                        class="-fn-refresh btn btn-default"
                         title="{{ 'mb.actions.refresh' | trans }}"><i class="fa fas fa-refresh"></i></button>
                 <button type="button"
-                        class="-fn-create-item btn btn-secondary"
+                        class="-fn-create-item btn btn-default"
                         title="{{ 'mb.data.store.create' | trans }}"><i class="fa fas fa-plus"></i></button>
                 {%- endblock -%}
             </div>

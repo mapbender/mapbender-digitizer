@@ -160,7 +160,7 @@
             return isValid;
         },
         markValidationState: function($input, isValid) {
-            var $formGroup = $input.closest('.mb-3');
+            var $formGroup = $input.closest('.form-group');
             $formGroup.toggleClass('has-error', !isValid);
             $formGroup.toggleClass('has-success', isValid);
             /** @todo: ensure message container is always present in the right place */

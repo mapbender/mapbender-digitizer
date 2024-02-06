@@ -111,7 +111,7 @@
                         'data-toolname': toolName,
                         title: tooltip
                     })
-                    .addClass('-fn-toggle-tool btn btn-outline-secondary')
+                    .addClass('-fn-toggle-tool btn btn-default')
                     .append($icon)
                     .data({
                         schema: btnSchema

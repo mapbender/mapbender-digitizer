@@ -465,8 +465,8 @@
 
             this._updateCalculatedText($('.-fn-calculated-text', dialog), itemValues);
 
-            dialog.on('click', '.mb-3 .-fn-copytoclipboard', function() {
-                var $input = $(':input', $(this).closest('.mb-3'));
+            dialog.on('click', '.form-group .-fn-copytoclipboard', function() {
+                var $input = $(':input', $(this).closest('.form-group'));
                 Mapbender.DataManager.FormUtil.copyToClipboard($input);
             });
             this.formRenderer_.initializeWidgets(dialog, schemaBaseUrl);
