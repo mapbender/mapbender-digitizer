@@ -1,10 +1,11 @@
-mb.data.store:  
+mb.data.store:
   create: Erstellen
   remove.successfully: 'Erfolgreich gelöscht'
   remove.confirm:
     text: 'Objekt löschen?'
   save.successfully: 'Erfolgreich gespeichert'
   api.query.error-message: Fehler
+  api.query.error-notloggedin: "Bitte loggen Sie sich ein"
 
 mb.data-manager.table:
   filter: Durchsuchen

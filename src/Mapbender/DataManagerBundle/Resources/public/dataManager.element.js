@@ -738,9 +738,10 @@
                 return;
             }
             var errorMessage = Mapbender.trans('mb.data.store.api.query.error-message');
+            var responseErrorMessage = Mapbender.trans('mb.data.store.'+xhr.responseJSON.message);
             console.error(errorMessage, xhr);
             if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = [errorMessage, xhr.responseJSON.message].join(":\n");
+                errorMessage = [errorMessage, responseErrorMessage].join(":\n");
             }
             $.notify(errorMessage, {
                 autoHide: false
