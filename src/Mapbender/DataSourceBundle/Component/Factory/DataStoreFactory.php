@@ -58,8 +58,12 @@ class DataStoreFactory
      */
     public function getDbalConnectionByName($name)
     {
-        /** @var Connection $connection */
-        $connection = $this->connectionRegistry->getConnection($name);
-        return $connection;
+        try {
+            /** @var Connection $connection */
+            $connection = $this->connectionRegistry->getConnection($name);
+            return $connection;
+        } catch (\InvalidArgumentException $e) {
+            throw new \Exception("api.query.error-database");
+        }
     }
 }

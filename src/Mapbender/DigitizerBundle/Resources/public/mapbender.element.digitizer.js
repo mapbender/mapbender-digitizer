@@ -38,8 +38,6 @@
                 // Let data manager base method trigger "ready" event and start loading data
                 widget._start();
                 widget.registerMapEvents_();
-            }, function() {
-                Mapbender.checkTarget("mbDigitizer");
             });
         },
         _createTableRenderer: function() {
