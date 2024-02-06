@@ -738,7 +738,11 @@
                         var element = $input;
                         var el = element;
                         return function() {
-                            eval(code);
+                           try {
+                               eval(code);
+                           } catch(e) {
+                               console.warn("Error in eval",code);
+                           }
                         };
                     })(handler);
                 }
