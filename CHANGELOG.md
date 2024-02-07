@@ -12,7 +12,12 @@
 * Allow to set text area height by providing row attribute  ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
 * Add option `paging` on root level to disable paging ([PR#99](https://github.com/mapbender/mapbender-digitizer/pull/99))
 * Allow to set maximumSelectionLength in select2 (type select) ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
-
+* Make 'eval' in change event error safe ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Allow labelOutline properties in styleAdapter (labelOutlineColor, labelOutlineWidth, labelYOffset, labelXOffset) ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Adjust copy symbol ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98)) 
+* Adjust border display of mandatory fields (inputs, select, select2, textarea) ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Adjust display of refresh button  ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Allow popup.modal and popup.position  ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
 
 ## 1.5.7
 * Rewrite context menu for Openlayers 7 compatibility
