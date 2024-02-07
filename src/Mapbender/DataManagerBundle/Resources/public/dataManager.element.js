@@ -89,7 +89,7 @@
                         }
                     }
                 };
-            })(this.options.schemes));
+            })(this.options.schemes)).catch(this._onAjaxError.bind(this));
 
             this.grantsRequest_.then(function() {
                 self.updateSchemaSelector_();

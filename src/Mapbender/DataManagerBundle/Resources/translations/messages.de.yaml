@@ -6,6 +6,7 @@ mb.data.store:
   save.successfully: 'Erfolgreich gespeichert'
   api.query.error-message: Fehler
   api.query.error-notloggedin: "Bitte loggen Sie sich ein"
+  api.query.error-database: "Verbindung zur Datenbank konnte nicht hergestellt werden. Überprüfen Sie die Konfiguration in 'featureType'"
 
 mb.data-manager.table:
   filter: Durchsuchen
