@@ -189,6 +189,15 @@ $buttonActiveTextColor: #fff !default;
     color: #707070;
     font-size: 11px;
 
+    textarea:required,
+    select:required ,
+    input:required,
+    .select2-required .select2-selection {
+        border: 2px solid #D5A99F;
+        border-radius: 4px;
+        transition: border-color 0.3s ease
+    }
+
     > .ui-tabs .ui-tabs-panel, &.content-padding {
         padding: 15px;
     }
@@ -308,17 +317,6 @@ $buttonActiveTextColor: #fff !default;
         margin-top: 0;
     }
 
-    div.mandatory {
-        input, select, textarea, .select2-selection {
-            border: 2px solid #D5A99F; /* Slightly thicker border for better visibility */
-            border-radius: 4px; /* Rounded corners for a smoother look */
-            transition: border-color 0.3s ease; /* Smooth transition for border color */
-
-            &.select2-search__field {
-                border: none;
-            }
-        }
-    }
 }
 
 .data-manager-datepicker {
