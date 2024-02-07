@@ -671,7 +671,7 @@
             });
         },
         zoomToFeature: function(schema, feature) {
-            Mapbender.Model.zoomToFeature(feature);
+            Mapbender.Model.zoomToFeature(feature, { buffer: schema.zoomBuffer || 10 });
         },
         _getEditDialogPopupConfig: function(schema, dataItem) {
             var options = this._superApply(arguments);

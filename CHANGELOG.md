@@ -18,6 +18,7 @@
 * Adjust border display of mandatory fields (inputs, select, select2, textarea) ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
 * Adjust display of refresh button  ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
 * Allow popup.modal and popup.position  ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Allow zoomBuffer parameter ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
 
 ## 1.5.7
 * Rewrite context menu for Openlayers 7 compatibility
