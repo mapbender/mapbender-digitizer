@@ -492,6 +492,8 @@
                 minWidth = parseInt(width.replace(/px$/, '')) || minWidth
             }
             return {
+                position:  schema.popup.position || {},
+                modal: schema.popup.modal || false,
                 title: schema.popup.title || Mapbender.trans('mb.data-manager.details_title'),
                 width: schema.popup.width,
                 minWidth: minWidth,

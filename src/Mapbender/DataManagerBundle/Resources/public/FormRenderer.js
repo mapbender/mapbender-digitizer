@@ -217,7 +217,10 @@
                         s2options.dropdownParent = scope;
                     }
                     var style = $select.attr('style');
-                    $(this).select2(s2options);
+                    $select.select2(s2options);
+                    if ($select.is('[required]')) {
+                        $select.next('.select2-container').addClass('select2-required');
+                    }
                     // Forward custom css rules from (now hidden) select2-ified select to visible select2 element
                     var $group = $select.closest('.mb-3');
                     var widthRxp = /width\s*:\s*[^;]*;?\s*/;
@@ -612,7 +615,8 @@
                 // Safest width inside .mb-3 / Bootstrap grids
                 width: '100%',
                 placeholder: placeholderText || '',
-                allowClear: !required && !!placeholderText
+                allowClear: !required && !!placeholderText,
+                maximumSelectionLength: item.maximumSelectionLength || null,
             };
         },
         handle_radioGroup_: function(settings) {
@@ -737,7 +741,11 @@
                         var element = $input;
                         var el = element;
                         return function() {
-                            eval(code);
+                           try {
+                               eval(code);
+                           } catch(e) {
+                               console.warn("Error in eval",code);
+                           }
                         };
                     })(handler);
                 }

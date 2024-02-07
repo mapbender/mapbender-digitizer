@@ -24,7 +24,7 @@
         placeholderRx_: /\${([^}]+)}/g,
         styleFunctionFromSvgRules: function(styleConfig, dataCallback) {
             var self = this;
-            var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor', 'externalGraphic'];
+            var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor', 'externalGraphic', 'labelOutlineColor', 'labelOutlineWidth', 'labelYOffset', 'labelXOffset'];
             return (function(styleConfig) {
                 var placeholderProps = self.detectDataPlaceholders_(styleConfig, placeholderCandidates);
                 var labelValue = styleConfig.label;
@@ -127,6 +127,17 @@
             var textStyle = this.getDefaultTextStyle();
             textStyle.setFont(this.canvasFontRuleFromSvg(ol2Style));
             this.resolveTextStyle_(textStyle, ol2Style);
+            if (ol2Style.labelOutlineWidth) {
+                textStyle.setStroke(new ol.style.Stroke({
+                    color: ol2Style.labelOutlineColor || '#ffffff', // Default to white if not specified
+                    width: ol2Style.labelOutlineWidth
+                }));
+            }
+            if (ol2Style.labelXOffset || ol2Style.labelYOffset) {
+                textStyle.setOffsetX(ol2Style.labelXOffset || 0);
+                textStyle.setOffsetY(ol2Style.labelYOffset || 0);
+            }
+
             return textStyle;
         },
         getIconStyle: function(styleConfig) {
@@ -176,6 +187,12 @@
             if (styleConfig.fontColor || (typeof styleConfig.fontOpacity !== 'undefined')) {
                 targetStyle.getFill().setColor(this.parseSvgColor(styleConfig, 'fontColor', 'fontOpacity', targetStyle.getFill().getColor()));
             }
+            if (styleConfig.labelOutlineWidth) {
+                targetStyle.getStroke() && targetStyle.getStroke().setWidth(styleConfig.labelOutlineWidth);
+                targetStyle.getStroke() && targetStyle.getStroke().setColor(styleConfig.labelOutlineColor || targetStyle.getStroke().getColor());
+            }
+            targetStyle.setOffsetX(styleConfig.labelXOffset || 0);
+            targetStyle.setOffsetY(styleConfig.labelYOffset || 0);
         },
         /**
          * @param {Object} style
