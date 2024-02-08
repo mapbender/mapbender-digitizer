@@ -5,6 +5,7 @@ mb.data.store:
     text: 'Delete object?'
   save.successfully: 'Saved successfully'
   api.query.error-message: Error
+  api.query.error-notloggedin: "Please sign in"
   api.query.error-database: "Connection to the database could not be established. Check the configuration in 'featureType'"
 
 mb.data-manager.table:
