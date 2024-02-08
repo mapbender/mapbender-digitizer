@@ -1,0 +1,30 @@
+mb.data.store:
+  create: Crear
+  remove.successfully: 'Se ha eliminado correctamente'
+  remove.confirm:
+    text: '¿Realmente deseas eliminar el objeto?'
+  save.successfully: 'Se ha guardado correctamente'
+  api.query.error-message: Error
+  api.query.error-notloggedin: "Por favor, inicia sesión"
+  api.query.error-database: "No se ha podido establecer la conexión con la base de datos. Compruebe la configuración en 'featureType'"."
+
+mb.data-manager.table:
+  filter: Filtro
+  empty: No hay datos
+  empty_after_filtering: No hay resultados
+  from_to_total: Muestra _START_ a _END_ de _TOTAL_
+  out_of: (de un total de _MAX_)
+
+mb.datamanager:
+  admin:
+    schemes: Configuración de esquemas
+  class:
+    title: Administrar datos
+    description: Añadir datos (sin geometría)
+mb:
+  'data-manager':
+    actions:
+      show_details: Mostrar detalles
+    details_title: Detalles del objeto
+    attachment:
+      open: Abrir archivo adjunto

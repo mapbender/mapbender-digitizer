@@ -23,12 +23,12 @@ mb.digitizer:
             toggleoff: 'Ocultar objeto'
             toggleon: 'Mostrar objeto'
     toolset:
-        current-extent: 'Mostrar solo objetos de la sección actual del mapa'
-        showAll: 'Mostrar todos los objetosn'
+        current-extent: 'Mostrar solo objetos visibles en la sección actual del mapa'
+        showAll: 'Mostrar todos los objetos'
         hideAll: 'Ocultar todos los objetos'
-        saveAll: 'Guardar todos los objeto'
-        moveFeature: Mover
-        modifyFeature: Editar
+        saveAll: 'Guardar todos los objetos'
+        moveFeature: Mover objeto
+        modifyFeature: Editar objeto
         drawPoint: 'Añadir punto'
         drawLine: 'Añadir línea'
         drawPolygon: 'Añadir polígono'
