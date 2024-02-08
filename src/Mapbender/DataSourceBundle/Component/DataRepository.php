@@ -350,7 +350,7 @@ class DataRepository
             $queryBuilder->andWhere($params['where']);
         }
         if ($setUserParam) {
-            $queryBuilder->setParameter(':userName', $this->tokenStorage->getToken()->getUsername());
+            $queryBuilder->setParameter('userName', $this->tokenStorage->getToken()->getUsername());
         }
     }
 

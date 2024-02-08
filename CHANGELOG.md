@@ -19,6 +19,7 @@
 * Adjust display of refresh button  ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
 * Allow popup.modal and popup.position  ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
 * Allow zoomBuffer parameter ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
+* Replace deprecated 'userName' parameter setting in query builder by contemporary solution 
 
 ## 1.5.7
 * Rewrite context menu for Openlayers 7 compatibility
