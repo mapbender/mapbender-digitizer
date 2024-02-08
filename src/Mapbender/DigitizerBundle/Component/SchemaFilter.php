@@ -91,16 +91,7 @@ class SchemaFilter extends \Mapbender\DataManagerBundle\Component\SchemaFilter
         if (!empty($schemaConfig['tableFields'])) {
             $schemaConfig['table'] += array('columns' => $schemaConfig['tableFields']);
         }
-        if (isset($schemaConfig['inlineSearch'])) {
-            $schemaConfig['table']['searching'] = $schemaConfig['inlineSearch'];
-        }
-        if (!empty($schemaConfig['pageLength'])) {
-            $schemaConfig['table']['pageLength'] = $schemaConfig['pageLength'];
-        }
-
         unset($schemaConfig['tableFields']);
-        unset($schemaConfig['inlineSearch']);
-        unset($schemaConfig['pageLength']);
 
         // resolve aliasing DM "allowEdit" vs historical Digitizer "allowEditData"
         if (\array_key_exists('allowEditData', $schemaConfig)) {
