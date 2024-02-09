@@ -1,8 +1,8 @@
 ;(function() {
     "use strict";
-    window.Mapbender = window.Mapbender || {};
-    window.Mapbender.Digitizer = window.Mapbender.Digitizer || {};
-    window.Mapbender.Digitizer.Interactions = window.Mapbender.Digitizer.Interactions || {};
+    window.Mapbender = Mapbender || {};
+    window.Mapbender.Digitizer = Mapbender.Digitizer || {};
+    window.Mapbender.Digitizer.Interactions = Mapbender.Digitizer.Interactions || {};
 
     class DrawDonut extends ol.interaction.Draw {
         constructor(options) {
