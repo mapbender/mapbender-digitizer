@@ -75,26 +75,29 @@
         },
 
         addSnapInteraction: function(schema) {
-            let layer = this.owner.getSchemaLayer(schema);
             let olMap = this.owner.mbMap.getModel().olMap;
-            let source = layer.getSource();
 
-            // remove existing custom snap interactions
             const interactions = olMap.getInteractions().getArray();
-            for (let i = interactions.length - 1; i >= 0; i--) {
-                let interaction = interactions[i];
+            interactions.forEach(interaction => {
                 if (interaction instanceof ol.interaction.Snap && interaction.DIGITIZER) {
                     olMap.removeInteraction(interaction);
                 }
-            }
-
-            // create a new snap interaction with a custom property
-            let snapInteraction = new ol.interaction.Snap({
-                source,
-                pixelTolerance: 10
             });
-            snapInteraction.DIGITIZER = true;  // Adding a custom property
-            olMap.addInteraction(snapInteraction);
+            const createSnapInteraction = (source) => {
+                let snapInteraction = new ol.interaction.Snap({
+                    source: source,
+                    pixelTolerance: 10
+                });
+                snapInteraction.DIGITIZER = true; // Marking the interaction as custom
+                olMap.addInteraction(snapInteraction);
+            };
+
+            let layers = this.owner.getSchemaLayers(schema);
+
+            layers.forEach(layer => {
+                let source = layer.getSource();
+                createSnapInteraction(source);
+            });
         },
 
         getModificationTool_: function(type) {
