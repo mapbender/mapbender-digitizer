@@ -98,7 +98,7 @@ class FormItemFilter
                     );
                 } else {
                     $option = array(
-                        'value' => $key,
+                        'value' => ($item["useValuesAsKeys"] ?? false) ? $mapped : $key,
                         'label' => $mapped,
                     );
                     if (!$warnedAmbiguous) {
