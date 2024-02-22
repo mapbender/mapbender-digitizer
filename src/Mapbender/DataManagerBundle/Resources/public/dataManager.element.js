@@ -284,11 +284,16 @@
         _updateToolset: function(schema) {
             $('.toolset', this.element).replaceWith(this.toolsetTemplate_);
             var $toolset = $('.toolset', this.element);
+            let allowRefresh = schema.allowRefresh;
             if (schema.combine) {
                 // Combination schema cannot create items
                 $('.-fn-create-item', $toolset).remove();
+                var subSchemas = this.expandCombination(schema);
+                for (var s = 0; s < subSchemas.length; ++s) {
+                    allowRefresh = allowRefresh || subSchemas[s].allowRefresh;
+                }
             }
-            if (!schema.allowRefresh) {
+            if (!allowRefresh) {
                 $('.-fn-refresh', $toolset).remove();
             }
         },
