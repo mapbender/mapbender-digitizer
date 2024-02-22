@@ -467,7 +467,9 @@
             this.toolsetRenderer.resume();
             this.resumeContextMenu_();
             this.checkSourceRefresh_(schema);
+            this.adjustStyle(schema,feature);
         },
+
         _getData: function(schema) {
             this.queuedRefresh_[schema.schemaName] = false;
             var self = this;
@@ -756,6 +758,11 @@
         },
         getInitialCustomStyle_: function(schema, feature) {
             return schema.styles.default;
+        },
+
+        // Empty method for overriding purpose
+        adjustStyle: function(schema, feature) {
+
         },
         __formatting_dummy: null
     });
