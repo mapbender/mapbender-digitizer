@@ -5,6 +5,7 @@
 * Integrated DataSourceBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-source/blob/master/CHANGELOG.md)
 * Ensure compatibility with Mapbender 4 / Symfony 5.4
 * Translation enhancements ([PR#96](https://github.com/mapbender/mapbender-digitizer/pull/96))
+* Add empty "adjustStyle" Method that can be overriden if application makes use of attibute-based styles.  ([PR#109](https://github.com/mapbender/mapbender-digitizer/pull/109))
 
 
 ## 1.5.7
