@@ -21,8 +21,8 @@
 * Allow zoomBuffer parameter ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
 * Replace deprecated 'userName' parameter setting in query builder by contemporary solution ([PR#102](https://github.com/mapbender/mapbender-digitizer/pull/102))
 * Added spanish translation ([PR#103](https://github.com/mapbender/mapbender-digitizer/pull/103))
+* Use allowRefresh of subschemas in combined schema ([PR#108](https://github.com/mapbender/mapbender-digitizer/pull/108))
 * Add empty "adjustStyle" Method that can be overriden if application makes use of attibute-based styles.  ([PR#109](https://github.com/mapbender/mapbender-digitizer/pull/109))
-* use allowRefresh of subschemas in combined schema
 
 ## 1.5.7
 * Rewrite context menu for Openlayers 7 compatibility
