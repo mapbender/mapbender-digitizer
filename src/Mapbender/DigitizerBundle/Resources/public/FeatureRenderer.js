@@ -34,6 +34,7 @@
             if (schema.allowCustomStyle) {
                 this.customStyleFeature_(feature);
             }
+            this.owner.adjustStyle(schema,feature);
         },
         getFeatureById: function(id, itemSchema) {
             var layers = !itemSchema && Object.values(this.schemaLayers_) || this.getLayers(itemSchema);

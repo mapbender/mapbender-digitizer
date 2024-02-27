@@ -38,8 +38,6 @@
                 // Let data manager base method trigger "ready" event and start loading data
                 widget._start();
                 widget.registerMapEvents_();
-            }, function() {
-                Mapbender.checkTarget("mbDigitizer");
             });
         },
         _createTableRenderer: function() {
@@ -467,7 +465,9 @@
             this.toolsetRenderer.resume();
             this.resumeContextMenu_();
             this.checkSourceRefresh_(schema);
+            this.adjustStyle(schema,feature);
         },
+
         _getData: function(schema) {
             this.queuedRefresh_[schema.schemaName] = false;
             var self = this;
@@ -671,7 +671,7 @@
             });
         },
         zoomToFeature: function(schema, feature) {
-            Mapbender.Model.zoomToFeature(feature);
+            Mapbender.Model.zoomToFeature(feature, { buffer: schema.zoomBuffer || 10 });
         },
         _getEditDialogPopupConfig: function(schema, dataItem) {
             var options = this._superApply(arguments);
@@ -756,6 +756,11 @@
         },
         getInitialCustomStyle_: function(schema, feature) {
             return schema.styles.default;
+        },
+
+        // Empty method for overriding purpose
+        adjustStyle: function(schema, feature) {
+
         },
         __formatting_dummy: null
     });

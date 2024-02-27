@@ -89,7 +89,7 @@
                         }
                     }
                 };
-            })(this.options.schemes));
+            })(this.options.schemes)).catch(this._onAjaxError.bind(this));
 
             this.grantsRequest_.then(function() {
                 self.updateSchemaSelector_();
@@ -497,6 +497,8 @@
                 minWidth = parseInt(width.replace(/px$/, '')) || minWidth
             }
             return {
+                position:  schema.popup.position || {},
+                modal: schema.popup.modal || false,
                 title: schema.popup.title || Mapbender.trans('mb.data-manager.details_title'),
                 width: schema.popup.width,
                 minWidth: minWidth,
@@ -743,9 +745,10 @@
                 return;
             }
             var errorMessage = Mapbender.trans('mb.data.store.api.query.error-message');
+            var responseErrorMessage = Mapbender.trans('mb.data.store.'+xhr.responseJSON.message);
             console.error(errorMessage, xhr);
             if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = [errorMessage, xhr.responseJSON.message].join(":\n");
+                errorMessage = [errorMessage, responseErrorMessage].join(":\n");
             }
             $.notify(errorMessage, {
                 autoHide: false

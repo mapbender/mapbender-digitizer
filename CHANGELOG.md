@@ -5,8 +5,24 @@
 * Integrated DataSourceBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-source/blob/master/CHANGELOG.md)
 * Ensure compatibility with Mapbender 4 / Symfony 5.4
 * Translation enhancements ([PR#96](https://github.com/mapbender/mapbender-digitizer/pull/96))
+* Rename translation files from .yml to .yaml ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Allow specific message for error when not logged in ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Repair Radiobutton ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Add default whitepace: pre-line in text fields to keep formatting ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Allow to set text area height by providing row attribute  ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
+* Add option `paging` on root level to disable paging ([PR#99](https://github.com/mapbender/mapbender-digitizer/pull/99))
+* Allow to set maximumSelectionLength in select2 (type select) ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
+* Make 'eval' in change event error safe ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
+* Allow labelOutline properties in styleAdapter (labelOutlineColor, labelOutlineWidth, labelYOffset, labelXOffset) ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
+* Adjust copy symbol ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101)) 
+* Adjust border display of mandatory fields (inputs, select, select2, textarea) ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
+* Adjust display of refresh button  ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
+* Allow popup.modal and popup.position  ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
+* Allow zoomBuffer parameter ([PR#101](https://github.com/mapbender/mapbender-digitizer/pull/101))
+* Replace deprecated 'userName' parameter setting in query builder by contemporary solution ([PR#102](https://github.com/mapbender/mapbender-digitizer/pull/102))
+* Added spanish translation ([PR#103](https://github.com/mapbender/mapbender-digitizer/pull/103))
+* Add empty "adjustStyle" Method that can be overriden if application makes use of attibute-based styles.  ([PR#109](https://github.com/mapbender/mapbender-digitizer/pull/109))
 * use allowRefresh of subschemas in combined schema
-
 
 ## 1.5.7
 * Rewrite context menu for Openlayers 7 compatibility
