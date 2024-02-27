@@ -38,8 +38,6 @@
                 // Let data manager base method trigger "ready" event and start loading data
                 widget._start();
                 widget.registerMapEvents_();
-            }, function() {
-                Mapbender.checkTarget("mbDigitizer");
             });
         },
         _createTableRenderer: function() {
@@ -673,7 +671,7 @@
             });
         },
         zoomToFeature: function(schema, feature) {
-            Mapbender.Model.zoomToFeature(feature);
+            Mapbender.Model.zoomToFeature(feature, { buffer: schema.zoomBuffer || 10 });
         },
         _getEditDialogPopupConfig: function(schema, dataItem) {
             var options = this._superApply(arguments);

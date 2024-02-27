@@ -89,6 +89,9 @@ class UserFilterProvider
     protected function getFilterValue()
     {
         $token = $this->tokenStorage->getToken();
+        if ($token == null) {
+            throw new \Exception("api.query.error-notloggedin");
+        }
         if ($token instanceof AnonymousToken) {
             return null;
         } else {

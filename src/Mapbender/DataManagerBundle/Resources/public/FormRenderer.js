@@ -217,7 +217,10 @@
                         s2options.dropdownParent = scope;
                     }
                     var style = $select.attr('style');
-                    $(this).select2(s2options);
+                    $select.select2(s2options);
+                    if ($select.is('[required]')) {
+                        $select.next('.select2-container').addClass('select2-required');
+                    }
                     // Forward custom css rules from (now hidden) select2-ified select to visible select2 element
                     var $group = $select.closest('.mb-3');
                     var widthRxp = /width\s*:\s*[^;]*;?\s*/;
@@ -612,48 +615,42 @@
                 // Safest width inside .mb-3 / Bootstrap grids
                 width: '100%',
                 placeholder: placeholderText || '',
-                allowClear: !required && !!placeholderText
+                allowClear: !required && !!placeholderText,
+                maximumSelectionLength: item.maximumSelectionLength || null,
             };
         },
         handle_radioGroup_: function(settings) {
-            var wrappedRadios = [];
             if (!settings.options || !settings.options.length) {
                 console.error('Ignoring item type "radioGroup" with empty "options" list.', settings);
-                return $nothing;
+                return null;
             }
+
             var groupValue = settings.value || '';
-            for (var r = 0; r < settings.options.length; ++r) {
-                var radio = settings.options[r];
+            var container = $('<div>');
+
+            settings.options.forEach(function(radio, index) {
                 var disabled = (radio.attr || {}).disabled || radio.disabled || settings.disabled;
-                var $radio = $('<input type="radio">')
-                    .attr(radio.attr || {})
-                    .attr('name', settings.name)
-                    .attr('value', radio.value || '')
-                    // Browser magic: if multiple radios with same name have "checked" prop,
-                    // the last one (in DOM order) will win out
-                    .prop('checked', r === 0 || (radio.value || '') === groupValue)
-                    .prop('disabled', disabled)
-                ;
-                /** @see https://getbootstrap.com/docs/3.4/css/#checkboxes-and-radios */
-                var $label = $(document.createElement('label'))
-                    .text(radio.label)
-                    .prepend($radio)
-                ;
+                var $radio = $('<input>', {
+                    type: 'radio',
+                    name: settings.name,
+                    value: radio.value || '',
+                    disabled: disabled,
+                    checked: index === 0 || radio.value === groupValue
+                });
+
+                var $labelTextSpan = $('<span>').text(radio.label);
+                var $label = $('<label>').prepend($radio).append($labelTextSpan);
+
+
                 if (settings.inline) {
-                    wrappedRadios.push($label.addClass('radio-inline'));
+                    $label.addClass('radio-inline');
+                    container.append($label);
                 } else {
-                    wrappedRadios.push($(document.createElement('div'))
-                        .addClass('radio')
-                        .append($label)
-                    );
+                    var $wrapper = $('<div>').addClass('radio').append($label);
+                    container.append($wrapper);
                 }
-            }
-            if (settings.inline && (settings.title || settings.text)) {
-                wrappedRadios = $(document.createElement('div'))
-                    .append(wrappedRadios)
-                ;
-            }
-            return this.wrapInput_(wrappedRadios, settings);
+            });
+            return this.wrapInput_(container, settings);
         },
         handle_breakLine_: function(settings) {
             return $(document.createElement('hr'))
@@ -744,7 +741,11 @@
                         var element = $input;
                         var el = element;
                         return function() {
-                            eval(code);
+                           try {
+                               eval(code);
+                           } catch(e) {
+                               console.warn("Error in eval",code);
+                           }
                         };
                     })(handler);
                 }
