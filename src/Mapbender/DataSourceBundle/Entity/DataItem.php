@@ -109,7 +109,7 @@ class DataItem implements \ArrayAccess
         return \array_key_exists($offset, $this->attributes);
     }
 
-    public function offsetGet($offset)
+    public function offsetGet($offset) : mixed
     {
         return $this->attributes[$offset];
     }
