@@ -6,7 +6,7 @@ mb.data.store:
   save.successfully: 'Se ha guardado correctamente'
   api.query.error-message: Error
   api.query.error-notloggedin: "Por favor, inicia sesión"
-  api.query.error-database: "No se ha podido establecer la conexión con la base de datos. Compruebe la configuración en 'featureType'"."
+  api.query.error-database: "No se ha podido establecer la conexión con la base de datos. Compruebe la configuración en 'featureType'."
 
 mb.data-manager.table:
   filter: Filtro
