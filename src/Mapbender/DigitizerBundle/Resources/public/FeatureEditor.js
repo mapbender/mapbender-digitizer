@@ -92,7 +92,7 @@
                 olMap.addInteraction(snapInteraction);
             };
 
-            let layers = this.owner.getSchemaLayers(schema);
+            let layers = this.owner.getSnappingLayers(schema);
 
             layers.forEach(layer => {
                 let source = layer.getSource();
