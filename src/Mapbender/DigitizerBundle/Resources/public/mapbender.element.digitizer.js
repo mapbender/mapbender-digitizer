@@ -565,6 +565,14 @@
             });
         },
         /**
+         * extracted to be overridden
+         * @param {*} schema
+         * @returns {Array<ol.layer.Vector>}
+         */
+        getSnappingLayers: function(schema) {
+          return this.getSchemaLayers(schema);
+        },
+        /**
          * @param {*} schema
          * @returns {Array<ol.layer.Vector>}
          */
