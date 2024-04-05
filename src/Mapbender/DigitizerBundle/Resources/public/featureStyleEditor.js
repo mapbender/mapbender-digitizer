@@ -23,14 +23,14 @@
             },
             buttons: [{
                 text: "Abbrechen",
-                class: 'button btn',
+                class: 'btn btn-light',
                 click: function (e) {
                     promise.reject();
                     $(this).dialog('close');
                 }
             }, {
                 text: "Speichern",
-                class: 'button btn',
+                class: 'btn btn-primary',
                 click: function (e) {
                     var values = editor.getFormData(this);
                     promise.resolveWith(null, [values]);
