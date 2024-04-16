@@ -753,6 +753,15 @@
             }
             for (var i = 0; i < sourceIds.length; ++i) {
                 var source = this.mbMap.getModel().getSourceById(sourceIds[i]);
+                if (!source) {
+                    if (!this.mbMap.getModel().findSourceAndLayerIdByName) {
+                        console.warn("Method findSourceAndLayerIdByName not available - consider Mapbender upgrade");
+                    } else {
+                        let ids = this.mbMap.getModel().findSourceAndLayerIdByName(sourceIds[i]);
+                        let sourceId = ids.sourceId;
+                        source = sourceId && this.mbMap.getModel().getSourceById(sourceId);
+                    }
+                }
                 if (source) {
                     if (typeof (source.refresh) === 'function') {
                         source.refresh();
