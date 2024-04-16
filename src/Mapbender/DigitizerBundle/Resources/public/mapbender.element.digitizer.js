@@ -609,7 +609,7 @@
             // Offset new geometry by ~3% the current (projected) viewport
             // This keeps the cloned geometry distinctly visible at any zoom level
             var extent = this.mbMap.getModel().getCurrentExtent();
-            if (!schema.copy.ommitOffset) {
+            if (!schema.copy.deactivateOffset) {
                 var cloneOffset = {
                     h: Math.abs((extent.right - extent.left) / 32.),
                     v: Math.abs((extent.top - extent.bottom) / 32.)
