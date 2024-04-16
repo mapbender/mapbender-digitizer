@@ -1,6 +1,6 @@
 ## next release
 * Enable loading source refresh by layer name ([PR#115](https://github.com/mapbender/mapbender-digitizer/pull/115))
-* Introduce param schema.copy.ommitOffset - if set to true, no offset is used when copying feature ([PR#113](https://github.com/mapbender/mapbender-digitizer/pull/113))
+* Introduce param schema.copy.deactivateOffset - if set to true, no offset is used when copying feature ([PR#113](https://github.com/mapbender/mapbender-digitizer/pull/113))
 * Mandatory fields in the form are marked with a red border
 * Integrated snap functionality - mouse pointer snaps to every vector geometry
 * Integrated DataManagerBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-manager/blob/master/CHANGELOG.md)
