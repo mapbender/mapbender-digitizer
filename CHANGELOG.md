@@ -1,4 +1,5 @@
 ## next release
+* Enable ContextMenu for overlapping features ([PR#116](https://github.com/mapbender/mapbender-digitizer/pull/116))
 * Enable loading source refresh by layer name ([PR#115](https://github.com/mapbender/mapbender-digitizer/pull/115))
 * Introduce param schema.copy.ommitOffset - if set to true, no offset is used when copying feature ([PR#113](https://github.com/mapbender/mapbender-digitizer/pull/113))
 * Mandatory fields in the form are marked with a red border
