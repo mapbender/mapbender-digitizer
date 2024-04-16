@@ -31,29 +31,50 @@
                 var pixel = olMap.getEventPixel(evt);
 
                 var layers = self.widget.getSchemaLayers(self.widget._getCurrentSchema());
-                // NOTE: prefer forEachFeatureAtPixel over getFeaturesAtPixel for performance
-                //       forEachFeatureAtPixel allows early out by returning truthy value from callback,
-                //       which is also (unintuitively) forwarded back to the caller
-                /** @see https://github.com/openlayers/openlayers/blob/v6.14.1/src/ol/PluggableMap.js#L612 */
+                var features = [];
                 var callback = function(feature) {
-                    return feature;
+                    features.push(feature);
+                    return false; // Continue collecting features
                 };
-                var feature = layers.length && olMap.forEachFeatureAtPixel(pixel, callback, {
-                    layerFilter: function(layer) {
-                        return -1 !== layers.indexOf(layer);
-                    }
-                });
-                var menuItems = feature && self.getMenuItems(feature);
-                if (menuItems && menuItems.length) {
+                if (layers.length) {
+                    olMap.forEachFeatureAtPixel(pixel, callback, {
+                        layerFilter: function(layer) {
+                            return -1 !== layers.indexOf(layer);
+                        }
+                    });
+                }
+
+                if (features.length) {
                     evt.stopPropagation();
                     evt.preventDefault();
-                    self.showMenu(evt, pixel, menuItems);
+                    var combinedMenuItems = self.getMenuItemsForMultipleFeatures(features);
+                    self.showMenu(evt, pixel, combinedMenuItems);
                 } else {
                     self.closeMenu();
                 }
             }
             olMap.getViewport().addEventListener('contextmenu', onContextMenu);
         },
+
+        getMenuItemsForMultipleFeatures: function(features) {
+            var self = this;
+            var items = [];
+
+            features.forEach(function(feature) {
+                var featureItems = self.getMenuItems(feature);
+
+                if (featureItems.length > 0) {
+                    if (features.length > 1) {
+                        items.push({ text: 'Feature ID: ' + feature.getId(), isHeader: true }); // Assuming each feature has an ID
+                    }
+                    items = items.concat(featureItems);
+                }
+            });
+
+            return items;
+        },
+
+
         getMenuItems: function(feature) {
             var items = [];
             var widget = this.widget;
@@ -92,30 +113,36 @@
         },
         showMenu: function(evt, pixel, items) {
             var self = this;
-            // Add one-shot event handler to close the menu on outside click
             evt.target.addEventListener('click', function(e) {
                 self.closeMenu();
                 evt.target.removeEventListener(e.type, this, false);
             });
-            // Clear previous items
             while (this.itemListElement_.lastChild) {
                 this.itemListElement_.removeChild(this.itemListElement_.lastChild);
             }
-            // Rebuild item DOM
             for (var i = 0; i < items.length; ++i) {
                 var itemConfig = items[i];
                 var itemNode = this.renderItem_(itemConfig);
-                this.configureItemEvents_(itemNode, itemConfig);
+                if (itemConfig.isHeader) {
+                    itemNode.className += " menu-header";
+                } else {
+                    this.configureItemEvents_(itemNode, itemConfig);
+                }
                 this.itemListElement_.appendChild(itemNode);
             }
             this.menuElement_.className = this.cssClass;
             this.setMenuPosition_(this.menuElement_, pixel);
         },
+
         renderItem_: function(itemConfig) {
             var li = document.createElement('li');
             li.innerText = itemConfig.text;
+            if (itemConfig.isHeader) {
+                li.className += " menu-header"; 
+            }
             return li;
         },
+
         configureItemEvents_: function(element, itemConfig) {
             var callback = itemConfig.callback;
             if (callback) {

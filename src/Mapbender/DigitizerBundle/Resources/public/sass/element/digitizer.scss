@@ -50,4 +50,12 @@
             background: #eee;
         }
     }
+
+    .menu-header {
+        font-weight: bold;
+        color: #333;
+        cursor: default;
+        user-select: none;
+        pointer-events: none; 
+    }
 }
