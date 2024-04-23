@@ -1,4 +1,6 @@
 ## next release
+* Allow deletion of vertices on single click
+* Prevent self intersection of polygons
 * Mandatory fields in the form are marked with a red border
 * Integrated snap functionality - mouse pointer snaps to every vector geometry
 * Integrated DataManagerBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-manager/blob/master/CHANGELOG.md)
