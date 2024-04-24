@@ -1,4 +1,5 @@
 ## next release
+* Allow leaving modification mode on pressing escape
 * Allow deletion of vertices on single click
 * Prevent self intersection of polygons
 * Mandatory fields in the form are marked with a red border

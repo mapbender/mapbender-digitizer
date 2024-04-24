@@ -191,6 +191,23 @@
                             return ol.events.condition.singleClick(event);
                         },
                     });
+
+                     let handleKeyDown = (evt) => {
+                        if (evt.key === 'Escape') {
+                            $('.-fn-toggle-tool[data-toolname=modifyFeature]',this.owner.element).click();
+                        }
+                    }
+
+                    const originalSetActive = interaction.setActive.bind(interaction);
+                    interaction.setActive = function(active) {
+                        originalSetActive(active);
+                        if (active) {
+                            document.addEventListener('keydown', handleKeyDown);
+                        } else {
+                            document.removeEventListener('keydown', handleKeyDown);
+                        }
+                    };
+
                     interaction.on('modifystart', function(e) {
                        if (e.features.getLength() > 1) {
                            console.error("Error: Modification of more than one feature is not possible");
