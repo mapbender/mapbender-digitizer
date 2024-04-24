@@ -2,6 +2,9 @@
 * Allow leaving modification mode on pressing escape
 * Allow deletion of vertices on single click
 * Prevent self intersection of polygons
+* Enable ContextMenu for overlapping features ([PR#116](https://github.com/mapbender/mapbender-digitizer/pull/116))
+* Enable loading source refresh by layer name ([PR#115](https://github.com/mapbender/mapbender-digitizer/pull/115))
+* Introduce param schema.copy.deactivateOffset - if set to true, no offset is used when copying feature ([PR#113](https://github.com/mapbender/mapbender-digitizer/pull/113))
 * Mandatory fields in the form are marked with a red border
 * Integrated snap functionality - mouse pointer snaps to every vector geometry
 * Integrated DataManagerBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-manager/blob/master/CHANGELOG.md)
@@ -26,6 +29,7 @@
 * Added spanish translation ([PR#103](https://github.com/mapbender/mapbender-digitizer/pull/103))
 * Use allowRefresh of subschemas in combined schema ([PR#108](https://github.com/mapbender/mapbender-digitizer/pull/108))
 * Add empty "adjustStyle" Method that can be overriden if application makes use of attibute-based styles.  ([PR#109](https://github.com/mapbender/mapbender-digitizer/pull/109))
+* Add default getSnappingLayers Method that can be overriden if application makes use of more snapping layers ([PR#110](https://github.com/mapbender/mapbender-digitizer/pull/110))
 
 ## 1.5.7
 * Rewrite context menu for Openlayers 7 compatibility

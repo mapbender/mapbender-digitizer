@@ -565,6 +565,14 @@
             });
         },
         /**
+         * extracted to be overridden
+         * @param {*} schema
+         * @returns {Array<ol.layer.Vector>}
+         */
+        getSnappingLayers: function(schema) {
+          return this.getSchemaLayers(schema);
+        },
+        /**
          * @param {*} schema
          * @returns {Array<ol.layer.Vector>}
          */
@@ -601,11 +609,13 @@
             // Offset new geometry by ~3% the current (projected) viewport
             // This keeps the cloned geometry distinctly visible at any zoom level
             var extent = this.mbMap.getModel().getCurrentExtent();
-            var cloneOffset = {
-                h: Math.abs((extent.right - extent.left) / 32.),
-                v: Math.abs((extent.top - extent.bottom) / 32.)
-            };
-            newFeature.getGeometry().translate(cloneOffset.h, cloneOffset.v);
+            if (!schema.copy.deactivateOffset) {
+                var cloneOffset = {
+                    h: Math.abs((extent.right - extent.left) / 32.),
+                    v: Math.abs((extent.top - extent.bottom) / 32.)
+                };
+                newFeature.getGeometry().translate(cloneOffset.h, cloneOffset.v);
+            }
             newFeature.set('dirty', true);
 
             this.renderer.addFeatures([newFeature]);
@@ -743,6 +753,15 @@
             }
             for (var i = 0; i < sourceIds.length; ++i) {
                 var source = this.mbMap.getModel().getSourceById(sourceIds[i]);
+                if (!source) {
+                    if (!this.mbMap.getModel().findSourceAndLayerIdByName) {
+                        console.warn("Method findSourceAndLayerIdByName not available - consider Mapbender upgrade");
+                    } else {
+                        let ids = this.mbMap.getModel().findSourceAndLayerIdByName(sourceIds[i]);
+                        let sourceId = ids.sourceId;
+                        source = sourceId && this.mbMap.getModel().getSourceById(sourceId);
+                    }
+                }
                 if (source) {
                     if (typeof (source.refresh) === 'function') {
                         source.refresh();
