@@ -3,6 +3,66 @@
     window.Mapbender = Mapbender || {};
     window.Mapbender.Digitizer = Mapbender.Digitizer || {};
 
+
+    /**
+     * Checks if a polygon with or without holes has self-intersections by testing each edge against every other edge.
+     * @param {ol.geom.Polygon} polygon - The OpenLayers Polygon geometry to check.
+     * @returns {boolean} True if there are self-intersections, false otherwise.
+     */
+    function hasSelfIntersections(polygon) {
+        const rings = polygon.getCoordinates(); // Includes outer boundary and any inner boundaries (holes)
+
+        // Function to check if two line segments intersect
+        function doLinesIntersect(a, b, c, d) {
+            let a1 = b[1] - a[1];
+            let b1 = a[0] - b[0];
+            let c1 = a1 * a[0] + b1 * a[1];
+
+            let a2 = d[1] - c[1];
+            let b2 = c[0] - d[0];
+            let c2 = a2 * c[0] + b2 * c[1];
+
+            let determinant = a1 * b2 - a2 * b1;
+
+            if (determinant === 0) {
+                // Lines are parallel
+                return false;
+            } else {
+                let x = (b2 * c1 - b1 * c2) / determinant;
+                let y = (a1 * c2 - a2 * c1) / determinant;
+                let onSegment = (point, linePoint1, linePoint2) => {
+                    return Math.min(linePoint1[0], linePoint2[0]) <= point[0] && point[0] <= Math.max(linePoint1[0], linePoint2[0]) &&
+                        Math.min(linePoint1[1], linePoint2[1]) <= point[1] && point[1] <= Math.max(linePoint1[1], linePoint2[1]);
+                };
+                return onSegment([x, y], a, b) && onSegment([x, y], c, d);
+            }
+        }
+
+        // Check each ring against every other ring
+        for (let i = 0; i < rings.length; i++) {
+            const ring1 = rings[i];
+            for (let j = i; j < rings.length; j++) {
+                const ring2 = rings[j];
+                // Compare each segment in ring1 with each segment in ring2
+                for (let k = 0; k < ring1.length - 1; k++) {
+                    for (let l = (i === j ? k + 2 : 0); l < ring2.length - 1; l++) {
+                        // Avoid checking consecutive segments in the same ring, unless comparing different rings
+                        if (i === j && k === 0 && l === ring1.length - 2) {
+                            continue; // Closing segment of the same ring
+                        }
+                        if (doLinesIntersect(ring1[k], ring1[k + 1], ring2[l], ring2[l + 1])) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+
     /**
      * @param {*} owner jQueryUI widget instance
      * @param {ol.PluggableMap} olMap
@@ -130,6 +190,15 @@
             var widget = this.owner;
             interaction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
                 var feature = event.feature;
+                let geom = feature.getGeometry();
+
+                if (geom.getType() === 'Polygon' && hasSelfIntersections(geom)) {
+                    $.notify(Mapbender.trans('mb.digitizer.intersection.error'));
+                    setTimeout(() => {
+                        widget.renderer.removeFeature(schema, feature);
+                    }, 0);
+                    return;
+                }
                 widget.initializeNewFeature(schema, feature);
                 widget._openEditDialog(schema, event.feature);
             });
@@ -228,66 +297,6 @@
                             }
                         });
                     });
-
-                /**
-                 * Checks if a polygon with or without holes has self-intersections by testing each edge against every other edge.
-                 * @param {ol.geom.Polygon} polygon - The OpenLayers Polygon geometry to check.
-                 * @returns {boolean} True if there are self-intersections, false otherwise.
-                 */
-                function hasSelfIntersections(polygon) {
-                    const rings = polygon.getCoordinates(); // Includes outer boundary and any inner boundaries (holes)
-
-                    // Function to check if two line segments intersect
-                    function doLinesIntersect(a, b, c, d) {
-                        let a1 = b[1] - a[1];
-                        let b1 = a[0] - b[0];
-                        let c1 = a1 * a[0] + b1 * a[1];
-
-                        let a2 = d[1] - c[1];
-                        let b2 = c[0] - d[0];
-                        let c2 = a2 * c[0] + b2 * c[1];
-
-                        let determinant = a1 * b2 - a2 * b1;
-
-                        if (determinant === 0) {
-                            // Lines are parallel
-                            return false;
-                        } else {
-                            let x = (b2 * c1 - b1 * c2) / determinant;
-                            let y = (a1 * c2 - a2 * c1) / determinant;
-                            let onSegment = (point, linePoint1, linePoint2) => {
-                                return Math.min(linePoint1[0], linePoint2[0]) <= point[0] && point[0] <= Math.max(linePoint1[0], linePoint2[0]) &&
-                                    Math.min(linePoint1[1], linePoint2[1]) <= point[1] && point[1] <= Math.max(linePoint1[1], linePoint2[1]);
-                            };
-                            return onSegment([x, y], a, b) && onSegment([x, y], c, d);
-                        }
-                    }
-
-                    // Check each ring against every other ring
-                    for (let i = 0; i < rings.length; i++) {
-                        const ring1 = rings[i];
-                        for (let j = i; j < rings.length; j++) {
-                            const ring2 = rings[j];
-                            // Compare each segment in ring1 with each segment in ring2
-                            for (let k = 0; k < ring1.length - 1; k++) {
-                                for (let l = (i === j ? k + 2 : 0); l < ring2.length - 1; l++) {
-                                    // Avoid checking consecutive segments in the same ring, unless comparing different rings
-                                    if (i === j && k === 0 && l === ring1.length - 2) {
-                                        continue; // Closing segment of the same ring
-                                    }
-                                    if (doLinesIntersect(ring1[k], ring1[k + 1], ring2[l], ring2[l + 1])) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return false;
-                }
-
-
-
-
 
                     return interaction;
                 case 'moveFeature':
