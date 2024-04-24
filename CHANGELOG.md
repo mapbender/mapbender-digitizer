@@ -1,4 +1,5 @@
 ## next release
+* Prevent self intersection of polygons not only on modification, but on creation as well
 * Allow leaving modification mode on pressing escape
 * Allow deletion of vertices on single click
 * Prevent self intersection of polygons
