@@ -249,6 +249,7 @@
                     throw new Error("Unhandled tool type " + type);
             }
         },
+
         createModificationTool_: function(type) {
             switch (type) {
                 case 'modifyFeature':
@@ -262,9 +263,16 @@
                         },
                     });
 
+                    let abortModification = () => {
+                        let feature = this.modifyingCollection_.getArray()[0];
+                        feature.setGeometry(originalGeometry);
+                        feature.set('dirty', false);
+                        $('.-fn-toggle-tool[data-toolname=modifyFeature]',this.owner.element).click();
+                    }
+
                      let handleKeyDown = (evt) => {
                         if (evt.key === 'Escape') {
-                            $('.-fn-toggle-tool[data-toolname=modifyFeature]',this.owner.element).click();
+                            abortModification();
                         }
                     }
 
