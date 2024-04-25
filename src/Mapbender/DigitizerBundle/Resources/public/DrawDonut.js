@@ -16,7 +16,7 @@
             const coordinate = this.sketchFeature_.getGeometry().getFirstCoordinate();
 
             this.originalFeature_ = map.forEachFeatureAtPixel(map.getPixelFromCoordinate(coordinate), (feature) => {
-                if (feature.getGeometry().getType() === 'Polygon') {
+                if (feature.getGeometry().getType() === 'Polygon' && feature.get("mbOrigin") ===  "digitizer") {
                     return feature;
                 }
             });

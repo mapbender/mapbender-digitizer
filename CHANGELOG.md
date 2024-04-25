@@ -1,4 +1,5 @@
 ## next release
+* prevent Draw Donut On Non-Digitizer Features ([PR#120](https://github.com/mapbender/mapbender-digitizer/pull/120))
 * Prevent self intersection of polygons not only on modification, but on creation as well ([PR#118](https://github.com/mapbender/mapbender-digitizer/pull/118))
 * Allow leaving modification mode on pressing escape ([PR#118](https://github.com/mapbender/mapbender-digitizer/pull/118))
 * Allow deletion of vertices on single click ([PR#118](https://github.com/mapbender/mapbender-digitizer/pull/118))
