@@ -22,7 +22,7 @@ mb.datamanager:
     title: Data manager
     description: Generate data (without geometry)
 mb:
-  'data-anager':
+  'data-manager':
     actions:
       show_details: Show details
     details_title: Detail data
