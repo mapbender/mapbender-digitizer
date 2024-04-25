@@ -43,10 +43,10 @@ mb.digitizer:
         pointRadius: Радиус точки (в пикселях)
         strokeColor: Цвет обводки
         strokeWidth: Толщина обводки
-        lineCap: Завершение линии
-        round: Округленно
-        square: Квадратно
-        butt: Встык
+        lineCap: Окончание линии
+        round: Скругленное
+        square: Квадратное
+        butt: Усеченное
         strokeDashstyle: Стиль линии
         solid: Сплошная
         dot: Точечная
