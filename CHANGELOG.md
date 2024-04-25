@@ -1,5 +1,5 @@
 ## next release
-* prevent Draw Donut On Non-Digitizer Features
+* prevent Draw Donut On Non-Digitizer Features ([PR#120](https://github.com/mapbender/mapbender-digitizer/pull/120))
 * Mandatory fields in the form are marked with a red border
 * Integrated snap functionality - mouse pointer snaps to every vector geometry
 * Integrated DataManagerBundle into this repository (changelog for earlier versions: https://github.com/mapbender/data-manager/blob/master/CHANGELOG.md)
