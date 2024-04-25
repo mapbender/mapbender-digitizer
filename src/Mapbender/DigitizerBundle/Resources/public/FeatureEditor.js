@@ -131,6 +131,22 @@
             } else {
                 tool = this.getCreationTool_(schema, type);
             }
+
+            let handleKeyDown = (evt) => {
+                if (evt.key === 'Escape') {
+                    tool.cancel && tool.cancel();
+                }
+            }
+
+            const originalSetActive = tool.setActive.bind(tool);
+            tool.setActive = function(active) {
+                originalSetActive(active);
+                if (active) {
+                    document.addEventListener('keydown', handleKeyDown);
+                } else {
+                    document.removeEventListener('keydown', handleKeyDown);
+                }
+            };
             this.addSnapInteraction(schema);
             return tool;
         },
@@ -263,28 +279,12 @@
                         },
                     });
 
-                    let abortModification = () => {
+                    interaction.cancel = () => {
                         let feature = this.modifyingCollection_.getArray()[0];
                         feature.setGeometry(originalGeometry);
                         feature.set('dirty', false);
                         $('.-fn-toggle-tool[data-toolname=modifyFeature]',this.owner.element).click();
                     }
-
-                     let handleKeyDown = (evt) => {
-                        if (evt.key === 'Escape') {
-                            abortModification();
-                        }
-                    }
-
-                    const originalSetActive = interaction.setActive.bind(interaction);
-                    interaction.setActive = function(active) {
-                        originalSetActive(active);
-                        if (active) {
-                            document.addEventListener('keydown', handleKeyDown);
-                        } else {
-                            document.removeEventListener('keydown', handleKeyDown);
-                        }
-                    };
 
                     interaction.on('modifystart', function(e) {
                        if (e.features.getLength() > 1) {
