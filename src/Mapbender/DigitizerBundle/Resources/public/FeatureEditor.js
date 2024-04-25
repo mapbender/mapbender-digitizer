@@ -118,7 +118,8 @@
                 feature.set('editing', false);
             });
             this.modifyingCollection_.clear();
-            if (feature) {
+            // Points are not suitable for modification
+            if (feature && feature.getGeometry().getType() !== "Point") {
                 feature.set('editing', true);
                 this.modifyingCollection_.push(feature);
             }
