@@ -1,8 +1,8 @@
 ## next release
-* Prevent self intersection of polygons not only on modification, but on creation as well
-* Allow leaving modification mode on pressing escape
-* Allow deletion of vertices on single click
-* Prevent self intersection of polygons
+* Prevent self intersection of polygons not only on modification, but on creation as well ([PR#118](https://github.com/mapbender/mapbender-digitizer/pull/118))
+* Allow leaving modification mode on pressing escape ([PR#118](https://github.com/mapbender/mapbender-digitizer/pull/118))
+* Allow deletion of vertices on single click ([PR#118](https://github.com/mapbender/mapbender-digitizer/pull/118))
+* Prevent self intersection of polygons  ([PR#118](https://github.com/mapbender/mapbender-digitizer/pull/118))
 * Enable ContextMenu for overlapping features ([PR#116](https://github.com/mapbender/mapbender-digitizer/pull/116))
 * Enable loading source refresh by layer name ([PR#115](https://github.com/mapbender/mapbender-digitizer/pull/115))
 * Introduce param schema.copy.deactivateOffset - if set to true, no offset is used when copying feature ([PR#113](https://github.com/mapbender/mapbender-digitizer/pull/113))
