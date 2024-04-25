@@ -15,25 +15,25 @@
         var promise = $.Deferred();
         var editor = this;
         this.dialogFactory.dialog($content, {
-            title: "Stylemanager",
+            title: "Style manager",
             width: '500px',
             resizable: true,
             classes: {
                 'ui-dialog-content': 'ui-dialog-content data-manager-edit-data digitizer-style-editor content-padding'
             },
             buttons: [{
-                text: "Abbrechen",
-                class: 'btn btn-light',
-                click: function (e) {
-                    promise.reject();
-                    $(this).dialog('close');
-                }
-            }, {
                 text: "Speichern",
                 class: 'btn btn-primary',
                 click: function (e) {
                     var values = editor.getFormData(this);
                     promise.resolveWith(null, [values]);
+                    $(this).dialog('close');
+                }
+            },{
+                text: "Abbrechen",
+                class: 'btn btn-light',
+                click: function (e) {
+                    promise.reject();
                     $(this).dialog('close');
                 }
             }]
