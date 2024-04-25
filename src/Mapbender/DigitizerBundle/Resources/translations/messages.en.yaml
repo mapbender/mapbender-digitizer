@@ -7,6 +7,7 @@ mb.digitizer:
     edit.attributes: Edit attributes
     edit.geometry: Edit geometry
     revert.geometry: Revert geometry changes
+    intersection.error: Self-intersection in geometry not allowed
     feature:
         remove:
             title: 'Remove feature'

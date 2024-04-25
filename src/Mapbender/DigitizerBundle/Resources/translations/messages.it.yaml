@@ -1,14 +1,65 @@
 mb.digitizer:
-  feature:
-    remove:
-      title: Rimuovi
-    zoomTo: 'Fai zoom su'
-    edit: 'Edita la feature'
-    attributes: 'Attributi della feature'
-    save:
-      title: Salva
-    print: 'Stampa'
+    actions:
+      show_details: Mostra dettagli
+    class:
+      title: Acquisizione dati (Digitizer)
+      description: Acquisizione e modifica dati
+    edit.attributes: Modifica attributi
+    edit.geometry: Modifica geometria
+    revert.geometry: Annulla modifica geometria
+    feature:
+        remove:
+            title: 'Rimuovi'
+        zoomTo: 'Ingrandisci'
+        edit: 'Modifica'
+        save:
+            title: 'Salva'
+        print: 'Stampa'
+        style:
+            change: 'Cambia stile'
+        clone:
+            title: 'Clona'
+        visibility:
+            toggleoff: 'Nascondi oggetto'
+            toggleon: 'Mostra oggetto'
+    toolset:
+        current-extent: 'Mostra solo oggetti nell'estensione corrente della mappa'
+        showAll: 'Mostra tutti gli oggetti'
+        hideAll: 'Nascondi tutti gli oggetti'
+        saveAll: 'Salva tutti gli oggetti'
+        moveFeature: Sposta
+        modifyFeature: Modifica
+        drawPoint: 'Disegna punto'
+        drawLine: 'Disegna linea'
+        drawPolygon: 'Disegna poligono'
+        drawRectangle: 'Disegna rettangolo'
+        drawCircle: 'Disegna cerchio'
+        drawEllipse: 'Disegna ellisse'
+        drawDonut: 'Disegna buco in poligono'
     style:
-      change: 'Cambia stile'
-  toolset:
-    current-extent: Selezione nell'attuale estensione
+        fillColor: Colore di riempimento
+        color: Colore
+        opacity: Opacità
+        pointRadius: Dimensione del punto (pixel)
+        strokeColor: Colore del contorno
+        strokeWidth: Spessore del contorno
+        lineCap: Termine della linea
+        round: Arrotondato
+        square: Quadrato
+        butt: Piatto
+        strokeDashstyle: Stile del tratto
+        solid: Continuo
+        dot: Puntinato
+        dash: Tratteggiato
+        longdash: Tratteggiato lungo
+        dashdot: Tratteggiato punto
+        longdashdot: Tratteggiato punto lungo
+        label: Etichetta
+        fontFamily: Famiglia del carattere
+        fontColor: Colore del carattere
+        fontSize: Dimensione del carattere
+        fontWeight: Grassetto
+        regular: Normale
+        bold: Grassetto
+        italic: Corsivo
+

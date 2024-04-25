@@ -3,6 +3,66 @@
     window.Mapbender = Mapbender || {};
     window.Mapbender.Digitizer = Mapbender.Digitizer || {};
 
+
+    /**
+     * Checks if a polygon with or without holes has self-intersections by testing each edge against every other edge.
+     * @param {ol.geom.Polygon} polygon - The OpenLayers Polygon geometry to check.
+     * @returns {boolean} True if there are self-intersections, false otherwise.
+     */
+    function hasSelfIntersections(polygon) {
+        const rings = polygon.getCoordinates(); // Includes outer boundary and any inner boundaries (holes)
+
+        // Function to check if two line segments intersect
+        function doLinesIntersect(a, b, c, d) {
+            let a1 = b[1] - a[1];
+            let b1 = a[0] - b[0];
+            let c1 = a1 * a[0] + b1 * a[1];
+
+            let a2 = d[1] - c[1];
+            let b2 = c[0] - d[0];
+            let c2 = a2 * c[0] + b2 * c[1];
+
+            let determinant = a1 * b2 - a2 * b1;
+
+            if (determinant === 0) {
+                // Lines are parallel
+                return false;
+            } else {
+                let x = (b2 * c1 - b1 * c2) / determinant;
+                let y = (a1 * c2 - a2 * c1) / determinant;
+                let onSegment = (point, linePoint1, linePoint2) => {
+                    return Math.min(linePoint1[0], linePoint2[0]) <= point[0] && point[0] <= Math.max(linePoint1[0], linePoint2[0]) &&
+                        Math.min(linePoint1[1], linePoint2[1]) <= point[1] && point[1] <= Math.max(linePoint1[1], linePoint2[1]);
+                };
+                return onSegment([x, y], a, b) && onSegment([x, y], c, d);
+            }
+        }
+
+        // Check each ring against every other ring
+        for (let i = 0; i < rings.length; i++) {
+            const ring1 = rings[i];
+            for (let j = i; j < rings.length; j++) {
+                const ring2 = rings[j];
+                // Compare each segment in ring1 with each segment in ring2
+                for (let k = 0; k < ring1.length - 1; k++) {
+                    for (let l = (i === j ? k + 2 : 0); l < ring2.length - 1; l++) {
+                        // Avoid checking consecutive segments in the same ring, unless comparing different rings
+                        if (i === j && k === 0 && l === ring1.length - 2) {
+                            continue; // Closing segment of the same ring
+                        }
+                        if (doLinesIntersect(ring1[k], ring1[k + 1], ring2[l], ring2[l + 1])) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+
     /**
      * @param {*} owner jQueryUI widget instance
      * @param {ol.PluggableMap} olMap
@@ -58,7 +118,8 @@
                 feature.set('editing', false);
             });
             this.modifyingCollection_.clear();
-            if (feature) {
+            // Points are not suitable for modification
+            if (feature && feature.getGeometry().getType() !== "Point") {
                 feature.set('editing', true);
                 this.modifyingCollection_.push(feature);
             }
@@ -70,6 +131,22 @@
             } else {
                 tool = this.getCreationTool_(schema, type);
             }
+
+            let handleKeyDown = (evt) => {
+                if (evt.key === 'Escape') {
+                    tool.cancel && tool.cancel();
+                }
+            }
+
+            const originalSetActive = tool.setActive.bind(tool);
+            tool.setActive = function(active) {
+                originalSetActive(active);
+                if (active) {
+                    document.addEventListener('keydown', handleKeyDown);
+                } else {
+                    document.removeEventListener('keydown', handleKeyDown);
+                }
+            };
             this.addSnapInteraction(schema);
             return tool;
         },
@@ -92,7 +169,7 @@
                 olMap.addInteraction(snapInteraction);
             };
 
-            let layers = this.owner.getSchemaLayers(schema);
+            let layers = this.owner.getSnappingLayers(schema);
 
             layers.forEach(layer => {
                 let source = layer.getSource();
@@ -128,19 +205,52 @@
         },
         addCreateEvents_: function(interaction, schema) {
             var widget = this.owner;
+            interaction.cancel = () => {
+                $('.-fn-toggle-tool[data-toolname].active',this.owner.element).click();
+            }
             interaction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
                 var feature = event.feature;
+                let geom = feature.getGeometry();
+
+                if (geom.getType() === 'Polygon' && hasSelfIntersections(geom)) {
+                    $.notify(Mapbender.trans('mb.digitizer.intersection.error'));
+                    setTimeout(() => {
+                        widget.renderer.removeFeature(schema, feature);
+                    }, 0);
+                    return;
+                }
                 widget.initializeNewFeature(schema, feature);
                 widget._openEditDialog(schema, event.feature);
             });
             this.addModifyEvents_(interaction);  // For drawDonut
         },
         addModifyEvents_: function(interaction) {
-            interaction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
-                event.features.forEach(function(feature) {
-                    feature.set('dirty', true);
-                });
+
+            // variables kept in closure
+            let feature, originalGeometry;
+
+            if (!interaction.cancel) {
+                interaction.cancel = () => {
+
+                    feature.setGeometry(originalGeometry);
+                    feature.set('dirty', false);
+                    $('.-fn-toggle-tool[data-toolname].active', this.owner.element).click();
+                }
+            }
+            interaction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
+                feature.set('dirty', true);
+                let geom = feature.getGeometry();
+                if (geom.getType() === 'Polygon' && hasSelfIntersections(geom)) {
+                    $.notify(Mapbender.trans('mb.digitizer.intersection.error'));
+                    feature.setGeometry(originalGeometry);
+                }
             });
+
+            interaction.on([ ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATESTART], function(event) {
+                feature = event.features.getArray()[0];
+                originalGeometry = feature.getGeometry().clone();
+            });
+
         },
         /**
          * @param {String} type
@@ -179,12 +289,19 @@
                     throw new Error("Unhandled tool type " + type);
             }
         },
+
         createModificationTool_: function(type) {
             switch (type) {
                 case 'modifyFeature':
-                    return new ol.interaction.Modify({
-                        features: this.modifyingCollection_
+
+                    let interaction = new ol.interaction.Modify({
+                        features: this.modifyingCollection_,
+                        deleteCondition: function(event) {
+                            return ol.events.condition.singleClick(event);
+                        },
                     });
+
+                    return interaction;
                 case 'moveFeature':
                     return this.createMoveFeature_();
                 default:
@@ -201,7 +318,7 @@
                 return self.leftClickOnly_(event) && ol.interaction.Translate.prototype.handleDownEvent.call(this, event);
             };
 
-            return new ol.interaction.Translate({
+            let interaction = new ol.interaction.Translate({
                 handleDownEvent: handleDownEvent,
                 layers: function(layer) {
                     var schema = self.owner._getCurrentSchema();
@@ -216,6 +333,8 @@
                     return false;
                 }
             });
+
+            return interaction;
         },
         leftClickOnly_: function(event) {
             if (event.pointerEvent && event.pointerEvent.button !== 0) {

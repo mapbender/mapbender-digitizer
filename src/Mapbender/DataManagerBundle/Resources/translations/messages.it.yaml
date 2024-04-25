@@ -1,7 +1,29 @@
+mb.data.store:
+  create: Crea
+  remove.successfully: 'Rimosso con successo'
+  remove.confirm:
+    text: 'Elimina l'oggetto?'
+  save.successfully: 'Salvato con successo'
+  api.query.error-message: Errore
+  api.query.error-notloggedin: "Effettua il login, per favore"
+  api.query.error-database: "Impossibile connettersi al database. Controlla la configurazione in 'featureType'"
+
 mb.data-manager.table:
   filter: Cerca
-  empty: Vuota
-  empty_after_filtering: Nessun risultato
-  from_to_total: ~  # @todo
-  out_of: ~ # @todo
-
+  empty: Nessun dato
+  empty_after_filtering: Nessun risultato trovato
+  from_to_total: Mostra da _START_ ad _END_ del _TOTAL_
+  out_of: (su un totale di _MAX_)
+mb.datamanager:
+  admin:
+    schemes: Configurazione
+  class:
+    title: Gestore dati
+    description: Acquisizione dati (senza geometria)
+mb:
+  'data-manager':
+    actions:
+      show_details: Mostra dettagli
+    details_title: Dettagli oggetto
+    attachment:
+      open: Apri allegato
