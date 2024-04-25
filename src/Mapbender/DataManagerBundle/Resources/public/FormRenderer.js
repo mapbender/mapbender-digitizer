@@ -379,7 +379,7 @@
             var $btnText = $('<span class="upload-button-text">')
                 .attr('data-placeholder', settings.text || 'Select')
             ;
-            var $btn = $('<button class="btn btn-success button fileinput-button">')
+            var $btn = $('<button class="btn btn-sm btn-light fileinput-button">')
                 .append($fileInput)
                 .append($inputReal)
                 .append('<i class="fa fa-upload" aria-hidden="true"/>')
