@@ -205,6 +205,9 @@
         },
         addCreateEvents_: function(interaction, schema) {
             var widget = this.owner;
+            interaction.cancel = () => {
+                $('.-fn-toggle-tool[data-toolname].active',this.owner.element).click();
+            }
             interaction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
                 var feature = event.feature;
                 let geom = feature.getGeometry();
@@ -222,11 +225,32 @@
             this.addModifyEvents_(interaction);  // For drawDonut
         },
         addModifyEvents_: function(interaction) {
-            interaction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
-                event.features.forEach(function(feature) {
-                    feature.set('dirty', true);
-                });
+
+            // variables kept in closure
+            let feature, originalGeometry;
+
+            if (!interaction.cancel) {
+                interaction.cancel = () => {
+
+                    feature.setGeometry(originalGeometry);
+                    feature.set('dirty', false);
+                    $('.-fn-toggle-tool[data-toolname].active', this.owner.element).click();
+                }
+            }
+            interaction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
+                feature.set('dirty', true);
+                let geom = feature.getGeometry();
+                if (geom.getType() === 'Polygon' && hasSelfIntersections(geom)) {
+                    $.notify(Mapbender.trans('mb.digitizer.intersection.error'));
+                    feature.setGeometry(originalGeometry);
+                }
             });
+
+            interaction.on([ ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATESTART], function(event) {
+                feature = event.features.getArray()[0];
+                originalGeometry = feature.getGeometry().clone();
+            });
+
         },
         /**
          * @param {String} type
@@ -270,41 +294,11 @@
             switch (type) {
                 case 'modifyFeature':
 
-                    let originalGeometry;
-
                     let interaction = new ol.interaction.Modify({
                         features: this.modifyingCollection_,
                         deleteCondition: function(event) {
                             return ol.events.condition.singleClick(event);
                         },
-                    });
-
-                    interaction.cancel = () => {
-                        let feature = this.modifyingCollection_.getArray()[0];
-                        feature.setGeometry(originalGeometry);
-                        feature.set('dirty', false);
-                        $('.-fn-toggle-tool[data-toolname=modifyFeature]',this.owner.element).click();
-                    }
-
-                    interaction.on('modifystart', function(e) {
-                       if (e.features.getLength() > 1) {
-                           console.error("Error: Modification of more than one feature is not possible");
-                           return;
-                       }
-                       if (e.features.getLength() == 0) {
-                           console.error("Error: Modification of zero features");
-                           return;
-                       }
-                       originalGeometry = e.features.getArray()[0].getGeometry().clone();
-                    });
-                    interaction.on('modifyend', function(e) {
-                        e.features.forEach(function(feature) {
-                            let geom = feature.getGeometry();
-                            if (geom.getType() === 'Polygon' && hasSelfIntersections(geom)) {
-                                $.notify(Mapbender.trans('mb.digitizer.intersection.error'));
-                                feature.setGeometry(originalGeometry);
-                            }
-                        });
                     });
 
                     return interaction;
@@ -324,7 +318,7 @@
                 return self.leftClickOnly_(event) && ol.interaction.Translate.prototype.handleDownEvent.call(this, event);
             };
 
-            return new ol.interaction.Translate({
+            let interaction = new ol.interaction.Translate({
                 handleDownEvent: handleDownEvent,
                 layers: function(layer) {
                     var schema = self.owner._getCurrentSchema();
@@ -339,6 +333,8 @@
                     return false;
                 }
             });
+
+            return interaction;
         },
         leftClickOnly_: function(event) {
             if (event.pointerEvent && event.pointerEvent.button !== 0) {
