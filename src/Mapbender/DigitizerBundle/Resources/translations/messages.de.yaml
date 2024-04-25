@@ -7,6 +7,7 @@ mb.digitizer:
     edit.attributes: Sachdaten bearbeiten
     edit.geometry: Geometrie bearbeiten
     revert.geometry: Geometrieänderung zurücknehmen
+    intersection.error: Ungültige Geometrie
     feature:
         remove:
             title: 'Löschen'
