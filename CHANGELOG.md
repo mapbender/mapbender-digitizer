@@ -27,6 +27,7 @@
 * Use allowRefresh of subschemas in combined schema ([PR#108](https://github.com/mapbender/mapbender-digitizer/pull/108))
 * Add empty "adjustStyle" Method that can be overriden if application makes use of attibute-based styles.  ([PR#109](https://github.com/mapbender/mapbender-digitizer/pull/109))
 * Add default getSnappingLayers Method that can be overriden if application makes use of more snapping layers ([PR#110](https://github.com/mapbender/mapbender-digitizer/pull/110))
+* Standardized button style using bootstrap css classes ([PR#111](https://github.com/mapbender/mapbender-digitizer/pull/111))
 
 ## 1.5.7
 * Rewrite context menu for Openlayers 7 compatibility

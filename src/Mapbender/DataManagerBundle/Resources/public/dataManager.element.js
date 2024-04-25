@@ -521,6 +521,7 @@
             if (schema.allowEdit) {
                 buttons.push({
                     text: Mapbender.trans('mb.actions.save'),
+                    'class': 'btn btn-primary',
                     click: function() {
                         var $scope = $(this).closest('.ui-dialog-content');
                         var saved = widget._submitFormData(schema, $scope, dataItem);
@@ -535,7 +536,7 @@
             if (schema.allowDelete && this._getUniqueItemId(dataItem)) {
                 buttons.push({
                     text: Mapbender.trans('mb.actions.delete'),
-                    'class': 'critical',
+                    'class': 'btn btn-danger',
                     click: function() {
                         widget._closeCurrentPopup();
                         widget.removeData(schema, dataItem);
@@ -545,6 +546,7 @@
             var closeText = buttons.length && 'mb.actions.cancel' || 'mb.actions.close';
             buttons.push({
                 text: Mapbender.trans(closeText),
+                'class': 'btn btn-light',
                 click: function() {
                     widget._cancelForm(schema, dataItem);
                 }
