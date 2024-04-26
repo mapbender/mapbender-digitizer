@@ -22,7 +22,7 @@
                 'ui-dialog-content': 'ui-dialog-content data-manager-edit-data digitizer-style-editor content-padding'
             },
             buttons: [{
-                text: "Speichern",
+                text: Mapbender.trans('mb.digitizer.actions.save'),
                 class: 'btn btn-primary',
                 click: function (e) {
                     var values = editor.getFormData(this);
@@ -30,7 +30,7 @@
                     $(this).dialog('close');
                 }
             },{
-                text: "Abbrechen",
+                text: Mapbender.trans('mb.digitizer.actions.cancel'),
                 class: 'btn btn-light',
                 click: function (e) {
                     promise.reject();

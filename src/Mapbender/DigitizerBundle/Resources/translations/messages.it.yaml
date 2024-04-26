@@ -1,6 +1,10 @@
 mb.digitizer:
     actions:
       show_details: Mostra dettagli
+      cancel: Cancella
+      close: Chiudi
+      delete: Elimina
+      save: Salva
     class:
       title: Acquisizione dati (Digitizer)
       description: Acquisizione e modifica dati

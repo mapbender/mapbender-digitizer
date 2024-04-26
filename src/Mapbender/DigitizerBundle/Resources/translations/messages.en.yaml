@@ -1,6 +1,10 @@
 mb.digitizer:
     actions:
       show_details: Show details
+      cancel: Cancel
+      close: Close
+      delete: Delete
+      save: Save
     class:
       title: Digitizer
       description: Georeferencing and Digitizing

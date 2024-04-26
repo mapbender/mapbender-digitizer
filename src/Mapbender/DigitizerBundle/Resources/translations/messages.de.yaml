@@ -1,6 +1,10 @@
 mb.digitizer:
     actions:
       show_details: Details anzeigen
+      cancel: Abbrechen
+      close: Schließen
+      delete: Löschen
+      save: Speichern
     class:
       title: Datenerfassung (Digitizer)
       description: Datenerfassung und Bearbeitung
