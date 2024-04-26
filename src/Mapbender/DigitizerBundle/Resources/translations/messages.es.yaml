@@ -1,6 +1,10 @@
 mb.digitizer:
     actions:
       show_details: Mostrar detalles
+      cancel: Cancelar
+      close: Cerrar
+      delete: Borrar
+      save: Guardar
     class:
       title: Digitalizador de datos
       description: Georreferenciación y digitalización de datos
