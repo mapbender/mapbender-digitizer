@@ -1,0 +1,30 @@
+mb.data.store:
+  create: Criar
+  remove.successfully: Removido com sucesso
+  remove.confirm:
+    text: Apagar objeto?
+  save.successfully: Salvo com sucesso
+  api.query.error-message: Erro
+  api.query.error-notloggedin: Por favor, faça login
+  api.query.error-database:  Não foi possível conectar ao banco de dados. Verifique a configuração em 'featureType'
+
+mb.data-manager.table:
+  filter: Filtrar
+  empty: Sem dados
+  empty_after_filtering: Nenhum resultado
+  from_to_total: Mostrando _START_ até _END_ de _TOTAL_
+  out_of: (de um total de _MAX_)
+
+mb.datamanager:
+  admin:
+    schemes: Configuração
+  class:
+    title: Gerenciador de Dados
+    description:  Captura de dados (sem geometria)
+mb:
+  'data-manager':
+    actions:
+      show_details: Mostrar detalhes
+    details_title: Detalhes do objeto
+    attachment:
+      open: Abrir anexo
