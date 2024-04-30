@@ -231,6 +231,7 @@
         revertGeometry: function(feature) {
             feature.setGeometry(feature.get('oldGeometry').clone());
             feature.set('dirty', false);
+            feature.set('oldGeometry', null);
         },
         /**
          * Called by both _deactivateSchema (schema selector switch) and deactivate (sidepane interaction)
@@ -535,6 +536,7 @@
                         feature.setGeometry(geometry);
                         widget._replaceItemData(itemSchema, feature, savedItem.properties || {});
                         feature.set('dirty', false);
+                        feature.set('oldGeometry', null);
                         widget.tableRenderer.refreshRow(feature, false);
                         widget._saveEvent(itemSchema, feature, widget._getUniqueItemId(feature));
                     }
