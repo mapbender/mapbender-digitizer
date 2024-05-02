@@ -38,7 +38,9 @@
         render: function(schema) {
             var settings = this.getOptions(schema);
             var $table = $('<table class="table table-striped -js-items">');
-            $table.DataTable(settings);
+            $table.on('draw.dt', function () {
+                $('ul.pagination').addClass('pagination-sm');
+            }).DataTable(settings);
             var $tableWrap = $('<div class="mapbender-element-result-table">');
             $tableWrap.append($table.closest('.dataTables_wrapper'));
             $tableWrap.attr('data-schema-name', schema.schemaName);
@@ -137,7 +139,13 @@
                 paging:       schema.paging ?? true,
                 selectable:   false,
                 oLanguage: this.getOLanguageOption(schema),
-                autoWidth:    false
+                autoWidth:    false,
+                language: {
+                    paginate: {
+                        previous: '<<',
+                        next: '>>'
+                    }
+                }
             };
             settings.createdRow = this.onRowCreation.bind(this, schema);
             return settings;

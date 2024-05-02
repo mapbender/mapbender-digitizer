@@ -1,21 +1,7 @@
 $buttonActiveTextColor: #fff !default;
 
 .mb-element-data-manager {
-    > select, .dataTables_filter label input {
-        display: block;
-        width: 100%;
-        background: white;
-        border: solid 1px grey;
-        font-weight: normal;
-    }
-
-    .dataTables_filter label {
-        display: block; // allow input (inside label!) to grow to full width
-    }
-
-    .dataTables_filter, > select, > .title, .toolset {
-        margin-bottom: 1.5ex;
-    }
+    padding-right: 7px;
 
     .data-container {
         margin-top: 1.5ex;
@@ -34,23 +20,36 @@ $buttonActiveTextColor: #fff !default;
     color: #555;
     font-size: 0.85rem;
 
-    > select, .dataTables_filter input {
-        height: 2.5em;
-        padding: 0.35em;
-        border-radius: 0;
-    }
-
     table thead th {
         white-space: nowrap;
     }
 
-    // Defeat highly specific table td padding rule for cell containing interface buttons
-    // See Mapbender/CoreBundle/Resources/public/sass/modules/_result_table.scss
     .mapbender-element-result-table {
         > .dataTables_wrapper {
-            > table[role="grid"] {
-                td.interface {
-                    padding: 0;
+            > .row:first-child {
+                .col-md-6:first-child {
+                    width: 0;
+                    padding-left: 1px;
+                    padding-right: 0;
+                }
+                .col-md-6:last-child {
+                    width: 95%;
+                    label {
+                        width: 100%;
+                    }
+                    input {
+                        width: 80%;
+                    }
+                }
+           }
+            > .row:last-child {
+                text-align: center;
+                .col-sm-12 {
+                    width: 100%;
+                    margin-bottom: 7px;
+                }
+                .col-sm-12:last-child .pagination {
+                    justify-content: center;
                 }
             }
         }
@@ -67,6 +66,9 @@ $buttonActiveTextColor: #fff !default;
                 font-size: inherit;
                 padding: 0.28em; // ~3px on 11px font-size
             }
+        }
+        td:last-child {
+            padding: 0.2rem 0.5rem;
         }
     }
 
