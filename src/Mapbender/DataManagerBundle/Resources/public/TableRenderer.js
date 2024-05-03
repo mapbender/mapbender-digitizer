@@ -37,7 +37,7 @@
          */
         render: function(schema) {
             var settings = this.getOptions(schema);
-            var $table = $('<table class="table table-striped -js-items">');
+            var $table = $('<table class="table table-striped table-hover -js-items">');
             $table.on('draw.dt', function () {
                 $('ul.pagination').addClass('pagination-sm');
             }).DataTable(settings);

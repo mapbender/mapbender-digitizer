@@ -109,7 +109,7 @@
                         case 'hover':
                         case 'editing':
                             $(tr).toggleClass('hover', !!feature.get('hover'));
-                            $(tr).toggleClass('editing', !!feature.get('editing'));
+                            $(tr).toggleClass('table-info', !!feature.get('editing'));
                             break;
                     }
 
