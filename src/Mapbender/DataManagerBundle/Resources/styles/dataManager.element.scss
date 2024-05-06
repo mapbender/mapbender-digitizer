@@ -29,18 +29,18 @@ $buttonActiveTextColor: #fff !default;
             > .row:first-child {
                 .col-md-6:first-child {
                     width: 0;
-                    padding-left: 1px;
-                    padding-right: 0;
                 }
                 .col-md-6:last-child {
                     width: 100%;
                     .dataTables_filter {
                         text-align: left;
                         label {
-                            display: block;
                             width: 100%;
+                            padding-left: 2px;
                             input {
-                                width: calc(100% - 80px);
+                                display: block;
+                                width: 100%;
+                                margin-left: 0px;
                             }
                         }
                     }
