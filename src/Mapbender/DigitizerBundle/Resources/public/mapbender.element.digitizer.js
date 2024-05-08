@@ -558,6 +558,13 @@
             var $saveAllButton = $('.-fn-save-all', this.element);
             var candidates = $saveAllButton.length && this.getSaveAllCandidates_() || [];
             $saveAllButton.prop('disabled', !candidates.length);
+            if (candidates.length) {
+                $saveAllButton.removeClass('btn-outline-primary');
+                $saveAllButton.addClass('btn-primary');
+            } else {
+                $saveAllButton.removeClass('btn-primary');
+                $saveAllButton.addClass('btn-outline-primary');
+            }
         },
         getSaveAllCandidates_: function() {
             var self = this;
