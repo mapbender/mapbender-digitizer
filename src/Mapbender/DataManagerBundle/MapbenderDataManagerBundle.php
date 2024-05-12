@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 class MapbenderDataManagerBundle extends Bundle
 {
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         // Ensure DataSourceBundle services exist (independent of kernel registration)
         $dsBundle = new MapbenderDataSourceBundle();
