@@ -2,7 +2,7 @@ mb.data.store:
   create: Crea
   remove.successfully: 'Rimosso con successo'
   remove.confirm:
-    text: 'Elimina l'oggetto?'
+    text: 'Elimina l''oggetto?'
   save.successfully: 'Salvato con successo'
   api.query.error-message: Errore
   api.query.error-notloggedin: "Effettua il login, per favore"
