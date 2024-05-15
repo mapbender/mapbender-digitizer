@@ -11,7 +11,7 @@ mb.data-manager.table:
   empty: Нет данных
   empty_after_filtering: Нет совпадений
   from_to_total: от _START_ до _END_ из _TOTAL_
-  out_of: (из общего числа: _TOTAL_)
+  out_of: '(из общего числа: _TOTAL_)'
 
 mb.datamanager:
   admin:

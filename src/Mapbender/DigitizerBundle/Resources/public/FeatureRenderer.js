@@ -3,7 +3,7 @@
 
     /**
      * @param {*} owner jQueryUI widget instance
-     * @param {ol.PluggableMap} olMap
+     * @param {ol.Map} olMap
      * @param {Mapbender.Digitizer.StyleAdapter} [styleAdapter]
      * @constructor
      */

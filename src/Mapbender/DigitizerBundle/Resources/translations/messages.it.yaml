@@ -27,7 +27,7 @@ mb.digitizer:
             toggleoff: 'Nascondi oggetto'
             toggleon: 'Mostra oggetto'
     toolset:
-        current-extent: 'Mostra solo oggetti nell'estensione corrente della mappa'
+        current-extent: 'Mostra solo oggetti nell''estensione corrente della mappa'
         showAll: 'Mostra tutti gli oggetti'
         hideAll: 'Nascondi tutti gli oggetti'
         saveAll: 'Salva tutti gli oggetti'

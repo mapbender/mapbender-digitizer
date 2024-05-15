@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 class MapbenderDataSourceBundle extends Bundle
 {
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         $configLocator = new FileLocator(__DIR__ . '/Resources/config');
         $xmlLoader = new XmlFileLoader($container, $configLocator);

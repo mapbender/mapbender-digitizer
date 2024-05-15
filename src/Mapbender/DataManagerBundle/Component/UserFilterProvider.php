@@ -6,7 +6,7 @@ namespace Mapbender\DataManagerBundle\Component;
 
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
 use Mapbender\DataSourceBundle\Entity\DataItem;
-use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
+use Symfony\Component\Security\Core\Authentication\Token\NullToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class UserFilterProvider
@@ -92,7 +92,7 @@ class UserFilterProvider
         if ($token == null) {
             throw new \Exception("api.query.error-notloggedin");
         }
-        if ($token instanceof AnonymousToken) {
+        if ($token instanceof NullToken) {
             return null;
         } else {
             return $token->getUsername();

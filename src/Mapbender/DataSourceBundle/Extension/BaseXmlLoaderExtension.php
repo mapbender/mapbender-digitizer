@@ -32,7 +32,7 @@ class BaseXmlLoaderExtension extends Extension
      * @param array            $configs
      * @param ContainerBuilder $container
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $fileSrc = dirname($this->reflector->getFileName()) . $this->xmlFilePath;
         $loader  = new XmlFileLoader($container, new FileLocator($fileSrc));

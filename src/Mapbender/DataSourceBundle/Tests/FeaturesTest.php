@@ -18,7 +18,7 @@ class FeaturesTest extends KernelTestCase
      */
     protected static $featureType;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $kernel = self::bootKernel();
         $container = $kernel->getContainer();
