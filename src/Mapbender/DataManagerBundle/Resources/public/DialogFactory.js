@@ -46,6 +46,8 @@
                 window.setTimeout(function() { if ($content.dialog('instance')) { $content.dialog('destroy');} }, 500);
             });
 
+            Mapbender.restrictPopupPositioning($dialog);
+
             return $content;
         },
 
