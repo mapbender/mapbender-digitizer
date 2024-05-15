@@ -20,7 +20,7 @@
             this.enabled_ = !!state;
         },
         /**
-         * @param {ol.PluggableMap} olMap
+         * @param {ol.Map} olMap
          */
         registerEvents: function(olMap) {
             var self = this;
@@ -138,7 +138,7 @@
             var li = document.createElement('li');
             li.innerText = itemConfig.text;
             if (itemConfig.isHeader) {
-                li.className += " menu-header"; 
+                li.className += " menu-header";
             }
             return li;
         },

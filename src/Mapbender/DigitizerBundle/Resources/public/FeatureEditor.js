@@ -65,7 +65,7 @@
 
     /**
      * @param {*} owner jQueryUI widget instance
-     * @param {ol.PluggableMap} olMap
+     * @param {ol.Map} olMap
      *
      * @constructor
      */
