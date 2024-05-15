@@ -231,7 +231,6 @@
         revertGeometry: function(feature) {
             feature.setGeometry(feature.get('oldGeometry').clone());
             feature.set('dirty', false);
-            feature.set('oldGeometry', null);
         },
         /**
          * Called by both _deactivateSchema (schema selector switch) and deactivate (sidepane interaction)
