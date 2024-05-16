@@ -2,25 +2,25 @@ mb.digitizer:
     actions:
       cancel: Cancelar
       close: Fechar
-      delete: Apagar
+      delete: Excluir
       save: Salvar
     class:
       title: Coletor de Dados (Digitizer)
       description: Coleta e edição de dados
     edit.attributes: Editar atributos
-    edit.geometry:  Editar geometria
+    edit.geometry: Editar geometria
     revert.geometry: Reverter alteração na geometria
     intersection.error: Geometria inválida
     feature:
         remove:
-            title: Apagar
+            title: Excluir
         zoomTo: Aproximar
         edit: Editar
         save:
             title: Salvar
         print: Imprimir
         style:
-            change: Mudar estilo
+            change: Alterar estilo
         clone:
             title: Duplicar
         visibility:
@@ -28,7 +28,7 @@ mb.digitizer:
             toggleon: Exibir objeto
     toolset:
         current-extent: Mostrar apenas objetos na extensão atual do mapa
-        showAll: Mostrar todos os objetos
+        showAll: Exibir todos os objetos
         hideAll: Ocultar todos os objetos
         saveAll: Salvar todos os objetos
         moveFeature: Mover
@@ -45,24 +45,24 @@ mb.digitizer:
         color: Cor
         opacity: Opacidade
         pointRadius: Tamanho do ponto (pixels)
-        strokeColor: Cor do traço
-        strokeWidth: Espessura do traço 
-        lineCap: Strichabschlüsse
+        strokeColor: Cor da linha
+        strokeWidth: Espessura da linha 
+        lineCap: Extremidades da linha
         round: Arredondado
         square: Quadrado
         butt: Reto
-        strokeDashstyle: Linienmuster
+        strokeDashstyle: Estilo da linha
         solid: Sólido
         dot: Pontilhado
         dash: Tracejado
         longdash: Tracejado longo
-        dashdot: Traço e ponto
-        longdashdot: Traço, ponto, ponto
+        dashdot: Traço-ponto
+        longdashdot: Traço-ponto-ponto
         label: Rótulo
         fontFamily: Família da fonte
         fontColor: Cor da fonte
         fontSize: Tamanho da fonte
-        fontWeight: Schriftstärke
+        fontWeight: Espessura da fonte
         regular: Normal
         bold: Negrito
         italic: Itálico
