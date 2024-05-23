@@ -1,32 +1,4 @@
 
-.mb-element-digitizer {
-    // Defeat highly specific table row background color rule on feature hover
-    // See Mapbender/CoreBundle/Resources/public/sass/modules/_result_table.scss
-    .mapbender-element-result-table {
-      > .dataTables_wrapper {
-        > table[role="grid"] {
-          > tbody > tr {
-            &.hover td {
-              background-color: #F7F79A;
-            }
-            &.editing td, &.hover.editing td {
-              background-color: #D8EEFF;
-            }
-          }
-          > thead > tr {
-            th {
-              color: white;
-              background-color: #6fb536;
-            }
-            th.sorting_asc, th.sorting_desc {
-              background-color: #578e2a;
-            }
-          }
-        }
-      }
-    }
-}
-
 .digitizer-style-editor {
     label .value-preview {
         font-weight: normal;
@@ -56,6 +28,6 @@
         color: #333;
         cursor: default;
         user-select: none;
-        pointer-events: none; 
+        pointer-events: none;
     }
 }

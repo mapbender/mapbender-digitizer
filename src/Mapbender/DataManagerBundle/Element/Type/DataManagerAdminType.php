@@ -17,7 +17,7 @@ class DataManagerAdminType extends AbstractType
     /**
      * @inheritdoc
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('schemes', 'Mapbender\ManagerBundle\Form\Type\YAMLConfigurationType', array(

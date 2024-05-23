@@ -109,7 +109,7 @@
                         case 'hover':
                         case 'editing':
                             $(tr).toggleClass('hover', !!feature.get('hover'));
-                            $(tr).toggleClass('editing', !!feature.get('editing'));
+                            $(tr).toggleClass('table-info', !!feature.get('editing'));
                             break;
                     }
 
@@ -151,6 +151,14 @@
                 .attr('title', tooltip)
             ;
             $('.-fn-save', tr).prop('disabled', !feature.get('dirty'));
+
+            if (!!feature.get('dirty')) {
+                $('.-fn-save', tr).removeClass('btn-outline-primary');
+                $('.-fn-save', tr).addClass('btn-primary');
+            } else {
+                $('.-fn-save', tr).removeClass('btn-primary');
+                $('.-fn-save', tr).addClass('btn-outline-primary');
+            }
         }
     });
 })();
