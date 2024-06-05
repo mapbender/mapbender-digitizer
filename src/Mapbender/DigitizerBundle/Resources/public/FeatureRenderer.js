@@ -14,6 +14,7 @@
         this.globalStyles_ = this.initializeGlobalStyles_();
         this.schemaStyles_ = {};
         this.schemaLayers_ = {};
+        this.stateMap_ = {};
     }
     Object.assign(Mapbender.Digitizer.FeatureRenderer.prototype, {
         /**
@@ -96,6 +97,8 @@
 
     Mapbender.Digitizer.FeatureRenderer.prototype.toggleSchema = function(schema, state) {
         // @todo ml: respect displayPermanent / displayOnInActive on a sub-schema basis
+        // save in stateMap if the layer is not yet initialised
+        this.stateMap_[schema.schemaName] = state;
         var subSchemas = !schema && [] || this.owner.expandCombination(schema);
         for (var s = 0; s < subSchemas.length; ++s) {
             var layer = this.schemaLayers_[subSchemas[s].schemaName];
@@ -141,6 +144,9 @@
         // have a valid target layer + source even on empty datasets
         var firstLayer = this.createSchemaFeatureLayer_(itemSchema);
         group.getLayers().push(firstLayer);
+        if (schemaName in this.stateMap_) {
+            group.setVisible(this.stateMap_[schemaName]);
+        }
         this.olMap.addLayer(group);
         return group;
     };
