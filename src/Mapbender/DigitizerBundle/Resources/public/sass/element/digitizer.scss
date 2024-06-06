@@ -31,3 +31,41 @@
         pointer-events: none;
     }
 }
+
+.ui-dialog.data-manager-dialog .ui-dialog-titlebar {
+  background-color: #fff;
+  color: #222;
+  font-size: 16px;
+  border-bottom: dashed 1px #b9babc;
+}
+
+.ui-dialog-content.data-manager-edit-data .ui-tabs > .ui-tabs-nav .ui-tabs-tab.ui-state-active {
+  background-color: #888;
+}
+
+.ui-dialog-content.data-manager-edit-data .ui-tabs > .ui-tabs-nav .ui-tabs-tab {
+  background-color: #aaa;
+}
+
+.ui-dialog-content.data-manager-edit-data {
+  padding: 10px 5px 5px 10px;
+}
+
+.btn-light {
+ --bs-btn-border-color: #dee2e6;
+}
+
+.btn-primary{
+  --bs-btn-bg: #279ddc;
+  --bs-btn-border-color: #279ddc;
+  --bs-btn-hover-bg: #1A709E;
+  --bs-btn-hover-border-color: #1A709E;
+  --bs-btn-active-bg: #1A709E;
+  --bs-btn-active-border-color: #1A709E;
+}
+
+.pagination {
+  --bs-pagination-active-bg: #279ddc;
+  --bs-pagination-active-border-color: #279ddc;
+  list-style: none;
+}
