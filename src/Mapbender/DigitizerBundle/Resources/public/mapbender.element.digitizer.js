@@ -538,7 +538,7 @@
                         feature.setGeometry(geometry);
                         widget._replaceItemData(itemSchema, feature, savedItem.properties || {});
                         feature.set('dirty', false);
-                        feature.set('oldGeometry', null);
+                        feature.set('oldGeometry', geometry);
                         widget.tableRenderer.refreshRow(feature, false);
                         widget._saveEvent(itemSchema, feature, widget._getUniqueItemId(feature));
                     }
