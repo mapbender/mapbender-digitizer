@@ -57,7 +57,7 @@
         getMenuItems: function(feature) {
             var items = [];
             var widget = this.widget;
-            if (feature.get('dirty') && feature.get('oldGeometry')) {
+            if (feature.get('dirty') && feature.get('oldGeometry') && !feature.get("editing")) { // show contextmenu only when feature not in editing mode
                 items.push({
                     text: Mapbender.trans('mb.digitizer.revert.geometry'),
                     callback: function() {
