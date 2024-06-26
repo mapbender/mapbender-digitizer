@@ -1,4 +1,10 @@
 # Mapbender Digitizer element
+
+:warning: This version is compatible with Mapbender 4 only. The latest digitizer release compatible
+with Mapbender 3 is [1.5.7](https://github.com/mapbender/mapbender-digitizer/releases/tag/1.5.7)
+
+---
+
 Display and edit features (and feature attributes) stored in
 database tables in a Mapbender application.
 
