@@ -1,0 +1,28 @@
+mb.data.store:
+  create: Создать
+  remove.successfully: 'Данные удалены'
+  remove.confirm:
+    text: 'Подведите удаление'
+  save.successfully: 'Данные сохранены'
+  api.query.error-message: Ошибка
+
+mb.data-manager.table:
+  filter: Искать
+  empty: Нет данных
+  empty_after_filtering: Нет совпадений
+  from_to_total: от _START_ до _END_ из _TOTAL_
+  out_of: '(из общего числа: _TOTAL_)'
+
+mb.datamanager:
+  admin:
+    schemes: Конфигурация
+  class:
+    title: Менеджер данных
+    description: Сбор данных (без геометрии)
+mb:
+  'data-manager':
+    actions:
+      show_details: Показать детали
+    details_title: Детали объекта
+    attachment:
+      open: Открыть вложение

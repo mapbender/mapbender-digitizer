@@ -1,0 +1,69 @@
+mb.digitizer:
+    actions:
+      show_details: Mostrar detalles
+      cancel: Cancelar
+      close: Cerrar
+      delete: Borrar
+      save: Guardar
+    class:
+      title: Digitalizador de datos
+      description: Georreferenciación y digitalización de datos
+    edit.attributes: Editar atributos
+    edit.geometry: Editar geometrías
+    revert.geometry: Revertir los cambios en la geometría
+    feature:
+        remove:
+            title: 'Eliminar'
+        zoomTo: 'Zoom al objeto '
+        edit: 'Editar'
+        save:
+            title: 'Guardar'
+        print: 'Imprimir'
+        style:
+            change: 'Cambiar el estilo'
+        clone:
+            title: 'Duplicar'
+        visibility:
+            toggleoff: 'Ocultar objeto'
+            toggleon: 'Mostrar objeto'
+    toolset:
+        current-extent: 'Mostrar solo objetos visibles en la sección actual del mapa'
+        showAll: 'Mostrar todos los objetos'
+        hideAll: 'Ocultar todos los objetos'
+        saveAll: 'Guardar todos los objetos'
+        moveFeature: Mover objeto
+        modifyFeature: Editar objeto
+        drawPoint: 'Añadir punto'
+        drawLine: 'Añadir línea'
+        drawPolygon: 'Añadir polígono'
+        drawRectangle: 'Añadir rectángulo'
+        drawCircle: 'Añadir círculo'
+        drawEllipse: 'Añadir elipse'
+        drawDonut: 'Añadir enclave en un polígono'
+    style:
+        fillColor: Color de relleno
+        color: Color
+        opacity: Opacidad
+        pointRadius: Tamaño del punto (píxel)
+        strokeColor: Color de línea
+        strokeWidth: Anchura de línea
+        lineCap: Estilo de terminación de línea
+        round: Redondeado
+        square: Cuadrado
+        butt: Plano
+        strokeDashstyle: Estilo de línea
+        solid: Línea sólida
+        dot: Línea de puntos
+        dash: Línea de guiones
+        longdash: Línea de guiones largos
+        dashdot: Línea de guiones y puntos
+        longdashdot: Línea de guión, punto, punto
+        label: Etiquetas
+        fontFamily: Fuente de texto
+        fontColor: Color de texto
+        fontSize: Tamaño de texto
+        fontWeight: Tamaño de texto
+        regular: Normal
+        bold: Negrita
+        italic: Cursiva
+

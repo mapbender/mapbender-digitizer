@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <!-- ensure required parameter is defined (parameters.yml will win this) -->
+        <parameter key="featureTypes" type="collection" />
+    </parameters>
+    <services>
+        <service id="mb.digitizer.registry" class="Mapbender\DataSourceBundle\Component\RepositoryRegistry">
+            <argument type="service" id="mbds.default_featuretype_factory"/>
+            <argument>%featureTypes%</argument>
+        </service>
+        <service id="mb.digitizer.schema_filter" class="Mapbender\DigitizerBundle\Component\SchemaFilter">
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="mb.digitizer.registry" />
+            <argument type="service" id="mb.data-manager.form_item_filter" />
+            <argument>%mapbender.uploads_dir%</argument>
+        </service>
+        <service id="mb.digitizer.http_handler" class="Mapbender\DigitizerBundle\Component\HttpHandler">
+            <argument type="service" id="twig" />
+            <argument type="service" id="form.factory" />
+            <argument type="service" id="mb.digitizer.schema_filter" />
+            <argument type="service" id="mb.digitizer.user_filter_provider" />
+        </service>
+        <service id="mapbender.element.Digitizer" class="Mapbender\DigitizerBundle\Element\Digitizer">
+            <tag name="mapbender.element" />
+            <argument type="service" id="mb.digitizer.registry" />
+            <argument type="service" id="mb.digitizer.schema_filter" />
+            <argument type="service" id="mb.digitizer.http_handler" />
+        </service>
+        <service id="mb.digitizer.user_filter_provider" alias="mb.data-manager.user_filter_provider" />
+    </services>
+</container>

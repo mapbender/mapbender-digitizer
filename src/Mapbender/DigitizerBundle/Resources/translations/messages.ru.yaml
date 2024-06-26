@@ -1,0 +1,77 @@
+mb.digitizer:
+  actions:
+    show_details: Показать детали
+    cancel: Отменить
+    close: Закрыть
+    delete: Удалить
+    save: Сохранить
+  feature:
+    remove:
+      title: 'Удалить'
+    zoomTo: 'Zoom to'
+    edit: 'Редактировать'
+    attributes: 'Атрибуты'
+    save:
+      title: 'Сохранить'
+    print: 'Print'
+    class:
+      title: Сбор данных (Digitizer)
+      description: Сбор и редактирование данных
+    edit.attributes: Редактировать атрибуты
+    edit.geometry: Редактировать геометрию
+    revert.geometry: Отменить изменение геометрии
+    feature:
+        remove:
+            title: 'Удалить'
+        zoomTo: 'Приблизить'
+        edit: 'Редактировать'
+        save:
+            title: 'Сохранить'
+        print: 'Печать'
+        style:
+            change: 'Изменить стиль'
+        clone:
+            title: 'Клонировать'
+        visibility:
+            toggleoff: 'Скрыть объект'
+            toggleon: 'Показать объект'
+    toolset:
+        current-extent: 'Показывать только объекты видимой части карты'
+        showAll: 'Показать все объекты'
+        hideAll: 'Скрыть все объекты'
+        saveAll: 'Сохранить все объекты'
+        moveFeature: Переместить
+        modifyFeature: Редактировать
+        drawPoint: 'Создать точку'
+        drawLine: 'Создать линию'
+        drawPolygon: 'Создать область'
+        drawRectangle: 'Создать прямоугольник'
+        drawCircle: 'Создать круг'
+        drawEllipse: 'Создать эллипс'
+        drawDonut: 'Создать вырез в области'
+    style:
+        fillColor: Цвет заливки
+        color: Цвет
+        opacity: Непрозрачность
+        pointRadius: Радиус точки (в пикселях)
+        strokeColor: Цвет обводки
+        strokeWidth: Толщина обводки
+        lineCap: Окончание линии
+        round: Скругленное
+        square: Квадратное
+        butt: Усеченное
+        strokeDashstyle: Стиль линии
+        solid: Сплошная
+        dot: Точечная
+        dash: Пунктирная
+        longdash: Длиннопунктирная
+        dashdot: Штрихпунктирная
+        longdashdot: Длинный штрихпунктир
+        label: Надпись
+        fontFamily: Шрифт
+        fontColor: Цвет шрифта
+        fontSize: Размер шрифта
+        fontWeight: Толщина шрифта
+        regular: Обычный
+        bold: Жирный
+        italic: Курсив

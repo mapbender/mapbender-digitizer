@@ -1,0 +1,40 @@
+<select class="form-select form-select-sm ms-1 mb-2 -fn-schema-selector"></select>
+<div class="toolset"></div>
+<div class="loading-indicator"><i class="fa fas fa-spinner fa-spin"></i></div>
+<div class="data-container"></div>
+<div style="display: none;" class="-tpl-table-buttons">
+    <div class="btn-group">
+        {%- block table_buttons -%}
+            {%- block edit_button -%}
+                <button type="button"
+                        class="-fn-edit-data btn btn-outline-secondary"
+                        title="{{ 'mb.actions.edit' | trans }}"><i class="fa fa-edit"></i></button>
+            {%- endblock -%}
+            {%- block delete_button -%}
+                <button type="button"
+                        class="critical -fn-delete btn btn-outline-secondary"
+                        title="{{ 'mb.actions.delete' | trans }}"><i class="far fa-trash-alt"></i></button>
+            {%- endblock -%}
+        {%- endblock -%}
+    </div>
+</div>
+<div style="display: none;" class="-tpl-toolset">
+    <div class="toolset">
+        {%- block toolset -%}
+        <div class="btn-toolbar">
+            {%- block toolset_groups -%}
+            <div class="btn-group">
+                {%- block toolset_buttons -%}
+                <button type="button"
+                        class="-fn-refresh btn btn-outline-secondary"
+                        title="{{ 'mb.actions.refresh' | trans }}"><i class="fa fas fa-refresh"></i></button>
+                <button type="button"
+                        class="-fn-create-item btn btn-outline-secondary"
+                        title="{{ 'mb.data.store.create' | trans }}"><i class="fa fas fa-plus"></i></button>
+                {%- endblock -%}
+            </div>
+            {%- endblock -%}
+        </div>
+        {%- endblock -%}
+    </div>
+</div>

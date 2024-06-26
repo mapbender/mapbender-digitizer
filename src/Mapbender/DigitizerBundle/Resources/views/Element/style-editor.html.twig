@@ -1,0 +1,170 @@
+<div data-style-group="fill">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="mb-3">
+                <label for="fillColor" class="form-label fw-bold">
+                    {{ 'mb.digitizer.style.fillColor' | trans }}
+                </label>
+                <div class="input-group -js-colorpicker">
+                    <input name="fillColor" class="form-control" type="text">
+                    <span class="input-group-text input-group-addon"><i></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="mb-3">
+                <label for="fillOpacity" class="form-label fw-bold w-100">
+                    {{ 'mb.digitizer.style.opacity' | trans }} <span class="float-end value-preview"></span>
+                </label>
+                <input class="form-range" name="fillOpacity" type="range" min="0" max="1" step="any" list="ds-opacity-ticks">
+            </div>
+        </div>
+        <div class="col-sm-4" data-style-group="point">
+            <div class="mb-3">
+                <label for="pointRadius" class="form-label fw-bold">
+                    {{ 'mb.digitizer.style.pointRadius' | trans }}
+                </label>
+                <input name="pointRadius" type="number" min="0" max="30" step="1" class="form-control">
+            </div>
+        </div>
+    </div>
+</div>
+<div data-style-group="stroke">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="mb-3">
+                <label for="strokeColor" class="form-label fw-bold">
+                    {{ 'mb.digitizer.style.strokeColor' | trans }}
+                </label>
+                <div class="input-group -js-colorpicker">
+                    <input name="strokeColor" class="form-control" type="text">
+                    <span class="input-group-text input-group-addon"><i></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="mb-3">
+                <label for="strokeOpacity" class="form-label fw-bold w-100">
+                    {{ 'mb.digitizer.style.opacity' | trans }} <span class="float-end value-preview"></span>
+                </label>
+                <input class="form-range" name="strokeOpacity" type="range" min="0" max="1" step="any" list="ds-opacity-ticks">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="mb-3">
+                <label for="strokeWidth" class="form-label fw-bold">
+                    {{ 'mb.digitizer.style.strokeWidth' | trans }}
+                </label>
+                <input name="strokeWidth" type="number" min="0" max="10" step="1" class="form-control">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="mb-3">
+                <label for="strokeLinecap" class="form-label fw-bold">
+                    {{ 'mb.digitizer.style.lineCap' | trans }}
+                </label>
+                <select name="strokeLinecap" class="form-select">
+                    <option value="round">{{ 'mb.digitizer.style.round' | trans }}</option>
+                    <option value="square">{{ 'mb.digitizer.style.square' | trans }}</option>
+                    <option value="butt">{{ 'mb.digitizer.style.butt' | trans }}</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="mb-3">
+                <label for="strokeDashstyle" class="form-label fw-bold">
+                    {{ 'mb.digitizer.style.strokeDashstyle' | trans }}
+                </label>
+                <select name="strokeDashstyle" class="form-select">
+                    <option value="solid">{{ 'mb.digitizer.style.solid' | trans }}</option>
+                    <option value="dot">{{ 'mb.digitizer.style.dot' | trans }}</option>
+                    <option value="dash">{{ 'mb.digitizer.style.dash' | trans }}</option>
+                    <option value="longdash">{{ 'mb.digitizer.style.longdash' | trans }}</option>
+                    <option value="dashdot">{{ 'mb.digitizer.style.dashdot' | trans }}</option>
+                    <option value="longdashdot">{{ 'mb.digitizer.style.longdashdot' | trans }}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<div data-style-group="font">
+    <div class="mb-3">
+        <label for="label" class="form-label fw-bold">
+            {{ 'mb.digitizer.style.label' | trans }}
+        </label>
+        <textarea name="label" class="form-control" rows="3" style="resize: none;" placeholder="#${gid}: ${name}"></textarea>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="mb-3">
+                <label for="fontFamily" class="form-label fw-bold">
+                    {{ 'mb.digitizer.style.fontFamily' | trans }}
+                </label>
+                <select name="fontFamily" class="form-select">
+                    <option value="Arial, Helvetica, sans-serif">Arial</option>
+                    <option value="Arial Black, Gadget, sans-serif">Arial Black</option>
+                    <option value="Comic Sans MS, cursive, sans-serif">Comic Sans</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="Impact, Charcoal, sans-serif">Impact</option>
+                    <option value="Lucida Sans Unicode, Lucida Grande, sans-serif">Lucida</option>
+                    <option value="Palatino Linotype, Book Antiqua, Palatino, serif">Palatino</option>
+                    <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
+                    <option value="Times New Roman, Times, serif">Times New Roman</option>
+                    <option value="Trebuchet MS, Helvetica, sans-serif">Trebuchet</option>
+                    <option value="Verdana, Geneva, sans-serif">Verdana</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="mb-3">
+                <label for="fontSize" class="form-label fw-bold">
+                    {{ 'mb.digitizer.style.fontSize' | trans }}
+                </label>
+                <input name="fontSize" type="number" min="5" max="30" class="form-control">
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="mb-3">
+                <label for="fontWeight" class="form-label fw-bold">
+                    {{ 'mb.digitizer.style.fontWeight' | trans }}
+                </label>
+                <select name="fontWeight" class="form-select">
+                    <option value="regular">{{ 'mb.digitizer.style.regular' | trans }}</option>
+                    <option value="bold">{{ 'mb.digitizer.style.bold' | trans }}</option>
+                    <option value="italic">{{ 'mb.digitizer.style.italic' | trans }}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="mb-3">
+                <label for="fontColor" class="form-label fw-bold">
+                    {{ 'mb.digitizer.style.fontColor' | trans }}
+                </label>
+                <div class="input-group -js-colorpicker">
+                    <input name="fontColor" class="form-control" type="text"><span class="input-group-text input-group-addon"><i></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="mb-3">
+                <label for="fontOpacity" class="form-label fw-bold w-100">
+                    {{ 'mb.digitizer.style.opacity' | trans }} <span class="float-end value-preview"></span>
+                </label>
+                <input class="form-range" name="fontOpacity" type="range" min="0" max="1" step="any" list="ds-opacity-ticks">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="hidden">
+    <datalist id="ds-opacity-ticks">
+        <option value="0" label="0%"></option>
+        <option value="0.25"></option>
+        <option value="0.5" label="50%"></option>
+        <option value="0.75"></option>
+        <option value="1" label="100%"></option>
+    </datalist>
+</div>

@@ -1,0 +1,69 @@
+mb.digitizer:
+    actions:
+      show_details: Show details
+      cancel: Cancel
+      close: Close
+      delete: Delete
+      save: Save
+    class:
+      title: Digitizer
+      description: Georeferencing and Digitizing
+    edit.attributes: Edit attributes
+    edit.geometry: Edit geometry
+    revert.geometry: Revert geometry changes
+    intersection.error: Self-intersection in geometry not allowed
+    feature:
+        remove:
+            title: 'Remove feature'
+        zoomTo: 'Zoom to feature'
+        edit: 'Edit'
+        save:
+            title: Save
+        print: Print
+        clone:
+            title: Copy
+        style:
+            change: 'Change style'
+        visibility:
+            toggleoff: Hide feature
+            toggleon: Display feature
+    toolset:
+        current-extent: 'Select by current extent only'
+        showAll: 'Show all features'
+        hideAll: 'Hide all features'
+        saveAll: 'Save all features'
+        moveFeature: Move
+        modifyFeature: Edit
+        drawPoint: 'Draw point'
+        drawLine: 'Draw line'
+        drawPolygon: 'Draw polygon'
+        drawRectangle: 'Draw rectangle'
+        drawCircle: 'Draw circle'
+        drawEllipse: 'Draw ellipse'
+        drawDonut: 'Draw donut'
+    style:
+        fillColor: Fill color
+        color: Color
+        opacity: Opacity
+        pointRadius: Point radius (pixels)
+        strokeColor: Line color
+        strokeWidth: Line width
+        lineCap: Line caps
+        round: round
+        square: square
+        butt: butt
+        strokeDashstyle: Pattern
+        solid: solid
+        dot: dot
+        dash: dash
+        longdash: longdash
+        dashdot: dashdot
+        longdashdot: longdashdot
+        label: Label
+        fontFamily: Font
+        fontColor: Text color
+        fontSize: Font size
+        fontWeight: Font weight
+        regular: regular
+        bold: bold
+        italic: italic

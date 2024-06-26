@@ -1,0 +1,69 @@
+mb.digitizer:
+    actions:
+      show_details: Details anzeigen
+      cancel: Abbrechen
+      close: Schließen
+      delete: Löschen
+      save: Speichern
+    class:
+      title: Datenerfassung (Digitizer)
+      description: Datenerfassung und Bearbeitung
+    edit.attributes: Sachdaten bearbeiten
+    edit.geometry: Geometrie bearbeiten
+    revert.geometry: Geometrieänderung zurücknehmen
+    intersection.error: Ungültige Geometrie
+    feature:
+        remove:
+            title: 'Löschen'
+        zoomTo: 'Heranzoomen'
+        edit: 'Bearbeiten'
+        save:
+            title: 'Speichern'
+        print: 'Druck'
+        style:
+            change: 'Stil ändern'
+        clone:
+            title: 'Duplizieren'
+        visibility:
+            toggleoff: 'Objekt ausblenden'
+            toggleon: 'Objekt einblenden'
+    toolset:
+        current-extent: 'nur Objekte des aktuellen Kartenausschnitts anzeigen'
+        showAll: 'Alle Objekte einblenden'
+        hideAll: 'Alle Objekte ausblenden'
+        saveAll: 'Alle Objekte speichern'
+        moveFeature: Verschieben
+        modifyFeature: Bearbeiten
+        drawPoint: 'Punkt erstellen'
+        drawLine: 'Linie erstellen'
+        drawPolygon: 'Fläche erstellen'
+        drawRectangle: 'Rechteck erstellen'
+        drawCircle: 'Kreis erstellen'
+        drawEllipse: 'Ellipse erstellen'
+        drawDonut: 'Enklave in Fläche zeichnen'
+    style:
+        fillColor: Füllfarbe
+        color: Color
+        opacity: Deckkraft
+        pointRadius: Punktgröße (pixel)
+        strokeColor: Strichfarbe
+        strokeWidth: Strichstärke
+        lineCap: Strichabschlüsse
+        round: Abgerundet
+        square: Eckig
+        butt: Bündig
+        strokeDashstyle: Linienmuster
+        solid: Durchgezogen
+        dot: Punktiert
+        dash: Gestrichelt
+        longdash: Gestrichelt, lang
+        dashdot: Strichpunkt
+        longdashdot: Strichpunktpunkt
+        label: Beschriftung
+        fontFamily: Schriftart
+        fontColor: Schriftfarbe
+        fontSize: Schriftgröße
+        fontWeight: Schriftstärke
+        regular: Normal
+        bold: Dick
+        italic: Kursiv

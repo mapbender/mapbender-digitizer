@@ -1,0 +1,30 @@
+mb.data.store:
+  create: Create
+  remove.successfully: 'Removed successfully'
+  remove.confirm:
+    text: 'Delete object?'
+  save.successfully: 'Saved successfully'
+  api.query.error-message: Error
+  api.query.error-notloggedin: "Please sign in"
+  api.query.error-database: "Connection to the database could not be established. Check the configuration in 'featureType'"
+
+mb.data-manager.table:
+  filter: Filter
+  empty: No data
+  empty_after_filtering: No matches
+  from_to_total: Showing _START_ to _END_ from _TOTAL_
+  out_of: (out of _MAX_ total)
+
+mb.datamanager:
+  admin:
+    schemes: Schemes
+  class:
+    title: Data manager
+    description: Generate data (without geometry)
+mb:
+  'data-manager':
+    actions:
+      show_details: Show details
+    details_title: Detail data
+    attachment:
+      open: Open attachment

@@ -1,0 +1,44 @@
+{%- extends '@MapbenderDataManager/Element/DataManager.html.twig' -%}
+{%- block table_buttons -%}
+    <button type="button"
+            class="-fn-copy btn btn-outline-secondary"
+            title="{{ 'mb.digitizer.feature.clone.title' | trans }}"><i class="fa far fa-copy"></i></button>
+    {#- eat whitespace -#}
+    <button type="button"
+            class="-fn-edit-style btn btn-outline-secondary"
+            title="{{ 'mb.digitizer.feature.style.change' | trans }}"><i class="fa fas fa-eyedropper fa-eye-dropper"></i></button>
+    {#- eat whitespace -#}
+    <button type="button"
+            class="-fn-toggle-visibility btn btn-outline-secondary"
+            title="{{ 'mb.digitizer.feature.visibility.toggleoff' | trans }}"><i class="fa far fa-eye"></i></button>
+    {{- block('edit_button') -}}
+    <button type="button"
+            class="-fn-save btn btn-outline-primary"
+            title="{{ 'mb.digitizer.feature.save.title' | trans }}"><i class="fa fas fa-save"></i></button>
+    {{- block('delete_button') -}}
+{%- endblock -%}
+{%- block toolset -%}
+    <div class="form-check ps-4">
+        <input type="checkbox" name="current-extent" class="form-check-input">
+        <label class="form-check-label">{{ 'mb.digitizer.toolset.current-extent' | trans }}</label>
+    </div>
+    {{- parent() -}}
+{%- endblock -%}
+{%- block toolset_buttons -%}
+    {{- parent() -}}
+    <button type="button"
+            class="-fn-visibility-all btn btn-outline-secondary"
+            title="{{ 'mb.digitizer.toolset.hideAll' | trans }}"><i class="fa far fa-eye-slash"></i></button>
+    <button type="button"
+            class="-fn-visibility-all btn btn-outline-secondary"
+            data-visibility="1"
+            title="{{ 'mb.digitizer.toolset.showAll' | trans }}"><i class="fa far fa-eye"></i></button>
+    <button type="button"
+            class="-fn-save-all btn btn-outline-primary"
+            title="{{ 'mb.digitizer.toolset.saveAll' | trans }}"><i class="fa fas fa-save"></i></button>
+{%- endblock -%}
+{%- block toolset_groups -%}
+    {{- parent() -}}
+    <div class="btn-group btn-group-sm ms-2 -js-drawing-tools">
+    </div>
+{%- endblock -%}

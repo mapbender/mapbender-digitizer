@@ -1,0 +1,68 @@
+<div class="elementForm elementFormDataManager">
+    <style media="all">
+        .elementFormDataManager label.block {
+            display: block;
+            margin: 0;
+        }
+        .elementFormDataManager label.block + .inputWrapper {
+            /* defeat .inputWrapper default width limitation */
+            width: 100%;
+        }
+        .elementFormDataManager .code-yaml {
+            width: 100%;
+        }
+        .elementFormDataManager .CodeMirror {
+            height: auto;
+        }
+        .elementFormDataManager .CodeMirror-code {
+            /* Provide some minimal space even for (nearly) empty "schemes" text (when creating new element) */
+            min-height: 15em;
+        }
+        .col-sm-2 {
+            width: 8%;
+        }
+        .col-sm-10 {
+            width: 92%;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function(){
+            var textarea = document.getElementById({{ form.configuration.schemes.vars.id | json_encode | raw }});
+
+            var yamlEditor = CodeMirror.fromTextArea(textarea, {
+                mode: "text/x-yaml",
+                styleActiveLine: true,
+                viewportMargin: Infinity,
+                lineNumbers: true,
+                indentUnit: 2,
+                tabSize: 2,
+                indentWithTabs: false,
+                lineWrapping: true
+            });
+
+            yamlEditor.on("change",function(obj, changedObject){
+                var value = obj.getValue().replace(/\t/g,"  ");
+                $(textarea).val(value);
+            });
+
+
+            // Resize, but only if rendered in popup
+            var $form = $(document.getElementById({{ form.configuration.schemes.vars.id | json_encode | raw }})).closest('form');
+            var popupContainer = $form.closest('.popup,.modal-dialog');
+
+            popupContainer.css({
+                width: '90%',
+                'min-height': '90vh'
+            });
+
+        })
+    </script>
+    {{ form_row(form.title) }}
+    {%- for child_name_before_schemes in form.configuration | keys | filter(k => k != 'schemes') -%}
+        {{- form_row(form.configuration[child_name_before_schemes]) -}}
+    {%- endfor -%}
+{% block schemes_row %}
+    {{ form_label(form.configuration.schemes) }}
+    {{ form_widget(form.configuration.schemes) }}
+{% endblock schemes_row %}
+</div>
