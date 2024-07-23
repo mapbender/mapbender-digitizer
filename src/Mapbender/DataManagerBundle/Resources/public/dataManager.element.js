@@ -731,7 +731,7 @@
                 options_.data = JSON.stringify(data);
             }
             this.$loadingIndicator_.css({opacity: 1});
-            return this.decorateXhr_($.ajax(options_, this.$loadingIndicator_));
+            return this.decorateXhr_($.ajax(options_), this.$loadingIndicator_);
         },
         decorateXhr_: function(jqXhr, $loadingIndicator) {
             if ($loadingIndicator) {
