@@ -367,7 +367,9 @@
          * @private
          */
         _afterSave: function(schema, dataItem, originalId, responseData) {
-            this._replaceItemData(schema, dataItem, responseData.dataItem);
+            if (responseData.dataItem) {
+                this._replaceItemData(schema, dataItem, responseData.dataItem.properties);
+            }
             if (!originalId) {
                 // new item
                 this.tableRenderer.addRow(dataItem, true);
