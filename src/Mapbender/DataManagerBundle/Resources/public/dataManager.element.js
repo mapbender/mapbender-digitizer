@@ -368,7 +368,7 @@
          */
         _afterSave: function(schema, dataItem, originalId, responseData) {
             if (responseData.dataItem) {
-                this._replaceItemData(schema, dataItem, responseData.dataItem.properties);
+                this._replaceItemData(schema, dataItem, responseData.dataItem);
             }
             if (!originalId) {
                 // new item
@@ -434,7 +434,7 @@
          * @private
          */
         _replaceItemData: function(schema, dataItem, newValues) {
-            Object.assign(dataItem.properties, newValues);
+            Object.assign(dataItem.properties, newValues.properties);
         },
         /**
          * Open edit feature dialog
