@@ -367,7 +367,9 @@
          * @private
          */
         _afterSave: function(schema, dataItem, originalId, responseData) {
-            this._replaceItemData(schema, dataItem, responseData.dataItem);
+            if (responseData.dataItem) {
+                this._replaceItemData(schema, dataItem, responseData.dataItem);
+            }
             if (!originalId) {
                 // new item
                 this.tableRenderer.addRow(dataItem, true);
@@ -432,7 +434,7 @@
          * @private
          */
         _replaceItemData: function(schema, dataItem, newValues) {
-            Object.assign(dataItem.properties, newValues);
+            Object.assign(dataItem.properties, newValues.properties);
         },
         /**
          * Open edit feature dialog
@@ -731,7 +733,7 @@
                 options_.data = JSON.stringify(data);
             }
             this.$loadingIndicator_.css({opacity: 1});
-            return this.decorateXhr_($.ajax(options_, this.$loadingIndicator_));
+            return this.decorateXhr_($.ajax(options_), this.$loadingIndicator_);
         },
         decorateXhr_: function(jqXhr, $loadingIndicator) {
             if ($loadingIndicator) {
