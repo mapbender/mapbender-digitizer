@@ -1,4 +1,5 @@
 ## 2.0.0
+* Enable immediate update of the feature table in the data manager
 * Remove bug that allowed a feature to revert to a status it had before the last save. ([PR#123] https://github.com/mapbender/mapbender-digitizer/pull/123)
 * Prevent Draw Donut On Non-Digitizer Features ([PR#120](https://github.com/mapbender/mapbender-digitizer/pull/120))
 * Prevent self intersection of polygons not only on modification, but on creation as well ([PR#118](https://github.com/mapbender/mapbender-digitizer/pull/118))
