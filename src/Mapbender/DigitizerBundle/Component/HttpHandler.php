@@ -75,8 +75,7 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
             $schema = $this->schemaFilter->getSchema($element, $schemaName);
             $feature = $schema->getRepository()->getById($featureData['idInSchema']);
             if (!$feature) {
-                // uh-oh!
-                continue;
+               $feature = $schema->getRepository()->itemFactory();
             }
             $updatedFeature = $this->saveItem($schema, $feature, $common + $featureData);
             $dataOut['saved'][] = $this->formatResponseItem($schema, $updatedFeature) + array(
