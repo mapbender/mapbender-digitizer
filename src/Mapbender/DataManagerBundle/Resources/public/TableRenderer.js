@@ -96,6 +96,23 @@
             }
         },
         /**
+         * @param {Object} item
+         * @param {Boolean} show to automatically update pagination
+         */
+        addOrRefreshRow: function(item, show) {
+            var dt = this.getDatatablesInstance_();
+
+            var rowExists = dt.rows(function(_, data) {
+                return data === item;
+            }).count() > 0;
+
+            if (rowExists) {
+                this.refreshRow(item, show);
+            } else {
+                this.addRow(item, show);
+            }
+        },
+        /**
          * Switch pagination so the given tr element is on the current page
          *
          * @param {Element} tr

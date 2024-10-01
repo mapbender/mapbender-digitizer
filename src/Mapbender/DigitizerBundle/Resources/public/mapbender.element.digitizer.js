@@ -439,8 +439,8 @@
          * @return {string}
          * @private
          */
-        _generateNamespacedId: function(schema, feature) {
-            return [this.element.attr('id'), schema.schemaName, this._getUniqueItemId(feature)].join('-');
+        _generateNamespacedId: function(schema, feature, index = null) {
+            return [this.element.attr('id'), schema.schemaName, this._getUniqueItemId(feature), ...(index !== null ? [index] : [])].join('-');
         },
         _afterSave: function(schema, feature, originalId, responseData) {
             // unravel dm-incompatible response format
@@ -515,7 +515,7 @@
                 var feature = features[i];
                 var itemSchema = this.getItemSchema(feature);
                 continueDrawing = continueDrawing || itemSchema.continueDrawingAfterSave;
-                var mapId = this._generateNamespacedId(itemSchema, feature);
+                var mapId = this._generateNamespacedId(itemSchema, feature, i);
                 featureMap[mapId] = feature;
                 postData.features.push({
                     schemaName: itemSchema.schemaName,
@@ -538,7 +538,8 @@
                         feature.setGeometry(geometry);
                         widget._replaceItemData(itemSchema, feature, savedItem.properties || {});
                         feature.set('dirty', false);
-                        widget.tableRenderer.refreshRow(feature, false);
+                        feature.set('oldGeometry', geometry);
+                        widget.tableRenderer.addOrRefreshRow(feature, true);
                         widget._saveEvent(itemSchema, feature, widget._getUniqueItemId(feature));
                     }
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
