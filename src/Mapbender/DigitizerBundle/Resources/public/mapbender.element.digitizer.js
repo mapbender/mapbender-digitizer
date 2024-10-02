@@ -554,6 +554,8 @@
                     $('.-fn-toggle-tool', widget.element).removeClass('active');
                 });
             }
+
+            return promise;
         },
         updateSaveAll: function() {
             var $saveAllButton = $('.-fn-save-all', this.element);
