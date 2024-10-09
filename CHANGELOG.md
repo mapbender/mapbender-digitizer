@@ -1,3 +1,7 @@
+## 2.0.2
+* Enable creation of several features at once ([PR#131](https://github.com/mapbender/mapbender-digitizer/pull/131))
+* Fix `trackUser` and `filterUser` in digitizer config ([PR#132](https://github.com/mapbender/mapbender-digitizer/pull/132))
+
 ## 2.0.1
 * Enable immediate update of the feature table in the data manager ([PR#130](https://github.com/mapbender/mapbender-digitizer/pull/130))
 
