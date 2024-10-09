@@ -95,7 +95,7 @@ class UserFilterProvider
         if ($token instanceof NullToken) {
             return null;
         } else {
-            return $token->getUsername();
+            return $token->getUserIdentifier();
         }
     }
 }
