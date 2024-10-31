@@ -1,4 +1,5 @@
 ## next release
+* updateMultiple now returns a Promise; TableRenderer includes addOrRefreshRow for automatic feature handling post-AJAX call; unique namespace ID for unsaved features enables updates post-AJAX; oldGeometry set after successful updateMultiple call. ([PR#133](https://github.com/mapbender/mapbender-digitizer/pull/133))
 * prevent Draw Donut On Non-Digitizer Features ([PR#120](https://github.com/mapbender/mapbender-digitizer/pull/120))
 * Prevent self intersection of polygons not only on modification, but on creation as well ([PR#118](https://github.com/mapbender/mapbender-digitizer/pull/118))
 * Allow leaving modification mode on pressing escape ([PR#118](https://github.com/mapbender/mapbender-digitizer/pull/118))
