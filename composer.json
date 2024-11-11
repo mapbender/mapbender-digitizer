@@ -7,14 +7,16 @@
     "authors": [
         {"name": "Andriy Oblivantsev"},
         {"name": "Stefan Winkelmann"},
-        {"name": "David Patzke"}
+        {"name": "David Patzke"},
+        {"name": "Felix Rauch"},
+        {"name": "Thorsten Hack"}
     ],
     "require": {
-        "php": ">=8.0",
+        "php": ">=8.1",
         "doctrine/dbal": "^2.11 || ^3",
         "doctrine/persistence": "^2 || ^3",
         "blueimp/jquery-file-upload": "9.*",
-        "mapbender/mapbender": "^3.2.6 || ^4"
+        "mapbender/mapbender": "^4"
     },
     "provide": {
         "mapbender/data-manager": "3.0",
