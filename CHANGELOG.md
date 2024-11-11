@@ -1,3 +1,6 @@
+## 2.0.3
+* Enable CSS styling in FormItem for images, and allow images to be displayed in their original size with the EnlargeImage attribute ([PR#134](https://github.com/mapbender/mapbender-digitizer/pull/134)) 
+
 ## 2.0.2
 * Enable creation of several features at once ([PR#131](https://github.com/mapbender/mapbender-digitizer/pull/131))
 * Fix `trackUser` and `filterUser` in digitizer config ([PR#132](https://github.com/mapbender/mapbender-digitizer/pull/132))
