@@ -417,6 +417,29 @@
                 .attr('data-default-src', src || '')
                 .attr('data-preview-for', settings.name || null)
             ;
+
+            if (settings.imageCss) {
+                $img.css(settings.imageCss);
+            }
+
+            if (settings.enlargeImage) {
+                $img.on('click', function() {
+                    var $this = $(this);
+                    if ($this.data('enlarged')) {
+                        $this.css({
+                            width: $this.data('previous-width'),
+                            height: $this.data('previous-height')
+                        });
+                        $this.data('enlarged', false);
+                    } else {
+                        $this.data('previous-width', $this.css('width'));
+                        $this.data('previous-height', $this.css('height'));
+                        $this.css({ width: 'auto', height: 'auto' });
+                        $this.data('enlarged', true);
+                    }
+                });
+            }
+
             // Wrap in row mb-3 (potentially with label), but
             // remove input-related values (img is not an input)
             return this.wrapInput_($img, {

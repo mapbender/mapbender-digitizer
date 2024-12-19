@@ -1,6 +1,7 @@
 ## 2.0.3
 * updateMultiple now returns a Promise; TableRenderer includes addOrRefreshRow for automatic feature handling post-AJAX call; unique namespace ID for unsaved features enables updates post-AJAX; oldGeometry set after successful updateMultiple call. ([PR#133](https://github.com/mapbender/mapbender-digitizer/pull/133))
 * prevent Draw Donut On Non-Digitizer Features ([PR#120](https://github.com/mapbender/mapbender-digitizer/pull/120))
+* Enable CSS styling in FormItem for images, and allow images to be displayed in their original size with the EnlargeImage attribute ([PR#134](https://github.com/mapbender/mapbender-digitizer/pull/134)) 
 
 ## 2.0.2
 * Enable creation of several features at once ([PR#131](https://github.com/mapbender/mapbender-digitizer/pull/131))
