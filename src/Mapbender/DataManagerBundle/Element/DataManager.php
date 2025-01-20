@@ -4,15 +4,14 @@
 namespace Mapbender\DataManagerBundle\Element;
 
 
-use Mapbender\Component\Element\ElementServiceInterface;
-use Mapbender\Component\Element\HttpHandlerProvider;
+use Mapbender\Component\Element\AbstractElementService;
 use Mapbender\Component\Element\TemplateView;
 use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataManagerBundle\Component\HttpHandler;
 use Mapbender\DataManagerBundle\Component\SchemaFilter;
 use Mapbender\DataSourceBundle\Component\RepositoryRegistry;
 
-class DataManager implements ElementServiceInterface, HttpHandlerProvider
+class DataManager extends AbstractElementService
 {
     /** @var RepositoryRegistry */
     protected $registry;
