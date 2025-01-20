@@ -59,16 +59,10 @@
             var seen = {};
             var toolSpecs = [];
             var subSchemas = this.owner.expandCombination(schema);
-            var standardTools = ['modifyFeature', 'moveFeature'];
-            var addModify = false;
             var addMove = false;
             var self = this;
             for (var s = 0; s < subSchemas.length; ++s) {
                 var validNames = this.getValidToolNames(subSchemas[s]);
-                // Note: Modify not allowed on single point geometries
-                //       Move allowed on everything
-                addModify = addModify || -1 !== validNames.indexOf('modifyFeature');
-                addMove = true;
                 var subSchemaTools = (subSchemas[s].toolset || this.getDefaultGeometryToolNames(subSchemas[s])).map(function(tc) {
                     var obj = (typeof tc === 'string') && {type: tc} || Object.assign({}, tc);
                     obj.schema = obj.schema || subSchemas[s].schemaName;
@@ -76,7 +70,6 @@
                 }).filter(function(toolSpec) {
                     return (!seen[toolSpec.type])
                         && self.checkToolAccess_(subSchemas[s], toolSpec.type)
-                        && -1 === standardTools.indexOf(toolSpec.type)
                         && -1 !== validNames.indexOf(toolSpec.type)
                     ;
                 });
@@ -87,12 +80,6 @@
                         seen[toolSpec.type] = true;
                     }
                 }
-            }
-            if (addModify) {
-                toolSpecs.push({type: 'modifyFeature'});
-            }
-            if (addMove) {
-                toolSpecs.push({type: 'moveFeature'});
             }
             return toolSpecs;
         },

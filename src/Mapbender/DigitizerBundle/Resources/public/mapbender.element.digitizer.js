@@ -293,7 +293,7 @@
             var subSchemas = this.expandCombination(schema);
             for (var s = 0; s < subSchemas.length; ++s) {
                 keepVisChange = keepVisChange || subSchemas[s].allowChangeVisibility;
-                keepSaveAll = keepSaveAll || subSchemas[s].allowDigitize || subSchemas[s].allowEdit;
+                keepSaveAll = keepSaveAll || (subSchemas[s].allowDigitize && subSchemas[s].allowEdit);
                 if (keepVisChange && keepSaveAll) {
                     break;
                 }
@@ -419,7 +419,7 @@
         getEnabledSchemaFunctionCodes: function(schema) {
             var codes = this._superApply(arguments);
             codes = codes.concat([
-                schema.allowDigitize && '-fn-save',
+                schema.allowDigitize && schema.allowEdit && '-fn-save',
                 schema.copy && schema.copy.enable && '-fn-copy',
                 schema.allowCustomStyle && '-fn-edit-style',
                 schema.allowChangeVisibility && '-fn-toggle-visibility'
