@@ -361,7 +361,8 @@
                     }
                 });
             }
-            buttons.push.apply(buttons, this._super(schema, feature));
+            const overrideShowSaveButton = !this._getUniqueItemId(feature) && schema.allowCreate;
+            buttons.push.apply(buttons, this._super(schema, feature, overrideShowSaveButton));
             return buttons;
         },
         _getItemData: function(feature) {

@@ -517,10 +517,10 @@
          * @return {Array<Object>}
          * @private
          */
-        _getEditDialogButtons: function(schema, dataItem) {
+        _getEditDialogButtons: function(schema, dataItem, overrideAllowSave) {
             var buttons = [];
             var widget = this;
-            if (schema.allowEdit) {
+            if (schema.allowEdit || overrideAllowSave) {
                 buttons.push({
                     text: Mapbender.trans('mb.actions.save'),
                     'class': 'btn btn-primary',
