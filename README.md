@@ -39,13 +39,13 @@ Using Digitizer requires registering *two* bundles in your application kernel. R
 ## Configuring feature interactions
 Each schema may define the following values to control access to data modifying interactions:
 
-| name | type | description | default |
-|---|---|---|---|
-| allowCreate | boolean or list of strings | Allow user to make new features | true |
-| allowEdit | boolean or list of strings | Allow user to modify existing features and their attributes | true |
-| allowDelete | boolean or list of strings | Allow user to remove features from the database | true |
-| allowDigitize | boolean or list of strings | Allow geometry editing (attribute editing may still be allowed via `allowEdit`) | true |
-| roles | list of strings or null | Show this schema only to users with (at least one of) these roles | null |
+| name | type | description                                                                     | default |
+|---|---|---------------------------------------------------------------------------------|---|
+| allowCreate | boolean or list of strings | Allow user to make new features                                                 | true |
+| allowEdit | boolean or list of strings | Allow user to modify existing feature attributes                     | true |
+| allowDelete | boolean or list of strings | Allow user to remove features from the database                                 | true |
+| allowDigitize | boolean or list of strings | Allow geometry editing (attribute editing must also be allowed via `allowEdit`) | true |
+| roles | list of strings or null | Show this schema only to users with (at least one of) these roles               | null |
 
 The `roles` list should contain entries understood by the Symfony grants system, such as
 `ROLE_USER` for logged-in users or `ROLE_GROUP_SOMETHING` for a user group created and

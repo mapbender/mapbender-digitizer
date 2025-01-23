@@ -293,7 +293,7 @@
             var subSchemas = this.expandCombination(schema);
             for (var s = 0; s < subSchemas.length; ++s) {
                 keepVisChange = keepVisChange || subSchemas[s].allowChangeVisibility;
-                keepSaveAll = keepSaveAll || subSchemas[s].allowDigitize || subSchemas[s].allowEdit;
+                keepSaveAll = keepSaveAll || (subSchemas[s].allowDigitize && subSchemas[s].allowEdit);
                 if (keepVisChange && keepSaveAll) {
                     break;
                 }
@@ -361,7 +361,8 @@
                     }
                 });
             }
-            buttons.push.apply(buttons, this._super(schema, feature));
+            const overrideShowSaveButton = !this._getUniqueItemId(feature) && schema.allowCreate;
+            buttons.push.apply(buttons, this._super(schema, feature, overrideShowSaveButton));
             return buttons;
         },
         _getItemData: function(feature) {
@@ -418,7 +419,7 @@
         getEnabledSchemaFunctionCodes: function(schema) {
             var codes = this._superApply(arguments);
             codes = codes.concat([
-                schema.allowDigitize && '-fn-save',
+                schema.allowDigitize && schema.allowEdit && '-fn-save',
                 schema.copy && schema.copy.enable && '-fn-copy',
                 schema.allowCustomStyle && '-fn-edit-style',
                 schema.allowChangeVisibility && '-fn-toggle-visibility'
