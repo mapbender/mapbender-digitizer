@@ -584,7 +584,7 @@
          */
         getSnappingLayers: function(schema) {
             let olMap = this.mbMap.getModel().olMap;
-            let layers = olMap.getLayers().getArray().filter(layer => layer instanceof ol.layer.Vector);
+            let layers = olMap.getAllLayers().filter(layer => layer instanceof ol.layer.Vector);
             return this.getSchemaLayers(schema).concat(layers);
         },
         /**
