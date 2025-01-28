@@ -579,12 +579,13 @@
             });
         },
         /**
-         * extracted to be overridden
          * @param {*} schema
          * @returns {Array<ol.layer.Vector>}
          */
         getSnappingLayers: function(schema) {
-          return this.getSchemaLayers(schema);
+            let olMap = this.mbMap.getModel().olMap;
+            let layers = olMap.getAllLayers().filter(layer => layer instanceof ol.layer.Vector);
+            return this.getSchemaLayers(schema).concat(layers);
         },
         /**
          * @param {*} schema
