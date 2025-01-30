@@ -399,7 +399,7 @@
                 .append($btn)
                 .append($downloadBtn)
                 .append($deleteBtn)
-                .append('<i class="fa fas -js-loading-indicator fa-spinner fa-spin hidden" />')
+                .append('<i class="fa fas -js-loading-indicator fa-spinner fa-spin hidden data-manager-spinner" />')
             ;
             return this.wrapInput_($group, settings);
         },
