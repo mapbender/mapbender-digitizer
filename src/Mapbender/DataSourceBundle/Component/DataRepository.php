@@ -6,6 +6,7 @@ namespace Mapbender\DataSourceBundle\Component;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
 use Mapbender\DataSourceBundle\Component\Drivers\DoctrineBaseDriver;
 use Mapbender\DataSourceBundle\Component\Drivers\Oracle;
 use Mapbender\DataSourceBundle\Component\Drivers\PostgreSQL;
@@ -199,6 +200,9 @@ class DataRepository
     {
         if (!$this->tableMetaData) {
             $this->tableMetaData = $this->driver->loadTableMeta($this->connection, $this->tableName);
+        }
+        if (empty($this->tableMetaData->getColumNames())) {
+            throw new ConfigurationErrorException("The table ".$this->tableName." is empty or does not exist.");
         }
         return $this->tableMetaData;
     }
