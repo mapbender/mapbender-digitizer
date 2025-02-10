@@ -78,7 +78,7 @@
                         && self.checkToolAccess_(subSchemas[s], toolSpec.type)
                         && -1 === standardTools.indexOf(toolSpec.type)
                         && -1 !== validNames.indexOf(toolSpec.type)
-                    ;
+                        ;
                 });
                 for (var t = 0; t < subSchemaTools.length; ++t) {
                     var toolSpec = subSchemaTools[t];
@@ -115,10 +115,22 @@
                     .append($icon)
                     .data({
                         schema: btnSchema
-                    })
-                ;
+                    });
                 buttons.push($button);
             }
+
+            if (schema.allowGeometryExport) {
+                var $exportBtnIcon = $('<span>').addClass('fa fa-download');
+                var $exportBtn = $('<button>')
+                    .attr({
+                        type: 'button',
+                        title: Mapbender.trans('mb.digitizer.toolset.exportSelected')
+                    })
+                    .addClass('btn btn-default -fn-export-selected')
+                    .append($exportBtnIcon);
+                buttons.push($exportBtn);
+            }
+
             return buttons;
         },
         checkToolAccess_: function(schema, toolName) {
@@ -139,6 +151,54 @@
                     }
                 });
             });
+
+            // Add an event listener for exporting the currently selected features
+            widget.element.on('click', '.-fn-export-selected', function() {
+                // Get the selected features
+                var exportFeatures = widget.tableRenderer.selectedFeatures || [];
+
+                // Check if there are any features to export
+                if (exportFeatures.length === 0) {
+                    $.notify(Mapbender.trans('mb.digitizer.feature.export.notFound'));
+                    return;
+                }
+
+                // Create a new array of features that include geometry and properties
+                var strippedFeatures = exportFeatures.map(function(originalFeature) {
+                    var geometryClone = originalFeature.getGeometry().clone();
+                    var properties = originalFeature.get("data");
+                    delete properties.geometry; // Remove the geometry property to avoid duplication
+                    return new ol.Feature({
+                        geometry: geometryClone,
+                        ...properties // Add the properties to the new feature
+                    });
+                });
+
+                // Prepare the GeoJSON formatting
+                var format = new ol.format.GeoJSON();
+                var dataProjection = 'EPSG:4326';
+
+                // Write features as GeoJSON, specifying only geometry
+                var geojson = format.writeFeaturesObject(strippedFeatures, {
+                    dataProjection: dataProjection,
+                    featureProjection: widget.mbMap.getModel().olMap.getView().getProjection()
+                });
+
+                // Convert to text
+                var geojsonString = JSON.stringify(geojson);
+
+                // Create a temporary downloadable link
+                var blob = new Blob([geojsonString], { type: 'application/json' });
+                var url = URL.createObjectURL(blob);
+
+                var tempLink = document.createElement('a');
+                tempLink.href = url;
+                tempLink.download = 'selected_features.geojson';
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
+            });
+
         }
     };
 })(jQuery);

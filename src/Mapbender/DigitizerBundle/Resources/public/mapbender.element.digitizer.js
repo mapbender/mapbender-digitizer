@@ -418,7 +418,8 @@
                 schema.allowDigitize && '-fn-save',
                 schema.copy && schema.copy.enable && '-fn-copy',
                 schema.allowCustomStyle && '-fn-edit-style',
-                schema.allowChangeVisibility && '-fn-toggle-visibility'
+                schema.allowChangeVisibility && '-fn-toggle-visibility',
+                schema.allowGeometryExport && '-fn-check-for-export'
             ]);
             return codes.filter(function(x) { return !!x; });
         },
@@ -474,6 +475,7 @@
             return this._super(schema).then(function(features) {
                 self.queuedRefresh_[schema.schemaName] = false;
                 self.renderer.replaceFeatures(schema, features);
+                self.tableRenderer.selectedFeatures = [];
                 return features;
             });
         },
