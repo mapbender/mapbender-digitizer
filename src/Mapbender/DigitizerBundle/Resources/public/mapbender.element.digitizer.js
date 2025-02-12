@@ -775,6 +775,33 @@
         adjustStyle: function(schema, feature) {
 
         },
+        createExportData: function(strippedFeatures) {
+            
+            var format = new ol.format.GeoJSON();
+            var dataProjection = 'EPSG:4326';
+
+            // Write features as GeoJSON, specifying only geometry
+            var geojson = format.writeFeaturesObject(strippedFeatures, {
+                dataProjection: dataProjection,
+                featureProjection: this.mbMap.getModel().olMap.getView().getProjection()
+            });
+
+            // Convert to text
+            var geojsonString = JSON.stringify(geojson);
+
+            // Create a temporary downloadable link
+            var blob =  new Blob([geojsonString], { type: 'application/json' });
+
+                           // Create a temporary downloadable link
+            var url = URL.createObjectURL(blob);
+
+            var tempLink = document.createElement('a');
+            tempLink.href = url;
+            tempLink.download = 'selected_features.geojson';
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+        },
         __formatting_dummy: null
     });
 
