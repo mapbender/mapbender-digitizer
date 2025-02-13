@@ -71,14 +71,6 @@
                 if (!$input.length) {
                     continue;
                 }
-                $('a[target="_blank"]', form).each(function() {
-                    var link = $(this).attr('href');
-                    const regex = /^\s*\$\{\s*data\.(\w+)\s*\}\s*$/;
-                    const match = link.match(regex);
-                    if(match !== null && inputName === match[1]){
-                        $(this).attr('href', value);
-                    }
-                });
                 switch ($input.get(0).type) {
                     case 'select-multiple':
                         if (!Array.isArray(value)) {
