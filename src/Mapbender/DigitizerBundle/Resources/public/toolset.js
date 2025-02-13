@@ -119,7 +119,7 @@
                 buttons.push($button);
             }
 
-            if (schema.allowGeometryExport) {
+            if (schema.allowGeometryExport || this.owner.expandCombination(schema).some(subSchema => subSchema.allowGeometryExport)) {
                 var $exportBtnIcon = $('<span>').addClass('fa fa-download');
                 var $exportBtn = $('<button>')
                     .attr({
@@ -180,7 +180,7 @@
                 // Write features as GeoJSON, specifying only geometry
                 var geojson = format.writeFeaturesObject(strippedFeatures, {
                     dataProjection: dataProjection,
-                    featureProjection: this.mbMap.getModel().olMap.getView().getProjection()
+                    featureProjection: widget.mbMap.getModel().olMap.getView().getProjection()
                 });
 
 
