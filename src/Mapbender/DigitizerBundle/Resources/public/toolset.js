@@ -174,7 +174,18 @@
                     });
                 });
 
-                widget.createExportData(strippedFeatures);
+                var format = new ol.format.GeoJSON();
+                var dataProjection = 'EPSG:4326';
+
+                // Write features as GeoJSON, specifying only geometry
+                var geojson = format.writeFeaturesObject(strippedFeatures, {
+                    dataProjection: dataProjection,
+                    featureProjection: this.mbMap.getModel().olMap.getView().getProjection()
+                });
+
+
+                widget.createExportData(geojson);
+
 
  
             });
