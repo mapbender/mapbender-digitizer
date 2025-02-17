@@ -1,3 +1,7 @@
+## next release
+* Enable export of geometries as geojson by using the attribute "allowGeometryExport" (PR#137)
+
+
 ## 2.0.3
 * updateMultiple now returns a Promise; TableRenderer includes addOrRefreshRow for automatic feature handling post-AJAX call; unique namespace ID for unsaved features enables updates post-AJAX; oldGeometry set after successful updateMultiple call. ([PR#133](https://github.com/mapbender/mapbender-digitizer/pull/133))
 * prevent Draw Donut On Non-Digitizer Features ([PR#120](https://github.com/mapbender/mapbender-digitizer/pull/120))
