@@ -15,6 +15,7 @@
 * Allow to set text area height by providing row attribute  ([PR#98](https://github.com/mapbender/mapbender-digitizer/pull/98))
 * Add option `paging` on root level to disable paging ([PR#99](https://github.com/mapbender/mapbender-digitizer/pull/99))
 * use allowRefresh of subschemas in combined schema
+* Enable export of geometries as geojson by using the attribute "allowGeometryExport" ([PR#137](https://github.com/mapbender/mapbender-digitizer/pull/137))
 
 
 ## 1.5.7
