@@ -1,5 +1,5 @@
 ## next release
-* Enable export of geometries as geojson by using the attribute "allowGeometryExport" (PR#137)
+* Enable export of geometries as geojson by using the attribute "allowGeometryExport" (PR#137 (https://github.com/mapbender/mapbender-digitizer/pull/137))
 
 
 ## 2.0.3
