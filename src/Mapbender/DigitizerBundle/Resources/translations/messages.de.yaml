@@ -13,6 +13,9 @@ mb.digitizer:
     revert.geometry: Geometrieänderung zurücknehmen
     intersection.error: Ungültige Geometrie
     feature:
+        export:
+            check: 'Zum Exportieren auswählen'
+            notFound: 'Keine Objekte zum Exportieren ausgewählt'
         remove:
             title: 'Löschen'
         zoomTo: 'Heranzoomen'
@@ -41,6 +44,7 @@ mb.digitizer:
         drawCircle: 'Kreis erstellen'
         drawEllipse: 'Ellipse erstellen'
         drawDonut: 'Enklave in Fläche zeichnen'
+        exportSelected: 'Ausgewählte Objekte exportieren'
     style:
         fillColor: Füllfarbe
         color: Color
