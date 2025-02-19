@@ -106,18 +106,6 @@
                 buttons.push($button);
             }
 
-            if (schema.allowGeometryExport || this.owner.expandCombination(schema).some(subSchema => subSchema.allowGeometryExport)) {
-                var $exportBtnIcon = $('<span>').addClass('fa fa-download');
-                var $exportBtn = $('<button>')
-                    .attr({
-                        type: 'button',
-                        title: Mapbender.trans('mb.digitizer.toolset.exportSelected')
-                    })
-                    .addClass('btn btn-outline-secondary -fn-export-selected')
-                    .append($exportBtnIcon);
-                buttons.push($exportBtn);
-            }
-
             return buttons;
         },
         checkToolAccess_: function(schema, toolName) {

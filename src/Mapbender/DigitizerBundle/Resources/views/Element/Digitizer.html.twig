@@ -48,4 +48,9 @@
     {{- parent() -}}
     <div class="btn-group btn-group-sm ms-2 -js-drawing-tools">
     </div>
+    <div class="btn-group btn-group-sm ms-2 -js-export">
+        <button type="button"
+                class="-fn-export-selected btn btn-outline-secondary"
+                title="{{ 'mb.digitizer.toolset.exportSelected' | trans }}"><i class="fa fa-download"></i></button>
+    </div>
 {%- endblock -%}

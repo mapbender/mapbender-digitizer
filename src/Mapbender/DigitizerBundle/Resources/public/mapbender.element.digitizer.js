@@ -307,6 +307,11 @@
             }
             var $geometryToolGroup = $('.-js-drawing-tools', $toolset);
             $geometryToolGroup.empty().append(this.toolsetRenderer.renderGeometryToolButtons(schema));
+
+            if (!(schema.allowGeometryExport || subSchemas.some(subSchema => subSchema.allowGeometryExport))) {
+                console.warn("No export button for schema", schema);
+                $('.-js-export', $toolset).hide();
+            }
         },
         _openEditDialog: function(schema, feature) {
             // Make feature visible in table when editing was started
