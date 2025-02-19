@@ -799,7 +799,7 @@
 
         },
         createExportData: function(geojson) {
-            
+
            var geojsonstring = JSON.stringify(geojson);
            this._downloadBlob(geojsonstring, 'application/json', 'export.geojson');
         },

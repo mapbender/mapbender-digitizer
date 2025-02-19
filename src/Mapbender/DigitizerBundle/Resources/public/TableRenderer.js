@@ -50,7 +50,7 @@
 
 
             // Existing buttons
-            this.registerButtonEvents(schema, $table);    
+            this.registerButtonEvents(schema, $table);
         },
 
         registerButtonEvents: function(schema, $table) {
@@ -66,10 +66,10 @@
                 var selected = (idx >= 0);
                 if (selected) {
                     self.selectedFeatures.splice(idx, 1);
-                    $('i.fa', this).removeClass('fa-check-square-o').addClass('fa-square-o');
+                    $('i', this).removeClass('fa-check-square').addClass('fa-square');
                 } else {
                     self.selectedFeatures.push(feature);
-                    $('i.fa', this).removeClass('fa-square-o').addClass('fa-check-square-o');
+                    $('i', this).removeClass('fa-square').addClass('fa-check-square');
                 }
             });
 
