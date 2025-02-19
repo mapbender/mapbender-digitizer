@@ -6,14 +6,17 @@ mb.digitizer:
     delete: Удалить
     save: Сохранить
   feature:
+    export:
+      check: 'Выбрать для экспорта'
+      notFound: 'Объекты для экспорта не выбраны'
     remove:
       title: 'Удалить'
-    zoomTo: 'Zoom to'
+    zoomTo: 'Приблизить к объекту'
     edit: 'Редактировать'
     attributes: 'Атрибуты'
     save:
       title: 'Сохранить'
-    print: 'Print'
+    print: 'Печать'
     class:
       title: Сбор данных (Digitizer)
       description: Сбор и редактирование данных

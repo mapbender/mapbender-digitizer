@@ -13,6 +13,9 @@ mb.digitizer:
     revert.geometry: Revert geometry changes
     intersection.error: Self-intersection in geometry not allowed
     feature:
+        export:
+          check: 'Select for export'
+          notFound: 'No objects selected for export'
         remove:
             title: 'Remove feature'
         zoomTo: 'Zoom to feature'

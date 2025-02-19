@@ -307,6 +307,11 @@
             }
             var $geometryToolGroup = $('.-js-drawing-tools', $toolset);
             $geometryToolGroup.empty().append(this.toolsetRenderer.renderGeometryToolButtons(schema));
+
+            if (!(schema.allowGeometryExport || subSchemas.some(subSchema => subSchema.allowGeometryExport))) {
+                console.warn("No export button for schema", schema);
+                $('.-js-export', $toolset).hide();
+            }
         },
         _openEditDialog: function(schema, feature) {
             // Make feature visible in table when editing was started
@@ -422,7 +427,8 @@
                 schema.allowDigitize && schema.allowEdit && '-fn-save',
                 schema.copy && schema.copy.enable && '-fn-copy',
                 schema.allowCustomStyle && '-fn-edit-style',
-                schema.allowChangeVisibility && '-fn-toggle-visibility'
+                schema.allowChangeVisibility && '-fn-toggle-visibility',
+                schema.allowGeometryExport && '-fn-check-for-export'
             ]);
             return codes.filter(function(x) { return !!x; });
         },
@@ -478,6 +484,7 @@
             return this._super(schema).then(function(features) {
                 self.queuedRefresh_[schema.schemaName] = false;
                 self.renderer.replaceFeatures(schema, features);
+                self.tableRenderer.selectedFeatures = [];
                 return features;
             });
         },
@@ -796,6 +803,23 @@
         adjustStyle: function(schema, feature) {
 
         },
+        createExportData: function(geojson) {
+
+           var geojsonstring = JSON.stringify(geojson);
+           this._downloadBlob(geojsonstring, 'application/json', 'export.geojson');
+        },
+
+        _downloadBlob: function(data, mimeType, filename) {
+            let blob = (data instanceof Blob) ? data : new Blob([data], { type: mimeType });
+            let url = URL.createObjectURL(blob);
+            let tempLink = document.createElement('a');
+            tempLink.href = url;
+            tempLink.download = filename;
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+        },
+
         __formatting_dummy: null
     });
 

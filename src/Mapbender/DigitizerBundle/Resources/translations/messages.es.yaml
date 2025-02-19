@@ -12,6 +12,9 @@ mb.digitizer:
     edit.geometry: Editar geometrías
     revert.geometry: Revertir los cambios en la geometría
     feature:
+        export:
+            check: 'Seleccionar para exportar'
+            notFound: 'No se han seleccionado objetos para exportar'
         remove:
             title: 'Eliminar'
         zoomTo: 'Zoom al objeto '

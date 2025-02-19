@@ -2,22 +2,32 @@
     "use strict";
 
     Mapbender.Digitizer = Mapbender.Digitizer || {};
+
     Mapbender.Digitizer.TableRenderer = function() {
+        // Call parent constructor
         Mapbender.DataManager.TableRenderer.apply(this, arguments);
+
+        // Initialize an array to store checked row IDs
+        this.selectedFeatures = [];
     };
-    Mapbender.Digitizer.TableRenderer.prototype = Object.create(Mapbender.DataManager.TableRenderer.prototype);
-    Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
-        constructor: Mapbender.Digitizer.TableRenderer
-    });
+
+    // Inherit from DataManager.TableRenderer
+    Mapbender.Digitizer.TableRenderer.prototype =
+        Object.create(Mapbender.DataManager.TableRenderer.prototype);
 
     Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
+        constructor: Mapbender.Digitizer.TableRenderer,
+
         render: function(schema) {
             var table = Mapbender.DataManager.TableRenderer.prototype.render.call(this, schema);
             this.registerEvents(schema, $(table));
             return table;
         },
+
         registerEvents: function(schema, $table) {
             var widget = this.owner;
+
+            // Hover highlight
             $table.on('mouseenter mouseleave', 'tbody > tr', function(event) {
                 var hover = event.handleObj.origType === 'mouseenter';
                 var feature = $(this).data().item;
@@ -25,11 +35,11 @@
                     feature.set('hover', hover);
                 }
             });
+
+            // Row click => zoom to feature
             $table.on('click', 'tbody > tr', function (e) {
-                // Do nothing if click hit an interaction button; return true to allow other handlers
                 var $target = $(e.target);
-                var $parentsAndSelf = $target.parentsUntil(this).add($target);
-                if ($parentsAndSelf.filter('.button,.btn').length) {
+                if ($target.is('.row-checkbox')) {
                     return true;
                 }
                 var feature = $(this).data().item;
@@ -37,36 +47,64 @@
                     widget.zoomToFeature(schema, feature);
                 }
             });
+
+
+            // Existing buttons
             this.registerButtonEvents(schema, $table);
         },
+
         registerButtonEvents: function(schema, $table) {
             var self = this;
-            $table.on('click', 'tbody > tr .-fn-save', function(event) {
-                // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
+
+            $table.on('click', '.-fn-check-for-export', function(e) {
+                e.stopPropagation();
+                var $row = $(this).closest('tr');
+                var feature = $row.data('item');
+                if (!feature) { return; }
+                // Toggle selected state, maintain selectedFeatures array
+                var idx = self.selectedFeatures.indexOf(feature);
+                var selected = (idx >= 0);
+                if (selected) {
+                    self.selectedFeatures.splice(idx, 1);
+                    $('i', this).removeClass('fa-check-square').addClass('fa-square');
+                } else {
+                    self.selectedFeatures.push(feature);
+                    $('i', this).removeClass('fa-square').addClass('fa-check-square');
+                }
+            });
+
+            // Save
+            $table.on('click', '.-fn-save', function(event) {
                 event.stopPropagation();
                 var data = $(this).closest('tr').data();
                 if (data.schema && data.item) {
-                    self.owner._saveItem(data.schema, data.item).fail(function(){
-                        self.owner._afterFailedSave(data.schema,data.item);
-                    });
+                    self.owner._saveItem(data.schema, data.item)
+                        .fail(function(){
+                            self.owner._afterFailedSave(data.schema, data.item);
+                        });
                 }
             });
-            $table.on('click', 'tbody > tr .-fn-toggle-visibility', function(event) {
-                // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
+
+            // Toggle visibility
+            $table.on('click', '.-fn-toggle-visibility', function(event) {
                 event.stopPropagation();
                 var $tr = $(this).closest('tr');
                 var feature = $tr.data().item;
                 feature.set('hidden', !feature.get('hidden'));
                 self.updateButtonStates_($tr.get(0), feature);
             });
-            $table.on('click', 'tbody > tr .-fn-edit-style', function(event) {
+
+            // Edit style
+            $table.on('click', '.-fn-edit-style', function(event) {
+                event.stopPropagation();
                 var data = $(this).closest('tr').data();
                 if (data.schema && data.item) {
                     self.owner.openStyleEditor(data.schema, data.item);
                 }
             });
-            $table.on('click', 'tbody > tr .-fn-copy', function(event) {
-                // Avoid calling row click handlers (may already try to zoom to feature, or open the edit dialog, depending on schema config)
+
+            // Copy
+            $table.on('click', '.-fn-copy', function(event) {
                 event.stopPropagation();
                 var data = $(this).closest('tr').data();
                 if (data.schema && data.item) {
@@ -74,33 +112,29 @@
                 }
             });
         },
+
         onRowCreation: function(tableSchema, tr, feature) {
             Mapbender.DataManager.TableRenderer.prototype.onRowCreation.apply(this, arguments);
-            // Place table row into feature data for quick access (synchronized highlighting etc)
+            // Link table row with feature
             feature.set('table-row', tr);
             // Inline save buttons start out disabled
             $('.-fn-save', tr).prop('disabled', !feature.get('dirty'));
             this.registerFeatureEvents(feature);
         },
+
         registerFeatureEvents: function(feature) {
-            // Avoid registering same event handlers on the same feature multiple times
             if (feature.get('table-events')) {
                 return;
             }
-            // @todo: track across multiple tables
-
             var self = this;
-            // Update interaction buttons when "hidden" and "dirty" values change
             feature.on(ol.ObjectEventType.PROPERTYCHANGE, function(event) {
                 var feature = event.target;
                 var tr = feature && feature.get('table-row');
                 if (tr) {
                     switch (event.key) {
                         default:
-                            // do nothing
                             break;
                         case 'dirty':
-                            // Page to feature on initial modification
                             if (feature.get('dirty')) {
                                 self.showRow(tr);
                             }
@@ -113,7 +147,6 @@
                             break;
                     }
 
-
                     if (event.key === 'dirty' && feature.get('dirty')) {
                         self.showRow(tr);
                     }
@@ -122,34 +155,28 @@
             });
             feature.set('table-events', true);
         },
-        /**
-         * @param {Object} feature
-         * @param {Boolean} show to automatically update pagination
-         */
+
         refreshRow: function(feature, show) {
             Mapbender.DataManager.TableRenderer.prototype.refreshRow.apply(this, arguments);
-
             var tr = feature && feature.get('table-row');
             if (tr) {
                 this.updateButtonStates_(tr, feature);
             }
         },
+
         updateButtonStates_: function(tr, feature) {
             var hidden = !!feature.get('hidden');
-            var tooltip;
-            if (hidden) {
-                tooltip = Mapbender.trans('mb.digitizer.feature.visibility.toggleon')
-            } else {
-                tooltip = Mapbender.trans('mb.digitizer.feature.visibility.toggleoff')
-            }
+            var tooltip = hidden
+                ? Mapbender.trans('mb.digitizer.feature.visibility.toggleon')
+                : Mapbender.trans('mb.digitizer.feature.visibility.toggleoff');
             var $visibilityButton = $('.-fn-toggle-visibility', tr);
-            // Support both icon class ON button (legacy misuse) and icon markup INSIDE button transparently
+            // Handle icon class toggling
             var $visibilityIcon = $visibilityButton.children().add($visibilityButton).filter('.fa');
             $visibilityIcon
                 .toggleClass('fa-eye-slash', hidden)
                 .toggleClass('fa-eye', !hidden)
-                .attr('title', tooltip)
-            ;
+                .attr('title', tooltip);
+
             $('.-fn-save', tr).prop('disabled', !feature.get('dirty'));
 
             if (!!feature.get('dirty')) {

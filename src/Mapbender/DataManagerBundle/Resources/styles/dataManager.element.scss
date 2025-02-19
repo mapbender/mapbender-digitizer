@@ -157,7 +157,7 @@ $buttonActiveTextColor: #fff !default;
         .ui-dialog-titlebar-close {
             &:before {
                 content: "\f00d"; // =.fa-times
-                font-family: "FontAwesome", "Font Awesome 5 Free", "Font Awesome 5 Pro";
+                font-family: "FontAwesome", "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 5 Free", "Font Awesome 5 Pro";
             }
 
             .ui-button-icon {
@@ -332,5 +332,39 @@ $buttonActiveTextColor: #fff !default;
     .ui-datepicker-title {
         margin-left: 0.5em;
         margin-right: 0.5em;
+    }
+}
+
+
+.data-manager-dialog, .mb-element-data-manager {
+    .sorting, .sorting_asc, .sorting_desc {
+        cursor: pointer;
+    }
+
+    .sorting:before, .sorting_asc:before, .sorting_desc:after {
+        display: inline-block !important;
+        min-width: 1.4em; // Prevent width change on sorting state change
+        font-family: var(--fa-style-family, "Font Awesome 6 Free");
+        font-weight: var(--fa-style, 900);
+        line-height: 1;
+        transform: translateY(1px);
+        right: 1em !important;
+    }
+
+    .sorting:before {
+        content: "\f0dc" !important; // = .fa-sort / .fa-unsorted
+        opacity: 1 !important;
+    }
+
+    .sorting_asc:before {
+        content: "\f160" !important; // = .fa-sort-amount-asc
+    }
+
+    .sorting_desc:after {
+        content: "\f161" !important; // = .fa-sort-amount-desc
+    }
+
+    .sorting:after, .sorting_asc:after, .sorting_desc:before {
+        content: "" !important;
     }
 }

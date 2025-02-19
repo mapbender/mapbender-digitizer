@@ -1,5 +1,9 @@
 {%- extends '@MapbenderDataManager/Element/DataManager.html.twig' -%}
+
 {%- block table_buttons -%}
+    <button type="button" class="-fn-check-for-export btn btn-outline-secondary" title="{{ 'mb.digitizer.feature.export.check' | trans }}">
+        <i class="far fa-square"></i>
+    </button>
     <button type="button"
             class="-fn-copy btn btn-outline-secondary"
             title="{{ 'mb.digitizer.feature.clone.title' | trans }}"><i class="fa far fa-copy"></i></button>
@@ -17,6 +21,7 @@
             title="{{ 'mb.digitizer.feature.save.title' | trans }}"><i class="fa fas fa-save"></i></button>
     {{- block('delete_button') -}}
 {%- endblock -%}
+
 {%- block toolset -%}
     <div class="form-check ps-4">
         <input type="checkbox" name="current-extent" class="form-check-input">
@@ -24,6 +29,7 @@
     </div>
     {{- parent() -}}
 {%- endblock -%}
+
 {%- block toolset_buttons -%}
     {{- parent() -}}
     <button type="button"
@@ -37,8 +43,14 @@
             class="-fn-save-all btn btn-outline-primary"
             title="{{ 'mb.digitizer.toolset.saveAll' | trans }}"><i class="fa fas fa-save"></i></button>
 {%- endblock -%}
+
 {%- block toolset_groups -%}
     {{- parent() -}}
     <div class="btn-group btn-group-sm ms-2 -js-drawing-tools">
+    </div>
+    <div class="btn-group btn-group-sm ms-2 -js-export">
+        <button type="button"
+                class="-fn-export-selected btn btn-outline-secondary"
+                title="{{ 'mb.digitizer.toolset.exportSelected' | trans }}"><i class="fa fa-download"></i></button>
     </div>
 {%- endblock -%}
