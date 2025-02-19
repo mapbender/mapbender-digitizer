@@ -56,7 +56,7 @@
         registerButtonEvents: function(schema, $table) {
             var self = this;
 
-            $table.on('click', 'tbody > tr .-fn-check-for-export', function(e) {
+            $table.on('click', '.-fn-check-for-export', function(e) {
                 e.stopPropagation();
                 var $row = $(this).closest('tr');
                 var feature = $row.data('item');
@@ -74,7 +74,7 @@
             });
 
             // Save
-            $table.on('click', 'tbody > tr .-fn-save', function(event) {
+            $table.on('click', '.-fn-save', function(event) {
                 event.stopPropagation();
                 var data = $(this).closest('tr').data();
                 if (data.schema && data.item) {
@@ -86,7 +86,7 @@
             });
 
             // Toggle visibility
-            $table.on('click', 'tbody > tr .-fn-toggle-visibility', function(event) {
+            $table.on('click', '.-fn-toggle-visibility', function(event) {
                 event.stopPropagation();
                 var $tr = $(this).closest('tr');
                 var feature = $tr.data().item;
@@ -95,7 +95,7 @@
             });
 
             // Edit style
-            $table.on('click', 'tbody > tr .-fn-edit-style', function(event) {
+            $table.on('click', '.-fn-edit-style', function(event) {
                 event.stopPropagation();
                 var data = $(this).closest('tr').data();
                 if (data.schema && data.item) {
@@ -104,7 +104,7 @@
             });
 
             // Copy
-            $table.on('click', 'tbody > tr .-fn-copy', function(event) {
+            $table.on('click', '.-fn-copy', function(event) {
                 event.stopPropagation();
                 var data = $(this).closest('tr').data();
                 if (data.schema && data.item) {
