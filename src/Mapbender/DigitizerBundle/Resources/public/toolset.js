@@ -113,7 +113,7 @@
                         type: 'button',
                         title: Mapbender.trans('mb.digitizer.toolset.exportSelected')
                     })
-                    .addClass('btn btn-default -fn-export-selected')
+                    .addClass('btn btn-outline-secondary -fn-export-selected')
                     .append($exportBtnIcon);
                 buttons.push($exportBtn);
             }
@@ -174,7 +174,7 @@
                 widget.createExportData(geojson);
 
 
- 
+
             });
 
         }
