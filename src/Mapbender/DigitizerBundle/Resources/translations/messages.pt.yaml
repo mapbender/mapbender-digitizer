@@ -12,6 +12,9 @@ mb.digitizer:
     revert.geometry: Reverter alteração na geometria
     intersection.error: Geometria inválida
     feature:
+        export:
+            check: Selecionar para exportar
+            notFound: Nenhum objeto selecionado para exportar
         remove:
             title: Excluir
         zoomTo: Aproximar
@@ -46,7 +49,7 @@ mb.digitizer:
         opacity: Opacidade
         pointRadius: Tamanho do ponto (pixels)
         strokeColor: Cor da linha
-        strokeWidth: Espessura da linha 
+        strokeWidth: Espessura da linha
         lineCap: Extremidades da linha
         round: Arredondado
         square: Quadrado

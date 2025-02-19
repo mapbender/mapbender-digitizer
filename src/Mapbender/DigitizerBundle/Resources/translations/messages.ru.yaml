@@ -6,6 +6,9 @@ mb.digitizer:
     delete: Удалить
     save: Сохранить
   feature:
+    export:
+      check: 'Выбрать для экспорта'
+      notFound: 'Объекты для экспорта не выбраны'
     remove:
       title: 'Удалить'
     zoomTo: 'Zoom to'
