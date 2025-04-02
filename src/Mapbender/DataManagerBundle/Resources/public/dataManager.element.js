@@ -381,11 +381,25 @@
         },
         _updateCalculatedText: function($elements, data) {
             $elements.each(function() {
-                var expression = $(this).attr('data-expression');
-                var textContent = function(data) {
-                    return eval(expression);
-                }(data);
-                $(this).text(textContent);
+                var expression = '';
+                var textContent = '';
+                if ($(this).attr('data-html-expression')){
+                    expression =$(this).attr('data-html-expression');
+
+                    textContent = function(data) {
+                        return eval(expression);
+                    }(data);
+                    $(this).html(textContent);
+                }else{
+                    expression =$(this).attr('data-expression');
+                
+                    textContent = function(data) {
+                        return eval(expression);
+                    }(data);
+                    $(this).text(textContent);
+                   
+                }  ;
+
             });
         },
         /**

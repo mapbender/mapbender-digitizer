@@ -1,3 +1,6 @@
+## next release
+* Enable dynamic feature data support for type: html ([PR#138](https://github.com/mapbender/mapbender-digitizer/pull/138)) 
+
 ## 2.0.3
 * updateMultiple now returns a Promise; TableRenderer includes addOrRefreshRow for automatic feature handling post-AJAX call; unique namespace ID for unsaved features enables updates post-AJAX; oldGeometry set after successful updateMultiple call. ([PR#133](https://github.com/mapbender/mapbender-digitizer/pull/133))
 * prevent Draw Donut On Non-Digitizer Features ([PR#120](https://github.com/mapbender/mapbender-digitizer/pull/120))
