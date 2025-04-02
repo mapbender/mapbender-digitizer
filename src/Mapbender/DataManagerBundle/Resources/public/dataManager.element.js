@@ -389,7 +389,7 @@
                 if ($(element).attr('data-html-expression')) {
                     $(element).html(content);
                 } else {
-                    $(element).text(textContent);
+                    $(element).text(content);
                 }
             });
         },
