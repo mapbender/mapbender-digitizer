@@ -531,14 +531,20 @@
             ;
             return $element;
         },
-        handle_html_: function(settings) {
+        handle_html_: function (settings) {
             /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L265 */
-            var $wrapper = $(document.createElement('div'))
+            const $wrapper = $(document.createElement('div'))
                 .attr(settings.attr || {})
                 .addClass(settings.cssClass)
-                .css(settings.css || {})
-                .append(settings.html)
-            ;
+                .css(settings.css || {});
+
+            if (settings.html.includes('function()') || settings.html.includes('function ()')) {
+                $wrapper.addClass('-fn-calculated-text')
+                    .attr('data-expression', settings.html)
+                    .attr('data-html-expression', true);
+            } else {
+                $wrapper.append(settings.html);
+            }
             return $wrapper;
         },
         handle_text_: function(settings) {

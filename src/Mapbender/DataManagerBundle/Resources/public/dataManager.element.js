@@ -379,13 +379,18 @@
             this._saveEvent(schema, dataItem, originalId);
             $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
         },
-        _updateCalculatedText: function($elements, data) {
-            $elements.each(function() {
-                var expression = $(this).attr('data-expression');
-                var textContent = function(data) {
+        _updateCalculatedText: function ($elements, data) {
+            $elements.each((index, element) => {
+                const expression = $(element).attr('data-expression');
+                const content = function (data) {
                     return eval(expression);
                 }(data);
-                $(this).text(textContent);
+
+                if ($(element).attr('data-html-expression')) {
+                    $(element).html(content);
+                } else {
+                    $(element).text(content);
+                }
             });
         },
         /**
