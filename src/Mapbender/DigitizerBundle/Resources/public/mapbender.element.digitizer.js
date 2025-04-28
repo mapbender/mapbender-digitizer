@@ -1,3 +1,132 @@
+// --- Geometry intersection utility ---
+if (typeof ol !== 'undefined' && ol.geom && !ol.geom.Geometry.prototype.intersects) {
+    /**
+     * Checks if two line segments (p1-p2 and q1-q2) intersect
+     */
+    function segmentsIntersect(p1, p2, q1, q2) {
+        function ccw(a, b, c) {
+            return (c[1] - a[1]) * (b[0] - a[0]) > (b[1] - a[1]) * (c[0] - a[0]);
+        }
+        return (ccw(p1, q1, q2) !== ccw(p2, q1, q2)) && (ccw(p1, p2, q1) !== ccw(p1, p2, q2));
+    }
+    /**
+     * Checks if a point is inside a polygon (ray casting algorithm)
+     */
+    function pointInPolygon(point, polygon) {
+        var x = point[0], y = point[1];
+        var inside = false;
+        var rings = polygon.getCoordinates();
+        if (polygon.getType() === 'Polygon') {
+            rings = [rings[0]];
+        } else if (polygon.getType() === 'MultiPolygon') {
+            rings = rings.map(function(r) { return r[0]; });
+        }
+        for (var r = 0; r < rings.length; r++) {
+            var vs = rings[r];
+            for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+                if (((vs[i][1] > y) !== (vs[j][1] > y)) &&
+                    (x < (vs[j][0] - vs[i][0]) * (y - vs[i][1]) / (vs[j][1] - vs[i][1]) + vs[i][0])) {
+                    inside = !inside;
+                }
+            }
+        }
+        return inside;
+    }
+    /**
+     * Returns all segments of a geometry as pairs of coordinates
+     */
+    function getSegments(geom) {
+        var segments = [];
+        var type = geom.getType();
+        var coords = geom.getCoordinates();
+        if (type === 'LineString') {
+            for (var i = 0; i < coords.length - 1; i++) {
+                segments.push([coords[i], coords[i + 1]]);
+            }
+        } else if (type === 'Polygon') {
+            var rings = coords;
+            for (var r = 0; r < rings.length; r++) {
+                var ring = rings[r];
+                for (var i = 0; i < ring.length - 1; i++) {
+                    segments.push([ring[i], ring[i + 1]]);
+                }
+            }
+        } else if (type === 'MultiLineString') {
+            for (var l = 0; l < coords.length; l++) {
+                var line = coords[l];
+                for (var i = 0; i < line.length - 1; i++) {
+                    segments.push([line[i], line[i + 1]]);
+                }
+            }
+        } else if (type === 'MultiPolygon') {
+            for (var p = 0; p < coords.length; p++) {
+                var rings = coords[p];
+                for (var r = 0; r < rings.length; r++) {
+                    var ring = rings[r];
+                    for (var i = 0; i < ring.length - 1; i++) {
+                        segments.push([ring[i], ring[i + 1]]);
+                    }
+                }
+            }
+        }
+        return segments;
+    }
+    /**
+     * Returns all points of a geometry
+     */
+    function getPoints(geom) {
+        var type = geom.getType();
+        var coords = geom.getCoordinates();
+        if (type === 'Point') {
+            return [coords];
+        } else if (type === 'MultiPoint') {
+            return coords;
+        } else if (type === 'LineString' || type === 'MultiLineString') {
+            return coords.flat();
+        } else if (type === 'Polygon') {
+            return coords[0];
+        } else if (type === 'MultiPolygon') {
+            return coords.map(function(r) { return r[0]; }).flat();
+        }
+        return [];
+    }
+    /**
+     * Real geometry intersection for polygons and lines
+     */
+    ol.geom.Geometry.prototype.intersects = function(other) {
+        var type1 = this.getType();
+        var type2 = other.getType();
+        // Segment intersection
+        var segs1 = getSegments(this);
+        var segs2 = getSegments(other);
+        for (var i = 0; i < segs1.length; i++) {
+            for (var j = 0; j < segs2.length; j++) {
+                if (segmentsIntersect(segs1[i][0], segs1[i][1], segs2[j][0], segs2[j][1])) {
+                    return true;
+                }
+            }
+        }
+        // Point in polygon (for containment)
+        if (type1 === 'Polygon' || type1 === 'MultiPolygon') {
+            var pts2 = getPoints(other);
+            for (var k = 0; k < pts2.length; k++) {
+                if (pointInPolygon(pts2[k], this)) {
+                    return true;
+                }
+            }
+        }
+        if (type2 === 'Polygon' || type2 === 'MultiPolygon') {
+            var pts1 = getPoints(this);
+            for (var k = 0; k < pts1.length; k++) {
+                if (pointInPolygon(pts1[k], other)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+}
+// --- End geometry intersection utility ---
 (function ($) {
     "use strict";
 
