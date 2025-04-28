@@ -219,6 +219,17 @@
                     }, 0);
                     return;
                 }
+                
+                // Check if the geometry is valid with respect to the validation polygon
+                if (schema.validationPolygon && !widget.isGeometryValid(geom, schema)) {
+                    $.notify(Mapbender.trans('mb.digitizer.validation.outside.error') || 
+                             'The geometry must be within or intersect the allowed area');
+                    setTimeout(() => {
+                        widget.renderer.removeFeature(schema, feature);
+                    }, 0);
+                    return;
+                }
+
                 widget.initializeNewFeature(schema, feature);
                 widget._openEditDialog(schema, event.feature);
             });

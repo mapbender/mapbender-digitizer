@@ -6,8 +6,11 @@
     $.widget("mapbender.mbDigitizer", $.mapbender.mbDataManager, {
 
         options: {
-            schemes: {}
+            schemes: {},
+            // Add configuration for the reference polygon(s)
+            validationPolygon: null  // This will be set in the element configuration
         },
+
         mbMap: null,
         printClient: null,
         active: false,
@@ -32,6 +35,13 @@
             var widget = this;
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
+            
+            // Register translation for validation error message
+            if (!Mapbender.trans('mb.digitizer.validation.outside.error')) {
+                Mapbender.trans = Mapbender.trans || {};
+                Mapbender.trans['mb.digitizer.validation.outside.error'] = 'The drawn geometry must be within or intersect the allowed area';
+            }
+            
             $.when(Mapbender.elementRegistry.waitReady('.mb-element-map'), this.grantsRequest_).then(function(mbMap, _) {
                 widget.mbMap = mbMap;
                 widget.setup();
@@ -796,6 +806,35 @@
         adjustStyle: function(schema, feature) {
 
         },
+        
+        /**
+         * Check if a geometry is valid based on validation polygon
+         * @param {ol.geom.Geometry} geometry The geometry to check
+         * @param {Object} schema Schema configuration which may contain validationPolygon
+         * @returns {boolean} true if the geometry is valid (within or intersects the validation polygon)
+         */
+        isGeometryValid: function(geometry, schema) {
+            // If no validation polygon is configured, all geometries are valid
+            if (!this.options.validationPolygon && !schema.validationPolygon) {
+                return true;
+            }
+            
+            // Get the validation polygon for this schema (if specified)
+            let validationPolygon = schema.validationPolygon || this.options.validationPolygon;
+            
+            if (!validationPolygon) {
+                return true; // No validation needed
+            }
+            
+            // Convert validation polygon from WKT if it's a string
+            if (typeof validationPolygon === 'string') {
+                validationPolygon = this.wktFormat_.readGeometryFromText(validationPolygon);
+            }
+            
+            // Check if the geometry is within or intersects the validation polygon
+            return geometry.intersects(validationPolygon) || validationPolygon.intersects(geometry);
+        },
+        
         __formatting_dummy: null
     });
 
