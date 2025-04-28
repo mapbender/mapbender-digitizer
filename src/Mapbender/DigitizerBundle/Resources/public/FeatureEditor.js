@@ -222,8 +222,7 @@
                 
                 // Check if the geometry is valid with respect to the validation polygon
                 if (schema.validationPolygon && !widget.isGeometryValid(geom, schema)) {
-                    $.notify(Mapbender.trans('mb.digitizer.validation.outside.error') || 
-                             'The geometry must be within or intersect the allowed area');
+                    $.notify(Mapbender.trans('mb.digitizer.validation.outside.error'));
                     setTimeout(() => {
                         widget.renderer.removeFeature(schema, feature);
                     }, 0);

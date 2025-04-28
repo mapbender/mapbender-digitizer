@@ -164,13 +164,7 @@ if (typeof ol !== 'undefined' && ol.geom && !ol.geom.Geometry.prototype.intersec
             var widget = this;
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
-            
-            // Register translation for validation error message
-            if (!Mapbender.trans('mb.digitizer.validation.outside.error')) {
-                Mapbender.trans = Mapbender.trans || {};
-                Mapbender.trans['mb.digitizer.validation.outside.error'] = 'The drawn geometry must be within or intersect the allowed area';
-            }
-            
+
             $.when(Mapbender.elementRegistry.waitReady('.mb-element-map'), this.grantsRequest_).then(function(mbMap, _) {
                 widget.mbMap = mbMap;
                 widget.setup();

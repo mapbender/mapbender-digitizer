@@ -12,6 +12,9 @@ mb.digitizer:
     edit.geometry: Geometrie bearbeiten
     revert.geometry: Geometrieänderung zurücknehmen
     intersection.error: Ungültige Geometrie
+    validation:
+        outside:
+            error: 'Die Geometrie liegt außerhalb des gültigen Bereiches.'    
     feature:
         remove:
             title: 'Löschen'

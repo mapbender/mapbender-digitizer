@@ -12,6 +12,9 @@ mb.digitizer:
     edit.geometry: Edit geometry
     revert.geometry: Revert geometry changes
     intersection.error: Self-intersection in geometry not allowed
+    validation:
+        outside:
+            error: 'The object is outside the valid area.'
     feature:
         remove:
             title: 'Remove feature'
