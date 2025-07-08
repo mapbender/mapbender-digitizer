@@ -111,6 +111,7 @@ class PostgreSQL extends DoctrineBaseDriver implements Geographic
             // Ignore (DataStore on PostgreSQL / no Postgis)
         }
 
+        // TODO: this method was removed in DBAL 4, find a replacement
         $sql = $platform->getListTableColumnsSQL($tableNameUnquoted);
         $columns = array();
         /** @see \Doctrine\DBAL\Platforms\PostgreSqlPlatform::getListTableColumnsSQL */
