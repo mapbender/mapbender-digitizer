@@ -3,6 +3,7 @@
 namespace Mapbender\DataSourceBundle\Component\Drivers;
 
 use Doctrine\DBAL\Connection;
+use Mapbender\DataSourceBundle\Component\DataRepository;
 use Mapbender\DataSourceBundle\Component\Drivers\Interfaces\Geographic;
 use Mapbender\DataSourceBundle\Component\Meta\Column;
 use Mapbender\DataSourceBundle\Component\Meta\TableMeta;
@@ -20,8 +21,7 @@ class PostgreSQL extends DoctrineBaseDriver implements Geographic
         $tableName = $connection->quoteIdentifier($tableName);
 
         $sql = $this->getInsertSql($tableName, $pData[0], $pData[1])
-            . ' RETURNING ' . $connection->quoteIdentifier($identifier)
-        ;
+            . ' RETURNING ' . $connection->quoteIdentifier($identifier);
         return $connection->fetchOne($sql, $pData[2]);
     }
 
@@ -88,28 +88,30 @@ class PostgreSQL extends DoctrineBaseDriver implements Geographic
         // closed to querying individual columns.
         $platform = $connection->getDatabasePlatform();
         $gcSql = 'SELECT f_geometry_column, srid, type FROM "public"."geometry_columns"'
-               . ' WHERE f_table_name = ?'
-        ;
+            . ' WHERE f_table_name = ?';
         $gcParams = array();
-        if (false !== strpos($tableName, ".")) {
-            $tableNameParts = explode('.', $tableName, 2);
+        if (str_contains($tableName, ".")) {
+            $tableNameParts = DataRepository::stripQuotesFromArray(explode('.', $tableName, 2));
+            $tableNameUnquoted = implode('.', $tableNameParts);
             $gcParams[] = $tableNameParts[1];
             $gcSql .= ' AND "f_table_schema" = ?';
             $gcParams[] = $tableNameParts[0];
         } else {
-            $gcParams[] = $tableName;
+            $gcParams[] = DataRepository::stripQuotes($tableName);
+            $tableNameUnquoted = $gcParams[0];
             $gcSql .= ' AND "f_table_schema" = current_schema()';
         }
         $gcInfos = array();
         try {
-            foreach ($connection->executeQuery($gcSql, $gcParams) as $row) {
+            $gcInfosResult = $connection->executeQuery($gcSql, $gcParams)->fetchAllAssociative();
+            foreach ($gcInfosResult as $row) {
                 $gcInfos[$row['f_geometry_column']] = array($row['type'], $row['srid']);
             }
         } catch (\Doctrine\DBAL\Exception $e) {
             // Ignore (DataStore on PostgreSQL / no Postgis)
         }
 
-        $sql = $platform->getListTableColumnsSQL($tableName);
+        $sql = $platform->getListTableColumnsSQL($tableNameUnquoted);
         $columns = array();
         /** @see \Doctrine\DBAL\Platforms\PostgreSqlPlatform::getListTableColumnsSQL */
         /** @see \Doctrine\DBAL\Schema\PostgreSqlSchemaManager::_getPortableTableColumnDefinition */
