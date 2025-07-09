@@ -67,12 +67,15 @@ class DataRepository
         return $this->connection;
     }
 
-    /**
-     * @return string
-     */
-    public function getTableName()
+    public function getTableName(): string
     {
         return $this->tableName;
+    }
+
+    public function getTableNameUnquoted(): string
+    {
+        $parts = explode(".", $this->tableName);
+        return implode(".", self::stripQuotesFromArray($parts));
     }
 
     /**
@@ -150,7 +153,7 @@ class DataRepository
     {
         $queryBuilder = $this->createQueryBuilder();
         $this->configureSelect($queryBuilder, false, array());
-        $connection   = $queryBuilder->getConnection();
+        $connection = $queryBuilder->getConnection();
         $condition = $queryBuilder->expr()->in($this->uniqueIdFieldName, array_map(array($connection, 'quote'), $ids));
         $queryBuilder->where($condition);
         $results = $this->prepareResults($queryBuilder->executeQuery()->fetchAllAssociative());
@@ -166,7 +169,7 @@ class DataRepository
         $values = $this->prepareStoreValues($item);
         unset($values[$this->uniqueIdFieldName]);
         $values = $this->getTableMetaData()->prepareInsertData($values);
-        $id = $this->driver->insert($this->connection, $this->getTableName(), $values, $this->uniqueIdFieldName);
+        $id = $this->driver->insert($this->connection, $this->getTableNameUnquoted(), $values, $this->uniqueIdFieldName);
         // Reload (fully populate, renormalize geometry etc)
         // Use reload to support FeatureType in maintaining srs in = srs out
         /** @see FeatureType::reloadItem */
@@ -180,7 +183,7 @@ class DataRepository
         $values = $this->prepareStoreValues($item);
         $identifier = $this->idToIdentifier($item->getId());
         $values = $this->getTableMetaData()->prepareUpdateData($values);
-        $this->driver->update($this->connection, $this->getTableName(), $values, $identifier);
+        $this->driver->update($this->connection, $this->getTableNameUnquoted(), $values, $identifier);
         return $this->reloadItem($item);
     }
 
@@ -202,7 +205,7 @@ class DataRepository
             $this->tableMetaData = $this->driver->loadTableMeta($this->connection, $this->tableName);
         }
         if (empty($this->tableMetaData->getColumNames())) {
-            throw new ConfigurationErrorException("The table ".$this->tableName." is empty or does not exist.");
+            throw new ConfigurationErrorException("The table " . $this->tableName . " is empty or does not exist.");
         }
         return $this->tableMetaData;
     }
@@ -368,5 +371,17 @@ class DataRepository
             $fields[] = \strtolower($columnName);
         }
         return $fields;
+    }
+
+    public static function stripQuotesFromArray(array $array)
+    {
+        return array_map('self::stripQuotes', $array);
+    }
+
+    public static function stripQuotes(string $name)
+    {
+        return str_starts_with($name, '"') && str_ends_with($name, '"')
+            ? substr($name, 1, -1)
+            : $name;
     }
 }
