@@ -1,0 +1,50 @@
+mb.digitizer:
+    actions:
+      show_details: Details tonen
+      cancel: Annuleren
+      close: Sluiten
+      delete: Verwijderen
+      save: Opslaan
+    class:
+      title: Digitizer
+      description: Georeferentie en digitalisering
+    edit.attributes: Attributen bewerken
+    edit.geometry: Geometrie bewerken
+    revert.geometry: Geometriewijzigingen ongedaan maken
+    intersection.error: Zelf-intersectie in geometrie niet toegestaan
+    feature:
+        remove:
+            title: 'Feature verwijderen'
+        zoomTo: 'Zoom naar feature'
+        edit: 'Bewerken'
+        save:
+            title: Opslaan
+        print: Afdrukken
+        print_tooltip: 'Feature afdrukken'
+        clone:
+            title: Kopiëren
+            tooltip: 'Maak een kopie van deze feature'
+        style:
+            change: 'Stijl wijzigen'
+            change_tooltip: 'Feature-uiterlijk wijzigen'
+        visibility:
+            toggleoff: Feature verbergen
+            toggleon: Feature weergeven
+    toolset:
+        current-extent: 'Alleen selecteren binnen huidige extent'
+        showAll: 'Alle features tonen'
+        hideAll: 'Alle features verbergen'
+        saveAll: 'Alle features opslaan'
+        moveFeature: Verplaatsen
+        modifyFeature: Bewerken
+        drawPoint: 'Punt tekenen'
+        drawLine: 'Lijn tekenen'
+        drawPolygon: 'Polygoon tekenen'
+        drawRectangle: 'Rechthoek tekenen'
+        drawCircle: 'Cirkel tekenen'
+        drawEllipse: 'Ellips tekenen'
+        drawDonut: 'Donut tekenen'
+    style:
+        fillColor: Vulkleur
+        color: Kleur
+        opacity: Transparantie

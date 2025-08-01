@@ -1,0 +1,34 @@
+mb.data.store:
+  create: Oluştur
+  remove.successfully: 'Başarıyla kaldırıldı'
+  remove.confirm:
+    text: 'Nesne silinsin mi?'
+  save.successfully: 'Başarıyla kaydedildi'
+  api.query.error-message: Hata
+  api.query.error-notloggedin: "Lütfen giriş yapın"
+  api.query.error-database: "Veritabanına bağlantı kurulamadı. 'featureType' içindeki yapılandırmayı kontrol edin"
+
+mb.data-manager.table:
+  filter: Filtre
+  empty: Veri yok
+  empty_after_filtering: Sonuç yok
+  from_to_total: _TOTAL_ içinden _START_ - _END_ gösteriliyor
+  out_of: (toplam _MAX_ içinden)
+
+mb.datamanager:
+  admin:
+    schemes: Şemalar
+  class:
+    title: Veri yöneticisi
+    description: Veri oluştur (geometri olmadan)
+mb:
+  'data-manager':
+    actions:
+      show_details: Ayrıntıları göster
+      save_tooltip: Değişiklikleri kaydet
+      delete_tooltip: Nesneyi sil
+      cancel_tooltip: Değişiklikleri iptal et
+      close_tooltip: İletişim kutusunu kapat
+    details_title: Ayrıntılı veriler
+    attachment:
+      open: Eki aç

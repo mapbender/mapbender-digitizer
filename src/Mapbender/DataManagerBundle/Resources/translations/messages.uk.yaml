@@ -1,0 +1,34 @@
+mb.data.store:
+  create: Створити
+  remove.successfully: 'Успішно видалено'
+  remove.confirm:
+    text: 'Видалити об''єкт?'
+  save.successfully: 'Успішно збережено'
+  api.query.error-message: Помилка
+  api.query.error-notloggedin: "Будь ласка, увійдіть в систему"
+  api.query.error-database: "Не вдалося встановити з'єднання з базою даних. Перевірте конфігурацію в 'featureType'"
+
+mb.data-manager.table:
+  filter: Фільтр
+  empty: Немає даних
+  empty_after_filtering: Немає результатів
+  from_to_total: Показано _START_ до _END_ з _TOTAL_
+  out_of: (з _MAX_ загалом)
+
+mb.datamanager:
+  admin:
+    schemes: Схеми
+  class:
+    title: Менеджер даних
+    description: Генерувати дані (без геометрії)
+mb:
+  'data-manager':
+    actions:
+      show_details: Показати деталі
+      save_tooltip: Зберегти зміни
+      delete_tooltip: Видалити об'єкт
+      cancel_tooltip: Скасувати зміни
+      close_tooltip: Закрити діалог
+    details_title: Детальні дані
+    attachment:
+      open: Відкрити вкладення

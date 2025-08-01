@@ -1,0 +1,50 @@
+mb.digitizer:
+    actions:
+      show_details: Afficher les détails
+      cancel: Annuler
+      close: Fermer
+      delete: Supprimer
+      save: Enregistrer
+    class:
+      title: Digitizer
+      description: Géoréférencement et numérisation
+    edit.attributes: Modifier les attributs
+    edit.geometry: Modifier la géométrie
+    revert.geometry: Annuler les modifications de géométrie
+    intersection.error: Auto-intersection dans la géométrie non autorisée
+    feature:
+        remove:
+            title: 'Supprimer l''entité'
+        zoomTo: 'Zoomer sur l''entité'
+        edit: 'Modifier'
+        save:
+            title: Enregistrer
+        print: Imprimer
+        print_tooltip: 'Imprimer l''entité'
+        clone:
+            title: Copier
+            tooltip: 'Créer une copie de cette entité'
+        style:
+            change: 'Changer de style'
+            change_tooltip: 'Changer l''apparence de l''entité'
+        visibility:
+            toggleoff: Masquer l'entité
+            toggleon: Afficher l'entité
+    toolset:
+        current-extent: 'Sélectionner uniquement par étendue actuelle'
+        showAll: 'Afficher toutes les entités'
+        hideAll: 'Masquer toutes les entités'
+        saveAll: 'Enregistrer toutes les entités'
+        moveFeature: Déplacer
+        modifyFeature: Modifier
+        drawPoint: 'Dessiner un point'
+        drawLine: 'Dessiner une ligne'
+        drawPolygon: 'Dessiner un polygone'
+        drawRectangle: 'Dessiner un rectangle'
+        drawCircle: 'Dessiner un cercle'
+        drawEllipse: 'Dessiner une ellipse'
+        drawDonut: 'Dessiner un beignet'
+    style:
+        fillColor: Couleur de remplissage
+        color: Couleur
+        opacity: Opacité
