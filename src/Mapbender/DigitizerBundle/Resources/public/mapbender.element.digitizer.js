@@ -334,6 +334,7 @@
             if (schema.copy && schema.copy.enable && this._getUniqueItemId(feature)) {
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.clone.title'),
+                    title: Mapbender.trans('mb.digitizer.feature.clone.tooltip'),
                     class: 'btn btn-light',
                     click: function() {
                         self.cloneFeature(schema, feature);
@@ -343,6 +344,7 @@
             if (schema.allowCustomStyle) {
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.style.change'),
+                    title: Mapbender.trans('mb.digitizer.feature.style.change_tooltip'),
                     class: 'btn btn-light',
                     click: function() {
                         self.openStyleEditor(schema, feature);
@@ -353,6 +355,7 @@
                 var printClient = this.printClient;
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.print'),
+                    title: Mapbender.trans('mb.digitizer.feature.print_tooltip'),
                     class: 'btn btn-light',
                     click: function() {
                         var data = self._getItemData(feature);

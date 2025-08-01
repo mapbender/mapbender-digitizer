@@ -25,6 +25,10 @@ mb:
   'data-manager':
     actions:
       show_details: Mostrar detalhes
+      save_tooltip: Salvar alterações
+      delete_tooltip: Excluir objeto
+      cancel_tooltip: Descartar alterações
+      close_tooltip: Fechar diálogo
     details_title: Detalhes do objeto
     attachment:
       open: Abrir anexo

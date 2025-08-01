@@ -28,10 +28,13 @@ mb.digitizer:
         save:
             title: 'Сохранить'
         print: 'Печать'
+        print_tooltip: 'Печать объекта'
         style:
             change: 'Изменить стиль'
+            change_tooltip: 'Изменить внешний вид объекта'
         clone:
             title: 'Клонировать'
+            tooltip: 'Создать копию этого объекта'
         visibility:
             toggleoff: 'Скрыть объект'
             toggleon: 'Показать объект'
