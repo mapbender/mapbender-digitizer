@@ -1,3 +1,6 @@
+## 2.0.5
+* Add tooltips to digitizer buttons ([PR#140](https://github.com/mapbender/mapbender-digitizer/pull/140))
+
 ## 2.0.4
 * Enable dynamic feature data support for type: html ([PR#138](https://github.com/mapbender/mapbender-digitizer/pull/138)) 
 * Allow quoted schema or table names in PostgreSQL connection ([#1745](https://github.com/mapbender/mapbender/issues/1745), [PR#139](https://github.com/mapbender/mapbender-digitizer/pull/139)) 
