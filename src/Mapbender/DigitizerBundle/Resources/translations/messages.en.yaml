@@ -20,10 +20,13 @@ mb.digitizer:
         save:
             title: Save
         print: Print
+        print_tooltip: 'Print feature'
         clone:
             title: Copy
+            tooltip: 'Create a copy of this feature'
         style:
             change: 'Change style'
+            change_tooltip: 'Change feature appearance'
         visibility:
             toggleoff: Hide feature
             toggleon: Display feature

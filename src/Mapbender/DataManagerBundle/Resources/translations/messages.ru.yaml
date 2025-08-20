@@ -23,6 +23,10 @@ mb:
   'data-manager':
     actions:
       show_details: Показать детали
+      save_tooltip: Сохранить изменения
+      delete_tooltip: Удалить объект
+      cancel_tooltip: Отменить изменения
+      close_tooltip: Закрыть диалог
     details_title: Детали объекта
     attachment:
       open: Открыть вложение

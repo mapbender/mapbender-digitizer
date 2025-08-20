@@ -1,0 +1,34 @@
+mb.data.store:
+  create: Créer
+  remove.successfully: 'Supprimé avec succès'
+  remove.confirm:
+    text: 'Supprimer l''objet ?'
+  save.successfully: 'Enregistré avec succès'
+  api.query.error-message: Erreur
+  api.query.error-notloggedin: "Veuillez vous connecter"
+  api.query.error-database: "La connexion à la base de données n'a pas pu être établie. Vérifiez la configuration dans 'featureType'"
+
+mb.data-manager.table:
+  filter: Filtre
+  empty: Aucune donnée
+  empty_after_filtering: Aucun résultat
+  from_to_total: Affichage de _START_ à _END_ sur _TOTAL_
+  out_of: (sur _MAX_ au total)
+
+mb.datamanager:
+  admin:
+    schemes: Schémas
+  class:
+    title: Gestionnaire de données
+    description: Générer des données (sans géométrie)
+mb:
+  'data-manager':
+    actions:
+      show_details: Afficher les détails
+      save_tooltip: Enregistrer les modifications
+      delete_tooltip: Supprimer l'objet
+      cancel_tooltip: Annuler les modifications
+      close_tooltip: Fermer la boîte de dialogue
+    details_title: Données détaillées
+    attachment:
+      open: Ouvrir la pièce jointe
