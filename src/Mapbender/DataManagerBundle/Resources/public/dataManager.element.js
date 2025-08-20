@@ -94,7 +94,7 @@
             this.grantsRequest_.then(function() {
                 self.updateSchemaSelector_();
             });
-            this.tableButtonsTemplate_ = $('.-tbl-table-buttons', this.element).remove().css('display', '').html();
+            this.tableButtonsTemplate_ = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
             this.toolsetTemplate_ = $('.-tpl-toolset', this.element).remove().css('display', '').html();
             this.formRenderer_ = this._createFormRenderer();
             this.dialogFactory_ = Mapbender.DataManager.DialogFactory;
