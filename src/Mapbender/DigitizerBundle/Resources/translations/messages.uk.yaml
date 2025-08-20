@@ -1,0 +1,50 @@
+mb.digitizer:
+    actions:
+      show_details: Показати деталі
+      cancel: Скасувати
+      close: Закрити
+      delete: Видалити
+      save: Зберегти
+    class:
+      title: Digitizer
+      description: Геореференція та цифровізація
+    edit.attributes: Редагувати атрибути
+    edit.geometry: Редагувати геометрію
+    revert.geometry: Скасувати зміни геометрії
+    intersection.error: Самопересічення в геометрії не дозволено
+    feature:
+        remove:
+            title: 'Видалити об''єкт'
+        zoomTo: 'Масштабувати до об''єкта'
+        edit: 'Редагувати'
+        save:
+            title: Зберегти
+        print: Друкувати
+        print_tooltip: 'Друкувати об''єкт'
+        clone:
+            title: Копіювати
+            tooltip: 'Створити копію цього об''єкта'
+        style:
+            change: 'Змінити стиль'
+            change_tooltip: 'Змінити вигляд об''єкта'
+        visibility:
+            toggleoff: Приховати об'єкт
+            toggleon: Показати об'єкт
+    toolset:
+        current-extent: 'Вибрати лише в поточному масштабі'
+        showAll: 'Показати всі об''єкти'
+        hideAll: 'Приховати всі об''єкти'
+        saveAll: 'Зберегти всі об''єкти'
+        moveFeature: Перемістити
+        modifyFeature: Редагувати
+        drawPoint: 'Намалювати точку'
+        drawLine: 'Намалювати лінію'
+        drawPolygon: 'Намалювати багатокутник'
+        drawRectangle: 'Намалювати прямокутник'
+        drawCircle: 'Намалювати коло'
+        drawEllipse: 'Намалювати еліпс'
+        drawDonut: 'Намалювати пончик'
+    style:
+        fillColor: Колір заливки
+        color: Колір
+        opacity: Прозорість

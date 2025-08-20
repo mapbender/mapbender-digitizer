@@ -19,10 +19,13 @@ mb.digitizer:
         save:
             title: 'Salva'
         print: 'Stampa'
+        print_tooltip: 'Stampa oggetto'
         style:
             change: 'Cambia stile'
+            change_tooltip: 'Cambia aspetto dell\'oggetto'
         clone:
             title: 'Clona'
+            tooltip: 'Crea una copia di questo oggetto'
         visibility:
             toggleoff: 'Nascondi oggetto'
             toggleon: 'Mostra oggetto'

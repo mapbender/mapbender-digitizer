@@ -1,0 +1,50 @@
+mb.digitizer:
+    actions:
+      show_details: Pokaż szczegóły
+      cancel: Anuluj
+      close: Zamknij
+      delete: Usuń
+      save: Zapisz
+    class:
+      title: Digitizer
+      description: Georeferencja i digitalizacja
+    edit.attributes: Edytuj atrybuty
+    edit.geometry: Edytuj geometrię
+    revert.geometry: Cofnij zmiany geometrii
+    intersection.error: Samoprzecięcie w geometrii nie jest dozwolone
+    feature:
+        remove:
+            title: 'Usuń obiekt'
+        zoomTo: 'Powiększ do obiektu'
+        edit: 'Edytuj'
+        save:
+            title: Zapisz
+        print: Drukuj
+        print_tooltip: 'Drukuj obiekt'
+        clone:
+            title: Kopiuj
+            tooltip: 'Utwórz kopię tego obiektu'
+        style:
+            change: 'Zmień styl'
+            change_tooltip: 'Zmień wygląd obiektu'
+        visibility:
+            toggleoff: Ukryj obiekt
+            toggleon: Wyświetl obiekt
+    toolset:
+        current-extent: 'Wybierz tylko w bieżącym zasięgu'
+        showAll: 'Pokaż wszystkie obiekty'
+        hideAll: 'Ukryj wszystkie obiekty'
+        saveAll: 'Zapisz wszystkie obiekty'
+        moveFeature: Przenieś
+        modifyFeature: Edytuj
+        drawPoint: 'Rysuj punkt'
+        drawLine: 'Rysuj linię'
+        drawPolygon: 'Rysuj wielokąt'
+        drawRectangle: 'Rysuj prostokąt'
+        drawCircle: 'Rysuj okrąg'
+        drawEllipse: 'Rysuj elipsę'
+        drawDonut: 'Rysuj pączek'
+    style:
+        fillColor: Kolor wypełnienia
+        color: Kolor
+        opacity: Przezroczystość

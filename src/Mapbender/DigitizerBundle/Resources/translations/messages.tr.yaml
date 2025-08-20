@@ -1,0 +1,50 @@
+mb.digitizer:
+    actions:
+      show_details: Ayrıntıları göster
+      cancel: İptal
+      close: Kapat
+      delete: Sil
+      save: Kaydet
+    class:
+      title: Digitizer
+      description: Coğrafi referanslama ve dijitalleştirme
+    edit.attributes: Öznitelikleri düzenle
+    edit.geometry: Geometriyi düzenle
+    revert.geometry: Geometri değişikliklerini geri al
+    intersection.error: Geometride kendiliğinden kesişme izin verilmez
+    feature:
+        remove:
+            title: 'Özelliği kaldır'
+        zoomTo: 'Özelliğe yakınlaştır'
+        edit: 'Düzenle'
+        save:
+            title: Kaydet
+        print: Yazdır
+        print_tooltip: 'Özelliği yazdır'
+        clone:
+            title: Kopyala
+            tooltip: 'Bu özelliğin bir kopyasını oluştur'
+        style:
+            change: 'Stili değiştir'
+            change_tooltip: 'Özellik görünümünü değiştir'
+        visibility:
+            toggleoff: Özelliği gizle
+            toggleon: Özelliği göster
+    toolset:
+        current-extent: 'Yalnızca mevcut kapsamda seç'
+        showAll: 'Tüm özellikleri göster'
+        hideAll: 'Tüm özellikleri gizle'
+        saveAll: 'Tüm özellikleri kaydet'
+        moveFeature: Taşı
+        modifyFeature: Düzenle
+        drawPoint: 'Nokta çiz'
+        drawLine: 'Çizgi çiz'
+        drawPolygon: 'Çokgen çiz'
+        drawRectangle: 'Dikdörtgen çiz'
+        drawCircle: 'Daire çiz'
+        drawEllipse: 'Elips çiz'
+        drawDonut: 'Halka çiz'
+    style:
+        fillColor: Dolgu rengi
+        color: Renk
+        opacity: Şeffaflık

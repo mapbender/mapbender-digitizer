@@ -87,6 +87,19 @@ $buttonActiveTextColor: #fff !default;
         // Ellipsis requires a width property; see https://stackoverflow.com/a/11877033
         max-width: 0;
     }
+
+    // Enable tooltips on disabled buttons
+    .btn[disabled][title] {
+        pointer-events: auto;
+        cursor: not-allowed;
+
+        &:hover {
+            // Prevent any hover effects on disabled buttons while keeping tooltips
+            background-color: inherit !important;
+            border-color: inherit !important;
+            color: inherit !important;
+        }
+    }
 }
 
 .ui-dialog.data-manager-dialog {

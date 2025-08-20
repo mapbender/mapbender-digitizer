@@ -23,6 +23,7 @@
             },
             buttons: [{
                 text: Mapbender.trans('mb.digitizer.actions.save'),
+                title: Mapbender.trans('mb.data-manager.actions.save_tooltip'),
                 class: 'btn btn-primary',
                 click: function (e) {
                     var values = editor.getFormData(this);
@@ -31,6 +32,7 @@
                 }
             },{
                 text: Mapbender.trans('mb.digitizer.actions.cancel'),
+                title: Mapbender.trans('mb.data-manager.actions.cancel_tooltip'),
                 class: 'btn btn-light',
                 click: function (e) {
                     promise.reject();

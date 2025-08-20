@@ -93,7 +93,7 @@
 
             this.grantsRequest_.then(function() {
                 self.updateSchemaSelector_();
-            })
+            });
             this.tableButtonsTemplate_ = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
             this.toolsetTemplate_ = $('.-tpl-toolset', this.element).remove().css('display', '').html();
             this.formRenderer_ = this._createFormRenderer();
@@ -528,6 +528,7 @@
             if (schema.allowEdit || overrideAllowSave) {
                 buttons.push({
                     text: Mapbender.trans('mb.actions.save'),
+                    title: Mapbender.trans('mb.data-manager.actions.save_tooltip'),
                     'class': 'btn btn-primary',
                     click: function() {
                         var $scope = $(this).closest('.ui-dialog-content');
@@ -543,6 +544,7 @@
             if (schema.allowDelete && this._getUniqueItemId(dataItem)) {
                 buttons.push({
                     text: Mapbender.trans('mb.actions.delete'),
+                    title: Mapbender.trans('mb.data-manager.actions.delete_tooltip'),
                     'class': 'btn btn-danger',
                     click: function() {
                         widget._closeCurrentPopup();
@@ -551,8 +553,10 @@
                 });
             }
             var closeText = buttons.length && 'mb.actions.cancel' || 'mb.actions.close';
+            var closeTooltip = buttons.length && 'mb.data-manager.actions.cancel_tooltip' || 'mb.data-manager.actions.close_tooltip';
             buttons.push({
                 text: Mapbender.trans(closeText),
+                title: Mapbender.trans(closeTooltip),
                 'class': 'btn btn-light',
                 click: function() {
                     widget._cancelForm(schema, dataItem);
