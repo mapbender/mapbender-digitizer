@@ -80,21 +80,7 @@ class EventProcessor
             'userRoles' => array(),
         );
         $token = $this->tokenStorage->getToken();
-
-        if (\method_exists($token, 'getRoleNames')) {
-            // Symfony >= 4.3
-            $locals['userRoles'] = $token->getRoleNames();
-        } else {
-            foreach ($token->getRoles() as $role) {
-                if (\is_object($role) && \method_exists($role, 'getRole')) {
-                    $roleName = $role->getRole();
-                } else {
-                    // Role objects should have __toString
-                    $roleName = \strval($role);
-                }
-                $locals['userRoles'][] = $roleName;
-            }
-        }
+        $locals['userRoles'] = $token->getRoleNames();
         return $locals;
     }
 }
