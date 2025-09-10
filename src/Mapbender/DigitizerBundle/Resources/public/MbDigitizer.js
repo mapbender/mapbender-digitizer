@@ -1,73 +1,75 @@
-(function ($) {
-    "use strict";
+(function() {
 
-    $.fn.dataTable.ext.errMode = 'throw';
+    class MbDigitizer extends Mapbender.Element.MbDataManager {
 
-    $.widget("mapbender.mbDigitizer", $.mapbender.mbDataManager, {
+        constructor(configuration, $element) {
+            super(configuration, $element);
 
-        options: {
-            schemes: {}
-        },
-        mbMap: null,
-        printClient: null,
-        active: false,
-        controlFactory: null,
-        activeTool_: null,
-        selectControl: null,
-        highlightControl: null,
-        excludedFromHighlighting_: [],
-        featureEditor: null,
-        renderer: null,
-        extentSearchFlags_: {},
-        queuedRefresh_: {},
-
-        _create: function () {
+            $.fn.dataTable.ext.errMode = 'throw';
+            this.mbMap = null;
+            this.printClient = null;
+            this.active = false;
+            this.controlFactory = null;
+            this.activeTool_ = null;
+            this.selectControl = null;
+            this.highlightControl = null;
+            this.excludedFromHighlighting_ = [];
+            this.featureEditor = null;
+            this.renderer = null;
+            this.extentSearchFlags_ = {};
+            this.queuedRefresh_ = {};
             // NOTE: Arrays / Objects in ui widget prototype are shared
             // between instances. Separate them
             this.excludedFromHighlighting_ = [];
             this.extentSearchFlags_ = {};
             this.queuedRefresh_ = {};
             this.toolsetRenderer = this._createToolsetRenderer();
-            this._super();
-            var widget = this;
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
-            $.when(Mapbender.elementRegistry.waitReady('.mb-element-map'), this.grantsRequest_).then(function(mbMap, _) {
-                widget.mbMap = mbMap;
-                widget.setup();
+            $.when(Mapbender.elementRegistry.waitReady('.mb-element-map'), this.grantsRequest_).then((mbMap, _) => {
+                this.mbMap = mbMap;
+                this.setup();
                 // Let data manager base method trigger "ready" event and start loading data
-                widget._start();
-                widget.registerMapEvents_();
+                this._start();
+                this.registerMapEvents_();
             });
-        },
-        _createTableRenderer: function() {
+        }
+
+        _createTableRenderer() {
             return new Mapbender.Digitizer.TableRenderer(this, this.tableButtonsTemplate_);
-        },
-        _createToolsetRenderer: function() {
+        }
+
+        _createToolsetRenderer() {
             return new Mapbender.Digitizer.Toolset(this);
-        },
-        _createStyleEditor: function() {
+        }
+
+        _createStyleEditor() {
             return new Mapbender.Digitizer.FeatureStyleEditor(this, this.dialogFactory_);
-        },
-        createStyleAdapter: function() {
+        }
+
+        createStyleAdapter() {
             return new Mapbender.Digitizer.StyleAdapter(this.options.fallbackStyle);
-        },
-        _createRenderer: function(olMap) {
+        }
+
+        _createRenderer(olMap) {
             return new Mapbender.Digitizer.FeatureRenderer(this, olMap);
-        },
-        _createFeatureEditor: function(olMap) {
+        }
+
+        _createFeatureEditor(olMap) {
             return new Mapbender.Digitizer.FeatureEditor(this, olMap);
-        },
-        _afterCreate: function() {
+        }
+
+        _afterCreate() {
             // Invoked only by data manager _create
             // do nothing; deliberately do NOT call parent method
-        },
-        setup: function() {
-            var self = this;
+        }
+
+        setup() {
+            const self = this;
             Mapbender.elementRegistry.waitCreated('.mb-element-printclient').then(function (printClient) {
                 self.printClient = printClient;
             });
-            var olMap = this.mbMap.getModel().olMap;
+            const olMap = this.mbMap.getModel().olMap;
             this.contextMenu = this._createContextMenu(olMap);
             this.renderer = this._createRenderer(olMap);
             this.selectControl = this.createSelectControl_();
@@ -75,24 +77,25 @@
             this.featureEditor = this._createFeatureEditor(olMap);
             olMap.addInteraction(this.selectControl);
             olMap.addInteraction(this.highlightControl);
-            var initialSchema = this._getCurrentSchema();
+            const initialSchema = this._getCurrentSchema();
             // @todo ml: evaluate displayPermanent
             this.renderer.toggleSchema(initialSchema, initialSchema.displayOnInactive && initialSchema.displayPermanent);
-        },
-        skipInitialData_: function() {
+        }
+
+        skipInitialData_() {
             // Digitizer only: allow permanently invisible "headless" Digitizer to load / render features normally
             return false;
-        },
-        registerMapEvents_: function() {
-            var self = this;
-            var olMap = this.mbMap.getModel().olMap;
+        }
+
+        registerMapEvents_() {
+            const self = this;
+            const olMap = this.mbMap.getModel().olMap;
             olMap.on(ol.MapEventType.MOVEEND, function() {
                 // Don't react at all if currently editing feature attributes
                 if (self.currentPopup || self.activeTool_) {
                     return;
                 }
-
-                var schema = self._getCurrentSchema();
+                const schema = self._getCurrentSchema();
                 if (self.extentSearchFlags_[schema.schemaName]) {
                     if (self.active || schema.displayOnInactive) {
                         self._getData(schema);
@@ -100,7 +103,6 @@
                         self.queuedRefresh_[schema.schemaName] = true;
                     }
                 }
-
                 // @todo ml: filter table rows for min/max resolution (not just on moveend, but always)
                 if (false) {
                     var layer = self.getSchemaLayer(schema);
@@ -112,8 +114,8 @@
             });
             this.mbMap.element.on('mbmapsrschanged', function(event, data) {
                 self.featureEditor.pause();
-                self.renderer.forAllFeatures(/** @param {ol.Feature} feature */function(feature) {
-                    var geometry = feature.getGeometry();
+                self.renderer.forAllFeatures(function(feature) {
+                    const geometry = feature.getGeometry();
                     if (geometry) {
                         geometry.transform(data.from, data.to);
                     }
@@ -123,32 +125,37 @@
                 });
                 self.featureEditor.resume();
             });
-        },
+        }
+
         // reveal / hide = automatic sidepane integration API
-        reveal: function() {
+        reveal() {
             this.activate();
-        },
-        hide: function() {
+        }
+
+        hide() {
             this.deactivate();
-        },
-        _createContextMenu: function(olMap) {
+        }
+
+        _createContextMenu(olMap) {
             return new Mapbender.Digitizer.MapContextMenu(olMap, this);
-        },
-        _initializeEvents: function() {
-            this._super();
+        }
+
+        _initializeEvents() {
+            super._initializeEvents();
+            this.toolsetRenderer = this._createToolsetRenderer();
             this.toolsetRenderer.registerEvents();
-            var self = this;
-            this.element.on('click', '.-fn-toggle-tool[data-toolname]', function() {
-                var $button = $(this);
-                var toolName = $button.attr('data-toolname');
-                var schema = $button.data('schema');
-                var oldState = $button.hasClass('active');
-                var newState = !oldState;
+            const self = this;
+            this.$element.on('click', '.-fn-toggle-tool[data-toolname]', function() {
+                const $button = $(this);
+                const toolName = $button.attr('data-toolname');
+                const schema = $button.data('schema');
+                const oldState = $button.hasClass('active');
+                const newState = !oldState;
                 if (newState) {
-                    var $activeOthers = $button.siblings('.-fn-toggle-tool.active').not($button);
+                    const $activeOthers = $button.siblings('.-fn-toggle-tool.active').not($button);
                     $activeOthers.each(function() {
-                        var $other = $(this);
-                        var otherSchema = $other.data('schema');
+                        const $other = $(this);
+                        const otherSchema = $other.data('schema');
                         self._toggleDrawingTool(otherSchema, $other.attr('data-toolname'), false);
                     });
                     $activeOthers.removeClass('active');
@@ -156,24 +163,25 @@
                 $button.toggleClass('active', newState);
                 self._toggleDrawingTool(schema, toolName, newState);
             });
-            this.element.on('change', 'input[name="current-extent"]', function() {
-                var schema = self._getCurrentSchema();
+            this.$element.on('change', 'input[name="current-extent"]', function() {
+                const schema = self._getCurrentSchema();
                 self.extentSearchFlags_[schema.schemaName] = $(this).prop('checked');
                 self._getData(schema);
             });
-            this.element.on('click', '.-fn-save-all', function() {
+            this.$element.on('click', '.-fn-save-all', function() {
                 self.updateMultiple(self.getSaveAllCandidates_());
             });
-        },
-        activate: function() {
+        }
+
+        activate() {
             if (!this.active) {
                 this.selectControl.setActive(true);
                 this.highlightControl.setActive(true);
-                var currentSchema = this._getCurrentSchema();
+                const currentSchema = this._getCurrentSchema();
                 this._toggleSchemaInteractions(currentSchema, true);
-                var schemaNames = Object.keys(this.options.schemes);
-                for (var s = 0; s < schemaNames.length; ++s) {
-                    var schema = this.options.schemes[schemaNames[s]];
+                const schemaNames = Object.keys(this.options.schemes);
+                for (let s = 0; s < schemaNames.length; ++s) {
+                    const schema = this.options.schemes[schemaNames[s]];
                     this.renderer.toggleSchema(schema, schema === currentSchema || schema.displayPermanent);
                 }
                 this.renderer.toggleSchema(currentSchema, true);
@@ -182,85 +190,95 @@
                     this._getData(currentSchema);
                 }
             }
-        },
-        deactivate: function() {
+        }
+
+        deactivate() {
             this.selectControl.setActive(false);
             this.highlightControl.setActive(false);
-            var currentSchema = this._getCurrentSchema();
+            const currentSchema = this._getCurrentSchema();
             this._deactivateCommon(currentSchema);
-            var schemaNames = Object.keys(this.options.schemes);
-            for (var s = 0; s < schemaNames.length; ++s) {
-                var schema = this.options.schemes[schemaNames[s]];
+            const schemaNames = Object.keys(this.options.schemes);
+            for (let s = 0; s < schemaNames.length; ++s) {
+                const schema = this.options.schemes[schemaNames[s]];
                 this.renderer.toggleSchema(schema, schema === currentSchema && schema.displayOnInactive);
             }
             this._closeCurrentPopup();
             this.active = false;
-        },
-        _closeCurrentPopup: function() {
+        }
+
+        _closeCurrentPopup() {
             if (this.currentPopup) {
-                var feature = this.currentPopup.data('item');
-                var itemSchema = this.currentPopup.data('schema');
+                const feature = this.currentPopup.data('item');
+                const itemSchema = this.currentPopup.data('schema');
                 if (!feature.getId()) {
                     this.renderer.removeFeature(itemSchema, feature);
                 }
             }
-            return this._superApply(arguments);
-        },
-        _activateSchema: function(schema) {
-            this._super(schema);
+            return super._closeCurrentPopup();
+        }
+
+        _activateSchema(schema) {
+            super._activateSchema(schema);
             this._toggleSchemaInteractions(schema, true);
             this.renderer.toggleSchema(schema, this.active || schema.displayOnInactive);
-        },
-        _toggleDrawingTool: function(schema, toolName, state) {
+        }
+
+        _toggleDrawingTool(schema, toolName, state) {
             if (!state && 'modifyFeature' === toolName) {
                 this.featureEditor.setEditFeature(null);
-                this.clearHighlightExclude_()
+                this.clearHighlightExclude_();
             }
             this.featureEditor.toggleTool(toolName, schema, state);
-            this.activeTool_ = state && {name: toolName, schema: schema} || null;
+            this.activeTool_ = state && { name: toolName, schema: schema } || null;
             this.resumeContextMenu_();
-        },
-        resumeContextMenu_: function() {
-            var contextMenuAllowed = ['modifyFeature', 'moveFeature'];
+        }
+
+        resumeContextMenu_() {
+            const contextMenuAllowed = ['modifyFeature', 'moveFeature'];
             this.contextMenu.setActive(!this.activeTool_ || -1 !== contextMenuAllowed.indexOf(this.activeTool_.name));
-        },
-        commitGeometry: function(schema, feature) {
-            feature.set("oldGeometry", feature.getGeometry().clone());
+        }
+
+        commitGeometry(schema, feature) {
+            feature.set('oldGeometry', feature.getGeometry().clone());
             feature.set('dirty', !this._getUniqueItemId(feature));
-        },
-        revertGeometry: function(feature) {
+        }
+
+        revertGeometry(feature) {
             feature.setGeometry(feature.get('oldGeometry').clone());
             feature.set('dirty', false);
-        },
+        }
+
         /**
          * Called by both _deactivateSchema (schema selector switch) and deactivate (sidepane interaction)
          *
          * @param schema
          * @private
          */
-        _deactivateCommon: function(schema) {
+        _deactivateCommon(schema) {
             this.featureEditor.setEditFeature(null);
             this.selectControl.getFeatures().clear();
             this._toggleSchemaInteractions(schema, false);
             if (schema === this._getCurrentSchema()) {
-                $('.-fn-toggle-tool', this.element).removeClass('active');
+                $('.-fn-toggle-tool', this.$element).removeClass('active');
                 this.clearHighlightExclude_();
             }
-        },
+        }
+
         /**
          * Called on schema selector change with the old schema
          * @param {Object} schema
          * @private
          */
-        _deactivateSchema: function(schema) {
-            this._super(schema);
+        _deactivateSchema(schema) {
+            super._deactivateSchema(schema);
             this._deactivateCommon(schema);
             this.renderer.toggleSchema(schema, schema.displayPermanent);
-        },
-        _toggleSchemaInteractions: function(schema, state) {
-            var subSchemas = this.expandCombination(schema);
-            var allowFeatureEditing = false;
-            for (var s = 0; s < subSchemas.length; ++s) {
+        }
+
+        _toggleSchemaInteractions(schema, state) {
+            const subSchemas = this.expandCombination(schema);
+            let allowFeatureEditing = false;
+            for (let s = 0; s < subSchemas.length; ++s) {
                 allowFeatureEditing = allowFeatureEditing || state && subSchemas[s].allowDigitize;
             }
             if (!state && this.activeTool_) {
@@ -269,14 +287,16 @@
             }
             this.featureEditor.setActive(allowFeatureEditing);
             this.contextMenu.setActive(state);
-        },
-        _getDataStoreFromSchema: function(schema) {
+        }
+
+        _getDataStoreFromSchema(schema) {
             // Digitizer schema config aliases "dataStore" (upstream) as "featureType"
             return schema.featureType;
-        },
-        _updateToolset: function(schema) {
-            this._super(schema);
-            var $toolset = $('.toolset', this.element);
+        }
+
+        _updateToolset(schema) {
+            super._updateToolset(schema);
+            const $toolset = $('.toolset', this.$element);
             if (typeof (this.extentSearchFlags_[schema.schemaName]) === 'undefined') {
                 this.extentSearchFlags_[schema.schemaName] = schema.searchType === 'currentExtent';
             }
@@ -289,34 +309,34 @@
             // Unlinke DataManager, all item creation happens with a drawing tool,
             // and doesn't work when using pure form entry
             $('.-fn-create-item', $toolset).remove();
-            var keepVisChange = false, keepSaveAll = false;
-            var subSchemas = this.expandCombination(schema);
-            for (var s = 0; s < subSchemas.length; ++s) {
+            let keepVisChange = false, keepSaveAll = false;
+            const subSchemas = this.expandCombination(schema);
+            for (let s = 0; s < subSchemas.length; ++s) {
                 keepVisChange = keepVisChange || subSchemas[s].allowChangeVisibility;
                 keepSaveAll = keepSaveAll || (subSchemas[s].allowDigitize && subSchemas[s].allowEdit);
                 if (keepVisChange && keepSaveAll) {
                     break;
                 }
             }
-
             if (!keepVisChange) {
-                $('.-fn-visibility-all', $toolset).remove();
+                  $('.-fn-visibility-all', $toolset).remove();
             }
             if (!keepSaveAll) {
-                $('.-fn-save-all', $toolset).remove();
+                  $('.-fn-save-all', $toolset).remove();
             }
-            var $geometryToolGroup = $('.-js-drawing-tools', $toolset);
+            const $geometryToolGroup = $('.-js-drawing-tools', $toolset);
             $geometryToolGroup.empty().append(this.toolsetRenderer.renderGeometryToolButtons(schema));
-        },
-        _openEditDialog: function(schema, feature) {
+        }
+
+        _openEditDialog(schema, feature) {
             // Make feature visible in table when editing was started
             // from map click or context menu.
             // NOTE: newly created features are not in the table and cannot be paged to
-            var tr = feature.get('table-row');
+            const tr = feature.get('table-row');
             if (tr) {
                 this.tableRenderer.showRow(tr);
             }
-            var dialog = this._super(schema, feature);
+            const dialog = super._openEditDialog(schema, feature);
             // Disable context menu interactions with other features only if the current item is new
             // Exiting the form by switching to a different feature would leave the new, unsaved feature in limbo
             if (!this._getUniqueItemId(feature)) {
@@ -327,16 +347,16 @@
                 this.featureEditor.pause();
             }
             return dialog;
-        },
-        _getEditDialogButtons: function(schema, feature) {
-            var self = this;
-            var buttons = [];
+        }
+
+        _getEditDialogButtons(schema, feature) {
+            const self = this;
+            const buttons = [];
             if (schema.copy && schema.copy.enable && this._getUniqueItemId(feature)) {
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.clone.title'),
                     title: Mapbender.trans('mb.digitizer.feature.clone.tooltip'),
-                    class: 'btn btn-light',
-                    click: function() {
+                    class: 'btn btn-light', click() {
                         self.cloneFeature(schema, feature);
                     }
                 });
@@ -345,82 +365,85 @@
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.style.change'),
                     title: Mapbender.trans('mb.digitizer.feature.style.change_tooltip'),
-                    class: 'btn btn-light',
-                    click: function() {
+                    class: 'btn btn-light', click() {
                         self.openStyleEditor(schema, feature);
                     }
                 });
             }
             if (schema.printable && this.printClient) {
-                var printClient = this.printClient;
+                const printClient = this.printClient;
                 buttons.push({
                     text: Mapbender.trans('mb.digitizer.feature.print'),
                     title: Mapbender.trans('mb.digitizer.feature.print_tooltip'),
-                    class: 'btn btn-light',
-                    click: function() {
-                        var data = self._getItemData(feature);
-                        var templates = (schema.featureType.print || {}).templates || null;
-                        printClient.printDigitizerFeature(data, schema, templates);
-                    }
+                    class: 'btn btn-light', click() {
+                        const data = self._getItemData(feature);
+                        const templates = (schema.featureType.print || {}).templates || null;
+                        printClient.printDigitizerFeature(data, schema, templates); }
                 });
             }
             const overrideShowSaveButton = !this._getUniqueItemId(feature) && schema.allowCreate;
-            buttons.push.apply(buttons, this._super(schema, feature, overrideShowSaveButton));
+            buttons.push.apply(buttons, super._getEditDialogButtons(schema, feature, overrideShowSaveButton));
             return buttons;
-        },
-        _getItemData: function(feature) {
+        }
+
+        _getItemData(feature) {
             // NOTE: 'data' property may not exist if feature has just been newly created by an editing tool
             if (!feature.get('data')) {
                 feature.set('data', {});
             }
             return feature.get('data');
-        },
-        _getSelectRequestParams: function(schema) {
-            var params = Object.assign({}, this._super(schema), {
+        }
+
+        _getSelectRequestParams(schema) {
+            const params = Object.assign({}, super._getSelectRequestParams(schema), {
                 srid: this.getCurrentSrid()
             });
             if (this.extentSearchFlags_[schema.schemaName]) {
                 params['extent'] = this.mbMap.getModel().getCurrentExtentArray().join(',');
             }
             return params;
-        },
-        _afterRemove: function(schema, feature, id) {
+        }
+
+        _afterRemove(schema, feature, id) {
             this.renderer.removeFeature(schema, feature);
-            this._super(schema, feature, id);
+            super._afterRemove(schema, feature, id);
             this.toolsetRenderer.resume();
             if (schema.allowDigitize) {
                 this.featureEditor.resume();
             }
             this.resumeContextMenu_();
             this.checkSourceRefresh_(schema);
-        },
+        }
 
-        _prepareDataItem: function(itemData) {
-            var feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
+        _prepareDataItem(itemData) {
+            const feature = this.wktFormat_.readFeatureFromText(itemData.geometry);
             feature.set('data', itemData.properties || {});
             feature.set('schemaName', itemData.schemaName);
-            var itemSchema = this.options.schemes[itemData.schemaName];
+            const itemSchema = this.options.schemes[itemData.schemaName];
             feature.set('uniqueIdProperty', this._getUniqueItemIdProperty(itemSchema));
-            var id = this._generateNamespacedId(itemSchema, feature);
-            var existingFeature = this.renderer.getFeatureById(id, itemSchema);
+            const id = this._generateNamespacedId(itemSchema, feature);
+            const existingFeature = this.renderer.getFeatureById(id, itemSchema);
             if (existingFeature && existingFeature.get('dirty')) {
                 // Keep & reuse existing feature that has been modified in the current session
-                return existingFeature;
+                existingFeature;
             } else {
                 feature.setId(id);
                 this.commitGeometry(itemSchema, feature);
                 this.renderer.initializeFeature(itemSchema, feature);
                 return feature;
             }
-        },
-        _getUniqueItemId: function(feature) {
+        }
+
+        _getUniqueItemId(feature) {
             return (feature.get('data') || {})[feature.get('uniqueIdProperty')] || null;
-        },
-        getItemSchema: function(feature) {
+        }
+
+        getItemSchema(feature) {
             return this.options.schemes[feature.get('schemaName')];
-        },
-        getEnabledSchemaFunctionCodes: function(schema) {
-            var codes = this._superApply(arguments);
+        }
+
+        getEnabledSchemaFunctionCodes(schema) {
+            let codes = super.getEnabledSchemaFunctionCodes(schema);
             codes = codes.concat([
                 schema.allowDigitize && schema.allowEdit && '-fn-save',
                 schema.copy && schema.copy.enable && '-fn-copy',
@@ -428,13 +451,15 @@
                 schema.allowChangeVisibility && '-fn-toggle-visibility'
             ]);
             return codes.filter(function(x) { return !!x; });
-        },
-        initializeNewFeature: function(itemSchema, feature) {
+        }
+
+        initializeNewFeature(itemSchema, feature) {
             feature.set('schemaName', itemSchema.schemaName);
             feature.set('uniqueIdProperty', this._getUniqueItemIdProperty(itemSchema));
             this.renderer.initializeFeature(itemSchema, feature);
             feature.set('dirty', true);
-        },
+        }
+
         /**
          * Return a globally unique feature id (unique even if features from multiple schemas appear on the same layer)
          *
@@ -443,17 +468,17 @@
          * @return {string}
          * @private
          */
-        _generateNamespacedId: function(schema, feature, index = null) {
-            return [this.element.attr('id'), schema.schemaName, this._getUniqueItemId(feature), ...(index !== null ? [index] : [])].join('-');
-        },
-        _afterSave: function(schema, feature, originalId, responseData) {
+        _generateNamespacedId(schema, feature, index = null) {
+            return [this.$element.attr('id'), schema.schemaName, this._getUniqueItemId(feature), ...(index !== null ? [index] : [])].join('-');
+        }
+
+        _afterSave(schema, feature, originalId, responseData) {
             // unravel dm-incompatible response format
             // Geometry may have been modified (made valid, transformed twice) on server roundtrip
             // => update to reflect server-side geometry exactly
-            var geometry = this.wktFormat_.readGeometryFromText(responseData.dataItem.geometry);
+            const geometry = this.wktFormat_.readGeometryFromText(responseData.dataItem.geometry);
             feature.setGeometry(geometry);
-
-            this._super(schema, feature, originalId, {
+            super._afterSave(schema, feature, originalId, {
                 dataItem: responseData.dataItem.properties
             });
             if (!feature.getId()) {
@@ -465,29 +490,31 @@
                 this.featureEditor.setEditFeature(null);
                 if (!schema.continueDrawingAfterSave && this.activeTool_) {
                     this._toggleDrawingTool(schema, this.activeTool_.name, false);
-                    $('.-fn-toggle-tool', this.element).removeClass('active');
+                    $('.-fn-toggle-tool', this.$element).removeClass('active');
                 }
                 this.featureEditor.resume();
             }
             this.toolsetRenderer.resume();
             this.resumeContextMenu_();
             this.checkSourceRefresh_(schema);
-            this.adjustStyle(schema,feature);
-        },
+            this.adjustStyle(schema, feature);
+        }
 
-        _getData: function(schema) {
+        _getData(schema) {
             this.queuedRefresh_[schema.schemaName] = false;
-            var self = this;
-            return this._super(schema).then(function(features) {
+            const self = this;
+            const promise = super._getData ? super._getData(schema) : $.Deferred().resolve([]).promise();
+            return promise.then(function(features) {
                 self.queuedRefresh_[schema.schemaName] = false;
                 self.renderer.replaceFeatures(schema, features);
                 return features;
             });
-        },
-        _cancelForm: function(schema, feature) {
-            this._super(schema, feature);
+        }
+
+        _cancelForm(schema, feature) {
+            super._cancelForm(schema, feature);
             // NOTE: this also detects cloned features (via new copy functionality) as new
-            var isNew = !this._getUniqueItemId(feature);
+            const isNew = !this._getUniqueItemId(feature);
             if (isNew) {
                 this.renderer.removeFeature(schema, feature);
             }
@@ -496,30 +523,32 @@
                 this.featureEditor.resume();
             }
             this.resumeContextMenu_();
-        },
-        _replaceItemData: function(schema, feature, newValues) {
+        }
+
+        _replaceItemData(schema, feature, newValues) {
             // NOTE: 'data' is a regular mutable data Object (see _prpareDataItem)
             Object.assign(feature.get('data'), newValues);
-        },
-        _getSaveRequestData: function(schema, dataItem, newValues) {
-            return Object.assign(this._superApply(arguments), {
+        }
+
+        _getSaveRequestData(schema, dataItem, newValues) {
+            return Object.assign(super._getSaveRequestData(schema, dataItem, newValues), {
                 geometry: this.wktFormat_.writeGeometryText(dataItem.getGeometry()),
                 srid: this.getCurrentSrid()
             });
-        },
-        updateMultiple: function(features) {
-            var postData = {
+        }
+
+        updateMultiple(features) {
+            const postData = {
                 srid: this.getCurrentSrid(),
-                // generate mapping of id => properties and geometry
                 features: []
             };
-            var featureMap = {};
-            var continueDrawing = false;
-            for (var i = 0; i < features.length; ++i) {
-                var feature = features[i];
-                var itemSchema = this.getItemSchema(feature);
+            const featureMap = {};
+            let continueDrawing = false;
+            for (let i = 0; i < features.length; ++i) {
+                const feature = features[i];
+                const itemSchema = this.getItemSchema(feature);
                 continueDrawing = continueDrawing || itemSchema.continueDrawingAfterSave;
-                var mapId = this._generateNamespacedId(itemSchema, feature, i);
+                const mapId = this._generateNamespacedId(itemSchema, feature, i);
                 featureMap[mapId] = feature;
                 postData.features.push({
                     schemaName: itemSchema.schemaName,
@@ -529,16 +558,15 @@
                     geometry: this.wktFormat_.writeGeometryText(feature.getGeometry())
                 });
             }
-            var widget = this;
-            var promise = this.postJSON('update-multiple', postData)
+            const widget = this;
+            const promise = this.postJSON ? this.postJSON('update-multiple', postData)
                 .then(function(response) {
-                    var savedItems = response.saved;
-                    for (var i = 0; i < savedItems.length; ++i) {
-                        var savedItem = savedItems[i];
-                        var itemSchema = widget.options.schemes[savedItem.schemaName];
-                        var feature = featureMap[savedItem.uniqueId];
-
-                        var geometry = widget.wktFormat_.readGeometryFromText(savedItem.geometry);
+                    const savedItems = response.saved;
+                    for (let i = 0; i < savedItems.length; ++i) {
+                        const savedItem = savedItems[i];
+                        const itemSchema = widget.options.schemes[savedItem.schemaName];
+                        const feature = featureMap[savedItem.uniqueId];
+                        const geometry = widget.wktFormat_.readGeometryFromText(savedItem.geometry);
                         feature.setGeometry(geometry);
                         widget._replaceItemData(itemSchema, feature, savedItem.properties || {});
                         feature.set('dirty', false);
@@ -547,71 +575,72 @@
                         widget._saveEvent(itemSchema, feature, widget._getUniqueItemId(feature));
                     }
                     $.notify(Mapbender.trans('mb.data.store.save.successfully'), 'info');
-                })
-            ;
+                }) : $.Deferred().resolve().promise();
             // @todo ml: find a reasonable continueDrawingAfterSave policy for combination schema
             if (!continueDrawing) {
-                promise.always(function() {
-                    if (widget.activeTool_) {
-                        widget._toggleDrawingTool(widget.activeTool_.schema, widget.activeTool_.name, false);
-                    }
-                    $('.-fn-toggle-tool', widget.element).removeClass('active');
-                });
-            }
-
+              promise.always(() => {
+                  if (widget.activeTool_) {
+                      widget._toggleDrawingTool(widget.activeTool_.schema, widget.activeTool_.name, false);
+                  }
+                  $('.-fn-toggle-tool', widget.$element).removeClass('active'); });
+           }
             return promise;
-        },
-        updateSaveAll: function() {
-            var $saveAllButton = $('.-fn-save-all', this.element);
-            var candidates = $saveAllButton.length && this.getSaveAllCandidates_() || [];
+        }
+
+        updateSaveAll() {
+            const $saveAllButton = $('.-fn-save-all', this.$element);
+            const candidates = $saveAllButton.length && this.getSaveAllCandidates_() || [];
             $saveAllButton.prop('disabled', !candidates.length);
             if (candidates.length) {
-                $saveAllButton.removeClass('btn-outline-primary');
-                $saveAllButton.addClass('btn-primary');
+                $saveAllButton.removeClass('btn-outline-primary').addClass('btn-primary');
             } else {
-                $saveAllButton.removeClass('btn-primary');
-                $saveAllButton.addClass('btn-outline-primary');
+                $saveAllButton.removeClass('btn-primary').addClass('btn-outline-primary');
             }
-        },
-        getSaveAllCandidates_: function() {
-            var self = this;
+        }
+
+        getSaveAllCandidates_() {
+            const self = this;
             return this.renderer.filterFeatures(this._getCurrentSchema(), function(feature) {
                 return self._getUniqueItemId(feature)
                     && feature.get('dirty')
                     && self.getItemSchema(feature).allowDigitize;
             });
-        },
+        }
+
         /**
          * @param {*} schema
          * @returns {Array<ol.layer.Vector>}
          */
-        getSnappingLayers: function(schema) {
+        getSnappingLayers(schema) {
             let olMap = this.mbMap.getModel().olMap;
             let layers = olMap.getAllLayers().filter(layer => layer instanceof ol.layer.Vector);
             return this.getSchemaLayers(schema).concat(layers);
-        },
+        }
+
         /**
          * @param {*} schema
          * @returns {Array<ol.layer.Vector>}
          */
-        getSchemaLayers: function(schema) {
+        getSchemaLayers(schema) {
             return this.renderer.getLayers(schema);
-        },
+        }
+
         /**
          * @param {*} schema
          * @returns {ol.layer.Vector|undefined}
          * @deprecated use getSchemaLayers for proper multi-layer support
          */
-        getSchemaLayer: function(schema) {
+        getSchemaLayer(schema) {
             if (schema.combine) {
-                throw new Error("Cannot get single layer for combination schema");
+                throw new Error('Cannot get single layer for combination schema');
             }
             return this.getSchemaLayers(schema)[0];
-        },
-        cloneFeature: function(schema, feature) {
-            var newFeature = feature.clone();
-            var copyDefaults = schema.copy.data || {};
-            var newAttributes = {};
+        }
+
+        cloneFeature(schema, feature) {
+            const newFeature = feature.clone();
+            const copyDefaults = schema.copy.data || {};
+            const newAttributes = {};
             if (schema.copy.overwriteValuesWithDefault) {
                 Object.assign(newAttributes, feature.get('data'), copyDefaults);
             } else {
@@ -620,31 +649,29 @@
             // clear id
             newAttributes[schema.featureType.uniqueId] = null;
             // @todo: Detect the first text-type attribute and prefix it with "Copy of"
-            //        Digitizer has no direct knowledge of data columns and types
-            //        All we have are table column and form item configuration
+            // Digitizer has no direct knowledge of data columns and types
+            // All we have are table column and form item configuration
             newFeature.set('data', newAttributes);
-
             // Offset new geometry by ~3% the current (projected) viewport
             // This keeps the cloned geometry distinctly visible at any zoom level
-            var extent = this.mbMap.getModel().getCurrentExtent();
+            const extent = this.mbMap.getModel().getCurrentExtent();
             if (!schema.copy.deactivateOffset) {
-                var cloneOffset = {
+                const cloneOffset = {
                     h: Math.abs((extent.right - extent.left) / 32.),
                     v: Math.abs((extent.top - extent.bottom) / 32.)
                 };
                 newFeature.getGeometry().translate(cloneOffset.h, cloneOffset.v);
             }
             newFeature.set('dirty', true);
-
             this.renderer.addFeatures([newFeature]);
-
             this._openEditDialog(schema, newFeature);
-        },
+        }
+
         /**
          * @param {ol.Feature|null} feature
          */
-        onFeatureClick: function(feature) {
-            var itemSchema = this.getItemSchema(feature);
+        onFeatureClick(feature) {
+            const itemSchema = this.getItemSchema(feature);
             if (feature && !this.activeTool_) {
                 this._openEditDialog(itemSchema, feature);
             } else if (!this.currentPopup && 'modifyFeature' === this.activeTool_.name) {
@@ -658,37 +685,38 @@
                     this.featureEditor.setEditFeature(null);
                 }
                 this.selectControl.getFeatures().clear();
-                var tr = feature && feature.get('table-row');
+                const tr = feature && feature.get('table-row');
                 if (tr) {
                     this.tableRenderer.showRow(tr);
                 }
             }
-        },
+        }
+
         /**
          * @return {number}
          */
-        getCurrentSrid: function() {
+        getCurrentSrid() {
             return parseInt(this.mbMap.getModel().getCurrentProjectionCode().replace(/^\w+:/, ''));
-        },
-        openStyleEditor: function(schema, feature) {
-            var self = this;
-            var styleConfig = feature.get('customStyleConfig');
+        }
+
+        openStyleEditor(schema, feature) {
+            const self = this;
+            let styleConfig = feature.get('customStyleConfig');
             if (!styleConfig) {
-                var defaults = this.getInitialCustomStyle_(schema, feature);
+                const defaults = this.getInitialCustomStyle_(schema, feature);
                 // Resolve any placeholders ...
                 styleConfig = this.renderer.resolveStyleConfigPlaceholders(defaults, feature);
                 // ... but allow label placeholder (editable as text)
                 styleConfig.label = defaults.label || '';
             }
-
             this.styleEditor.openEditor(schema, feature, styleConfig).then(function(values) {
-                var styleFieldData = JSON.stringify(values);
+                const styleFieldData = JSON.stringify(values);
                 function always() {
                     feature.get('data')[schema.featureType.styleField] = styleFieldData;
                     self.renderer.customStyleFeature_(feature);
                 }
                 if (self._getUniqueItemId(feature)) {
-                    var formData = {};
+                    const formData = {};
                     formData[schema.featureType.styleField] = styleFieldData;
                     self._saveItem(schema, feature, formData).then(function() {
                         always();
@@ -697,87 +725,89 @@
                     always();
                 }
             });
-        },
-        zoomToFeature: function(schema, feature) {
+        }
+
+        zoomToFeature(schema, feature) {
             Mapbender.Model.zoomToFeature(feature, { buffer: schema.zoomBuffer || 10 });
-        },
-        _getEditDialogPopupConfig: function(schema, dataItem) {
-            var options = this._superApply(arguments);
+        }
+
+        _getEditDialogPopupConfig(schema, dataItem) {
+            const options = super._getEditDialogPopupConfig(schema, dataItem);
             if (!(schema.popup || {}).title && schema.allowEdit) {
                 options.title = Mapbender.trans('mb.digitizer.edit.attributes');
             }
             return options;
-        },
-        createSelectControl_: function() {
-            var self = this;
-            var selectControl = new ol.interaction.Select({
-                condition: ol.events.condition.singleClick,
-                layers: function(layer) {
-                    var schema = self._getCurrentSchema();
-                    var activeLayers = schema && self.getSchemaLayers(schema) || [];
-                    return -1 !== activeLayers.indexOf(layer);
-                },
-                style: null
-            });
+        }
 
-            selectControl.on('select', function (event) {
-                // Prevent interaction from filtering out the same feature if we click on it again before doing
-                // anything else.
-                /** @see https://github.com/openlayers/openlayers/blob/v6.4.3/src/ol/interaction/Select.js#L469 */
-                this.features_.clear();
-                self.onFeatureClick(event.selected[0] || null);
-            });
-            return selectControl;
-        },
-        createHighlightControl_: function() {
-            var self = this;
-            var highlightControl = new ol.interaction.Select({
-                condition: ol.events.condition.pointerMove,
-                layers: function(layer) {
-                    var schema = self._getCurrentSchema();
-                    var activeLayers = schema && self.getSchemaLayers(schema) || [];
+        createSelectControl_() {
+          const self = this;
+          const selectControl = new ol.interaction.Select({
+              condition: ol.events.condition.singleClick,
+              layers(layer) {
+                  const schema = self._getCurrentSchema();
+                  const activeLayers = schema && self.getSchemaLayers(schema) || [];
+                  return -1 !== activeLayers.indexOf(layer);
+              },
+              style: null
+          });
+          selectControl.on('select', function (event) {
+              // Prevent interaction from filtering out the same feature if we click on it again before doing
+              // anything else.
+              /** @see https://github.com/openlayers/openlayers/blob/v6.4.3/src/ol/interaction/Select.js#L469 */
+              this.features_.clear();
+              self.onFeatureClick(event.selected[0] || null);
+          });
+          return selectControl;
+        }
+
+        createHighlightControl_() {
+            const self = this;
+            const highlightControl = new ol.interaction.Select({
+                condition: ol.events.condition.pointerMove, layers(layer) {
+                    const schema = self._getCurrentSchema();
+                    const activeLayers = schema && self.getSchemaLayers(schema) || [];
                     return -1 !== activeLayers.indexOf(layer);
                 },
-                filter: function(feature) {
+                filter(feature) {
                     return -1 === self.excludedFromHighlighting_.indexOf(feature);
                 }
-            });
+              });
+              highlightControl.on('select', function (e) {
+              e.deselected.forEach(function(feature) {
+                  // Avoid excessive property updates to reduce layer re-rendering
+                  if (feature.get('hover')) {
+                      feature.set('hover', false);
+                  }
+              });
+              e.selected.forEach(function(feature) {
+                  // Avoid excessive property updates to reduce layer re-rendering
+                  // Styling for editing / hidden states takes priority over hover,
+                  // allowing a sake skip of the hover style update
+                  if (!feature.get('editing') || !feature.get('hidden')) {
+                      feature.set('hover', true);
+                  }
+              });
+          });
+          return highlightControl;
+        }
 
-            highlightControl.on('select', function (e) {
-                e.deselected.forEach(function(feature) {
-                    // Avoid excessive property updates to reduce layer re-rendering
-                    if (feature.get('hover')) {
-                        feature.set('hover', false);
-                    }
-                });
-                e.selected.forEach(function(feature) {
-                    // Avoid excessive property updates to reduce layer re-rendering
-                    // Styling for editing / hidden states takes priority over hover,
-                    // allowing a sake skip of the hover style update
-                    if (!feature.get('editing') || !feature.get('hidden')) {
-                        feature.set('hover', true);
-                    }
-                });
-            });
-            return highlightControl;
-        },
-        clearHighlightExclude_: function() {
+        clearHighlightExclude_() {
             this.excludedFromHighlighting_.splice(0, this.excludedFromHighlighting_.length);
-        },
-        checkSourceRefresh_: function(schema) {
-            var sourceIds = schema.refreshLayersAfterFeatureSave || [];
+        }
+
+        checkSourceRefresh_(schema) {
+            let sourceIds = schema.refreshLayersAfterFeatureSave || [];
             if (sourceIds && !Array.isArray(sourceIds)) {
                 sourceIds = [sourceIds];
             }
-            for (var i = 0; i < sourceIds.length; ++i) {
-                var source = this.mbMap.getModel().getSourceById(sourceIds[i]);
+            for (let i = 0; i < sourceIds.length; ++i) {
+                let source = this.mbMap.getModel().getSourceById(sourceIds[i]);
                 if (!source) {
                     if (!this.mbMap.getModel().findSourceAndLayerIdByName) {
-                        console.warn("Method findSourceAndLayerIdByName not available - consider Mapbender upgrade");
+                        console.warn('Method findSourceAndLayerIdByName not available - consider Mapbender upgrade');
                     } else {
                         let ids = this.mbMap.getModel().findSourceAndLayerIdByName(sourceIds[i]);
-                        let sourceId = ids.sourceId;
-                        source = sourceId && this.mbMap.getModel().getSourceById(sourceId);
+                        let sourceId = ids.sourceId; source = sourceId && this.mbMap.getModel().getSourceById(sourceId);
                     }
                 }
                 if (source) {
@@ -787,19 +817,21 @@
                         source.addParams({_OLSALT: Math.random()});
                     }
                 } else {
-                    console.warn("Could not find source with id " + sourceIds[i] + " for refresh");
+                    console.warn('Could not find source with id ' + sourceIds[i] + ' for refresh');
                 }
             }
-        },
-        getInitialCustomStyle_: function(schema, feature) {
+        }
+
+        getInitialCustomStyle_(schema, feature) {
             return schema.styles.default;
-        },
+        }
 
         // Empty method for overriding purpose
-        adjustStyle: function(schema, feature) {
+        adjustStyle(schema, feature) {
 
-        },
-        __formatting_dummy: null
-    });
+        }
+    }
 
-})(jQuery);
+    window.Mapbender.Element = window.Mapbender.Element || {};
+    window.Mapbender.Element.MbDigitizer = MbDigitizer;
+})();

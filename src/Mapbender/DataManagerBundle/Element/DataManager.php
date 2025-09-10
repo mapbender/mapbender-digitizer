@@ -44,7 +44,7 @@ class DataManager extends AbstractElementService
 
     public function getWidgetName(Element $element)
     {
-        return 'mapbender.mbDataManager';
+        return 'MbDataManager';
     }
 
     public static function getDefaultConfiguration()
@@ -73,7 +73,7 @@ class DataManager extends AbstractElementService
                 '@MapbenderDataManagerBundle/Resources/public/DialogFactory.js',
                 '../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
                 '@MapbenderDataManagerBundle/Resources/public/TableRenderer.js',
-                '@MapbenderDataManagerBundle/Resources/public/dataManager.element.js',
+                '@MapbenderDataManagerBundle/Resources/public/MbDataManager.js',
             ),
             'trans' => array(
                 'mb.data-manager.*',
