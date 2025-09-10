@@ -26,7 +26,7 @@ class Digitizer extends DataManager
 
     public function getWidgetName(Element $element)
     {
-        return 'mapbender.mbDigitizer';
+        return 'MbDigitizer';
     }
 
     public function getView(Element $element)
@@ -50,7 +50,7 @@ class Digitizer extends DataManager
         return array(
             'js' => array_merge($dataManagerAssets["js"], array(
                 "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
-                "@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js",
+                "@MapbenderDigitizerBundle/Resources/public/MbDigitizer.js",
                 "@MapbenderDigitizerBundle/Resources/public/toolset.js",
                 "@MapbenderDigitizerBundle/Resources/public/FeatureRenderer.js",
                 '@MapbenderDigitizerBundle/Resources/public/FeatureEditor.js',

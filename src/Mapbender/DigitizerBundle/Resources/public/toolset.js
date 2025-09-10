@@ -46,11 +46,11 @@
         },
         pause: function() {
             // @todo: reintegrate with FeatureEditor :)
-            $('button.-fn-toggle-tool', this.owner.element).prop('disabled', true);
+            $('button.-fn-toggle-tool', this.owner.$element).prop('disabled', true);
         },
         resume: function() {
             // @todo: reintegrate with FeatureEditor :)
-            $('button.-fn-toggle-tool', this.owner.element).prop('disabled', false);
+            $('button.-fn-toggle-tool', this.owner.$element).prop('disabled', false);
         },
         getDefaultGeometryToolNames: function(schema) {
             return this.getValidToolNames(schema);
@@ -118,7 +118,7 @@
         },
         registerEvents: function() {
             var widget = this.owner;
-            widget.element.on('click', '.-fn-visibility-all', function() {
+            widget.$element.on('click', '.-fn-visibility-all', function() {
                 var state = !!$(this).attr('data-visibility');
                 widget.renderer.forAllSchemaFeatures(widget._getCurrentSchema(), function (feature) {
                     if (widget.getItemSchema(feature).allowChangeVisibility) {
