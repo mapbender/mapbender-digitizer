@@ -142,7 +142,9 @@
 
         _initializeEvents() {
             super._initializeEvents();
-            this.toolsetRenderer = this._createToolsetRenderer();
+            if (!this.toolsetRenderer) {
+                this.toolsetRenderer = this._createToolsetRenderer();
+            }
             this.toolsetRenderer.registerEvents();
             const self = this;
             this.$element.on('click', '.-fn-toggle-tool[data-toolname]', function() {
