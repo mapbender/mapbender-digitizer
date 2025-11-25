@@ -4,6 +4,7 @@
 namespace Mapbender\DataSourceBundle\Component;
 
 
+use Symfony\Component\Security\Core\Authentication\Token\NullToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
@@ -73,26 +74,29 @@ class EventProcessor
      */
     protected function addBuiltins(array $locals)
     {
+        $token = $this->tokenStorage->getToken();
+        
         $locals += array(
             'context' => $this->authorizationChecker,
             'tokenStorage' => $this->tokenStorage,
-            'user' => $this->tokenStorage->getToken()->getUser(),
+            'user' => ($token !== null && !$token instanceof NullToken) ? $token->getUser() : null,
             'userRoles' => array(),
         );
-        $token = $this->tokenStorage->getToken();
 
-        if (\method_exists($token, 'getRoleNames')) {
-            // Symfony >= 4.3
-            $locals['userRoles'] = $token->getRoleNames();
-        } else {
-            foreach ($token->getRoles() as $role) {
-                if (\is_object($role) && \method_exists($role, 'getRole')) {
-                    $roleName = $role->getRole();
-                } else {
-                    // Role objects should have __toString
-                    $roleName = \strval($role);
+        if ($token !== null && !$token instanceof NullToken) {
+            if (\method_exists($token, 'getRoleNames')) {
+                // Symfony >= 4.3
+                $locals['userRoles'] = $token->getRoleNames();
+            } else {
+                foreach ($token->getRoles() as $role) {
+                    if (\is_object($role) && \method_exists($role, 'getRole')) {
+                        $roleName = $role->getRole();
+                    } else {
+                        // Role objects should have __toString
+                        $roleName = \strval($role);
+                    }
+                    $locals['userRoles'][] = $roleName;
                 }
-                $locals['userRoles'][] = $roleName;
             }
         }
         return $locals;
