@@ -1,3 +1,6 @@
+## next bugfix release
+* Show error message when a YAML syntax error occurs in manager ([PR#145](https://github.com/mapbender/mapbender-digitizer/pull/145))
+
 ## 2.0.5
 * Add tooltips to digitizer buttons ([PR#140](https://github.com/mapbender/mapbender-digitizer/pull/140))
 
