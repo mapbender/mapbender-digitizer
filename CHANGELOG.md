@@ -1,5 +1,6 @@
-## next bugfix release
+## 2.0.6
 * Show error message when a YAML syntax error occurs in manager ([PR#145](https://github.com/mapbender/mapbender-digitizer/pull/145))
+* Fix popup width & height was ignored ([PR#146](https://github.com/mapbender/mapbender-digitizer/pull/146))
 
 ## 2.0.5
 * Add tooltips to digitizer buttons ([PR#140](https://github.com/mapbender/mapbender-digitizer/pull/140))
