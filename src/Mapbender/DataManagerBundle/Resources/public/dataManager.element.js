@@ -508,6 +508,7 @@
                 modal: schema.popup.modal || false,
                 title: schema.popup.title || Mapbender.trans('mb.data-manager.details_title'),
                 width: schema.popup.width,
+                height: schema.popup.height,
                 minWidth: minWidth,
                 classes: {
                     'ui-dialog-content': 'ui-dialog-content data-manager-edit-data'

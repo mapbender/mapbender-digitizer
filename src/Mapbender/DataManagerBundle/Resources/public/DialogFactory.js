@@ -16,11 +16,16 @@
                 closeText: '',
                 resizable: false
             };
-            var options_ = Object.assign({}, defaults, options || {}, {
+            const options_ = Object.assign({}, defaults, options || {}, {
                 classes: Object.assign({}, defaults.classes, (options || {}).classes || {})
             });
+
             $content.dialog(options_);
             var $dialog = $content.closest('.ui-dialog');
+
+            if (options_.width) $dialog.css("width", options_.width);
+            if (options_.height) $dialog.css("height", options_.height);
+
             // Remove draggable + resizable containments. This cannot be controlled with dialog options :(
             var draggable = $dialog.draggable('instance');
             var resizable = $dialog.resizable('instance');
