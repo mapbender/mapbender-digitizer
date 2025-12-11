@@ -32,3 +32,5 @@ mb:
     details_title: Detalles del objeto
     attachment:
       open: Abrir archivo adjunto
+    error:
+      invalid_file_extension: 'Tipo de archivo no válido. Tipos de archivo permitidos:'

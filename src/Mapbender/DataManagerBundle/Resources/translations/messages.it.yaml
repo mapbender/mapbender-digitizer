@@ -31,3 +31,5 @@ mb:
     details_title: Dettagli oggetto
     attachment:
       open: Apri allegato
+    error:
+      invalid_file_extension: 'Tipo di file non valido. Tipi di file consentiti:'
