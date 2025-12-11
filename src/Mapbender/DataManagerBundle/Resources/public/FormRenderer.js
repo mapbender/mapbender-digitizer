@@ -243,12 +243,12 @@
                 const $group = $input.closest('.mb-3');
                 const $realInput = $('input[name="' + name + '"]', $group);
                 const url = $input.attr('data-upload-url');
-                const datatypes = $input.attr('data-allowed-types');
+                const allowedExtensions = $input.attr('data-allowed-types');
                 const $loadingIcon = $('.-js-loading-indicator', $group);
                 $input.fileupload({
                     dataType: 'json',
                     url: url,
-                    submit: (e, data) => self.checkFileExtension(data.files, datatypes),
+                    submit: (e, data) => self.checkFileExtension(data.files, allowedExtensions),
                     success: function(response) {
                         var values = {};
                         values[name] = response.filename;
@@ -275,15 +275,15 @@
                 return false;
             });
         },
-        checkFileExtension: function (files, allowedTypesCsv) {
+        checkFileExtension: function (files, allowedExtensionsCsv) {
             // no value means no restriction
-            if (!allowedTypesCsv) return true;
-            const datatypes = allowedTypesCsv.split(',').map(s => s.trim().toLowerCase());
+            if (!allowedExtensionsCsv) return true;
+            const allowedExtensions = allowedExtensionsCsv.split(',').map(s => s.trim().toLowerCase());
             for (let i = 0; i < files.length; ++i) {
                 const file = files[i];
                 const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-                if (datatypes.indexOf(fileExt) === -1) {
-                    Mapbender.info(Mapbender.trans('mb.data-manager.error.invalid_file_extension') + ' ' + datatypes.join(', '));
+                if (!allowedExtensions.includes(fileExt)) {
+                    Mapbender.info(Mapbender.trans('mb.data-manager.error.invalid_file_extension') + ' ' + allowedExtensions.join(', '));
                     return false;
                 }
             }
