@@ -1,3 +1,6 @@
+## next feature release
+* Add file type check to form type `file` (key: `allowedFileTypes`) ([PR#147](https://github.com/mapbender/mapbender-digitizer/pull/147))
+
 ## 2.0.6
 * Show error message when a YAML syntax error occurs in manager ([PR#145](https://github.com/mapbender/mapbender-digitizer/pull/145))
 * Fix popup width & height was ignored ([PR#146](https://github.com/mapbender/mapbender-digitizer/pull/146))

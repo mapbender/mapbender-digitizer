@@ -32,3 +32,5 @@ mb:
     details_title: Ayrıntılı veriler
     attachment:
       open: Eki aç
+    error:
+      invalid_file_extension: 'Geçersiz dosya türü. İzin verilen dosya türleri:'

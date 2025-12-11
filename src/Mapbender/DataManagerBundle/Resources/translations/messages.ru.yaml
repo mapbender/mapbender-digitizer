@@ -30,3 +30,5 @@ mb:
     details_title: Детали объекта
     attachment:
       open: Открыть вложение
+    error:
+      invalid_file_extension: 'Недопустимый тип файла. Разрешённые типы файлов:'

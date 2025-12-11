@@ -32,3 +32,5 @@ mb:
     details_title: Données détaillées
     attachment:
       open: Ouvrir la pièce jointe
+    error:
+      invalid_file_extension: 'Type de fichier non valide. Types de fichiers autorisés:'
