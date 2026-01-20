@@ -12,52 +12,78 @@
         /**
          * @param {String|HTMLElement|jQuery} content
          * @param {Object} [options]
-         * @return {jQuery}
+         * @return {Mapbender.Popup}
          * @private
          */
         baseDialog_(content, options) {
             const $content = $((typeof content === 'string') ? $.parseHTML(content) : content);
             const defaults = {
-                classes: {
-                    'ui-dialog': 'ui-dialog data-manager-dialog',
-                    'ui-button': 'ui-button button btn'
-                },
-                closeText: '',
-                resizable: false
+                modal: true,
+                closeButton: true,
+                draggable: true,
+                resizable: false,
+                scrollable: true,
+                detachOnClose: true,
+                destroyOnClose: false
             };
-            const options_ = Object.assign({}, defaults, options || {}, {
-                classes: Object.assign({}, defaults.classes, (options || {}).classes || {})
-            });
-            $content.dialog(options_);
-            const $dialog = $content.closest('.ui-dialog');
-            // Remove draggable + resizable containments. This cannot be controlled with dialog options :(
-            const draggable = $dialog.draggable('instance');
-            const resizable = $dialog.resizable('instance');
-            if (draggable) {
-                draggable.option('containment', false);
-                // "If set to true container auto-scrolls while dragging"
-                // See https://api.jqueryui.com/draggable/#option-scroll
-                // Disable this. It breaks Mapbender's fixed full width / full height layout when
-                // dragging dialog off a screen edge.
-                draggable.option('scroll', false);
+            const options_ = Object.assign({}, defaults, options || {});
+            
+            // Map buttons to Mapbender.Popup format
+            if (options_.buttons && options_.buttons.length) {
+                options_.buttons = options_.buttons.map(btn => ({
+                    label: btn.text,
+                    cssClass: btn.class || 'btn',
+                    callback: btn.click
+                }));
             }
-            if (resizable) {
-                resizable.option('containment', false);
+            
+            // Store cssClass for content element (not popup wrapper)
+            const contentCssClass = options_.cssClass;
+            delete options_.cssClass;  // Don't apply to popup wrapper
+            
+            // Set content
+            options_.content = $content;
+            
+            // Create popup
+            const popup = new Mapbender.Popup(options_);
+            
+            // Store reference to original content element for data access
+            // (since Popup.setContent uses .html() which loses jQuery data)
+            popup.$contentElement = $content;
+            
+            // Apply CSS class to popupContent element
+            if (contentCssClass && popup.$element) {
+                $('.popupContent', popup.$element).addClass(contentCssClass);
             }
-
-            // Hide text labels on .ui-button-icon-only, with or without jqueryui css
-            $('.ui-dialog-titlebar .ui-button-icon-only', $content.closest('.ui-dialog')).each(function() {
-                const $button = $(this);
-                const $icon = $('.ui-button-icon', this);
-                $button.empty().append($icon);
-            });
-            $content.on('dialogclose', function() {
-                window.setTimeout(function() { if ($content.dialog('instance')) { $content.dialog('destroy');} }, 500);
-            });
-
-            Mapbender.restrictPopupPositioning($dialog);
-
-            return $content;
+            
+            // Apply position if specified (jQuery UI position format to CSS)
+            // Note: Mapbender.Popup doesn't support position option natively,
+            // so we apply it as CSS after creation
+            if (options.position && popup.$element) {
+                const pos = options.position;
+                const cssPos = {};
+                
+                // Handle jQuery UI position format: {my: "center", at: "center", of: window}
+                // For now, support simple numeric/string positions
+                if (typeof pos.left !== 'undefined') {
+                    cssPos.left = typeof pos.left === 'number' ? pos.left + 'px' : pos.left;
+                }
+                if (typeof pos.top !== 'undefined') {
+                    cssPos.top = typeof pos.top === 'number' ? pos.top + 'px' : pos.top;
+                }
+                if (typeof pos.right !== 'undefined') {
+                    cssPos.right = typeof pos.right === 'number' ? pos.right + 'px' : pos.right;
+                }
+                if (typeof pos.bottom !== 'undefined') {
+                    cssPos.bottom = typeof pos.bottom === 'number' ? pos.bottom + 'px' : pos.bottom;
+                }
+                
+                if (Object.keys(cssPos).length > 0) {
+                    popup.$element.css(cssPos);
+                }
+            }
+            
+            return popup;
         }
 
         /**
@@ -70,7 +96,7 @@
                 .append(content || null)
             ;
             const deferred = $.Deferred();
-            this.baseDialog_($content, {
+            const popup = this.baseDialog_($content, {
                 title: title,
                 modal: true,
                 buttons:[
@@ -79,7 +105,7 @@
                          'class': 'button success btn',
                          click: function() {
                              deferred.resolve();
-                             $(this).dialog('close');
+                             popup.close();
                              return false;
                          }
                     }, {
@@ -87,7 +113,7 @@
                          'class': 'button critical btn',
                          click:   function() {
                              deferred.reject();
-                             $(this).dialog('close');
+                             popup.close();
                              return false;
                          }
                      }
@@ -99,7 +125,7 @@
         /**
          * @param {String|HTMLElement|jQuery} content
          * @param {Object} [options]
-         * @return {jQuery}
+         * @return {Mapbender.Popup}
          */
         dialog(content, options) {
             const buttons = (options || {}).buttons || [];

@@ -192,9 +192,7 @@
 
         _closeCurrentPopup() {
             if (this.currentPopup) {
-                if (this.currentPopup.dialog('instance')) {
-                    this.currentPopup.dialog('destroy');
-                }
+                this.currentPopup.close();
                 this.currentPopup = null;
             }
         }
@@ -437,8 +435,8 @@
             if (!$('> .ui-tabs', dialog).length) {
                 dialog.addClass('content-padding');
             }
-            this.dialogFactory_.dialog(dialog, dialogOptions);
-            widget.currentPopup = dialog;
+            const popup = this.dialogFactory_.dialog(dialog, dialogOptions);
+            widget.currentPopup = popup;  // Store the Mapbender.Popup instance
             Mapbender.DataManager.FormUtil.setValues(dialog, itemValues);
             const schemaBaseUrl = [this.elementUrl, schema.schemaName, '/'].join('');
             this.formRenderer_.updateFileInputs(dialog, schemaBaseUrl, itemValues);
@@ -467,20 +465,18 @@
          */
         _getEditDialogPopupConfig(schema, dataItem) {
             let width = schema.popup.width;
-            // NOTE: unlike width, which allows CSS units, minWidth option is expected to be a pure pixel number
-            let minWidth = 550;
-            if (/\d+px/.test(width || '')) {
-                minWidth = parseInt(width.replace(/px$/, '')) || minWidth;
+            // Ensure minimum width of 550px if not specified or too small
+            if (!width || (typeof width === 'string' && parseInt(width) < 550)) {
+                width = '550px';
+            } else if (typeof width === 'number' && width < 550) {
+                width = 550;
             }
             return {
-                position: schema.popup.position || {},
                 modal: schema.popup.modal || false,
                 title: schema.popup.title || Mapbender.trans('mb.data-manager.details_title'),
-                width: schema.popup.width,
-                minWidth: minWidth,
-                classes: {
-                    'ui-dialog-content': 'ui-dialog-content data-manager-edit-data'
-                },
+                width: width,
+                cssClass: 'data-manager-edit-data',
+                position: schema.popup.position || null,  // Preserve position config for CSS positioning
                 buttons: this._getEditDialogButtons(schema, dataItem)
             };
         }
@@ -500,7 +496,8 @@
                     text: Mapbender.trans('mb.actions.save'),
                     'class': 'btn btn-primary',
                     click: function() {
-                        const $scope = $(this).closest('.ui-dialog-content');
+                        // In Mapbender.Popup, 'this' refers to the popup instance
+                        const $scope = $('.popupContent', this.$element);
                         const saved = widget._submitFormData(schema, $scope, dataItem);
                         if (saved) {
                             saved.then(function() {

@@ -288,7 +288,8 @@
 
         updateFileInputs(scope, baseUrl, values) {
             var fileInputs = $('.fileinput-button input[name]', scope).get();
-            var dataImages = $('img[data-preview-for]', $(scope).closest('.ui-dialog')).get();
+            var $container = $(scope).closest('.popup');
+            var dataImages = $('img[data-preview-for]', $container).get();
             var i;
             for (i = 0; i < fileInputs.length; ++i) {
                 var fileInput = fileInputs[i];
@@ -504,7 +505,8 @@
                     .attr('href', ['#', $panel.attr('id')].join(''))
                     .text(title)
                 ;
-                this.checkExtraSettings_(sub, ['children', 'title'], 'tabs child');
+                this.checkExtraSettings_(sub, ['children', 'title', 'css'], 'tabs child');
+                $panel.css(sub.css || {});
                 $panel.append(this.renderElements(sub.children));
                 $tabList.append($(document.createElement('li')).append($tabLink));
                 $container.append($panel);

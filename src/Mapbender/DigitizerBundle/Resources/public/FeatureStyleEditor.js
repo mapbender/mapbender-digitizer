@@ -15,21 +15,19 @@
         openDialog_($content) {
             var promise = $.Deferred();
             var editor = this;
-            this.dialogFactory.dialog($content, {
+            var popup = this.dialogFactory.dialog($content, {
                 title: "Style manager",
                 width: '500px',
                 resizable: true,
-                classes: {
-                    'ui-dialog-content': 'ui-dialog-content data-manager-edit-data digitizer-style-editor content-padding'
-                },
+                cssClass: 'data-manager-edit-data digitizer-style-editor content-padding',
                 buttons: [{
                     text: Mapbender.trans('mb.digitizer.actions.save'),
                     title: Mapbender.trans('mb.data-manager.actions.save_tooltip'),
                     class: 'btn btn-primary',
                     click: function (e) {
-                        var values = editor.getFormData(this);
+                        var values = editor.getFormData(popup.$element);
                         promise.resolveWith(null, [values]);
-                        $(this).dialog('close');
+                        popup.close();
                     }
                 },{
                     text: Mapbender.trans('mb.digitizer.actions.cancel'),
@@ -37,7 +35,7 @@
                     class: 'btn btn-light',
                     click: function (e) {
                         promise.reject();
-                        $(this).dialog('close');
+                        popup.close();
                     }
                 }]
             });

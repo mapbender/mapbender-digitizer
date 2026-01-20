@@ -210,9 +210,10 @@
 
         _closeCurrentPopup() {
             if (this.currentPopup) {
-                const feature = this.currentPopup.data('item');
-                const itemSchema = this.currentPopup.data('schema');
-                if (!feature.getId()) {
+                const $content = this.currentPopup.$contentElement;
+                const feature = $content.data('item');
+                const itemSchema = $content.data('schema');
+                if (feature && !feature.getId()) {
                     this.renderer.removeFeature(itemSchema, feature);
                 }
             }
