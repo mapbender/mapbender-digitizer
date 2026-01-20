@@ -3,26 +3,24 @@
     window.Mapbender = Mapbender || {};
     window.Mapbender.Digitizer = Mapbender.Digitizer || {};
 
-    Mapbender.Digitizer.StyleAdapter = function(defaultStyleConfig) {
-        this.defaultStyle_ = ol.style.Style.defaultFunction()[0].clone();
-        this.enforceArrayColor_(this.defaultStyle_);
+    class StyleAdapter {
+        constructor(defaultStyleConfig) {
+            this.placeholderRx_ = /\${([^}]+)}/g;
+            this.defaultStyle_ = ol.style.Style.defaultFunction()[0].clone();
+            this.enforceArrayColor_(this.defaultStyle_);
 
-        var placeholderProps = this.detectDataPlaceholders_(defaultStyleConfig);
-        if (placeholderProps.length) {
-            throw new Error("Fallback style MUST NOT include data placeholders. Found: " + placeholderProps.join(', '));
+            var placeholderProps = this.detectDataPlaceholders_(defaultStyleConfig);
+            if (placeholderProps.length) {
+                throw new Error("Fallback style MUST NOT include data placeholders. Found: " + placeholderProps.join(', '));
+            }
+            this.resolveBaseStyle_(this.defaultStyle_, defaultStyleConfig);
+
+            this.defaultText_ = new ol.style.Text();
+            this.enforceArrayColor_(this.defaultText_);
+            this.defaultText_.setOverflow(true);
         }
-        this.resolveBaseStyle_(this.defaultStyle_, defaultStyleConfig);
 
-        this.defaultText_ = new ol.style.Text();
-        this.enforceArrayColor_(this.defaultText_);
-        this.defaultText_.setOverflow(true);
-    };
-
-    Object.assign(Mapbender.Digitizer.StyleAdapter.prototype, {
-        defaultStyle_: null,
-        defaultText_: null,
-        placeholderRx_: /\${([^}]+)}/g,
-        styleFunctionFromSvgRules: function(styleConfig, dataCallback) {
+        styleFunctionFromSvgRules(styleConfig, dataCallback) {
             var self = this;
             var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor', 'externalGraphic', 'labelOutlineColor', 'labelOutlineWidth', 'labelYOffset', 'labelXOffset'];
             return (function(styleConfig) {
@@ -67,22 +65,25 @@
                     return styles;
                 };
             })(styleConfig);
-        },
+        }
+
         /**
          * @return {ol.style.Style}
          */
-        getDefaultStyleObject: function() {
+        getDefaultStyleObject() {
             return this.defaultStyle_.clone();
-        },
-        getDefaultTextStyle: function() {
+        }
+
+        getDefaultTextStyle() {
             return this.defaultText_.clone();
-        },
+        }
+
         /**
          * @param {ol.style.Style} targetStyle
          * @param {Object} styleConfig
          * @private
          */
-        resolveColors_: function(targetStyle, styleConfig) {
+        resolveColors_(targetStyle, styleConfig) {
             if (styleConfig.fillColor || (typeof styleConfig.fillOpacity !== 'undefined')) {
                 var resolvedFill = this.parseSvgColor(styleConfig, 'fillColor', 'fillOpacity', targetStyle.getFill().getColor());
                 targetStyle.getFill().setColor(resolvedFill);
@@ -97,8 +98,9 @@
             // clone image style again.
             /** @see https://github.com/openlayers/openlayers/blob/v6.4.3/src/ol/renderer/vector.js#L107 */
             targetStyle.setImage(targetStyle.getImage().clone());
-        },
-        resolveBaseStyle_: function(targetStyle, styleConfig) {
+        }
+
+        resolveBaseStyle_(targetStyle, styleConfig) {
             this.resolveColors_(targetStyle, styleConfig);
             if (typeof styleConfig.strokeWidth !== 'undefined') {
                 targetStyle.getStroke().setWidth(styleConfig.strokeWidth);
@@ -107,8 +109,9 @@
                 targetStyle.getStroke().setLineCap(styleConfig.strokeLinecap);
             }
             targetStyle.getStroke().setLineDash(this.dashRuleToComponents(styleConfig.strokeDashstyle));
-        },
-        getBaseStyleObject: function(ol2Style) {
+        }
+
+        getBaseStyleObject(ol2Style) {
             var newStyle = this.getDefaultStyleObject();
             this.resolveBaseStyle_(newStyle, ol2Style);
 
@@ -122,8 +125,9 @@
 
             newStyle.setImage(image);
             return newStyle;
-        },
-        getTextStyle: function (ol2Style) {
+        }
+
+        getTextStyle(ol2Style) {
             var textStyle = this.getDefaultTextStyle();
             textStyle.setFont(this.canvasFontRuleFromSvg(ol2Style));
             this.resolveTextStyle_(textStyle, ol2Style);
@@ -150,8 +154,9 @@
             }
 
             return textStyle;
-        },
-        getIconStyle: function(styleConfig) {
+        }
+
+        getIconStyle(styleConfig) {
             var iconStyle = new ol.style.Icon({
                 src: styleConfig.externalGraphic
             });
@@ -166,8 +171,9 @@
                 }
             }
             return iconStyle;
-        },
-        getIconScaleHandler_: function(iconStyle, styleConfig) {
+        }
+
+        getIconScaleHandler_(iconStyle, styleConfig) {
             return (function(styleConfig) {
                 return function() {
                     /** @this ol.style.Image */
@@ -187,13 +193,14 @@
                     }
                 }.bind(iconStyle);
             }(styleConfig));
-        },
+        }
+
         /**
          * @param {ol.style.Text} targetStyle
          * @param {Object} styleConfig
          * @private
          */
-        resolveTextStyle_: function(targetStyle, styleConfig) {
+        resolveTextStyle_(targetStyle, styleConfig) {
             targetStyle.setText(styleConfig.label || '');
             if (styleConfig.fontColor || (typeof styleConfig.fontOpacity !== 'undefined')) {
                 targetStyle.getFill().setColor(this.parseSvgColor(styleConfig, 'fontColor', 'fontOpacity', targetStyle.getFill().getColor()));
@@ -204,7 +211,8 @@
             }
             targetStyle.setOffsetX(styleConfig.labelXOffset || 0);
             targetStyle.setOffsetY(styleConfig.labelYOffset || 0);
-        },
+        }
+
         /**
          * @param {Object} style
          * @param {string} colorProp
@@ -212,7 +220,7 @@
          * @param {Array<Number>} defaults
          * @return {Array<Number>}
          */
-        parseSvgColor: function(style, colorProp, opacityProp, defaults) {
+        parseSvgColor(style, colorProp, opacityProp, defaults) {
             // Unlinke Mapbender.StyleUtil.parseSvgColor, fill in missing properties using native OL6 defaults, instead of
             // OL2 SVG defaults
             var components = defaults.slice();
@@ -231,7 +239,8 @@
                 }
             }
             return components;
-        },
+        }
+
         /**
          * @param {Object} style
          * @param {String} [style.fontFamily]
@@ -239,19 +248,20 @@
          * @param {String} [style.fontWeight]
          * @return {string}
          */
-        canvasFontRuleFromSvg: function(style) {
+        canvasFontRuleFromSvg(style) {
             var fontFamily = style.fontFamily || "sans-serif";
             var fontSize = style.fontSize && ([style.fontSize, 'px'].join('')) || '';
             var fontWeight = style.fontWeight !== 'regular' && style.fontWeight || 'normal';
 
             /** @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font */
             return [fontWeight, fontSize, fontFamily].filter(function(part) { return !!part; }).join(" ");
-        },
+        }
+
         /**
          * @param {String} dashStyle
          * @return {null|number[]}
          */
-        dashRuleToComponents: function(dashStyle) {
+        dashRuleToComponents(dashStyle) {
             switch (dashStyle) {
                 default:
                 case 'solid':
@@ -267,11 +277,12 @@
                 case 'longdashdot':
                     return [20, 12, 3, 7];
             }
-        },
+        }
+
         /**
          * @param {ol.style.Style|ol.style.Text} styleComponent
          */
-        enforceArrayColor_: function(styleComponent) {
+        enforceArrayColor_(styleComponent) {
             // Enforce Array types for fill and stroke colors, to support amending missing props with array slices
             if (styleComponent.getStroke() && (typeof (styleComponent.getStroke().getColor()) === 'string')) {
                 styleComponent.getStroke().setColor(Mapbender.StyleUtil.parseCssColor(styleComponent.getStroke().getColor()));
@@ -279,7 +290,8 @@
             if (styleComponent.getFill() && (typeof (styleComponent.getFill().getColor()) === 'string')) {
                 styleComponent.getFill().setColor(Mapbender.StyleUtil.parseCssColor(styleComponent.getFill().getColor()));
             }
-        },
+        }
+
         /**
          *
          * @param {Object} data
@@ -287,7 +299,7 @@
          * @return {Array<String>}
          * @private
          */
-        detectDataPlaceholders_: function(data, candidates) {
+        detectDataPlaceholders_(data, candidates) {
             var placeholderRx = this.placeholderRx_;
             return (candidates || Object.keys(data)).filter(function(prop) {
                 // Reset global-flagged RegExp state.
@@ -295,7 +307,8 @@
                 placeholderRx.lastIndex = 0;
                 return placeholderRx.test(data[prop] || '');
             });
-        },
+        }
+
         /**
          * @param {Object} original
          * @param {Array<String>} propertyNames
@@ -303,7 +316,7 @@
          * @return {function}
          * @private
          */
-        getPlaceholderResolver_: function(original, propertyNames, dataCallback) {
+        getPlaceholderResolver_(original, propertyNames, dataCallback) {
             if (propertyNames.length) {
                 var placeholderRx = this.placeholderRx_;
                 return function(styleConfig, feature) {
@@ -322,21 +335,23 @@
                     return original;
                 }
             }
-        },
-        resolvePlaceholders: function(styleConfig, featureData) {
+        }
+
+        resolvePlaceholders(styleConfig, featureData) {
             var placeholderProps = this.detectDataPlaceholders_(styleConfig);
             var resolver = this.getPlaceholderResolver_(styleConfig, placeholderProps, function() {
                 return featureData;
             });
             return resolver(styleConfig);
-        },
+        }
+
         /**
          * @param {ol.style.Image} iconStyle
          * @param {Object} styleConfig
          * @return {ol.style.Style}
          * @private
          */
-        expandIconStyle_: function(iconStyle, styleConfig) {
+        expandIconStyle_(iconStyle, styleConfig) {
             return new ol.style.Style({
                 // Icons are only rendered on point geometries.
                 // => We must use a geometry function to make points out of
@@ -345,8 +360,9 @@
                 geometry: this.iconStyleGeometryFunction_,
                 image: iconStyle
             });
-        },
-        iconStyleGeometryFunction_: function(feature) {
+        }
+
+        iconStyleGeometryFunction_(feature) {
             var geometry = feature.getGeometry();
             switch (geometry && geometry.getType()) {
                 case 'Polygon':
@@ -360,7 +376,8 @@
                 default:
                     return geometry;
             }
-        },
-        __dummy: null
-    });
+        }
+    }
+
+    Mapbender.Digitizer.StyleAdapter = StyleAdapter;
 })();

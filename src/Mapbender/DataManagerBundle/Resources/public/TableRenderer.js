@@ -1,4 +1,4 @@
-!(function () {
+(function () {
     "use strict";
 
     /**
@@ -8,7 +8,6 @@
      * @static
      */
     function escapeHtml(text) {
-        'use strict';
         return text.replace(/["&'\/<>]/g, function (a) {
             return {
                 '"': '&quot;', '&': '&amp;', "'": '&#39;',
@@ -18,54 +17,60 @@
     }
 
     Mapbender.DataManager = Mapbender.DataManager || {};
-    /**
-     * @param {*} owner owning DataManager (jQueryUI widget instance)
-     * @param {String} buttonsTemplate
-     * @constructor
-     */
-    Mapbender.DataManager.TableRenderer = function TableRenderer(owner, buttonsTemplate) {
-        this.owner = owner;
-        this.scope = owner.$element.get(0);
-        this.buttonsTemplate = buttonsTemplate;
-        this.buttonMarkupCache_ = {};
-    }
 
-    Object.assign(Mapbender.DataManager.TableRenderer.prototype, {
+    /**
+     * Table renderer class for rendering data tables
+     */
+    class TableRenderer {
+        /**
+         * @param {*} owner owning DataManager (jQueryUI widget instance)
+         * @param {String} buttonsTemplate
+         */
+        constructor(owner, buttonsTemplate) {
+            this.owner = owner;
+            this.scope = owner.$element.get(0);
+            this.buttonsTemplate = buttonsTemplate;
+            this.buttonMarkupCache_ = {};
+        }
+
         /**
          * @param {DataManagerSchemaConfig} schema
          * @return {jQuery}
          */
-        render: function(schema) {
-            var settings = this.getOptions(schema);
-            var $table = $('<table class="table table-striped table-hover -js-items">');
+        render(schema) {
+            const settings = this.getOptions(schema);
+            const $table = $('<table class="table table-striped table-hover -js-items">');
             $table.on('draw.dt', function () {
                 $('ul.pagination').addClass('pagination-sm');
             }).DataTable(settings);
-            var $tableWrap = $('<div class="mapbender-element-result-table">');
+            const $tableWrap = $('<div class="mapbender-element-result-table">');
             $tableWrap.append($table.closest('.dataTables_wrapper'));
             $tableWrap.attr('data-schema-name', schema.schemaName);
             return $tableWrap;
-        },
+        }
+
         /**
          * @param {Array<Object>} data
          */
-        replaceRows: function(data) {
-            var dt = this.getDatatablesInstance_();
+        replaceRows(data) {
+            const dt = this.getDatatablesInstance_();
             dt.clear();
             dt.rows.add(data);
             dt.draw();
-        },
+        }
+
         /**
          * @param {Object} item
          * @param {Boolean} show to automatically update pagination
          */
-        addRow: function(item, show) {
-            var dt = this.getDatatablesInstance_();
-            var tr = dt.row.add(item).node();
+        addRow(item, show) {
+            const dt = this.getDatatablesInstance_();
+            const tr = dt.row.add(item).node();
             if (show) {
                 this.showRow(tr);
             }
-        },
+        }
+
         /**
          * Deletes the row corresponding to item from the table.
          * Will maintain current pagination if there are still items on the current page.
@@ -73,36 +78,38 @@
          *
          * @param {Object} item
          */
-        removeRow: function(item) {
-            var dt = this.getDatatablesInstance_();
-            var dtRow = dt.row(function(_, data) {
+        removeRow(item) {
+            const dt = this.getDatatablesInstance_();
+            const dtRow = dt.row(function(_, data) {
                 return data === item;
             });
             dtRow.remove();
             dt.draw(false);
-        },
+        }
+
         /**
          * @param {Object} item
          * @param {Boolean} show to automatically update pagination
          */
-        refreshRow: function(item, show) {
-            var dt = this.getDatatablesInstance_();
-            var dtRow = dt.row(function(_, data) {
+        refreshRow(item, show) {
+            const dt = this.getDatatablesInstance_();
+            const dtRow = dt.row(function(_, data) {
                 return data === item;
             });
             dtRow.data(item);
             if (show) {
                 this.showRow(dtRow.node());
             }
-        },
+        }
+
         /**
          * @param {Object} item
          * @param {Boolean} show to automatically update pagination
          */
-        addOrRefreshRow: function(item, show) {
-            var dt = this.getDatatablesInstance_();
+        addOrRefreshRow(item, show) {
+            const dt = this.getDatatablesInstance_();
 
-            var rowExists = dt.rows(function(_, data) {
+            const rowExists = dt.rows(function(_, data) {
                 return data === item;
             }).count() > 0;
 
@@ -111,41 +118,44 @@
             } else {
                 this.addRow(item, show);
             }
-        },
+        }
+
         /**
          * Switch pagination so the given tr element is on the current page
          *
          * @param {Element} tr
          */
-        showRow: function(tr) {
-            var dt = this.getDatatablesInstance_();
+        showRow(tr) {
+            const dt = this.getDatatablesInstance_();
             // NOTE: current dataTables versions could just do dt.row(tr).show().draw(false)
-            var rowIndex = dt.rows({order: 'current'}).nodes().indexOf(tr);
-            var pageLength = dt.page.len();
-            var rowPage = Math.floor(rowIndex / pageLength);
+            const rowIndex = dt.rows({order: 'current'}).nodes().indexOf(tr);
+            const pageLength = dt.page.len();
+            const rowPage = Math.floor(rowIndex / pageLength);
             dt.page(rowPage);
             dt.draw(false);
-        },
+        }
+
         /**
          * Get dataTables api instance
          * @return {Element|null}
          * @private
          */
-        getDatatablesInstance_: function() {
+        getDatatablesInstance_() {
             return $('table.-js-items:first', this.scope).dataTable().api();
-        },
+        }
+
         /**
          * @param {DataManagerSchemaConfig} schema
          * @return {Object}
          */
-        getOptions: function(schema) {
-            var columnsOption = this.getColumnsOption(schema);
-            var buttonColumnOptions = this.getButtonColumnOptions(schema);
+        getOptions(schema) {
+            const columnsOption = this.getColumnsOption(schema);
+            const buttonColumnOptions = this.getButtonColumnOptions(schema);
             if (buttonColumnOptions) {
                 columnsOption.push(buttonColumnOptions);
             }
 
-            var settings = {
+            const settings = {
                 columns: columnsOption,
                 lengthChange: false,
                 pageLength: schema.pageLength || 16,
@@ -166,40 +176,56 @@
             };
             settings.createdRow = this.onRowCreation.bind(this, schema);
             return settings;
-        },
-        getDisabledButtonsSelector: function(itemSchema) {
+        }
+
+        /**
+         * @param {Object} itemSchema
+         * @return {String|null}
+         */
+        getDisabledButtonsSelector(itemSchema) {
             return !itemSchema.allowDelete && '.-fn-delete' || null;
-        },
-        onRowCreation: function(tableSchema, tr, dataItem) {
-            var schema = this.owner.getItemSchema(dataItem);
+        }
+
+        /**
+         * @param {Object} tableSchema
+         * @param {Element} tr
+         * @param {Object} dataItem
+         */
+        onRowCreation(tableSchema, tr, dataItem) {
+            const schema = this.owner.getItemSchema(dataItem);
             $(tr).data({
                 item: dataItem,
                 schema: schema
             });
             $('.-fn-edit-data', tr).attr('title', Mapbender.trans(schema.allowEdit ? 'mb.actions.edit' : 'mb.data-manager.actions.show_details'));
             $('.btn', tr).not(this.buttonMarkupCache_[schema.schemaName].enabledSelector).prop('disabled', true);
-        },
-        initButtonMarkupCache_: function(tableSchema) {
-            var functionCoverage = {};
-            var subSchemas = this.owner.expandCombination(tableSchema);
-            for (var s = 0; s < subSchemas.length; ++s) {
+        }
+
+        /**
+         * @param {Object} tableSchema
+         * @private
+         */
+        initButtonMarkupCache_(tableSchema) {
+            const functionCoverage = {};
+            const subSchemas = this.owner.expandCombination(tableSchema);
+            for (let s = 0; s < subSchemas.length; ++s) {
                 if (subSchemas[s] !== tableSchema) {
                     this.initButtonMarkupCache_(subSchemas[s]);
                 }
-                var schemaFunctions = this.owner.getEnabledSchemaFunctionCodes(subSchemas[s]);
-                for (var f = 0; f < schemaFunctions.length; ++f) {
-                    var schemaFunction = schemaFunctions[f];
+                const schemaFunctions = this.owner.getEnabledSchemaFunctionCodes(subSchemas[s]);
+                for (let f = 0; f < schemaFunctions.length; ++f) {
+                    const schemaFunction = schemaFunctions[f];
                     functionCoverage[schemaFunction] = (functionCoverage[schemaFunction] || []).concat(subSchemas[s].schemaName);
                 }
             }
-            var keepFunctions = Object.keys(functionCoverage);
+            const keepFunctions = Object.keys(functionCoverage);
             // Remove buttons not present in any subschema of the combination
-            var keepSelector = keepFunctions.length && keepFunctions.map(function(code) {
+            const keepSelector = keepFunctions.length && keepFunctions.map(function(code) {
                 return ['.', code].join('');
             }).join(',');
-            var $remaining = $($.parseHTML(this.buttonsTemplate));
+            const $remaining = $($.parseHTML(this.buttonsTemplate));
             $('.btn', $remaining).not(keepSelector).remove();
-            var remainingMarkup = $remaining.get().map(function(node) {
+            const remainingMarkup = $remaining.get().map(function(node) {
                 return node.outerHTML;
             }).join('');
 
@@ -210,8 +236,15 @@
                 // on a row-by-row basis
                 enabledSelector: keepSelector
             };
-        },
-        defaultColumnRenderFn_: function(cellValue, type) {
+        }
+
+        /**
+         * @param {*} cellValue
+         * @param {String} type
+         * @return {*}
+         * @private
+         */
+        defaultColumnRenderFn_(cellValue, type) {
             switch (type) {
                 case 'sort':
                 case 'type':
@@ -222,37 +255,43 @@
                 case 'display':
                     return cellValue !== null ? escapeHtml('' + cellValue) : '';
             }
-        },
+        }
+
         /**
          * @param {DataManagerSchemaConfig} schema
          * @return {Array<Object>}
          * @see https://datatables.net/reference/option/columns
          */
-        getColumnsOption: function(schema) {
-            var columnConfigs = this.getColumnsConfigs(schema);
-            var self = this;
+        getColumnsOption(schema) {
+            const columnConfigs = this.getColumnsConfigs(schema);
+            const self = this;
             function getDefaultDataFn(schema, fieldName) {
                 return function(item) {
                     return self.owner._getItemData(item)[fieldName];
                 };
             }
             return (columnConfigs).map(function(fieldSettings) {
-                var option = Object.assign({}, fieldSettings);
+                const option = Object.assign({}, fieldSettings);
                 option.render = option.render || self.defaultColumnRenderFn_
                 if (typeof (option.data) === 'string') {
                     option.data = getDefaultDataFn(schema, option.data);
                 }
                 return option;
             });
-        },
-        getDefaultColumnConfigs: function(schema) {
-            var self = this;
+        }
+
+        /**
+         * @param {Object} schema
+         * @return {Array<Object>}
+         */
+        getDefaultColumnConfigs(schema) {
+            const self = this;
             if (schema.combine) {
-                var commonDataNames = [];
-                var subSchemas = this.owner.expandCombination(schema);
-                for (var s = 0; s < subSchemas.length; ++s) {
-                    var subschemaColumns = this.getColumnsConfigs(subSchemas[s]);
-                    var dataNames = subschemaColumns.map(function(c) {
+                let commonDataNames = [];
+                const subSchemas = this.owner.expandCombination(schema);
+                for (let s = 0; s < subSchemas.length; ++s) {
+                    const subschemaColumns = this.getColumnsConfigs(subSchemas[s]);
+                    const dataNames = subschemaColumns.map(function(c) {
                         return c.data;
                     });
                     if (s === 0) {
@@ -275,21 +314,31 @@
                 width: '1%',
                 className: 'text-right no-clip'
             }];
-        },
-        getColumnsConfigs: function(schema) {
-            var fieldConfigs = (schema.table || {}).columns || [];
+        }
+
+        /**
+         * @param {Object} schema
+         * @return {Array<Object>}
+         */
+        getColumnsConfigs(schema) {
+            const fieldConfigs = (schema.table || {}).columns || [];
             if (!fieldConfigs.length) {
-                fieldConfigs = this.getDefaultColumnConfigs(schema);
+                return this.getDefaultColumnConfigs(schema);
             }
-            for (var i = 0; i < fieldConfigs.length; ++i) {
+            for (let i = 0; i < fieldConfigs.length; ++i) {
                 if (fieldConfigs[i].label && !fieldConfigs[i].title) {
                     fieldConfigs[i].title = fieldConfigs[i].label;
                     delete fieldConfigs[i].label;
                 }
             }
             return fieldConfigs;
-        },
-        getButtonColumnOptions: function(tableSchema) {
+        }
+
+        /**
+         * @param {Object} tableSchema
+         * @return {Object}
+         */
+        getButtonColumnOptions(tableSchema) {
             if (!this.buttonMarkupCache_[tableSchema.schemaName]) {
                 this.initButtonMarkupCache_(tableSchema);
             }
@@ -301,12 +350,13 @@
                 className: 'interface no-clip',
                 defaultContent: this.buttonMarkupCache_[tableSchema.schemaName].html
             };
-        },
+        }
+
         /**
          * @param {DataManagerSchemaConfig} schema
          * @return {*}
          */
-        getOLanguageOption: function(schema) {
+        getOLanguageOption(schema) {
             return {
                 // @see https://legacy.datatables.net/usage/i18n
                 sSearch: Mapbender.trans('mb.data-manager.table.filter') + ':',
@@ -317,5 +367,7 @@
                 sInfoFiltered: Mapbender.trans('mb.data-manager.table.out_of')
             };
         }
-    });
+    }
+
+    Mapbender.DataManager.TableRenderer = TableRenderer;
 })();
