@@ -32,3 +32,5 @@ mb:
     details_title: Детальні дані
     attachment:
       open: Відкрити вкладення
+    error:
+      invalid_file_extension: 'Недійсний тип файлу. Дозволені типи файлів:'

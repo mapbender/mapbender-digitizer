@@ -238,15 +238,17 @@
             }
             var self = this;
             $('input[type="file"][data-upload-url][data-name]', scope).each(function() {
-                var $input = $(this);
-                var name = $input.attr('data-name');
-                var $group = $input.closest('.mb-3');
-                var $realInput = $('input[name="' + name + '"]', $group);
-                var url = $input.attr('data-upload-url');
-                var $loadingIcon = $('.-js-loading-indicator', $group);
+                const $input = $(this);
+                const name = $input.attr('data-name');
+                const $group = $input.closest('.mb-3');
+                const $realInput = $('input[name="' + name + '"]', $group);
+                const url = $input.attr('data-upload-url');
+                const allowedExtensions = $input.attr('data-allowed-types');
+                const $loadingIcon = $('.-js-loading-indicator', $group);
                 $input.fileupload({
                     dataType: 'json',
                     url: url,
+                    submit: (e, data) => self.checkFileExtension(data.files, allowedExtensions),
                     success: function(response) {
                         var values = {};
                         values[name] = response.filename;
@@ -272,6 +274,20 @@
                 self.updateFileInputs($group, baseUrl, fakeValues);
                 return false;
             });
+        },
+        checkFileExtension: function (files, allowedExtensionsCsv) {
+            // no value means no restriction
+            if (!allowedExtensionsCsv) return true;
+            const allowedExtensions = allowedExtensionsCsv.split(',').map(s => s.trim().toLowerCase());
+            for (let i = 0; i < files.length; ++i) {
+                const file = files[i];
+                const fileExt = (file.name.split('.').pop() || '').toLowerCase();
+                if (!allowedExtensions.includes(fileExt)) {
+                    Mapbender.info(Mapbender.trans('mb.data-manager.error.invalid_file_extension') + ' ' + allowedExtensions.join(', '));
+                    return false;
+                }
+            }
+            return true;
         },
         getAttachmentUrl_: function(baseUrl, fieldName, inputValue) {
             if (inputValue && !/^(http[s]?)?:?\/\//.test(inputValue)) {
@@ -374,6 +390,7 @@
                 .attr(settings.attr || {})
                 .attr('accept', (settings.attr || settings).accept || null)
                 .attr('data-upload-url', settings.__uploadUrl__)
+                .attr('data-allowed-types', settings.allowedFileTypes)
                 .attr('data-name', settings.name)
             ;
             var $btnText = $('<span class="upload-button-text">')

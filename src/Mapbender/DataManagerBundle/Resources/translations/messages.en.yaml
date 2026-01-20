@@ -32,3 +32,5 @@ mb:
     details_title: Detail data
     attachment:
       open: Open attachment
+    error:
+      invalid_file_extension: 'Invalid file type. Allowed file types:'

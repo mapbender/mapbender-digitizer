@@ -32,3 +32,5 @@ mb:
     details_title: Detailgegevens
     attachment:
       open: Bijlage openen
+    error:
+      invalid_file_extension: 'Ongeldig bestandstype. Toegestane bestandstypen:'
