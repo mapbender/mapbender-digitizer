@@ -14,6 +14,11 @@
             this.dialogFactory_ = null;
             this.tableRenderer = null;
             this.currentPopup = null;
+            this.popupWindow = null;
+            this.callback = null;
+            // Determine if element should open in a popup dialog (when in toolbar/taskbar)
+            // or stay inline (when in sidepane)
+            this.useDialog_ = !this.$element.closest('.sideContent, .mobilePane').length;
 
             if (Array.isArray(this.options.schemes) || !Object.keys(this.options.schemes || {}).length) {
                 throw new Error('Missing schema configuration');
@@ -175,10 +180,59 @@
         }
 
         /**
-         * Mapbender sidepane interaction API
+         * Mapbender sidepane interaction API / Close handler
          */
         hide() {
             this._closeCurrentPopup();
+            if (this.useDialog_) {
+                this.closeByButton();
+            }
+        }
+
+        /**
+         * Called by button controller - opens element in popup if in toolbar
+         */
+        activateByButton(callback, mbButton) {
+            if (this.useDialog_) {
+                // Use parent class method to handle popup
+                super.activateByButton(callback, mbButton);
+                
+                // Trigger initial data load if not already loaded
+                if (!this.currentSettings) {
+                    setTimeout(() => {
+                        $('.-fn-schema-selector', this.$element).trigger('change');
+                    }, 100);
+                }
+            }
+        }
+
+        /**
+         * Called by button controller when closing
+         */
+        closeByButton() {
+            if (this.useDialog_) {
+                super.closeByButton();
+            }
+        }
+
+        /**
+         * Get popup options for dialog
+         * @returns {Object}
+         */
+        getPopupOptions() {
+            return {
+                title: this.$element.attr('data-title') || 'Data Manager',
+                draggable: true,
+                resizable: true,
+                modal: false,
+                closeOnESC: false,
+                detachOnClose: false,
+                content: [this.$element],
+                cssClass: 'data-manager-dialog',
+                width: 800,
+                height: 600,
+                buttons: []
+            };
         }
 
         /**

@@ -82,4 +82,16 @@ class Digitizer extends DataManager
         $configuration['fallbackStyle'] = $defaultStyles['default'];
         return $configuration;
     }
+
+    public static function getDefaultConfiguration()
+    {
+        $config = parent::getDefaultConfiguration();
+        $config['element_icon'] = self::getDefaultIcon();
+        return $config;
+    }
+
+    public static function getDefaultIcon()
+    {
+        return 'iconEdit';
+    }
 }
