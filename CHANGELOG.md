@@ -1,4 +1,4 @@
-## next feature release
+## 2.0.7
 * Add file type check to form type `file` (key: `allowedFileTypes`) ([PR#147](https://github.com/mapbender/mapbender-digitizer/pull/147))
 
 ## 2.0.6
