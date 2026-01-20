@@ -25,7 +25,7 @@
      */
     Mapbender.DataManager.TableRenderer = function TableRenderer(owner, buttonsTemplate) {
         this.owner = owner;
-        this.scope = owner.element.get(0);
+        this.scope = owner.$element.get(0);
         this.buttonsTemplate = buttonsTemplate;
         this.buttonMarkupCache_ = {};
     }
