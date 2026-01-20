@@ -1,3 +1,8 @@
+## Unreleased
+* Migrate from jQuery UI dialogs to Mapbender.Popup
+* Convert ES5 pseudo-classes to ES6 classes (DialogFactory, FormRenderer, FormUtil, TableRenderer, FeatureEditor, FeatureRenderer, FeatureStyleEditor, StyleAdapter, ContextMenu, Toolset)
+* Rename files to start with uppercase letters for consistency
+
 ## 2.0.5
 * Add tooltips to digitizer buttons ([PR#140](https://github.com/mapbender/mapbender-digitizer/pull/140))
 
