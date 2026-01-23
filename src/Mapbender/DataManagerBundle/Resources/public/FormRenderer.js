@@ -479,7 +479,7 @@
             }
 
             var $img = $(document.createElement('img'))
-                .addClass('img-responsive')
+                .addClass('img-responsive d-block')
                 .attr('src', src)
                 .attr('data-default-src', src || '')
                 .attr('data-preview-for', settings.name || null)

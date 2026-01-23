@@ -1,4 +1,5 @@
 ## Unreleased
+* Image preview now displays below the title instead of next to it
 * Show magnifying glass icon instead of pencil in table rows when form contains only display fields
 * Automatically hide Save button when form contains only display fields (no editable inputs)
 * Add dynamic expression evaluation support for formItem types 'label' and 'text' (similar to 'html')
