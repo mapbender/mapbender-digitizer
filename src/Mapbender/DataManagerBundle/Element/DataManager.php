@@ -75,6 +75,7 @@ class DataManager extends AbstractElementService
                 '@MapbenderDataManagerBundle/Resources/styles/dataManager.element.scss',
             ),
             'js' => array(
+                '@MapbenderDataManagerBundle/Resources/public/ExpressionEvaluator.js',
                 '@MapbenderDataManagerBundle/Resources/public/FormRenderer.js',
                 '@MapbenderDataManagerBundle/Resources/public/FormUtil.js',
                 '@MapbenderDataManagerBundle/Resources/public/DialogFactory.js',

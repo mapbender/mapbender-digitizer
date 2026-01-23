@@ -557,7 +557,8 @@
                 .addClass(settings.cssClass)
                 .css(settings.css || {});
 
-            if (settings.html.includes('function()') || settings.html.includes('function ()')) {
+            // Check if it's a dynamic expression (function, data reference, or template literal)
+            if (Mapbender.DataManager.ExpressionEvaluator.isDynamicExpression(settings.html)) {
                 $wrapper.addClass('-fn-calculated-text')
                     .attr('data-expression', settings.html)
                     .attr('data-html-expression', true);

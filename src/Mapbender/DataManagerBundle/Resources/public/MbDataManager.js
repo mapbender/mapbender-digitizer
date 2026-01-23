@@ -404,9 +404,7 @@
         _updateCalculatedText($elements, data) {
             $elements.each((index, element) => {
                 const expression = $(element).attr('data-expression');
-                const content = (function(data_) {
-                    return eval(expression);
-                })(data);
+                const content = Mapbender.DataManager.ExpressionEvaluator.evaluateSafe(expression, data, '');
                 if ($(element).attr('data-html-expression')) {
                     $(element).html(content);
                 } else {
@@ -525,9 +523,16 @@
             } else if (typeof width === 'number' && width < 550) {
                 width = 550;
             }
+            
+            let title = schema.popup.title || Mapbender.trans('mb.data-manager.details_title');
+            
+            // Support dynamic title expressions (function, data reference, or template literal)
+            const itemData = this._getItemData(dataItem);
+            title = Mapbender.DataManager.ExpressionEvaluator.evaluateIfDynamic(title, itemData);
+            
             return {
                 modal: schema.popup.modal || false,
-                title: schema.popup.title || Mapbender.trans('mb.data-manager.details_title'),
+                title: title,
                 width: width,
                 cssClass: 'data-manager-edit-data',
                 position: schema.popup.position || null,  // Preserve position config for CSS positioning
