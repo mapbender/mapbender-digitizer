@@ -163,6 +163,40 @@
         }
 
         /**
+         * Check if form items contain any editable fields
+         * @param {Array<Object>} items
+         * @return {Boolean}
+         */
+        hasEditableFields(items) {
+            const editableTypes = ['input', 'textArea', 'date', 'colorPicker', 'file', 'checkbox', 'select', 'radioGroup'];
+            const containerTypes = ['form', 'tabs', 'fieldSet', 'inline'];
+            
+            for (var i = 0; i < items.length; ++i) {
+                var item = items[i];
+                if (!item || !item.type) {
+                    continue;
+                }
+                
+                // Check if this is an editable field type
+                if (editableTypes.indexOf(item.type) !== -1) {
+                    // Further check if field is not disabled or readonly
+                    if (!item.disabled && !item.readonly) {
+                        return true;
+                    }
+                }
+                
+                // Recursively check container types
+                if (containerTypes.indexOf(item.type) !== -1 && item.children) {
+                    if (this.hasEditableFields(item.children)) {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+
+        /**
          * @param {Object} settings
          * @return {jQuery}
          */

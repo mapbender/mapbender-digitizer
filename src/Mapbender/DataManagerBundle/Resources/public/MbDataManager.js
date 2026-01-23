@@ -550,7 +550,12 @@
         _getEditDialogButtons(schema, dataItem, overrideAllowSave) {
             const buttons = [];
             const widget = this;
-            if (schema.allowEdit || overrideAllowSave) {
+            
+            // Check if form has any editable fields
+            const hasEditableFields = this.formRenderer_.hasEditableFields(schema.formItems || []);
+            
+            // Only show save button if allowed AND form has editable fields
+            if ((schema.allowEdit || overrideAllowSave) && hasEditableFields) {
                 buttons.push({
                     text: Mapbender.trans('mb.actions.save'),
                     'class': 'btn btn-primary',
