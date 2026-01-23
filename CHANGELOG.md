@@ -1,4 +1,5 @@
 ## Unreleased
+* Remove close/cancel button from edit dialogs (dialog can be closed using the X button in title bar)
 * Migrate from jQuery UI dialogs to Mapbender.Popup
 * Convert ES5 pseudo-classes to ES6 classes (DialogFactory, FormRenderer, FormUtil, TableRenderer, FeatureEditor, FeatureRenderer, FeatureStyleEditor, StyleAdapter, ContextMenu, Toolset)
 * Rename files to start with uppercase letters for consistency

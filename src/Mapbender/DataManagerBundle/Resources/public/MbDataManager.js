@@ -577,16 +577,6 @@
                     }
                 });
             }
-            const closeText = buttons.length && 'mb.actions.cancel' || 'mb.actions.close';
-            const closeTooltip = buttons.length && 'mb.data-manager.actions.cancel_tooltip' || 'mb.data-manager.actions.close_tooltip';
-            buttons.push({
-                text: Mapbender.trans(closeText),
-                title: Mapbender.trans(closeTooltip),
-                'class': 'btn btn-light',
-                click: function() {
-                    widget._cancelForm(schema, dataItem);
-                }
-            });
             return buttons;
         }
 
