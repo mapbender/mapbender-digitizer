@@ -173,20 +173,20 @@
             
             for (var i = 0; i < items.length; ++i) {
                 var item = items[i];
-                if (!item || !item.type) {
+                if (!item) {
                     continue;
                 }
                 
                 // Check if this is an editable field type
-                if (editableTypes.indexOf(item.type) !== -1) {
+                if (item.type && editableTypes.indexOf(item.type) !== -1) {
                     // Further check if field is not disabled or readonly
                     if (!item.disabled && !item.readonly) {
                         return true;
                     }
                 }
                 
-                // Recursively check container types
-                if (containerTypes.indexOf(item.type) !== -1 && item.children) {
+                // Recursively check items with children (containers or tab panels)
+                if (item.children && item.children.length) {
                     if (this.hasEditableFields(item.children)) {
                         return true;
                     }

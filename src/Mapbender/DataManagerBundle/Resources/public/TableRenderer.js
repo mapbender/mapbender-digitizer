@@ -31,6 +31,7 @@
             this.scope = owner.$element.get(0);
             this.buttonsTemplate = buttonsTemplate;
             this.buttonMarkupCache_ = {};
+            this.editableFieldsCache_ = {};
         }
 
         /**
@@ -197,7 +198,20 @@
                 item: dataItem,
                 schema: schema
             });
-            $('.-fn-edit-data', tr).attr('title', Mapbender.trans(schema.allowEdit ? 'mb.actions.edit' : 'mb.data-manager.actions.show_details'));
+            
+            // Use cached value for whether form has editable fields
+            const hasEditableFields = this.editableFieldsCache_[schema.schemaName];
+            const $editButton = $('.-fn-edit-data', tr);
+            const $icon = $('i', $editButton);
+            
+            // Set icon and tooltip based on whether form is editable
+            if (hasEditableFields && schema.allowEdit) {
+                $editButton.attr('title', Mapbender.trans('mb.actions.edit'));
+                $icon.removeClass('fa-search').addClass('fa-edit fa-pen');
+            } else {
+                $editButton.attr('title', Mapbender.trans('mb.data-manager.actions.show_details'));
+                $icon.removeClass('fa-edit fa-pen').addClass('fa-search');
+            }
             $('.btn', tr).not(this.buttonMarkupCache_[schema.schemaName].enabledSelector).prop('disabled', true);
         }
 
@@ -236,6 +250,9 @@
                 // on a row-by-row basis
                 enabledSelector: keepSelector
             };
+            
+            // Cache whether this schema has editable fields (calculated once per schema)
+            this.editableFieldsCache_[tableSchema.schemaName] = this.owner.formRenderer_.hasEditableFields(tableSchema.formItems || []);
         }
 
         /**
