@@ -1,4 +1,6 @@
 ## Unreleased
+* Add dynamic expression evaluation support for formItem types 'label' and 'text' (similar to 'html')
+* Add support for title attribute in formItem type 'label'
 * Remove close/cancel button from edit dialogs (dialog can be closed using the X button in title bar)
 * Migrate from jQuery UI dialogs to Mapbender.Popup
 * Convert ES5 pseudo-classes to ES6 classes (DialogFactory, FormRenderer, FormUtil, TableRenderer, FeatureEditor, FeatureRenderer, FeatureStyleEditor, StyleAdapter, ContextMenu, Toolset)

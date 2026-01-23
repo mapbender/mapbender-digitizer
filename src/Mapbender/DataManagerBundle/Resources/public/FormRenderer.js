@@ -142,6 +142,27 @@
         }
 
         /**
+         * Apply text content or dynamic expression to an element
+         * @param {jQuery} $element - The element to apply content to
+         * @param {String} content - The text or expression
+         * @param {Boolean} isHtml - Whether to use HTML mode (for type 'html')
+         * @private
+         */
+        applyTextOrExpression_($element, content, isHtml) {
+            if (content && Mapbender.DataManager.ExpressionEvaluator.isDynamicExpression(content)) {
+                $element.addClass('-fn-calculated-text')
+                    .attr('data-expression', content);
+                if (isHtml) {
+                    $element.attr('data-html-expression', true);
+                }
+            } else if (isHtml) {
+                $element.append(content);
+            } else {
+                $element.text(content || '');
+            }
+        }
+
+        /**
          * @param {Object} settings
          * @return {jQuery}
          */
@@ -168,7 +189,7 @@
                 case 'text':
                     return this.handle_text_(settings);
                 case 'label':
-                    return this.renderTag_('p', settings);
+                    return this.handle_label_(settings);
                 case 'input':
                     return this.handle_input_(settings);
                 case 'textArea':
@@ -557,24 +578,17 @@
                 .addClass(settings.cssClass)
                 .css(settings.css || {});
 
-            // Check if it's a dynamic expression (function, data reference, or template literal)
-            if (Mapbender.DataManager.ExpressionEvaluator.isDynamicExpression(settings.html)) {
-                $wrapper.addClass('-fn-calculated-text')
-                    .attr('data-expression', settings.html)
-                    .attr('data-html-expression', true);
-            } else {
-                $wrapper.append(settings.html);
-            }
+            this.applyTextOrExpression_($wrapper, settings.html, true);
             return $wrapper;
         }
 
         handle_text_(settings) {
             /** https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L823 */
             var $wrapper = $(document.createElement('div')).addClass('mb-3 text');
-            var $textContainer = $(document.createElement('div'))
-                .addClass('-fn-calculated-text')
-                .attr('data-expression', settings.text)
-            ;
+            var $textContainer = $(document.createElement('div'));
+            
+            this.applyTextOrExpression_($textContainer, settings.text, false);
+            
             if (settings.title) {
                 $wrapper.append(this.fieldLabel_(settings));
             }
@@ -584,6 +598,27 @@
                 .addClass(settings.cssClass)
             ;
             return $wrapper;
+        }
+
+        handle_label_(settings) {
+            var $labelElement = $(document.createElement('p'))
+                .attr(settings.attr || {})
+                .addClass(settings.cssClass || '')
+                .css(settings.css || {})
+            ;
+            
+            this.applyTextOrExpression_($labelElement, settings.text, false);
+            $labelElement.append(this.renderElements(settings.children || []));
+            
+            // If title is provided, wrap in a container with label
+            if (settings.title) {
+                var $wrapper = $(document.createElement('div')).addClass('mb-3 label');
+                $wrapper.append(this.fieldLabel_(settings));
+                $wrapper.append($labelElement);
+                return $wrapper;
+            }
+            
+            return $labelElement;
         }
 
         handle_checkbox_(settings) {
