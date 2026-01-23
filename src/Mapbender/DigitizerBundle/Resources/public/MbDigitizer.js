@@ -134,6 +134,49 @@
 
         hide() {
             this.deactivate();
+            // Also close popup window if open
+            if (this.useDialog_) {
+                this.closeByButton();
+            }
+        }
+
+        /**
+         * Called by button controller - activates digitizer and opens popup if in toolbar
+         */
+        activateByButton(callback, mbButton) {
+            if (this.useDialog_) {
+                // Let parent handle popup creation
+                super.activateByButton(callback, mbButton);
+                
+                // Activate digitizer functionality
+                this.activate();
+            } else {
+                this.activate();
+            }
+        }
+
+        /**
+         * Called by button controller when closing
+         */
+        closeByButton() {
+            this.deactivate();
+            if (this.useDialog_) {
+                super.closeByButton();
+            }
+        }
+
+        /**
+         * Get popup options for digitizer dialog
+         * @returns {Object}
+         */
+        getPopupOptions() {
+            const baseOptions = super.getPopupOptions();
+            return Object.assign(baseOptions, {
+                title: this.$element.attr('data-title') || 'Digitizer',
+                cssClass: 'digitizer-dialog',
+                width: 900,
+                height: 700
+            });
         }
 
         _createContextMenu(olMap) {
@@ -210,9 +253,10 @@
 
         _closeCurrentPopup() {
             if (this.currentPopup) {
-                const feature = this.currentPopup.data('item');
-                const itemSchema = this.currentPopup.data('schema');
-                if (!feature.getId()) {
+                const $content = this.currentPopup.$contentElement;
+                const feature = $content.data('item');
+                const itemSchema = $content.data('schema');
+                if (feature && !feature.getId()) {
                     this.renderer.removeFeature(itemSchema, feature);
                 }
             }

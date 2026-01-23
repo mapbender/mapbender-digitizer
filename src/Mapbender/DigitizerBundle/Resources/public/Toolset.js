@@ -2,28 +2,28 @@
     "use strict";
     window.Mapbender.Digitizer = Mapbender.Digitizer || {};
 
-    Mapbender.Digitizer.Toolset = function(owner) {
-        this.owner = owner;
-    };
+    class Toolset {
+        constructor(owner) {
+            this.owner = owner;
+            this.iconMap_ = {
+                drawCircle: "icon-draw-circle",
+                drawDonut: "icon-draw-donut",
+                drawEllipse: "icon-draw-ellipse",
+                drawLine: "icon-draw-line",
+                drawPoint: "icon-draw-point",
+                drawPolygon: "icon-draw-polygon",
+                drawRectangle: "icon-draw-rectangle",
+                modifyFeature: "icon-modify-feature",
+                moveFeature: "icon-move-feature"
+            };
+        }
 
-    Mapbender.Digitizer.Toolset.prototype = {
-        iconMap_: {
-            drawCircle: "icon-draw-circle",
-            drawDonut: "icon-draw-donut",
-            drawEllipse: "icon-draw-ellipse",
-            drawLine: "icon-draw-line",
-            drawPoint: "icon-draw-point",
-            drawPolygon: "icon-draw-polygon",
-            drawRectangle: "icon-draw-rectangle",
-            modifyFeature: "icon-modify-feature",
-            moveFeature: "icon-move-feature"
-        },
         /**
          * @param {Object} schema
          * @return {Array<String>}
          * @static
          */
-        getValidToolNames: function(schema) {
+        getValidToolNames(schema) {
             switch (schema.featureType.geomType) {
                 case 'point':
                 case 'multipoint':
@@ -43,19 +43,23 @@
                         'modifyFeature', 'moveFeature'
                     ];
             }
-        },
-        pause: function() {
+        }
+
+        pause() {
             // @todo: reintegrate with FeatureEditor :)
             $('button.-fn-toggle-tool', this.owner.$element).prop('disabled', true);
-        },
-        resume: function() {
+        }
+
+        resume() {
             // @todo: reintegrate with FeatureEditor :)
             $('button.-fn-toggle-tool', this.owner.$element).prop('disabled', false);
-        },
-        getDefaultGeometryToolNames: function(schema) {
+        }
+
+        getDefaultGeometryToolNames(schema) {
             return this.getValidToolNames(schema);
-        },
-        normalizeToolSet_: function(schema) {
+        }
+
+        normalizeToolSet_(schema) {
             var seen = {};
             var toolSpecs = [];
             var subSchemas = this.owner.expandCombination(schema);
@@ -82,8 +86,9 @@
                 }
             }
             return toolSpecs;
-        },
-        renderGeometryToolButtons: function(schema) {
+        }
+
+        renderGeometryToolButtons(schema) {
             var toolSpecs = this.normalizeToolSet_(schema);
             var buttons = [];
             for (var i = 0; i < toolSpecs.length; ++i) {
@@ -107,16 +112,18 @@
                 buttons.push($button);
             }
             return buttons;
-        },
-        checkToolAccess_: function(schema, toolName) {
+        }
+
+        checkToolAccess_(schema, toolName) {
             var isModify = -1 !== ['drawDonut', 'moveFeature', 'modifyFeature'].indexOf(toolName);
             if (isModify) {
                 return schema.allowEdit && schema.allowDigitize;
             } else {
                 return schema.allowCreate;
             }
-        },
-        registerEvents: function() {
+        }
+
+        registerEvents() {
             var widget = this.owner;
             widget.$element.on('click', '.-fn-visibility-all', function() {
                 var state = !!$(this).attr('data-visibility');
@@ -127,5 +134,7 @@
                 });
             });
         }
-    };
+    }
+
+    Mapbender.Digitizer.Toolset = Toolset;
 })(jQuery);
