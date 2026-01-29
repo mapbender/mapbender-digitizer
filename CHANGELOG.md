@@ -11,6 +11,11 @@
 * Rename files to start with uppercase letters for consistency
 * Add support for dynamic popup titles using data expressions in schema configuration
 * Add template literal syntax support (`${data.property}`) for html, text, and popup title expressions
+* Remove "Abbrechen" (Cancel) button from style editor dialog; only the save button remains
+* Make style editor dialog more compact by removing extra whitespace at the bottom
+* Allow mobile dialogs to be manually resized smaller (minimum height reduced)
+* Fix: Mobile dialog resize handle now works reliably; JS height is no longer overridden by CSS
+* Set confirm dialog to always open at a fixed position (30% left, 20% top)
 
 
 ## 2.0.5
@@ -249,4 +254,4 @@ NOTE: this version requires Mapbender >=3.2.5 (currently in RC phase) and will n
   * getFeatureTypeForSchema
   * getSchemaConfigs
   * getSchemaConfig
-  * getFileUri 
+  * getFileUri
