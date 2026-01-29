@@ -92,35 +92,36 @@
          * @return {Promise}
          */
         confirm(title, content) {
-            const $content = $(document.createElement('div'))
-                .append(content || null)
-            ;
+            const $content = $(document.createElement('div')).append(content || null);
             const deferred = $.Deferred();
-            const popup = this.baseDialog_($content, {
+            const dialogOptions = {
                 title: title,
-                modal: true,
-                buttons:[
+                position: { left: '30%', top: '20%' },
+                buttons: [
                     {
-                         text: Mapbender.trans('mb.actions.accept'),
-                         'class': 'button success btn',
-                         click: function() {
-                             deferred.resolve();
-                             popup.close();
-                             return false;
-                         }
+                        text: Mapbender.trans('mb.actions.accept'),
+                        'class': 'button success btn',
+                        click: function() {
+                            deferred.resolve();
+                            popup.close();
+                            return false;
+                        }
                     }, {
-                         text: Mapbender.trans('mb.actions.cancel'),
-                         'class': 'button critical btn',
-                         click:   function() {
-                             deferred.reject();
-                             popup.close();
-                             return false;
-                         }
-                     }
-                ]
-            });
+                        text: Mapbender.trans('mb.actions.cancel'),
+                        'class': 'button critical btn',
+                        click: function() {
+                            deferred.reject();
+                            popup.close();
+                            return false;
+                        }
+                    }
+                ],
+                content: $content
+            };
+            const popup = this.baseDialog_($content, dialogOptions);
             return deferred.promise();
         }
+        
 
         /**
          * @param {String|HTMLElement|jQuery} content
