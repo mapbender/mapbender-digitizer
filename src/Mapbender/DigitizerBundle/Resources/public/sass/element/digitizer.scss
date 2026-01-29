@@ -3,6 +3,10 @@
     label .value-preview {
         font-weight: normal;
     }
+
+    textarea.form-control {
+        min-height: 0;
+    }
 }
 
 .mb-digitizer-contextmenu {
