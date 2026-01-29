@@ -29,14 +29,6 @@
                         promise.resolveWith(null, [values]);
                         popup.close();
                     }
-                },{
-                    text: Mapbender.trans('mb.digitizer.actions.cancel'),
-                    title: Mapbender.trans('mb.data-manager.actions.cancel_tooltip'),
-                    class: 'btn btn-light',
-                    click: function (e) {
-                        promise.reject();
-                        popup.close();
-                    }
                 }]
             });
             return promise;
