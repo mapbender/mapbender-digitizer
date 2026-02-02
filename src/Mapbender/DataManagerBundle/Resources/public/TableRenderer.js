@@ -38,12 +38,13 @@
         render: function(schema) {
             var settings = this.getOptions(schema);
             var $table = $('<table class="table table-striped table-hover -js-items">');
+
+            var $tableWrap = $('<div class="mapbender-element-result-table">');
+            $tableWrap.append($table);
+            $tableWrap.attr('data-schema-name', schema.schemaName);
             $table.on('draw.dt', function () {
                 $('ul.pagination').addClass('pagination-sm');
             }).DataTable(settings);
-            var $tableWrap = $('<div class="mapbender-element-result-table">');
-            $tableWrap.append($table.closest('.dataTables_wrapper'));
-            $tableWrap.attr('data-schema-name', schema.schemaName);
             return $tableWrap;
         },
         /**
@@ -157,13 +158,28 @@
                 selectable:   false,
                 oLanguage: this.getOLanguageOption(schema),
                 autoWidth:    false,
-                language: {
+                // per default, data tables uses a two-column layout
+                // due to limited space in sidebar, align search, info and paging vertically
+                layout: {
+                    topStart: null,
+                    topEnd: null,
+                    top: 'search',
+                    bottomStart: null,
+                    bottomEnd: null,
+                    bottom: 'info',
+                    bottom2: 'paging',
+                }
+            };
+
+            // TODO: remove this in next major release
+            if (!$.fn.DataTable.versionCheck('2.0')) {
+                settings.language = {
                     paginate: {
                         previous: '<<',
                         next: '>>'
                     }
-                }
-            };
+                };
+            }
             settings.createdRow = this.onRowCreation.bind(this, schema);
             return settings;
         },
