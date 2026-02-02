@@ -20,6 +20,7 @@
                 width: '500px',
                 resizable: true,
                 cssClass: 'data-manager-edit-data digitizer-style-editor content-padding',
+                position: { left: '30%', top: '20%' },
                 buttons: [{
                     text: Mapbender.trans('mb.digitizer.actions.save'),
                     title: Mapbender.trans('mb.data-manager.actions.save_tooltip'),

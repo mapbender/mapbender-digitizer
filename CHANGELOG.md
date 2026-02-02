@@ -1,4 +1,5 @@
 ## Unreleased
+* Fix: Style manager dialog now opens centered instead of jumping to top-left corner
 * Click on edit/view button now always zooms to the feature on the map when opening the dialog
 * Mobile optimization: Dialogs now take full width and only upper portion of screen (max 60vh) on mobile devices (max-width: 767px)
 * Image preview now displays below the title instead of next to it
