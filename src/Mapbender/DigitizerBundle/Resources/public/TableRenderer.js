@@ -40,6 +40,16 @@
 
         registerButtonEvents(schema, $table) {
             var self = this;
+            // Handle click on edit button - zoom to feature and open dialog
+            $table.on('click', 'tbody > tr .-fn-edit-data', function(event) {
+
+                var $tr = $(this).closest('tr');
+                var data = $tr.data();
+                if (data.schema && data.item) {
+                    self.owner.zoomToFeature(data.schema, data.item);
+                }
+            });
+            
             $table.on('click', 'tbody > tr .-fn-save', function(event) {
                 // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
                 event.stopPropagation();
