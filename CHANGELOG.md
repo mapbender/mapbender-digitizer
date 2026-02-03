@@ -1,23 +1,9 @@
 ## Unreleased
-* Fix: Style manager dialog now opens centered instead of jumping to top-left corner
-* Click on edit/view button now always zooms to the feature on the map when opening the dialog
-* Mobile optimization: Dialogs now take full width and only upper portion of screen (max 60vh) on mobile devices (max-width: 767px)
-* Image preview now displays below the title instead of next to it
-* Show magnifying glass icon instead of pencil in table rows when form contains only display fields
-* Automatically hide Save button when form contains only display fields (no editable inputs)
-* Add dynamic expression evaluation support for formItem types 'label' and 'text' (similar to 'html')
-* Add support for title attribute in formItem type 'label'
-* Remove close/cancel button from edit dialogs (dialog can be closed using the X button in title bar)
-* Migrate from jQuery UI dialogs to Mapbender.Popup
-* Convert ES5 pseudo-classes to ES6 classes (DialogFactory, FormRenderer, FormUtil, TableRenderer, FeatureEditor, FeatureRenderer, FeatureStyleEditor, StyleAdapter, ContextMenu, Toolset)
-* Rename files to start with uppercase letters for consistency
-* Add support for dynamic popup titles using data expressions in schema configuration
-* Add template literal syntax support (`${data.property}`) for html, text, and popup title expressions
-* Remove "Abbrechen" (Cancel) button from style editor dialog; only the save button remains
-* Make style editor dialog more compact by removing extra whitespace at the bottom
-* Allow mobile dialogs to be manually resized smaller (minimum height reduced)
-* Fix: Mobile dialog resize handle now works reliably; JS height is no longer overridden by CSS
-* Set confirm dialog to always open at a fixed position (30% left, 20% top)
+* Migrate from jQuery UI dialogs to Mapbender.Popup with improved mobile support
+* Add dynamic expression support for labels, text fields, and popup titles (template literal syntax `${data.property}`)
+* Modernize JavaScript codebase (ES6 classes, singleton pattern for better extensibility)
+
+For detailed changes, see the [PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149).
 
 
 ## 2.0.5
