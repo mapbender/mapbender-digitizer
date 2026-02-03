@@ -122,6 +122,10 @@ $buttonActiveTextColor: #fff !default;
     }
 
     .ui-tabs {
+        // Prevent horizontal overflow when tabs are used in popup dialogs
+        box-sizing: border-box;
+        max-width: 100%;
+
         > .ui-tabs-nav {
             line-height: 2.5;
 
