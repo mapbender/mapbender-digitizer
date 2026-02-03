@@ -215,9 +215,7 @@
                 
                 // Trigger initial data load if not already loaded
                 if (!this.currentSettings) {
-                    setTimeout(() => {
-                        $('.-fn-schema-selector', this.$element).trigger('change');
-                    }, 100);
+                    this._onSchemaSelectorChange();
                 }
             }
         }
