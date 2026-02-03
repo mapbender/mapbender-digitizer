@@ -42,7 +42,8 @@
     }
 
     class FormRenderer {
-        constructor() {
+        constructor(expressionEvaluator) {
+            this.expressionEvaluator_ = expressionEvaluator || Mapbender.DataManager.ExpressionEvaluator;
         }
 
         /**
@@ -149,7 +150,7 @@
          * @private
          */
         applyTextOrExpression_($element, content, isHtml) {
-            if (content && Mapbender.DataManager.ExpressionEvaluator.isDynamicExpression(content)) {
+            if (content && this.expressionEvaluator_.isDynamicExpression(content)) {
                 $element.addClass('-fn-calculated-text')
                     .attr('data-expression', content);
                 if (isHtml) {

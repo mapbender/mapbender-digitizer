@@ -13,7 +13,7 @@
          * @param {string} expression
          * @return {boolean}
          */
-        static isDynamicExpression(expression) {
+        isDynamicExpression(expression) {
             if (typeof expression !== 'string') {
                 return false;
             }
@@ -30,7 +30,7 @@
          * @return {*} The evaluated result
          * @throws {Error} If evaluation fails
          */
-        static evaluate(expression, data) {
+        evaluate(expression, data) {
             if (expression.includes('${')) {
                 // Template literal style: "Editing ${data.title} - ${data.gid}"
                 return new Function('data', `return \`${expression}\`;`)(data);
@@ -49,7 +49,7 @@
          * @param {*} [fallback=''] - Fallback value if evaluation fails
          * @return {*} The evaluated result or fallback value
          */
-        static evaluateSafe(expression, data, fallback) {
+        evaluateSafe(expression, data, fallback) {
             if (fallback === undefined) {
                 fallback = '';
             }
@@ -68,7 +68,7 @@
          * @param {*} [fallback] - Fallback value if evaluation fails (defaults to original value)
          * @return {*} The evaluated result or original value
          */
-        static evaluateIfDynamic(value, data, fallback) {
+        evaluateIfDynamic(value, data, fallback) {
             if (this.isDynamicExpression(value)) {
                 if (fallback === undefined) {
                     fallback = value;
@@ -79,6 +79,7 @@
         }
     }
 
-    Mapbender.DataManager.ExpressionEvaluator = ExpressionEvaluator;
+    // Export as singleton instance for better extensibility
+    Mapbender.DataManager.ExpressionEvaluator = new ExpressionEvaluator();
 
 }(jQuery));

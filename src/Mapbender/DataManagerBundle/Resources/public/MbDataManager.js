@@ -12,6 +12,8 @@
             this.grantsRequest_ = null;
             this.formRenderer_ = null;
             this.dialogFactory_ = null;
+            this.expressionEvaluator_ = null;
+            this.formUtil_ = null;
             this.tableRenderer = null;
             this.currentPopup = null;
             this.popupWindow = null;
@@ -57,8 +59,10 @@
             });
             this.tableButtonsTemplate_ = $('.-tpl-table-buttons', this.$element).remove().css('display', '').html();
             this.toolsetTemplate_ = $('.-tpl-toolset', this.$element).remove().css('display', '').html();
+            this.expressionEvaluator_ = this._createExpressionEvaluator();
+            this.formUtil_ = this._createFormUtil();
             this.formRenderer_ = this._createFormRenderer();
-            this.dialogFactory_ = Mapbender.DataManager.DialogFactory;
+            this.dialogFactory_ = this._createDialogFactory();
             const schemaNames = Object.keys(this.options.schemes);
             for (let s = 0; s < schemaNames.length; ++s) {
                 const schemaName = schemaNames[s];
@@ -75,11 +79,23 @@
         }
 
         _createFormRenderer() {
-            return new Mapbender.DataManager.FormRenderer();
+            return new Mapbender.DataManager.FormRenderer(this.expressionEvaluator_);
         }
 
         _createTableRenderer() {
             return new Mapbender.DataManager.TableRenderer(this, this.tableButtonsTemplate_);
+        }
+
+        _createDialogFactory() {
+            return Mapbender.DataManager.DialogFactory;
+        }
+
+        _createExpressionEvaluator() {
+            return Mapbender.DataManager.ExpressionEvaluator;
+        }
+
+        _createFormUtil() {
+            return Mapbender.DataManager.FormUtil;
         }
 
         updateSchemaSelector_() {
@@ -404,7 +420,7 @@
         _updateCalculatedText($elements, data) {
             $elements.each((index, element) => {
                 const expression = $(element).attr('data-expression');
-                const content = Mapbender.DataManager.ExpressionEvaluator.evaluateSafe(expression, data, '');
+                const content = this.expressionEvaluator_.evaluateSafe(expression, data, '');
                 if ($(element).attr('data-html-expression')) {
                     $(element).html(content);
                 } else {
@@ -419,8 +435,8 @@
          * @private
          */
         _getFormData($form) {
-            const valid = Mapbender.DataManager.FormUtil.validateForm($form);
-            return valid && Mapbender.DataManager.FormUtil.extractValues($form, true);
+            const valid = this.formUtil_.validateForm($form);
+            return valid && this.formUtil_.extractValues($form, true);
         }
 
         /**
@@ -489,7 +505,7 @@
             }
             const popup = this.dialogFactory_.dialog(dialog, dialogOptions);
             widget.currentPopup = popup;  // Store the Mapbender.Popup instance
-            Mapbender.DataManager.FormUtil.setValues(dialog, itemValues);
+            this.formUtil_.setValues(dialog, itemValues);
             const schemaBaseUrl = [this.elementUrl, schema.schemaName, '/'].join('');
             this.formRenderer_.updateFileInputs(dialog, schemaBaseUrl, itemValues);
             // Legacy custom vis-ui event shenanigans
@@ -499,7 +515,7 @@
             this._updateCalculatedText($('.-fn-calculated-text', dialog), itemValues);
             dialog.on('click', '.mb-3 .-fn-copytoclipboard', function() {
                 const $input = $(':input', $(this).closest('.mb-3'));
-                Mapbender.DataManager.FormUtil.copyToClipboard($input);
+                widget.formUtil_.copyToClipboard($input);
             });
             this.formRenderer_.initializeWidgets(dialog, schemaBaseUrl);
             dialog.one('dialogclose', function() {
@@ -528,7 +544,7 @@
             
             // Support dynamic title expressions (function, data reference, or template literal)
             const itemData = this._getItemData(dataItem);
-            title = Mapbender.DataManager.ExpressionEvaluator.evaluateIfDynamic(title, itemData);
+            title = this.expressionEvaluator_.evaluateIfDynamic(title, itemData);
             
             return {
                 modal: schema.popup.modal || false,
