@@ -1,3 +1,11 @@
+## Unreleased
+* Migrate from jQuery UI dialogs to Mapbender.Popup with improved mobile support
+* Add dynamic expression support for labels, text fields, and popup titles (template literal syntax `${data.property}`)
+* Modernize JavaScript codebase (ES6 classes, singleton pattern for better extensibility)
+
+For detailed changes, see the [PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149).
+
+
 ## 2.0.5
 * Add tooltips to digitizer buttons ([PR#140](https://github.com/mapbender/mapbender-digitizer/pull/140))
 
@@ -234,4 +242,4 @@ NOTE: this version requires Mapbender >=3.2.5 (currently in RC phase) and will n
   * getFeatureTypeForSchema
   * getSchemaConfigs
   * getSchemaConfig
-  * getFileUri 
+  * getFileUri

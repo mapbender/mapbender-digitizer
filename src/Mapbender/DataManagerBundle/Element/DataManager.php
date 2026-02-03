@@ -51,13 +51,20 @@ class DataManager extends AbstractElementService
     {
         return array(
             'schemes' => null,
+            'element_icon' => self::getDefaultIcon(),
         );
+    }
+
+    public static function getDefaultIcon()
+    {
+        return 'iconTable';
     }
 
     public function getView(Element $element)
     {
         $view = new TemplateView('@MapbenderDataManager/Element/DataManager.html.twig');
         $view->attributes['class'] = 'mb-element-data-manager';
+        $view->attributes['data-title'] = $element->getTitle();
         return $view;
     }
 
@@ -68,6 +75,7 @@ class DataManager extends AbstractElementService
                 '@MapbenderDataManagerBundle/Resources/styles/dataManager.element.scss',
             ),
             'js' => array(
+                '@MapbenderDataManagerBundle/Resources/public/ExpressionEvaluator.js',
                 '@MapbenderDataManagerBundle/Resources/public/FormRenderer.js',
                 '@MapbenderDataManagerBundle/Resources/public/FormUtil.js',
                 '@MapbenderDataManagerBundle/Resources/public/DialogFactory.js',

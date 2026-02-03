@@ -12,8 +12,15 @@
             this.grantsRequest_ = null;
             this.formRenderer_ = null;
             this.dialogFactory_ = null;
+            this.expressionEvaluator_ = null;
+            this.formUtil_ = null;
             this.tableRenderer = null;
             this.currentPopup = null;
+            this.popupWindow = null;
+            this.callback = null;
+            // Determine if element should open in a popup dialog (when in toolbar/taskbar)
+            // or stay inline (when in sidepane)
+            this.useDialog_ = !this.$element.closest('.sideContent, .mobilePane').length;
 
             if (Array.isArray(this.options.schemes) || !Object.keys(this.options.schemes || {}).length) {
                 throw new Error('Missing schema configuration');
@@ -52,8 +59,10 @@
             });
             this.tableButtonsTemplate_ = $('.-tpl-table-buttons', this.$element).remove().css('display', '').html();
             this.toolsetTemplate_ = $('.-tpl-toolset', this.$element).remove().css('display', '').html();
+            this.expressionEvaluator_ = this._createExpressionEvaluator();
+            this.formUtil_ = this._createFormUtil();
             this.formRenderer_ = this._createFormRenderer();
-            this.dialogFactory_ = Mapbender.DataManager.DialogFactory;
+            this.dialogFactory_ = this._createDialogFactory();
             const schemaNames = Object.keys(this.options.schemes);
             for (let s = 0; s < schemaNames.length; ++s) {
                 const schemaName = schemaNames[s];
@@ -70,11 +79,23 @@
         }
 
         _createFormRenderer() {
-            return new Mapbender.DataManager.FormRenderer();
+            return new Mapbender.DataManager.FormRenderer(this.expressionEvaluator_);
         }
 
         _createTableRenderer() {
             return new Mapbender.DataManager.TableRenderer(this, this.tableButtonsTemplate_);
+        }
+
+        _createDialogFactory() {
+            return Mapbender.DataManager.DialogFactory;
+        }
+
+        _createExpressionEvaluator() {
+            return Mapbender.DataManager.ExpressionEvaluator;
+        }
+
+        _createFormUtil() {
+            return Mapbender.DataManager.FormUtil;
         }
 
         updateSchemaSelector_() {
@@ -175,10 +196,57 @@
         }
 
         /**
-         * Mapbender sidepane interaction API
+         * Mapbender sidepane interaction API / Close handler
          */
         hide() {
             this._closeCurrentPopup();
+            if (this.useDialog_) {
+                this.closeByButton();
+            }
+        }
+
+        /**
+         * Called by button controller - opens element in popup if in toolbar
+         */
+        activateByButton(callback, mbButton) {
+            if (this.useDialog_) {
+                // Use parent class method to handle popup
+                super.activateByButton(callback, mbButton);
+                
+                // Trigger initial data load if not already loaded
+                if (!this.currentSettings) {
+                    this._onSchemaSelectorChange();
+                }
+            }
+        }
+
+        /**
+         * Called by button controller when closing
+         */
+        closeByButton() {
+            if (this.useDialog_) {
+                super.closeByButton();
+            }
+        }
+
+        /**
+         * Get popup options for dialog
+         * @returns {Object}
+         */
+        getPopupOptions() {
+            return {
+                title: this.$element.attr('data-title') || 'Data Manager',
+                draggable: true,
+                resizable: true,
+                modal: false,
+                closeOnESC: false,
+                detachOnClose: false,
+                content: [this.$element],
+                cssClass: 'data-manager-dialog',
+                width: 800,
+                height: 600,
+                buttons: []
+            };
         }
 
         /**
@@ -192,9 +260,7 @@
 
         _closeCurrentPopup() {
             if (this.currentPopup) {
-                if (this.currentPopup.dialog('instance')) {
-                    this.currentPopup.dialog('destroy');
-                }
+                this.currentPopup.close();
                 this.currentPopup = null;
             }
         }
@@ -352,9 +418,7 @@
         _updateCalculatedText($elements, data) {
             $elements.each((index, element) => {
                 const expression = $(element).attr('data-expression');
-                const content = (function(data_) {
-                    return eval(expression);
-                })(data);
+                const content = this.expressionEvaluator_.evaluateSafe(expression, data, '');
                 if ($(element).attr('data-html-expression')) {
                     $(element).html(content);
                 } else {
@@ -369,8 +433,8 @@
          * @private
          */
         _getFormData($form) {
-            const valid = Mapbender.DataManager.FormUtil.validateForm($form);
-            return valid && Mapbender.DataManager.FormUtil.extractValues($form, true);
+            const valid = this.formUtil_.validateForm($form);
+            return valid && this.formUtil_.extractValues($form, true);
         }
 
         /**
@@ -437,9 +501,9 @@
             if (!$('> .ui-tabs', dialog).length) {
                 dialog.addClass('content-padding');
             }
-            this.dialogFactory_.dialog(dialog, dialogOptions);
-            widget.currentPopup = dialog;
-            Mapbender.DataManager.FormUtil.setValues(dialog, itemValues);
+            const popup = this.dialogFactory_.dialog(dialog, dialogOptions);
+            widget.currentPopup = popup;  // Store the Mapbender.Popup instance
+            this.formUtil_.setValues(dialog, itemValues);
             const schemaBaseUrl = [this.elementUrl, schema.schemaName, '/'].join('');
             this.formRenderer_.updateFileInputs(dialog, schemaBaseUrl, itemValues);
             // Legacy custom vis-ui event shenanigans
@@ -449,7 +513,7 @@
             this._updateCalculatedText($('.-fn-calculated-text', dialog), itemValues);
             dialog.on('click', '.mb-3 .-fn-copytoclipboard', function() {
                 const $input = $(':input', $(this).closest('.mb-3'));
-                Mapbender.DataManager.FormUtil.copyToClipboard($input);
+                widget.formUtil_.copyToClipboard($input);
             });
             this.formRenderer_.initializeWidgets(dialog, schemaBaseUrl);
             dialog.one('dialogclose', function() {
@@ -466,21 +530,31 @@
          * @private
          */
         _getEditDialogPopupConfig(schema, dataItem) {
+            const minWidth = 550;
             let width = schema.popup.width;
-            // NOTE: unlike width, which allows CSS units, minWidth option is expected to be a pure pixel number
-            let minWidth = 550;
-            if (/\d+px/.test(width || '')) {
-                minWidth = parseInt(width.replace(/px$/, '')) || minWidth;
+            
+            // parseInt handles both "550" and "550px" correctly, returns NaN for invalid values
+            const widthNum = parseInt(width, 10);
+            
+            // Use minimum width if not specified, invalid, or too small
+            if (!width || isNaN(widthNum) || widthNum < minWidth) {
+                width = minWidth;
+            } else if (typeof width === 'string') {
+                width = widthNum;
             }
+            
+            let title = schema.popup.title || Mapbender.trans('mb.data-manager.details_title');
+            
+            // Support dynamic title expressions (function, data reference, or template literal)
+            const itemData = this._getItemData(dataItem);
+            title = this.expressionEvaluator_.evaluateIfDynamic(title, itemData);
+            
             return {
-                position: schema.popup.position || {},
                 modal: schema.popup.modal || false,
-                title: schema.popup.title || Mapbender.trans('mb.data-manager.details_title'),
-                width: schema.popup.width,
-                minWidth: minWidth,
-                classes: {
-                    'ui-dialog-content': 'ui-dialog-content data-manager-edit-data'
-                },
+                title: title,
+                width: width,
+                cssClass: 'data-manager-edit-data',
+                position: schema.popup.position || null,  // Preserve position config for CSS positioning
                 buttons: this._getEditDialogButtons(schema, dataItem)
             };
         }
@@ -495,12 +569,18 @@
         _getEditDialogButtons(schema, dataItem, overrideAllowSave) {
             const buttons = [];
             const widget = this;
-            if (schema.allowEdit || overrideAllowSave) {
+            
+            // Check if form has any editable fields
+            const hasEditableFields = this.formRenderer_.hasEditableFields(schema.formItems || []);
+            
+            // Only show save button if allowed AND form has editable fields
+            if ((schema.allowEdit || overrideAllowSave) && hasEditableFields) {
                 buttons.push({
                     text: Mapbender.trans('mb.actions.save'),
                     'class': 'btn btn-primary',
                     click: function() {
-                        const $scope = $(this).closest('.ui-dialog-content');
+                        // In Mapbender.Popup, 'this' refers to the popup instance
+                        const $scope = $('.popupContent', this.$element);
                         const saved = widget._submitFormData(schema, $scope, dataItem);
                         if (saved) {
                             saved.then(function() {
@@ -521,16 +601,6 @@
                     }
                 });
             }
-            const closeText = buttons.length && 'mb.actions.cancel' || 'mb.actions.close';
-            const closeTooltip = buttons.length && 'mb.data-manager.actions.cancel_tooltip' || 'mb.data-manager.actions.close_tooltip';
-            buttons.push({
-                text: Mapbender.trans(closeText),
-                title: Mapbender.trans(closeTooltip),
-                'class': 'btn btn-light',
-                click: function() {
-                    widget._cancelForm(schema, dataItem);
-                }
-            });
             return buttons;
         }
 

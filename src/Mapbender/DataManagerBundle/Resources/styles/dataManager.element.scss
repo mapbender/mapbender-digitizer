@@ -102,108 +102,8 @@ $buttonActiveTextColor: #fff !default;
     }
 }
 
-.ui-dialog.data-manager-dialog {
-
-    textarea.form-control {
-        min-height: 0;
-    }
-
-    label input[type=radio] {
-        margin-right: 10px;
-    }
-
-    .text {
-        white-space: pre-line;
-    }
-
-
-    &:focus {
-        outline: none;
-    }
-
-    background: #fff;
-
-    .ui-dialog-content, .ui-dialog-bottonpane {
-        background: transparent;
-    }
-
-    display: flex;
-    flex-direction: column;
-
-    .ui-dialog-content {
-        flex: 1 1 auto;
-        height: initial !important; // Overrule inline style
-    }
-
-    .ui-dialog-titlebar, .ui-dialog-buttonpane {
-        flex: 0 1 auto;
-    }
-
-    max-height: 100vh;
-    border: 1px solid #b3b3b3;
-
-    .ui-dialog-button-pane {
-        border-bottom: 5px solid #b3b3b3;
-    }
-
-    .ui-dialog-titlebar {
-        line-height: 2;
-        padding: 0 0 0 15px;
-        background-color: $buttonFirstActiveColor;
-        color: $buttonActiveTextColor;
-
-        .ui-widget-header, .ui-button {
-            color: inherit;
-        }
-
-        font-size: 16px;
-
-        > .ui-button, > .ui-dialog-titlebar-buttonpane {
-            font-size: inherit;
-            float: right;
-            border: none;
-            text-indent: 0;
-            outline: none;
-            background: transparent;
-        }
-
-        .ui-dialog-titlebar-close {
-            &:before {
-                content: "\f00d"; // =.fa-times
-                font-family: "FontAwesome", "Font Awesome 5 Free", "Font Awesome 5 Pro";
-            }
-
-            .ui-button-icon {
-                display: none;
-            }
-        }
-    }
-
-    .ui-dialog-title {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    }
-
-    .ui-dialog-content {
-        min-width: 100%;
-    }
-
-    a.ui-button {
-        // jquerydialogextendjs uses anchors instead of buttons
-        text-decoration: none;
-    }
-
-    .ui-dialog-buttonpane {
-        padding: 15px;
-        text-align: right;
-
-        .btn + .btn {
-            margin-left: 5px;
-        }
-    }
-}
-
 // Pop-up dialogs
-.ui-dialog-content.data-manager-edit-data {
+.popupContent.data-manager-edit-data {
     overflow-y: auto;
     color: #707070;
     font-size: 11px;
@@ -222,6 +122,10 @@ $buttonActiveTextColor: #fff !default;
     }
 
     .ui-tabs {
+        // Prevent horizontal overflow when tabs are used in popup dialogs
+        box-sizing: border-box;
+        max-width: 100%;
+
         > .ui-tabs-nav {
             line-height: 2.5;
 
@@ -345,5 +249,25 @@ $buttonActiveTextColor: #fff !default;
     .ui-datepicker-title {
         margin-left: 0.5em;
         margin-right: 0.5em;
+    }
+}
+
+// Mobile-specific dialog styling for edit dialogs
+@media (max-width: 767px) {
+    .popup.mapbender-popup {
+        &:has(.popupContent.data-manager-edit-data),
+        &.data-manager-dialog,
+        &.digitizer-dialog {
+            width: 100% !important;
+            max-width: 100vw !important;
+            max-height: 60vh !important;
+            right: 0 !important;
+            margin: 0 !important;
+
+            .popupContent {
+                max-height: calc(60vh - 60px) !important; // Subtract header height
+                overflow-y: auto !important;
+            }
+        }
     }
 }
