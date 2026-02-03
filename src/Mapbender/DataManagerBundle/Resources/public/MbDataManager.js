@@ -530,12 +530,17 @@
          * @private
          */
         _getEditDialogPopupConfig(schema, dataItem) {
+            const minWidth = 550;
             let width = schema.popup.width;
-            // Ensure minimum width of 550px if not specified or too small
-            if (!width || (typeof width === 'string' && parseInt(width) < 550)) {
-                width = '550px';
-            } else if (typeof width === 'number' && width < 550) {
-                width = 550;
+            
+            // parseInt handles both "550" and "550px" correctly, returns NaN for invalid values
+            const widthNum = parseInt(width, 10);
+            
+            // Use minimum width if not specified, invalid, or too small
+            if (!width || isNaN(widthNum) || widthNum < minWidth) {
+                width = minWidth;
+            } else if (typeof width === 'string') {
+                width = widthNum;
             }
             
             let title = schema.popup.title || Mapbender.trans('mb.data-manager.details_title');
