@@ -32,3 +32,5 @@ mb:
     details_title: Dane szczegółowe
     attachment:
       open: Otwórz załącznik
+    error:
+      invalid_file_extension: 'Nieprawidłowy typ pliku. Dozwolone typy plików:'

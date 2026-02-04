@@ -13,6 +13,7 @@ use Mapbender\DataSourceBundle\Component\Drivers\PostgreSQL;
 use Mapbender\DataSourceBundle\Component\Drivers\SQLite;
 use Mapbender\DataSourceBundle\Component\Meta\TableMeta;
 use Mapbender\DataSourceBundle\Entity\DataItem;
+use Symfony\Component\Security\Core\Authentication\Token\NullToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
@@ -357,7 +358,14 @@ class DataRepository
             $queryBuilder->andWhere($params['where']);
         }
         if ($setUserParam) {
-            $queryBuilder->setParameter('userName', $this->tokenStorage->getToken()->getUserIdentifier());
+            $token = $this->tokenStorage->getToken();
+            // Check for null token or NullToken (anonymous user) - same pattern as Mapbender core
+            if ($token !== null && !$token instanceof NullToken) {
+                $queryBuilder->setParameter('userName', $token->getUserIdentifier());
+            } else {
+                // No authenticated user, use empty string or anonymous
+                $queryBuilder->setParameter('userName', '');
+            }
         }
     }
 

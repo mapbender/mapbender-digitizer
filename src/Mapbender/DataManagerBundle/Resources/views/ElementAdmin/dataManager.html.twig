@@ -63,6 +63,7 @@
     {%- endfor -%}
 {% block schemes_row %}
     {{ form_label(form.configuration.schemes) }}
+    {{ form_errors(form.configuration.schemes) }}
     {{ form_widget(form.configuration.schemes) }}
 {% endblock schemes_row %}
 </div>

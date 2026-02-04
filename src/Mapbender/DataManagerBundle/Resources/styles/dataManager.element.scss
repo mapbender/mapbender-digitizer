@@ -1,5 +1,52 @@
 $buttonActiveTextColor: #fff !default;
 
+/** START: LEGACY: Remove this for Mapbender 5 */
+
+.mb-element-data-manager .mapbender-element-result-table {
+    > .dataTables_wrapper {
+        > .row:first-child {
+            .col-md-6:first-child {
+                width: 0;
+            }
+
+            .col-md-6:last-child {
+                width: 100%;
+
+                .dataTables_filter {
+                    text-align: left;
+
+                    label {
+                        width: 100%;
+                        padding-left: 2px;
+
+                        input {
+                            display: block;
+                            width: 100%;
+                            margin-left: 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        > .row:last-child {
+            text-align: center;
+
+            .col-sm-12 {
+                width: 100%;
+                margin-bottom: 7px;
+            }
+
+            .col-sm-12:last-child .pagination {
+                justify-content: center;
+            }
+        }
+    }
+}
+/** END: LEGACY **/
+
+
+
 .mb-element-data-manager {
     padding-right: 7px;
 
@@ -25,37 +72,17 @@ $buttonActiveTextColor: #fff !default;
     }
 
     .mapbender-element-result-table {
-        > .dataTables_wrapper {
-            > .row:first-child {
-                .col-md-6:first-child {
-                    width: 0;
-                }
-                .col-md-6:last-child {
-                    width: 100%;
-                    .dataTables_filter {
-                        text-align: left;
-                        label {
-                            width: 100%;
-                            padding-left: 2px;
-                            input {
-                                display: block;
-                                width: 100%;
-                                margin-left: 0px;
-                            }
-                        }
-                    }
-                }
-           }
-           > .row:last-child {
-               text-align: center;
-               .col-sm-12 {
-                   width: 100%;
-                   margin-bottom: 7px;
-               }
-               .col-sm-12:last-child .pagination {
-                   justify-content: center;
-               }
-           }
+        .dt-search {
+            &, .label, input {
+                width: 100%;
+                text-align: left;
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        .dt-info {
+            margin-top: 10px;
         }
 
         .btn-group {

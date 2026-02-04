@@ -41,12 +41,12 @@
         render(schema) {
             const settings = this.getOptions(schema);
             const $table = $('<table class="table table-striped table-hover -js-items">');
+            const $tableWrap = $('<div class="mapbender-element-result-table">');
+            $tableWrap.append($table);
+            $tableWrap.attr('data-schema-name', schema.schemaName);
             $table.on('draw.dt', function () {
                 $('ul.pagination').addClass('pagination-sm');
             }).DataTable(settings);
-            const $tableWrap = $('<div class="mapbender-element-result-table">');
-            $tableWrap.append($table.closest('.dataTables_wrapper'));
-            $tableWrap.attr('data-schema-name', schema.schemaName);
             return $tableWrap;
         }
 
@@ -168,13 +168,28 @@
                 selectable:   false,
                 oLanguage: this.getOLanguageOption(schema),
                 autoWidth:    false,
-                language: {
+                // per default, data tables uses a two-column layout
+                // due to limited space in sidebar, align search, info and paging vertically
+                layout: {
+                    topStart: null,
+                    topEnd: null,
+                    top: 'search',
+                    bottomStart: null,
+                    bottomEnd: null,
+                    bottom: 'info',
+                    bottom2: 'paging',
+                }
+            };
+
+            // TODO: remove this in next major release
+            if (!$.fn.DataTable.versionCheck('2.0')) {
+                settings.language = {
                     paginate: {
                         previous: '<<',
                         next: '>>'
                     }
-                }
-            };
+                };
+            }
             settings.createdRow = this.onRowCreation.bind(this, schema);
             return settings;
         }
@@ -198,12 +213,12 @@
                 item: dataItem,
                 schema: schema
             });
-            
+
             // Use cached value for whether form has editable fields
             const hasEditableFields = this.editableFieldsCache_[schema.schemaName];
             const $editButton = $('.-fn-edit-data', tr);
             const $icon = $('i', $editButton);
-            
+
             // Set icon and tooltip based on whether form is editable
             if (hasEditableFields && schema.allowEdit) {
                 $editButton.attr('title', Mapbender.trans('mb.actions.edit'));
@@ -250,7 +265,7 @@
                 // on a row-by-row basis
                 enabledSelector: keepSelector
             };
-            
+
             // Cache whether this schema has editable fields (calculated once per schema)
             this.editableFieldsCache_[tableSchema.schemaName] = this.owner.formRenderer_.hasEditableFields(tableSchema.formItems || []);
         }

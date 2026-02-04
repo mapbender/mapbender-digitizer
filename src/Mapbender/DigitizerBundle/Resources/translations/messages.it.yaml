@@ -22,7 +22,7 @@ mb.digitizer:
         print_tooltip: 'Stampa oggetto'
         style:
             change: 'Cambia stile'
-            change_tooltip: 'Cambia aspetto dell\'oggetto'
+            change_tooltip: 'Cambia aspetto dell''oggetto'
         clone:
             title: 'Clona'
             tooltip: 'Crea una copia di questo oggetto'

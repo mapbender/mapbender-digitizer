@@ -4,6 +4,7 @@
 namespace Mapbender\DataSourceBundle\Component;
 
 
+use Symfony\Component\Security\Core\Authentication\Token\NullToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
@@ -12,21 +13,16 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class EventProcessor
 {
-    /** @var TokenStorageInterface */
-    protected $tokenStorage;
-    /** @var AuthorizationCheckerInterface */
-    protected $authorizationChecker;
-
     public $allowSave = true;
     public $allowUpdate = true;
     public $allowInsert = true;
     public $allowRemove = true;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker,
-                                TokenStorageInterface $tokenStorage)
+    public function __construct(
+        protected AuthorizationCheckerInterface $authorizationChecker,
+        protected TokenStorageInterface         $tokenStorage
+    )
     {
-        $this->authorizationChecker = $authorizationChecker;
-        $this->tokenStorage = $tokenStorage;
     }
 
     public function runExpression($expression, array $locals)
@@ -73,14 +69,19 @@ class EventProcessor
      */
     protected function addBuiltins(array $locals)
     {
+        $token = $this->tokenStorage->getToken();
+
         $locals += array(
             'context' => $this->authorizationChecker,
             'tokenStorage' => $this->tokenStorage,
-            'user' => $this->tokenStorage->getToken()->getUser(),
+            'user' => ($token !== null && !$token instanceof NullToken) ? $token->getUser() : null,
             'userRoles' => array(),
         );
-        $token = $this->tokenStorage->getToken();
-        $locals['userRoles'] = $token->getRoleNames();
+
+        if ($token !== null && !$token instanceof NullToken) {
+            $token = $this->tokenStorage->getToken();
+            $locals['userRoles'] = $token->getRoleNames();
+        }
         return $locals;
     }
 }

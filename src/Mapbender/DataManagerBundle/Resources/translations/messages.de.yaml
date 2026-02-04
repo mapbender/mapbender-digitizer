@@ -32,3 +32,5 @@ mb:
     details_title: Objektdetails
     attachment:
       open: Anhang öffnen
+    error:
+      invalid_file_extension: 'Ungültiger Dateityp. Erlaubte Dateitypen:'

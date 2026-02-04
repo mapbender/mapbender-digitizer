@@ -171,13 +171,13 @@
         hasEditableFields(items) {
             const editableTypes = ['input', 'textArea', 'date', 'colorPicker', 'file', 'checkbox', 'select', 'radioGroup'];
             const containerTypes = ['form', 'tabs', 'fieldSet', 'inline'];
-            
+
             for (var i = 0; i < items.length; ++i) {
                 var item = items[i];
                 if (!item) {
                     continue;
                 }
-                
+
                 // Check if this is an editable field type
                 if (item.type && editableTypes.indexOf(item.type) !== -1) {
                     // Further check if field is not disabled or readonly
@@ -185,7 +185,7 @@
                         return true;
                     }
                 }
-                
+
                 // Recursively check items with children (containers or tab panels)
                 if (item.children && item.children.length) {
                     if (this.hasEditableFields(item.children)) {
@@ -193,7 +193,7 @@
                     }
                 }
             }
-            
+
             return false;
         }
 
@@ -297,15 +297,17 @@
             }
             var self = this;
             $('input[type="file"][data-upload-url][data-name]', scope).each(function() {
-                var $input = $(this);
-                var name = $input.attr('data-name');
-                var $group = $input.closest('.mb-3');
-                var $realInput = $('input[name="' + name + '"]', $group);
-                var url = $input.attr('data-upload-url');
-                var $loadingIcon = $('.-js-loading-indicator', $group);
+                const $input = $(this);
+                const name = $input.attr('data-name');
+                const $group = $input.closest('.mb-3');
+                const $realInput = $('input[name="' + name + '"]', $group);
+                const url = $input.attr('data-upload-url');
+                const allowedExtensions = $input.attr('data-allowed-types');
+                const $loadingIcon = $('.-js-loading-indicator', $group);
                 $input.fileupload({
                     dataType: 'json',
                     url: url,
+                    submit: (e, data) => self.checkFileExtension(data.files, allowedExtensions),
                     success: function(response) {
                         var values = {};
                         values[name] = response.filename;
@@ -331,6 +333,21 @@
                 self.updateFileInputs($group, baseUrl, fakeValues);
                 return false;
             });
+        }
+
+        checkFileExtension(files, allowedExtensionsCsv) {
+            // no value means no restriction
+            if (!allowedExtensionsCsv) return true;
+            const allowedExtensions = allowedExtensionsCsv.split(',').map(s => s.trim().toLowerCase());
+            for (let i = 0; i < files.length; ++i) {
+                const file = files[i];
+                const fileExt = (file.name.split('.').pop() || '').toLowerCase();
+                if (!allowedExtensions.includes(fileExt)) {
+                    Mapbender.info(Mapbender.trans('mb.data-manager.error.invalid_file_extension') + ' ' + allowedExtensions.join(', '));
+                    return false;
+                }
+            }
+            return true;
         }
 
         getAttachmentUrl_(baseUrl, fieldName, inputValue) {
@@ -441,6 +458,7 @@
                 .attr(settings.attr || {})
                 .attr('accept', (settings.attr || settings).accept || null)
                 .attr('data-upload-url', settings.__uploadUrl__)
+                .attr('data-allowed-types', settings.allowedFileTypes)
                 .attr('data-name', settings.name)
             ;
             var $btnText = $('<span class="upload-button-text">')
@@ -621,9 +639,9 @@
             /** https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L823 */
             var $wrapper = $(document.createElement('div')).addClass('mb-3 text');
             var $textContainer = $(document.createElement('div'));
-            
+
             this.applyTextOrExpression_($textContainer, settings.text, false);
-            
+
             if (settings.title) {
                 $wrapper.append(this.fieldLabel_(settings));
             }
@@ -641,10 +659,10 @@
                 .addClass(settings.cssClass || '')
                 .css(settings.css || {})
             ;
-            
+
             this.applyTextOrExpression_($labelElement, settings.text, false);
             $labelElement.append(this.renderElements(settings.children || []));
-            
+
             // If title is provided, wrap in a container with label
             if (settings.title) {
                 var $wrapper = $(document.createElement('div')).addClass('mb-3 label');
@@ -652,7 +670,7 @@
                 $wrapper.append($labelElement);
                 return $wrapper;
             }
-            
+
             return $labelElement;
         }
 

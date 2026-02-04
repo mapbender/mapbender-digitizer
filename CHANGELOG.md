@@ -1,10 +1,18 @@
-## Unreleased
-* Migrate from jQuery UI dialogs to Mapbender.Popup with improved mobile support
-* Add dynamic expression support for labels, text fields, and popup titles (template literal syntax `${data.property}`)
-* Modernize JavaScript codebase (ES6 classes, singleton pattern for better extensibility)
+## next feature release
+* Migrate from jQuery UI dialogs to Mapbender.Popup with improved mobile support ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
+* Add dynamic expression support for labels, text fields, and popup titles (template literal syntax `${data.property}`) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
+* Modernize JavaScript codebase (ES6 classes, singleton pattern for better extensibility) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
 
-For detailed changes, see the [PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149).
+## next bugfix release
+* Add support for DataTables version 2 ([PR#150](https://github.com/mapbender/mapbender-digitizer/pull/150))
 
+## 2.0.7
+* Add file type check to form type `file` (key: `allowedFileTypes`) ([PR#147](https://github.com/mapbender/mapbender-digitizer/pull/147))
+
+## 2.0.6
+* Show error message when a YAML syntax error occurs in manager ([PR#145](https://github.com/mapbender/mapbender-digitizer/pull/145))
+* Fix popup width & height was ignored ([PR#146](https://github.com/mapbender/mapbender-digitizer/pull/146))
+>>>>>>> master
 
 ## 2.0.5
 * Add tooltips to digitizer buttons ([PR#140](https://github.com/mapbender/mapbender-digitizer/pull/140))
