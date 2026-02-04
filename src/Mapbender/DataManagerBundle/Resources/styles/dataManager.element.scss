@@ -105,6 +105,7 @@ $buttonActiveTextColor: #fff !default;
 // Pop-up dialogs
 .popupContent.data-manager-edit-data {
     overflow-y: auto;
+    overflow-x: clip;
     color: #707070;
     font-size: 11px;
 
