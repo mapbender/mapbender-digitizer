@@ -1,4 +1,4 @@
-(function($) {
+(function ($) {
     /**
      * @typedef {Object} DataManagerItem
      */
@@ -57,7 +57,7 @@
         /** @type {Promise|null} */
         grantsRequest_: null,
 
-        _create: function() {
+        _create: function () {
             if (Array.isArray(this.options.schemes) || !Object.keys(this.options.schemes).length) {
                 throw new Error("Missing schema configuration");
             }
@@ -75,25 +75,7 @@
                     .prepend(this.$loadingIndicator_.css({float: 'right', opacity: 0.0}))
                 ;
             }
-            var self = this;
-            this.grantsRequest_ = $.getJSON([this.elementUrl, 'grants'].join(''));
-            this.grantsRequest_.then((function(mergeWith) {
-                return function(allGrants) {
-                    var schemaNames = Object.keys(allGrants);
-                    for (var i = 0; i < schemaNames.length; ++i) {
-                        var schemaName = schemaNames[i];
-                        if (allGrants[schemaName] === false) {
-                            delete mergeWith[schemaName];
-                        } else {
-                            Object.assign(mergeWith[schemaName], allGrants[schemaName]);
-                        }
-                    }
-                };
-            })(this.options.schemes)).catch(this._onAjaxError.bind(this));
-
-            this.grantsRequest_.then(function() {
-                self.updateSchemaSelector_();
-            });
+            this._loadGrants();
             this.tableButtonsTemplate_ = $('.-tpl-table-buttons', this.element).remove().css('display', '').html();
             this.toolsetTemplate_ = $('.-tpl-toolset', this.element).remove().css('display', '').html();
             this.formRenderer_ = this._createFormRenderer();
@@ -112,20 +94,45 @@
             this._initializeEvents();
             this._afterCreate();
         },
-        _createFormRenderer: function() {
+        _loadGrants: function () {
+            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
+            const failListener = typeof Mapbender.handleAjaxError === 'function'
+                ? (e) => Mapbender.handleAjaxError(e, () => this._loadGrants())
+                : this._onAjaxError.bind(this);
+
+            this.grantsRequest_ = $.getJSON(this.elementUrl + 'grants')
+                .then((mergeWith => allGrants => {
+                    const schemaNames = Object.keys(allGrants);
+                    for (let schemaName of schemaNames) {
+                        if (allGrants[schemaName] === false) {
+                            delete mergeWith[schemaName];
+                        } else {
+                            Object.assign(mergeWith[schemaName], allGrants[schemaName]);
+                        }
+                    }
+                })(this.options.schemes))
+                .fail(failListener)
+                .then(() => this.updateSchemaSelector_())
+            ;
+            this.onGrantsLoadStarted();
+        },
+        onGrantsLoadStarted: function() {
+            // do nothing, can be overridden by digitizer
+        },
+        _createFormRenderer: function () {
             return new Mapbender.DataManager.FormRenderer();
         },
-        _createTableRenderer: function() {
+        _createTableRenderer: function () {
             return new Mapbender.DataManager.TableRenderer(this, this.tableButtonsTemplate_);
         },
         /**
          * @private
          */
-        updateSchemaSelector_: function() {
+        updateSchemaSelector_: function () {
             var self = this;
             var $select = $('select.-fn-schema-selector', this.element);
             var schemaNames = Object.keys(this.options.schemes);
-            var visible = schemaNames.filter(function(schemaName) {
+            var visible = schemaNames.filter(function (schemaName) {
                 return self.options.schemes[schemaName].listed;
             });
 
@@ -147,14 +154,14 @@
                 $select.append(option);
             }
         },
-        getItemSchema: function(item) {
+        getItemSchema: function (item) {
             return this.options.schemes[item.schemaName];
         },
         /**
          * @param {DataManagerSchemaConfig|String} schema
          * @return {Array<DataManagerSchemaConfig>}
          */
-        expandCombination: function(schema) {
+        expandCombination: function (schema) {
             var expanded = [];
             var schema0 = (typeof schema === 'string') && this.options.schemes[schema] || schema;
             if (!schema0.combine) {
@@ -175,7 +182,7 @@
          * before triggering ready event and loading the first set of data.
          * @private
          */
-        _afterCreate: function() {
+        _afterCreate: function () {
             this._start();
         },
         /**
@@ -184,40 +191,40 @@
          * but before loading the first set of data.
          * @private
          */
-        _start: function() {
+        _start: function () {
             this._trigger('ready');
             if (!this.skipInitialData_()) {
                 // Use schema change event, it does everything we need
                 $('.-fn-schema-selector', this.element).trigger('change');
             }
         },
-        skipInitialData_: function() {
+        skipInitialData_: function () {
             return !!this.element.parents('.contentPane').length;
         },
-        _initializeEvents: function() {
+        _initializeEvents: function () {
             var self = this;
-            $('.-fn-schema-selector', this.element).on('change', function() {
+            $('.-fn-schema-selector', this.element).on('change', function () {
                 self._onSchemaSelectorChange();
             });
-            this.element.on('click', '.-fn-edit-data', function() {
+            this.element.on('click', '.-fn-edit-data', function () {
                 var $tr = $(this).closest('tr');
                 self._openEditDialog($tr.data('schema'), $tr.data('item'));
             });
-            this.element.on('click', '.-fn-delete', function() {
+            this.element.on('click', '.-fn-delete', function () {
                 var $tr = $(this).closest('tr');
                 self.removeData($tr.data('schema'), $tr.data('item'));
             });
-            this.element.on('click', '.-fn-refresh', function() {
+            this.element.on('click', '.-fn-refresh', function () {
                 self._getData(self._getCurrentSchema());
             });
-            this.element.on('click', '.-fn-create-item', function() {
+            this.element.on('click', '.-fn-create-item', function () {
                 self._createItem(self._getCurrentSchema());
             });
         },
         /**
          * Mapbender sidepane interaction API
          */
-        hide: function() {
+        hide: function () {
             this._closeCurrentPopup();
         },
         /**
@@ -225,10 +232,10 @@
          * @param {DataManagerSchemaConfig} schema
          * @return {DataStoreConfig}
          */
-        _getDataStoreFromSchema: function(schema) {
+        _getDataStoreFromSchema: function (schema) {
             return schema.dataStore;
         },
-        _closeCurrentPopup: function() {
+        _closeCurrentPopup: function () {
             if (this.currentPopup) {
                 if (this.currentPopup.dialog('instance')) {
                     this.currentPopup.dialog('destroy');
@@ -240,7 +247,7 @@
          * @param {DataManagerSchemaConfig} schema
          * @private
          */
-        _activateSchema: function(schema) {
+        _activateSchema: function (schema) {
             if (this.currentSettings) {
                 this._deactivateSchema(this.currentSettings);
                 this.currentSettings = null;
@@ -256,7 +263,7 @@
          * @param {DataManagerSchemaConfig} schema
          * @private
          */
-        _deactivateSchema: function(schema) {
+        _deactivateSchema: function (schema) {
             this._closeCurrentPopup();
         },
         _getCurrentSchema: function () {
@@ -271,7 +278,7 @@
             const firstSchemaKey = schemaKeys[0];
             return this.options["schemes"][firstSchemaKey];
         },
-        _onSchemaSelectorChange: function() {
+        _onSchemaSelectorChange: function () {
             var schemaNew = this._getCurrentSchema();
             this._activateSchema(schemaNew);
             this._getData(schemaNew);
@@ -281,7 +288,7 @@
          * @param {DataManagerSchemaConfig} schema
          * @private
          */
-        _updateToolset: function(schema) {
+        _updateToolset: function (schema) {
             $('.toolset', this.element).replaceWith(this.toolsetTemplate_);
             var $toolset = $('.toolset', this.element);
             let allowRefresh = schema.allowRefresh;
@@ -304,8 +311,7 @@
          * @return {Promise}
          * @private
          */
-        _saveItem: function(schema, dataItem, newValues) {
-            var self = this;
+        _saveItem: function (schema, dataItem, newValues) {
             var params = {
                 schema: schema.schemaName
             };
@@ -314,12 +320,10 @@
                 params.id = id;
             }
             var submitData = this._getSaveRequestData(schema, dataItem, newValues);
-            return this.postJSON('save?' + $.param(params), submitData)
-                .then(function(response) {
-                    self._afterSave(schema, dataItem, id, response);
-                    return response;
-                })
-            ;
+            return this.postJSON('save?' + $.param(params), submitData, undefined, (response) => {
+                this._afterSave(schema, dataItem, id, response);
+                return response;
+            });
         },
         /**
          * @param {DataManagerSchemaConfig} schema
@@ -328,7 +332,7 @@
          * @return {{dataItem: *}}
          * @private
          */
-        _getSaveRequestData: function(schema, dataItem, newValues) {
+        _getSaveRequestData: function (schema, dataItem, newValues) {
             return {
                 properties: Object.assign({}, this._getItemData(dataItem), newValues || {})
             };
@@ -342,7 +346,7 @@
          * @param {(String|null)} originalId
          * @private
          */
-        _saveEvent: function(schema, dataItem, originalId) {
+        _saveEvent: function (schema, dataItem, originalId) {
             /** @var {DataManagagerSaveEventData} eventData */
             var eventData = {
                 item: dataItem,
@@ -366,7 +370,7 @@
          * @param {Object} responseData
          * @private
          */
-        _afterSave: function(schema, dataItem, originalId, responseData) {
+        _afterSave: function (schema, dataItem, originalId, responseData) {
             if (responseData.dataItem) {
                 this._replaceItemData(schema, dataItem, responseData.dataItem);
             }
@@ -398,7 +402,7 @@
          * @return {Object|boolean} false on any invalid form inputs
          * @private
          */
-        _getFormData: function($form) {
+        _getFormData: function ($form) {
             var valid = Mapbender.DataManager.FormUtil.validateForm($form);
             return valid && Mapbender.DataManager.FormUtil.extractValues($form, true);
         },
@@ -409,7 +413,7 @@
          * @return {boolean|Promise}
          * @private
          */
-        _submitFormData: function(schema, $scope, dataItem) {
+        _submitFormData: function (schema, $scope, dataItem) {
             var formData = this._getFormData($scope);
 
             if (formData) {
@@ -427,7 +431,7 @@
          * Gets persistent data properties of the item
          * @return {Object}
          */
-        _getItemData: function(dataItem) {
+        _getItemData: function (dataItem) {
             return dataItem.properties;
         },
         /**
@@ -438,7 +442,7 @@
          * @param {Object} newValues
          * @private
          */
-        _replaceItemData: function(schema, dataItem, newValues) {
+        _replaceItemData: function (schema, dataItem, newValues) {
             Object.assign(dataItem.properties, newValues.properties);
         },
         /**
@@ -448,7 +452,7 @@
          * @param {Object} dataItem
          * @private
          */
-        _openEditDialog: function(schema, dataItem) {
+        _openEditDialog: function (schema, dataItem) {
             var widget = this;
             this._closeCurrentPopup();
             var itemValues = this._getItemData(dataItem);
@@ -471,19 +475,19 @@
             var schemaBaseUrl = [this.elementUrl, schema.schemaName, '/'].join('');
             this.formRenderer_.updateFileInputs(dialog, schemaBaseUrl, itemValues);
             // Legacy custom vis-ui event shenanigans
-            $('.-js-custom-events[name]', dialog).each(function() {
+            $('.-js-custom-events[name]', dialog).each(function () {
                 $(this).trigger('filled', {data: itemValues, value: itemValues[$(this).attr('name')]});
             });
 
             this._updateCalculatedText($('.-fn-calculated-text', dialog), itemValues);
 
-            dialog.on('click', '.mb-3 .-fn-copytoclipboard', function() {
+            dialog.on('click', '.mb-3 .-fn-copytoclipboard', function () {
                 var $input = $(':input', $(this).closest('.mb-3'));
                 Mapbender.DataManager.FormUtil.copyToClipboard($input);
             });
             this.formRenderer_.initializeWidgets(dialog, schemaBaseUrl);
 
-            dialog.one('dialogclose', function() {
+            dialog.one('dialogclose', function () {
                 widget._cancelForm(schema, dataItem);
             });
 
@@ -496,7 +500,7 @@
          * @see https://api.jqueryui.com/1.12/dialog/
          * @private
          */
-        _getEditDialogPopupConfig: function(schema, dataItem) {
+        _getEditDialogPopupConfig: function (schema, dataItem) {
             var width = schema.popup.width;
             // NOTE: unlike width, which allows CSS units, minWidth option is expected to be a pure pixel number
             var minWidth = 550;
@@ -504,7 +508,7 @@
                 minWidth = parseInt(width.replace(/px$/, '')) || minWidth
             }
             return {
-                position:  schema.popup.position || {},
+                position: schema.popup.position || {},
                 modal: schema.popup.modal || false,
                 title: schema.popup.title || Mapbender.trans('mb.data-manager.details_title'),
                 width: schema.popup.width,
@@ -523,7 +527,7 @@
          * @return {Array<Object>}
          * @private
          */
-        _getEditDialogButtons: function(schema, dataItem, overrideAllowSave) {
+        _getEditDialogButtons: function (schema, dataItem, overrideAllowSave) {
             var buttons = [];
             var widget = this;
             if (schema.allowEdit || overrideAllowSave) {
@@ -531,11 +535,11 @@
                     text: Mapbender.trans('mb.actions.save'),
                     title: Mapbender.trans('mb.data-manager.actions.save_tooltip'),
                     'class': 'btn btn-primary',
-                    click: function() {
+                    click: function () {
                         var $scope = $(this).closest('.ui-dialog-content');
                         var saved = widget._submitFormData(schema, $scope, dataItem);
                         if (saved) {
-                            saved.then(function() {
+                            saved.then(function () {
                                 widget._closeCurrentPopup();
                             });
                         }
@@ -547,7 +551,7 @@
                     text: Mapbender.trans('mb.actions.delete'),
                     title: Mapbender.trans('mb.data-manager.actions.delete_tooltip'),
                     'class': 'btn btn-danger',
-                    click: function() {
+                    click: function () {
                         widget._closeCurrentPopup();
                         widget.removeData(schema, dataItem);
                     }
@@ -559,7 +563,7 @@
                 text: Mapbender.trans(closeText),
                 title: Mapbender.trans(closeTooltip),
                 'class': 'btn btn-light',
-                click: function() {
+                click: function () {
                     widget._cancelForm(schema, dataItem);
                 }
             });
@@ -569,7 +573,7 @@
          * @param {DataManagerSchemaConfig} schema
          * @private
          */
-        _createItem: function(schema) {
+        _createItem: function (schema) {
             this._openEditDialog(schema, {
                 id: null,
                 schemaName: schema.schemaName,
@@ -581,7 +585,7 @@
          * @param {Object} dataItem
          * @private
          */
-        _cancelForm: function(schema, dataItem) {
+        _cancelForm: function (schema, dataItem) {
             this._closeCurrentPopup();
             // @todo Digitizer: discard geometry modifications / discard entire item if it's new
         },
@@ -589,7 +593,7 @@
          * @param {DataManagerSchemaConfig} schema
          * @return {Object}
          */
-        _getSelectRequestParams: function(schema) {
+        _getSelectRequestParams: function (schema) {
             return {
                 schema: schema.schemaName
             };
@@ -600,8 +604,8 @@
          * @param {Object} params
          * @returns {jqXHR} resolves with prepared items
          */
-        loadItems: function(params) {
-            return $.getJSON([this.elementUrl, 'select'].join(''), params);
+        loadItems: function (params) {
+            return $.getJSON(this.elementUrl + 'select', params);
         },
         /**
          * Loads data items, and replaces current table (Digitizer: and map layer contents).
@@ -612,7 +616,7 @@
          * @returns {Promise} resolves with prepared items
          * @private
          */
-        _getData: function(schema) {
+        _getData: function (schema) {
             var widget = this;
             if (this.fetchXhr) {
                 this.fetchXhr.abort();
@@ -620,21 +624,28 @@
             }
             this._closeCurrentPopup();
             this.$loadingIndicator_.css({opacity: 1});
-            this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), this.$loadingIndicator_)
+            this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), this.$loadingIndicator_);
+
+            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
+            const failListener = typeof Mapbender.handleAjaxError === 'function'
+                ? (e) => Mapbender.handleAjaxError(e, () => this._getData(schema))
+                : this._onAjaxError.bind(this);
+
             return this.fetchXhr
-                .always(function() {
+                .always(function () {
                     widget.fetchXhr = null;
                 })
-                .then(function(dataItems) {
-                    return dataItems.map(function(itemData) {
+                .then(function (dataItems) {
+                    return dataItems.map(function (itemData) {
                         return widget._prepareDataItem(itemData);
                     });
                 })
-                .then(function(preparedItems) {
+                .then(function (preparedItems) {
                     widget.tableRenderer.replaceRows(preparedItems);
                     return preparedItems;
                 })
-            ;
+                .fail(failListener)
+                ;
         },
         /**
          * Transforms data item server response data to internally used item structure.
@@ -642,7 +653,7 @@
          * @return {*}
          * @private
          */
-        _prepareDataItem: function(data) {
+        _prepareDataItem: function (data) {
             // Trivial in data-manager. Use plain object directly.
             return data;
         },
@@ -652,20 +663,20 @@
          * @param {DataManagerSchemaConfig} schema
          * @param {Object} dataItem
          */
-        removeData: function(schema, dataItem) {
+        removeData: function (schema, dataItem) {
             var widget = this;
             var id = this._getUniqueItemId(dataItem);
             if (!id) {
                 throw new Error("Can't delete item without id from server");
             }
-            this.confirmDialog(Mapbender.trans('mb.data.store.remove.confirm.text')).then(function() {
-                var params ={
+            this.confirmDialog(Mapbender.trans('mb.data.store.remove.confirm.text')).then(function () {
+                var params = {
                     schema: schema.schemaName,
                     id: id
                 };
                 widget.postJSON('delete?' + $.param(params), null, {
                     method: 'DELETE'
-                }).done(function() {
+                }, () => {
                     widget._afterRemove(schema, dataItem, id);
                 });
             });
@@ -678,7 +689,7 @@
          * @param id
          * @private
          */
-        _deleteEvent: function(schema, dataItem, id) {
+        _deleteEvent: function (schema, dataItem, id) {
             // Quirky jquery ui event. Triggers a 'mbdatamanagerremove' on this.element. Limited legacy data payload.
             this._trigger('removed', null, {
                 schema: schema,
@@ -708,7 +719,7 @@
          * @param {String} id
          * @private
          */
-        _afterRemove: function(schema, dataItem, id) {
+        _afterRemove: function (schema, dataItem, id) {
             this.tableRenderer.removeRow(dataItem);
             this._deleteEvent(schema, dataItem, id);
             $.notify(Mapbender.trans('mb.data.store.remove.successfully'), 'info');
@@ -718,7 +729,7 @@
          * @return {String}
          * @private
          */
-        _getUniqueItemIdProperty: function(schema) {
+        _getUniqueItemIdProperty: function (schema) {
             // @todo: this default should be server provided
             return this._getDataStoreFromSchema(schema).uniqueId || 'id';
         },
@@ -728,10 +739,10 @@
          * @return {(String|null)}
          * @private
          */
-        _getUniqueItemId: function(item) {
+        _getUniqueItemId: function (item) {
             return item.id || null;
         },
-        postJSON: function(uri, data, options) {
+        postJSON: function (uri, data, options, onSuccess) {
             var options_ = {
                 url: this.elementUrl + uri,
                 method: 'POST',
@@ -743,23 +754,31 @@
                 options_.data = JSON.stringify(data);
             }
             this.$loadingIndicator_.css({opacity: 1});
-            return this.decorateXhr_($.ajax(options_), this.$loadingIndicator_);
+
+            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
+            const failListener = typeof Mapbender.handleAjaxError === 'function'
+                ? (e) => Mapbender.handleAjaxError(e, () => this.postJSON(uri, data, options, onSuccess))
+                : this._onAjaxError.bind(this);
+
+            let promise = this.decorateXhr_($.ajax(options_), this.$loadingIndicator_).fail(failListener);
+            if (onSuccess) promise = promise.then(onSuccess);
+            return promise;
         },
-        decorateXhr_: function(jqXhr, $loadingIndicator) {
+        decorateXhr_: function (jqXhr, $loadingIndicator) {
             if ($loadingIndicator) {
-                jqXhr.always(function() {
+                jqXhr.always(function () {
                     $loadingIndicator.css({opacity: 0});
                 });
             }
-            jqXhr.fail(this._onAjaxError);
             return jqXhr;
         },
-        _onAjaxError: function(xhr) {
+        // TODO: this can be removed for Mapbender 5
+        _onAjaxError: function (xhr) {
             if (xhr.statusText === 'abort') {
                 return;
             }
             var errorMessage = Mapbender.trans('mb.data.store.api.query.error-message');
-            var responseErrorMessage = Mapbender.trans('mb.data.store.'+xhr.responseJSON.message);
+            var responseErrorMessage = Mapbender.trans('mb.data.store.' + xhr.responseJSON?.message);
             console.error(errorMessage, xhr);
             if (xhr.responseJSON && xhr.responseJSON.message) {
                 errorMessage = [errorMessage, responseErrorMessage].join(":\n");
@@ -768,7 +787,7 @@
                 autoHide: false
             });
         },
-        getEnabledSchemaFunctionCodes: function(schema) {
+        getEnabledSchemaFunctionCodes: function (schema) {
             var codes = ['-fn-edit-data'];
             if (schema.allowDelete) {
                 codes.push('-fn-delete');

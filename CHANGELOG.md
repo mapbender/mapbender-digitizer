@@ -1,5 +1,6 @@
 ## next bugfix release
 * Add support for DataTables version 2 ([PR#150](https://github.com/mapbender/mapbender-digitizer/pull/150))
+* Show message after asynchronous requests for expired sessions with option to retry ([PR#151](https://github.com/mapbender/mapbender-digitizer/pull/151))
 
 ## 2.0.7
 * Add file type check to form type `file` (key: `allowedFileTypes`) ([PR#147](https://github.com/mapbender/mapbender-digitizer/pull/147))

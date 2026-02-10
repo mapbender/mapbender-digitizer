@@ -29,16 +29,9 @@
             this.queuedRefresh_ = {};
             this.toolsetRenderer = this._createToolsetRenderer();
             this._super();
-            var widget = this;
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
-            $.when(Mapbender.elementRegistry.waitReady('.mb-element-map'), this.grantsRequest_).then(function(mbMap, _) {
-                widget.mbMap = mbMap;
-                widget.setup();
-                // Let data manager base method trigger "ready" event and start loading data
-                widget._start();
-                widget.registerMapEvents_();
-            });
+            // setup() called in onGrantsLoadStarted
         },
         _createTableRenderer: function() {
             return new Mapbender.Digitizer.TableRenderer(this, this.tableButtonsTemplate_);
@@ -61,6 +54,17 @@
         _afterCreate: function() {
             // Invoked only by data manager _create
             // do nothing; deliberately do NOT call parent method
+        },
+        onGrantsLoadStarted: function() {
+            $.when(Mapbender.elementRegistry.waitReady('.mb-element-map'), this.grantsRequest_)
+                .then((mbMap) => this._onMapAndGrantsLoaded(mbMap));
+        },
+        _onMapAndGrantsLoaded: function (mbMap) {
+            this.mbMap = mbMap;
+            this.setup();
+            // Let data manager base method trigger "ready" event and start loading data
+            this._start();
+            this.registerMapEvents_();
         },
         setup: function() {
             var self = this;
@@ -530,8 +534,7 @@
                 });
             }
             var widget = this;
-            var promise = this.postJSON('update-multiple', postData)
-                .then(function(response) {
+            var promise = this.postJSON('update-multiple', postData, undefined,(response) => {
                     var savedItems = response.saved;
                     for (var i = 0; i < savedItems.length; ++i) {
                         var savedItem = savedItems[i];
