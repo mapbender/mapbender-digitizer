@@ -312,7 +312,6 @@
          * @private
          */
         _saveItem: function (schema, dataItem, newValues) {
-            var self = this;
             var params = {
                 schema: schema.schemaName
             };
@@ -321,12 +320,10 @@
                 params.id = id;
             }
             var submitData = this._getSaveRequestData(schema, dataItem, newValues);
-            return this.postJSON('save?' + $.param(params), submitData)
-                .then(function (response) {
-                    self._afterSave(schema, dataItem, id, response);
-                    return response;
-                })
-                ;
+            return this.postJSON('save?' + $.param(params), submitData, undefined, (response) => {
+                this._afterSave(schema, dataItem, id, response);
+                return response;
+            });
         },
         /**
          * @param {DataManagerSchemaConfig} schema
@@ -608,7 +605,7 @@
          * @returns {jqXHR} resolves with prepared items
          */
         loadItems: function (params) {
-            return $.getJSON([this.elementUrl, 'select'].join(''), params);
+            return $.getJSON(this.elementUrl + 'select', params);
         },
         /**
          * Loads data items, and replaces current table (Digitizer: and map layer contents).
@@ -627,7 +624,13 @@
             }
             this._closeCurrentPopup();
             this.$loadingIndicator_.css({opacity: 1});
-            this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), this.$loadingIndicator_)
+            this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), this.$loadingIndicator_);
+
+            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
+            const failListener = typeof Mapbender.handleAjaxError === 'function'
+                ? (e) => Mapbender.handleAjaxError(e, () => this._getData(schema))
+                : this._onAjaxError.bind(this);
+
             return this.fetchXhr
                 .always(function () {
                     widget.fetchXhr = null;
@@ -641,6 +644,7 @@
                     widget.tableRenderer.replaceRows(preparedItems);
                     return preparedItems;
                 })
+                .fail(failListener)
                 ;
         },
         /**
@@ -672,7 +676,7 @@
                 };
                 widget.postJSON('delete?' + $.param(params), null, {
                     method: 'DELETE'
-                }).done(function () {
+                }, () => {
                     widget._afterRemove(schema, dataItem, id);
                 });
             });
@@ -738,7 +742,7 @@
         _getUniqueItemId: function (item) {
             return item.id || null;
         },
-        postJSON: function (uri, data, options) {
+        postJSON: function (uri, data, options, onSuccess) {
             var options_ = {
                 url: this.elementUrl + uri,
                 method: 'POST',
@@ -750,7 +754,15 @@
                 options_.data = JSON.stringify(data);
             }
             this.$loadingIndicator_.css({opacity: 1});
-            return this.decorateXhr_($.ajax(options_), this.$loadingIndicator_);
+
+            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
+            const failListener = typeof Mapbender.handleAjaxError === 'function'
+                ? (e) => Mapbender.handleAjaxError(e, () => this.postJSON(uri, data, options, onSuccess))
+                : this._onAjaxError.bind(this);
+
+            let promise = this.decorateXhr_($.ajax(options_), this.$loadingIndicator_).fail(failListener);
+            if (onSuccess) promise = promise.then(onSuccess);
+            return promise;
         },
         decorateXhr_: function (jqXhr, $loadingIndicator) {
             if ($loadingIndicator) {
@@ -758,7 +770,6 @@
                     $loadingIndicator.css({opacity: 0});
                 });
             }
-            jqXhr.fail(this._onAjaxError);
             return jqXhr;
         },
         // TODO: this can be removed for Mapbender 5

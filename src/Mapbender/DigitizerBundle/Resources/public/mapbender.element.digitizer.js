@@ -534,8 +534,7 @@
                 });
             }
             var widget = this;
-            var promise = this.postJSON('update-multiple', postData)
-                .then(function(response) {
+            var promise = this.postJSON('update-multiple', postData, undefined,(response) => {
                     var savedItems = response.saved;
                     for (var i = 0; i < savedItems.length; ++i) {
                         var savedItem = savedItems[i];
