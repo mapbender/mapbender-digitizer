@@ -482,6 +482,11 @@
                 .attr('name', settings.name || null)
                 .addClass('form-control')
             ;
+            var digitizer = $('.mb-element-digitizer').data('mapbenderMbDigitizer');
+            var regexPattern = (settings.hasOwnProperty('pattern')) ? settings.pattern : digitizer.options.regexPattern;
+            if (!$input.attr('pattern')) {
+                $input.attr('pattern', regexPattern);
+            }
             if (settings.value) {
                 $input.val(settings.value);
             }

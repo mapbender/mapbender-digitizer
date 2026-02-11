@@ -7,6 +7,7 @@ mb.data.store:
   api.query.error-message: Błąd
   api.query.error-notloggedin: "Proszę się zalogować"
   api.query.error-database: "Nie można nawiązać połączenia z bazą danych. Sprawdź konfigurację w 'featureType'"
+  api.query.error-invalid-data: 'Invalid input'
 
 mb.data-manager.table:
   filter: Filtr

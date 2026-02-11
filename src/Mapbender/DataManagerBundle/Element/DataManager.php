@@ -51,6 +51,7 @@ class DataManager extends AbstractElementService
     {
         return array(
             'schemes' => null,
+            'regexPattern' => '^[a-zA-Z0-9_\-\s]*$',
         );
     }
 

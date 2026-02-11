@@ -7,6 +7,7 @@ mb.data.store:
   api.query.error-message: Erro
   api.query.error-notloggedin: Por favor, faça login
   api.query.error-database:  Não foi possível conectar ao banco de dados. Verifique a configuração em 'featureType'
+  api.query.error-invalid-data: 'Entrada inválida'
 
 mb.data-manager.table:
   filter: Filtrar
