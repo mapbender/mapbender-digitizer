@@ -204,7 +204,7 @@ class HttpHandler implements ElementHttpHandlerInterface
             } else {
                 if (array_key_exists('name', $formItem)) {
                     $pattern = (array_key_exists('pattern', $formItem)) ? $formItem['pattern'] : $regexPattern;
-                    if (!preg_match('/' . $pattern . '/', $formItem['name'])) {
+                    if (!preg_match('/' . $pattern . '/u', $formItem['name'])) {
                         throw new BadRequestHttpException('api.query.error-invalid-data');
                     }
                 }
