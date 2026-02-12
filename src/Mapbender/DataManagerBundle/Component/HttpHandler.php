@@ -175,7 +175,7 @@ class HttpHandler implements ElementHttpHandlerInterface
             // store new item
             $dataItem = $schema->getRepository()->itemFactory();
         }
-        $this->validateInputData($element->getConfiguration(), $schema->config);
+        $this->validateInputData($element->getConfiguration(), $schema->config, $requestData);
         $itemOut = $this->saveItem($schema, $dataItem, $requestData);
         return array(
             'dataItem' => $this->formatResponseItem($schema, $itemOut),
@@ -190,21 +190,21 @@ class HttpHandler implements ElementHttpHandlerInterface
         return $schema->getRepository()->save($item);
     }
 
-    protected function validateInputData($elementConfig, $schemaConfig)
+    protected function validateInputData($elementConfig, $schemaConfig, $requestData)
     {
         $regexPattern = $elementConfig['regexPattern'];
-        $this->iterateFormItems($schemaConfig['formItems'], $regexPattern);
+        $this->iterateFormItems($schemaConfig['formItems'], $regexPattern, $requestData);
     }
 
-    protected function iterateFormItems($formItems, $regexPattern)
+    protected function iterateFormItems($formItems, $regexPattern, $requestData)
     {
         foreach ($formItems as $formItem) {
             if (array_key_exists('children', $formItem)) {
-                $this->iterateFormItems($formItem['children'], $regexPattern);
+                $this->iterateFormItems($formItem['children'], $regexPattern, $requestData);
             } else {
-                if (array_key_exists('name', $formItem)) {
+                if (array_key_exists('name', $formItem) && !empty($requestData['properties'][$formItem['name']])) {
                     $pattern = (array_key_exists('pattern', $formItem)) ? $formItem['pattern'] : $regexPattern;
-                    if (!preg_match('/' . $pattern . '/u', $formItem['name'])) {
+                    if (!preg_match('/' . $pattern . '/u', $requestData['properties'][$formItem['name']])) {
                         throw new BadRequestHttpException('api.query.error-invalid-data');
                     }
                 }
