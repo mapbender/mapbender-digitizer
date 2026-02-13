@@ -7,6 +7,7 @@ mb.data.store:
   api.query.error-message: Hata
   api.query.error-notloggedin: "Lütfen giriş yapın"
   api.query.error-database: "Veritabanına bağlantı kurulamadı. 'featureType' içindeki yapılandırmayı kontrol edin"
+  api.query.error-invalid-data: 'Geçersiz giriş'
 
 mb.data-manager.table:
   filter: Filtre

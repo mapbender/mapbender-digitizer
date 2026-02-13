@@ -7,6 +7,7 @@ mb.data.store:
   api.query.error-message: Помилка
   api.query.error-notloggedin: "Будь ласка, увійдіть в систему"
   api.query.error-database: "Не вдалося встановити з'єднання з базою даних. Перевірте конфігурацію в 'featureType'"
+  api.query.error-invalid-data: 'Неправильний ввід'
 
 mb.data-manager.table:
   filter: Фільтр
