@@ -203,7 +203,7 @@ class HttpHandler implements ElementHttpHandlerInterface
                 $this->iterateFormItems($formItem['children'], $regexPattern, $requestData);
             } else {
                 if (array_key_exists('name', $formItem) && !empty($requestData['properties'][$formItem['name']])) {
-                    $pattern = (array_key_exists('pattern', $formItem)) ? $formItem['pattern'] : $regexPattern;
+                    $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $regexPattern;
                     if (!preg_match('/' . $pattern . '/u', $requestData['properties'][$formItem['name']])) {
                         throw new BadRequestHttpException('api.query.error-invalid-data');
                     }
