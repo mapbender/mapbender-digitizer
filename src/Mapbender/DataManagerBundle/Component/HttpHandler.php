@@ -192,18 +192,18 @@ class HttpHandler implements ElementHttpHandlerInterface
 
     protected function validateInputData($elementConfig, $schemaConfig, $requestData)
     {
-        $regexPattern = $elementConfig['regexPattern'];
-        $this->iterateFormItems($schemaConfig['formItems'], $regexPattern, $requestData);
+        $pattern = $elementConfig['pattern'];
+        $this->iterateFormItems($schemaConfig['formItems'], $pattern, $requestData);
     }
 
-    protected function iterateFormItems($formItems, $regexPattern, $requestData)
+    protected function iterateFormItems($formItems, $pattern, $requestData)
     {
         foreach ($formItems as $formItem) {
             if (array_key_exists('children', $formItem)) {
-                $this->iterateFormItems($formItem['children'], $regexPattern, $requestData);
+                $this->iterateFormItems($formItem['children'], $pattern, $requestData);
             } else {
                 if (array_key_exists('name', $formItem) && !empty($requestData['properties'][$formItem['name']])) {
-                    $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $regexPattern;
+                    $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $pattern;
                     if (!preg_match('/' . $pattern . '/u', $requestData['properties'][$formItem['name']])) {
                         throw new BadRequestHttpException('api.query.error-invalid-data');
                     }
