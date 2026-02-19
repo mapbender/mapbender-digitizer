@@ -38,25 +38,7 @@
                     .addClass('clearfix')
                     .prepend(this.$loadingIndicator_.css({ float: 'right', opacity: 0.0 }));
             }
-            const self = this;
-            this.grantsRequest_ = $.getJSON([this.elementUrl, 'grants'].join(''));
-            this.grantsRequest_.then((function(mergeWith) {
-                return function(allGrants) {
-                    const schemaNames = Object.keys(allGrants);
-                    for (let i = 0; i < schemaNames.length; ++i) {
-                        const schemaName = schemaNames[i];
-                        if (allGrants[schemaName] === false) {
-                            delete mergeWith[schemaName];
-                        } else {
-                            Object.assign(mergeWith[schemaName], allGrants[schemaName]);
-                        }
-                    }
-                };
-            })(this.options.schemes)).catch(this._onAjaxError.bind(this));
-
-            this.grantsRequest_.then(function() {
-                self.updateSchemaSelector_();
-            });
+            this._loadGrants();
             this.tableButtonsTemplate_ = $('.-tpl-table-buttons', this.$element).remove().css('display', '').html();
             this.toolsetTemplate_ = $('.-tpl-toolset', this.$element).remove().css('display', '').html();
             this.expressionEvaluator_ = this._createExpressionEvaluator();
@@ -76,6 +58,33 @@
             this.tableRenderer = this._createTableRenderer();
             this._initializeEvents();
             this._afterCreate();
+        }
+
+        _loadGrants() {
+            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
+            const failListener = typeof Mapbender.handleAjaxError === 'function'
+                ? (e) => Mapbender.handleAjaxError(e, () => this._loadGrants())
+                : this._onAjaxError.bind(this);
+
+            this.grantsRequest_ = $.getJSON(this.elementUrl + 'grants')
+                .then((mergeWith => allGrants => {
+                    const schemaNames = Object.keys(allGrants);
+                    for (let schemaName of schemaNames) {
+                        if (allGrants[schemaName] === false) {
+                            delete mergeWith[schemaName];
+                        } else {
+                            Object.assign(mergeWith[schemaName], allGrants[schemaName]);
+                        }
+                    }
+                })(this.options.schemes))
+                .fail(failListener)
+                .then(() => this.updateSchemaSelector_())
+            ;
+            this.onGrantsLoadStarted();
+        }
+
+        onGrantsLoadStarted() {
+            // do nothing, can be overridden by digitizer
         }
 
         _createFormRenderer() {
@@ -212,7 +221,7 @@
             if (this.useDialog_) {
                 // Use parent class method to handle popup
                 super.activateByButton(callback, mbButton);
-                
+
                 // Trigger initial data load if not already loaded
                 if (!this.currentSettings) {
                     this._onSchemaSelectorChange();
@@ -338,7 +347,6 @@
          * @private
          */
         _saveItem(schema, dataItem, newValues) {
-            const self = this;
             const params = {
                 schema: schema.schemaName
             };
@@ -347,12 +355,10 @@
                 params.id = id;
             }
             const submitData = this._getSaveRequestData(schema, dataItem, newValues);
-            return this.postJSON('save?' + $.param(params), submitData)
-                .then(function(response) {
-                    self._afterSave(schema, dataItem, id, response);
-                    return response;
-                })
-            ;
+            return this.postJSON('save?' + $.param(params), submitData, undefined, (response) => {
+                this._afterSave(schema, dataItem, id, response);
+                return response;
+            });
         }
 
         /**
@@ -532,23 +538,23 @@
         _getEditDialogPopupConfig(schema, dataItem) {
             const minWidth = 550;
             let width = schema.popup.width;
-            
+
             // parseInt handles both "550" and "550px" correctly, returns NaN for invalid values
             const widthNum = parseInt(width, 10);
-            
+
             // Use minimum width if not specified, invalid, or too small
             if (!width || isNaN(widthNum) || widthNum < minWidth) {
                 width = minWidth;
             } else if (typeof width === 'string') {
                 width = widthNum;
             }
-            
+
             let title = schema.popup.title || Mapbender.trans('mb.data-manager.details_title');
-            
+
             // Support dynamic title expressions (function, data reference, or template literal)
             const itemData = this._getItemData(dataItem);
             title = this.expressionEvaluator_.evaluateIfDynamic(title, itemData);
-            
+
             return {
                 modal: schema.popup.modal || false,
                 title: title,
@@ -569,10 +575,10 @@
         _getEditDialogButtons(schema, dataItem, overrideAllowSave) {
             const buttons = [];
             const widget = this;
-            
+
             // Check if form has any editable fields
             const hasEditableFields = this.formRenderer_.hasEditableFields(schema.formItems || []);
-            
+
             // Only show save button if allowed AND form has editable fields
             if ((schema.allowEdit || overrideAllowSave) && hasEditableFields) {
                 buttons.push({
@@ -642,7 +648,7 @@
          * @returns {jqXHR} resolves with prepared items
          */
         loadItems(params) {
-            return $.getJSON([this.elementUrl, 'select'].join(''), params);
+            return $.getJSON(this.elementUrl + 'select', params);
         }
 
         /**
@@ -663,19 +669,27 @@
             this._closeCurrentPopup();
             this.$loadingIndicator_.css({ opacity: 1 });
             this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), this.$loadingIndicator_);
+
+            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
+            const failListener = typeof Mapbender.handleAjaxError === 'function'
+                ? (e) => Mapbender.handleAjaxError(e, () => this._getData(schema))
+                : this._onAjaxError.bind(this);
+
             return this.fetchXhr
-                .always(function() {
+                .always(function () {
                     widget.fetchXhr = null;
                 })
-                .then(function(dataItems) {
-                    return dataItems.map(function(itemData) {
+                .then(function (dataItems) {
+                    return dataItems.map(function (itemData) {
                         return widget._prepareDataItem(itemData);
                     });
                 })
-                .then(function(preparedItems) {
+                .then(function (preparedItems) {
                     widget.tableRenderer.replaceRows(preparedItems);
                     return preparedItems;
-                });
+                })
+                .fail(failListener)
+                ;
         }
 
         /**
@@ -708,7 +722,7 @@
                 };
                 widget.postJSON('delete?' + $.param(params), null, {
                     method: 'DELETE'
-                }).done(function() {
+                }, () => {
                     widget._afterRemove(schema, dataItem, id);
                 });
             });
@@ -777,7 +791,7 @@
             return item.id || null;
         }
 
-        postJSON(uri, data, options) {
+        postJSON(uri, data, options, onSuccess) {
             const options_ = {
                 url: this.elementUrl + uri,
                 method: 'POST',
@@ -789,7 +803,15 @@
                 options_.data = JSON.stringify(data);
             }
             this.$loadingIndicator_.css({ opacity: 1 });
-            return this.decorateXhr_($.ajax(options_), this.$loadingIndicator_);
+
+            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
+            const failListener = typeof Mapbender.handleAjaxError === 'function'
+                ? (e) => Mapbender.handleAjaxError(e, () => this.postJSON(uri, data, options, onSuccess))
+                : this._onAjaxError.bind(this);
+
+            let promise = this.decorateXhr_($.ajax(options_), this.$loadingIndicator_).fail(failListener);
+            if (onSuccess) promise = promise.then(onSuccess);
+            return promise;
         }
 
         decorateXhr_(jqXhr, $loadingIndicator) {

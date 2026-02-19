@@ -26,13 +26,20 @@
             this.toolsetRenderer = this._createToolsetRenderer();
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
-            $.when(Mapbender.elementRegistry.waitReady('.mb-element-map'), this.grantsRequest_).then((mbMap, _) => {
-                this.mbMap = mbMap;
-                this.setup();
-                // Let data manager base method trigger "ready" event and start loading data
-                this._start();
-                this.registerMapEvents_();
-            });
+            // setup() called in onGrantsLoadStarted
+        }
+
+        onGrantsLoadStarted() {
+            $.when(Mapbender.elementRegistry.waitReady('.mb-element-map'), this.grantsRequest_)
+                .then((mbMap) => this._onMapAndGrantsLoaded(mbMap));
+        }
+
+        _onMapAndGrantsLoaded(mbMap) {
+            this.mbMap = mbMap;
+            this.setup();
+            // Let data manager base method trigger "ready" event and start loading data
+            this._start();
+            this.registerMapEvents_();
         }
 
         _createTableRenderer() {
@@ -147,7 +154,7 @@
             if (this.useDialog_) {
                 // Let parent handle popup creation
                 super.activateByButton(callback, mbButton);
-                
+
                 // Activate digitizer functionality
                 this.activate();
             } else {
@@ -605,8 +612,7 @@
                 });
             }
             const widget = this;
-            const promise = this.postJSON ? this.postJSON('update-multiple', postData)
-                .then(function(response) {
+            const promise = this.postJSON ? this.postJSON('update-multiple', postData, undefined, (response) => {
                     const savedItems = response.saved;
                     for (let i = 0; i < savedItems.length; ++i) {
                         const savedItem = savedItems[i];

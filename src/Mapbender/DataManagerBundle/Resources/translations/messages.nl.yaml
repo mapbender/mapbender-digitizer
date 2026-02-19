@@ -7,6 +7,7 @@ mb.data.store:
   api.query.error-message: Fout
   api.query.error-notloggedin: "Graag inloggen"
   api.query.error-database: "Verbinding met de database kon niet worden gemaakt. Controleer de configuratie in 'featureType'"
+  api.query.error-invalid-data: 'Ongeldige invoer'
 
 mb.data-manager.table:
   filter: Filter

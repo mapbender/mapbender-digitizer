@@ -167,7 +167,6 @@ class HttpHandler implements ElementHttpHandlerInterface
         $schemaName = $request->query->get('schema');
         /** @var ItemSchema $schema */
         $schema = $this->schemaFilter->getSchema($element, $schemaName);
-
         $requestData = json_decode($request->getContent(), true);
         if ($itemId) {
             // update existing item
@@ -176,6 +175,7 @@ class HttpHandler implements ElementHttpHandlerInterface
             // store new item
             $dataItem = $schema->getRepository()->itemFactory();
         }
+        $this->validateInputData($element->getConfiguration(), $schema->config, $requestData);
         $itemOut = $this->saveItem($schema, $dataItem, $requestData);
         return array(
             'dataItem' => $this->formatResponseItem($schema, $itemOut),
@@ -188,6 +188,28 @@ class HttpHandler implements ElementHttpHandlerInterface
         $userData = $this->userFilterProvider->getStorageValues($schema, $item);
         $item->setAttributes($userData);
         return $schema->getRepository()->save($item);
+    }
+
+    protected function validateInputData($elementConfig, $schemaConfig, $requestData)
+    {
+        $pattern = $elementConfig['pattern'];
+        $this->iterateFormItems($schemaConfig['formItems'], $pattern, $requestData);
+    }
+
+    protected function iterateFormItems($formItems, $pattern, $requestData)
+    {
+        foreach ($formItems as $formItem) {
+            if (array_key_exists('children', $formItem)) {
+                $this->iterateFormItems($formItem['children'], $pattern, $requestData);
+            } else {
+                if (array_key_exists('name', $formItem) && !empty($requestData['properties'][$formItem['name']])) {
+                    $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $pattern;
+                    if (!preg_match('/' . $pattern . '/u', $requestData['properties'][$formItem['name']])) {
+                        throw new BadRequestHttpException('api.query.error-invalid-data');
+                    }
+                }
+            }
+        }
     }
 
     /**

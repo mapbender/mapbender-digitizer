@@ -7,6 +7,7 @@ mb.data.store:
   api.query.error-message: Error
   api.query.error-notloggedin: "Por favor, inicia sesión"
   api.query.error-database: "No se ha podido establecer la conexión con la base de datos. Compruebe la configuración en 'featureType'."
+  api.query.error-invalid-data: 'Entrada no válida'
 
 mb.data-manager.table:
   filter: Filtro
