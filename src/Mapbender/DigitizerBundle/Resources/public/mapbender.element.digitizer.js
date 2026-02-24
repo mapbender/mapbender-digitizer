@@ -773,14 +773,20 @@
                 sourceIds = [sourceIds];
             }
             for (var i = 0; i < sourceIds.length; ++i) {
-                var source = this.mbMap.getModel().getSourceById(sourceIds[i]);
+                const model = this.mbMap.getModel();
+                // TODO v5: remove check. model.getSourceBySourceId is available since Mapbender 4.2.5
+                let source = typeof model.getSourceBySourceId === 'function'
+                    ? model.getSourceBySourceId(sourceIds[i])
+                    : model.getSourceById(sourceIds[i]);
+
                 if (!source) {
-                    if (!this.mbMap.getModel().findSourceAndLayerIdByName) {
+                    // TODO v5: remove fallback.
+                    if (!model.findSourceAndLayerIdByName) {
                         console.warn("Method findSourceAndLayerIdByName not available - consider Mapbender upgrade");
                     } else {
-                        let ids = this.mbMap.getModel().findSourceAndLayerIdByName(sourceIds[i]);
+                        let ids = model.findSourceAndLayerIdByName(sourceIds[i]);
                         let sourceId = ids.sourceId;
-                        source = sourceId && this.mbMap.getModel().getSourceById(sourceId);
+                        source = sourceId && model.getSourceById(sourceId);
                     }
                 }
                 if (source) {
