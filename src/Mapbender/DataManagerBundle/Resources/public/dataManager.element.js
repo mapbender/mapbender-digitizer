@@ -95,29 +95,24 @@
             this._afterCreate();
         },
         _loadGrants: function () {
-            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
-            const failListener = typeof Mapbender.handleAjaxError === 'function'
-                ? (e) => Mapbender.handleAjaxError(e, () => this._loadGrants())
-                : this._onAjaxError.bind(this);
-
             this.grantsRequest_ = $.getJSON(this.elementUrl + 'grants')
-                .then((mergeWith => allGrants => {
+                .then((allGrants) => {
                     const schemaNames = Object.keys(allGrants);
                     for (let schemaName of schemaNames) {
                         if (allGrants[schemaName] === false) {
-                            delete mergeWith[schemaName];
+                            delete this.options.schemes[schemaName];
                         } else {
-                            Object.assign(mergeWith[schemaName], allGrants[schemaName]);
+                            Object.assign(this.options.schemes[schemaName], allGrants[schemaName]);
                         }
                     }
-                })(this.options.schemes))
-                .fail(failListener)
+                })
+                .fail(this._createFailListener(() => this._loadGrants()))
                 .then(() => this.updateSchemaSelector_())
             ;
             this.onGrantsLoadStarted();
         },
-        onGrantsLoadStarted: function() {
-            // do nothing, can be overridden by digitizer
+        onGrantsLoadStarted: function () {
+            // do nothing, can be overridden by subclasses
         },
         _createFormRenderer: function () {
             return new Mapbender.DataManager.FormRenderer();
@@ -626,10 +621,7 @@
             this.$loadingIndicator_.css({opacity: 1});
             this.fetchXhr = this.decorateXhr_(this.loadItems(this._getSelectRequestParams(schema)), this.$loadingIndicator_);
 
-            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
-            const failListener = typeof Mapbender.handleAjaxError === 'function'
-                ? (e) => Mapbender.handleAjaxError(e, () => this._getData(schema))
-                : this._onAjaxError.bind(this);
+            const failListener = this._createFailListener(() => this._getData(schema));
 
             return this.fetchXhr
                 .always(function () {
@@ -755,10 +747,7 @@
             }
             this.$loadingIndicator_.css({opacity: 1});
 
-            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
-            const failListener = typeof Mapbender.handleAjaxError === 'function'
-                ? (e) => Mapbender.handleAjaxError(e, () => this.postJSON(uri, data, options, onSuccess))
-                : this._onAjaxError.bind(this);
+            const failListener = this._createFailListener(() => this.postJSON(uri, data, options, onSuccess));
 
             let promise = this.decorateXhr_($.ajax(options_), this.$loadingIndicator_).fail(failListener);
             if (onSuccess) promise = promise.then(onSuccess);
@@ -771,6 +760,13 @@
                 });
             }
             return jqXhr;
+        },
+        // TODO: this can be removed for Mapbender 5
+        _createFailListener: function (retryCallback) {
+            // Mapbender.handleAjaxError only exists in Mapbender >= 4.2.5
+            return typeof Mapbender.handleAjaxError === 'function'
+                ? (e) => Mapbender.handleAjaxError(e, retryCallback)
+                : this._onAjaxError.bind(this);
         },
         // TODO: this can be removed for Mapbender 5
         _onAjaxError: function (xhr) {
