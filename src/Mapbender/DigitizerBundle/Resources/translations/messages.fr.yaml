@@ -1,13 +1,13 @@
 mb.digitizer:
     actions:
-      show_details: Afficher les détails
-      cancel: Annuler
-      close: Fermer
-      delete: Supprimer
-      save: Enregistrer
+        show_details: Afficher les détails
+        cancel: Annuler
+        close: Fermer
+        delete: Supprimer
+        save: Enregistrer
     class:
-      title: Digitizer
-      description: Géoréférencement et numérisation
+        title: Digitizer
+        description: Géoréférencement et numérisation
     edit.attributes: Modifier les attributs
     edit.geometry: Modifier la géométrie
     revert.geometry: Annuler les modifications de géométrie
@@ -48,6 +48,28 @@ mb.digitizer:
         fillColor: Couleur de remplissage
         color: Couleur
         opacity: Opacité
+        pointRadius: Rayon du point (pixels)
+        strokeColor: Couleur du trait
+        strokeWidth: Largeur du trait
+        lineCap: Terminaison de ligne
+        round: arrondi
+        square: carré
+        butt: plat
+        strokeDashstyle: Style de trait
+        solid: continu
+        dot: pointillé
+        dash: tiret
+        longdash: tiret long
+        dashdot: tiret-point
+        longdashdot: tiret long-point
+        label: Étiquette
+        fontFamily: Police
+        fontColor: Couleur du texte
+        fontSize: Taille de police
+        fontWeight: Graisse de police
+        regular: normal
+        bold: gras
+        italic: italique
         preview: 'Aperçu'
     userStyle:
         name: 'Nom du style'
@@ -72,3 +94,8 @@ mb.digitizer:
         searchByColor: 'Filtre couleur'
         clearColorFilter: 'Effacer le filtre couleur'
         filterMyStylesOnly: 'Uniquement mes styles'
+        featureNotConfigured: 'La fonction de style utilisateur n''est pas configurée'
+        invalidJsonPayload: 'Données JSON invalides'
+        nameAndConfigRequired: 'Le nom et la configuration du style sont requis'
+        notFoundOrNotAuthorized: 'Style introuvable ou non autorisé'
+        idRequired: 'L''ID du style est requis'

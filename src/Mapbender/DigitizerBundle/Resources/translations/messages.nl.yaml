@@ -1,13 +1,13 @@
 mb.digitizer:
     actions:
-      show_details: Details tonen
-      cancel: Annuleren
-      close: Sluiten
-      delete: Verwijderen
-      save: Opslaan
+        show_details: Details tonen
+        cancel: Annuleren
+        close: Sluiten
+        delete: Verwijderen
+        save: Opslaan
     class:
-      title: Digitizer
-      description: Georeferentie en digitalisering
+        title: Digitizer
+        description: Georeferentie en digitalisering
     edit.attributes: Attributen bewerken
     edit.geometry: Geometrie bewerken
     revert.geometry: Geometriewijzigingen ongedaan maken
@@ -48,6 +48,28 @@ mb.digitizer:
         fillColor: Vulkleur
         color: Kleur
         opacity: Transparantie
+        pointRadius: Puntgrootte (pixels)
+        strokeColor: Lijnkleur
+        strokeWidth: Lijndikte
+        lineCap: Lijneinde
+        round: afgerond
+        square: vierkant
+        butt: vlak
+        strokeDashstyle: Lijnpatroon
+        solid: doorgetrokken
+        dot: gestippeld
+        dash: gestreept
+        longdash: lang gestreept
+        dashdot: streep-punt
+        longdashdot: lang streep-punt
+        label: Label
+        fontFamily: Lettertype
+        fontColor: Tekstkleur
+        fontSize: Lettergrootte
+        fontWeight: Letterdikte
+        regular: normaal
+        bold: vet
+        italic: cursief
         preview: 'Voorbeeld'
     userStyle:
         name: 'Stijlnaam'
@@ -72,3 +94,8 @@ mb.digitizer:
         searchByColor: 'Kleurfilter'
         clearColorFilter: 'Kleurfilter wissen'
         filterMyStylesOnly: 'Alleen mijn stijlen'
+        featureNotConfigured: 'Gebruikersstijl functie is niet geconfigureerd'
+        invalidJsonPayload: 'Ongeldige JSON-gegevens'
+        nameAndConfigRequired: 'Naam en stijlconfiguratie zijn vereist'
+        notFoundOrNotAuthorized: 'Stijl niet gevonden of niet geautoriseerd'
+        idRequired: 'Stijl-ID is vereist'

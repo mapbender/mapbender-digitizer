@@ -1,16 +1,17 @@
 mb.digitizer:
     actions:
-      show_details: Mostrar detalles
-      cancel: Cancelar
-      close: Cerrar
-      delete: Borrar
-      save: Guardar
+        show_details: Mostrar detalles
+        cancel: Cancelar
+        close: Cerrar
+        delete: Borrar
+        save: Guardar
     class:
-      title: Digitalizador de datos
-      description: Georreferenciación y digitalización de datos
+        title: Digitalizador de datos
+        description: Georreferenciación y digitalización de datos
     edit.attributes: Editar atributos
     edit.geometry: Editar geometrías
     revert.geometry: Revertir los cambios en la geometría
+    intersection.error: Auto-intersección en la geometría no permitida
     feature:
         remove:
             title: 'Eliminar'
@@ -20,12 +21,12 @@ mb.digitizer:
             title: 'Guardar'
         print: 'Imprimir'
         print_tooltip: 'Imprimir objeto'
-        style:
-            change: 'Cambiar el estilo'
-            change_tooltip: 'Cambiar la apariencia del objeto'
         clone:
             title: 'Duplicar'
             tooltip: 'Crear una copia de este objeto'
+        style:
+            change: 'Cambiar el estilo'
+            change_tooltip: 'Cambiar la apariencia del objeto'
         visibility:
             toggleoff: 'Ocultar objeto'
             toggleon: 'Mostrar objeto'
@@ -93,3 +94,8 @@ mb.digitizer:
         searchByColor: 'Filtro de color'
         clearColorFilter: 'Limpiar filtro de color'
         filterMyStylesOnly: 'Solo mis estilos'
+        featureNotConfigured: 'La función de estilo de usuario no está configurada'
+        invalidJsonPayload: 'Datos JSON no válidos'
+        nameAndConfigRequired: 'Se requiere nombre y configuración de estilo'
+        notFoundOrNotAuthorized: 'Estilo no encontrado o no autorizado'
+        idRequired: 'Se requiere el ID del estilo'

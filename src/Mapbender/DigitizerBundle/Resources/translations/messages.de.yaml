@@ -1,13 +1,13 @@
 mb.digitizer:
     actions:
-      show_details: Details anzeigen
-      cancel: Abbrechen
-      close: Schließen
-      delete: Löschen
-      save: Speichern
+        show_details: Details anzeigen
+        cancel: Abbrechen
+        close: Schließen
+        delete: Löschen
+        save: Speichern
     class:
-      title: Datenerfassung (Digitizer)
-      description: Datenerfassung und Bearbeitung
+        title: Datenerfassung (Digitizer)
+        description: Datenerfassung und Bearbeitung
     edit.attributes: Sachdaten bearbeiten
     edit.geometry: Geometrie bearbeiten
     revert.geometry: Geometrieänderung zurücknehmen
@@ -21,12 +21,12 @@ mb.digitizer:
             title: 'Speichern'
         print: 'Druck'
         print_tooltip: 'Objekt drucken'
-        style:
-            change: 'Stil ändern'
-            change_tooltip: 'Darstellung des Objekts ändern'
         clone:
             title: 'Duplizieren'
             tooltip: 'Eine Kopie des Objekts erstellen'
+        style:
+            change: 'Stil ändern'
+            change_tooltip: 'Darstellung des Objekts ändern'
         visibility:
             toggleoff: 'Objekt ausblenden'
             toggleon: 'Objekt einblenden'
@@ -94,3 +94,8 @@ mb.digitizer:
         searchByColor: 'Farbfilter'
         clearColorFilter: 'Farbfilter löschen'
         filterMyStylesOnly: 'Nur meine Styles anzeigen'
+        featureNotConfigured: 'Benutzerstil-Funktion ist nicht konfiguriert'
+        invalidJsonPayload: 'Ungültige JSON-Daten'
+        nameAndConfigRequired: 'Name und Style-Konfiguration sind erforderlich'
+        notFoundOrNotAuthorized: 'Style nicht gefunden oder nicht berechtigt'
+        idRequired: 'Style-ID ist erforderlich'

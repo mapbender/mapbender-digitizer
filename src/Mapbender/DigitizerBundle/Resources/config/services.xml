@@ -28,7 +28,8 @@
             <argument type="service" id="mb.digitizer.schema_filter" />
             <argument type="service" id="mb.digitizer.user_filter_provider" />
             <argument type="service" id="mb.digitizer.user_style_repository" />
-            <argument type="service" id="security.token_storage" />
+            <argument type="service" id="security.helper" />
+            <argument type="service" id="translator" />
         </service>
         <service id="mapbender.element.Digitizer" class="Mapbender\DigitizerBundle\Element\Digitizer">
             <tag name="mapbender.element" />

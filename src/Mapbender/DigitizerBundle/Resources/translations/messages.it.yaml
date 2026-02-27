@@ -1,16 +1,17 @@
 mb.digitizer:
     actions:
-      show_details: Mostra dettagli
-      cancel: Cancella
-      close: Chiudi
-      delete: Elimina
-      save: Salva
+        show_details: Mostra dettagli
+        cancel: Cancella
+        close: Chiudi
+        delete: Elimina
+        save: Salva
     class:
-      title: Acquisizione dati (Digitizer)
-      description: Acquisizione e modifica dati
+        title: Acquisizione dati (Digitizer)
+        description: Acquisizione e modifica dati
     edit.attributes: Modifica attributi
     edit.geometry: Modifica geometria
     revert.geometry: Annulla modifica geometria
+    intersection.error: Auto-intersezione nella geometria non consentita
     feature:
         remove:
             title: 'Rimuovi'
@@ -20,12 +21,12 @@ mb.digitizer:
             title: 'Salva'
         print: 'Stampa'
         print_tooltip: 'Stampa oggetto'
-        style:
-            change: 'Cambia stile'
-            change_tooltip: 'Cambia aspetto dell''oggetto'
         clone:
             title: 'Clona'
             tooltip: 'Crea una copia di questo oggetto'
+        style:
+            change: 'Cambia stile'
+            change_tooltip: 'Cambia aspetto dell''oggetto'
         visibility:
             toggleoff: 'Nascondi oggetto'
             toggleon: 'Mostra oggetto'
@@ -93,3 +94,8 @@ mb.digitizer:
         searchByColor: 'Filtro colore'
         clearColorFilter: 'Cancella filtro colore'
         filterMyStylesOnly: 'Solo i miei stili'
+        featureNotConfigured: 'La funzione stile utente non è configurata'
+        invalidJsonPayload: 'Dati JSON non validi'
+        nameAndConfigRequired: 'Nome e configurazione dello stile sono obbligatori'
+        notFoundOrNotAuthorized: 'Stile non trovato o non autorizzato'
+        idRequired: 'L''ID dello stile è obbligatorio'

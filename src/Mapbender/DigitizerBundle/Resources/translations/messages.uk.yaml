@@ -1,13 +1,13 @@
 mb.digitizer:
     actions:
-      show_details: Показати деталі
-      cancel: Скасувати
-      close: Закрити
-      delete: Видалити
-      save: Зберегти
+        show_details: Показати деталі
+        cancel: Скасувати
+        close: Закрити
+        delete: Видалити
+        save: Зберегти
     class:
-      title: Digitizer
-      description: Геореференція та цифровізація
+        title: Digitizer
+        description: Геореференція та цифровізація
     edit.attributes: Редагувати атрибути
     edit.geometry: Редагувати геометрію
     revert.geometry: Скасувати зміни геометрії
@@ -48,6 +48,28 @@ mb.digitizer:
         fillColor: Колір заливки
         color: Колір
         opacity: Прозорість
+        pointRadius: Радіус точки (пікселі)
+        strokeColor: Колір лінії
+        strokeWidth: Товщина лінії
+        lineCap: Закінчення лінії
+        round: заокруглене
+        square: квадратне
+        butt: плоске
+        strokeDashstyle: Стиль лінії
+        solid: суцільна
+        dot: точкова
+        dash: пунктирна
+        longdash: довга пунктирна
+        dashdot: штрих-пунктир
+        longdashdot: довгий штрих-пунктир
+        label: Напис
+        fontFamily: Шрифт
+        fontColor: Колір тексту
+        fontSize: Розмір шрифту
+        fontWeight: Товщина шрифту
+        regular: звичайний
+        bold: жирний
+        italic: курсив
         preview: 'Попередній перегляд'
     userStyle:
         name: 'Назва стилю'
@@ -72,3 +94,8 @@ mb.digitizer:
         searchByColor: 'Фільтр за кольором'
         clearColorFilter: 'Скинути фільтр кольору'
         filterMyStylesOnly: 'Лише мої стилі'
+        featureNotConfigured: 'Функція стилів користувача не налаштована'
+        invalidJsonPayload: 'Некоректні дані JSON'
+        nameAndConfigRequired: 'Потрібні назва та конфігурація стилю'
+        notFoundOrNotAuthorized: 'Стиль не знайдено або немає прав доступу'
+        idRequired: 'Потрібен ID стилю'

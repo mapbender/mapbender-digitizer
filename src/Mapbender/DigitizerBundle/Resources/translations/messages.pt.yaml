@@ -1,12 +1,13 @@
 mb.digitizer:
     actions:
-      cancel: Cancelar
-      close: Fechar
-      delete: Excluir
-      save: Salvar
+        show_details: Mostrar detalhes
+        cancel: Cancelar
+        close: Fechar
+        delete: Excluir
+        save: Salvar
     class:
-      title: Coletor de Dados (Digitizer)
-      description: Coleta e edição de dados
+        title: Coletor de Dados (Digitizer)
+        description: Coleta e edição de dados
     edit.attributes: Editar atributos
     edit.geometry: Editar geometria
     revert.geometry: Reverter alteração na geometria
@@ -20,12 +21,12 @@ mb.digitizer:
             title: Salvar
         print: Imprimir
         print_tooltip: 'Imprimir objeto'
-        style:
-            change: Alterar estilo
-            change_tooltip: 'Alterar aparência do objeto'
         clone:
             title: Duplicar
             tooltip: 'Criar uma cópia deste objeto'
+        style:
+            change: Alterar estilo
+            change_tooltip: 'Alterar aparência do objeto'
         visibility:
             toggleoff: Ocultar objeto
             toggleon: Exibir objeto
@@ -93,3 +94,8 @@ mb.digitizer:
         searchByColor: 'Filtro de cor'
         clearColorFilter: 'Limpar filtro de cor'
         filterMyStylesOnly: 'Apenas meus estilos'
+        featureNotConfigured: 'Recurso de estilo do usuário não configurado'
+        invalidJsonPayload: 'Dados JSON inválidos'
+        nameAndConfigRequired: 'Nome e configuração do estilo são obrigatórios'
+        notFoundOrNotAuthorized: 'Estilo não encontrado ou não autorizado'
+        idRequired: 'ID do estilo é obrigatório'

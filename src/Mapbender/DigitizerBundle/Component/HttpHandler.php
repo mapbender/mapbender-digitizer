@@ -15,7 +15,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Mapbender\DigitizerBundle\Repository\UserStyleRepository;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 /**
@@ -30,20 +31,25 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
     /** @var UserStyleRepository|null */
     private $userStyleRepository;
 
-    /** @var TokenStorageInterface|null */
-    private $tokenStorage;
+    /** @var Security|null */
+    private $security;
+
+    /** @var TranslatorInterface|null */
+    private $translator;
 
     public function __construct(Environment $twig,
                                 FormFactoryInterface $formFactory,
                                 SchemaFilter $schemaFilter,
                                 UserFilterProvider $userFilterProvider,
-                                UserStyleRepository $userStyleRepository = null,
-                                TokenStorageInterface $tokenStorage = null)
+                                ?UserStyleRepository $userStyleRepository = null,
+                                ?Security $security = null,
+                                ?TranslatorInterface $translator = null)
     {
         parent::__construct($formFactory, $schemaFilter, $userFilterProvider);
         $this->twig = $twig;
         $this->userStyleRepository = $userStyleRepository;
-        $this->tokenStorage = $tokenStorage;
+        $this->security = $security;
+        $this->translator = $translator;
     }
 
     public function dispatchRequest(Element $element, Request $request)
@@ -81,19 +87,29 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
 
     private function getCurrentUserId(): string
     {
-        $token = $this->tokenStorage->getToken();
-        if (!$token) {
-            throw new \RuntimeException('No authentication token available');
+        if (!$this->security) {
+            throw new \RuntimeException('Security service not available');
         }
-        $user = $token->getUser();
-        if (\is_object($user) && \method_exists($user, 'getUserIdentifier')) {
-            return $user->getUserIdentifier();
+        $user = $this->security->getUser();
+        if (!$user) {
+            throw new \RuntimeException('No authenticated user available');
         }
-        return strval($user);
+        return $user->getUserIdentifier();
+    }
+
+    private function trans(string $id): string
+    {
+        if ($this->translator) {
+            return $this->translator->trans($id);
+        }
+        return $id;
     }
 
     private function listUserStyles(): JsonResponse
     {
+        if (!$this->userStyleRepository) {
+            return new JsonResponse(['error' => $this->trans('mb.digitizer.userStyle.featureNotConfigured')], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
         $userId = $this->getCurrentUserId();
         $styles = $this->userStyleRepository->findAllSortedByUser($userId);
         $data = array_map(function($style) use ($userId) {
@@ -106,20 +122,26 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
 
     private function saveUserStyle(Request $request): JsonResponse
     {
+        if (!$this->userStyleRepository) {
+            return new JsonResponse(['error' => $this->trans('mb.digitizer.userStyle.featureNotConfigured')], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
         $data = json_decode($request->getContent(), true);
+        if (!\is_array($data)) {
+            return new JsonResponse(['error' => $this->trans('mb.digitizer.userStyle.invalidJsonPayload')], Response::HTTP_BAD_REQUEST);
+        }
         $userId = $this->getCurrentUserId();
         $name = $data['name'] ?? null;
         $styleConfig = $data['styleConfig'] ?? null;
         $id = $data['id'] ?? null;
 
         if (!$name || !$styleConfig || !\is_array($styleConfig)) {
-            return new JsonResponse(['error' => 'Name und Style-Konfiguration sind erforderlich'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => $this->trans('mb.digitizer.userStyle.nameAndConfigRequired')], Response::HTTP_BAD_REQUEST);
         }
 
         if ($id) {
             $result = $this->userStyleRepository->update($userId, (int)$id, $name, $styleConfig);
             if (!$result) {
-                return new JsonResponse(['error' => 'Style nicht gefunden oder nicht berechtigt'], Response::HTTP_NOT_FOUND);
+                return new JsonResponse(['error' => $this->trans('mb.digitizer.userStyle.notFoundOrNotAuthorized')], Response::HTTP_NOT_FOUND);
             }
         } else {
             $result = $this->userStyleRepository->create($userId, $name, $styleConfig);
@@ -129,16 +151,22 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
 
     private function deleteUserStyle(Request $request): JsonResponse
     {
+        if (!$this->userStyleRepository) {
+            return new JsonResponse(['error' => $this->trans('mb.digitizer.userStyle.featureNotConfigured')], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
         $data = json_decode($request->getContent(), true);
+        if (!\is_array($data)) {
+            return new JsonResponse(['error' => $this->trans('mb.digitizer.userStyle.invalidJsonPayload')], Response::HTTP_BAD_REQUEST);
+        }
         $userId = $this->getCurrentUserId();
         $id = $data['id'] ?? null;
 
         if (!$id) {
-            return new JsonResponse(['error' => 'Style-ID ist erforderlich'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => $this->trans('mb.digitizer.userStyle.idRequired')], Response::HTTP_BAD_REQUEST);
         }
         $deleted = $this->userStyleRepository->delete($userId, (int)$id);
         if (!$deleted) {
-            return new JsonResponse(['error' => 'Style nicht gefunden oder nicht berechtigt'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['error' => $this->trans('mb.digitizer.userStyle.notFoundOrNotAuthorized')], Response::HTTP_NOT_FOUND);
         }
         return new JsonResponse(['success' => true]);
     }
@@ -162,6 +190,7 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         );
         foreach ($requestData['features'] as $featureData) {
             $schemaName = $featureData['schemaName'];
+            /** @var ItemSchema $schema */
             $schema = $this->schemaFilter->getSchema($element, $schemaName);
             $feature = $schema->getRepository()->getById($featureData['idInSchema']);
             if (!$feature) {

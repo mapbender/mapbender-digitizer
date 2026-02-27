@@ -1,13 +1,13 @@
 mb.digitizer:
     actions:
-      show_details: Ayrıntıları göster
-      cancel: İptal
-      close: Kapat
-      delete: Sil
-      save: Kaydet
+        show_details: Ayrıntıları göster
+        cancel: İptal
+        close: Kapat
+        delete: Sil
+        save: Kaydet
     class:
-      title: Digitizer
-      description: Coğrafi referanslama ve dijitalleştirme
+        title: Digitizer
+        description: Coğrafi referanslama ve dijitalleştirme
     edit.attributes: Öznitelikleri düzenle
     edit.geometry: Geometriyi düzenle
     revert.geometry: Geometri değişikliklerini geri al
@@ -48,6 +48,28 @@ mb.digitizer:
         fillColor: Dolgu rengi
         color: Renk
         opacity: Şeffaflık
+        pointRadius: Nokta yarıçapı (piksel)
+        strokeColor: Çizgi rengi
+        strokeWidth: Çizgi kalınlığı
+        lineCap: Çizgi ucu
+        round: yuvarlak
+        square: kare
+        butt: düz
+        strokeDashstyle: Çizgi deseni
+        solid: düz çizgi
+        dot: noktalı
+        dash: kısa çizgi
+        longdash: uzun çizgi
+        dashdot: çizgi-nokta
+        longdashdot: uzun çizgi-nokta
+        label: Etiket
+        fontFamily: Yazı tipi
+        fontColor: Metin rengi
+        fontSize: Yazı boyutu
+        fontWeight: Yazı kalınlığı
+        regular: normal
+        bold: kalın
+        italic: italik
         preview: 'Önizleme'
     userStyle:
         name: 'Stil adı'
@@ -72,3 +94,8 @@ mb.digitizer:
         searchByColor: 'Renk filtresi'
         clearColorFilter: 'Renk filtresini temizle'
         filterMyStylesOnly: 'Yalnızca benim stillerim'
+        featureNotConfigured: 'Kullanıcı stili özelliği yapılandırılmamış'
+        invalidJsonPayload: 'Geçersiz JSON verileri'
+        nameAndConfigRequired: 'Ad ve stil yapılandırması gereklidir'
+        notFoundOrNotAuthorized: 'Stil bulunamadı veya yetki yok'
+        idRequired: 'Stil kimliği gereklidir'

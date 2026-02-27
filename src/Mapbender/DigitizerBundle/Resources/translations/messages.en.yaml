@@ -1,13 +1,13 @@
 mb.digitizer:
     actions:
-      show_details: Show details
-      cancel: Cancel
-      close: Close
-      delete: Delete
-      save: Save
+        show_details: Show details
+        cancel: Cancel
+        close: Close
+        delete: Delete
+        save: Save
     class:
-      title: Digitizer
-      description: Georeferencing and Digitizing
+        title: Digitizer
+        description: Georeferencing and Digitizing
     edit.attributes: Edit attributes
     edit.geometry: Edit geometry
     revert.geometry: Revert geometry changes
@@ -94,3 +94,8 @@ mb.digitizer:
         searchByColor: 'Color filter'
         clearColorFilter: 'Clear color filter'
         filterMyStylesOnly: 'My styles only'
+        featureNotConfigured: 'User style feature not configured'
+        invalidJsonPayload: 'Invalid JSON payload'
+        nameAndConfigRequired: 'Name and style configuration are required'
+        notFoundOrNotAuthorized: 'Style not found or not authorized'
+        idRequired: 'Style ID is required'
