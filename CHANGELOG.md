@@ -1,4 +1,5 @@
 ## next feature release
+* Refactor DataSourceBundle: remove eval-based EventProcessor (security), simplify driver abstraction, add PropertyAdapter strategy for flexible property storage ([PR#155](https://github.com/mapbender/mapbender-digitizer/pull/155)) **BREAKING**: Oracle/SQLite spatial support dropped, deprecated services removed — see `EVENT-MIGRATION.md`
 * Migrate from jQuery UI dialogs to Mapbender.Popup with improved mobile support ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
 * Add dynamic expression support for labels, text fields, and popup titles (template literal syntax `${data.property}`) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
 * Modernize JavaScript codebase (ES6 classes, singleton pattern for better extensibility) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
