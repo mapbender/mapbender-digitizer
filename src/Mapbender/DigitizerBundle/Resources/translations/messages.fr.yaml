@@ -48,3 +48,27 @@ mb.digitizer:
         fillColor: Couleur de remplissage
         color: Couleur
         opacity: Opacité
+        preview: 'Aperçu'
+    userStyle:
+        name: 'Nom du style'
+        namePlaceholder: 'ex. Mon style par défaut'
+        nameRequired: 'Veuillez entrer un nom'
+        saveTitle: 'Enregistrer le style'
+        save: 'Enregistrer'
+        saved: 'Style enregistré'
+        saveError: 'Erreur lors de l''enregistrement du style'
+        loadError: 'Erreur lors du chargement des styles'
+        selectTitle: 'Styles enregistrés'
+        noStyles: 'Aucun style enregistré disponible'
+        apply: 'Appliquer'
+        delete: 'Supprimer'
+        confirmDelete: 'Voulez-vous vraiment supprimer ce style?'
+        deleted: 'Style supprimé'
+        deleteError: 'Erreur lors de la suppression du style'
+        loadSaved: 'Charger les styles enregistrés'
+        saveCurrentStyle: 'Enregistrer le style actuel'
+        currentStyle: 'Style actuel'
+        searchByName: 'Rechercher par nom...'
+        searchByColor: 'Filtre couleur'
+        clearColorFilter: 'Effacer le filtre couleur'
+        filterMyStylesOnly: 'Uniquement mes styles'

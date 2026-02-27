@@ -48,3 +48,27 @@ mb.digitizer:
         fillColor: Vulkleur
         color: Kleur
         opacity: Transparantie
+        preview: 'Voorbeeld'
+    userStyle:
+        name: 'Stijlnaam'
+        namePlaceholder: 'bijv. Mijn standaard stijl'
+        nameRequired: 'Voer een naam in'
+        saveTitle: 'Stijl opslaan'
+        save: 'Opslaan'
+        saved: 'Stijl opgeslagen'
+        saveError: 'Fout bij opslaan van stijl'
+        loadError: 'Fout bij laden van stijlen'
+        selectTitle: 'Opgeslagen stijlen'
+        noStyles: 'Geen opgeslagen stijlen beschikbaar'
+        apply: 'Toepassen'
+        delete: 'Verwijderen'
+        confirmDelete: 'Wilt u deze stijl echt verwijderen?'
+        deleted: 'Stijl verwijderd'
+        deleteError: 'Fout bij verwijderen van stijl'
+        loadSaved: 'Opgeslagen stijlen laden'
+        saveCurrentStyle: 'Huidige stijl opslaan'
+        currentStyle: 'Huidige stijl'
+        searchByName: 'Zoeken op naam...'
+        searchByColor: 'Kleurfilter'
+        clearColorFilter: 'Kleurfilter wissen'
+        filterMyStylesOnly: 'Alleen mijn stijlen'

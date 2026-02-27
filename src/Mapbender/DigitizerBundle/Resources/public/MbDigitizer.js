@@ -26,6 +26,7 @@
             this.toolsetRenderer = this._createToolsetRenderer();
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
+            this.userStyleManager = null;
             // setup() called in onGrantsLoadStarted
         }
 
@@ -37,6 +38,7 @@
         _onMapAndGrantsLoaded(mbMap) {
             this.mbMap = mbMap;
             this.setup();
+            this.userStyleManager = new Mapbender.Digitizer.UserStyleManager(this);
             // Let data manager base method trigger "ready" event and start loading data
             this._start();
             this.registerMapEvents_();
@@ -765,6 +767,7 @@
                 const styleFieldData = JSON.stringify(values);
                 function always() {
                     feature.get('data')[schema.featureType.styleField] = styleFieldData;
+                    feature.set('customStyleConfig', values);
                     self.renderer.customStyleFeature_(feature);
                 }
                 if (self._getUniqueItemId(feature)) {

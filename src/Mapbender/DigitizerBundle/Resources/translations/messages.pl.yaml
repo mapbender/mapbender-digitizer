@@ -48,3 +48,27 @@ mb.digitizer:
         fillColor: Kolor wypełnienia
         color: Kolor
         opacity: Przezroczystość
+        preview: 'Podgląd'
+    userStyle:
+        name: 'Nazwa stylu'
+        namePlaceholder: 'np. Mój domyślny styl'
+        nameRequired: 'Proszę podać nazwę'
+        saveTitle: 'Zapisz styl'
+        save: 'Zapisz'
+        saved: 'Styl zapisany'
+        saveError: 'Błąd podczas zapisywania stylu'
+        loadError: 'Błąd podczas wczytywania stylów'
+        selectTitle: 'Zapisane style'
+        noStyles: 'Brak zapisanych stylów'
+        apply: 'Zastosuj'
+        delete: 'Usuń'
+        confirmDelete: 'Czy naprawdę chcesz usunąć ten styl?'
+        deleted: 'Styl usunięty'
+        deleteError: 'Błąd podczas usuwania stylu'
+        loadSaved: 'Wczytaj zapisane style'
+        saveCurrentStyle: 'Zapisz bieżący styl'
+        currentStyle: 'Bieżący styl'
+        searchByName: 'Szukaj po nazwie...'
+        searchByColor: 'Filtr kolorów'
+        clearColorFilter: 'Wyczyść filtr kolorów'
+        filterMyStylesOnly: 'Tylko moje style'

@@ -78,3 +78,27 @@ mb.digitizer:
         regular: Обычный
         bold: Жирный
         italic: Курсив
+        preview: 'Предварительный просмотр'
+    userStyle:
+        name: 'Название стиля'
+        namePlaceholder: 'напр. Мой стандартный стиль'
+        nameRequired: 'Пожалуйста, введите название'
+        saveTitle: 'Сохранить стиль'
+        save: 'Сохранить'
+        saved: 'Стиль сохранён'
+        saveError: 'Ошибка при сохранении стиля'
+        loadError: 'Ошибка при загрузке стилей'
+        selectTitle: 'Сохранённые стили'
+        noStyles: 'Нет сохранённых стилей'
+        apply: 'Применить'
+        delete: 'Удалить'
+        confirmDelete: 'Вы действительно хотите удалить этот стиль?'
+        deleted: 'Стиль удалён'
+        deleteError: 'Ошибка при удалении стиля'
+        loadSaved: 'Загрузить сохранённые стили'
+        saveCurrentStyle: 'Сохранить текущий стиль'
+        currentStyle: 'Текущий стиль'
+        searchByName: 'Поиск по названию...'
+        searchByColor: 'Фильтр по цвету'
+        clearColorFilter: 'Сбросить фильтр цвета'
+        filterMyStylesOnly: 'Только мои стили'

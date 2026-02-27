@@ -1,0 +1,28 @@
+<div class="user-style-selector">
+    <div class="style-search-container mb-3">
+        <div class="row g-2 mb-2 align-items-center">
+            <div class="col">
+                <input type="text" class="form-control form-control-sm -fn-search-name" 
+                       placeholder="{{ 'mb.digitizer.userStyle.searchByName'|trans }}">
+            </div>
+            <div class="col-auto">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted small">{{ 'mb.digitizer.userStyle.searchByColor'|trans }}:</span>
+                    <div class="input-group input-group-sm -js-color-search color-search-group">
+                        <input type="text" class="form-control -fn-search-color" readonly style="width: 60px; cursor: pointer;">
+                        <span class="input-group-text input-group-addon"><i></i></span>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm -fn-clear-color" 
+                            title="{{ 'mb.digitizer.userStyle.clearColorFilter'|trans }}">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input -fn-filter-my-styles" id="filterMyStyles">
+            <label class="form-check-label" for="filterMyStyles">{{ 'mb.digitizer.userStyle.filterMyStylesOnly'|trans }}</label>
+        </div>
+    </div>
+    <div class="style-list-container"></div>
+</div>

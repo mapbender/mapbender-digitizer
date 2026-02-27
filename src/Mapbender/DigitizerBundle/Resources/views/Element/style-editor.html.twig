@@ -1,3 +1,13 @@
+<div class="user-style-actions">
+    <div class="user-style-buttons">
+        <button type="button" class="btn btn-sm btn-light -fn-load-saved-styles">{{ 'mb.digitizer.userStyle.loadSaved' | trans }}</button>
+        <button type="button" class="btn btn-sm btn-light -fn-save-current-style">{{ 'mb.digitizer.userStyle.saveCurrentStyle' | trans }}</button>
+    </div>
+    <div class="current-style-name-display" style="display: none;">
+        <i class="fa fa-bookmark"></i>
+        <span class="style-name-text"></span>
+    </div>
+</div>
 <div data-style-group="fill">
     <div class="row">
         <div class="col-sm-4">
@@ -157,6 +167,12 @@
                 <input class="form-range" name="fontOpacity" type="range" min="0" max="1" step="any" list="ds-opacity-ticks">
             </div>
         </div>
+    </div>
+</div>
+<div class="style-preview-container">
+    <label class="form-label fw-bold">{{ 'mb.digitizer.style.preview' | trans }}</label>
+    <div class="style-preview-wrapper">
+        <canvas class="style-preview-canvas" width="300" height="150"></canvas>
     </div>
 </div>
 <div class="hidden">

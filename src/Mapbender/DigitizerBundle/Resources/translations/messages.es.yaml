@@ -69,4 +69,27 @@ mb.digitizer:
         regular: Normal
         bold: Negrita
         italic: Cursiva
-
+        preview: 'Vista previa'
+    userStyle:
+        name: 'Nombre del estilo'
+        namePlaceholder: 'p. ej. Mi estilo predeterminado'
+        nameRequired: 'Por favor, introduzca un nombre'
+        saveTitle: 'Guardar estilo'
+        save: 'Guardar'
+        saved: 'Estilo guardado'
+        saveError: 'Error al guardar el estilo'
+        loadError: 'Error al cargar los estilos'
+        selectTitle: 'Estilos guardados'
+        noStyles: 'No hay estilos guardados'
+        apply: 'Aplicar'
+        delete: 'Eliminar'
+        confirmDelete: '¿Realmente desea eliminar este estilo?'
+        deleted: 'Estilo eliminado'
+        deleteError: 'Error al eliminar el estilo'
+        loadSaved: 'Cargar estilos guardados'
+        saveCurrentStyle: 'Guardar estilo actual'
+        currentStyle: 'Estilo actual'
+        searchByName: 'Buscar por nombre...'
+        searchByColor: 'Filtro de color'
+        clearColorFilter: 'Limpiar filtro de color'
+        filterMyStylesOnly: 'Solo mis estilos'

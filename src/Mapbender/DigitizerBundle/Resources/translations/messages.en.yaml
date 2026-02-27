@@ -70,3 +70,27 @@ mb.digitizer:
         regular: regular
         bold: bold
         italic: italic
+        preview: Preview
+    userStyle:
+        name: 'Style name'
+        namePlaceholder: 'e.g. My default style'
+        nameRequired: 'Please enter a name'
+        saveTitle: 'Save style'
+        save: 'Save'
+        saved: 'Style saved'
+        saveError: 'Error saving style'
+        loadError: 'Error loading styles'
+        selectTitle: 'Saved styles'
+        noStyles: 'No saved styles available'
+        apply: 'Apply'
+        delete: 'Delete'
+        confirmDelete: 'Do you really want to delete this style?'
+        deleted: 'Style deleted'
+        deleteError: 'Error deleting style'
+        loadSaved: 'Load saved styles'
+        saveCurrentStyle: 'Save current style'
+        currentStyle: 'Current style'
+        searchByName: 'Search by name...'
+        searchByColor: 'Color filter'
+        clearColorFilter: 'Clear color filter'
+        filterMyStylesOnly: 'My styles only'

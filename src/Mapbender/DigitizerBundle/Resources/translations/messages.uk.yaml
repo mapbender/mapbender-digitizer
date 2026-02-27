@@ -48,3 +48,27 @@ mb.digitizer:
         fillColor: Колір заливки
         color: Колір
         opacity: Прозорість
+        preview: 'Попередній перегляд'
+    userStyle:
+        name: 'Назва стилю'
+        namePlaceholder: 'напр. Мій стандартний стиль'
+        nameRequired: 'Будь ласка, введіть назву'
+        saveTitle: 'Зберегти стиль'
+        save: 'Зберегти'
+        saved: 'Стиль збережено'
+        saveError: 'Помилка при збереженні стилю'
+        loadError: 'Помилка при завантаженні стилів'
+        selectTitle: 'Збережені стилі'
+        noStyles: 'Немає збережених стилів'
+        apply: 'Застосувати'
+        delete: 'Видалити'
+        confirmDelete: 'Ви дійсно хочете видалити цей стиль?'
+        deleted: 'Стиль видалено'
+        deleteError: 'Помилка при видаленні стилю'
+        loadSaved: 'Завантажити збережені стилі'
+        saveCurrentStyle: 'Зберегти поточний стиль'
+        currentStyle: 'Поточний стиль'
+        searchByName: 'Пошук за назвою...'
+        searchByColor: 'Фільтр за кольором'
+        clearColorFilter: 'Скинути фільтр кольору'
+        filterMyStylesOnly: 'Лише мої стилі'

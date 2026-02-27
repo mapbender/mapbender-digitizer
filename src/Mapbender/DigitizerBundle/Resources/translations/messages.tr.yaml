@@ -48,3 +48,27 @@ mb.digitizer:
         fillColor: Dolgu rengi
         color: Renk
         opacity: Şeffaflık
+        preview: 'Önizleme'
+    userStyle:
+        name: 'Stil adı'
+        namePlaceholder: 'örn. Varsayılan stilim'
+        nameRequired: 'Lütfen bir ad girin'
+        saveTitle: 'Stili kaydet'
+        save: 'Kaydet'
+        saved: 'Stil kaydedildi'
+        saveError: 'Stil kaydedilirken hata oluştu'
+        loadError: 'Stiller yüklenirken hata oluştu'
+        selectTitle: 'Kayıtlı stiller'
+        noStyles: 'Kayıtlı stil yok'
+        apply: 'Uygula'
+        delete: 'Sil'
+        confirmDelete: 'Bu stili gerçekten silmek istiyor musunuz?'
+        deleted: 'Stil silindi'
+        deleteError: 'Stil silinirken hata oluştu'
+        loadSaved: 'Kayıtlı stilleri yükle'
+        saveCurrentStyle: 'Mevcut stili kaydet'
+        currentStyle: 'Mevcut stil'
+        searchByName: 'Ada göre ara...'
+        searchByColor: 'Renk filtresi'
+        clearColorFilter: 'Renk filtresini temizle'
+        filterMyStylesOnly: 'Yalnızca benim stillerim'

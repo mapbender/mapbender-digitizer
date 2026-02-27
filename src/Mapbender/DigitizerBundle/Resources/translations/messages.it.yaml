@@ -69,4 +69,27 @@ mb.digitizer:
         regular: Normale
         bold: Grassetto
         italic: Corsivo
-
+        preview: 'Anteprima'
+    userStyle:
+        name: 'Nome dello stile'
+        namePlaceholder: 'es. Mio stile predefinito'
+        nameRequired: 'Inserire un nome'
+        saveTitle: 'Salva stile'
+        save: 'Salva'
+        saved: 'Stile salvato'
+        saveError: 'Errore durante il salvataggio dello stile'
+        loadError: 'Errore durante il caricamento degli stili'
+        selectTitle: 'Stili salvati'
+        noStyles: 'Nessuno stile salvato disponibile'
+        apply: 'Applica'
+        delete: 'Elimina'
+        confirmDelete: 'Vuoi davvero eliminare questo stile?'
+        deleted: 'Stile eliminato'
+        deleteError: 'Errore durante l''eliminazione dello stile'
+        loadSaved: 'Carica stili salvati'
+        saveCurrentStyle: 'Salva stile corrente'
+        currentStyle: 'Stile corrente'
+        searchByName: 'Cerca per nome...'
+        searchByColor: 'Filtro colore'
+        clearColorFilter: 'Cancella filtro colore'
+        filterMyStylesOnly: 'Solo i miei stili'

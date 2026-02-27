@@ -57,3 +57,102 @@
   --bs-pagination-active-border-color: #279ddc;
   list-style: none;
 }
+
+/* Style Preview */
+.style-preview-container {
+    margin-bottom: 16px;
+
+    .style-preview-wrapper {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .style-preview-canvas {
+        background-color: #ffffff;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+    }
+}
+
+/* User Style Actions */
+.user-style-actions {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+
+    .user-style-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .current-style-name-display {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dashed #dee2e6;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #495057;
+
+        i { color: #6c757d; }
+    }
+}
+
+/* User Style Selector Popup */
+.user-style-selector {
+    .style-search-container {
+        .color-search-group {
+            .form-control {
+                background-color: #fff;
+                color: #212529;
+            }
+        }
+    }
+
+    .style-list-container {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .style-list {
+        .list-group-item {
+            transition: background-color 0.15s ease-in-out;
+            padding: 10px 12px;
+
+            &:hover { background-color: #f8f9fa; }
+
+            .style-item-header { margin-bottom: 8px; }
+
+            .style-preview-row {
+                display: flex;
+                gap: 8px;
+                padding: 6px;
+                background-color: #ffffff;
+                border: 1px solid #e9ecef;
+                border-radius: 4px;
+            }
+
+            .style-preview-mini {
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 3px;
+            }
+
+            .btn-group { flex-shrink: 0; }
+        }
+    }
+}
+
+.user-style-save-form { padding: 0.5rem; }
+
+.user-style-selector-popup .popupContent { padding: 1rem; }

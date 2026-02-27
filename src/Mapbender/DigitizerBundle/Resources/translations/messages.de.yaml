@@ -70,3 +70,27 @@ mb.digitizer:
         regular: Normal
         bold: Dick
         italic: Kursiv
+        preview: Vorschau
+    userStyle:
+        name: 'Style-Name'
+        namePlaceholder: 'z.B. Mein Standard-Stil'
+        nameRequired: 'Bitte einen Namen eingeben'
+        saveTitle: 'Style speichern'
+        save: 'Speichern'
+        saved: 'Style wurde gespeichert'
+        saveError: 'Fehler beim Speichern des Styles'
+        loadError: 'Fehler beim Laden der Styles'
+        selectTitle: 'Gespeicherte Styles'
+        noStyles: 'Keine gespeicherten Styles vorhanden'
+        apply: 'Anwenden'
+        delete: 'Löschen'
+        confirmDelete: 'Möchten Sie diesen Style wirklich löschen?'
+        deleted: 'Style wurde gelöscht'
+        deleteError: 'Fehler beim Löschen des Styles'
+        loadSaved: 'Gespeicherte Styles laden'
+        saveCurrentStyle: 'Aktuellen Style speichern'
+        currentStyle: 'Aktueller Style'
+        searchByName: 'Nach Name suchen...'
+        searchByColor: 'Farbfilter'
+        clearColorFilter: 'Farbfilter löschen'
+        filterMyStylesOnly: 'Nur meine Styles anzeigen'
