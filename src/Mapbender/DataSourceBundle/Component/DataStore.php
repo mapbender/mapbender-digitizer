@@ -60,7 +60,7 @@ class DataStore
     public function __construct(
         Connection $connection,
         TokenStorageInterface $tokenStorage,
-        $config = [],
+        array $config = [],
     ) {
         $this->connection = $connection;
         $this->tokenStorage = $tokenStorage;
@@ -354,24 +354,20 @@ class DataStore
         $this->collectInsertData($item, $columns, $placeholders, $params);
 
         if (empty($columns)) {
-            $sql = sprintf(
-                'INSERT INTO %s DEFAULT VALUES RETURNING %s',
-                $this->getTableName(),
-                $this->qi($this->uniqueId),
+            $this->connection->executeStatement(
+                sprintf('INSERT INTO %s DEFAULT VALUES', $this->getTableName()),
             );
         } else {
             $sql = sprintf(
-                'INSERT INTO %s (%s) VALUES (%s) RETURNING %s',
+                'INSERT INTO %s (%s) VALUES (%s)',
                 $this->getTableName(),
                 implode(', ', $columns),
                 implode(', ', $placeholders),
-                $this->qi($this->uniqueId),
             );
+            $this->connection->executeStatement($sql, $params);
         }
 
-        $stmt = $this->connection->prepare($sql);
-        $result = $stmt->executeQuery($params);
-        $id = $result->fetchOne();
+        $id = $this->connection->lastInsertId();
         $item->setId($id);
 
         return $this->reloadItem($item) ?? $item;
@@ -495,10 +491,7 @@ class DataStore
     protected function quoteTableName(string $tableName): string
     {
         $parsed = static::parseSchemaQualifiedName($tableName);
-        $parts = [$parsed['table']];
-        if ($parsed['schema'] !== 'public') {
-            array_unshift($parts, $parsed['schema']);
-        }
+        $parts = [$parsed['schema'], $parsed['table']];
         return implode('.', array_map(fn($p) => $this->qi($p), $parts));
     }
 
@@ -535,7 +528,7 @@ class DataStore
     protected function getUserName(): string
     {
         $token = $this->tokenStorage->getToken();
-        if ($token && method_exists($token, 'getUserIdentifier')) {
+        if ($token) {
             return $token->getUserIdentifier() ?? '';
         }
         return '';

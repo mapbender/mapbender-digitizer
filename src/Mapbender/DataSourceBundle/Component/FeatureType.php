@@ -38,7 +38,7 @@ class FeatureType extends DataStore
     public function __construct(
         Connection $connection,
         TokenStorageInterface $tokenStorage,
-        $config = [],
+        array $config = [],
     ) {
         $this->geomField = $config['geomField'] ?? 'geom';
         $this->configuredSrid = !empty($config['srid']) ? (int) $config['srid'] : null;
@@ -372,7 +372,11 @@ class FeatureType extends DataStore
                 'srid' => $row ? ((int) $row['srid'] ?: null) : null,
                 'type' => $row ? ($row['type'] ?: null) : null,
             ];
-        } catch (\Exception) {
+        } catch (\Exception $e) {
+            @trigger_error(
+                "geometry_columns query failed for {$this->tableName}.{$this->geomField}: {$e->getMessage()}",
+                E_USER_WARNING,
+            );
             $this->geometryMetadata = ['srid' => null, 'type' => null];
         }
 

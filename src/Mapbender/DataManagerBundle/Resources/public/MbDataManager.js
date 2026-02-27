@@ -97,9 +97,6 @@
                 .then(() => this.updateSchemaSelector_())
             ;
             this.onGrantsLoadStarted();
-/**
-         * @private
-         */
         }
 
         onGrantsLoadStarted() {
@@ -440,8 +437,8 @@
          * @param {(String|null)} originalId
          * @private
          */
-/** @var {DataManagagerSaveEventData} eventData */
         _saveEvent(schema, dataItem, originalId) {
+            /** @var {DataManagerSaveEventData} eventData */
             const eventData = {
                 item: dataItem,
                 itemId: this._getUniqueItemId(dataItem),
@@ -888,6 +885,7 @@
                     $loadingIndicator.css({ opacity: 0 });
                 });
             }
+            jqXhr.fail(this._onAjaxError.bind(this));
             return jqXhr;
         }
 
