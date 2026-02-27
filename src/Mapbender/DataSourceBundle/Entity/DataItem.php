@@ -1,9 +1,6 @@
 <?php
 namespace Mapbender\DataSourceBundle\Entity;
 
-/**
- * @author    Andriy Oblivantsev <eslider@gmail.com>
- */
 class DataItem implements \ArrayAccess
 {
     /** @var mixed[] */

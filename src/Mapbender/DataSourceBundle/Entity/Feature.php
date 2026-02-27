@@ -3,9 +3,6 @@ namespace Mapbender\DataSourceBundle\Entity;
 
 use Mapbender\DataSourceBundle\Utils\WktUtility;
 
-/**
- * @author    Andriy Oblivantsev <eslider@gmail.com>
- */
 class Feature extends DataItem
 {
     /** @var string|null */
