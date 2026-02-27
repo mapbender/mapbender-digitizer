@@ -38,7 +38,9 @@
         _onMapAndGrantsLoaded(mbMap) {
             this.mbMap = mbMap;
             this.setup();
-            this.userStyleManager = new Mapbender.Digitizer.UserStyleManager(this);
+            if (this.options.userStylesAvailable) {
+                this.userStyleManager = new Mapbender.Digitizer.UserStyleManager(this);
+            }
             // Let data manager base method trigger "ready" event and start loading data
             this._start();
             this.registerMapEvents_();

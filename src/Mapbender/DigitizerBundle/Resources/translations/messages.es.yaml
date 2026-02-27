@@ -99,3 +99,8 @@ mb.digitizer:
         nameAndConfigRequired: 'Se requiere nombre y configuración de estilo'
         notFoundOrNotAuthorized: 'Estilo no encontrado o no autorizado'
         idRequired: 'Se requiere el ID del estilo'
+        tableNotAvailable: 'Guardado de estilos no disponible (tabla de base de datos no encontrada)'
+    admin:
+        userStylesHeading: "Almacenamiento de estilos de usuario"
+        userStylesConnection: 'Conexión de base de datos para estilos de usuario'
+        userStylesTable: 'Nombre de tabla para estilos de usuario'

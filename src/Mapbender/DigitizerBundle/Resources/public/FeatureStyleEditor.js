@@ -87,7 +87,18 @@
         _bindUserStyleButtons($content, valuesPromise) {
             var self = this;
             var userStyleManager = this.owner.userStyleManager;
-            if (!userStyleManager) return;
+            var $actionsContainer = $content.find('.user-style-actions');
+
+            if (!userStyleManager) {
+                // Replace buttons with a warning when user styles DB is unavailable
+                $actionsContainer.empty().append(
+                    '<div class="user-style-unavailable text-muted">' +
+                    '<i class="fa fa-exclamation-triangle text-warning"></i> ' +
+                    Mapbender.trans('mb.digitizer.userStyle.tableNotAvailable') +
+                    '</div>'
+                );
+                return;
+            }
 
             var $styleNameDisplay = $content.find('.current-style-name-display');
             var $styleNameText = $styleNameDisplay.find('.style-name-text');

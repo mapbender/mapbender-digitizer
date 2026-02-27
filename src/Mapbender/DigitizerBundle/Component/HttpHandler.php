@@ -85,6 +85,38 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
         return new Response($content);
     }
 
+    /**
+     * Set the user styles table name on the repository.
+     */
+    public function setUserStylesTable(string $tableName): void
+    {
+        if ($this->userStyleRepository) {
+            $this->userStyleRepository->setTableName($tableName);
+        }
+    }
+
+    /**
+     * Set the user styles connection name on the repository.
+     */
+    public function setUserStylesConnection(string $connectionName): void
+    {
+        if ($this->userStyleRepository) {
+            $this->userStyleRepository->setConnectionName($connectionName);
+        }
+    }
+
+    /**
+     * Check whether user style persistence is available (table exists).
+     * Gracefully returns false on any connection or schema error.
+     */
+    public function isUserStyleAvailable(): bool
+    {
+        if (!$this->userStyleRepository) {
+            return false;
+        }
+        return $this->userStyleRepository->tableExists();
+    }
+
     private function getCurrentUserId(): string
     {
         if (!$this->security) {

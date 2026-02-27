@@ -6,6 +6,7 @@ namespace Mapbender\DigitizerBundle\Repository;
 
 use Mapbender\DigitizerBundle\Entity\UserStyle;
 use Doctrine\DBAL\Connection;
+use Doctrine\Persistence\ConnectionRegistry;
 
 /**
  * Repository for UserStyle entities using DBAL.
@@ -16,17 +17,84 @@ use Doctrine\DBAL\Connection;
  */
 class UserStyleRepository
 {
-    private Connection $connection;
-    private string $tableName;
+    private ConnectionRegistry $connectionRegistry;
+    private ?string $connectionName = null;
+    private ?string $tableName = null;
 
     /**
-     * @param Connection $connection The DBAL connection to use
-     * @param string $tableName The fully qualified table name (e.g. 'digi.user_styles')
+     * @param ConnectionRegistry $connectionRegistry The Doctrine connection registry
      */
-    public function __construct(Connection $connection, string $tableName = 'digi.user_styles')
+    public function __construct(ConnectionRegistry $connectionRegistry)
     {
-        $this->connection = $connection;
+        $this->connectionRegistry = $connectionRegistry;
+    }
+
+    /**
+     * Resolve the DBAL connection from the registry.
+     */
+    private function getConnection(): Connection
+    {
+        if ($this->connectionName === null) {
+            throw new \RuntimeException('No database connection configured for user styles. Please set the connection in the Digitizer element backend configuration.');
+        }
+        /** @var Connection $connection */
+        $connection = $this->connectionRegistry->getConnection($this->connectionName);
+        return $connection;
+    }
+
+    /**
+     * Override the table name at runtime (e.g. from element configuration).
+     */
+    public function setTableName(string $tableName): void
+    {
         $this->tableName = $tableName;
+    }
+
+    public function getTableName(): string
+    {
+        return $this->tableName;
+    }
+
+    /**
+     * Override the connection name at runtime (e.g. from element configuration).
+     */
+    public function setConnectionName(string $connectionName): void
+    {
+        $this->connectionName = $connectionName;
+    }
+
+    public function getConnectionName(): string
+    {
+        return $this->connectionName;
+    }
+
+    /**
+     * Check whether the configured table exists in the database.
+     * Returns false if connection or table name is not configured.
+     */
+    public function tableExists(): bool
+    {
+        if ($this->connectionName === null || $this->tableName === null) {
+            return false;
+        }
+        try {
+            $connection = $this->getConnection();
+            $schemaManager = $connection->createSchemaManager();
+            $parts = explode('.', $this->tableName);
+            if (count($parts) === 2) {
+                // schema.table format — Doctrine's tablesExist() does not handle
+                // qualified names, so we check schema existence separately and
+                // then look up only the bare table name.
+                $schemas = $schemaManager->listSchemaNames();
+                if (!in_array($parts[0], $schemas, true)) {
+                    return false;
+                }
+                return $schemaManager->tablesExist([$parts[1]]);
+            }
+            return $schemaManager->tablesExist([$this->tableName]);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**
@@ -61,7 +129,7 @@ class UserStyleRepository
                 WHERE user_id = :userId
                 ORDER BY updated_at DESC';
 
-        $rows = $this->connection->fetchAllAssociative($sql, ['userId' => $userId]);
+        $rows = $this->getConnection()->fetchAllAssociative($sql, ['userId' => $userId]);
         return array_map(fn($row) => $this->rowToEntity($row), $rows);
     }
 
@@ -77,7 +145,7 @@ class UserStyleRepository
                 FROM ' . $this->tableName . '
                 ORDER BY CASE WHEN user_id = :userId THEN 0 ELSE 1 END ASC, updated_at DESC';
 
-        $rows = $this->connection->fetchAllAssociative($sql, ['userId' => $currentUserId]);
+        $rows = $this->getConnection()->fetchAllAssociative($sql, ['userId' => $currentUserId]);
         return array_map(fn($row) => $this->rowToEntity($row), $rows);
     }
 
@@ -94,7 +162,7 @@ class UserStyleRepository
                 FROM ' . $this->tableName . '
                 WHERE user_id = :userId AND id = :id';
 
-        $row = $this->connection->fetchAssociative($sql, [
+        $row = $this->getConnection()->fetchAssociative($sql, [
             'userId' => $userId,
             'id' => $styleId,
         ]);
@@ -114,7 +182,7 @@ class UserStyleRepository
                 FROM ' . $this->tableName . '
                 WHERE id = :id';
 
-        $row = $this->connection->fetchAssociative($sql, ['id' => $styleId]);
+        $row = $this->getConnection()->fetchAssociative($sql, ['id' => $styleId]);
 
         return $row ? $this->rowToEntity($row) : null;
     }
@@ -131,7 +199,7 @@ class UserStyleRepository
     {
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
-        $this->connection->insert($this->tableName, [
+        $this->getConnection()->insert($this->tableName, [
             'user_id' => $userId,
             'name' => $name,
             'style_config' => json_encode($styleConfig),
@@ -139,7 +207,7 @@ class UserStyleRepository
             'updated_at' => $now,
         ]);
 
-        $id = (int) $this->connection->lastInsertId();
+        $id = (int) $this->getConnection()->lastInsertId();
 
         $style = new UserStyle();
         $style->setId($id);
@@ -165,7 +233,7 @@ class UserStyleRepository
     {
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
-        $affected = $this->connection->update($this->tableName, [
+        $affected = $this->getConnection()->update($this->tableName, [
             'name' => $name,
             'style_config' => json_encode($styleConfig),
             'updated_at' => $now,
@@ -190,7 +258,7 @@ class UserStyleRepository
      */
     public function delete(string $userId, int $id): bool
     {
-        $affected = $this->connection->delete($this->tableName, [
+        $affected = $this->getConnection()->delete($this->tableName, [
             'id' => $id,
             'user_id' => $userId,
         ]);

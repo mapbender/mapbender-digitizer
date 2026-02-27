@@ -99,3 +99,8 @@ mb.digitizer:
         nameAndConfigRequired: 'Потрібні назва та конфігурація стилю'
         notFoundOrNotAuthorized: 'Стиль не знайдено або немає прав доступу'
         idRequired: 'Потрібен ID стилю'
+        tableNotAvailable: 'Збереження стилів недоступне (таблиця бази даних не знайдена)'
+    admin:
+        userStylesHeading: "Зберігання стилів користувача"
+        userStylesConnection: "Підключення до бази даних для користувацьких стилів"
+        userStylesTable: "Назва таблиці для користувацьких стилів"

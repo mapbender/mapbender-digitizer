@@ -99,3 +99,8 @@ mb.digitizer:
         nameAndConfigRequired: 'Необходимы название и конфигурация стиля'
         notFoundOrNotAuthorized: 'Стиль не найден или нет прав доступа'
         idRequired: 'Требуется ID стиля'
+        tableNotAvailable: 'Сохранение стилей недоступно (таблица базы данных не найдена)'
+    admin:
+        userStylesHeading: "Хранение пользовательских стилей"
+        userStylesConnection: 'Подключение к базе данных для пользовательских стилей'
+        userStylesTable: 'Имя таблицы для пользовательских стилей'

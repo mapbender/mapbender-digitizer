@@ -1,0 +1,69 @@
+<div class="elementForm elementFormDigitizer">
+    <style media="all">
+        .elementFormDigitizer label.block {
+            display: block;
+            margin: 0;
+        }
+        .elementFormDigitizer label.block + .inputWrapper {
+            /* defeat .inputWrapper default width limitation */
+            width: 100%;
+        }
+        .elementFormDigitizer .code-yaml {
+            width: 100%;
+        }
+        .elementFormDigitizer .CodeMirror {
+            height: auto;
+        }
+        .elementFormDigitizer .CodeMirror-code {
+            /* Provide some minimal space even for (nearly) empty "schemes" text (when creating new element) */
+            min-height: 15em;
+        }
+        /* Give user-styles fields wider label columns than the DataManager default 8% */
+        .elementFormDigitizer .col-sm-2 {
+            width: 25%;
+        }
+        .elementFormDigitizer .col-sm-10 {
+            width: 75%;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function(){
+            var textarea = document.getElementById({{ form.configuration.schemes.vars.id | json_encode | raw }});
+
+            var yamlEditor = CodeMirror.fromTextArea(textarea, {
+                mode: "text/x-yaml",
+                styleActiveLine: true,
+                viewportMargin: Infinity,
+                lineNumbers: true,
+                indentUnit: 2,
+                tabSize: 2,
+                indentWithTabs: false,
+                lineWrapping: true
+            });
+
+            yamlEditor.on("change",function(obj, changedObject){
+                var value = obj.getValue().replace(/\t/g,"  ");
+                $(textarea).val(value);
+            });
+
+
+            // Resize, but only if rendered in popup
+            var $form = $(document.getElementById({{ form.configuration.schemes.vars.id | json_encode | raw }})).closest('form');
+            var popupContainer = $form.closest('.popup,.modal-dialog');
+
+            popupContainer.css({
+                width: '90%',
+                'min-height': '90vh'
+            });
+
+        })
+    </script>
+    {{ form_row(form.title) }}
+    {{ form_row(form.configuration.userStylesConnection) }}
+    {{ form_row(form.configuration.userStylesTable) }}
+{% block schemes_row %}
+    {{ form_label(form.configuration.schemes) }}
+    {{ form_errors(form.configuration.schemes) }}
+    {{ form_widget(form.configuration.schemes) }}
+{% endblock schemes_row %}
+</div>

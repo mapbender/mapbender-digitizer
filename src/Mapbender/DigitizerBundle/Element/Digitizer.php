@@ -5,6 +5,7 @@ namespace Mapbender\DigitizerBundle\Element;
 use Mapbender\Component\Element\TemplateView;
 use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataManagerBundle\Element\DataManager;
+use Mapbender\DigitizerBundle\Component\HttpHandler;
 use Mapbender\DigitizerBundle\Component\SchemaFilter;
 
 
@@ -76,11 +77,35 @@ class Digitizer extends DataManager
         );
     }
 
+    /**
+     * @return HttpHandler
+     */
+    public function getHttpHandler(Element $element)
+    {
+        /** @var HttpHandler $handler */
+        $handler = parent::getHttpHandler($element);
+        $config = $element->getConfiguration();
+        if (!empty($config['userStylesConnection'])) {
+            $handler->setUserStylesConnection($config['userStylesConnection']);
+        }
+        if (!empty($config['userStylesTable'])) {
+            $handler->setUserStylesTable($config['userStylesTable']);
+        }
+        return $handler;
+    }
+
     public function getClientConfiguration(Element $element)
     {
         $configuration = parent::getClientConfiguration($element);
         $defaultStyles = $this->schemaFilter->getDefaultStyles();
         $configuration['fallbackStyle'] = $defaultStyles['default'];
+        try {
+            /** @var HttpHandler $httpHandler */
+            $httpHandler = $this->getHttpHandler($element);
+            $configuration['userStylesAvailable'] = $httpHandler->isUserStyleAvailable();
+        } catch (\Throwable $e) {
+            $configuration['userStylesAvailable'] = false;
+        }
         return $configuration;
     }
 
@@ -88,7 +113,19 @@ class Digitizer extends DataManager
     {
         $config = parent::getDefaultConfiguration();
         $config['element_icon'] = self::getDefaultIcon();
+        $config['userStylesTable'] = null;
+        $config['userStylesConnection'] = null;
         return $config;
+    }
+
+    public static function getFormTemplate()
+    {
+        return '@MapbenderDigitizer/ElementAdmin/digitizer.html.twig';
+    }
+
+    public static function getType()
+    {
+        return 'Mapbender\DigitizerBundle\Element\Type\DigitizerAdminType';
     }
 
     public static function getDefaultIcon()

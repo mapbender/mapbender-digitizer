@@ -99,3 +99,8 @@ mb.digitizer:
         nameAndConfigRequired: 'Name and style configuration are required'
         notFoundOrNotAuthorized: 'Style not found or not authorized'
         idRequired: 'Style ID is required'
+        tableNotAvailable: 'Style saving unavailable (database table not found)'
+    admin:
+        userStylesHeading: "User Style Storage"
+        userStylesConnection: 'User styles database connection'
+        userStylesTable: 'User styles table name'

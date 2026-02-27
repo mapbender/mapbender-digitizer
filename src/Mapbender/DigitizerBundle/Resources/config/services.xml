@@ -5,7 +5,6 @@
     <parameters>
         <!-- ensure required parameter is defined (parameters.yml will win this) -->
         <parameter key="featureTypes" type="collection" />
-        <parameter key="mb.digitizer.user_styles_table">digi.user_styles</parameter>
     </parameters>
     <services>
         <service id="mb.digitizer.registry" class="Mapbender\DataSourceBundle\Component\RepositoryRegistry">
@@ -19,8 +18,7 @@
             <argument>%mapbender.uploads_dir%</argument>
         </service>
         <service id="mb.digitizer.user_style_repository" class="Mapbender\DigitizerBundle\Repository\UserStyleRepository">
-            <argument type="service" id="doctrine.dbal.digitizer_connection" />
-            <argument>%mb.digitizer.user_styles_table%</argument>
+            <argument type="service" id="doctrine" />
         </service>
         <service id="mb.digitizer.http_handler" class="Mapbender\DigitizerBundle\Component\HttpHandler">
             <argument type="service" id="twig" />
@@ -38,5 +36,9 @@
             <argument type="service" id="mb.digitizer.http_handler" />
         </service>
         <service id="mb.digitizer.user_filter_provider" alias="mb.data-manager.user_filter_provider" />
+        <service id="mb.digitizer.admin_type" class="Mapbender\DigitizerBundle\Element\Type\DigitizerAdminType">
+            <tag name="form.type" />
+            <argument type="service" id="doctrine" />
+        </service>
     </services>
 </container>

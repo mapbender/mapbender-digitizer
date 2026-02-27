@@ -99,3 +99,8 @@ mb.digitizer:
         nameAndConfigRequired: 'Ad ve stil yapılandırması gereklidir'
         notFoundOrNotAuthorized: 'Stil bulunamadı veya yetki yok'
         idRequired: 'Stil kimliği gereklidir'
+        tableNotAvailable: 'Stil kaydetme kullanılamıyor (veritabanı tablosu bulunamadı)'
+    admin:
+        userStylesHeading: "Kullanıcı stili depolama"
+        userStylesConnection: 'Kullanıcı stilleri veritabanı bağlantısı'
+        userStylesTable: 'Kullanıcı stilleri tablo adı'

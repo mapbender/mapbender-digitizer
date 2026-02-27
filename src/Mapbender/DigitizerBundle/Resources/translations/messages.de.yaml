@@ -99,3 +99,8 @@ mb.digitizer:
         nameAndConfigRequired: 'Name und Style-Konfiguration sind erforderlich'
         notFoundOrNotAuthorized: 'Style nicht gefunden oder nicht berechtigt'
         idRequired: 'Style-ID ist erforderlich'
+        tableNotAvailable: 'Style-Speicherung nicht verfügbar (Datenbanktabelle nicht gefunden)'
+    admin:
+        userStylesHeading: "Benutzerstil-Speicherung"
+        userStylesConnection: 'Datenbankverbindung für Benutzerstile'
+        userStylesTable: 'Tabellenname für Benutzerstile'

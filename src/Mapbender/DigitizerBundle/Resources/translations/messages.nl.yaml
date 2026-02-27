@@ -99,3 +99,8 @@ mb.digitizer:
         nameAndConfigRequired: 'Naam en stijlconfiguratie zijn vereist'
         notFoundOrNotAuthorized: 'Stijl niet gevonden of niet geautoriseerd'
         idRequired: 'Stijl-ID is vereist'
+        tableNotAvailable: 'Stijl opslaan niet beschikbaar (databasetabel niet gevonden)'
+    admin:
+        userStylesHeading: "Opslag van gebruikersstijlen"
+        userStylesConnection: 'Databaseverbinding voor gebruikersstijlen'
+        userStylesTable: 'Tabelnaam voor gebruikersstijlen'
