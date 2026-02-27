@@ -20,12 +20,10 @@ class DataStoreFactory
     /**
      * @param ManagerRegistry $connectionRegistry Doctrine registry
      * @param TokenStorageInterface $tokenStorage Security token storage
-     * @param mixed $eventProcessor DEPRECATED, accepted but ignored for backward compatibility
      */
     public function __construct(
         ManagerRegistry $connectionRegistry,
         TokenStorageInterface $tokenStorage,
-        $eventProcessor = null,
     ) {
         $this->connectionRegistry = $connectionRegistry;
         $this->tokenStorage = $tokenStorage;
@@ -55,7 +53,7 @@ class DataStoreFactory
      * @param string $name
      * @return Connection
      */
-    public function getDbalConnectionByName($name): Connection
+    public function getDbalConnectionByName(string $name): Connection
     {
         try {
             /** @var Connection $connection */

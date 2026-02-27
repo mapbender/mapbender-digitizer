@@ -32,22 +32,18 @@ class FeatureType extends DataStore
     protected string $geomField;
     protected ?int $configuredSrid;
     protected ?int $detectedSrid = null;
+    /** @var array{srid: int|null, type: string|null}|null Cached geometry_columns metadata */
+    private ?array $geometryMetadata = null;
 
     public function __construct(
         Connection $connection,
         TokenStorageInterface $tokenStorage,
-        $eventProcessorOrConfig = [],
         $config = [],
     ) {
-        // Resolve config (same backward-compat as DataStore)
-        if (is_array($eventProcessorOrConfig)) {
-            $config = $eventProcessorOrConfig;
-        }
-
         $this->geomField = $config['geomField'] ?? 'geom';
         $this->configuredSrid = !empty($config['srid']) ? (int) $config['srid'] : null;
 
-        parent::__construct($connection, $tokenStorage, $eventProcessorOrConfig, $config);
+        parent::__construct($connection, $tokenStorage, $config);
     }
 
     /**
@@ -187,75 +183,26 @@ class FeatureType extends DataStore
 
     /**
      * @inheritDoc
-     * Adds geometry column with PostGIS INSERT.
+     * Adds geometry column to INSERT via hook.
      */
-    protected function insertItem(DataItem $item): DataItem
+    protected function collectInsertData(DataItem $item, array &$columns, array &$placeholders, array &$params): void
     {
         /** @var Feature $item */
-        $allProperties = $this->getItemPropertiesForStorage($item);
-        $storageData = $this->propertyAdapter->prepareStorageData($allProperties);
-
-        $columns = [];
-        $placeholders = [];
-        $params = [];
-
-        foreach ($storageData as $col => $value) {
-            $columns[] = $this->qi($col);
-            $placeholders[] = '?';
-            $params[] = $value;
-        }
-
-        // Add geometry
         $geomSql = $this->buildGeomInsertExpression($item);
         if ($geomSql !== null) {
             $columns[] = $this->qi($this->geomField);
             $placeholders[] = $geomSql['expression'];
             $params = array_merge($params, $geomSql['params']);
         }
-
-        if (empty($columns)) {
-            $sql = sprintf(
-                'INSERT INTO %s DEFAULT VALUES RETURNING %s',
-                $this->getTableName(),
-                $this->qi($this->uniqueId),
-            );
-        } else {
-            $sql = sprintf(
-                'INSERT INTO %s (%s) VALUES (%s) RETURNING %s',
-                $this->getTableName(),
-                implode(', ', $columns),
-                implode(', ', $placeholders),
-                $this->qi($this->uniqueId),
-            );
-        }
-
-        $stmt = $this->connection->prepare($sql);
-        $result = $stmt->executeQuery($params);
-        $id = $result->fetchOne();
-        $item->setId($id);
-
-        return $this->reloadItem($item) ?? $item;
     }
 
     /**
      * @inheritDoc
-     * Adds geometry column with PostGIS UPDATE.
+     * Adds geometry column to UPDATE via hook.
      */
-    protected function updateItem(DataItem $item): DataItem
+    protected function collectUpdateData(DataItem $item, array &$setClauses, array &$params): void
     {
         /** @var Feature $item */
-        $allProperties = $this->getItemPropertiesForStorage($item);
-        $storageData = $this->propertyAdapter->prepareStorageData($allProperties);
-
-        $setClauses = [];
-        $params = [];
-
-        foreach ($storageData as $col => $value) {
-            $setClauses[] = $this->qi($col) . ' = ?';
-            $params[] = $value;
-        }
-
-        // Geometry SET clause
         $geomSql = $this->buildGeomInsertExpression($item);
         if ($geomSql !== null) {
             $setClauses[] = $this->qi($this->geomField) . ' = ' . $geomSql['expression'];
@@ -264,21 +211,6 @@ class FeatureType extends DataStore
             // Explicitly set geometry to NULL if empty
             $setClauses[] = $this->qi($this->geomField) . ' = NULL';
         }
-
-        if (!empty($setClauses)) {
-            $params[] = $item->getId();
-
-            $sql = sprintf(
-                'UPDATE %s SET %s WHERE %s = ?',
-                $this->getTableName(),
-                implode(', ', $setClauses),
-                $this->qi($this->uniqueId),
-            );
-
-            $this->connection->executeStatement($sql, $params);
-        }
-
-        return $this->reloadItem($item) ?? $item;
     }
 
     /**
@@ -402,14 +334,7 @@ class FeatureType extends DataStore
      */
     private function detectGeometryColumnType(): ?string
     {
-        $parsed = $this->parseTableName();
-        try {
-            $sql = 'SELECT type FROM geometry_columns WHERE f_table_name = ? AND f_table_schema = ?';
-            $result = $this->connection->fetchOne($sql, [$parsed['table'], $parsed['schema']]);
-            return $result ?: null;
-        } catch (\Exception) {
-            return null;
-        }
+        return $this->getGeometryMetadata()['type'];
     }
 
     /**
@@ -419,32 +344,38 @@ class FeatureType extends DataStore
      */
     private function detectSridFromGeometryColumns(): ?int
     {
-        $parsed = $this->parseTableName();
+        return $this->getGeometryMetadata()['srid'];
+    }
+
+    /**
+     * Query geometry_columns once and cache both SRID and type.
+     * Avoids redundant queries when both values are needed during INSERT/UPDATE.
+     *
+     * @return array{srid: int|null, type: string|null}
+     */
+    private function getGeometryMetadata(): array
+    {
+        if ($this->geometryMetadata !== null) {
+            return $this->geometryMetadata;
+        }
+
+        $parsed = static::parseSchemaQualifiedName($this->tableName);
         try {
-            $sql = 'SELECT srid FROM geometry_columns WHERE f_table_name = ? AND f_table_schema = ? AND f_geometry_column = ?';
-            $result = $this->connection->fetchOne($sql, [
+            $sql = 'SELECT srid, type FROM geometry_columns'
+                . ' WHERE f_table_name = ? AND f_table_schema = ? AND f_geometry_column = ?';
+            $row = $this->connection->fetchAssociative($sql, [
                 $parsed['table'],
                 $parsed['schema'],
                 $this->geomField,
             ]);
-            return $result ? (int) $result : null;
+            $this->geometryMetadata = [
+                'srid' => $row ? ((int) $row['srid'] ?: null) : null,
+                'type' => $row ? ($row['type'] ?: null) : null,
+            ];
         } catch (\Exception) {
-            return null;
+            $this->geometryMetadata = ['srid' => null, 'type' => null];
         }
-    }
 
-    /**
-     * Parse table name into schema + table components.
-     *
-     * @return array{schema: string, table: string}
-     */
-    private function parseTableName(): array
-    {
-        $unquoted = str_replace('"', '', $this->tableName);
-        $parts = explode('.', $unquoted);
-        if (count($parts) === 2) {
-            return ['schema' => $parts[0], 'table' => $parts[1]];
-        }
-        return ['schema' => 'public', 'table' => $parts[0]];
+        return $this->geometryMetadata;
     }
 }

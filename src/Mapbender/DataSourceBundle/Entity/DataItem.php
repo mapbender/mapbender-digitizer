@@ -4,17 +4,16 @@ namespace Mapbender\DataSourceBundle\Entity;
 class DataItem implements \ArrayAccess
 {
     /** @var mixed[] */
-    protected $attributes = array();
+    protected array $attributes = [];
 
-    /** @var string */
-    protected $uniqueIdField;
+    protected string $uniqueIdField;
 
     /**
-     * @param mixed[] $attributes array
+     * @param mixed[] $attributes
      * @param string $uniqueIdField ID field name
      * @internal
      */
-    public function __construct(array $attributes = array(), $uniqueIdField = 'id')
+    public function __construct(array $attributes = [], string $uniqueIdField = 'id')
     {
         $this->uniqueIdField = $uniqueIdField;
         if (!array_key_exists($this->uniqueIdField, $attributes)) {
@@ -25,80 +24,57 @@ class DataItem implements \ArrayAccess
     }
 
     /**
-     * @return array
+     * @return mixed[]
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->attributes;
     }
 
-    /**
-     * @param mixed $id
-     */
-    public function setId($id)
+    public function setId(mixed $id): void
     {
         $this->attributes[$this->uniqueIdField] = $id;
     }
 
     /**
-     * Is id not null
-     *
-     * @return bool
      * @deprecated use getId and coerce to boolean
      */
-    public function hasId()
+    public function hasId(): bool
     {
         return !is_null($this->getId());
     }
 
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
+    public function getId(): mixed
     {
         return $this->attributes[$this->uniqueIdField];
     }
 
     /**
-     * Get attributes
-     *
      * @return mixed[]
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->attributes;
     }
 
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public function getAttribute($name)
+    public function getAttribute(string $name): mixed
     {
         return $this->attributes[$name];
     }
 
     /**
-     * ADD attributes
+     * Merge attributes into the existing set.
      *
-     * @param mixed $attributes
+     * @param mixed[] $attributes
      */
-    public function setAttributes($attributes)
+    public function setAttributes(array $attributes): void
     {
         $this->attributes = array_merge($this->attributes, $attributes);
     }
 
-    /**
-     * Set attribute
-     *
-     * @param string $key
-     * @param mixed $value
-     */
-    public function setAttribute($key, $value)
+    public function setAttribute(string $key, mixed $value): void
     {
-        $this->attributes[ $key ] = $value;
+        $this->attributes[$key] = $value;
     }
 
     public function offsetExists($offset): bool

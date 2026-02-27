@@ -55,23 +55,15 @@ class DataStore
     /**
      * @param Connection $connection
      * @param TokenStorageInterface $tokenStorage
-     * @param mixed $eventProcessorOrConfig EventProcessor (deprecated, ignored) or config array
-     * @param array $config Configuration array (when 3rd arg is EventProcessor)
+     * @param array $config Configuration array
      */
     public function __construct(
         Connection $connection,
         TokenStorageInterface $tokenStorage,
-        $eventProcessorOrConfig = [],
         $config = [],
     ) {
         $this->connection = $connection;
         $this->tokenStorage = $tokenStorage;
-
-        // Backward compatibility: old signature passed EventProcessor as 3rd arg, config as 4th
-        if (is_array($eventProcessorOrConfig)) {
-            $config = $eventProcessorOrConfig;
-        }
-        // else: $eventProcessorOrConfig is EventProcessor (ignored), $config is 4th arg
 
         $this->tableName = $config['table'] ?? '';
         $this->uniqueId = $config['uniqueId'] ?? 'id';
@@ -145,11 +137,18 @@ class DataStore
     }
 
     /**
-     * @return string Database platform name (e.g. "postgresql")
+     * Check if the underlying database platform is PostgreSQL.
+     *
+     * Replaces the deprecated getPlatformName() which relied on
+     * Doctrine DBAL's deprecated Platform::getName().
+     *
+     * @return bool
      */
-    public function getPlatformName(): string
+    public function isPostgreSQL(): bool
     {
-        return $this->connection->getDatabasePlatform()->getName();
+        $platform = $this->connection->getDatabasePlatform();
+        return $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform
+            || $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQL120Platform;
     }
 
     /**
@@ -255,10 +254,11 @@ class DataStore
     }
 
     /**
-     * @param mixed $itemOrId DataItem or integer ID
-     * @return int|null Number of deleted rows
+     * Delete a data item by ID or DataItem instance.
+     *
+     * @return int|string Number of deleted rows
      */
-    public function remove($itemOrId)
+    public function remove(DataItem|int|string $itemOrId): int|string
     {
         $id = ($itemOrId instanceof DataItem) ? $itemOrId->getId() : $itemOrId;
         return $this->connection->delete(
@@ -310,6 +310,12 @@ class DataStore
     /**
      * Add WHERE clauses from permanent filter and criteria.
      *
+     * SECURITY NOTE: Both $this->filter and $criteria['where'] are raw SQL fragments.
+     * - $this->filter comes from trusted YAML/DB configuration, sanitized by sanitizeFilter().
+     * - $criteria['where'] is constructed by internal code paths only (HttpHandler/UserFilterProvider),
+     *   using quoteIdentifier() and quote() — never from direct user input.
+     * Do NOT pass unsanitized user input through these channels.
+     *
      * @param \Doctrine\DBAL\Query\QueryBuilder $qb
      * @param array $criteria
      */
@@ -343,6 +349,9 @@ class DataStore
             $placeholders[] = '?';
             $params[] = $value;
         }
+
+        // Extension point for subclasses (e.g. FeatureType adds geometry)
+        $this->collectInsertData($item, $columns, $placeholders, $params);
 
         if (empty($columns)) {
             $sql = sprintf(
@@ -379,15 +388,18 @@ class DataStore
         $allProperties = $this->getItemPropertiesForStorage($item);
         $storageData = $this->propertyAdapter->prepareStorageData($allProperties);
 
-        if (!empty($storageData)) {
-            $setClauses = [];
-            $params = [];
+        $setClauses = [];
+        $params = [];
 
-            foreach ($storageData as $col => $value) {
-                $setClauses[] = $this->qi($col) . ' = ?';
-                $params[] = $value;
-            }
+        foreach ($storageData as $col => $value) {
+            $setClauses[] = $this->qi($col) . ' = ?';
+            $params[] = $value;
+        }
 
+        // Extension point for subclasses (e.g. FeatureType adds geometry)
+        $this->collectUpdateData($item, $setClauses, $params);
+
+        if (!empty($setClauses)) {
             $params[] = $item->getId();
 
             $sql = sprintf(
@@ -401,6 +413,33 @@ class DataStore
         }
 
         return $this->reloadItem($item) ?? $item;
+    }
+
+    /**
+     * Hook for subclasses to add extra columns to INSERT statements.
+     * Called after property adapter columns are collected.
+     *
+     * @param DataItem $item The item being inserted
+     * @param string[] &$columns Quoted column names (modified by reference)
+     * @param string[] &$placeholders SQL placeholders/expressions (modified by reference)
+     * @param array &$params Bound parameter values (modified by reference)
+     */
+    protected function collectInsertData(DataItem $item, array &$columns, array &$placeholders, array &$params): void
+    {
+        // Base implementation: no extra columns
+    }
+
+    /**
+     * Hook for subclasses to add extra SET clauses to UPDATE statements.
+     * Called after property adapter columns are collected.
+     *
+     * @param DataItem $item The item being updated
+     * @param string[] &$setClauses SET clause fragments (modified by reference)
+     * @param array &$params Bound parameter values (modified by reference)
+     */
+    protected function collectUpdateData(DataItem $item, array &$setClauses, array &$params): void
+    {
+        // Base implementation: no extra columns
     }
 
     /**
@@ -455,9 +494,29 @@ class DataStore
      */
     protected function quoteTableName(string $tableName): string
     {
+        $parsed = static::parseSchemaQualifiedName($tableName);
+        $parts = [$parsed['table']];
+        if ($parsed['schema'] !== 'public') {
+            array_unshift($parts, $parsed['schema']);
+        }
+        return implode('.', array_map(fn($p) => $this->qi($p), $parts));
+    }
+
+    /**
+     * Parse a potentially schema-qualified table name into schema + table components.
+     * Handles both quoted ('"schema"."table"') and unquoted ('schema.table') formats.
+     *
+     * @param string $tableName
+     * @return array{schema: string, table: string}
+     */
+    protected static function parseSchemaQualifiedName(string $tableName): array
+    {
         $unquoted = str_replace('"', '', $tableName);
         $parts = explode('.', $unquoted);
-        return implode('.', array_map(fn($p) => $this->qi($p), $parts));
+        if (count($parts) === 2) {
+            return ['schema' => $parts[0], 'table' => $parts[1]];
+        }
+        return ['schema' => 'public', 'table' => $parts[0]];
     }
 
     /**

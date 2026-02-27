@@ -8,7 +8,6 @@ use Mapbender\CoreBundle\Entity\Element;
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
 use Mapbender\DataManagerBundle\Exception\UnknownSchemaException;
 use Mapbender\DataSourceBundle\Component\DataStore;
-use Mapbender\DataSourceBundle\Component\FeatureType;
 use Mapbender\DataSourceBundle\Component\RepositoryRegistry;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
@@ -369,6 +368,7 @@ class SchemaFilter
      */
     public function processSchemaBaseConfig(array $schemaConfig, $schemaName)
     {
+        $defaults = static::getConfigDefaults();
         // Re-merge "popup" sub-array
         if (!empty($schemaConfig['popup']) && !empty($defaults['popup'])) {
             $schemaConfig['popup'] = array_replace($defaults['popup'], $schemaConfig['popup']);
@@ -425,7 +425,9 @@ class SchemaFilter
     protected function getExtendedUploadsBasePath($storeConfig)
     {
         if (null === $this->isFeatureTypeRegistry) {
-            $this->isFeatureTypeRegistry = (($this->registry->dataStoreFactory($storeConfig)) instanceof FeatureType);
+            // Detect FeatureType by config key presence instead of instantiating a repository
+            $this->isFeatureTypeRegistry = !empty($storeConfig['geomField'])
+                || !empty($storeConfig['srid']);
         }
         return $this->uploadsBasePath . '/' . ($this->isFeatureTypeRegistry ? 'featureTypes' : 'ds-uploads');
     }
