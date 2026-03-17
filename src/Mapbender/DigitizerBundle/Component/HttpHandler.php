@@ -27,14 +27,15 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
     /** @var Environment */
     protected $twig;
 
-    public function __construct(Environment $twig,
+    public function __construct(Environment          $twig,
                                 FormFactoryInterface $formFactory,
-                                SchemaFilter $schemaFilter,
-                                UserFilterProvider $userFilterProvider,
-                                TranslatorInterface $translator,
+                                SchemaFilter         $schemaFilter,
+                                UserFilterProvider   $userFilterProvider,
+                                TranslatorInterface  $translator,
+                                string               $defaultPattern,
     )
     {
-        parent::__construct($formFactory, $schemaFilter, $userFilterProvider, $translator);
+        parent::__construct($formFactory, $schemaFilter, $userFilterProvider, $translator, $defaultPattern);
         $this->twig = $twig;
     }
 

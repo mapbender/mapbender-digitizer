@@ -36,7 +36,8 @@ class HttpHandler implements ElementHttpHandlerInterface
     public function __construct(FormFactoryInterface $formFactory,
                                 SchemaFilter         $schemaFilter,
                                 UserFilterProvider   $userFilterProvider,
-                                TranslatorInterface $translator
+                                TranslatorInterface  $translator,
+                                protected string     $defaultPattern,
     )
     {
         $this->formFactory = $formFactory;
@@ -182,7 +183,7 @@ class HttpHandler implements ElementHttpHandlerInterface
             // store new item
             $dataItem = $schema->getRepository()->itemFactory();
         }
-        $this->validateInputData($element->getConfiguration(), $schema->config, $requestData);
+        $this->validateInputData($schema->config, $requestData);
         $itemOut = $this->saveItem($schema, $dataItem, $requestData);
         return array(
             'dataItem' => $this->formatResponseItem($schema, $itemOut),
@@ -197,20 +198,19 @@ class HttpHandler implements ElementHttpHandlerInterface
         return $schema->getRepository()->save($item);
     }
 
-    protected function validateInputData($elementConfig, $schemaConfig, $requestData)
+    protected function validateInputData($schemaConfig, $requestData)
     {
-        $pattern = $elementConfig['pattern'];
-        $this->iterateFormItems($schemaConfig['formItems'], $pattern, $requestData);
+        $this->iterateFormItems($schemaConfig['formItems'],$requestData);
     }
 
-    protected function iterateFormItems($formItems, $pattern, $requestData)
+    protected function iterateFormItems($formItems, $requestData)
     {
         foreach ($formItems as $formItem) {
             if (array_key_exists('children', $formItem)) {
-                $this->iterateFormItems($formItem['children'], $pattern, $requestData);
+                $this->iterateFormItems($formItem['children'], $requestData);
             } else {
                 if (array_key_exists('name', $formItem) && !empty($requestData['properties'][$formItem['name']])) {
-                    $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $pattern;
+                    $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $this->defaultPattern;
                     if (!preg_match('/' . $pattern . '/u', $requestData['properties'][$formItem['name']])) {
                         $fieldName = !empty($formItem['label']) ? $formItem['label'] : $formItem['name'];
                         $error = $this->translate('api.query.error-invalid-data')." ($fieldName)";
