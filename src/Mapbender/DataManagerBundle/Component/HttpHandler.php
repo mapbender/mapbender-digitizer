@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Data manager http handler for new (Mapbender >= 3.2.6) service Element
@@ -30,14 +31,18 @@ class HttpHandler implements ElementHttpHandlerInterface
     protected $schemaFilter;
     /** @var UserFilterProvider */
     protected $userFilterProvider;
+    private TranslatorInterface $translator;
 
     public function __construct(FormFactoryInterface $formFactory,
-                                SchemaFilter $schemaFilter,
-                                UserFilterProvider $userFilterProvider)
+                                SchemaFilter         $schemaFilter,
+                                UserFilterProvider   $userFilterProvider,
+                                TranslatorInterface $translator
+    )
     {
         $this->formFactory = $formFactory;
         $this->schemaFilter = $schemaFilter;
         $this->userFilterProvider = $userFilterProvider;
+        $this->translator = $translator;
     }
 
     public function handleRequest(Element $element, Request $request)
@@ -53,6 +58,8 @@ class HttpHandler implements ElementHttpHandlerInterface
             return new JsonResponse(array('message' => $e->getMessage()), JsonResponse::HTTP_NOT_FOUND);
         } catch (\Doctrine\DBAL\Exception $e) {
             return new JsonResponse(array('message' => $e->getMessage()), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Exception $e) {
+            return new Response($this->translate($e->getMessage()), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -205,7 +212,9 @@ class HttpHandler implements ElementHttpHandlerInterface
                 if (array_key_exists('name', $formItem) && !empty($requestData['properties'][$formItem['name']])) {
                     $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $pattern;
                     if (!preg_match('/' . $pattern . '/u', $requestData['properties'][$formItem['name']])) {
-                        throw new BadRequestHttpException('api.query.error-invalid-data');
+                        $fieldName = !empty($formItem['label']) ? $formItem['label'] : $formItem['name'];
+                        $error = $this->translate('api.query.error-invalid-data')." ($fieldName)";
+                        throw new BadRequestHttpException($error);
                     }
                 }
             }
@@ -374,5 +383,19 @@ class HttpHandler implements ElementHttpHandlerInterface
         } while (true);
 
         return $file->move($targetDir, $name);
+    }
+
+    /**
+     * Translate a message, first trying the message id directly, then prefixing it with "mb.data.store." if not found.
+     */
+    private function translate(string $message): string
+    {
+        $translatedDirectly = $this->translator->trans($message);
+        if ($message !== $translatedDirectly) return $translatedDirectly;
+
+        $translatedPrefixed = $this->translator->trans('mb.data.store.' . $message);
+        if ('mb.data.store.'.$message !== $translatedPrefixed) return $translatedPrefixed;
+
+        return $message;
     }
 }
