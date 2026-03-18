@@ -120,7 +120,13 @@
          */
         showRow: function(tr) {
             var dt = this.getDatatablesInstance_();
-            // NOTE: current dataTables versions could just do dt.row(tr).show().draw(false)
+            // TODO v5: check can be removed in next major upgrade
+            if ($.fn.DataTable.versionCheck('2.0')) {
+                // redraw table
+                return dt.draw(false);
+            }
+
+            // in older versions, automatic pagination after adding a row was not available
             var rowIndex = dt.rows({order: 'current'}).nodes().indexOf(tr);
             var pageLength = dt.page.len();
             var rowPage = Math.floor(rowIndex / pageLength);

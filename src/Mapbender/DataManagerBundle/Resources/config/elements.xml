@@ -13,6 +13,8 @@
             <argument type="service" id="form.factory" />
             <argument type="service" id="mb.data-manager.schema_filter" />
             <argument type="service" id="mb.data-manager.user_filter_provider" />
+            <argument type="service" id="translator" />
+            <argument>%mapbender.data_manager.default_regex%</argument>
         </service>
         <service id="mapbender.element.DataManager" class="Mapbender\DataManagerBundle\Element\DataManager">
             <tag name="mapbender.element" canonical="Mapbender\DataManagerBundle\Element\DataManagerElement" />

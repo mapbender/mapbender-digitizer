@@ -14,6 +14,8 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 /**
@@ -25,12 +27,15 @@ class HttpHandler extends \Mapbender\DataManagerBundle\Component\HttpHandler
     /** @var Environment */
     protected $twig;
 
-    public function __construct(Environment $twig,
+    public function __construct(Environment          $twig,
                                 FormFactoryInterface $formFactory,
-                                SchemaFilter $schemaFilter,
-                                UserFilterProvider $userFilterProvider)
+                                SchemaFilter         $schemaFilter,
+                                UserFilterProvider   $userFilterProvider,
+                                TranslatorInterface  $translator,
+                                string               $defaultPattern,
+    )
     {
-        parent::__construct($formFactory, $schemaFilter, $userFilterProvider);
+        parent::__construct($formFactory, $schemaFilter, $userFilterProvider, $translator, $defaultPattern);
         $this->twig = $twig;
     }
 
