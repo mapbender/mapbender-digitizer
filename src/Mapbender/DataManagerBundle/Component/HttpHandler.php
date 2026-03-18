@@ -208,14 +208,17 @@ class HttpHandler implements ElementHttpHandlerInterface
         foreach ($formItems as $formItem) {
             if (array_key_exists('children', $formItem)) {
                 $this->iterateFormItems($formItem['children'], $requestData);
-            } else {
-                if (array_key_exists('name', $formItem) && !empty($requestData['properties'][$formItem['name']])) {
-                    $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $this->defaultPattern;
-                    if (!preg_match('/' . $pattern . '/u', $requestData['properties'][$formItem['name']])) {
-                        $fieldName = !empty($formItem['label']) ? $formItem['label'] : $formItem['name'];
-                        $error = $this->translate('api.query.error-invalid-data')." ($fieldName)";
-                        throw new BadRequestHttpException($error);
-                    }
+            } elseif (array_key_exists('name', $formItem) && !empty($requestData['properties'][$formItem['name']])) {
+                $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $this->defaultPattern;
+                // Escape the chosen delimiter in the pattern to avoid breaking the regex.
+                $escapedPattern = str_replace('#', '\#', $pattern);
+                $regex = '#' . $escapedPattern . '#u';
+                // Suppress potential warnings from invalid regexes and handle errors explicitly.
+                $result = @preg_match($regex, $requestData['properties'][$formItem['name']]);
+                if ($result !== 1) {
+                    $fieldName = !empty($formItem['label']) ? $formItem['label'] : $formItem['name'];
+                    $error = $this->translate('api.query.error-invalid-data') . " ($fieldName)";
+                    throw new BadRequestHttpException($error);
                 }
             }
         }
