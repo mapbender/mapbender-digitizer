@@ -449,7 +449,6 @@
         }
 
         handle_file_(settings) {
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L545 */
             var $inputReal = $('<input type="hidden" />')
                 // NOTE: do not attempt required / disabled etc on hidden inputs
                 .attr('name', settings.name)
@@ -490,7 +489,6 @@
         }
 
         handle_image_(settings) {
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L496 */
             /** @todo: support "enlargeImage"...? */
             var src = settings.src || null;
             if (src && !/^(http[s]?)?:?\//.test(src)) {
@@ -563,7 +561,6 @@
         }
 
         handle_tabs_(settings) {
-            /** https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L641 */
             var $tabList = $(document.createElement('ul'));
             var $container = $(document.createElement('div'));
             $container.append($tabList);
@@ -625,7 +622,6 @@
         }
 
         handle_html_(settings) {
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L265 */
             const $wrapper = $(document.createElement('div'))
                 .attr(settings.attr || {})
                 .addClass(settings.cssClass)
@@ -636,7 +632,6 @@
         }
 
         handle_text_(settings) {
-            /** https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L823 */
             var $wrapper = $(document.createElement('div')).addClass('mb-3 text');
             var $textContainer = $(document.createElement('div'));
 
@@ -804,7 +799,6 @@
         }
 
         fieldLabel_(settings) {
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L353 */
             var $label = $(document.createElement('label'))
                 .attr({'for': settings.name || null })
                 .text(settings.title || settings.text)
@@ -817,7 +811,6 @@
                 ;
                 $label.append('&nbsp;', $icon);
             }
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L345 */
             if (settings.copyClipboard) {
                 $label.append('&nbsp;', $('<i/>')
                     .addClass('fa fa-clipboard far-clipboard -fn-copytoclipboard')
@@ -877,7 +870,6 @@
         }
 
         addCustomEvents_($input, settings) {
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L123 */
             var names = ['filled', 'change'].filter(function(name) {
                 return settings[name];
             });

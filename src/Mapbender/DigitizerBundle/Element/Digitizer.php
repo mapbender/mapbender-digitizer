@@ -59,14 +59,14 @@ class Digitizer extends DataManager
                 "@MapbenderDigitizerBundle/Resources/public/ContextMenu.js",
                 "@MapbenderDigitizerBundle/Resources/public/FeatureStyleEditor.js",
                 "@MapbenderDigitizerBundle/Resources/public/StyleAdapter.js",
-                '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
+                '/bundles/mapbendercore/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
                 '../vendor/select2/select2/dist/js/select2.js',
                 '../vendor/select2/select2/dist/js/i18n/de.js',
                 '@MapbenderDigitizerBundle/Resources/public/polyfill/setprototype.polyfill.js',
             )),
             'css' => array_merge($dataManagerAssets["css"], array(
                 '../vendor/select2/select2/dist/css/select2.css',
-                '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
+                '/bundles/mapbendercore/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
             )),
             'trans' => array_merge($dataManagerAssets['trans'], array(

@@ -44,17 +44,6 @@ class DataItem implements \ArrayAccess
     }
 
     /**
-     * Is id not null
-     *
-     * @return bool
-     * @deprecated use getId and coerce to boolean
-     */
-    public function hasId()
-    {
-        return !is_null($this->getId());
-    }
-
-    /**
      * Get id
      *
      * @return integer

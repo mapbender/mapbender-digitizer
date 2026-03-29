@@ -110,14 +110,6 @@
                         self.queuedRefresh_[schema.schemaName] = true;
                     }
                 }
-                // @todo ml: filter table rows for min/max resolution (not just on moveend, but always)
-                if (false) {
-                    var layer = self.getSchemaLayer(schema);
-                    var resolution = olMap.getView().getResolution();
-                    if (resolution > layer.getMaxResolution() || resolution < layer.getMinResolution()) {
-                        self.tableRenderer.replaceRows([]);
-                    }
-                }
             });
             this.mbMap.element.on('mbmapsrschanged', function(event, data) {
                 self.featureEditor.pause();
@@ -675,18 +667,6 @@
          */
         getSchemaLayers(schema) {
             return this.renderer.getLayers(schema);
-        }
-
-        /**
-         * @param {*} schema
-         * @returns {ol.layer.Vector|undefined}
-         * @deprecated use getSchemaLayers for proper multi-layer support
-         */
-        getSchemaLayer(schema) {
-            if (schema.combine) {
-                throw new Error('Cannot get single layer for combination schema');
-            }
-            return this.getSchemaLayers(schema)[0];
         }
 
         cloneFeature(schema, feature) {
