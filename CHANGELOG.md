@@ -1,4 +1,4 @@
-## next bugfix release
+## 2.0.8
 * Add support for DataTables version 2 ([PR#150](https://github.com/mapbender/mapbender-digitizer/pull/150)), [PR#154](https://github.com/mapbender/mapbender-digitizer/pull/154)
 * Show message after asynchronous requests for expired sessions with option to retry ([PR#151](https://github.com/mapbender/mapbender-digitizer/pull/151))
 * Add validation for input fields, new parameter `mapbender.data_manager.default_regex` for default ([PR#152](https://github.com/mapbender/mapbender-digitizer/pull/152), [PR#154](https://github.com/mapbender/mapbender-digitizer/pull/154))
