@@ -5,6 +5,7 @@
     <parameters>
         <!-- ensure required parameter is defined (parameters.yml will win this) -->
         <parameter key="dataStores" type="collection" />
+        <parameter key="mapbender.data_manager.default_regex" type="string">.*</parameter>
     </parameters>
     <services>
         <service id="mb.data-manager.registry" class="Mapbender\DataSourceBundle\Component\RepositoryRegistry" >

@@ -22,6 +22,8 @@
             <argument type="service" id="form.factory" />
             <argument type="service" id="mb.digitizer.schema_filter" />
             <argument type="service" id="mb.digitizer.user_filter_provider" />
+            <argument type="service" id="translator" />
+            <argument>%mapbender.data_manager.default_regex%</argument>
         </service>
         <service id="mapbender.element.Digitizer" class="Mapbender\DigitizerBundle\Element\Digitizer">
             <tag name="mapbender.element" />

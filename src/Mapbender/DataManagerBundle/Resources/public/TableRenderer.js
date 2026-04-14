@@ -127,13 +127,8 @@
          * @param {Element} tr
          */
         showRow(tr) {
-            const dt = this.getDatatablesInstance_();
-            // NOTE: current dataTables versions could just do dt.row(tr).show().draw(false)
-            const rowIndex = dt.rows({order: 'current'}).nodes().indexOf(tr);
-            const pageLength = dt.page.len();
-            const rowPage = Math.floor(rowIndex / pageLength);
-            dt.page(rowPage);
-            dt.draw(false);
+            // redraw table
+            return this.getDatatablesInstance_().draw(false);
         }
 
         /**

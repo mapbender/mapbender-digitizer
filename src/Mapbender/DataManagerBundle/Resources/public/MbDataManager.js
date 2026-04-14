@@ -829,7 +829,10 @@
                 return;
             }
             let errorMessage = Mapbender.trans('mb.data.store.api.query.error-message');
-            let responseErrorMessage = Mapbender.trans('mb.data.store.'+xhr.responseJSON.message);
+            const xhrMessage = xhr.responseJSON?.message;
+            const translatedMessage = Mapbender.trans('mb.data.store.' + xhrMessage);
+            const responseErrorMessage = translatedMessage === ('mb.data.store.' + xhrMessage) ? xhrMessage : translatedMessage;
+
             console.error(errorMessage, xhr);
             if (xhr.responseJSON && xhr.responseJSON.message) {
                 errorMessage = [errorMessage, responseErrorMessage].join(':\n');

@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Data manager http handler for new (Mapbender >= 3.2.6) service Element
@@ -30,14 +31,19 @@ class HttpHandler implements ElementHttpHandlerInterface
     protected $schemaFilter;
     /** @var UserFilterProvider */
     protected $userFilterProvider;
+    private TranslatorInterface $translator;
 
     public function __construct(FormFactoryInterface $formFactory,
-                                SchemaFilter $schemaFilter,
-                                UserFilterProvider $userFilterProvider)
+                                SchemaFilter         $schemaFilter,
+                                UserFilterProvider   $userFilterProvider,
+                                TranslatorInterface  $translator,
+                                protected string     $defaultPattern,
+    )
     {
         $this->formFactory = $formFactory;
         $this->schemaFilter = $schemaFilter;
         $this->userFilterProvider = $userFilterProvider;
+        $this->translator = $translator;
     }
 
     public function handleRequest(Element $element, Request $request)
@@ -53,6 +59,8 @@ class HttpHandler implements ElementHttpHandlerInterface
             return new JsonResponse(array('message' => $e->getMessage()), JsonResponse::HTTP_NOT_FOUND);
         } catch (\Doctrine\DBAL\Exception $e) {
             return new JsonResponse(array('message' => $e->getMessage()), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Exception $e) {
+            return new Response($this->translate($e->getMessage()), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -175,7 +183,7 @@ class HttpHandler implements ElementHttpHandlerInterface
             // store new item
             $dataItem = $schema->getRepository()->itemFactory();
         }
-        $this->validateInputData($element->getConfiguration(), $schema->config, $requestData);
+        $this->validateInputData($schema->config, $requestData);
         $itemOut = $this->saveItem($schema, $dataItem, $requestData);
         return array(
             'dataItem' => $this->formatResponseItem($schema, $itemOut),
@@ -190,23 +198,27 @@ class HttpHandler implements ElementHttpHandlerInterface
         return $schema->getRepository()->save($item);
     }
 
-    protected function validateInputData($elementConfig, $schemaConfig, $requestData)
+    protected function validateInputData($schemaConfig, $requestData)
     {
-        $pattern = $elementConfig['pattern'];
-        $this->iterateFormItems($schemaConfig['formItems'], $pattern, $requestData);
+        $this->iterateFormItems($schemaConfig['formItems'],$requestData);
     }
 
-    protected function iterateFormItems($formItems, $pattern, $requestData)
+    protected function iterateFormItems($formItems, $requestData)
     {
         foreach ($formItems as $formItem) {
             if (array_key_exists('children', $formItem)) {
-                $this->iterateFormItems($formItem['children'], $pattern, $requestData);
-            } else {
-                if (array_key_exists('name', $formItem) && !empty($requestData['properties'][$formItem['name']])) {
-                    $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $pattern;
-                    if (!preg_match('/' . $pattern . '/u', $requestData['properties'][$formItem['name']])) {
-                        throw new BadRequestHttpException('api.query.error-invalid-data');
-                    }
+                $this->iterateFormItems($formItem['children'], $requestData);
+            } elseif (array_key_exists('name', $formItem) && !empty($requestData['properties'][$formItem['name']])) {
+                $pattern = (!empty($formItem['attr']['pattern'])) ? $formItem['attr']['pattern'] : $this->defaultPattern;
+                // Escape the chosen delimiter in the pattern to avoid breaking the regex.
+                $escapedPattern = str_replace('#', '\#', $pattern);
+                $regex = '#' . $escapedPattern . '#u';
+                // Suppress potential warnings from invalid regexes and handle errors explicitly.
+                $result = @preg_match($regex, $requestData['properties'][$formItem['name']]);
+                if ($result !== 1) {
+                    $fieldName = !empty($formItem['label']) ? $formItem['label'] : $formItem['name'];
+                    $error = $this->translate('api.query.error-invalid-data') . " ($fieldName)";
+                    throw new BadRequestHttpException($error);
                 }
             }
         }
@@ -374,5 +386,19 @@ class HttpHandler implements ElementHttpHandlerInterface
         } while (true);
 
         return $file->move($targetDir, $name);
+    }
+
+    /**
+     * Translate a message, first trying the message id directly, then prefixing it with "mb.data.store." if not found.
+     */
+    private function translate(string $message): string
+    {
+        $translatedDirectly = $this->translator->trans($message);
+        if ($message !== $translatedDirectly) return $translatedDirectly;
+
+        $translatedPrefixed = $this->translator->trans('mb.data.store.' . $message);
+        if ('mb.data.store.'.$message !== $translatedPrefixed) return $translatedPrefixed;
+
+        return $message;
     }
 }

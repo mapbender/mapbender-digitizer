@@ -3,9 +3,11 @@
 * Add dynamic expression support for labels, text fields, and popup titles (template literal syntax `${data.property}`) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
 * Modernize JavaScript codebase (ES6 classes, singleton pattern for better extensibility) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
 
-## next bugfix release
-* Add support for DataTables version 2 ([PR#150](https://github.com/mapbender/mapbender-digitizer/pull/150))
+## 2.0.8
+* Add support for DataTables version 2 ([PR#150](https://github.com/mapbender/mapbender-digitizer/pull/150)), [PR#154](https://github.com/mapbender/mapbender-digitizer/pull/154)
 * Show message after asynchronous requests for expired sessions with option to retry ([PR#151](https://github.com/mapbender/mapbender-digitizer/pull/151))
+* Add validation for input fields, new parameter `mapbender.data_manager.default_regex` for default ([PR#152](https://github.com/mapbender/mapbender-digitizer/pull/152), [PR#154](https://github.com/mapbender/mapbender-digitizer/pull/154))
+* Improve error handling ([PR#154](https://github.com/mapbender/mapbender-digitizer/pull/154))
 
 ## 2.0.7
 * Add file type check to form type `file` (key: `allowedFileTypes`) ([PR#147](https://github.com/mapbender/mapbender-digitizer/pull/147))

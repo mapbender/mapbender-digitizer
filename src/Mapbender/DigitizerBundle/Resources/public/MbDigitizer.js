@@ -853,14 +853,13 @@
                 sourceIds = [sourceIds];
             }
             for (let i = 0; i < sourceIds.length; ++i) {
-                let source = this.mbMap.getModel().getSourceById(sourceIds[i]);
+                const model = this.mbMap.getModel();
+                let source = model.getSourceBySourceId(sourceIds[i]);
+
                 if (!source) {
-                    if (!this.mbMap.getModel().findSourceAndLayerIdByName) {
-                        console.warn('Method findSourceAndLayerIdByName not available - consider Mapbender upgrade');
-                    } else {
-                        let ids = this.mbMap.getModel().findSourceAndLayerIdByName(sourceIds[i]);
-                        let sourceId = ids.sourceId; source = sourceId && this.mbMap.getModel().getSourceById(sourceId);
-                    }
+                    let ids = model.findSourceAndLayerIdByName(sourceIds[i]);
+                    let sourceId = ids.sourceId;
+                    source = sourceId && model.getSourceById(sourceId);
                 }
                 if (source) {
                     if (typeof (source.refresh) === 'function') {

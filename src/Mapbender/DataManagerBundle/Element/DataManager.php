@@ -52,7 +52,6 @@ class DataManager extends AbstractElementService
         return array(
             'schemes' => null,
             'element_icon' => self::getDefaultIcon(),
-            'pattern' => '^[\p{L}0-9_\-\s]*$',
         );
     }
 
