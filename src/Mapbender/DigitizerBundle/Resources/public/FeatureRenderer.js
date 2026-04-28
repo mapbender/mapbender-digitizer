@@ -444,7 +444,7 @@
         createEditingStyle_() {
             // Adopted from "ol4-extensions" repository
             // @see https://github.com/mapbender/ol4-extensions/blob/0.0.4/selectableModify.js#L3
-            const baseStyle = ol.style.Style.defaultFunction()[0].clone();
+            const baseStyle = ol.style.Style.createDefaultStyle()[0].clone();
             const extractEdges = function(geometry) {
                 let polygons, lines;
                 switch (geometry.getType()) {

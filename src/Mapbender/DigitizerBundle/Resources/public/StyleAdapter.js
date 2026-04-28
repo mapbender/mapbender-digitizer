@@ -6,7 +6,7 @@
     class StyleAdapter {
         constructor(defaultStyleConfig) {
             this.placeholderRx_ = /\${([^}]+)}/g;
-            this.defaultStyle_ = ol.style.Style.defaultFunction()[0].clone();
+            this.defaultStyle_ = ol.style.Style.createDefaultStyle()[0].clone();
             this.enforceArrayColor_(this.defaultStyle_);
 
             var placeholderProps = this.detectDataPlaceholders_(defaultStyleConfig);
