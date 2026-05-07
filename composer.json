@@ -42,5 +42,11 @@
             "dev-release/1.4": "1.4.x-dev",
             "dev-staging/1.6": "1.6.x-dev"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/mapbender/jquery-file-upload"
+        }
+    ]
 }
