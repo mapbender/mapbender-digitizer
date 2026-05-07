@@ -15,7 +15,7 @@
         "php": ">=8.1",
         "doctrine/dbal": "^2.11 || ^3",
         "doctrine/persistence": "^2 || ^3",
-        "blueimp/jquery-file-upload": "9.*",
+        "mapbender/jquery-file-upload": "1.*",
         "mapbender/mapbender": "^4"
     },
     "provide": {

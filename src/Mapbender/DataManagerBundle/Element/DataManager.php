@@ -79,7 +79,7 @@ class DataManager extends AbstractElementService
                 '@MapbenderDataManagerBundle/Resources/public/FormRenderer.js',
                 '@MapbenderDataManagerBundle/Resources/public/FormUtil.js',
                 '@MapbenderDataManagerBundle/Resources/public/DialogFactory.js',
-                '../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
+                '../vendor/mapbender/jquery-file-upload/js/jquery.fileupload.js',
                 '@MapbenderDataManagerBundle/Resources/public/TableRenderer.js',
                 '@MapbenderDataManagerBundle/Resources/public/MbDataManager.js',
             ),
