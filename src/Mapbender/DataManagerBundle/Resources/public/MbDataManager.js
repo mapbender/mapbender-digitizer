@@ -1,5 +1,20 @@
 (function() {
 
+    const DEPRECATED_EVENT_HOOKS = [
+        'onBeforeSave', 'onAfterSave', 'onBeforeUpdate', 'onAfterUpdate',
+        'onBeforeInsert', 'onAfterInsert', 'onBeforeRemove', 'onAfterRemove',
+        'onBeforeSearch', 'onAfterSearch'
+    ];
+
+    const DEPRECATED_EVENTS_WARNING =
+        'The eval-based event system (EventProcessor) was removed because it allowed\n' +
+        'arbitrary PHP code execution from YAML/database configuration — a significant\n' +
+        'security risk. Any logic in these hooks is silently ignored.\n\n' +
+        'MIGRATION: Use database triggers, Symfony EventDispatcher, or DataStore\n' +
+        'subclass overrides instead. See EVENT-MIGRATION.md for a complete guide.\n\n' +
+        'To suppress this warning, remove the "events" key from the dataStore/featureType\n' +
+        'configuration of the affected schemas.';
+
     class MbDataManager extends MapbenderElement {
         constructor(configuration, $element) {
             super(configuration, $element);
@@ -56,6 +71,7 @@
                 }
             }
             this.tableRenderer = this._createTableRenderer();
+            this._warnDeprecatedEvents();
             this._initializeEvents();
             this._afterCreate();
         }
@@ -163,6 +179,44 @@
          */
         _afterCreate() {
             this._start();
+        }
+
+        /**
+         * Checks all schema configurations for deprecated server-side event hooks
+         * (onBeforeSave, onAfterSave, etc.) and displays a prominent console warning.
+         * These eval-based PHP events were removed for security reasons and are silently
+         * ignored by the backend. See EVENT-MIGRATION.md for migration instructions.
+         * @private
+         */
+        _warnDeprecatedEvents() {
+            const schemaNames = Object.keys(this.options.schemes);
+            const warnings = [];
+            for (const schemaName of schemaNames) {
+                const schema = this.options.schemes[schemaName];
+                if (schema.combine) continue;
+                const dsConfig = this._getDataStoreFromSchema(schema);
+                if (dsConfig && dsConfig.events && typeof dsConfig.events === 'object') {
+                    const configuredHooks = Object.keys(dsConfig.events).filter(function(k) {
+                        return DEPRECATED_EVENT_HOOKS.indexOf(k) !== -1 && dsConfig.events[k];
+                    });
+                    if (configuredHooks.length) {
+                        warnings.push({schema: schemaName, hooks: configuredHooks});
+                    }
+                }
+            }
+            if (warnings.length) {
+                const elementTitle = this.$element.attr('data-title') || this.$element.attr('id');
+                console.warn(
+                    '%c⚠ DEPRECATED EVENT HOOKS DETECTED — ' + elementTitle + ' %c\n\n' +
+                    'The following server-side event hooks are configured but will NOT be executed:\n\n' +
+                    warnings.map(function(w) {
+                        return '  Schema "' + w.schema + '": ' + w.hooks.join(', ');
+                    }).join('\n') + '\n\n' +
+                    DEPRECATED_EVENTS_WARNING,
+                    'background: #ff6600; color: white; font-size: 14px; font-weight: bold; padding: 4px 8px;',
+                    'color: #cc5500; font-size: 12px;'
+                );
+            }
         }
 
         /**
@@ -384,6 +438,7 @@
          * @private
          */
         _saveEvent(schema, dataItem, originalId) {
+            /** @var {DataManagerSaveEventData} eventData */
             const eventData = {
                 item: dataItem,
                 itemId: this._getUniqueItemId(dataItem),
@@ -589,7 +644,7 @@
                         const $scope = $('.popupContent', this.$element);
                         const saved = widget._submitFormData(schema, $scope, dataItem);
                         if (saved) {
-                            saved.then(function() {
+                            saved.then(function () {
                                 widget._closeCurrentPopup();
                             });
                         }
@@ -601,12 +656,22 @@
                     text: Mapbender.trans('mb.actions.delete'),
                     title: Mapbender.trans('mb.data-manager.actions.delete_tooltip'),
                     'class': 'btn btn-danger',
-                    click: function() {
+                    click: function () {
                         widget._closeCurrentPopup();
                         widget.removeData(schema, dataItem);
                     }
                 });
             }
+            var closeText = buttons.length && 'mb.actions.cancel' || 'mb.actions.close';
+            var closeTooltip = buttons.length && 'mb.data-manager.actions.cancel_tooltip' || 'mb.data-manager.actions.close_tooltip';
+            buttons.push({
+                text: Mapbender.trans(closeText),
+                title: Mapbender.trans(closeTooltip),
+                'class': 'btn btn-light',
+                click: function () {
+                    widget._cancelForm(schema, dataItem);
+                }
+            });
             return buttons;
         }
 
@@ -820,7 +885,7 @@
                     $loadingIndicator.css({ opacity: 0 });
                 });
             }
-            jqXhr.fail(this._onAjaxError);
+            jqXhr.fail(this._onAjaxError.bind(this));
             return jqXhr;
         }
 

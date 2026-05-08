@@ -14,39 +14,30 @@ use Mapbender\DataSourceBundle\Component\Factory\DataStoreFactory;
  */
 class RepositoryRegistry
 {
-    /** @var DataStoreFactory */
-    protected $factory;
+    protected DataStoreFactory $factory;
     /** @var mixed[][] */
-    protected $repositoryConfigs;
+    protected array $repositoryConfigs;
     /** @var DataStore[] */
-    protected $repositories = array();
+    protected array $repositories = [];
 
     /**
-     * @param DataStoreFactory $factory
      * @param mixed[][] $repositoryConfigs
      */
-    public function __construct(DataStoreFactory $factory,
-                                array $repositoryConfigs)
+    public function __construct(DataStoreFactory $factory, array $repositoryConfigs)
     {
         $this->factory = $factory;
         $this->repositoryConfigs = $repositoryConfigs;
     }
 
-    /**
-     * @param array $config
-     * @return DataStore
-     */
-    public function dataStoreFactory(array $config)
+    public function dataStoreFactory(array $config): DataStore
     {
         return $this->factory->fromConfig($config);
     }
 
     /**
-     * @param string $name
-     * @return DataStore
      * @since 0.1.15
      */
-    public function getDataStoreByName($name)
+    public function getDataStoreByName(string $name): DataStore
     {
         if (!$name) {
             throw new \InvalidArgumentException("Empty dataStore / featureType name " . var_export($name, true));
@@ -61,57 +52,15 @@ class RepositoryRegistry
      * @return mixed[][]
      * @since 0.1.8
      */
-    public function getDataStoreDeclarations()
+    public function getDataStoreDeclarations(): array
     {
         return $this->repositoryConfigs;
     }
 
     /**
-     * Alias for dataStoreFactory
-     *
-     * @param mixed[] $config
-     * @return DataStore
-     * @since 0.1.15
-     * @deprecated use aliased method directly
-     * aliased @since 0.1.22
-     */
-    public function featureTypeFactory(array $config)
-    {
-        return $this->dataStoreFactory($config);
-    }
-
-    /**
-     * Alias for getDataStoreByName
-     *
-     * @param string $name
-     * @return DataStore
-     * @since 0.1.15
-     * @deprecated use aliased method directly
-     * aliased @since 0.1.22
-     */
-    public function getFeatureTypeByName($name)
-    {
-        return $this->getDataStoreByName($name);
-    }
-
-    /**
-     * Alias for getDataStoreDeclarations
-     *
-     * @return array
-     * @deprecated use aliased method directly
-     * aliased @since 0.1.22
-     */
-    public function getFeatureTypeDeclarations()
-    {
-        return $this->getDataStoreDeclarations();
-    }
-
-    /**
-     * @param string $name
-     * @return Connection
      * @since 0.0.16
      */
-    public function getDbalConnectionByName($name)
+    public function getDbalConnectionByName(string $name): Connection
     {
         return $this->factory->getDbalConnectionByName($name);
     }

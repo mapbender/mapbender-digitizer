@@ -3,19 +3,15 @@ namespace Mapbender\DataSourceBundle\Entity;
 
 use Mapbender\DataSourceBundle\Utils\WktUtility;
 
-/**
- * @author    Andriy Oblivantsev <eslider@gmail.com>
- */
 class Feature extends DataItem
 {
-    /** @var string|null */
-    protected $geomField;
+    protected string $geomField;
 
     /**
      * @param string|null $geom
      * @return $this
      */
-    public function setGeom($geom)
+    public function setGeom(?string $geom): static
     {
         if ($geom && !($newSrid = WktUtility::getEwktSrid($geom))) {
             if ($oldSrid = $this->getSrid()) {
@@ -29,35 +25,26 @@ class Feature extends DataItem
 
     /**
      * Get geometry as WKT.
-     * @return string|null
      */
-    public function getGeom()
+    public function getGeom(): ?string
     {
         return WktUtility::wktFromEwkt($this->attributes[$this->geomField]);
     }
 
     /**
      * Get geometry as EWKT string.
-     *
-     * @return string|null
      */
-    public function getEwkt()
+    public function getEwkt(): ?string
     {
         return $this->attributes[$this->geomField] ?: null;
     }
 
-    /**
-     * @return integer|null
-     */
-    public function getSrid()
+    public function getSrid(): ?int
     {
         return WktUtility::getEwktSrid($this->getEwkt());
     }
 
-    /**
-     * @param integer $srid
-     */
-    public function setSrid($srid)
+    public function setSrid(int $srid): void
     {
         if ($wkt = WktUtility::wktFromEwkt($this->attributes[$this->geomField])) {
             $this->attributes[$this->geomField] = "SRID={$srid};{$wkt}";
@@ -70,13 +57,8 @@ class Feature extends DataItem
      * @param string $geomField
      * @internal
      */
-    public function __construct(array $attributes = array(), $uniqueIdField = 'id', $geomField = "geom")
+    public function __construct(array $attributes = array(), string $uniqueIdField = 'id', string $geomField = 'geom')
     {
-        if (\is_numeric($uniqueIdField)) {
-            @trigger_error("DEPRECATED: do not pass srid to Feature constructor.", E_USER_DEPRECATED);
-            $uniqueIdField = $geomField;
-            $geomField = (\func_num_args() >= 4) ? \func_get_arg(3) : 'geom';
-        }
         $this->geomField = $geomField;
         // Ensure getGeom / getEwkt / getSrid works
         $attributes += array(
@@ -85,12 +67,7 @@ class Feature extends DataItem
         parent::__construct($attributes, $uniqueIdField);
     }
 
-    /**
-     * ADD attributes
-     *
-     * @param mixed $attributes
-     */
-    public function setAttributes($attributes)
+    public function setAttributes(array $attributes): void
     {
         if (array_key_exists($this->geomField, $attributes)) {
             $this->setGeom($attributes[$this->geomField]);
@@ -99,7 +76,7 @@ class Feature extends DataItem
         parent::setAttributes($attributes);
     }
 
-    public function setAttribute($key, $value)
+    public function setAttribute(string $key, mixed $value): void
     {
         if ($key === $this->geomField) {
             $this->setGeom($value);
@@ -109,11 +86,9 @@ class Feature extends DataItem
     }
 
     /**
-     * Get geometry type
-     *
-     * @return string|null
+     * Get geometry type (e.g. "POLYGON", "POINT").
      */
-    public function getType()
+    public function getType(): ?string
     {
         return WktUtility::getGeometryType($this->attributes[$this->geomField]);
     }

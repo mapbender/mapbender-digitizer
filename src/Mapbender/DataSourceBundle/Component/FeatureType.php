@@ -1,214 +1,385 @@
 <?php
+
 namespace Mapbender\DataSourceBundle\Component;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Query\QueryBuilder;
+use Mapbender\DataSourceBundle\Component\PropertyAdapter\DiscreteColumnAdapter;
+use Mapbender\DataSourceBundle\Component\PropertyAdapter\PropertyAdapterInterface;
 use Mapbender\DataSourceBundle\Entity\DataItem;
 use Mapbender\DataSourceBundle\Entity\Feature;
 use Mapbender\DataSourceBundle\Utils\WktUtility;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
- * Loads and stores Features (DataItem with geometry).
+ * Repository for spatial database features (DataItem with PostGIS geometry).
  *
- * @author    Andriy Oblivantsev <eslider@gmail.com>
- * @copyright 2015 by WhereGroup GmbH & Co. KG
- * @link      https://github.com/mapbender/mapbender-digitizer
+ * Extends DataStore with geometry handling: spatial SELECT (ST_AsEWKT),
+ * spatial INSERT/UPDATE (ST_GeomFromEWKT, ST_MakeValid, ST_Transform),
+ * and spatial filtering (ST_Intersects).
+ *
+ * Additional configuration keys (on top of DataStore):
+ *   geomField   string   Geometry column name (default: "geom")
+ *   srid        int      Storage SRID; auto-detected from geometry_columns if omitted
  *
  * @method Feature save(Feature|array $feature)
  * @method Feature[] search(array $criteria)
- * @method Feature insertItem(Feature $item)
- * @method Feature updateItem(Feature $item)
- * @method Feature update($itemOrData)
  * @method Feature insert($itemOrData)
- * @method Feature[] getByIds(array $ids)
+ * @method Feature update($itemOrData)
  * @method Feature itemFactory()
- * @method Feature[] prepareResults(array $rows)
- * @method Feature getByIdInternal($id, QueryBuilder $qb)
  */
 class FeatureType extends DataStore
 {
-    /**
-     * @var string Geometry field name
-     */
-    protected $geomField;
+    protected string $geomField;
+    protected ?int $configuredSrid;
+    protected ?int $detectedSrid = null;
+    /** @var array{srid: int|null, type: string|null}|null Cached geometry_columns metadata */
+    private ?array $geometryMetadata = null;
 
-    /** @var int|null fallback source srid used only if detection fails (e.g. materialized views) */
-    protected $configuredSrid;
+    public function __construct(
+        Connection $connection,
+        TokenStorageInterface $tokenStorage,
+        array $config = [],
+    ) {
+        $this->geomField = $config['geomField'] ?? 'geom';
+        $this->configuredSrid = !empty($config['srid']) ? (int) $config['srid'] : null;
 
-    /**
-     * @var int SRID to get geometry converted to
-     */
-    protected $srid;
-
-    public function __construct(Connection $connection, TokenStorageInterface $tokenStorage, EventProcessor $eventProcessor, $args = array())
-    {
-        $this->geomField = $args['geomField'];
-        parent::__construct($connection, $tokenStorage, $eventProcessor, $args);
-        if ($this->geomField && false !== ($key = \array_search($this->geomField, $this->fields))) {
-            unset($this->fields[$key]);
-        }
-        if (!empty($args['srid'])) {
-            $this->configuredSrid = \intval($args['srid']) ?: null;
-        }
-    }
-
-    public function getFields()
-    {
-        return array_merge(parent::getFields(), array($this->geomField));
+        parent::__construct($connection, $tokenStorage, $config);
     }
 
     /**
-     * Get feature by ID and SRID
-     *
-     * @param int $id
-     * @param int $srid SRID
-     * @return Feature|null
+     * @return string Geometry column name
      */
-    public function getById($id, $srid = null)
-    {
-        $qb = $this->createQueryBuilder();
-        $this->configureSelect($qb, false, array(
-            'srid' => $srid,
-        ));
-        return $this->getByIdInternal($id, $qb);
-    }
-
-    /**
-     * @param Feature $feature
-     * @return Feature|null
-     */
-    protected function reloadItem($feature)
-    {
-        return $this->getById($feature->getId(), $feature->getSrid());
-    }
-
-    /**
-     * @param DataItem $feature
-     * @return mixed[]
-     */
-    protected function prepareStoreValues(DataItem $feature)
-    {
-        $data = parent::prepareStoreValues($feature);
-        /** @var Feature $feature */
-        $ewkt = $feature->getEwkt();
-        $meta = $this->getTableMetaData();
-        $geomColumnName = $meta->getRealColumnName($this->geomField);
-        if ($ewkt) {
-            $tableSrid = $this->getSrid();
-            $geomSql = $this->driver->getReadEwktSql($this->connection->quote($ewkt));
-            $geomSql = $this->driver->getTransformSql($geomSql, $tableSrid);
-            if ($this->checkPromoteToCollection($ewkt, $geomColumnName)) {
-                $geomSql = $this->driver->getPromoteToCollectionSql($geomSql);
-            }
-            $data[$geomColumnName] = new Expression($geomSql);
-        } else {
-            $data[$geomColumnName] = null;
-        }
-        return $data;
-    }
-
-    /**
-     * @param string $ewkt
-     * @param string|null $columnName
-     * @return boolean
-     */
-    protected function checkPromoteToCollection($ewkt, $columnName)
-    {
-        $tableType = $this->getTableMetaData()->getColumn($columnName)->getGeometryType();
-        $wktType = WktUtility::getGeometryType($ewkt);
-
-        // @todo: document why we would want to promote to collection, and why we only have a Postgis implementation
-        return $tableType && $wktType != $tableType
-            && strtoupper($tableType) !== 'GEOMETRY'
-            && preg_match('#^MULTI#i', $tableType)
-            && !preg_match('#^MULTI#i', $wktType)
-        ;
-    }
-
-    /**
-     * @return string
-     */
-    public function getGeomField()
+    public function getGeomField(): string
     {
         return $this->geomField;
     }
 
     /**
-     * Create preinitialized item
-     *
-     * @param array $values
-     * @return Feature
-     * @since 0.1.16.2
-     */
-    public function itemFromArray(array $values)
-    {
-        return new Feature($values, $this->uniqueIdFieldName, $this->geomField);
-    }
-
-    /**
-     * Get SRID
+     * Get the storage SRID. Auto-detects from geometry_columns if not configured.
      *
      * @return int
+     * @throws \RuntimeException if SRID cannot be determined
      */
-    public function getSrid()
+    public function getSrid(): int
     {
-        $this->srid = $this->srid ?: $this->getTableMetaData()->getColumn($this->geomField)->getSrid() ?: $this->configuredSrid;
-        if (!$this->srid) {
-            # Throw a decently helpful exception now instead of throwing a
-            # hard to parse one ("Invalid sridTo 0") later.
-            throw new \RuntimeException("SRID detection failure on {$this->tableName}.{$this->geomField}; must supply an 'srid' value in your featuretype configuration");
+        if ($this->detectedSrid !== null) {
+            return $this->detectedSrid;
         }
-        return $this->srid;
+        if ($this->configuredSrid) {
+            $this->detectedSrid = $this->configuredSrid;
+            return $this->detectedSrid;
+        }
+
+        $this->detectedSrid = $this->detectSridFromGeometryColumns();
+        if (!$this->detectedSrid) {
+            throw new \RuntimeException(
+                "SRID detection failure on {$this->tableName}.{$this->geomField}; "
+                . "supply an 'srid' value in your featureType configuration",
+            );
+        }
+        return $this->detectedSrid;
     }
 
     /**
-     * @return FeatureQueryBuilder
+     * @return string[]
      */
-    public function createQueryBuilder()
+    public function getFields(): array
     {
-        return new FeatureQueryBuilder($this->connection, $this->driver, $this->getSrid());
+        return array_merge(parent::getFields(), [$this->geomField]);
     }
 
-    protected function attributesFromRow(array $values)
+    /**
+     * Get feature by ID, optionally transforming geometry to a target SRID.
+     *
+     * @param mixed $id
+     * @param int|null $srid Target SRID for returned geometry (null = storage SRID)
+     * @return Feature|null
+     */
+    public function getById($id, $srid = null): ?Feature
     {
-        $attributes = parent::attributesFromRow($values);
-        if ($this->geomField && !\array_key_exists($this->geomField, $attributes)) {
-            $meta = $this->getTableMetaData();
-            $attributes[$this->geomField] = $values[$meta->getRealColumnName($this->geomField)];
+        $criteria = [];
+        if ($srid) {
+            $criteria['srid'] = $srid;
         }
-        return $attributes;
-    }
+        $qb = $this->createSelectQueryBuilder($criteria);
+        $qb->andWhere($this->qi($this->uniqueId) . ' = :pkId');
+        $qb->setParameter('pkId', $id);
+        $this->bindUserName($qb);
 
-    protected function configureSelect(QueryBuilder $queryBuilder, $includeDefaultFilter, array $params)
-    {
-        /** @var FeatureQueryBuilder $queryBuilder */
-        parent::configureSelect($queryBuilder, $includeDefaultFilter, $params);
-        $queryBuilder->addGeomSelect($this->geomField);
-        if (!empty($params['srid'])) {
-            $queryBuilder->setTargetSrid($params['srid']);
+        $row = $qb->executeQuery()->fetchAssociative();
+        if (!$row) {
+            return null;
         }
+        return $this->itemFromRow($row);
     }
 
-    protected function addQueryFilters(QueryBuilder $queryBuilder, $includeDefaultFilter, $params)
+    /**
+     * @return Feature
+     */
+    public function itemFactory(): Feature
     {
-        parent::addQueryFilters($queryBuilder, $includeDefaultFilter, $params);
-        // add bounding geometry condition
-        if (!empty($params['intersect'])) {
-            $clipWkt = $params['intersect'];
-            if (!($srid = WktUtility::getEwktSrid($clipWkt))) {
-                if (!empty($params['srid'])) {
-                    $clipSrid = $params['srid'];
-                } else {
-                    $clipSrid = $this->getSrid();
-                }
-                $clipWkt = "SRID={$clipSrid};$clipWkt";
+        return new Feature([], $this->uniqueId, $this->geomField);
+    }
+
+    /**
+     * @param array $attributes
+     * @return Feature
+     */
+    public function itemFromArray(array $attributes): Feature
+    {
+        return new Feature($attributes, $this->uniqueId, $this->geomField);
+    }
+
+    // ---------------------------------------------------------------
+    // Protected overrides
+    // ---------------------------------------------------------------
+
+    /**
+     * @inheritDoc
+     * Adds geometry as EWKT to the SELECT.
+     */
+    protected function createSelectQueryBuilder(array $criteria): \Doctrine\DBAL\Query\QueryBuilder
+    {
+        $qb = parent::createSelectQueryBuilder($criteria);
+
+        $targetSrid = !empty($criteria['srid']) ? (int) $criteria['srid'] : $this->getSrid();
+        $geomRef = $this->qi($this->geomField);
+
+        // Select geometry as EWKT, transformed to target SRID
+        $qb->addSelect(
+            "ST_AsEWKT(ST_Transform({$geomRef}, {$targetSrid})) AS {$geomRef}",
+        );
+
+        return $qb;
+    }
+
+    /**
+     * @inheritDoc
+     * Adds spatial intersection filter.
+     */
+    protected function addFilters(\Doctrine\DBAL\Query\QueryBuilder $qb, array $criteria): void
+    {
+        parent::addFilters($qb, $criteria);
+
+        if (!empty($criteria['intersect'])) {
+            $clipWkt = $criteria['intersect'];
+            $geomRef = $this->qi($this->geomField);
+
+            // Determine SRID for the clip geometry
+            $clipSrid = WktUtility::getEwktSrid($clipWkt);
+            if (!$clipSrid) {
+                $clipSrid = !empty($criteria['srid']) ? (int) $criteria['srid'] : $this->getSrid();
+                $clipWkt = "SRID={$clipSrid};{$clipWkt}";
             }
-            $connection = $queryBuilder->getConnection();
-            $clipGeomExpression = $this->driver->getReadEwktSql($connection->quote($clipWkt));
-            $clipGeomExpression = $this->driver->getTransformSql($clipGeomExpression, $this->getSrid());
-            $columnReference = $connection->quoteIdentifier($this->geomField);
-            $queryBuilder->andWhere($this->driver->getIntersectCondition($columnReference, $clipGeomExpression));
+
+            // Transform clip geometry to storage SRID and intersect
+            $storageSrid = $this->getSrid();
+            $qb->andWhere(
+                "ST_Intersects({$geomRef}, ST_Transform(ST_GeomFromEWKT(:intersectGeom), {$storageSrid}))",
+            );
+            $qb->setParameter('intersectGeom', $clipWkt);
         }
+    }
+
+    /**
+     * @inheritDoc
+     * Adds geometry column to INSERT via hook.
+     */
+    protected function collectInsertData(DataItem $item, array &$columns, array &$placeholders, array &$params): void
+    {
+        /** @var Feature $item */
+        $geomSql = $this->buildGeomInsertExpression($item);
+        if ($geomSql !== null) {
+            $columns[] = $this->qi($this->geomField);
+            $placeholders[] = $geomSql['expression'];
+            $params = array_merge($params, $geomSql['params']);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     * Adds geometry column to UPDATE via hook.
+     */
+    protected function collectUpdateData(DataItem $item, array &$setClauses, array &$params): void
+    {
+        /** @var Feature $item */
+        $geomSql = $this->buildGeomInsertExpression($item);
+        if ($geomSql !== null) {
+            $setClauses[] = $this->qi($this->geomField) . ' = ' . $geomSql['expression'];
+            $params = array_merge($params, $geomSql['params']);
+        } else {
+            // Explicitly set geometry to NULL if empty
+            $setClauses[] = $this->qi($this->geomField) . ' = NULL';
+        }
+    }
+
+    /**
+     * @inheritDoc
+     * Includes geometry in the Feature attributes.
+     */
+    protected function itemFromRow(array $row): Feature
+    {
+        $properties = $this->propertyAdapter->extractProperties($row);
+        $properties[$this->uniqueId] = $row[$this->uniqueId];
+        $properties[$this->geomField] = $row[$this->geomField] ?? null;
+        return $this->itemFromArray($properties);
+    }
+
+    /**
+     * @inheritDoc
+     * Preserves SRID when reloading.
+     */
+    protected function reloadItem(DataItem $item): ?Feature
+    {
+        /** @var Feature $item */
+        $srid = $item->getSrid();
+        return $this->getById($item->getId(), $srid);
+    }
+
+    /**
+     * @inheritDoc
+     * Exclude geometry from the properties passed to the adapter.
+     */
+    protected function getItemPropertiesForStorage(DataItem $item): array
+    {
+        $attrs = parent::getItemPropertiesForStorage($item);
+        unset($attrs[$this->geomField]);
+        return $attrs;
+    }
+
+    /**
+     * @inheritDoc
+     * Exclude geometry column from the property adapter.
+     */
+    protected function createPropertyAdapter(array $config): PropertyAdapterInterface
+    {
+        $storage = $config['propertyStorage'] ?? 'columns';
+
+        if ($storage === 'json') {
+            $jsonColumn = $config['propertyColumn'] ?? 'properties';
+            return new \Mapbender\DataSourceBundle\Component\PropertyAdapter\JsonColumnAdapter($jsonColumn);
+        }
+
+        return new DiscreteColumnAdapter(
+            $this->connection,
+            $config['table'] ?? '',
+            $config['fields'] ?? null,
+            $config['uniqueId'] ?? 'id',
+            $this->geomField,
+        );
+    }
+
+    // ---------------------------------------------------------------
+    // PostGIS SQL helpers
+    // ---------------------------------------------------------------
+
+    /**
+     * Build the SQL expression and parameters for inserting/updating geometry.
+     *
+     * @param Feature $feature
+     * @return array{expression: string, params: array}|null
+     */
+    private function buildGeomInsertExpression(Feature $feature): ?array
+    {
+        $ewkt = $feature->getEwkt();
+        if (!$ewkt) {
+            return null;
+        }
+
+        $storageSrid = $this->getSrid();
+        $geomType = $this->detectGeometryColumnType();
+
+        // Build: ST_MakeValid(ST_Transform(ST_GeomFromEWKT(?), storageSrid))
+        $expr = 'ST_GeomFromEWKT(?)';
+        $params = [$ewkt];
+
+        // Always transform to storage SRID
+        $expr = "ST_Transform({$expr}, {$storageSrid})";
+
+        // Promote to multi-geometry if needed
+        if ($this->shouldPromoteToMulti($ewkt, $geomType)) {
+            $expr = "ST_Multi({$expr})";
+        }
+
+        // Always validate
+        $expr = "ST_MakeValid({$expr})";
+
+        return ['expression' => $expr, 'params' => $params];
+    }
+
+    /**
+     * Check if incoming geometry needs promotion to MULTI variant.
+     */
+    private function shouldPromoteToMulti(string $ewkt, ?string $columnType): bool
+    {
+        if (!$columnType) {
+            return false;
+        }
+        $upperType = strtoupper($columnType);
+        if ($upperType === 'GEOMETRY') {
+            return false;
+        }
+        $wktType = WktUtility::getGeometryType($ewkt);
+        if (!$wktType) {
+            return false;
+        }
+        return preg_match('#^MULTI#i', $columnType)
+            && !preg_match('#^MULTI#i', $wktType);
+    }
+
+    /**
+     * Auto-detect geometry column type from geometry_columns.
+     *
+     * @return string|null e.g. "MULTIPOLYGON", "POINT", "GEOMETRY"
+     */
+    private function detectGeometryColumnType(): ?string
+    {
+        return $this->getGeometryMetadata()['type'];
+    }
+
+    /**
+     * Auto-detect SRID from the geometry_columns system table.
+     *
+     * @return int|null
+     */
+    private function detectSridFromGeometryColumns(): ?int
+    {
+        return $this->getGeometryMetadata()['srid'];
+    }
+
+    /**
+     * Query geometry_columns once and cache both SRID and type.
+     * Avoids redundant queries when both values are needed during INSERT/UPDATE.
+     *
+     * @return array{srid: int|null, type: string|null}
+     */
+    private function getGeometryMetadata(): array
+    {
+        if ($this->geometryMetadata !== null) {
+            return $this->geometryMetadata;
+        }
+
+        $parsed = static::parseSchemaQualifiedName($this->tableName);
+        try {
+            $sql = 'SELECT srid, type FROM geometry_columns'
+                . ' WHERE f_table_name = ? AND f_table_schema = ? AND f_geometry_column = ?';
+            $row = $this->connection->fetchAssociative($sql, [
+                $parsed['table'],
+                $parsed['schema'],
+                $this->geomField,
+            ]);
+            $this->geometryMetadata = [
+                'srid' => $row ? ((int) $row['srid'] ?: null) : null,
+                'type' => $row ? ($row['type'] ?: null) : null,
+            ];
+        } catch (\Exception $e) {
+            @trigger_error(
+                "geometry_columns query failed for {$this->tableName}.{$this->geomField}: {$e->getMessage()}",
+                E_USER_WARNING,
+            );
+            $this->geometryMetadata = ['srid' => null, 'type' => null];
+        }
+
+        return $this->geometryMetadata;
     }
 }
