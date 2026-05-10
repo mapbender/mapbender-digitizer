@@ -4,7 +4,9 @@
 namespace Mapbender\DataSourceBundle\Component;
 
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Mapbender\DataManagerBundle\Exception\ConfigurationErrorException;
 use Mapbender\DataSourceBundle\Component\Drivers\DoctrineBaseDriver;
@@ -349,12 +351,16 @@ class DataRepository
     {
         $setUserParam = false;
         $userNamePattern = '#:userName([^_\w\d]|$)#';
+        $setRolesParam = false;
+        $rolesPattern = '#:roles([^_\w\d]|$)#';
         if ($includeDefaultFilter && !empty($this->sqlFilter)) {
             $setUserParam = !!preg_match($userNamePattern, $this->sqlFilter);
+            $setRolesParam = !!preg_match($rolesPattern, $this->sqlFilter);
             $queryBuilder->andWhere($this->sqlFilter);
         }
         if (!empty($params['where'])) {
             $setUserParam = $setUserParam || preg_match($userNamePattern, $params['where']);
+            $setRolesParam = $setRolesParam || preg_match($rolesPattern, $params['where']);
             $queryBuilder->andWhere($params['where']);
         }
         if ($setUserParam) {
@@ -365,6 +371,14 @@ class DataRepository
             } else {
                 // No authenticated user, use empty string or anonymous
                 $queryBuilder->setParameter('userName', '');
+            }
+        }
+        if ($setRolesParam) {
+            $token = $this->tokenStorage->getToken();
+            if ($token !== null && !$token instanceof NullToken) {
+                $queryBuilder->setParameter('roles', $token->getRoleNames(), ArrayParameterType::STRING);
+            } else {
+                $queryBuilder->setParameter('roles', [], ArrayParameterType::STRING);
             }
         }
     }
