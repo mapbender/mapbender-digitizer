@@ -16,6 +16,7 @@
         "doctrine/dbal": "^2.11 || ^3",
         "doctrine/persistence": "^2 || ^3",
         "mapbender/jquery-file-upload": "1.*",
+        "mapbender/select2": "1.*",
         "mapbender/mapbender": "^4"
     },
     "provide": {
