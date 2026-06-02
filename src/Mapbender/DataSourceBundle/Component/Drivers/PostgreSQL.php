@@ -90,16 +90,20 @@ class PostgreSQL extends DoctrineBaseDriver implements Geographic
         $gcSql = 'SELECT f_geometry_column, srid, type FROM "public"."geometry_columns"'
             . ' WHERE f_table_name = ?';
         $gcParams = array();
+        $columnWhereClause = '';
+        $columnParams = array();
         if (str_contains($tableName, ".")) {
             $tableNameParts = DataRepository::stripQuotesFromArray(explode('.', $tableName, 2));
-            $tableNameUnquoted = implode('.', $tableNameParts);
             $gcParams[] = $tableNameParts[1];
             $gcSql .= ' AND "f_table_schema" = ?';
             $gcParams[] = $tableNameParts[0];
+            $columnWhereClause = ' AND c.relname = ? AND n.nspname = ?';
+            $columnParams = array($tableNameParts[1], $tableNameParts[0]);
         } else {
             $gcParams[] = DataRepository::stripQuotes($tableName);
-            $tableNameUnquoted = $gcParams[0];
             $gcSql .= ' AND "f_table_schema" = current_schema()';
+            $columnWhereClause = ' AND c.relname = ? AND n.nspname = current_schema()';
+            $columnParams = array($gcParams[0]);
         }
         $gcInfos = array();
         try {
@@ -111,13 +115,21 @@ class PostgreSQL extends DoctrineBaseDriver implements Geographic
             // Ignore (DataStore on PostgreSQL / no Postgis)
         }
 
-        // TODO: this method was removed in DBAL 4, find a replacement
-        $sql = $platform->getListTableColumnsSQL($tableNameUnquoted);
+        // getListTableColumnsSQL() was removed in DBAL 4; use a direct parameterized query instead.
+        // We intentionally bypass the SchemaManager here because it throws on geometry type columns.
+        $columnSql = 'SELECT quote_ident(a.attname) AS field,'
+            . ' format_type(a.atttypid, a.atttypmod) AS complete_type,'
+            . ' a.attnotnull AS isnotnull,'
+            . ' (SELECT pg_get_expr(adbin, adrelid) FROM pg_attrdef'
+            . '  WHERE c.oid = pg_attrdef.adrelid AND pg_attrdef.adnum = a.attnum) AS "default"'
+            . ' FROM pg_attribute a'
+            . ' INNER JOIN pg_class c ON c.oid = a.attrelid'
+            . ' INNER JOIN pg_namespace n ON n.oid = c.relnamespace'
+            . ' WHERE a.attnum > 0 AND NOT a.attisdropped'
+            . $columnWhereClause
+            . ' ORDER BY a.attnum';
         $columns = array();
-        /** @see \Doctrine\DBAL\Platforms\PostgreSqlPlatform::getListTableColumnsSQL */
-        /** @see \Doctrine\DBAL\Schema\PostgreSqlSchemaManager::_getPortableTableColumnDefinition */
-        $result = $connection->executeQuery($sql);
-        $data = $result->fetchAllAssociative();
+        $data = $connection->executeQuery($columnSql, $columnParams)->fetchAllAssociative();
         foreach ($data as $row) {
             $name = trim($row['field'], '"');   // Undo quote_ident
             $notNull = !$row['isnotnull'];

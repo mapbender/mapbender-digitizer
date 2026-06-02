@@ -88,8 +88,16 @@ class Oracle extends DoctrineBaseDriver implements Geographic
         // NOTE: cannot use Doctrine SchemaManager. SchemaManager will throw when encountering
         // geometry type columns. Internal SchemaManager Column metadata APIs are
         // closed to querying individual columns.
+        // getListTableColumnsSQL() was removed in DBAL 4; use ALL_TAB_COLUMNS directly.
         $platform = $connection->getDatabasePlatform();
-        $sql = $platform->getListTableColumnsSQL($tableName);
+        $columnSql = 'SELECT LOWER(C.COLUMN_NAME) AS column_name,'
+            . ' LOWER(C.DATA_TYPE) AS data_type,'
+            . ' C.DATA_DEFAULT AS data_default,'
+            . ' C.NULLABLE AS nullable'
+            . ' FROM ALL_TAB_COLUMNS C'
+            . ' WHERE C.TABLE_NAME = ?'
+            . ' AND C.OWNER = USER'
+            . ' ORDER BY C.COLUMN_ID';
 
         $gmdSql = 'SELECT COLUMN_NAME, SRID FROM ALL_SDO_GEOM_METADATA'
                 . ' WHERE TABLE_NAME = ' . $platform->quoteIdentifier($tableName)
@@ -104,9 +112,7 @@ class Oracle extends DoctrineBaseDriver implements Geographic
         }
 
         $columns = array();
-        /** @see \Doctrine\DBAL\Platforms\OraclePlatform::getListTableColumnsSQL */
-        /** @see \Doctrine\DBAL\Schema\OracleSchemaManager::_getPortableTableColumnDefinition */
-        foreach ($connection->executeQuery($sql) as $row) {
+        foreach ($connection->executeQuery($columnSql, [strtoupper($tableName)]) as $row) {
             $name = $row['column_name'];
             if (!empty($srids[\strtoupper($name)])) {
                 $srid = $srids[\strtoupper($name)];
