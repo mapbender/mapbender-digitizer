@@ -130,7 +130,7 @@ class DataStore extends EventAwareDataRepository
      */
     public function getPlatformName()
     {
-        return $this->getConnection()->getDatabasePlatform()->getName();
+        return get_class($this->getConnection()->getDatabasePlatform());
     }
 
     /** @noinspection PhpUnused */
