@@ -1,4 +1,4 @@
-## next minor release
+## 2.0.9
 * Add support for parameter `roles` in featureType filter ([PR#158](https://github.com/mapbender/mapbender-digitizer/pull/158))
 
 
