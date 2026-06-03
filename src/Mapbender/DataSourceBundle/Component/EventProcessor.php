@@ -24,7 +24,7 @@ class EventProcessor
     public $allowRemove = true;
 
     public function __construct(AuthorizationCheckerInterface $authorizationChecker,
-                                TokenStorageInterface $tokenStorage)
+                                TokenStorageInterface         $tokenStorage)
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
@@ -75,18 +75,20 @@ class EventProcessor
     protected function addBuiltins(array $locals)
     {
         $token = $this->tokenStorage->getToken();
-        
+
         $locals += array(
             'context' => $this->authorizationChecker,
             'tokenStorage' => $this->tokenStorage,
             'user' => ($token !== null && !$token instanceof NullToken) ? $token->getUser() : null,
-            'userRoles' => array(),
+            'userRoles' => [],
+            'groupRoles' => [],
         );
 
         if ($token !== null && !$token instanceof NullToken) {
             if (\method_exists($token, 'getRoleNames')) {
                 // Symfony >= 4.3
                 $locals['userRoles'] = $token->getRoleNames();
+                $locals['groupRoles'] = array_filter($token->getRoleNames(), fn($r) => str_starts_with('ROLE_GROUP_', $r));
             } else {
                 foreach ($token->getRoles() as $role) {
                     if (\is_object($role) && \method_exists($role, 'getRole')) {
@@ -96,6 +98,9 @@ class EventProcessor
                         $roleName = \strval($role);
                     }
                     $locals['userRoles'][] = $roleName;
+                    if (str_starts_with($roleName, 'ROLE_GROUP_')) {
+                        $locals['groupRoles'][] = $roleName;
+                    }
                 }
             }
         }
