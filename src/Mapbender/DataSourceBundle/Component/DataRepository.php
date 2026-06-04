@@ -154,7 +154,7 @@ class DataRepository
     {
         $queryBuilder = $this->createQueryBuilder();
         $this->configureSelect($queryBuilder, false, array());
-        $connection = $queryBuilder->getConnection();
+        $connection = $this->connection;
         $condition = $queryBuilder->expr()->in($this->uniqueIdFieldName, array_map(array($connection, 'quote'), $ids));
         $queryBuilder->where($condition);
         $results = $this->prepareResults($queryBuilder->executeQuery()->fetchAllAssociative());
@@ -323,7 +323,7 @@ class DataRepository
     protected function configureSelect(QueryBuilder $queryBuilder, $includeDefaultFilter, array $params)
     {
         $queryBuilder->from($this->getTableName(), 't');
-        $connection = $queryBuilder->getConnection();
+        $connection = $this->connection;
         $meta = $this->getTableMetaData();
         foreach ($this->fields as $fieldName) {
             $columnName = $meta->getRealColumnName($fieldName);

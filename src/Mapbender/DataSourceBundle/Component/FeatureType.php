@@ -204,7 +204,7 @@ class FeatureType extends DataStore
                 }
                 $clipWkt = "SRID={$clipSrid};$clipWkt";
             }
-            $connection = $queryBuilder->getConnection();
+            $connection = $this->connection;
             $clipGeomExpression = $this->driver->getReadEwktSql($connection->quote($clipWkt));
             $clipGeomExpression = $this->driver->getTransformSql($clipGeomExpression, $this->getSrid());
             $columnReference = $connection->quoteIdentifier($this->geomField);
