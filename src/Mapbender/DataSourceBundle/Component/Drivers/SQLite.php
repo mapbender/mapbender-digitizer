@@ -16,10 +16,9 @@ class SQLite extends DoctrineBaseDriver
         // NOTE: cannot use Doctrine SchemaManager::listTableColumns. SchemaManager
         // destroys the distinction between a column with no default and a column
         // with a null default.
-        $sql = $connection->getDatabasePlatform()->getListTableColumnsSQL($tableName);
+        // getListTableColumnsSQL() was removed in DBAL 4; use PRAGMA table_info directly.
+        $sql = 'PRAGMA table_info(' . $connection->quoteIdentifier($tableName) . ')';
         $columns = array();
-        /** @see \Doctrine\DBAL\Platforms\SqlitePlatform::getListTableColumnsSQL */
-        /** @see \Doctrine\DBAL\Schema\SqliteSchemaManager::_getPortableTableColumnDefinition */
         foreach ($connection->executeQuery($sql) as $row) {
             $isNullable = !$row['notnull'];
             $hasDefault = !empty($row['dflt_value']);
