@@ -11,6 +11,8 @@ use Mapbender\DataSourceBundle\Component\Drivers\Interfaces\Geographic;
 
 class FeatureQueryBuilder extends QueryBuilder
 {
+    /** @var Connection */
+    protected $connection;
     /** @var DoctrineBaseDriver */
     protected $driver;
     /** @var int|string|null */
@@ -30,8 +32,14 @@ class FeatureQueryBuilder extends QueryBuilder
     public function __construct(Connection $connection, DoctrineBaseDriver $driver, $sourceSrid)
     {
         parent::__construct($connection);
+        $this->connection = $connection;
         $this->driver = $driver;
         $this->sourceSrid = $sourceSrid;
+    }
+
+    public function getConnection(): Connection
+    {
+        return $this->connection;
     }
 
     /**
@@ -58,16 +66,16 @@ class FeatureQueryBuilder extends QueryBuilder
         $this->targetSrid = $targetSrid;
     }
 
-    public function select($select = null)
+    public function select(string ...$expressions): static
     {
         $this->isSelect = true;
-        return parent::select($select);
+        return parent::select(...$expressions);
     }
 
-    public function addSelect($select = null)
+    public function addSelect(string ...$expressions): static
     {
         $this->isSelect = true;
-        return parent::addSelect($select);
+        return parent::addSelect(...$expressions);
     }
 
     public function addGeomSelect($columnName)
@@ -75,7 +83,7 @@ class FeatureQueryBuilder extends QueryBuilder
         $this->geomNames[] = $columnName;
     }
 
-    public function getSQL()
+    public function getSQL(): string
     {
         if ($this->isSelect && $this->geomNames) {
             if ($this->driver instanceof Geographic) {
