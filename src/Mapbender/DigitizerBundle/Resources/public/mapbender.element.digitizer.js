@@ -31,7 +31,7 @@
             this._super();
             this.styleEditor = this._createStyleEditor();
             this.wktFormat_ = new ol.format.WKT();
-            // setup() called in onGrantsLoadStarted
+            // setup() and _start() called via onGrantsLoadStarted() → _onMapAndGrantsLoaded()
         },
         _createTableRenderer: function() {
             return new Mapbender.Digitizer.TableRenderer(this, this.tableButtonsTemplate_);
@@ -55,7 +55,7 @@
             // Invoked only by data manager _create
             // do nothing; deliberately do NOT call parent method
         },
-        onGrantsLoadStarted: function() {
+        onGrantsLoadStarted: function () {
             $.when(Mapbender.elementRegistry.waitReady('.mb-element-map'), this.grantsRequest_)
                 .then((mbMap) => this._onMapAndGrantsLoaded(mbMap));
         },
@@ -534,7 +534,7 @@
                 });
             }
             var widget = this;
-            var promise = this.postJSON('update-multiple', postData, undefined,(response) => {
+            var promise = this.postJSON('update-multiple', postData, undefined, (response) => {
                     var savedItems = response.saved;
                     for (var i = 0; i < savedItems.length; ++i) {
                         var savedItem = savedItems[i];
