@@ -18,6 +18,12 @@
             this.currentPopup = null;
             this.popupWindow = null;
             this.callback = null;
+            // minimum width in pixels for the edit popup. Values smaller than this will be reset to the minWidth
+            this.minPopupWidth = 300;
+            // default width for the edit popup if no width is specified
+            this.defaultPopupWidth = 550;
+            this.minPopupHeight = 300;
+            this.defaultPopupHeight = 400;
             // Determine if element should open in a popup dialog (when in toolbar/taskbar)
             // or stay inline (when in sidepane)
             this.useDialog_ = !this.$element.closest('.sideContent, .mobilePane').length;
@@ -536,33 +542,42 @@
          * @private
          */
         _getEditDialogPopupConfig(schema, dataItem) {
-            const minWidth = 550;
-            let width = schema.popup.width;
-
-            // parseInt handles both "550" and "550px" correctly, returns NaN for invalid values
-            const widthNum = parseInt(width, 10);
-
-            // Use minimum width if not specified, invalid, or too small
-            if (!width || isNaN(widthNum) || widthNum < minWidth) {
-                width = minWidth;
-            } else if (typeof width === 'string') {
-                width = widthNum;
-            }
-
             let title = schema.popup.title || Mapbender.trans('mb.data-manager.details_title');
 
             // Support dynamic title expressions (function, data reference, or template literal)
             const itemData = this._getItemData(dataItem);
             title = this.expressionEvaluator_.evaluateIfDynamic(title, itemData);
 
+            const width = this._parseNumericValue(schema.popup.width, this.defaultPopupWidth, this.minPopupWidth, window.innerWidth * .9);
+            const height = this._parseNumericValue(schema.popup.height, this.defaultPopupHeight, this.minPopupHeight, window.innerHeight * .9);
             return {
                 modal: schema.popup.modal || false,
                 title: title,
                 width: width,
+                height: height,
+                left: (window.innerWidth - width) / 2,
+                top: (window.innerHeight - height) / 2,
                 cssClass: 'data-manager-edit-data',
                 position: schema.popup.position || null,  // Preserve position config for CSS positioning
                 buttons: this._getEditDialogButtons(schema, dataItem)
             };
+        }
+
+        _parseNumericValue(value, defaultValue, minValue, maxValue) {
+            // parseInt handles both "550" and "550px" correctly, returns NaN for invalid values
+            const valueNum = parseInt(value, 10);
+
+            // Use minimum width if not specified, invalid, or too small
+            if (!value || isNaN(valueNum)) {
+                return defaultValue;
+            }
+            if (minValue !== undefined && valueNum < minValue) {
+                return minValue;
+            }
+            if (maxValue !== undefined && valueNum > maxValue) {
+                return maxValue;
+            }
+            return valueNum;
         }
 
         /**
