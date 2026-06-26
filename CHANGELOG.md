@@ -1,8 +1,12 @@
-## next feature release
-* Migrate from jQuery UI dialogs to Mapbender.Popup with improved mobile support ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
-* Add dynamic expression support for labels, text fields, and popup titles (template literal syntax `${data.property}`) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
+## 3.0.0-RC1
+Breaking Changes:
+* Remove support for DataTables 1.x ([PR#153](https://github.com/mapbender/mapbender-digitizer/pull/153))
 * Modernize JavaScript codebase (ES6 classes, singleton pattern for better extensibility) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
 * Ensure compatibility with Doctrine DBAL 4 ([PR#159](https://github.com/mapbender/mapbender-digitizer/pull/159))
+* Migrate from jQuery UI dialogs to Mapbender.Popup with improved mobile support ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
+
+Features:
+* Add dynamic expression support for labels, text fields, and popup titles (template literal syntax `${data.property}`) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
 
 ## 2.0.8
 * Add support for DataTables version 2 ([PR#150](https://github.com/mapbender/mapbender-digitizer/pull/150)), [PR#154](https://github.com/mapbender/mapbender-digitizer/pull/154)
