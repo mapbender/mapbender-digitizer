@@ -13,21 +13,16 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class EventProcessor
 {
-    /** @var TokenStorageInterface */
-    protected $tokenStorage;
-    /** @var AuthorizationCheckerInterface */
-    protected $authorizationChecker;
-
     public $allowSave = true;
     public $allowUpdate = true;
     public $allowInsert = true;
     public $allowRemove = true;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker,
-                                TokenStorageInterface         $tokenStorage)
+    public function __construct(
+        protected AuthorizationCheckerInterface $authorizationChecker,
+        protected TokenStorageInterface         $tokenStorage
+    )
     {
-        $this->authorizationChecker = $authorizationChecker;
-        $this->tokenStorage = $tokenStorage;
     }
 
     public function runExpression($expression, array $locals)
@@ -85,24 +80,9 @@ class EventProcessor
         );
 
         if ($token !== null && !$token instanceof NullToken) {
-            if (\method_exists($token, 'getRoleNames')) {
-                // Symfony >= 4.3
-                $locals['userRoles'] = $token->getRoleNames();
-                $locals['groupRoles'] = array_filter($token->getRoleNames(), fn($r) => str_starts_with('ROLE_GROUP_', $r));
-            } else {
-                foreach ($token->getRoles() as $role) {
-                    if (\is_object($role) && \method_exists($role, 'getRole')) {
-                        $roleName = $role->getRole();
-                    } else {
-                        // Role objects should have __toString
-                        $roleName = \strval($role);
-                    }
-                    $locals['userRoles'][] = $roleName;
-                    if (str_starts_with($roleName, 'ROLE_GROUP_')) {
-                        $locals['groupRoles'][] = $roleName;
-                    }
-                }
-            }
+            $token = $this->tokenStorage->getToken();
+            $locals['userRoles'] = $token->getRoleNames();
+            $locals['groupRoles'] = array_filter($token->getRoleNames(), fn($r) => str_starts_with('ROLE_GROUP_', $r));
         }
         return $locals;
     }

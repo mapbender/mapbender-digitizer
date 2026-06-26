@@ -26,7 +26,7 @@ class Digitizer extends DataManager
 
     public function getWidgetName(Element $element)
     {
-        return 'mapbender.mbDigitizer';
+        return 'MbDigitizer';
     }
 
     public function getView(Element $element)
@@ -50,23 +50,23 @@ class Digitizer extends DataManager
         return array(
             'js' => array_merge($dataManagerAssets["js"], array(
                 "@MapbenderDigitizerBundle/Resources/public/ol6-compat.js",
-                "@MapbenderDigitizerBundle/Resources/public/mapbender.element.digitizer.js",
-                "@MapbenderDigitizerBundle/Resources/public/toolset.js",
+                "@MapbenderDigitizerBundle/Resources/public/MbDigitizer.js",
+                "@MapbenderDigitizerBundle/Resources/public/Toolset.js",
                 "@MapbenderDigitizerBundle/Resources/public/FeatureRenderer.js",
                 '@MapbenderDigitizerBundle/Resources/public/FeatureEditor.js',
                 '@MapbenderDigitizerBundle/Resources/public/DrawDonut.js',
                 "@MapbenderDigitizerBundle/Resources/public/TableRenderer.js",
-                "@MapbenderDigitizerBundle/Resources/public/contextMenu.js",
-                "@MapbenderDigitizerBundle/Resources/public/featureStyleEditor.js",
+                "@MapbenderDigitizerBundle/Resources/public/ContextMenu.js",
+                "@MapbenderDigitizerBundle/Resources/public/FeatureStyleEditor.js",
                 "@MapbenderDigitizerBundle/Resources/public/StyleAdapter.js",
-                '/components/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
+                '/bundles/mapbendercore/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
                 '../vendor/select2/select2/dist/js/select2.js',
                 '../vendor/select2/select2/dist/js/i18n/de.js',
                 '@MapbenderDigitizerBundle/Resources/public/polyfill/setprototype.polyfill.js',
             )),
             'css' => array_merge($dataManagerAssets["css"], array(
                 '../vendor/select2/select2/dist/css/select2.css',
-                '/components/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
+                '/bundles/mapbendercore/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
                 '@MapbenderDigitizerBundle/Resources/public/sass/element/digitizer.scss',
             )),
             'trans' => array_merge($dataManagerAssets['trans'], array(
@@ -81,5 +81,17 @@ class Digitizer extends DataManager
         $defaultStyles = $this->schemaFilter->getDefaultStyles();
         $configuration['fallbackStyle'] = $defaultStyles['default'];
         return $configuration;
+    }
+
+    public static function getDefaultConfiguration()
+    {
+        $config = parent::getDefaultConfiguration();
+        $config['element_icon'] = self::getDefaultIcon();
+        return $config;
+    }
+
+    public static function getDefaultIcon()
+    {
+        return 'iconEdit';
     }
 }

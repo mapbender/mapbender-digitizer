@@ -156,7 +156,7 @@ class DataRepository
     {
         $queryBuilder = $this->createQueryBuilder();
         $this->configureSelect($queryBuilder, false, array());
-        $connection = $queryBuilder->getConnection();
+        $connection = $this->connection;
         $condition = $queryBuilder->expr()->in($this->uniqueIdFieldName, array_map(array($connection, 'quote'), $ids));
         $queryBuilder->where($condition);
         $results = $this->prepareResults($queryBuilder->executeQuery()->fetchAllAssociative());
@@ -247,19 +247,16 @@ class DataRepository
      */
     protected function driverFactory(Connection $connection)
     {
-        $platformName = $connection->getDatabasePlatform()->getName();
-        switch ($platformName) {
-            case 'sqlite';
-                $driver = new SQLite();
-                break;
-            case 'postgresql';
-                $driver = new PostgreSQL();
-                break;
-            case 'oracle';
-                $driver = new Oracle();
-                break;
-            default:
-                throw new \RuntimeException("Unsupported DBAL platform " . print_r($platformName, true));
+        $platform = $connection->getDatabasePlatform();
+
+        if ($platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform) {
+            $driver = new SQLite();
+        } elseif ($platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform) {
+            $driver = new PostgreSQL();
+        } elseif ($platform instanceof \Doctrine\DBAL\Platforms\OraclePlatform) {
+            $driver = new Oracle();
+        } else {
+            throw new \RuntimeException("Unsupported DBAL platform " . get_class($platform));
         }
         return $driver;
     }
@@ -328,7 +325,7 @@ class DataRepository
     protected function configureSelect(QueryBuilder $queryBuilder, $includeDefaultFilter, array $params)
     {
         $queryBuilder->from($this->getTableName(), 't');
-        $connection = $queryBuilder->getConnection();
+        $connection = $this->connection;
         $meta = $this->getTableMetaData();
         foreach ($this->fields as $fieldName) {
             $columnName = $meta->getRealColumnName($fieldName);

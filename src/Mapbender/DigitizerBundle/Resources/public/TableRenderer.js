@@ -2,21 +2,19 @@
     "use strict";
 
     Mapbender.Digitizer = Mapbender.Digitizer || {};
-    Mapbender.Digitizer.TableRenderer = function() {
-        Mapbender.DataManager.TableRenderer.apply(this, arguments);
-    };
-    Mapbender.Digitizer.TableRenderer.prototype = Object.create(Mapbender.DataManager.TableRenderer.prototype);
-    Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
-        constructor: Mapbender.Digitizer.TableRenderer
-    });
 
-    Object.assign(Mapbender.Digitizer.TableRenderer.prototype, {
-        render: function(schema) {
-            var table = Mapbender.DataManager.TableRenderer.prototype.render.call(this, schema);
+    class TableRenderer extends Mapbender.DataManager.TableRenderer {
+        constructor() {
+            super(...arguments);
+        }
+
+        render(schema) {
+            var table = super.render(schema);
             this.registerEvents(schema, $(table));
             return table;
-        },
-        registerEvents: function(schema, $table) {
+        }
+
+        registerEvents(schema, $table) {
             var widget = this.owner;
             $table.on('mouseenter mouseleave', 'tbody > tr', function(event) {
                 var hover = event.handleObj.origType === 'mouseenter';
@@ -38,9 +36,20 @@
                 }
             });
             this.registerButtonEvents(schema, $table);
-        },
-        registerButtonEvents: function(schema, $table) {
+        }
+
+        registerButtonEvents(schema, $table) {
             var self = this;
+            // Handle click on edit button - zoom to feature and open dialog
+            $table.on('click', 'tbody > tr .-fn-edit-data', function(event) {
+
+                var $tr = $(this).closest('tr');
+                var data = $tr.data();
+                if (data.schema && data.item) {
+                    self.owner.zoomToFeature(data.schema, data.item);
+                }
+            });
+            
             $table.on('click', 'tbody > tr .-fn-save', function(event) {
                 // Avoid calling row click handlers (may zoom to feature or open the edit dialog, depending on schema config)
                 event.stopPropagation();
@@ -73,16 +82,18 @@
                     self.owner.cloneFeature(data.schema, data.item);
                 }
             });
-        },
-        onRowCreation: function(tableSchema, tr, feature) {
-            Mapbender.DataManager.TableRenderer.prototype.onRowCreation.apply(this, arguments);
+        }
+
+        onRowCreation(tableSchema, tr, feature) {
+            super.onRowCreation(tableSchema, tr, feature);
             // Place table row into feature data for quick access (synchronized highlighting etc)
             feature.set('table-row', tr);
             // Inline save buttons start out disabled
             $('.-fn-save', tr).prop('disabled', !feature.get('dirty'));
             this.registerFeatureEvents(feature);
-        },
-        registerFeatureEvents: function(feature) {
+        }
+
+        registerFeatureEvents(feature) {
             // Avoid registering same event handlers on the same feature multiple times
             if (feature.get('table-events')) {
                 return;
@@ -121,20 +132,22 @@
                 }
             });
             feature.set('table-events', true);
-        },
+        }
+
         /**
          * @param {Object} feature
          * @param {Boolean} show to automatically update pagination
          */
-        refreshRow: function(feature, show) {
-            Mapbender.DataManager.TableRenderer.prototype.refreshRow.apply(this, arguments);
+        refreshRow(feature, show) {
+            super.refreshRow(feature, show);
 
             var tr = feature && feature.get('table-row');
             if (tr) {
                 this.updateButtonStates_(tr, feature);
             }
-        },
-        updateButtonStates_: function(tr, feature) {
+        }
+
+        updateButtonStates_(tr, feature) {
             var hidden = !!feature.get('hidden');
             var tooltip;
             if (hidden) {
@@ -160,5 +173,7 @@
                 $('.-fn-save', tr).addClass('btn-outline-primary');
             }
         }
-    });
+    }
+
+    Mapbender.Digitizer.TableRenderer = TableRenderer;
 })();

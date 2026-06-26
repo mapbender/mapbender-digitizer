@@ -1,4 +1,4 @@
-;!(function() {
+(function() {
     "use strict";
     window.Mapbender = Mapbender || {};
     window.Mapbender.Digitizer = Mapbender.Digitizer || {};
@@ -61,50 +61,57 @@
     }
 
 
-
-
     /**
-     * @param {*} owner jQueryUI widget instance
-     * @param {ol.Map} olMap
-     *
-     * @constructor
+     * Feature editor class for managing drawing and modification interactions
      */
-    Mapbender.Digitizer.FeatureEditor = function(owner, olMap) {
-        this.owner = owner;
-        this.olMap = olMap;
-        this.activeInteraction = null;
-        this.paused_ = false;
-        this.schemaTools_ = {};
-        this.sharedTools_ = {};
-        this.modifyingCollection_ = new ol.Collection([]);
-        this.geometryFunctions_ = {};
-    };
+    class FeatureEditor {
+        /**
+         * @param {*} owner jQueryUI widget instance
+         * @param {ol.Map} olMap
+         */
+        constructor(owner, olMap) {
+            this.owner = owner;
+            this.olMap = olMap;
+            this.activeInteraction = null;
+            this.paused_ = false;
+            this.schemaTools_ = {};
+            this.sharedTools_ = {};
+            this.modifyingCollection_ = new ol.Collection([]);
+            this.geometryFunctions_ = {};
+        }
 
-    Object.assign(Mapbender.Digitizer.FeatureEditor.prototype, {
         /**
          * @param {boolean} state
          */
-        setActive: function(state) {
+        setActive(state) {
             if (this.activeInteraction) {
                 this.activeInteraction.setActive(state);
             }
             // cannot resume from this
             this.paused_ = false;
-        },
-        pause: function() {
+        }
+
+        pause() {
             if (!this.paused_ && this.activeInteraction && this.activeInteraction.getActive()) {
                 this.activeInteraction.setActive(false);
                 this.paused_ = true;
             }
-        },
-        resume: function() {
+        }
+
+        resume() {
             if (this.paused_ && this.activeInteraction) {
                 this.activeInteraction.setActive(true);
             }
             this.paused_ = false;
-        },
-        toggleTool: function(toolName, schema, state) {
-            var tool = this.getDrawingTool(toolName, schema);
+        }
+
+        /**
+         * @param {String} toolName
+         * @param {Object} schema
+         * @param {boolean} state
+         */
+        toggleTool(toolName, schema, state) {
+            const tool = this.getDrawingTool(toolName, schema);
             if (state) {
                 if (this.activeInteraction && this.activeInteraction !== tool) {
                     console.warn("WARNING: enabling multiple drawing tools at the same time", toolName, this.activeInteraction);
@@ -112,8 +119,12 @@
             }
             this.activeInteraction = state && tool || null;
             tool.setActive(!!state);
-        },
-        setEditFeature: function(feature) {
+        }
+
+        /**
+         * @param {ol.Feature} feature
+         */
+        setEditFeature(feature) {
             this.modifyingCollection_.forEach(function(feature) {
                 feature.set('editing', false);
             });
@@ -123,8 +134,14 @@
                 feature.set('editing', true);
                 this.modifyingCollection_.push(feature);
             }
-        },
-        getDrawingTool: function(type, schema) {
+        }
+
+        /**
+         * @param {String} type
+         * @param {Object} schema
+         * @return {ol.interaction.Interaction}
+         */
+        getDrawingTool(type, schema) {
             let tool;
             if (type === 'moveFeature' || type === 'modifyFeature') {
                 tool = this.getModificationTool_(type);
@@ -132,11 +149,11 @@
                 tool = this.getCreationTool_(schema, type);
             }
 
-            let handleKeyDown = (evt) => {
+            const handleKeyDown = (evt) => {
                 if (evt.key === 'Escape') {
                     tool.cancel && tool.cancel();
                 }
-            }
+            };
 
             const originalSetActive = tool.setActive.bind(tool);
             tool.setActive = function(active) {
@@ -149,10 +166,13 @@
             };
             this.addSnapInteraction(schema);
             return tool;
-        },
+        }
 
-        addSnapInteraction: function(schema) {
-            let olMap = this.owner.mbMap.getModel().olMap;
+        /**
+         * @param {Object} schema
+         */
+        addSnapInteraction(schema) {
+            const olMap = this.owner.mbMap.getModel().olMap;
 
             const interactions = olMap.getInteractions().getArray();
             interactions.forEach(interaction => {
@@ -161,7 +181,7 @@
                 }
             });
             const createSnapInteraction = (source) => {
-                let snapInteraction = new ol.interaction.Snap({
+                const snapInteraction = new ol.interaction.Snap({
                     source: source,
                     pixelTolerance: 10
                 });
@@ -169,48 +189,71 @@
                 olMap.addInteraction(snapInteraction);
             };
 
-            let layers = this.owner.getSnappingLayers(schema);
+            const layers = this.owner.getSnappingLayers(schema);
 
             layers.forEach(layer => {
-                let source = layer.getSource();
+                const source = layer.getSource();
                 createSnapInteraction(source);
             });
-        },
+        }
 
-        getModificationTool_: function(type) {
+        /**
+         * @param {String} type
+         * @return {ol.interaction.Interaction}
+         * @private
+         */
+        getModificationTool_(type) {
             if (!this.sharedTools_[type]) {
-                var interaction = this.createModificationTool_(type);
+                const interaction = this.createModificationTool_(type);
                 this.addModifyEvents_(interaction);
                 this.initMap_(interaction);
                 this.sharedTools_[type] = interaction;
             }
             return this.sharedTools_[type];
-        },
-        getCreationTool_: function(schema, type) {
+        }
+
+        /**
+         * @param {Object} schema
+         * @param {String} type
+         * @return {ol.interaction.Interaction}
+         * @private
+         */
+        getCreationTool_(schema, type) {
             if (!this.schemaTools_[schema.schemaName]) {
                 this.schemaTools_[schema.schemaName] = {};
             }
-            var toolGroup = this.schemaTools_[schema.schemaName];
+            const toolGroup = this.schemaTools_[schema.schemaName];
             if (!toolGroup[type]) {
-                var interaction = this.createDrawingTool_(type, schema);
+                const interaction = this.createDrawingTool_(type, schema);
                 this.addCreateEvents_(interaction, schema);
                 this.initMap_(interaction);
                 toolGroup[type] = interaction;
             }
             return toolGroup[type];
-        },
-        initMap_: function(interaction) {
+        }
+
+        /**
+         * @param {ol.interaction.Interaction} interaction
+         * @private
+         */
+        initMap_(interaction) {
             interaction.setActive(false);
             this.olMap.addInteraction(interaction);
-        },
-        addCreateEvents_: function(interaction, schema) {
-            var widget = this.owner;
+        }
+
+        /**
+         * @param {ol.interaction.Interaction} interaction
+         * @param {Object} schema
+         * @private
+         */
+        addCreateEvents_(interaction, schema) {
+            const widget = this.owner;
             interaction.cancel = () => {
-                $('.-fn-toggle-tool[data-toolname].active',this.owner.element).click();
-            }
+                $('.-fn-toggle-tool[data-toolname].active', this.owner.element).click();
+            };
             interaction.on(ol.interaction.DrawEventType.DRAWEND, function(event) {
-                var feature = event.feature;
-                let geom = feature.getGeometry();
+                const feature = event.feature;
+                const geom = feature.getGeometry();
 
                 if (geom.getType() === 'Polygon' && hasSelfIntersections(geom)) {
                     $.notify(Mapbender.trans('mb.digitizer.intersection.error'));
@@ -223,43 +266,48 @@
                 widget._openEditDialog(schema, event.feature);
             });
             this.addModifyEvents_(interaction);  // For drawDonut
-        },
-        addModifyEvents_: function(interaction) {
+        }
 
+        /**
+         * @param {ol.interaction.Interaction} interaction
+         * @private
+         */
+        addModifyEvents_(interaction) {
             // variables kept in closure
             let feature, originalGeometry;
 
             if (!interaction.cancel) {
                 interaction.cancel = () => {
-
                     feature.setGeometry(originalGeometry);
                     feature.set('dirty', false);
                     $('.-fn-toggle-tool[data-toolname].active', this.owner.element).click();
-                }
+                };
             }
             interaction.on([ol.interaction.ModifyEventType.MODIFYEND, ol.interaction.TranslateEventType.TRANSLATEEND], function(event) {
                 feature.set('dirty', true);
-                let geom = feature.getGeometry();
+                const geom = feature.getGeometry();
                 if (geom.getType() === 'Polygon' && hasSelfIntersections(geom)) {
                     $.notify(Mapbender.trans('mb.digitizer.intersection.error'));
                     feature.setGeometry(originalGeometry);
                 }
             });
 
-            interaction.on([ ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATESTART], function(event) {
+            interaction.on([ol.interaction.ModifyEventType.MODIFYSTART, ol.interaction.TranslateEventType.TRANSLATESTART], function(event) {
                 feature = event.features.getArray()[0];
                 originalGeometry = feature.getGeometry().clone();
             });
+        }
 
-        },
         /**
          * @param {String} type
-         * @param {*} schema
+         * @param {Object} schema
+         * @return {ol.interaction.Draw}
+         * @private
          */
-        createDrawingTool_: function(type, schema) {
-            var layer = this.owner.getSchemaLayers(schema)[0];
+        createDrawingTool_(type, schema) {
+            const layer = this.owner.getSchemaLayers(schema)[0];
 
-            var options = {
+            const options = {
                 source: layer.getSource(),
                 // prevent double-click zoom on draw end / attribute editor opening on nearby existing geometry
                 stopClick: true,
@@ -288,44 +336,52 @@
                 default:
                     throw new Error("Unhandled tool type " + type);
             }
-        },
+        }
 
-        createModificationTool_: function(type) {
+        /**
+         * @param {String} type
+         * @return {ol.interaction.Interaction}
+         * @private
+         */
+        createModificationTool_(type) {
             switch (type) {
                 case 'modifyFeature':
-
-                    let interaction = new ol.interaction.Modify({
+                    const interaction = new ol.interaction.Modify({
                         features: this.modifyingCollection_,
                         deleteCondition: function(event) {
                             return ol.events.condition.singleClick(event);
                         },
                     });
-
                     return interaction;
                 case 'moveFeature':
                     return this.createMoveFeature_();
                 default:
                     throw new Error("Unhandled tool type " + type);
             }
-        },
-        createMoveFeature_: function() {
-            var self = this;
+        }
+
+        /**
+         * @return {ol.interaction.Translate}
+         * @private
+         */
+        createMoveFeature_() {
+            const self = this;
             // ol.interaction.Translate does not have a "condition" option, but it
             // supports completely replacing the handleDownEvent method via Pointer
             // base class.
             // @see https://github.com/openlayers/openlayers/blob/main/src/ol/interaction/Pointer.js#L57
-            var handleDownEvent = function(event) {
+            const handleDownEvent = function(event) {
                 return self.leftClickOnly_(event) && ol.interaction.Translate.prototype.handleDownEvent.call(this, event);
             };
 
-            let interaction = new ol.interaction.Translate({
+            const interaction = new ol.interaction.Translate({
                 handleDownEvent: handleDownEvent,
                 layers: function(layer) {
-                    var schema = self.owner._getCurrentSchema();
-                    var subSchemas = (schema && self.owner.expandCombination(schema) || []).filter(function(schema) {
+                    const schema = self.owner._getCurrentSchema();
+                    const subSchemas = (schema && self.owner.expandCombination(schema) || []).filter(function(schema) {
                         return schema.allowDigitize;
                     });
-                    for (var s = 0; s < subSchemas.length; ++s) {
+                    for (let s = 0; s < subSchemas.length; ++s) {
                         if (-1 !== self.owner.getSchemaLayers(subSchemas[s]).indexOf(layer)) {
                             return true;
                         }
@@ -335,31 +391,43 @@
             });
 
             return interaction;
-        },
-        leftClickOnly_: function(event) {
+        }
+
+        /**
+         * @param {Event} event
+         * @return {boolean}
+         * @private
+         */
+        leftClickOnly_(event) {
             if (event.pointerEvent && event.pointerEvent.button !== 0) {
                 return false;
             } else {
                 return ol.events.condition.noModifierKeys(event);
             }
-        },
-        getGeometryFunction_: function(type) {
+        }
+
+        /**
+         * @param {String} type
+         * @return {Function|null}
+         * @private
+         */
+        getGeometryFunction_(type) {
             if (typeof (this.geometryFunctions_[type]) !== 'undefined') {
                 return this.geometryFunctions_[type];
             }
-            var geometryFunction = null;
+            let geometryFunction = null;
             if (type === 'drawRectangle') {
                 geometryFunction = ol.interaction.Draw.createBox();
             }
             if (type === 'drawCircle' || type === 'drawEllipse') {
                 geometryFunction = function(coordinates, geometry) {
-                    var center = coordinates[0];
-                    var last = coordinates[1];
-                    var dx = center[0] - last[0];
-                    var dy = type === 'drawCircle' && dx || (center[1] - last[1]);
-                    var radius = Math.sqrt(dx * dx + dy * dy);
-                    var circle = new ol.geom.Circle(center, radius);
-                    var polygon = ol.geom.Polygon.fromCircle(circle, 64);
+                    const center = coordinates[0];
+                    const last = coordinates[1];
+                    const dx = center[0] - last[0];
+                    const dy = type === 'drawCircle' && dx || (center[1] - last[1]);
+                    const radius = Math.sqrt(dx * dx + dy * dy);
+                    const circle = new ol.geom.Circle(center, radius);
+                    const polygon = ol.geom.Polygon.fromCircle(circle, 64);
                     polygon.scale(dx/radius, dy/radius);
                     if (!geometry) {
                         geometry = polygon;
@@ -371,7 +439,8 @@
             }
             this.geometryFunctions_[type] = geometryFunction;
             return geometryFunction;
-        },
-        __dummy__: null
-    });
-}());
+        }
+    }
+
+    Mapbender.Digitizer.FeatureEditor = FeatureEditor;
+})();

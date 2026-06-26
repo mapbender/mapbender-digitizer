@@ -44,20 +44,27 @@ class DataManager extends AbstractElementService
 
     public function getWidgetName(Element $element)
     {
-        return 'mapbender.mbDataManager';
+        return 'MbDataManager';
     }
 
     public static function getDefaultConfiguration()
     {
         return array(
             'schemes' => null,
+            'element_icon' => self::getDefaultIcon(),
         );
+    }
+
+    public static function getDefaultIcon()
+    {
+        return 'iconTable';
     }
 
     public function getView(Element $element)
     {
         $view = new TemplateView('@MapbenderDataManager/Element/DataManager.html.twig');
         $view->attributes['class'] = 'mb-element-data-manager';
+        $view->attributes['data-title'] = $element->getTitle();
         return $view;
     }
 
@@ -68,12 +75,13 @@ class DataManager extends AbstractElementService
                 '@MapbenderDataManagerBundle/Resources/styles/dataManager.element.scss',
             ),
             'js' => array(
+                '@MapbenderDataManagerBundle/Resources/public/ExpressionEvaluator.js',
                 '@MapbenderDataManagerBundle/Resources/public/FormRenderer.js',
                 '@MapbenderDataManagerBundle/Resources/public/FormUtil.js',
                 '@MapbenderDataManagerBundle/Resources/public/DialogFactory.js',
-                '../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js',
+                '../vendor/mapbender/jquery-file-upload/js/jquery.fileupload.js',
                 '@MapbenderDataManagerBundle/Resources/public/TableRenderer.js',
-                '@MapbenderDataManagerBundle/Resources/public/dataManager.element.js',
+                '@MapbenderDataManagerBundle/Resources/public/MbDataManager.js',
             ),
             'trans' => array(
                 'mb.data-manager.*',

@@ -41,10 +41,10 @@
         }
     }
 
-    Mapbender.DataManager.FormRenderer = function FormRenderer() {
-    };
-
-    Object.assign(Mapbender.DataManager.FormRenderer.prototype, {
+    class FormRenderer {
+        constructor(expressionEvaluator) {
+            this.expressionEvaluator_ = expressionEvaluator || Mapbender.DataManager.ExpressionEvaluator;
+        }
 
         /**
          * Fixes / amends form items list (in place).
@@ -54,7 +54,7 @@
          * @param {Array<Object>} fileConfigs
          * @param {Object} [parent]
          */
-        prepareItems: function(items, baseUrl, fileConfigs, parent) {
+        prepareItems(items, baseUrl, fileConfigs, parent) {
             var dropped = [], i;
             for (i = 0; i < items.length; ++i) {
                 var item = items[i];
@@ -87,7 +87,8 @@
                     break;
                 }
             }
-        },
+        }
+
         /**
          * @param {Object} item
          * @param {String} baseUrl
@@ -95,7 +96,7 @@
          * @return {Object}
          * @private
          */
-        prepareLeaf_: function(item, baseUrl, fileConfigs) {
+        prepareLeaf_(item, baseUrl, fileConfigs) {
             if (item.type === 'inline' || item.type === 'fieldSet') {
                 var reformedRadioGroup = this.reformRadioGroup_(item.children || [], item);
                 if (reformedRadioGroup && reformedRadioGroup.__filtered__.length) {
@@ -126,24 +127,81 @@
                 item.__uploadUrl__ = [baseUrl, 'attachment', '?field=', encodeURIComponent(item.name)].join('');
                 return item;
             }
-        },
+        }
+
         /**
          * @param {Array<Object>} children
          * @return {Array<HTMLElement>}
          */
-        renderElements: function(children) {
+        renderElements(children) {
             var elements = [];
             for (var i = 0; i < children.length; ++i) {
                 var $element = this.renderElement(children[i]);
                 elements.push.apply(elements, $element.get());
             }
             return elements;
-        },
+        }
+
+        /**
+         * Apply text content or dynamic expression to an element
+         * @param {jQuery} $element - The element to apply content to
+         * @param {String} content - The text or expression
+         * @param {Boolean} isHtml - Whether to use HTML mode (for type 'html')
+         * @private
+         */
+        applyTextOrExpression_($element, content, isHtml) {
+            if (content && this.expressionEvaluator_.isDynamicExpression(content)) {
+                $element.addClass('-fn-calculated-text')
+                    .attr('data-expression', content);
+                if (isHtml) {
+                    $element.attr('data-html-expression', true);
+                }
+            } else if (isHtml) {
+                $element.append(content);
+            } else {
+                $element.text(content || '');
+            }
+        }
+
+        /**
+         * Check if form items contain any editable fields
+         * @param {Array<Object>} items
+         * @return {Boolean}
+         */
+        hasEditableFields(items) {
+            const editableTypes = ['input', 'textArea', 'date', 'colorPicker', 'file', 'checkbox', 'select', 'radioGroup'];
+            const containerTypes = ['form', 'tabs', 'fieldSet', 'inline'];
+
+            for (var i = 0; i < items.length; ++i) {
+                var item = items[i];
+                if (!item) {
+                    continue;
+                }
+
+                // Check if this is an editable field type
+                if (item.type && editableTypes.indexOf(item.type) !== -1) {
+                    // Further check if field is not disabled or readonly
+                    if (!item.disabled && !item.readonly) {
+                        return true;
+                    }
+                }
+
+                // Recursively check items with children (containers or tab panels)
+                if (item.children && item.children.length) {
+                    if (this.hasEditableFields(item.children)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         /**
          * @param {Object} settings
          * @return {jQuery}
          */
-        renderElement: function(settings) {
+        renderElement(settings) {
             var definedChildren = settings.children && settings.children.length && settings.children || null;
             if (requireChildrenRxp.test(settings.type) && !definedChildren) {
                 console.error("Missing required 'children' on type " + settings.type + " => ignoring", settings);
@@ -166,7 +224,7 @@
                 case 'text':
                     return this.handle_text_(settings);
                 case 'label':
-                    return this.renderTag_('p', settings);
+                    return this.handle_label_(settings);
                 case 'input':
                     return this.handle_input_(settings);
                 case 'textArea':
@@ -192,8 +250,9 @@
                 case 'p':
                     return this.renderTag_(settings.type, settings);
             }
-        },
-        initializeWidgets: function(scope, baseUrl) {
+        }
+
+        initializeWidgets(scope, baseUrl) {
             if ($.fn.colorpicker) {
                 $('.-js-init-colorpicker', scope).each(function() {
                     $(this).colorpicker({
@@ -274,8 +333,9 @@
                 self.updateFileInputs($group, baseUrl, fakeValues);
                 return false;
             });
-        },
-        checkFileExtension: function (files, allowedExtensionsCsv) {
+        }
+
+        checkFileExtension(files, allowedExtensionsCsv) {
             // no value means no restriction
             if (!allowedExtensionsCsv) return true;
             const allowedExtensions = allowedExtensionsCsv.split(',').map(s => s.trim().toLowerCase());
@@ -288,18 +348,21 @@
                 }
             }
             return true;
-        },
-        getAttachmentUrl_: function(baseUrl, fieldName, inputValue) {
+        }
+
+        getAttachmentUrl_(baseUrl, fieldName, inputValue) {
             if (inputValue && !/^(http[s]?)?:?\/\//.test(inputValue)) {
                 var baseName = inputValue.replace(/^.*?\/([^/]*)$/, '$1');
                 return [baseUrl, 'attachment', '?field=', encodeURIComponent(fieldName), '&name=', encodeURIComponent(baseName)].join('');
             } else {
                 return inputValue;
             }
-        },
-        updateFileInputs: function(scope, baseUrl, values) {
+        }
+
+        updateFileInputs(scope, baseUrl, values) {
             var fileInputs = $('.fileinput-button input[name]', scope).get();
-            var dataImages = $('img[data-preview-for]', $(scope).closest('.ui-dialog')).get();
+            var $container = $(scope).closest('.popup');
+            var dataImages = $('img[data-preview-for]', $container).get();
             var i;
             for (i = 0; i < fileInputs.length; ++i) {
                 var fileInput = fileInputs[i];
@@ -338,20 +401,23 @@
                     }
                 }
             }
-        },
-        handle_input_: function(settings) {
+        }
+
+        handle_input_(settings) {
             var $input = this.textInput_(settings, 'text');
             this.addCustomEvents_($input, settings);
             return this.wrapInput_($input, settings);
-        },
-        handle_textArea_: function(settings) {
+        }
+
+        handle_textArea_(settings) {
             var $input = $(document.createElement('textarea'))
                 .attr('rows', settings.rows || 3)
             ;
             this.configureTextInput_($input, settings);
             return this.wrapInput_($input, settings);
-        },
-        handle_date_: function(settings) {
+        }
+
+        handle_date_(settings) {
             var native = browserNativeInputs.date;
             var type = native && 'date' || 'text';
             var $input = this.textInput_(settings, type);
@@ -366,8 +432,9 @@
                 $input.addClass('-js-datepicker');
             }
             return $wrapper;
-        },
-        handle_colorPicker_: function(settings) {
+        }
+
+        handle_colorPicker_(settings) {
             var $input = this.textInput_(settings, 'text');
             if ($.fn.colorpicker) {
                 var $addonGroup = $(document.createElement('div'))
@@ -379,9 +446,9 @@
             } else {
                 return this.wrapInput_($input, settings);
             }
-        },
-        handle_file_: function(settings) {
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L545 */
+        }
+
+        handle_file_(settings) {
             var $inputReal = $('<input type="hidden" />')
                 // NOTE: do not attempt required / disabled etc on hidden inputs
                 .attr('name', settings.name)
@@ -419,9 +486,9 @@
                 .append('<i class="fa fas -js-loading-indicator fa-spinner fa-spin hidden data-manager-spinner" />')
             ;
             return this.wrapInput_($group, settings);
-        },
-        handle_image_: function(settings) {
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L496 */
+        }
+
+        handle_image_(settings) {
             /** @todo: support "enlargeImage"...? */
             var src = settings.src || null;
             if (src && !/^(http[s]?)?:?\//.test(src)) {
@@ -429,7 +496,7 @@
             }
 
             var $img = $(document.createElement('img'))
-                .addClass('img-responsive')
+                .addClass('img-responsive d-block')
                 .attr('src', src)
                 .attr('data-default-src', src || '')
                 .attr('data-preview-for', settings.name || null)
@@ -464,13 +531,15 @@
                 infoText: settings.infoText,
                 css: settings.css
             });
-        },
-        textInput_: function(settings, type) {
+        }
+
+        textInput_(settings, type) {
             var $input = $('<input type="' + type + '"/>');
             this.configureTextInput_($input, settings);
             return $input;
-        },
-        configureTextInput_: function($input, settings) {
+        }
+
+        configureTextInput_($input, settings) {
             // Used for input type="text" and textarea
             $input
                 .prop({
@@ -489,9 +558,9 @@
                 $input.data('warn', this.createValidationCallback_(settings.mandatory));
             }
             this.configureValidationMessage_($input, settings);
-        },
-        handle_tabs_: function(settings) {
-            /** https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L641 */
+        }
+
+        handle_tabs_(settings) {
             var $tabList = $(document.createElement('ul'));
             var $container = $(document.createElement('div'));
             $container.append($tabList);
@@ -507,7 +576,8 @@
                     .attr('href', ['#', $panel.attr('id')].join(''))
                     .text(title)
                 ;
-                this.checkExtraSettings_(sub, ['children', 'title'], 'tabs child');
+                this.checkExtraSettings_(sub, ['children', 'title', 'css'], 'tabs child');
+                $panel.css(sub.css || {});
                 $panel.append(this.renderElements(sub.children));
                 $tabList.append($(document.createElement('li')).append($tabLink));
                 $container.append($panel);
@@ -519,8 +589,9 @@
                 }
             });
             return $container;
-        },
-        handle_fieldSet_: function(settings) {
+        }
+
+        handle_fieldSet_(settings) {
             this.checkExtraSettings_(settings, ['type', 'children']);
             var $container = $(document.createElement('div'))
                 .addClass('row reduce-gutters')
@@ -537,8 +608,9 @@
                 $container.append($column);
             }
             return $container;
-        },
-        renderTag_: function(tagName, settings) {
+        }
+
+        renderTag_(tagName, settings) {
             var $element = $(document.createElement(tagName))
                 .attr(settings.attr || {})
                 .addClass(settings.cssClass || '')
@@ -547,30 +619,24 @@
                 .append(this.renderElements(settings.children || []))
             ;
             return $element;
-        },
-        handle_html_: function (settings) {
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L265 */
+        }
+
+        handle_html_(settings) {
             const $wrapper = $(document.createElement('div'))
                 .attr(settings.attr || {})
                 .addClass(settings.cssClass)
                 .css(settings.css || {});
 
-            if (settings.html.includes('function()') || settings.html.includes('function ()')) {
-                $wrapper.addClass('-fn-calculated-text')
-                    .attr('data-expression', settings.html)
-                    .attr('data-html-expression', true);
-            } else {
-                $wrapper.append(settings.html);
-            }
+            this.applyTextOrExpression_($wrapper, settings.html, true);
             return $wrapper;
-        },
-        handle_text_: function(settings) {
-            /** https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L823 */
+        }
+
+        handle_text_(settings) {
             var $wrapper = $(document.createElement('div')).addClass('mb-3 text');
-            var $textContainer = $(document.createElement('div'))
-                .addClass('-fn-calculated-text')
-                .attr('data-expression', settings.text)
-            ;
+            var $textContainer = $(document.createElement('div'));
+
+            this.applyTextOrExpression_($textContainer, settings.text, false);
+
             if (settings.title) {
                 $wrapper.append(this.fieldLabel_(settings));
             }
@@ -580,8 +646,30 @@
                 .addClass(settings.cssClass)
             ;
             return $wrapper;
-        },
-        handle_checkbox_: function(settings) {
+        }
+
+        handle_label_(settings) {
+            var $labelElement = $(document.createElement('p'))
+                .attr(settings.attr || {})
+                .addClass(settings.cssClass || '')
+                .css(settings.css || {})
+            ;
+
+            this.applyTextOrExpression_($labelElement, settings.text, false);
+            $labelElement.append(this.renderElements(settings.children || []));
+
+            // If title is provided, wrap in a container with label
+            if (settings.title) {
+                var $wrapper = $(document.createElement('div')).addClass('mb-3 label');
+                $wrapper.append(this.fieldLabel_(settings));
+                $wrapper.append($labelElement);
+                return $wrapper;
+            }
+
+            return $labelElement;
+        }
+
+        handle_checkbox_(settings) {
             var $label = this.fieldLabel_(settings);
             var $checkbox = $('<input type="checkbox" class="form-check-input"/>')
                 .attr('name', settings.name || null)
@@ -595,15 +683,17 @@
                 .append($checkbox)
                 .append($label)
             ;
-        },
-        renderSelectOption_: function(optionConfig, selectConfig) {
+        }
+
+        renderSelectOption_(optionConfig, selectConfig) {
             return $(document.createElement('option'))
                 .attr(optionConfig.attr || {})
                 .attr('value', optionConfig.value)
                 .text(optionConfig.label)
             ;
-        },
-        handle_select_: function(settings) {
+        }
+
+        handle_select_(settings) {
             var required = (settings.attr || {}).required || settings.required || !!settings.mandatory;
             var multiple = (settings.attr || {}).multiple || settings.multiple;
             var $select = $(document.createElement('select'))
@@ -653,8 +743,9 @@
             this.addCustomEvents_($select, settings);
             this.configureValidationMessage_($select, settings);
             return this.wrapInput_($select, settings);
-        },
-        getSelect2Options: function(item, required, multiple, placeholderText) {
+        }
+
+        getSelect2Options(item, required, multiple, placeholderText) {
             /** @see https://select2.org/configuration/options-api */
             return {
                 dropdownAutoWidth: true,
@@ -664,8 +755,9 @@
                 allowClear: !required && !!placeholderText,
                 maximumSelectionLength: item.maximumSelectionLength || null,
             };
-        },
-        handle_radioGroup_: function(settings) {
+        }
+
+        handle_radioGroup_(settings) {
             if (!settings.options || !settings.options.length) {
                 console.error('Ignoring item type "radioGroup" with empty "options" list.', settings);
                 return null;
@@ -697,15 +789,16 @@
                 }
             });
             return this.wrapInput_(container, settings);
-        },
-        handle_breakLine_: function(settings) {
+        }
+
+        handle_breakLine_(settings) {
             return $(document.createElement('hr'))
                 .attr(settings.attr || {})
                 .addClass(settings.cssClass || null)
             ;
-        },
-        fieldLabel_: function(settings) {
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L353 */
+        }
+
+        fieldLabel_(settings) {
             var $label = $(document.createElement('label'))
                 .attr({'for': settings.name || null })
                 .text(settings.title || settings.text)
@@ -718,7 +811,6 @@
                 ;
                 $label.append('&nbsp;', $icon);
             }
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L345 */
             if (settings.copyClipboard) {
                 $label.append('&nbsp;', $('<i/>')
                     .addClass('fa fa-clipboard far-clipboard -fn-copytoclipboard')
@@ -726,8 +818,9 @@
                 );
             }
             return $label;
-        },
-        wrapInput_: function($input, settings) {
+        }
+
+        wrapInput_($input, settings) {
             if ($input.is('input[type="hidden"]')) {
                 if (settings.title) {
                     console.error("Hidden input with a label. Label will not render", settings.title);
@@ -747,8 +840,9 @@
             }
             $group.append($input);
             return $group;
-        },
-        renderFallback_: function(settings) {
+        }
+
+        renderFallback_(settings) {
             if ((settings.children || []).length) {
                 return $(document.createElement('div'))
                     .append(this.renderElements(settings.children))
@@ -757,8 +851,9 @@
                 console.error("Don't know how to render item type " + settings.type, settings);
                 return $nothing;
             }
-        },
-        createValidationCallback_: function(expression) {
+        }
+
+        createValidationCallback_(expression) {
             // legacy fun fact: string runs through eval, but result of eval can only be used
             // if it happens to have an method named .exec accepting a single parameter
             // => this was never compatible with anything but regex literals
@@ -768,12 +863,13 @@
                     return rxp.test(value);
                 }
             }());
-        },
-        configureValidationMessage_: function($input, settings) {
+        }
+
+        configureValidationMessage_($input, settings) {
             $input.attr('data-custom-validation-message', settings.name && settings.mandatoryText || null);
-        },
-        addCustomEvents_: function($input, settings) {
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L123 */
+        }
+
+        addCustomEvents_($input, settings) {
             var names = ['filled', 'change'].filter(function(name) {
                 return settings[name];
             });
@@ -797,8 +893,9 @@
                 }
                 $input.on(name, handler);
             }
-        },
-        checkExtraSettings_: function(settings, expectedProps, description) {
+        }
+
+        checkExtraSettings_(settings, expectedProps, description) {
             var description_ = description || ['type ', '"', settings.type, '"'].join('');
             var other = Object.keys(settings).filter(function(name) {
                 return -1 === expectedProps.indexOf(name);
@@ -811,8 +908,9 @@
                     "; remove everything else"].join(''),
                     settings);
             }
-        },
-        reformRadioGroup_: function(children, parent) {
+        }
+
+        reformRadioGroup_(children, parent) {
             var radioItems = children.filter(function(sub) {
                 return sub.type === 'radio';
             });
@@ -861,9 +959,10 @@
                 console.warn('Detected legacy list of individual "radio" form items. Use a "radioGroup" item instead.', radioItems, replacement);
                 return replacement;
             }
-        },
-        __dummy: null
-    });
+        }
+    }
+
+    Mapbender.DataManager.FormRenderer = FormRenderer;
 
     // Handled:
     // * 'form'
@@ -898,4 +997,3 @@
     // * 'selectOption'
     // * 'selectOptionList'
 }(jQuery));
-
