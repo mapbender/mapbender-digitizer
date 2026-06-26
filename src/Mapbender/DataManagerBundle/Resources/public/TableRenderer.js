@@ -176,15 +176,6 @@
                 }
             };
 
-            // TODO: remove this in next major release
-            if (!$.fn.DataTable.versionCheck('2.0')) {
-                settings.language = {
-                    paginate: {
-                        previous: '<<',
-                        next: '>>'
-                    }
-                };
-            }
             settings.createdRow = this.onRowCreation.bind(this, schema);
             return settings;
         }

@@ -121,7 +121,6 @@
                 return !self.validateInput(input);
             });
             // If there are erros, switch tab container (if any) to reveal the first affected input
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/utils/fn.formData.js#L166 */
             const $firstInvalid = invalidInputs.length && $(invalidInputs[0]);
             const $tabElement = $firstInvalid && $firstInvalid.closest('.ui-tabs');
             if ($tabElement && $tabElement.length) {
@@ -137,7 +136,6 @@
         /**
          * @param {HTMLElement} input
          * @return {boolean}
-         * @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/utils/fn.formData.js#L13
          */
         validateInput(input) {
             const $input = $(input);
@@ -196,7 +194,6 @@
                 /** @var {Array<String>|null} valueList */
                 text = text.join(separator) || '';
             }
-            /** @see https://github.com/mapbender/vis-ui.js/blob/0.2.84/src/js/jquery.form.generator.js#L157 */
             if (window.clipboardData && window.clipboardData.setData) {
                 /** @see https://caniuse.com/mdn-api_clipboardevent_clipboarddata */
                 return clipboardData.setData("Text", text);
