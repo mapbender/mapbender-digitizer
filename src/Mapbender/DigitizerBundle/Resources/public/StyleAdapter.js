@@ -9,7 +9,7 @@
             this.defaultStyle_ = ol.style.Style.createDefaultStyle()[0].clone();
             this.enforceArrayColor_(this.defaultStyle_);
 
-            var placeholderProps = this.detectDataPlaceholders_(defaultStyleConfig);
+            var placeholderProps = Mapbender.StyleUtil.detectDataPlaceholders(defaultStyleConfig);
             if (placeholderProps.length) {
                 throw new Error("Fallback style MUST NOT include data placeholders. Found: " + placeholderProps.join(', '));
             }
@@ -23,8 +23,8 @@
         styleFunctionFromSvgRules(styleConfig, dataCallback) {
             var self = this;
             var placeholderCandidates = ['fillColor', 'strokeColor', 'label', 'fontColor', 'externalGraphic', 'labelOutlineColor', 'labelOutlineWidth', 'labelYOffset', 'labelXOffset'];
-            return (function(styleConfig) {
-                var placeholderProps = self.detectDataPlaceholders_(styleConfig, placeholderCandidates);
+            return (function (styleConfig) {
+                var placeholderProps = Mapbender.StyleUtil.detectDataPlaceholders(styleConfig, placeholderCandidates);
                 var labelValue = styleConfig.label;
                 var dynText = labelValue && (placeholderProps.indexOf('label') !== -1 || placeholderProps.indexOf('fontColor') !== -1);
                 var dynBase = placeholderProps.indexOf('fillColor') !== -1 || placeholderProps.indexOf('strokeColor') !== -1;
@@ -32,10 +32,10 @@
                 var textStyle = labelValue && self.getTextStyle(styleConfig);
                 var useIcon = styleConfig.externalGraphic && styleConfig.graphic !== false;
                 var dynIcon = useIcon && -1 !== placeholderProps.indexOf('externalGraphic');
-                var iconStyle = useIcon && !dynIcon && self.expandIconStyle_(self.getIconStyle(styleConfig));
+                var iconStyle = useIcon && !dynIcon && Mapbender.Util.ExternalGraphicUtil.getIconStyle(styleConfig);
 
-                var resolvePlaceholders = self.getPlaceholderResolver_(styleConfig, placeholderProps, dataCallback);
-                return function(feature) {
+                var resolvePlaceholders = Mapbender.StyleUtil.getPlaceholderResolver(styleConfig, placeholderProps, dataCallback);
+                return function (feature) {
                     var styles = [baseStyle];
                     var resolvedStyle = resolvePlaceholders(styleConfig, feature);
                     if (dynBase) {
@@ -54,7 +54,7 @@
                     }
                     if (dynIcon) {
                         if (resolvedStyle.externalGraphic) {
-                            iconStyle = self.expandIconStyle_(self.getIconStyle(resolvedStyle), resolvedStyle);
+                            iconStyle = Mapbender.Util.ExternalGraphicUtil.getIconStyle(resolvedStyle);
                         } else {
                             iconStyle = null;
                         }
@@ -156,45 +156,6 @@
             return textStyle;
         }
 
-        getIconStyle(styleConfig) {
-            var iconStyle = new ol.style.Icon({
-                src: styleConfig.externalGraphic
-            });
-            if (styleConfig.graphicWidth || styleConfig.graphicHeight) {
-                var onload = this.getIconScaleHandler_(iconStyle, styleConfig);
-                // see https://github.com/openlayers/openlayers/blob/main/src/ol/ImageState.js
-                if (iconStyle.getImageState() === 2) {
-                    // already loaded
-                    onload();
-                } else {
-                    iconStyle.listenImageChange(onload);
-                }
-            }
-            return iconStyle;
-        }
-
-        getIconScaleHandler_(iconStyle, styleConfig) {
-            return (function(styleConfig) {
-                return function() {
-                    /** @this ol.style.Image */
-                    if (this.getImageState() === 2) {
-                        // Now loaded
-                        // see https://github.com/openlayers/openlayers/blob/main/src/ol/ImageState.js
-                        var naturalSize = this.getImageSize();
-                        var scale;
-                        if (!styleConfig.graphicHeight) {
-                            scale = styleConfig.graphicWidth / naturalSize[0];
-                        } else if (!styleConfig.graphicWidth) {
-                            scale = styleConfig.graphicHeight / naturalSize[1];
-                        } else {
-                            scale = [styleConfig.graphicWidth / naturalSize[0], styleConfig.graphicHeight / naturalSize[1]];
-                        }
-                        this.setScale(scale);
-                    }
-                }.bind(iconStyle);
-            }(styleConfig));
-        }
-
         /**
          * @param {ol.style.Text} targetStyle
          * @param {Object} styleConfig
@@ -254,7 +215,9 @@
             var fontWeight = style.fontWeight !== 'regular' && style.fontWeight || 'normal';
 
             /** @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font */
-            return [fontWeight, fontSize, fontFamily].filter(function(part) { return !!part; }).join(" ");
+            return [fontWeight, fontSize, fontFamily].filter(function (part) {
+                return !!part;
+            }).join(" ");
         }
 
         /**
@@ -293,89 +256,12 @@
         }
 
         /**
-         *
-         * @param {Object} data
-         * @param {Array<String>} [candidates] to limit scanning to specifically named properties (default: scan all properties)
-         * @return {Array<String>}
-         * @private
-         */
-        detectDataPlaceholders_(data, candidates) {
-            var placeholderRx = this.placeholderRx_;
-            return (candidates || Object.keys(data)).filter(function(prop) {
-                // Reset global-flagged RegExp state.
-                // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test#using_test_on_a_regex_with_the_global_flag
-                placeholderRx.lastIndex = 0;
-                return placeholderRx.test(data[prop] || '');
-            });
-        }
-
-        /**
-         * @param {Object} original
-         * @param {Array<String>} propertyNames
-         * @param {function} dataCallback
-         * @return {function}
-         * @private
-         */
-        getPlaceholderResolver_(original, propertyNames, dataCallback) {
-            if (propertyNames.length) {
-                var placeholderRx = this.placeholderRx_;
-                return function(styleConfig, feature) {
-                    var valuesOut = Object.assign({}, styleConfig);
-                    var data = dataCallback(feature);
-                    propertyNames.forEach(function(prop) {
-                        valuesOut[prop] = styleConfig[prop].replace(placeholderRx, function(match, dataProp) {
-                            var dataValue = data[dataProp];
-                            return dataValue || (prop === 'label' ? '' : dataValue);
-                        });
-                    });
-                    return valuesOut;
-                }
-            } else {
-                return function(original) {
-                    return original;
-                }
-            }
-        }
-
-        resolvePlaceholders(styleConfig, featureData) {
-            var placeholderProps = this.detectDataPlaceholders_(styleConfig);
-            var resolver = this.getPlaceholderResolver_(styleConfig, placeholderProps, function() {
-                return featureData;
-            });
-            return resolver(styleConfig);
-        }
-
-        /**
-         * @param {ol.style.Image} iconStyle
          * @param {Object} styleConfig
-         * @return {ol.style.Style}
-         * @private
+         * @param {ol.Feature} feature
+         * @return {Object}
          */
-        expandIconStyle_(iconStyle, styleConfig) {
-            return new ol.style.Style({
-                // Icons are only rendered on point geometries.
-                // => We must use a geometry function to make points out of
-                // polygons and lines.
-                // @see https://gis.stackexchange.com/questions/361817/openlayers-displaying-polygon-with-icon-style
-                geometry: this.iconStyleGeometryFunction_,
-                image: iconStyle
-            });
-        }
-
-        iconStyleGeometryFunction_(feature) {
-            var geometry = feature.getGeometry();
-            switch (geometry && geometry.getType()) {
-                case 'Polygon':
-                    return geometry.getInteriorPoint();
-                case 'MultiPolygon':
-                    return geometry.getInteriorPoints();
-                case 'LineString':
-                    return new ol.geom.Point(geometry.getFlatMidpoint(), geometry.getLayout());
-                case 'MultiLineString':
-                    return new ol.geom.MultiPoint(geometry.getFlatMidpoints(), geometry.getLayout());
-                default:
-                    return geometry;
-            }
+        resolvePlaceholders(styleConfig, featureData) {
+            return Mapbender.StyleUtil.resolvePlaceholders(styleConfig, featureData);
         }
     }
 
