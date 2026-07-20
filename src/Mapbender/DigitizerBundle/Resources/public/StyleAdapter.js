@@ -5,7 +5,6 @@
 
     class StyleAdapter {
         constructor(defaultStyleConfig) {
-            this.placeholderRx_ = /\${([^}]+)}/g;
             this.defaultStyle_ = ol.style.Style.createDefaultStyle()[0].clone();
             this.enforceArrayColor_(this.defaultStyle_);
 
@@ -257,8 +256,8 @@
 
         /**
          * @param {Object} styleConfig
-         * @param {ol.Feature} feature
-         * @return {Object}
+         * @param {object} feature data
+         * @return {object}
          */
         resolvePlaceholders(styleConfig, featureData) {
             return Mapbender.StyleUtil.resolvePlaceholders(styleConfig, featureData);
