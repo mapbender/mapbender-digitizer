@@ -1,4 +1,4 @@
-## 3.0.0-RC1
+## 3.0.0-RC3
 Breaking Changes:
 * Remove support for DataTables 1.x ([PR#153](https://github.com/mapbender/mapbender-digitizer/pull/153))
 * Modernize JavaScript codebase (ES6 classes, singleton pattern for better extensibility) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
