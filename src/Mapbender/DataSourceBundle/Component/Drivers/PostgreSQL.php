@@ -143,7 +143,8 @@ class PostgreSQL extends DoctrineBaseDriver implements Geographic
                 $geomType = $srid = null;
             }
 
-            $columns[$name] = new Column($notNull, $hasDefault, $isNumeric, $geomType, $srid, $row['is_generated']);
+            $isGenerated = is_bool($row['is_generated']) ? $row['is_generated'] : $row['is_generated'] === 't';
+            $columns[$name] = new Column($notNull, $hasDefault, $isNumeric, $geomType, $srid, $isGenerated);
         }
         $tableMeta = new TableMeta($connection->getDatabasePlatform(), $columns);
         return $tableMeta;
