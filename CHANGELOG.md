@@ -8,6 +8,10 @@ Breaking Changes:
 Features:
 * Add dynamic expression support for labels, text fields, and popup titles (template literal syntax `${data.property}`) ([PR#149](https://github.com/mapbender/mapbender-digitizer/pull/149))
 
+Bugfixes:
+* Ignore generated columns in updates and inserts ([PR#163](https://github.com/mapbender/mapbender-digitizer/pull/163))
+
+
 ## 2.0.9
 * Add support for parameter `roles` in featureType filter ([PR#158](https://github.com/mapbender/mapbender-digitizer/pull/158))
 

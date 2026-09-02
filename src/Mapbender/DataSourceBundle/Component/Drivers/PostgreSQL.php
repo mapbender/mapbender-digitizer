@@ -120,6 +120,7 @@ class PostgreSQL extends DoctrineBaseDriver implements Geographic
         $columnSql = 'SELECT quote_ident(a.attname) AS field,'
             . ' format_type(a.atttypid, a.atttypmod) AS complete_type,'
             . ' a.attnotnull AS isnotnull,'
+            . ' a.attgenerated <> \'\' AS is_generated,'
             . ' (SELECT pg_get_expr(adbin, adrelid) FROM pg_attrdef'
             . '  WHERE c.oid = pg_attrdef.adrelid AND pg_attrdef.adnum = a.attnum) AS "default"'
             . ' FROM pg_attribute a'
@@ -142,7 +143,8 @@ class PostgreSQL extends DoctrineBaseDriver implements Geographic
                 $geomType = $srid = null;
             }
 
-            $columns[$name] = new Column($notNull, $hasDefault, $isNumeric, $geomType, $srid);
+            $isGenerated = is_bool($row['is_generated']) ? $row['is_generated'] : $row['is_generated'] === 't';
+            $columns[$name] = new Column($notNull, $hasDefault, $isNumeric, $geomType, $srid, $isGenerated);
         }
         $tableMeta = new TableMeta($connection->getDatabasePlatform(), $columns);
         return $tableMeta;

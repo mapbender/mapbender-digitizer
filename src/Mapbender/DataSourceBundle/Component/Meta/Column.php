@@ -6,32 +6,14 @@ namespace Mapbender\DataSourceBundle\Component\Meta;
 
 class Column
 {
-    /** @var bool */
-    protected $nullable;
-    /** @var bool */
-    protected $hasDefault;
-    /** @var bool */
-    protected $isNumeric;
-    /** @var string|null */
-    protected $geometryType;
-    /** @var int|null */
-    protected $srid;
-
-    /**
-     * @param boolean $nullable
-     * @param boolean $hasDefault
-     * @param boolean $isNumeric
-     * @param string|null $geometryType
-     * @param int|null $srid
-     */
-    public function __construct($nullable, $hasDefault, $isNumeric,
-                                $geometryType = null, $srid = null)
+    public function __construct(
+        protected bool    $nullable,
+        protected bool    $hasDefault,
+        protected bool    $isNumeric,
+        protected ?string $geometryType = null,
+        protected ?int    $srid = null,
+        protected bool    $isGenerated = false)
     {
-        $this->nullable = $nullable;
-        $this->hasDefault = $hasDefault;
-        $this->isNumeric = $isNumeric;
-        $this->geometryType = $geometryType;
-        $this->srid = $srid;
     }
 
     /**
@@ -86,5 +68,10 @@ class Column
     public function getSrid()
     {
         return $this->srid;
+    }
+
+    public function isGenerated(): bool
+    {
+        return $this->isGenerated;
     }
 }
