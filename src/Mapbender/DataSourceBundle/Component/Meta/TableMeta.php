@@ -39,20 +39,26 @@ class TableMeta
 
     public function prepareUpdateData(array $data)
     {
+        $updateData = [];
         foreach ($data as $columnName => $value) {
+            $column = $this->getColumn($columnName);
+            if ($column->isGenerated()) {
+                continue;
+            }
+            $updateData[$columnName] = $value;
+
             if (\is_string($value) && !$value) {
-                $column = $this->getColumn($columnName);
                 // "0" is a well-formed number (work around PHP "0" == false equivalence)
                 // NOTE: Starting with PHP 8 is_numeric allows trailing whitespace. Avoid that behaviour.
                 // see https://www.php.net/manual/en/function.is-numeric.php
                 if ($column->isNumeric() && !\is_numeric(trim($value))) {
-                    $data[$columnName] = $column->getSafeDefault();
+                    $updateData[$columnName] = $column->getSafeDefault();
                 }
-            } elseif (\is_bool($value) && $this->getColumn($columnName)->isNumeric()) {
-                $data[$columnName] = $value ? 1 : 0;
+            } elseif (\is_bool($value) && $column->isNumeric()) {
+                $updateData[$columnName] = $value ? 1 : 0;
             }
         }
-        return $data;
+        return $updateData;
     }
 
     public function prepareInsertData(array $data)
