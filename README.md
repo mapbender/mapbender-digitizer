@@ -1,7 +1,8 @@
 # Mapbender Digitizer element
 
-:warning: This version is compatible with Mapbender 4 only. The latest digitizer release compatible
-with Mapbender 3 is [1.5.7](https://github.com/mapbender/mapbender-digitizer/releases/tag/1.5.7)
+:warning: This version is compatible with Mapbender 5 only.  
+The release/v2-lts branch (currently latest version: [2.0.9](https://github.com/mapbender/mapbender-digitizer/releases/tag/2.0.9)) is compatible with Mapbender 4 and receives bugfixes and security updates until September 2027.  
+The latest digitizer release compatible with Mapbender 3 is [1.5.7](https://github.com/mapbender/mapbender-digitizer/releases/tag/1.5.7) and is not maintained anymore.
 
 ---
 
