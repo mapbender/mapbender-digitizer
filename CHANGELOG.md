@@ -1,3 +1,6 @@
+## next bugfix release
+* Fix widget unresponsive after canceling the popup when creating a new feature ([PR#164](https://github.com/mapbender/mapbender-digitizer/pull/164))
+
 ## 3.0.0
 Breaking Changes:
 * Remove support for DataTables 1.x ([PR#153](https://github.com/mapbender/mapbender-digitizer/pull/153))

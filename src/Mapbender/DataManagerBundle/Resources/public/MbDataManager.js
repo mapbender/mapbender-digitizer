@@ -528,7 +528,7 @@
                 widget.formUtil_.copyToClipboard($input);
             });
             this.formRenderer_.initializeWidgets(dialog, schemaBaseUrl);
-            dialog.one('dialogclose', function() {
+            popup.$element.one('close', function() {
                 widget._cancelForm(schema, dataItem);
             });
             return dialog;
