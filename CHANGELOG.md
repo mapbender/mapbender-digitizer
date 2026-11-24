@@ -1,4 +1,5 @@
-## next bugfix release
+## 3.0.1
+Bugfixes:
 * Fix widget unresponsive after canceling the popup when creating a new feature ([PR#164](https://github.com/mapbender/mapbender-digitizer/pull/164))
 
 ## 3.0.0
